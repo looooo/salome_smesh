@@ -3,6 +3,9 @@
 // Author    : Edward AGAPOV (eap)
 // Copyright : Open CASCADE
 
+#ifdef _MSC_VER
+#pragma warning(disable:4786)
+#endif
 
 #include "SMDS_VolumeTool.hxx"
 
@@ -10,6 +13,7 @@
 #include "SMDS_MeshNode.hxx"
 #include <map>
 #include <float.h>
+#include <math.h>
 
 using namespace std;
 
@@ -389,7 +393,7 @@ bool SMDS_VolumeTool::GetFaceNodes (int faceIndex,
 
   theFaceNodes.clear();
   int iNode, nbNode = myFaceNbNodes[ faceIndex ];
-  for ( int iNode = 0; iNode < nbNode; iNode++ )
+  for ( iNode = 0; iNode < nbNode; iNode++ )
     theFaceNodes.insert( myFaceNodes[ iNode ]);
   
   return true;
@@ -415,7 +419,7 @@ bool SMDS_VolumeTool::IsFaceExternal( int faceIndex )
     return ( reversed ? faceIndex != 0 : faceIndex != 1 );
   case 8: {
     // in a forward hexahedron, odd face normal is external, else vice versa
-    bool odd = faceIndex % 2;
+    bool odd = (faceIndex % 2 != 0);
     return ( reversed ? !odd : odd );
   }
   default:;

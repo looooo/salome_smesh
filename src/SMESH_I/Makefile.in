@@ -47,7 +47,7 @@ EXPORT_HEADERS= \
 	SMESH_Hypothesis_i.hxx \
 	SMESH.hxx
 
-EXPORT_PYSCRIPTS = smeshpy.py SMESH_test.py
+EXPORT_PYSCRIPTS = smeshpy.py
 
 # Libraries targets
 

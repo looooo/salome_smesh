@@ -80,25 +80,7 @@ namespace{
     return aDist;
   }
 
-
-
-
-
-
-
-
-
-
-
   int getNbMultiConnection( SMDS_Mesh* theMesh, const int theId )
-
-
-
-
-
-
-
-
   {
     if ( theMesh == 0 )
       return 0;
@@ -374,11 +356,6 @@ namespace{
     return abs(aVec3 * anAreaVec) / 6.0;
   }
 
-
-
-
-
-
   inline double getMaxHeight(double theLen[6])
   {
     double aHeight = max(theLen[0],theLen[1]);
@@ -388,15 +365,6 @@ namespace{
     aHeight = max(aHeight,theLen[5]);
     return aHeight;
   }
-
-
-
-
-
-
-
-
-
 
 }
 

@@ -253,7 +253,6 @@ namespace SMESH{
       virtual SMDSAbs_ElementType GetType() const;
     };
     
-  
     /*
       PREDICATES
     */

@@ -228,6 +228,15 @@ class SMESH_MeshEditor {
                                SMESHDS_Mesh *          aMesh);
   // Add elemToAdd to the groups the elemInGroups belongs to
 
+  static const SMDS_MeshElement*
+    FindFaceInSet(const SMDS_MeshNode*                     n1,
+                  const SMDS_MeshNode*                     n2,
+                  const std::set<const SMDS_MeshElement*>& elemSet,
+                  const std::set<const SMDS_MeshElement*>& avoidSet);
+  // Return a face having linked nodes n1 and n2 and which is
+  // - not in avoidSet,
+  // - in elemSet provided that !elemSet.empty()
+
   int FindShape (const SMDS_MeshElement * theElem);
   // Return an index of the shape theElem is on
   // or zero if a shape not found

@@ -91,7 +91,7 @@ static bool IsContains( SMESHDS_Mesh*           theMeshDS,
                         TopAbs_ShapeEnum        theAvoidShapeEnum = TopAbs_SHAPE )
 {
   TopExp_Explorer anExp( theShape,theFindShapeEnum,theAvoidShapeEnum );
-
+  
   while( anExp.More() )
   {
     const TopoDS_Shape& aShape = anExp.Current();
@@ -169,6 +169,143 @@ TopoDS_Shape Controls::BelongToGeom::GetShape()
 SMESHDS_Mesh* Controls::BelongToGeom::GetMeshDS()
 {
   return myMeshDS;
+}
+
+/*
+  Class       : LyingOnGeom
+  Description : Predicate for verifying whether entiy lying or partially lying on
+                specified geometrical support
+*/
+
+Controls::LyingOnGeom::LyingOnGeom()
+: myMeshDS(NULL),
+  myType(SMDSAbs_All)
+{}
+
+void Controls::LyingOnGeom::SetMesh( SMDS_Mesh* theMesh )
+{
+ myMeshDS = dynamic_cast<SMESHDS_Mesh*>(theMesh);
+}
+
+void Controls::LyingOnGeom::SetGeom( const TopoDS_Shape& theShape )
+{
+  myShape = theShape;
+}
+
+bool Controls::LyingOnGeom::IsSatisfy( long theId )
+{
+  if ( myMeshDS == 0 || myShape.IsNull() )
+    return false;
+
+  if( myType == SMDSAbs_Node )
+  {
+    if( const SMDS_MeshNode* aNode = myMeshDS->FindNode( theId ) )
+    {
+      const SMDS_PositionPtr& aPosition = aNode->GetPosition();
+      SMDS_TypeOfPosition aTypeOfPosition = aPosition->GetTypeOfPosition();
+      switch( aTypeOfPosition )
+      {
+      case SMDS_TOP_VERTEX : return IsContains( myMeshDS,myShape,aNode,TopAbs_VERTEX );
+      case SMDS_TOP_EDGE   : return IsContains( myMeshDS,myShape,aNode,TopAbs_EDGE );
+      case SMDS_TOP_FACE   : return IsContains( myMeshDS,myShape,aNode,TopAbs_FACE );
+      case SMDS_TOP_3DSPACE: return IsContains( myMeshDS,myShape,aNode,TopAbs_SHELL );
+      }
+    }
+  }
+  else
+  {
+    if( const SMDS_MeshElement* anElem = myMeshDS->FindElement( theId ) )
+    {
+      if( myType == SMDSAbs_All )
+      {
+        return Contains( myMeshDS,myShape,anElem,TopAbs_EDGE ) ||
+               Contains( myMeshDS,myShape,anElem,TopAbs_FACE ) ||
+               Contains( myMeshDS,myShape,anElem,TopAbs_SHELL )||
+               Contains( myMeshDS,myShape,anElem,TopAbs_SOLID );
+      }
+      else if( myType == anElem->GetType() )
+      {
+        switch( myType )
+        {
+        case SMDSAbs_Edge  : return Contains( myMeshDS,myShape,anElem,TopAbs_EDGE );
+        case SMDSAbs_Face  : return Contains( myMeshDS,myShape,anElem,TopAbs_FACE );
+        case SMDSAbs_Volume: return Contains( myMeshDS,myShape,anElem,TopAbs_SHELL )||
+                                    Contains( myMeshDS,myShape,anElem,TopAbs_SOLID );
+        }
+      }
+    }
+  }
+    
+  return false;
+}
+
+void Controls::LyingOnGeom::SetType( SMDSAbs_ElementType theType )
+{
+  myType = theType;
+}
+
+SMDSAbs_ElementType Controls::LyingOnGeom::GetType() const
+{
+  return myType;
+}
+
+TopoDS_Shape Controls::LyingOnGeom::GetShape()
+{
+  return myShape;
+}
+
+SMESHDS_Mesh* Controls::LyingOnGeom::GetMeshDS()
+{
+  return myMeshDS;
+}
+
+bool Controls::LyingOnGeom::Contains( SMESHDS_Mesh*           theMeshDS,
+				      const TopoDS_Shape&     theShape,
+				      const SMDS_MeshElement* theElem,
+				      TopAbs_ShapeEnum        theFindShapeEnum,
+				      TopAbs_ShapeEnum        theAvoidShapeEnum )
+{
+  if (IsContains(theMeshDS, theShape, theElem, theFindShapeEnum, theAvoidShapeEnum))
+    return true;
+  
+  if ( SMESHDS_SubMesh* aSubMesh = theMeshDS->MeshElements( theShape ) )
+    {
+      SMDS_NodeIteratorPtr aNodeIt = aSubMesh->GetNodes();
+      while ( aNodeIt->more() )
+	{
+	  const SMDS_MeshNode* aNode = static_cast<const SMDS_MeshNode*>(aNodeIt->next());
+	  SMDS_ElemIteratorPtr anElemIt = aNode->GetInverseElementIterator();
+	  while ( anElemIt->more() )
+	    {
+	      const SMDS_MeshElement* anElement = static_cast<const SMDS_MeshElement*>(anElemIt->next());
+	      if (anElement == theElem)
+		return true;
+	    }
+	}
+    }
+  
+  TopExp_Explorer anExp( theShape,TopAbs_VERTEX,theAvoidShapeEnum );
+
+  while( anExp.More() )
+  {
+    const TopoDS_Shape& aShape = anExp.Current();
+    if( SMESHDS_SubMesh* aSubMesh = theMeshDS->MeshElements( aShape ) ){
+      SMDS_NodeIteratorPtr aNodeIt = aSubMesh->GetNodes();
+      while ( aNodeIt->more() )
+	{
+	  const SMDS_MeshNode* aNode = static_cast<const SMDS_MeshNode*>(aNodeIt->next());
+	  SMDS_ElemIteratorPtr anElemIt = aNode->GetInverseElementIterator();
+	  while ( anElemIt->more() )
+	    {
+	      const SMDS_MeshElement* anElement = static_cast<const SMDS_MeshElement*>(anElemIt->next());
+	      if (anElement == theElem)
+		return true;
+	    }
+	}
+    }
+    anExp.Next();
+  }
+  return false;
 }
 
 
@@ -696,7 +833,57 @@ FunctorType BelongToCylinder_i::GetFunctorType()
   return FT_BelongToCylinder;
 }
 
+/*
+  Class       : LyingOnGeom_i
+  Description : Predicate for selection on geometrical support
+*/
+LyingOnGeom_i::LyingOnGeom_i()
+{
+  myLyingOnGeomPtr.reset( new Controls::LyingOnGeom() );
+  myFunctorPtr = myPredicatePtr = myLyingOnGeomPtr;
+  myShapeName = 0;
+}
 
+LyingOnGeom_i::~LyingOnGeom_i()
+{
+  delete myShapeName;
+}
+
+void LyingOnGeom_i::SetGeom( GEOM::GEOM_Object_ptr theGeom )
+{
+  if ( theGeom->_is_nil() )
+    return;
+  SMESH_Gen_i* aSMESHGen = SMESH_Gen_i::GetSMESHGen();
+  GEOM::GEOM_Gen_var aGEOMGen = SMESH_Gen_i::GetGeomEngine();
+  TopoDS_Shape aLocShape = aSMESHGen->GetShapeReader()->GetShape( aGEOMGen, theGeom );
+  myLyingOnGeomPtr->SetGeom( aLocShape );
+}
+
+void LyingOnGeom_i::SetGeom( const TopoDS_Shape& theShape )
+{
+  myLyingOnGeomPtr->SetGeom( theShape );
+}
+
+void LyingOnGeom_i::SetElementType(ElementType theType){
+  myLyingOnGeomPtr->SetType(SMDSAbs_ElementType(theType));
+}
+
+FunctorType LyingOnGeom_i::GetFunctorType()
+{
+  return SMESH::FT_LyingOnGeom;
+}
+
+void LyingOnGeom_i::SetShapeName( const char* theName )
+{
+  delete myShapeName;
+  myShapeName = strdup( theName );
+  myLyingOnGeomPtr->SetGeom( getShapeByName( myShapeName ) );
+}
+
+char* LyingOnGeom_i::GetShapeName()
+{
+  return CORBA::string_dup( myShapeName );
+}
 
 /*
   Class       : FreeBorders_i
@@ -1160,6 +1347,13 @@ BelongToCylinder_ptr FilterManager_i::CreateBelongToCylinder()
   return anObj._retn();
 }
 
+LyingOnGeom_ptr FilterManager_i::CreateLyingOnGeom()
+{
+  SMESH::LyingOnGeom_i* aServant = new SMESH::LyingOnGeom_i();
+  SMESH::LyingOnGeom_var anObj = aServant->_this();
+  return anObj._retn();
+}
+
 FreeBorders_ptr FilterManager_i::CreateFreeBorders()
 {
   SMESH::FreeBorders_i* aServant = new SMESH::FreeBorders_i();
@@ -1402,6 +1596,21 @@ static inline bool getCriteria( Predicate_i*                thePred,
 
       return true;
     }
+   case FT_LyingOnGeom:
+    {
+      LyingOnGeom_i* aPred = dynamic_cast<LyingOnGeom_i*>( thePred );
+
+      CORBA::ULong i = theCriteria->length();
+      theCriteria->length( i + 1 );
+
+      theCriteria[ i ] = createCriterion();
+
+      theCriteria[ i ].Type          = FT_LyingOnGeom;
+      theCriteria[ i ].ThresholdStr  = aPred->GetShapeName();
+      theCriteria[ i ].TypeOfElement = aPred->GetElementType();
+
+      return true;
+    }
   case FT_RangeOfIds:
     {
       RangeOfIds_i* aPred = dynamic_cast<RangeOfIds_i*>( thePred );
@@ -1576,6 +1785,14 @@ CORBA::Boolean Filter_i::SetCriteria( const SMESH::Filter::Criteria& theCriteria
           aPredicate = tmpPred;
         }
         break;
+      case SMESH::FT_LyingOnGeom:
+        {
+          SMESH::LyingOnGeom_ptr tmpPred = aFilterMgr->CreateLyingOnGeom();
+          tmpPred->SetElementType( aTypeOfElem );
+          tmpPred->SetShapeName( aThresholdStr );
+          aPredicate = tmpPred;
+        }
+        break; 
       case SMESH::FT_RangeOfIds:
         {
           SMESH::RangeOfIds_ptr tmpPred = aFilterMgr->CreateRangeOfIds();
@@ -1786,6 +2003,7 @@ static inline LDOMString toString( const long theType )
     case FT_BelongToGeom    : return "Belong to Geom";
     case FT_BelongToPlane   : return "Belong to Plane";
     case FT_BelongToCylinder: return "Belong to Cylinder";
+    case FT_LyingOnGeom     : return "Lying on Geom";
     case FT_RangeOfIds      : return "Range of IDs";
     case FT_FreeBorders     : return "Free borders";
     case FT_FreeEdges       : return "Free edges";
@@ -1819,6 +2037,7 @@ static inline SMESH::FunctorType toFunctorType( const LDOMString& theStr )
   else if ( theStr.equals( "Belong to Geom"               ) ) return FT_BelongToGeom;
   else if ( theStr.equals( "Belong to Plane"              ) ) return FT_BelongToPlane;
   else if ( theStr.equals( "Belong to Cylinder"           ) ) return FT_BelongToCylinder;
+  else if ( theStr.equals( "Lying on Geom"                ) ) return FT_LyingOnGeom;
   else if ( theStr.equals( "Free borders"                 ) ) return FT_FreeBorders;
   else if ( theStr.equals( "Free edges"                   ) ) return FT_FreeEdges;
   else if ( theStr.equals( "Borders at multi-connections" ) ) return FT_MultiConnection;
@@ -2334,23 +2553,3 @@ string_array* FilterLibrary_i::GetAllNames()
 
   return aResArray._retn();
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

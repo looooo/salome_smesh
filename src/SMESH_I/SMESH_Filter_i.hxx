@@ -72,6 +72,39 @@ private:
   SMDSAbs_ElementType             myType;
 };
 typedef boost::shared_ptr<BelongToGeom> BelongToGeomPtr;
+
+/*
+  Class       : LyingOnGeom
+  Description : Predicate for verifying whether entiy lying or partially lying on
+                specified geometrical support
+*/
+class LyingOnGeom: public virtual Predicate
+{
+public:
+                                  LyingOnGeom();
+  
+  virtual void                    SetMesh( SMDS_Mesh* theMesh );
+  virtual void                    SetGeom( const TopoDS_Shape& theShape );
+
+  virtual bool                    IsSatisfy( long theElementId );
+
+  virtual void                    SetType( SMDSAbs_ElementType theType );
+  virtual                         SMDSAbs_ElementType GetType() const;
+
+  TopoDS_Shape                    GetShape();
+  SMESHDS_Mesh*                   GetMeshDS();
+  
+  virtual bool                    Contains( SMESHDS_Mesh*           theMeshDS,
+					    const TopoDS_Shape&     theShape,
+					    const SMDS_MeshElement* theElem,
+					    TopAbs_ShapeEnum        theFindShapeEnum,
+					    TopAbs_ShapeEnum        theAvoidShapeEnum = TopAbs_SHAPE );
+private:
+  TopoDS_Shape                    myShape;
+  SMESHDS_Mesh*                   myMeshDS;
+  SMDSAbs_ElementType             myType;
+};
+typedef boost::shared_ptr<LyingOnGeom> LyingOnGeomPtr;
 }
 
 /*
@@ -359,6 +392,30 @@ public:
   FunctorType                     GetFunctorType();
 };
 
+/*
+  Class       : LyingOnGeom_i
+  Description : Predicate for selection on geometrical support(lying or partially lying)
+*/
+class LyingOnGeom_i: public virtual POA_SMESH::LyingOnGeom,
+		     public virtual Predicate_i
+{
+public:
+                                  LyingOnGeom_i();
+  virtual                         ~LyingOnGeom_i();
+    
+  void                            SetGeom( GEOM::GEOM_Object_ptr theGeom );
+  void                            SetElementType( ElementType theType );
+  FunctorType                     GetFunctorType();
+  
+  void                            SetGeom( const TopoDS_Shape& theShape );
+  
+  void                            SetShapeName( const char* theName );
+  char*                           GetShapeName();
+  
+protected:
+  Controls::LyingOnGeomPtr        myLyingOnGeomPtr;
+  char*                           myShapeName;
+};
 
 /*
   Class       : FreeBorders_i
@@ -641,6 +698,8 @@ public:
   BelongToGeom_ptr          CreateBelongToGeom();
   BelongToPlane_ptr         CreateBelongToPlane();
   BelongToCylinder_ptr      CreateBelongToCylinder();
+
+  LyingOnGeom_ptr           CreateLyingOnGeom();
 
   FreeBorders_ptr           CreateFreeBorders();
   FreeEdges_ptr             CreateFreeEdges();

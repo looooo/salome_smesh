@@ -1048,6 +1048,9 @@ msgstr "Belong to Plane"
 msgid "SMESHGUI_FilterTable::BELONG_TO_CYLINDER"
 msgstr "Belong to Cylinder"
 
+msgid "SMESHGUI_FilterTable::LYING_ON_GEOM"
+msgstr "Lying on Geom"
+
 # -------------- SMESHGUI_FilterDlg --------------
 msgid "SMESHGUI_FilterDlg::TLT"
 msgstr "Selection filter"

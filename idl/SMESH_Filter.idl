@@ -60,6 +60,7 @@ module SMESH
     FT_BelongToGeom,
     FT_BelongToPlane,
     FT_BelongToCylinder,
+    FT_LyingOnGeom,
     FT_RangeOfIds,
     FT_LessThan,
     FT_MoreThan,
@@ -180,6 +181,19 @@ module SMESH
     void   SetCylinder( in GEOM::GEOM_Object theGeom, in ElementType theType );
   };
 
+  /*!
+  * Logical functor (predicate) "Lying On Geometry".
+  * Verify whether mesh element or node lying or partially lying on the pointed Geom Object
+  */
+  interface LyingOnGeom: Predicate
+  {
+    void SetGeom( in GEOM::GEOM_Object theGeom );
+    void SetElementType( in ElementType theType );
+
+    void   SetShapeName( in string theName );
+    string GetShapeName();    
+  };
+ 
   /*!
   * Logical functor (predicate) "Free borders".
   * Verify whether 1D mesh element is free ( i.e. connected to one face only )
@@ -361,6 +375,8 @@ module SMESH
     BelongToGeom      CreateBelongToGeom();
     BelongToPlane     CreateBelongToPlane();
     BelongToCylinder  CreateBelongToCylinder();
+
+    LyingOnGeom       CreateLyingOnGeom();
 
     FreeBorders       CreateFreeBorders();
     FreeEdges         CreateFreeEdges();

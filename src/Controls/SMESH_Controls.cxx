@@ -2145,7 +2145,7 @@ void ManifoldPart::getFacesByLink( const ManifoldPart::Link& theLink,
     SMDS_MeshFace* aFace = (SMDS_MeshFace*)anItr->next();
     if ( !aFace )
       continue;
-    aSetOfFaces.insert( aFace );
+    aSetOfFaces.Add( aFace );
   }
   // take all faces that shared second node
   anItr = theLink.myNode2->facesIterator();
@@ -2153,7 +2153,7 @@ void ManifoldPart::getFacesByLink( const ManifoldPart::Link& theLink,
   for ( ; anItr->more(); )
   {
     SMDS_MeshFace* aFace = (SMDS_MeshFace*)anItr->next();
-    if ( aSetOfFaces.find( aFace ) != aSetOfFaces.end() )
+    if ( aSetOfFaces.Contains( aFace ) )
       theFaces.push_back( aFace );
   }
 }

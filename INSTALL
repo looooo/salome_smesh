@@ -1,6 +1,6 @@
-This is the version 1.2.2 of SMESH in the branch nadir_1_2_2 dedicated to the
-Netgen integration in the SMESH Engine
+This is SMESH V1_3_0
+
 Compatible with :
-	- KERNEL 1.2.1
-	- GEOM 1.2.1
-	- MED 1.2.3
+	GEOM	V1_3_0
+	KERNEL	V1_3_0
+	MED	V1_3_0

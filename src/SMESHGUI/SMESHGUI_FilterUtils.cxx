@@ -27,11 +27,12 @@ namespace SMESH
 
   SMESH::FilterManager_var GetFilterManager()
   {
-    static SMESH::FilterManager_var aFilterManager;
-    if(CORBA::is_nil(aFilterManager)){
-      aFilterManager = GetSMESHGen()->CreateFilterManager();
-    }
-    return aFilterManager;
+    return GetSMESHGen()->CreateFilterManager(); // DumpPython
+    //static SMESH::FilterManager_var aFilterManager;
+    //if(CORBA::is_nil(aFilterManager)){
+    //  aFilterManager = GetSMESHGen()->CreateFilterManager();
+    //}
+    //return aFilterManager;
   }
 
 }

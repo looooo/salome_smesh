@@ -83,6 +83,15 @@ namespace SMESH
 
   TCollection_AsciiString& 
   operator<<(TCollection_AsciiString& theString, 
+	     SMESH::Filter_i* theArg)
+  {
+    theString += TCollection_AsciiString("aFilter_");
+    theString += TCollection_AsciiString(int(theArg));
+    return theString;
+  }
+
+  TCollection_AsciiString& 
+  operator<<(TCollection_AsciiString& theString, 
 	     SMESH::Functor_i* theArg)
   {
     FunctorType aFunctorType = theArg->GetFunctorType();
@@ -414,7 +423,6 @@ TCollection_AsciiString SMESH_Gen_i::DumpPython_impl
   else
     aScript += "\n\tsmesh.SetCurrentStudy(None)";
 
-  Standard_Integer posToInertGlobalVars = aScript.Length();
   TCollection_AsciiString globalVars;
 
   // Dump trace of restored study

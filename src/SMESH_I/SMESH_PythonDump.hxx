@@ -49,6 +49,11 @@ namespace SMESH
   operator<<(TCollection_AsciiString& theString, 
 	     SMESH::FilterManager_i* theArg);
 
+  class Filter_i;
+  TCollection_AsciiString& 
+  operator<<(TCollection_AsciiString& theString, 
+	     SMESH::Filter_i* theArg);
+
   class Functor_i;
   TCollection_AsciiString& 
   operator<<(TCollection_AsciiString& theString, 

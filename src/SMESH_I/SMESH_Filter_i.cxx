@@ -416,7 +416,7 @@ Functor_i::Functor_i():
 void Functor_i::SetMesh( SMESH_Mesh_ptr theMesh )
 {
   myFunctorPtr->SetMesh( MeshPtr2SMDSMesh( theMesh ) );
-  INFOS("Functor_i::SetMesh~");
+  TPythonDump()<<this<<".SetMesh("<<theMesh<<")";
 }
 
 ElementType Functor_i::GetElementType()
@@ -1107,6 +1107,7 @@ EqualTo_i::EqualTo_i()
 void EqualTo_i::SetTolerance( CORBA::Double theToler )
 {
   myEqualToPtr->SetTolerance( theToler );
+  TPythonDump()<<this<<".SetTolerance("<<float(theToler)<<")";
 }
 
 CORBA::Double EqualTo_i::GetTolerance()
@@ -1146,6 +1147,7 @@ void LogicalNOT_i::SetPredicate( Predicate_ptr thePredicate )
   if ( myPredicate ){
     myLogicalNOTPtr->SetPredicate(myPredicate->GetPredicate());
     myPredicate->Register();
+    TPythonDump()<<this<<".SetPredicate("<<myPredicate<<")";
   }
 }
 
@@ -1197,6 +1199,7 @@ void LogicalBinary_i::SetPredicate1( Predicate_ptr thePredicate )
   if ( myPredicate1 ){
     myLogicalBinaryPtr->SetPredicate1(myPredicate1->GetPredicate());
     myPredicate1->Register();
+    TPythonDump()<<this<<".SetPredicate1("<<myPredicate1<<")";
   }
 }
 
@@ -1210,6 +1213,7 @@ void LogicalBinary_i::SetPredicate2( Predicate_ptr thePredicate )
   if ( myPredicate2 ){
     myLogicalBinaryPtr->SetPredicate2(myPredicate2->GetPredicate());
     myPredicate2->Register();
+    TPythonDump()<<this<<".SetPredicate2("<<myPredicate2<<")";
   }
 }
 
@@ -1431,6 +1435,7 @@ EqualTo_ptr FilterManager_i::CreateEqualTo()
 {
   SMESH::EqualTo_i* aServant = new SMESH::EqualTo_i();
   SMESH::EqualTo_var anObj = aServant->_this();
+  TPythonDump()<<aServant<<" = "<<this<<".CreateEqualTo()";
   return anObj._retn();
 }
 
@@ -1439,6 +1444,7 @@ LogicalNOT_ptr FilterManager_i::CreateLogicalNOT()
 {
   SMESH::LogicalNOT_i* aServant = new SMESH::LogicalNOT_i();
   SMESH::LogicalNOT_var anObj = aServant->_this();
+  TPythonDump()<<aServant<<" = "<<this<<".CreateLogicalNOT()";
   return anObj._retn();
 }
 
@@ -1447,6 +1453,7 @@ LogicalAND_ptr FilterManager_i::CreateLogicalAND()
 {
   SMESH::LogicalAND_i* aServant = new SMESH::LogicalAND_i();
   SMESH::LogicalAND_var anObj = aServant->_this();
+  TPythonDump()<<aServant<<" = "<<this<<".CreateLogicalAND()";
   return anObj._retn();
 }
 
@@ -1455,6 +1462,7 @@ LogicalOR_ptr FilterManager_i::CreateLogicalOR()
 {
   SMESH::LogicalOR_i* aServant = new SMESH::LogicalOR_i();
   SMESH::LogicalOR_var anObj = aServant->_this();
+  TPythonDump()<<aServant<<" = "<<this<<".CreateLogicalOR()";
   return anObj._retn();
 }
 
@@ -1462,6 +1470,7 @@ Filter_ptr FilterManager_i::CreateFilter()
 {
   SMESH::Filter_i* aServant = new SMESH::Filter_i();
   SMESH::Filter_var anObj = aServant->_this();
+  TPythonDump()<<aServant<<" = "<<this<<".CreateFilter()";
   return anObj._retn();
 }
 
@@ -1469,6 +1478,7 @@ FilterLibrary_ptr FilterManager_i::LoadLibrary( const char* aFileName )
 {
   SMESH::FilterLibrary_i* aServant = new SMESH::FilterLibrary_i( aFileName );
   SMESH::FilterLibrary_var anObj = aServant->_this();
+  TPythonDump()<<aServant<<" = "<<this<<".LoadLibrary("<<aFileName<<")";
   return anObj._retn();
 }
 
@@ -1476,11 +1486,13 @@ FilterLibrary_ptr FilterManager_i::CreateLibrary()
 {
   SMESH::FilterLibrary_i* aServant = new SMESH::FilterLibrary_i();
   SMESH::FilterLibrary_var anObj = aServant->_this();
+  TPythonDump()<<aServant<<" = "<<this<<".CreateLibrary()";
   return anObj._retn();
 }
 
 CORBA::Boolean FilterManager_i::DeleteLibrary( const char* aFileName )
 {
+  TPythonDump()<<this<<".DeleteLibrary("<<aFileName<<")";
   return remove( aFileName ) ? false : true;
 }
 
@@ -1538,6 +1550,7 @@ void Filter_i::SetPredicate( Predicate_ptr thePredicate )
   {
     myFilter.SetPredicate( myPredicate->GetPredicate() );
     myPredicate->Register();
+    TPythonDump()<<this<<".SetPredicate("<<myPredicate<<")";
   }
 }
 

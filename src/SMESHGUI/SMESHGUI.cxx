@@ -140,7 +140,9 @@ namespace{
 
   void ExportMeshToFile(QAD_Desktop * parent, int theCommandID);
 
-  void SetViewMode(int theCommandID);
+  void SetDisplayMode(int theCommandID);
+
+  void SetDisplayEntity(int theCommandID);
 
   void Control( int theCommandID );
 
@@ -286,7 +288,48 @@ namespace{
     }
   }  
   
-  void SetViewMode(int theCommandID){
+  inline void InverseEntityMode(unsigned int& theOutputMode,
+				unsigned int theMode)
+  {
+    bool anIsNotPresent = ~theOutputMode & theMode;
+    if(anIsNotPresent)
+      theOutputMode |= theMode;
+    else
+      theOutputMode &= ~theMode;
+  }
+
+  void SetDisplayEntity(int theCommandID){
+    SALOME_Selection *Sel = SALOME_Selection::Selection(SMESH::GetActiveStudy()->getSelection());
+    if(Sel->IObjectCount() >= 1){
+      SALOME_ListIteratorOfListIO It(Sel->StoredIObjects());
+      for(; It.More(); It.Next()){
+	Handle(SALOME_InteractiveObject) IObject = It.Value();
+	if(IObject->hasEntry()){
+	  if(SMESH_Actor *anActor = SMESH::FindActorByEntry(IObject->getEntry())){
+	    unsigned int aMode = anActor->GetEntityMode();
+	    switch(theCommandID){
+	    case 217:
+	      InverseEntityMode(aMode,SMESH_Actor::eEdges);
+	      break;
+	    case 218:
+	      InverseEntityMode(aMode,SMESH_Actor::eFaces);
+	      break;
+	    case 219:
+	      InverseEntityMode(aMode,SMESH_Actor::eVolumes);
+	      break;
+	    case 220:
+	      aMode = SMESH_Actor::eAllEntity;
+	      break;
+	    }
+	    if(aMode)
+	      anActor->SetEntityMode(aMode);
+	  }
+	}
+      }
+    }
+  }
+
+  void SetDisplayMode(int theCommandID){
     SALOME_Selection *Sel = SALOME_Selection::Selection(SMESH::GetActiveStudy()->getSelection());
     if(Sel->IObjectCount() >= 1){
       switch(theCommandID){
@@ -1031,14 +1074,22 @@ bool SMESHGUI::OnGUIEvent(int theCommandID, QAD_Desktop * parent)
   case 1134: // Clipping
   case 1133: // Tranparency
   case 1132: // Colors / Size
-  case 215:
-  case 213:
-  case 212:
-  case 211:
-    {
-      ::SetViewMode(theCommandID);
-      break;
-    }
+
+    // Display Mode
+  case 215: // Nodes
+  case 213: // Nodes
+  case 212: // Nodes
+  case 211: // Nodes
+    ::SetDisplayMode(theCommandID);
+  break;
+
+    // Display Entity
+  case 217: // Edges
+  case 218: // Faces
+  case 219: // Volumes
+  case 220: // All Entity
+    ::SetDisplayEntity(theCommandID);
+  break;
 
   case 214:					// UPDATE
     {
@@ -2316,21 +2367,22 @@ bool SMESHGUI::CustomPopup(QAD_Desktop* parent, QPopupMenu* popup, const QString
         if ( !aGeomGroup->_is_nil()  ) // group linked on geometry
 	  popup->removeItem( 803 ); // EDIT GROUP
           
-	SMESH_Actor* ac = SMESH::FindActorByEntry(IObject->getEntry());
+	SMESH_Actor* anActor = SMESH::FindActorByEntry(IObject->getEntry());
 	// if object has actor
-	if ( ac && studyFrame->getTypeView() == VIEW_VTK ) {
+	if ( anActor && studyFrame->getTypeView() == VIEW_VTK ) {
 	  VTKViewer_RenderWindowInteractor* myRenderInter = SMESH::GetCurrentVtkView()->getRWInteractor();
 	  if ( myRenderInter->isVisible( IObject ) ) {
 	    popup->removeItem( QAD_Display_Popup_ID );
-	    popup->setItemChecked( 9010, ac->GetPointsLabeled() ); // Numbering / Display Nodes #
-	    popup->setItemChecked( 9011, ac->GetCellsLabeled() );  // Numbering / Display Elements #
-	    TVisualObjPtr aVisualObj = ac->GetObject();
+	    popup->setItemChecked( 9010, anActor->GetPointsLabeled() ); // Numbering / Display Nodes #
+	    popup->setItemChecked( 9011, anActor->GetCellsLabeled() );  // Numbering / Display Elements #
+	    TVisualObjPtr aVisualObj = anActor->GetObject();
 	    int aNbEdges = aVisualObj->GetNbEntities(SMESH::EDGE);
 	    int aNbFaces = aVisualObj->GetNbEntities(SMESH::FACE);
 	    int aNbVolumes = aVisualObj->GetNbEntities(SMESH::VOLUME);
+
 	    QMenuItem* mi = popup->findItem( 1131 );
 	    if ( mi && mi->popup() ) {
-	      int  prType = ac->GetRepresentation();
+	      int  prType = anActor->GetRepresentation();
 	      // Display Mode / Wireframe
 	      if(aNbVolumes == 0 && aNbFaces == 0 && aNbEdges == 0){
 		mi->popup()->removeItem( 211 );
@@ -2346,15 +2398,47 @@ bool SMESHGUI::CustomPopup(QAD_Desktop* parent, QPopupMenu* popup, const QString
 	      // Display Mode / Points
 	      mi->popup()->setItemChecked( 215, prType == SMESH_Actor::ePoint );  
 	      // Display Mode / Shrink
-	      bool isShrunk = ac->IsShrunk();
-	      bool isShrunkable = ac->IsShrunkable();
+	      bool isShrunk = anActor->IsShrunk();
+	      bool isShrunkable = anActor->IsShrunkable();
 	      mi->popup()->setItemChecked( 213, isShrunk );   
 	      mi->popup()->setItemEnabled( 213, prType != SMESH_Actor::ePoint && isShrunkable);
 	    }
-	    // Scalar Bar
+
+	    // Display Entity
+	    mi = popup->findItem( 1135 );
+	    if ( mi && mi->popup() ) {
+	      QPopupMenu* aPopup = mi->popup();
+	      unsigned int aMode = anActor->GetEntityMode();
+
+	      if(aNbVolumes == 0)
+		aPopup->removeItem( 219 );
+	      else
+		aPopup->setItemChecked( 219, aMode & SMESH_Actor::eVolumes );
+
+	      if(aNbFaces == 0)
+		aPopup->removeItem( 218 );
+	      else
+		aPopup->setItemChecked( 218, aMode & SMESH_Actor::eFaces );
+
+
+	      if(aNbEdges == 0)
+		aPopup->removeItem( 217 );
+	      else
+		aPopup->setItemChecked( 217, aMode & SMESH_Actor::eEdges );
+
+
+	      bool aIsRemove = (aNbVolumes == 0 || aMode & SMESH_Actor::eVolumes);
+	      aIsRemove &= (aNbFaces == 0 || aMode & SMESH_Actor::eFaces);
+	      aIsRemove &= (aNbEdges == 0 || aMode & SMESH_Actor::eEdges);
+
+	      if(aIsRemove)
+		aPopup->removeItem( 220 );
+	    }
+
+	    // Controls
 	    mi = popup->findItem( 2000 );
 	    if ( mi && mi->popup() ) {
-	      SMESH_Actor::eControl cMode = ac->GetControlMode();
+	      SMESH_Actor::eControl cMode = anActor->GetControlMode();
 	      switch ( cMode ) {
 	      case SMESH_Actor::eLengthEdges:
 		mi->popup()->setItemChecked( 6001, true ); break;
@@ -2388,7 +2472,7 @@ bool SMESHGUI::CustomPopup(QAD_Desktop* parent, QPopupMenu* popup, const QString
 		mi->popup()->removeItem( 201 );
 		break;
 	      }
-	      TVisualObjPtr aVisualObj = ac->GetObject();
+	      TVisualObjPtr aVisualObj = anActor->GetObject();
 	      if(aNbEdges == 0){
 		mi->popup()->removeItem( 6001 );
 		mi->popup()->removeItem( 6003 );

@@ -439,6 +439,8 @@ SMESH_Actor::SMESH_Actor(){
   myPtsLabeledDataMapper->SetLabelTextProperty(aPtsTextProp);
   aPtsTextProp->Delete();
     
+  myEntityMode = eAllEntity;
+
   myIsPointsLabeled = false;
 
   myPointLabels = vtkActor2D::New();
@@ -1018,6 +1020,55 @@ void SMESH_Actor::SetVisibility(int theMode, bool theIsUpdateRepersentation){
     myCellsLabels->VisibilityOff();
   }
   Modified();
+}
+
+
+namespace{
+
+  inline bool UpdateEntityMode(unsigned int& theOutputMode, 
+			       unsigned int theInputMode, 
+			       unsigned int theMode,
+			       int theCondition)
+  {
+    if(!theCondition)
+      theOutputMode &= ~theMode;
+
+    return theOutputMode & theMode && theCondition;
+  }
+
+}
+
+void SMESH_Actor::SetEntityMode(unsigned int theMode){
+  if(!myVisualObj->GetNbEntities(SMESH::EDGE))
+    theMode &= ~eEdges;
+
+  if(!myVisualObj->GetNbEntities(SMESH::FACE))
+    theMode &= ~eFaces;
+
+  if(!myVisualObj->GetNbEntities(SMESH::VOLUME))
+    theMode &= ~eVolumes;
+
+  if(!theMode)
+    return;
+
+  myScalarBarActor->VisibilityOff();
+
+  my1DExtActor->VisibilityOff();
+  my1DActor->VisibilityOff();
+  
+  my2DActor->VisibilityOff();
+  my3DActor->VisibilityOff();
+  
+  if(theMode & eEdges)
+    my1DActor->VisibilityOn();
+  
+  if(theMode & eFaces)
+    my2DActor->VisibilityOn();
+  
+  if(theMode & eVolumes)
+    my3DActor->VisibilityOn();
+  
+  myEntityMode = theMode;
 }
 
 

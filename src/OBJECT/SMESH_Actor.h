@@ -121,6 +121,11 @@ class SMESH_Actor : public SALOME_Actor{
 
   enum EReperesent { ePoint, eEdge, eSurface};
   virtual void SetRepresentation(int theMode);
+
+  enum EEntityMode { eEdges = 0x01, eFaces = 0x02, eVolumes = 0x04, eAllEntity = 0x07};
+  unsigned int GetEntityMode() const { return myEntityMode;}
+  void SetEntityMode(unsigned int theMode);
+
   void SetPointRepresentation(bool theIsPointsVisible);
   bool GetPointRepresentation();
 
@@ -198,6 +203,7 @@ class SMESH_Actor : public SALOME_Actor{
   vtkProperty* my1DExtProp;
   SMESH_DeviceActor* my1DExtActor;
 
+  unsigned int myEntityMode;
   bool myIsPointsVisible;
 
   bool myIsShrinkable;

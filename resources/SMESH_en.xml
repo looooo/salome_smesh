@@ -231,6 +231,14 @@
 	<popup-item item-id="213" pos-id="" label-id="Shrink" icon-id="mesh_shrink.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
    </submenu>
    <endsubmenu />
+   <submenu label-id="Display Entity" item-id="1135" pos-id="">
+	<popup-item item-id="217" pos-id="" label-id="Edges" icon-id="mesh_line.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
+    	<popup-item item-id="218" pos-id="" label-id="Faces" icon-id="mesh_triangle.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
+    	<popup-item item-id="219" pos-id="" label-id="Volumes" icon-id="mesh_tetra.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
+        <separator pos-id=""/>
+	<popup-item item-id="220" pos-id="" label-id="All" icon-id="" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
+   </submenu>
+   <endsubmenu />
    <popup-item item-id="1132" pos-id="" label-id="Colors / Size" icon-id="" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
    <popup-item item-id="1133" pos-id="" label-id="Transparency" icon-id="" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
    <popup-item item-id="1134" pos-id="" label-id="Clipping" icon-id="" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
@@ -272,6 +280,14 @@
     	<popup-item item-id="215" pos-id="" label-id="Nodes" icon-id="mesh_points.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
         <separator pos-id=""/>
 	<popup-item item-id="213" pos-id="" label-id="Shrink" icon-id="mesh_shrink.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
+   </submenu>
+   <endsubmenu />
+   <submenu label-id="Display Entity" item-id="1135" pos-id="">
+	<popup-item item-id="217" pos-id="" label-id="Edges" icon-id="mesh_line.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
+    	<popup-item item-id="218" pos-id="" label-id="Faces" icon-id="mesh_triangle.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
+    	<popup-item item-id="219" pos-id="" label-id="Volumes" icon-id="mesh_tetra.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
+        <separator pos-id=""/>
+	<popup-item item-id="220" pos-id="" label-id="All" icon-id="" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
    </submenu>
    <endsubmenu />
    <popup-item item-id="1132" pos-id="" label-id="Colors / Size" icon-id="" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
@@ -317,6 +333,14 @@
     	<popup-item item-id="215" pos-id="" label-id="Nodes" icon-id="mesh_points.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
         <separator pos-id=""/>
 	<popup-item item-id="213" pos-id="" label-id="Shrink" icon-id="mesh_shrink.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
+   </submenu>
+   <endsubmenu />
+   <submenu label-id="Display Entity" item-id="1135" pos-id="">
+	<popup-item item-id="217" pos-id="" label-id="Edges" icon-id="mesh_line.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
+    	<popup-item item-id="218" pos-id="" label-id="Faces" icon-id="mesh_triangle.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
+    	<popup-item item-id="219" pos-id="" label-id="Volumes" icon-id="mesh_tetra.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
+        <separator pos-id=""/>
+	<popup-item item-id="220" pos-id="" label-id="All" icon-id="" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
    </submenu>
    <endsubmenu />
    <popup-item item-id="1132" pos-id="" label-id="Colors / Size" icon-id="" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>

@@ -411,6 +411,11 @@ Functor_i::Functor_i():
   SMESH_Gen_i::GetPOA()->activate_object( this );
 }
 
+Functor_i::~Functor_i()
+{
+  TPythonDump()<<this<<".Destroy()";
+}
+
 void Functor_i::SetMesh( SMESH_Mesh_ptr theMesh )
 {
   myFunctorPtr->SetMesh( MeshPtr2SMDSMesh( theMesh ) );
@@ -1287,6 +1292,13 @@ FilterManager_i::FilterManager_i()
   SMESH_Gen_i::GetPOA()->activate_object( this );
 }
 
+
+FilterManager_i::~FilterManager_i()
+{
+  TPythonDump()<<this<<".Destroy()";
+}
+
+
 MinimumAngle_ptr FilterManager_i::CreateMinimumAngle()
 {
   SMESH::MinimumAngle_i* aServant = new SMESH::MinimumAngle_i();
@@ -1565,6 +1577,11 @@ Filter_i::~Filter_i()
 {
   if ( myPredicate )
     myPredicate->Destroy();
+
+  if(!CORBA::is_nil(myMesh))
+    myMesh->Destroy();
+
+  TPythonDump()<<this<<".Destroy()";
 }
 
 //=======================================================================
@@ -1599,12 +1616,25 @@ SMESH::ElementType Filter_i::GetElementType()
 // name    : Filter_i::SetMesh
 // Purpose : Set mesh
 //=======================================================================
-void Filter_i::SetMesh( SMESH_Mesh_ptr theMesh )
+void 
+Filter_i::
+SetMesh( SMESH_Mesh_ptr theMesh )
 {
-  if(myPredicate){
-    myPredicate->SetMesh( theMesh );
-    TPythonDump()<<this<<".SetMesh("<<theMesh<<")";
-  }
+  if(!CORBA::is_nil(theMesh))
+    theMesh->Register();
+
+  if(!CORBA::is_nil(myMesh))
+    myMesh->Destroy();
+
+  myMesh = theMesh;
+  TPythonDump()<<this<<".SetMesh("<<theMesh<<")";
+}
+
+SMESH::long_array* 
+Filter_i::
+GetIDs()
+{
+  return GetElementsId(myMesh);
 }
 
 //=======================================================================
@@ -1634,16 +1664,15 @@ SMESH::long_array*
 Filter_i::
 GetElementsId( SMESH_Mesh_ptr theMesh )
 {
-  Controls::Filter::TIdSequence aSequence;
-  GetElementsId(myPredicate,theMesh,aSequence);
-
   SMESH::long_array_var anArray = new SMESH::long_array;
-  long i = 0, iEnd = aSequence.size();
-
-  anArray->length( iEnd );
-  for ( ; i < iEnd; i++ )
-    anArray[ i ] = aSequence[i];
-
+  if(!CORBA::is_nil(theMesh)){
+    Controls::Filter::TIdSequence aSequence;
+    GetElementsId(myPredicate,theMesh,aSequence);
+    long i = 0, iEnd = aSequence.size();
+    anArray->length( iEnd );
+    for ( ; i < iEnd; i++ )
+      anArray[ i ] = aSequence[i];
+  }
   return anArray._retn();
 }
 
@@ -2399,6 +2428,7 @@ FilterLibrary_i::FilterLibrary_i()
 FilterLibrary_i::~FilterLibrary_i()
 {
   delete myFileName;
+  TPythonDump()<<this<<".Destroy()";
 }
 
 //=======================================================================

@@ -125,6 +125,7 @@ namespace SMESH
     
   protected:
     Functor_i();
+    ~Functor_i();
   protected:                                
     Controls::FunctorPtr            myFunctorPtr;
   };
@@ -629,32 +630,57 @@ namespace SMESH
   {
   public:
     Filter_i();
-    virtual          ~Filter_i();
+    ~Filter_i();
     
-    void             SetPredicate( Predicate_ptr );
-    void             SetMesh( SMESH_Mesh_ptr );
-    
-    static
-    void             GetElementsId( Predicate_i*,
-				    const SMDS_Mesh*,
-				    Controls::Filter::TIdSequence& );
-    static
-    void             GetElementsId( Predicate_i*,
-				    SMESH_Mesh_ptr,
-				    Controls::Filter::TIdSequence& );
+    virtual
+    void
+    SetPredicate( Predicate_ptr );
 
-    long_array*      GetElementsId( SMESH_Mesh_ptr );
-    ElementType      GetElementType();
+    virtual
+    void
+    SetMesh( SMESH_Mesh_ptr );
+
+    virtual
+    SMESH::long_array* 
+    GetIDs();
     
-    CORBA::Boolean   GetCriteria( SMESH::Filter::Criteria_out theCriteria );
-    CORBA::Boolean   SetCriteria( const SMESH::Filter::Criteria& theCriteria );
+    static
+    void
+    GetElementsId( Predicate_i*,
+		   const SMDS_Mesh*,
+		   Controls::Filter::TIdSequence& );
+    static
+    void           
+    GetElementsId( Predicate_i*,
+		   SMESH_Mesh_ptr,
+		   Controls::Filter::TIdSequence& );
     
-    Predicate_ptr    GetPredicate();
+    virtual
+    long_array*      
+    GetElementsId( SMESH_Mesh_ptr );
+
+    virtual
+    ElementType      
+    GetElementType();
+    
+    virtual
+    CORBA::Boolean   
+    GetCriteria( SMESH::Filter::Criteria_out theCriteria );
+
+    virtual
+    CORBA::Boolean
+    SetCriteria( const SMESH::Filter::Criteria& theCriteria );
+    
+    virtual
+    Predicate_ptr
+    GetPredicate();
+
     Predicate_i*     GetPredicate_i();
 
   private:
     Controls::Filter myFilter;
     Predicate_i*     myPredicate;
+    SMESH_Mesh_var   myMesh;
   };
   
   
@@ -704,6 +730,8 @@ namespace SMESH
   {
   public:
     FilterManager_i();
+    ~FilterManager_i();
+
     MinimumAngle_ptr          CreateMinimumAngle();
     AspectRatio_ptr           CreateAspectRatio();
     AspectRatio3D_ptr         CreateAspectRatio3D();

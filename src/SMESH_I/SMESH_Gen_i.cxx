@@ -472,12 +472,23 @@ SMESH::SMESH_Hypothesis_ptr SMESH_Gen_i::CreateHypothesis( const char* theHypNam
   SMESH::SMESH_Hypothesis_var hyp = this->createHypothesis( theHypName, theLibName );
 
   // Publish hypothesis/algorithm in the study
-  if ( CanPublishInStudy( hyp ) )
-    PublishHypothesis( myCurrentStudy, hyp );
+  if ( CanPublishInStudy( hyp ) ) {
+    SALOMEDS::SObject_var aSO = PublishHypothesis( myCurrentStudy, hyp );
+
+    // Update Python script
+    TCollection_AsciiString aStr (aSO->GetID());
+    aStr += " = smesh.CreateHypothesis(\"";
+    aStr += Standard_CString(theHypName);
+    aStr += "\", \"";
+    aStr += Standard_CString(theLibName);
+    aStr += "\")";
+
+    AddToPythonScript(myCurrentStudy->StudyId(), aStr);
+  }
 
   return hyp._retn();
 }
-  
+
 //=============================================================================
 /*!
  *  SMESH_Gen_i::CreateMesh
@@ -497,9 +508,20 @@ SMESH::SMESH_Mesh_ptr SMESH_Gen_i::CreateMesh( GEOM::GEOM_Object_ptr theShapeObj
   SMESH_Mesh_i* meshServant = dynamic_cast<SMESH_Mesh_i*>( GetServant( mesh ).in() );
   ASSERT( meshServant );
   meshServant->SetShape( theShapeObject );
+
   // publish mesh in the study
-  if ( CanPublishInStudy( mesh ) )
-    PublishMesh( myCurrentStudy, mesh.in() );
+  if ( CanPublishInStudy( mesh ) ) {
+    SALOMEDS::SObject_var aSO = PublishMesh( myCurrentStudy, mesh.in() );
+
+    // Update Python script
+    TCollection_AsciiString aStr (aSO->GetID());
+    aStr += " = smesh.CreateMesh(salome.IDToObject(\"";
+    aStr += theShapeObject->GetStudyEntry();
+    aStr += "\"))";
+
+    AddToPythonScript(myCurrentStudy->StudyId(), aStr);
+  }
+
   return mesh._retn();
 }
 
@@ -520,8 +542,17 @@ SMESH::SMESH_Mesh_ptr SMESH_Gen_i::CreateMeshesFromUNV( const char* theFileName 
   SMESH::SMESH_Mesh_var aMesh = createMesh();
   string aFileName; // = boost::filesystem::path(theFileName).leaf();
   // publish mesh in the study
-  if ( CanPublishInStudy( aMesh ) )
-    PublishMesh( myCurrentStudy, aMesh.in(), aFileName.c_str() );
+  if ( CanPublishInStudy( aMesh ) ) {
+    SALOMEDS::SObject_var aSO = PublishMesh( myCurrentStudy, aMesh.in(), aFileName.c_str() );
+
+    // Update Python script
+    TCollection_AsciiString aStr (aSO->GetID());
+    aStr += " = smesh.CreateMeshesFromUNV(\"";
+    aStr += Standard_CString(theFileName);
+    aStr += "\")";
+
+    AddToPythonScript(myCurrentStudy->StudyId(), aStr);
+  }
 
   SMESH_Mesh_i* aServant = dynamic_cast<SMESH_Mesh_i*>( GetServant( aMesh ).in() );
   ASSERT( aServant );
@@ -544,6 +575,9 @@ SMESH::mesh_array* SMESH_Gen_i::CreateMeshesFromMED( const char* theFileName,
   Unexpect aCatch(SALOME_SalomeException);
   if(MYDEBUG) MESSAGE( "SMESH_Gen_i::CreateMeshFromMED" );
 
+  // Python Dump
+  TCollection_AsciiString aStr ("([");
+
   // Retrieve mesh names from the file
   DriverMED_R_SMESHDS_Mesh myReader;
   myReader.SetFile( theFileName );
@@ -552,19 +586,30 @@ SMESH::mesh_array* SMESH_Gen_i::CreateMeshesFromMED( const char* theFileName,
   list<string> aNames = myReader.GetMeshNames(aStatus);
   SMESH::mesh_array_var aResult = new SMESH::mesh_array();
   theStatus = (SMESH::DriverMED_ReadStatus)aStatus;
-  if(theStatus == SMESH::DRS_OK){
+  if (theStatus == SMESH::DRS_OK) {
     aResult->length( aNames.size() );
     int i = 0;
     
     // Iterate through all meshes and create mesh objects
     for ( list<string>::iterator it = aNames.begin(); it != aNames.end(); it++ ) {
+      // Python Dump
+      if (i > 0) aStr += ", ";
+
       // create mesh
       SMESH::SMESH_Mesh_var mesh = createMesh();
       
       // publish mesh in the study
-      if ( CanPublishInStudy( mesh ) )
-        PublishMesh( myCurrentStudy, mesh.in(), (*it).c_str() );
-      
+      if ( CanPublishInStudy( mesh ) ) {
+        SALOMEDS::SObject_var aSO = PublishMesh( myCurrentStudy, mesh.in(), (*it).c_str() );
+
+        // Python Dump
+        aStr += aSO->GetID();
+      } else {
+        // Python Dump
+        aStr += "mesh_";
+        aStr += TCollection_AsciiString(i);
+      }
+
       // Read mesh data (groups are published automatically by ImportMEDFile())
       SMESH_Mesh_i* meshServant = dynamic_cast<SMESH_Mesh_i*>( GetServant( mesh ).in() );
       ASSERT( meshServant );
@@ -576,6 +621,17 @@ SMESH::mesh_array* SMESH_Gen_i::CreateMeshesFromMED( const char* theFileName,
       aResult[i++] = SMESH::SMESH_Mesh::_duplicate( mesh );
     }
   }
+
+  // Update Python script
+  aStr += "], status) = smesh.CreateMeshesFromMED(\"";
+  aStr += Standard_CString(theFileName);
+  aStr += "\")";
+
+  AddToPythonScript(myCurrentStudy->StudyId(), aStr);
+
+  aStr = "print \"CreateMeshesFromMED: \", status";
+  AddToPythonScript(myCurrentStudy->StudyId(), aStr);
+
   return aResult._retn();
 }
 
@@ -596,8 +652,18 @@ SMESH::SMESH_Mesh_ptr SMESH_Gen_i::CreateMeshesFromSTL( const char* theFileName 
   SMESH::SMESH_Mesh_var aMesh = createMesh();
   string aFileName; // = boost::filesystem::path(theFileName).leaf();
   // publish mesh in the study
-  if ( CanPublishInStudy( aMesh ) )
-    PublishInStudy( myCurrentStudy, SALOMEDS::SObject::_nil(), aMesh.in(), aFileName.c_str() );
+  if ( CanPublishInStudy( aMesh ) ) {
+    SALOMEDS::SObject_var aSO = PublishInStudy
+      ( myCurrentStudy, SALOMEDS::SObject::_nil(), aMesh.in(), aFileName.c_str() );
+
+    // Update Python script
+    TCollection_AsciiString aStr (aSO->GetID());
+    aStr += " = smesh.CreateMeshesFromSTL(\"";
+    aStr += Standard_CString(theFileName);
+    aStr += "\")";
+
+    AddToPythonScript(myCurrentStudy->StudyId(), aStr);
+  }
 
   SMESH_Mesh_i* aServant = dynamic_cast<SMESH_Mesh_i*>( GetServant( aMesh ).in() );
   ASSERT( aServant );
@@ -744,6 +810,19 @@ CORBA::Boolean SMESH_Gen_i::Compute( SMESH::SMESH_Mesh_ptr theMesh,
     THROW_SALOME_CORBA_EXCEPTION( "bad Mesh reference",
                                   SALOME::BAD_PARAM );
 
+  // Update Python script
+  SALOMEDS::SObject_var aSO = ObjectToSObject(myCurrentStudy, theMesh);
+  TCollection_AsciiString aStr ("isDone = smesh.Compute(");
+  aStr += aSO->GetID();
+  aStr += ", salome.IDToObject(\"";
+  aStr += theShapeObject->GetStudyEntry();
+  aStr += "\"))";
+
+  AddToPythonScript(myCurrentStudy->StudyId(), aStr);
+
+  aStr = "print \"Compute: \", isDone";
+  AddToPythonScript(myCurrentStudy->StudyId(), aStr);
+
   try {
     // get mesh servant
     SMESH_Mesh_i* meshServant = dynamic_cast<SMESH_Mesh_i*>( GetServant( theMesh ).in() );
@@ -784,6 +863,9 @@ SALOMEDS::TMPFile* SMESH_Gen_i::Save( SALOMEDS::SComponent_ptr theComponent,
   if ( myCurrentStudy->_is_nil() || 
        theComponent->GetStudy()->StudyId() != myCurrentStudy->StudyId() )
     SetCurrentStudy( theComponent->GetStudy() );
+
+  // Store study contents as a set of python commands
+  SavePython(myCurrentStudy);
 
   StudyContext* myStudyContext = GetCurrentStudyContext();
   

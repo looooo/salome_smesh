@@ -45,6 +45,10 @@
 #include "SMESH_Gen.hxx"
 #include "GEOM_Client.hxx"
 
+#include <TCollection_AsciiString.hxx>
+#include <Resource_DataMapOfAsciiStringAsciiString.hxx>
+#include <TColStd_HSequenceOfAsciiString.hxx>
+
 #include <map>
 
 class SMESH_Mesh_i;
@@ -273,6 +277,24 @@ public:
     return aResultSO._retn();
   }
 
+  virtual Engines::TMPFile* DumpPython(CORBA::Object_ptr theStudy, 
+				       CORBA::Boolean isPublished, 
+				       CORBA::Boolean& isValidScript);
+
+  void AddToPythonScript (int theStudyID, const TCollection_AsciiString& theString);
+
+  void SavePython (SALOMEDS::Study_ptr theStudy);
+
+  TCollection_AsciiString DumpPython_impl (int theStudyID, 
+                                           Resource_DataMapOfAsciiStringAsciiString& theObjectNames,
+                                           bool isPublished, 
+                                           bool& aValidScript,
+                                           const TCollection_AsciiString& theSavedTrace);
+
+  TCollection_AsciiString GetNewPythonLines (int theStudyID);
+
+  void CleanPythonTrace (int theStudyID);
+
   // *****************************************
   // Internal methods
   // *****************************************
@@ -369,6 +391,9 @@ private:
 
   GEOM_Client*              myShapeReader;      // Shape reader
   SALOMEDS::Study_var       myCurrentStudy;     // Current study
+
+  // Dump Python: trace of API methods calls
+  std::map < int, Handle(TColStd_HSequenceOfAsciiString) > myPythonScripts;
 };
 
 #endif

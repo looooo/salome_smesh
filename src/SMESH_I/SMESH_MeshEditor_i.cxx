@@ -67,9 +67,28 @@ CORBA::Boolean SMESH_MeshEditor_i::RemoveElements(const SMESH::
 {
   ::SMESH_MeshEditor anEditor( _myMesh );
   list< int > IdList;
-  for (int i = 0; i < IDsOfElements.length(); i++)
+
+  // Update Python script
+  TCollection_AsciiString aStr ("isDone = mesh_editor.RemoveElements([");
+
+  for (int i = 0; i < IDsOfElements.length(); i++) {
+    // convert long_array into list< int >
     IdList.push_back( IDsOfElements[i] );
 
+    if (i > 0) aStr += ", ";
+    aStr += TCollection_AsciiString((int)IDsOfElements[i]);
+  }
+
+  aStr += "])";
+
+  SMESH_Gen_i* aSMESHGen = SMESH_Gen_i::GetSMESHGen();
+  aSMESHGen->AddToPythonScript(aSMESHGen->GetCurrentStudy()->StudyId(), aStr);
+
+  aStr = "print \"RemoveElements: \", isDone";
+
+  aSMESHGen->AddToPythonScript(aSMESHGen->GetCurrentStudy()->StudyId(), aStr);
+
+  // Remove Elements
   return anEditor.Remove( IdList, false );
 };
 

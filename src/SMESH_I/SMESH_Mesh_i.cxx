@@ -336,6 +336,23 @@ SMESH::Hypothesis_Status SMESH_Mesh_i::AddHypothesis(GEOM::GEOM_Object_ptr aSubS
 
   if(MYDEBUG) MESSAGE( " AddHypothesis(): status = " << status );
 
+  // Update Python script
+  SALOMEDS::SObject_var aMeshSO = SMESH_Gen_i::ObjectToSObject(_gen_i->GetCurrentStudy(), _this());
+  SALOMEDS::SObject_var aHypoSO = SMESH_Gen_i::ObjectToSObject(_gen_i->GetCurrentStudy(), anHyp);
+
+  TCollection_AsciiString aStr ("status = ");
+  aStr += aMeshSO->GetID();
+  aStr += ".AddHypothesis(salome.IDToObject(\"";
+  aStr += aSubShapeObject->GetStudyEntry();
+  aStr += "\"), ";
+  aStr += aHypoSO->GetID();
+  aStr += ")";
+
+  _gen_i->AddToPythonScript(_gen_i->GetCurrentStudy()->StudyId(), aStr);
+
+  aStr = "print \"AddHypothesis: \", status";
+  _gen_i->AddToPythonScript(_gen_i->GetCurrentStudy()->StudyId(), aStr);
+
   return ConvertHypothesisStatus(status);
 }
 
@@ -1050,9 +1067,19 @@ void SMESH_Mesh_i::SetImpl(::SMESH_Mesh * impl)
 
 SMESH::SMESH_MeshEditor_ptr SMESH_Mesh_i::GetMeshEditor()
 {
-	SMESH_MeshEditor_i *aMeshEditor = new SMESH_MeshEditor_i( _impl );
-	SMESH::SMESH_MeshEditor_var aMesh = aMeshEditor->_this();
-	return aMesh._retn();
+  // Update Python script
+  SALOMEDS::SObject_var aSO =
+    SMESH_Gen_i::ObjectToSObject(_gen_i->GetCurrentStudy(), _this());
+  TCollection_AsciiString aStr ("mesh_editor = ");
+  aStr += aSO->GetID();
+  aStr += ".GetMeshEditor()";
+
+  _gen_i->AddToPythonScript(_gen_i->GetCurrentStudy()->StudyId(), aStr);
+
+  // Create MeshEditor
+  SMESH_MeshEditor_i *aMeshEditor = new SMESH_MeshEditor_i( _impl );
+  SMESH::SMESH_MeshEditor_var aMesh = aMeshEditor->_this();
+  return aMesh._retn();
 }
 
 //=============================================================================

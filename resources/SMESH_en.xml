@@ -127,6 +127,7 @@
      <popup-item item-id="411" pos-id="" label-id="Cutting of quadrangles" icon-id="mesh_cutquad.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
      <popup-item item-id="412" pos-id="" label-id="Smoothing" icon-id="mesh_smoothing.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
      <popup-item item-id="413" pos-id="" label-id="Extrusion" icon-id="mesh_extrusion.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
+     <popup-item item-id="416" pos-id="" label-id="Extrusion along a path" icon-id="mesh_extrusionpath.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
      <popup-item item-id="414" pos-id="" label-id="Revolution" icon-id="mesh_revolution.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
      <popup-item item-id="415" pos-id="" label-id="Pattern mapping" icon-id="mesh_pattern.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
 </menu-item>
@@ -464,6 +465,7 @@
      <toolbutton-item item-id="411" label-id="Cutting of quadrangles" icon-id="mesh_cutquad.png" tooltip-id="Cutting of quadrangles" accel-id="" toggle-id="" execute-action=""/>
      <toolbutton-item item-id="412" label-id="Smoothing" icon-id="mesh_smoothing.png" tooltip-id="Smoothing" accel-id="" toggle-id="" execute-action=""/>
      <toolbutton-item item-id="413" label-id="Extrusion" icon-id="mesh_extrusion.png" tooltip-id="Extrusion along a line" accel-id="" toggle-id="" execute-action=""/> 
+     <toolbutton-item item-id="416" label-id="Extrusion along a path" icon-id="mesh_extrusionpath.png" tooltip-id="Extrusion along a path" accel-id="" toggle-id="" execute-action=""/> 
      <toolbutton-item item-id="414" label-id="Revolution" icon-id="mesh_revolution.png" tooltip-id="Revolution around an axis" accel-id="" toggle-id="" execute-action=""/>
      <toolbutton-item item-id="415" label-id="Pattern mapping" icon-id="mesh_pattern.png" tooltip-id="2D and 3D pattern mapping" accel-id="" toggle-id="" execute-action=""/>     
 </toolbar>

@@ -41,6 +41,7 @@ class SMDS_MeshFace;
 class SMDS_MeshNode;
 class gp_Ax1;
 class gp_Vec;
+class gp_Pnt;
 
 class SMESH_MeshEditor {
  public:
@@ -121,12 +122,20 @@ class SMESH_MeshEditor {
   // Generate new elements by extrusion of theElements 
   // by theStep by theNbSteps
 
+  int ExtrusionAlongTrack (std::set<const SMDS_MeshElement*> & theElements,
+			   SMESH_subMesh*                      theTrackPattern,
+			   const SMDS_MeshNode*                theNodeStart,
+			   const bool                          theHasAngles,
+			   std::list<double>&                  theAngles,
+			   const bool                          theHasRefPoint,
+			   const gp_Pnt&                       theRefPoint);
+  // Generate new elements by extrusion of theElements along path given by theTrackPattern,
+  // theHasAngles are the rotation angles, base point can be given by theRefPoint
 
   void Transform (std::set<const SMDS_MeshElement*> & theElements,
                   const gp_Trsf&                      theTrsf,
                   const bool                          theCopy);
   // Move or copy theElements applying theTrsf to their nodes
-
 
   typedef std::list< std::list< const SMDS_MeshNode* > > TListOfListOfNodes;
 

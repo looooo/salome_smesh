@@ -99,6 +99,7 @@ mesh_smoothing.png \
 mesh_renumbering_nodes.png \
 mesh_renumbering_elements.png \
 mesh_extrusion.png \
+mesh_extrusionpath.png \
 mesh_revolution.png \
 ModuleMesh.png \
 mesh_unionGroups.png \
@@ -124,7 +125,9 @@ SMESHCatalog.xml \
 flight_solid.brep \
 mesh_pattern.png \
 pattern_sample_2d.png \
-pattern_sample_3D.png
+pattern_sample_3D.png \
+mesh_add.png \
+mesh_remove.png
 
 BIN_SCRIPT= \
 VERSION

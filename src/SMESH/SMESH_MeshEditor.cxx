@@ -39,12 +39,18 @@
 
 #include <TopTools_ListIteratorOfListOfShape.hxx>
 #include <TopTools_ListOfShape.hxx>
+#include <gp_Dir.hxx>
 #include <gp_Vec.hxx>
 #include <gp_Ax1.hxx>
 #include <gp_Trsf.hxx>
 #include <gp_Lin.hxx>
+#include <gp_XYZ.hxx>
 #include <gp.hxx>
 #include <gp_Pln.hxx>
+#include <BRep_Tool.hxx>
+#include <SMDS_EdgePosition.hxx>
+#include <Geom_Curve.hxx>
+
 
 #include <map>
 
@@ -1935,6 +1941,327 @@ void SMESH_MeshEditor::ExtrusionSweep(set<const SMDS_MeshElement*> & theElems,
 
   makeWalls( aMesh, mapNewNodes, newElemsMap, mapElemNewNodes, theElems );
 
+}
+
+class SMESH_MeshEditor_PathPoint {
+public:
+  SMESH_MeshEditor_PathPoint() {
+    myPnt.SetCoord(99., 99., 99.);
+    myTgt.SetCoord(1.,0.,0.);
+    myAngle=0.;
+    myPrm=0.;
+  }
+  void SetPnt(const gp_Pnt& aP3D){
+    myPnt=aP3D;
+  }
+  void SetTangent(const gp_Dir& aTgt){
+    myTgt=aTgt;
+  }
+  void SetAngle(const double& aBeta){
+    myAngle=aBeta;
+  }
+  void SetParameter(const double& aPrm){
+    myPrm=aPrm;
+  }
+  const gp_Pnt& Pnt()const{
+    return myPnt;
+  }
+  const gp_Dir& Tangent()const{
+    return myTgt;
+  }
+  double Angle()const{
+    return myAngle;
+  }
+  double Parameter()const{
+    return myPrm;
+  }
+
+protected:
+  gp_Pnt myPnt;
+  gp_Dir myTgt;
+  double myAngle;
+  double myPrm;
+};
+
+//=======================================================================
+//function : ExtrusionAlongTrack
+//purpose  : 
+//=======================================================================
+int SMESH_MeshEditor::ExtrusionAlongTrack (std::set<const SMDS_MeshElement*> & theElements,
+					   SMESH_subMesh* theTrack,
+					   const SMDS_MeshNode* theN1,
+					   const bool theHasAngles,
+					   std::list<double>& theAngles,
+					   const bool theHasRefPoint,
+					   const gp_Pnt& theRefPoint)
+{
+  MESSAGE("SMESH_MeshEditor::ExtrusionAlongTrack")
+  int j, iErr, aNbTP, aNbAngles, aNbE, aNb;
+  double aT1, aT2, aT, aAngle, aX, aY, aZ;
+  std::list<double> aPrms;
+  std::list<double>::iterator aItD;
+  std::set< const SMDS_MeshElement* >::iterator itElem;
+
+  Standard_Real aTx1, aTx2, aL2, aTolVec, aTolVec2;
+  gp_Pnt aP3D, aV0;
+  gp_Vec aVec;
+  gp_XYZ aGC;
+  Handle(Geom_Curve) aC3D;
+  TopoDS_Edge aTrackEdge;
+  TopoDS_Vertex aV1, aV2;
+
+  SMDS_ElemIteratorPtr aItE;
+  SMDS_NodeIteratorPtr aItN;
+  SMDSAbs_ElementType aTypeE;
+
+  TNodeOfNodeListMap mapNewNodes;
+  TElemOfVecOfNnlmiMap mapElemNewNodes;
+  TElemOfElemListMap newElemsMap;
+
+  aTolVec=1.e-7;
+  aTolVec2=aTolVec*aTolVec;
+  iErr=0;
+
+  // 1. Check data
+  aNbE=theElements.size();
+  if ( !aNbE ) {
+    iErr = 10; // nothing to do
+    return iErr;
+  }
+
+  // 1.1 Track Pattern
+  ASSERT( theTrack );
+
+  SMESHDS_SubMesh* pSubMeshDS=theTrack->GetSubMeshDS();
+
+  if ( !pSubMeshDS->Contains( theN1 ) ) {
+    iErr = 2; // No match found for start node
+    return iErr;
+  }
+
+  aItE = pSubMeshDS->GetElements();
+  while ( aItE->more() ) {
+    const SMDS_MeshElement* pE = aItE->next();
+    aTypeE = pE->GetType();
+    if ( aTypeE != SMDSAbs_Edge ) {
+      iErr = 3; // Pattern must contain links only
+      return iErr;
+    }
+  }
+
+  const TopoDS_Shape& aS = theTrack->GetSubShape();
+  if ( aS.ShapeType() != TopAbs_EDGE) {
+    iErr = 3; // Sub shape for the Pattern must be an Edge
+    return iErr;
+    aTrackEdge = TopoDS::Edge( aS );
+    if ( BRep_Tool::Degenerated( aTrackEdge ) ) {
+      iErr = 4; // the Edge must not be degenerated
+      return iErr;
+    }
+  }
+
+  TopExp::Vertices( aTrackEdge, aV1, aV2 );
+  aT1=BRep_Tool::Parameter( aV1, aTrackEdge );
+  aT2=BRep_Tool::Parameter( aV2, aTrackEdge );
+
+  aItN = myMesh->GetSubMesh( aV1 )->GetSubMeshDS()->GetNodes();
+  const SMDS_MeshNode* aN1 = aItN->next();
+
+  aItN = myMesh->GetSubMesh( aV2 )->GetSubMeshDS()->GetNodes();
+  const SMDS_MeshNode* aN2 = aItN->next();
+
+  if ( !( aN1 == theN1 || aN2 == theN1 ) ) {
+    iErr = 5; // starting node must be aN1 or aN2 
+    return iErr;
+  }
+
+  aNbTP = pSubMeshDS->NbNodes() + 2;
+
+  // 1.2. Angles
+  vector<double> aAngles( aNbTP );
+
+  if ( theHasAngles ) {
+    aNbAngles = theAngles.size();
+    if ( aNbTP != aNbAngles ) {
+      iErr = 6; // number of Angles does not match to the number of track points
+      return iErr;
+    }
+    aItD = theAngles.begin();
+    for ( j=0; aItD != aPrms.end(); ++aItD, ++j ) {
+      aAngle = *aItD;
+      aAngles[j] = aAngle;
+    }
+  }
+  else {
+    for ( j=0; j < aNbTP; ++j ) {
+      aAngles[j] = 0.;
+    }
+  }
+
+  // 2. Collect parameters on the track edge  
+  aPrms.push_back( aT1 );
+  aPrms.push_back( aT2 );
+
+  aItN = pSubMeshDS->GetNodes();
+  while ( aItN->more() ) {
+    const SMDS_MeshNode* pNode = aItN->next();
+    const SMDS_EdgePosition* pEPos =
+      static_cast<const SMDS_EdgePosition*>( pNode->GetPosition().get() );
+    aT = pEPos->GetUParameter();
+    aPrms.push_back( aT );
+  }
+
+  // sort parameters
+  aPrms.sort();
+  if ( aN1 == theN1 ) {
+    if ( aT1 > aT2 ) {
+      aPrms.reverse();
+    }
+  }
+  else {
+    if ( aT2 > aT1 ) {
+      aPrms.reverse();
+    }
+  }
+
+  // 3. Path Points
+  SMESH_MeshEditor_PathPoint aPP;
+  vector<SMESH_MeshEditor_PathPoint> aPPs( aNbTP );
+  //
+  aC3D = BRep_Tool::Curve( aTrackEdge, aTx1, aTx2 );
+  //
+  aItD = aPrms.begin();
+  for ( j=0; aItD != aPrms.end(); ++aItD, ++j ) {
+    aT = *aItD;
+    aC3D->D1( aT, aP3D, aVec );
+    aL2 = aVec.SquareMagnitude();
+    if ( aL2 < aTolVec2 ) {
+      iErr = 20; // can not obtain the tangent;
+      return iErr;
+    }
+    gp_Dir aTgt( aVec );
+    aAngle = aAngles[j];
+
+    aPP.SetPnt( aP3D );
+    aPP.SetTangent( aTgt );
+    aPP.SetAngle( aAngle );
+    aPP.SetParameter( aT );
+    aPPs[j]=aPP;
+  }
+
+  // 3. Center of rotation aV0
+  aV0 = theRefPoint;
+  if ( !theHasRefPoint ) {
+    aNb = 0;
+    aGC.SetCoord( 0.,0.,0. );
+
+    itElem = theElements.begin();
+    for ( ; itElem != theElements.end(); itElem++ ) {
+      const SMDS_MeshElement* elem = (*itElem);
+
+      SMDS_ElemIteratorPtr itN = elem->nodesIterator();
+      while ( itN->more() ) {
+	const SMDS_MeshNode* node = static_cast<const SMDS_MeshNode*>( itN->next() );
+	aX = node->X();
+	aY = node->Y();
+	aZ = node->Z();
+
+	if ( mapNewNodes.find( node ) == mapNewNodes.end() ) {
+	  list<const SMDS_MeshNode*> aLNx;
+	  mapNewNodes[node] = aLNx;
+	  //
+	  gp_XYZ aXYZ( aX, aY, aZ );
+	  aGC += aXYZ;
+	  ++aNb;
+	}
+      }
+    }
+    aGC /= aNb;
+    aV0.SetXYZ( aGC );
+  } // if (!theHasRefPoint) {
+  mapNewNodes.clear();
+
+  // 4. Processing the elements
+  SMESHDS_Mesh* aMesh = GetMeshDS();
+
+  for ( itElem = theElements.begin(); itElem != theElements.end(); itElem++ ) {
+    // check element type
+    const SMDS_MeshElement* elem = (*itElem);
+    aTypeE = elem->GetType();
+    if ( !elem || ( aTypeE != SMDSAbs_Face && aTypeE != SMDSAbs_Edge ) )
+      continue;
+
+    vector<TNodeOfNodeListMapItr> & newNodesItVec = mapElemNewNodes[ elem ];
+    newNodesItVec.reserve( elem->NbNodes() );
+
+    // loop on elem nodes
+    SMDS_ElemIteratorPtr itN = elem->nodesIterator();
+    while ( itN->more() ) {
+
+      // check if a node has been already processed
+      const SMDS_MeshNode* node = 
+	static_cast<const SMDS_MeshNode*>( itN->next() );
+      TNodeOfNodeListMap::iterator nIt = mapNewNodes.find( node );
+      if ( nIt == mapNewNodes.end() ) {
+        nIt = mapNewNodes.insert( make_pair( node, list<const SMDS_MeshNode*>() )).first;
+        list<const SMDS_MeshNode*>& listNewNodes = nIt->second;
+	
+	// make new nodes
+	aX = node->X();  aY = node->Y(); aZ = node->Z();
+	
+	Standard_Real aAngle1x;
+	gp_Pnt aP0x, aP1x, aPN0, aPN1, aV0x, aV1x;
+	gp_Ax1 anAx1;
+
+	aV0x = aV0;
+	aPN0.SetCoord(aX, aY, aZ);
+
+	const SMESH_MeshEditor_PathPoint& aPP0 = aPPs[0];
+	aP0x = aPP0.Pnt();
+
+	for ( j = 1; j < aNbTP; ++j ) {
+	  const SMESH_MeshEditor_PathPoint& aPP1 = aPPs[j];
+	  aP1x = aPP1.Pnt();
+	  const gp_Dir& aDT1x = aPP1.Tangent();
+	  aAngle1x = aPP1.Angle();
+	  
+	  gp_Trsf aTrsf, aTrsfRot; 
+	  // Translation
+	  gp_Vec aV01x( aP0x, aP1x );
+	  aTrsf.SetTranslation( aV01x );
+	  
+	  // traslated point
+	  aV1x = aV0x.Transformed( aTrsf );
+	  aPN1 = aPN0.Transformed( aTrsf );
+	  
+	  if ( theHasAngles ) {
+	    anAx1.SetLocation( aV1x );
+	    anAx1.SetDirection( aDT1x );
+	    aTrsfRot.SetRotation( anAx1, aAngle1x );
+	    
+	    aPN1 = aPN1.Transformed( aTrsfRot );
+	  }
+
+	  // make new node
+	  aX = aPN1.X();
+	  aY = aPN1.X();
+	  aZ = aPN1.X();
+	  const SMDS_MeshNode* newNode = aMesh->AddNode( aX, aY, aZ );
+	  listNewNodes.push_back( newNode );
+	  
+	  aPN0 = aPN1;
+	  aP0x = aP1x;
+	  aV0x = aV1x;
+	}
+      }
+      newNodesItVec.push_back( nIt );
+    }
+    // make new elements
+    sweepElement( aMesh, elem, newNodesItVec, newElemsMap[elem] );
+  }
+  
+  makeWalls( aMesh, mapNewNodes, newElemsMap, mapElemNewNodes, theElements );
+  return iErr;
 }
 
 //=======================================================================

@@ -30,6 +30,7 @@
 #include "SMESH_DeviceActor.h"
 #include "SMESH_ExtractGeometry.h"
 #include "SMESH_ControlsDef.hxx"
+#include "SMESH_ActorUtils.h"
 
 #include "SALOME_Transform.h"
 #include "SALOME_TransformFilter.h"
@@ -330,8 +331,6 @@ void SMESH_DeviceActor::SetExtControlMode(SMESH::Controls::FunctorPtr theFunctor
       
       theLookupTable->SetRange(aScalars->GetRange());
       theLookupTable->Build();
-      
-      SetUnstructuredGrid(aDataSet);
       
       myMergeFilter->SetScalars(aDataSet);
       aDataSet->Delete();

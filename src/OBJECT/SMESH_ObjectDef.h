@@ -201,7 +201,4 @@ protected:
 };
 
 
-extern void WriteUnstructuredGrid(vtkUnstructuredGrid* theGrid, const char* theFileName);
-
-
 #endif

@@ -826,6 +826,8 @@ bool SMESH_ActorDef::Init(TVisualObjPtr theVisualObj,
   my3DActor->Init(myVisualObj,myImplicitBoolean);
   
   my1DActor->GetMapper()->SetLookupTable(myLookupTable);
+  my1DExtActor->GetMapper()->SetLookupTable(myLookupTable);
+
   my2DActor->GetMapper()->SetLookupTable(myLookupTable);
   my3DActor->GetMapper()->SetLookupTable(myLookupTable);
     
@@ -1135,11 +1137,6 @@ void SMESH_ActorDef::SetRepresentation(int theMode){
     aProp = aBackProp = my1DProp;
     if(myRepresentation != ePoint)
       aReperesent = SMESH_DeviceActor::eInsideframe;
-    break;
-  case eLength2D:
-  case eFreeEdges:
-  case eFreeBorders:
-    my1DExtActor->SetVisibility(true);
     break;
   }
   

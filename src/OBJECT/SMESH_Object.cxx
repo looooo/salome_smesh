@@ -26,6 +26,7 @@
 //  Module : SMESH
 
 #include "SMESH_ObjectDef.h"
+#include "SMESH_ActorUtils.h"
 
 #include "SMDS_Mesh.hxx"
 #include "SMESH_Actor.h"
@@ -41,8 +42,6 @@
 #include <vtkUnsignedCharArray.h>
 
 #include <vtkUnstructuredGrid.h>
-#include <vtkUnstructuredGridWriter.h>
-#include <vtkUnstructuredGridReader.h>
 
 #include <memory>
 #include <sstream>	
@@ -68,17 +67,6 @@ static int MYDEBUGWITHFILES = 0;
 static int MYDEBUG = 0;
 static int MYDEBUGWITHFILES = 0;
 #endif
-
-
-void WriteUnstructuredGrid(vtkUnstructuredGrid* theGrid, const char* theFileName){
-  vtkUnstructuredGridWriter* aWriter = vtkUnstructuredGridWriter::New();
-  aWriter->SetFileName(theFileName);
-  aWriter->SetInput(theGrid);
-  if(theGrid->GetNumberOfCells()){
-    aWriter->Write();
-  }
-  aWriter->Delete();
-}
 
 
 namespace{
@@ -393,7 +381,7 @@ void SMESH_VisualObjDef::buildPrs()
   }
   
   if( MYDEBUG ) MESSAGE( "Update - myGrid->GetNumberOfCells() = "<<myGrid->GetNumberOfCells() );
-  if( MYDEBUGWITHFILES ) WriteUnstructuredGrid( myGrid,"/tmp/buildPrs" );
+  if( MYDEBUGWITHFILES ) SMESH::WriteUnstructuredGrid( myGrid,"/tmp/buildPrs" );
 }
 
 //=================================================================================

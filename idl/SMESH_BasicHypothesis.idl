@@ -56,6 +56,13 @@ module SMESH
     double GetMaxElementArea();
   };
 
+  interface SMESH_LengthFromEdges : SMESH_Hypothesis
+  {
+    void SetMode(in long mode) 
+      raises (SALOME::SALOME_Exception);
+    long GetMode();
+  };
+
   interface SMESH_MaxElementVolume : SMESH_Hypothesis
   {
     void SetMaxElementVolume(in double volume) 

@@ -38,6 +38,7 @@ using namespace std;
 //---------------------------------------
 #include "SMESH_LocalLength_i.hxx"
 #include "SMESH_NumberOfSegments_i.hxx"
+#include "SMESH_LengthFromEdges_i.hxx"
 #include "SMESH_MaxElementArea_i.hxx"
 #include "SMESH_MaxElementVolume_i.hxx"
 #include "SMESH_Regular_1D_i.hxx"
@@ -84,6 +85,7 @@ SMESH_HypothesisFactory_i::SMESH_HypothesisFactory_i()
 //---------------------------------------
 _creatorMap["LocalLength"] = new HypothesisCreator_i<SMESH_LocalLength_i>;
 _creatorMap["NumberOfSegments"] = new HypothesisCreator_i<SMESH_NumberOfSegments_i>;
+_creatorMap["LengthFromEdges"] = new HypothesisCreator_i<SMESH_LengthFromEdges_i>;
 _creatorMap["MaxElementArea"] = new HypothesisCreator_i<SMESH_MaxElementArea_i>;
 _creatorMap["MaxElementVolume"] = new HypothesisCreator_i<SMESH_MaxElementVolume_i>;
 _creatorMap["Regular_1D"] = new HypothesisCreator_i<SMESH_Regular_1D_i>;

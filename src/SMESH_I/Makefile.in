@@ -54,6 +54,7 @@ LIB_SRC = SMESH_Gen_i.cxx SMESH_Mesh_i.cxx SMESH_MEDMesh_i.cxx \
           SMESH_NumberOfSegments_i.cxx \
           SMESH_LocalLength_i.cxx \
           SMESH_MaxElementArea_i.cxx \
+	  SMESH_LengthFromEdges_i.cxx \
           SMESH_MaxElementVolume_i.cxx \
           SMESH_Regular_1D_i.cxx \
           SMESH_Quadrangle_2D_i.cxx \

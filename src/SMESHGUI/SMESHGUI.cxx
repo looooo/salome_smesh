@@ -76,7 +76,6 @@ using namespace std;
 #include "OCCViewer_ViewPort3d.h"
 #include "OCCViewer_Viewer3d.h"
 
-#include "GEOM_Client.hxx"
 #include "GEOM_InteractiveObject.hxx"
 
 #include "SALOME_NamingService.hxx"
@@ -116,7 +115,6 @@ using namespace std;
 #include <gp_Pnt.hxx>
 #include <gp_Vec.hxx>
 
-static GEOM_Client ShapeReader;
 static SMESHGUI *smeshGUI = 0;
 static CORBA::ORB_var _orb;
 

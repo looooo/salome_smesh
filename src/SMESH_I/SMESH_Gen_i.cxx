@@ -196,7 +196,7 @@ SMESH::SMESH_Mesh_ptr SMESH_Gen_i::Init(GEOM::GEOM_Gen_ptr geomEngine,
   SMESH_Mesh_i* meshServant = 0;
   try
     {
-      if (! _ShapeReader) _ShapeReader = new GEOM_Client();
+      if (! _ShapeReader) _ShapeReader = new GEOM_Client(GetContainerRef());
       ASSERT(_ShapeReader);
       
       // explore main Shape, get local TopoDS_Shapes of all subShapes
@@ -283,7 +283,7 @@ CORBA::Boolean SMESH_Gen_i::IsReadyToCompute(SMESH::SMESH_Mesh_ptr aMesh,
 
   try
     {
-      if (! _ShapeReader) _ShapeReader = new GEOM_Client();
+      if (! _ShapeReader) _ShapeReader = new GEOM_Client(GetContainerRef());
       ASSERT(_ShapeReader);
       TopoDS_Shape myMainShape  = _ShapeReader->GetShape(geom,myShape);
       TopTools_IndexedMapOfShape myIndexToShape;      

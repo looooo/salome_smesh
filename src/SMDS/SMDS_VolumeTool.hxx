@@ -154,6 +154,29 @@ class SMDS_VolumeTool
   // Return index of a face formed by theFaceNodesIndices
   // Return -1 if a face not found
 
+  // ------------------------
+  // static methods for faces
+  // ------------------------
+
+  enum VolumeType { UNKNOWN, TETRA, PYRAM, PENTA, HEXA };
+
+  static VolumeType GetType(int nbNodes);
+  // return VolumeType by nb of nodes in a volume
+
+  static int NbFaces( VolumeType type );
+  // return nb of faces by volume type
+
+  static const int* GetFaceNodesIndices(VolumeType type,
+                                        int        faceIndex,
+                                        bool       external);
+  // Return the array of face nodes indices
+  // To comfort link iteration, the array
+  // length == NbFaceNodes( faceIndex ) + 1 and
+  // the last node index == the first one.
+
+  static int NbFaceNodes(VolumeType type,
+                         int        faceIndex );
+  // Return number of nodes in the array of face nodes
 
  private:
 

@@ -960,3 +960,76 @@ bool SMDS_VolumeTool::setFace( int faceIndex )
 
   return true;
 }
+
+//=======================================================================
+//function : GetType
+//purpose  : return VolumeType by nb of nodes in a volume
+//=======================================================================
+
+SMDS_VolumeTool::VolumeType SMDS_VolumeTool::GetType(int nbNodes)
+{
+  switch ( nbNodes ) {
+  case 4: return TETRA;
+  case 5: return PYRAM;
+  case 6: return PENTA;
+  case 8: return HEXA;
+  default:return UNKNOWN;
+  }
+}
+
+//=======================================================================
+//function : NbFaces
+//purpose  : return nb of faces by volume type
+//=======================================================================
+
+int SMDS_VolumeTool::NbFaces( VolumeType type )
+{
+  switch ( type ) {
+  case TETRA: return 4;
+  case PYRAM: return 5;
+  case PENTA: return 5;
+  case HEXA : return 6;
+  default:    return 0;
+  }
+}
+
+//=======================================================================
+//function : GetFaceNodesIndices
+//purpose  : Return the array of face nodes indices
+//           To comfort link iteration, the array
+//           length == NbFaceNodes( faceIndex ) + 1 and
+//           the last node index == the first one.
+//=======================================================================
+
+const int* SMDS_VolumeTool::GetFaceNodesIndices(VolumeType type,
+                                                int        faceIndex,
+                                                bool       external)
+{
+  switch ( type ) {
+  case TETRA: return Tetra_F[ faceIndex ];
+  case PYRAM: return Pyramid_F[ faceIndex ];
+  case PENTA: return external ? Penta_FE[ faceIndex ] : Penta_F[ faceIndex ];
+  case HEXA:  return external ? Hexa_FE[ faceIndex ] : Hexa_F[ faceIndex ];
+  default:;
+  }
+  return 0;
+}
+
+//=======================================================================
+//function : NbFaceNodes
+//purpose  : Return number of nodes in the array of face nodes
+//=======================================================================
+
+int SMDS_VolumeTool::NbFaceNodes(VolumeType type,
+                                 int        faceIndex )
+{
+  switch ( type ) {
+  case TETRA: return Tetra_nbN[ faceIndex ];
+  case PYRAM: return Pyramid_nbN[ faceIndex ];
+  case PENTA: return Penta_nbN[ faceIndex ];
+  case HEXA:  return Hexa_nbN[ faceIndex ];
+  default:;
+  }
+  return 0;
+}
+

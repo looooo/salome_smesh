@@ -298,5 +298,3 @@ SALOME_MED::string_array* SMESH_MEDFamily_i::getGroupsNames()
   THROW_SALOME_CORBA_EXCEPTION("Not Implemented", SALOME::BAD_PARAM);
   return NULL;
 }
-
-

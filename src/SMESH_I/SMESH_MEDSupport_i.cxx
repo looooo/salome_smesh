@@ -329,6 +329,7 @@ SALOME_MED::long_array * SMESH_MEDSupport_i::getNumber(
  * CORBA:  ??????????????????????????????
  */
 //=============================================================================
+
 SALOME_MED::long_array *
 	SMESH_MEDSupport_i::getNumberIndex()throw(SALOME::SALOME_Exception)
 {
@@ -341,6 +342,7 @@ SALOME_MED::long_array *
  * CORBA: Array containing indexes for elements included in the support  
  */
 //=============================================================================
+
 CORBA::Long SMESH_MEDSupport_i::getNumberOfGaussPoint(SALOME_MED::
 	medGeometryElement geomElement) throw(SALOME::SALOME_Exception)
 {

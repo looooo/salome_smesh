@@ -489,7 +489,7 @@ CORBA::Long SMESH_MEDMesh_i::getNumberOfElements(SALOME_MED::
 	}
 	catch(...)
 	{
-		MESSAGE("Exception en accedant au nombre d élements");
+		MESSAGE("Exception en accedant au nombre d Ã©lements");
 		THROW_SALOME_CORBA_EXCEPTION("Unable to acces Mesh C++ Object",
 			SALOME::INTERNAL_ERROR);
 	}
@@ -547,10 +547,11 @@ SMESH_MEDMesh_i::getConnectivityIndex(SALOME_MED::medConnectivity mode,
  * CORBA: Find an element corresponding to the given connectivity
  */
 //=============================================================================
-CORBA::Long SMESH_MEDMesh_i::getElementNumber(SALOME_MED::medConnectivity mode,
-					      SALOME_MED::medEntityMesh entity,
-					      SALOME_MED::medGeometryElement type,
-					      const SALOME_MED::long_array & connectivity)
+CORBA::Long
+SMESH_MEDMesh_i::getElementNumber(SALOME_MED::medConnectivity mode,
+				  SALOME_MED::medEntityMesh entity,
+				  SALOME_MED::medGeometryElement type,
+				  const SALOME_MED::long_array & connectivity)
   throw(SALOME::SALOME_Exception)
 {
 	const char *LOC = "getElementNumber ";
@@ -1053,7 +1054,7 @@ void SMESH_MEDMesh_i::calculeNbElts() throw(SALOME::SALOME_Exception)
 			SCRUTE(index);
 
 			// Traitement de la face
-			// Attention La numérotation des noeuds Med commence a 1
+			// Attention La numÃ©rotation des noeuds Med commence a 1
 
 			int longueur = _seq_elemId[index]->length();
 			_seq_elemId[index]->length(longueur + nb_of_nodes);

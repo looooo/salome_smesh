@@ -88,17 +88,18 @@ class SMESH_MEDMesh_i:
 	  throw (SALOME::SALOME_Exception);
 
 	char *getCoordinatesSystem() throw(SALOME::SALOME_Exception);
-	SALOME_MED::double_array * getCoordinates(SALOME_MED::medModeSwitch typeSwitch)
-		throw(SALOME::SALOME_Exception);
 
         CORBA::Double getCoordinate(CORBA::Long Number, CORBA::Long Axis)
 	  throw (SALOME::SALOME_Exception);
+
+	SALOME_MED::double_array * getCoordinates(SALOME_MED::medModeSwitch typeSwitch)
+		throw(SALOME::SALOME_Exception);
 
 	SALOME_MED::string_array * getCoordinatesNames()
 		throw(SALOME::SALOME_Exception);
 
 	SALOME_MED::string_array * getCoordinatesUnits()
-		throw(SALOME::SALOME_Exception);
+	  throw(SALOME::SALOME_Exception);
 
 	CORBA::Long getNumberOfNodes() throw(SALOME::SALOME_Exception);
 
@@ -114,7 +115,7 @@ class SMESH_MEDMesh_i:
 		       CORBA::Long number)
 	  throw   (SALOME::SALOME_Exception);
 
-	CORBA::Long getNumberOfElements(SALOME_MED::medEntityMesh entity,
+        CORBA::Long getNumberOfElements(SALOME_MED::medEntityMesh entity,
 		SALOME_MED::medGeometryElement geomElement)
 		throw(SALOME::SALOME_Exception);
 
@@ -141,8 +142,8 @@ class SMESH_MEDMesh_i:
 		throw(SALOME::SALOME_Exception);
 
 	SALOME_MED::long_array *
-		getReverseConnectivity(SALOME_MED::medConnectivity mode) throw(SALOME::
-		SALOME_Exception);
+		getReverseConnectivity(SALOME_MED::medConnectivity mode)
+	  throw(SALOME::SALOME_Exception);
 
 	SALOME_MED::long_array *
 		getReverseConnectivityIndex(SALOME_MED::
@@ -155,13 +156,12 @@ class SMESH_MEDMesh_i:
 	CORBA::Long getNumberOfGroups(SALOME_MED::medEntityMesh entity)
 		throw(SALOME::SALOME_Exception);
 
-        SALOME_MED::Family_array *
+	SALOME_MED::Family_array *
 	getFamilies(SALOME_MED::medEntityMesh entity)
 	  throw(SALOME::SALOME_Exception);
 
-	SALOME_MED::FAMILY_ptr
-	getFamily(SALOME_MED::medEntityMesh entity,
-		  CORBA::Long i) throw(SALOME::SALOME_Exception);
+	SALOME_MED::FAMILY_ptr getFamily(SALOME_MED::medEntityMesh entity,
+		CORBA::Long i) throw(SALOME::SALOME_Exception);
 
 	SALOME_MED::Group_array * getGroups(SALOME_MED::medEntityMesh entity)
 		throw(SALOME::SALOME_Exception);

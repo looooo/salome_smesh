@@ -70,7 +70,9 @@ namespace SMESH
   class TPythonDump
   {
     TCollection_AsciiString myString;
+    static size_t myCounter;
   public:
+    TPythonDump();
     virtual ~TPythonDump();
     
     template<class T>

@@ -180,13 +180,22 @@ namespace SMESH
     return theString;
   }
 
+  size_t TPythonDump::myCounter = 0;
+
+  TPythonDump::
+  TPythonDump()
+  {
+    ++myCounter;
+  }
   TPythonDump::
   ~TPythonDump()
   {
-    SMESH_Gen_i* aSMESHGen = SMESH_Gen_i::GetSMESHGen();
-    SALOMEDS::Study_ptr aStudy = aSMESHGen->GetCurrentStudy();
-    if(!aStudy->_is_nil()){
-      aSMESHGen->AddToPythonScript(aStudy->StudyId(),myString);
+    if(--myCounter == 0){
+      SMESH_Gen_i* aSMESHGen = SMESH_Gen_i::GetSMESHGen();
+      SALOMEDS::Study_ptr aStudy = aSMESHGen->GetCurrentStudy();
+      if(!aStudy->_is_nil()){
+	aSMESHGen->AddToPythonScript(aStudy->StudyId(),myString);
+      }
     }
   }
 }

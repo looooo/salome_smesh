@@ -1278,6 +1278,7 @@ MinimumAngle_ptr FilterManager_i::CreateMinimumAngle()
 {
   SMESH::MinimumAngle_i* aServant = new SMESH::MinimumAngle_i();
   SMESH::MinimumAngle_var anObj = aServant->_this();
+  TPythonDump()<<aServant<<" = "<<this<<".CreateMinimumAngle()";
   return anObj._retn();
 }
 
@@ -1286,6 +1287,7 @@ AspectRatio_ptr FilterManager_i::CreateAspectRatio()
 {
   SMESH::AspectRatio_i* aServant = new SMESH::AspectRatio_i();
   SMESH::AspectRatio_var anObj = aServant->_this();
+  TPythonDump()<<aServant<<" = "<<this<<".CreateAspectRatio()";
   return anObj._retn();
 }
 
@@ -1294,6 +1296,7 @@ AspectRatio3D_ptr FilterManager_i::CreateAspectRatio3D()
 {
   SMESH::AspectRatio3D_i* aServant = new SMESH::AspectRatio3D_i();
   SMESH::AspectRatio3D_var anObj = aServant->_this();
+  TPythonDump()<<aServant<<" = "<<this<<".CreateAspectRatio3D()";
   return anObj._retn();
 }
 
@@ -1302,6 +1305,7 @@ Warping_ptr FilterManager_i::CreateWarping()
 {
   SMESH::Warping_i* aServant = new SMESH::Warping_i();
   SMESH::Warping_var anObj = aServant->_this();
+  TPythonDump()<<aServant<<" = "<<this<<".CreateWarping()";
   return anObj._retn();
 }
 
@@ -1310,6 +1314,7 @@ Taper_ptr FilterManager_i::CreateTaper()
 {
   SMESH::Taper_i* aServant = new SMESH::Taper_i();
   SMESH::Taper_var anObj = aServant->_this();
+  TPythonDump()<<aServant<<" = "<<this<<".CreateTaper()";
   return anObj._retn();
 }
 
@@ -1318,6 +1323,7 @@ Skew_ptr FilterManager_i::CreateSkew()
 {
   SMESH::Skew_i* aServant = new SMESH::Skew_i();
   SMESH::Skew_var anObj = aServant->_this();
+  TPythonDump()<<aServant<<" = "<<this<<".CreateSkew()";
   return anObj._retn();
 }
 
@@ -1335,6 +1341,7 @@ Length_ptr FilterManager_i::CreateLength()
 {
   SMESH::Length_i* aServant = new SMESH::Length_i();
   SMESH::Length_var anObj = aServant->_this();
+  TPythonDump()<<aServant<<" = "<<this<<".CreateLength()";
   return anObj._retn();
 }
 
@@ -1342,6 +1349,7 @@ Length2D_ptr FilterManager_i::CreateLength2D()
 {
   SMESH::Length2D_i* aServant = new SMESH::Length2D_i();
   SMESH::Length2D_var anObj = aServant->_this();
+  TPythonDump()<<aServant<<" = "<<this<<".CreateLength2D()";
   return anObj._retn();
 }
 
@@ -1349,6 +1357,7 @@ MultiConnection_ptr FilterManager_i::CreateMultiConnection()
 {
   SMESH::MultiConnection_i* aServant = new SMESH::MultiConnection_i();
   SMESH::MultiConnection_var anObj = aServant->_this();
+  TPythonDump()<<aServant<<" = "<<this<<".CreateMultiConnection()";
   return anObj._retn();
 }
 
@@ -1356,6 +1365,7 @@ MultiConnection2D_ptr FilterManager_i::CreateMultiConnection2D()
 {
   SMESH::MultiConnection2D_i* aServant = new SMESH::MultiConnection2D_i();
   SMESH::MultiConnection2D_var anObj = aServant->_this();
+  TPythonDump()<<aServant<<" = "<<this<<".CreateMultiConnection2D()";
   return anObj._retn();
 }
 
@@ -1363,6 +1373,7 @@ BelongToGeom_ptr FilterManager_i::CreateBelongToGeom()
 {
   SMESH::BelongToGeom_i* aServant = new SMESH::BelongToGeom_i();
   SMESH::BelongToGeom_var anObj = aServant->_this();
+  TPythonDump()<<aServant<<" = "<<this<<".CreateBelongToGeom()";
   return anObj._retn();
 }
 
@@ -1370,6 +1381,7 @@ BelongToPlane_ptr FilterManager_i::CreateBelongToPlane()
 {
   SMESH::BelongToPlane_i* aServant = new SMESH::BelongToPlane_i();
   SMESH::BelongToPlane_var anObj = aServant->_this();
+  TPythonDump()<<aServant<<" = "<<this<<".CreateBelongToPlane()";
   return anObj._retn();
 }
 
@@ -1377,6 +1389,7 @@ BelongToCylinder_ptr FilterManager_i::CreateBelongToCylinder()
 {
   SMESH::BelongToCylinder_i* aServant = new SMESH::BelongToCylinder_i();
   SMESH::BelongToCylinder_var anObj = aServant->_this();
+  TPythonDump()<<aServant<<" = "<<this<<".CreateBelongToCylinder()";
   return anObj._retn();
 }
 
@@ -1384,6 +1397,7 @@ LyingOnGeom_ptr FilterManager_i::CreateLyingOnGeom()
 {
   SMESH::LyingOnGeom_i* aServant = new SMESH::LyingOnGeom_i();
   SMESH::LyingOnGeom_var anObj = aServant->_this();
+  TPythonDump()<<aServant<<" = "<<this<<".CreateLyingOnGeom()";
   return anObj._retn();
 }
 
@@ -1391,6 +1405,7 @@ FreeBorders_ptr FilterManager_i::CreateFreeBorders()
 {
   SMESH::FreeBorders_i* aServant = new SMESH::FreeBorders_i();
   SMESH::FreeBorders_var anObj = aServant->_this();
+  TPythonDump()<<aServant<<" = "<<this<<".CreateFreeBorders()";
   return anObj._retn();
 }
 
@@ -1398,6 +1413,7 @@ FreeEdges_ptr FilterManager_i::CreateFreeEdges()
 {
   SMESH::FreeEdges_i* aServant = new SMESH::FreeEdges_i();
   SMESH::FreeEdges_var anObj = aServant->_this();
+  TPythonDump()<<aServant<<" = "<<this<<".CreateFreeEdges()";
   return anObj._retn();
 }
 
@@ -1405,6 +1421,7 @@ RangeOfIds_ptr FilterManager_i::CreateRangeOfIds()
 {
   SMESH::RangeOfIds_i* aServant = new SMESH::RangeOfIds_i();
   SMESH::RangeOfIds_var anObj = aServant->_this();
+  TPythonDump()<<aServant<<" = "<<this<<".CreateRangeOfIds()";
   return anObj._retn();
 }
 
@@ -1412,6 +1429,7 @@ BadOrientedVolume_ptr FilterManager_i::CreateBadOrientedVolume()
 {
   SMESH::BadOrientedVolume_i* aServant = new SMESH::BadOrientedVolume_i();
   SMESH::BadOrientedVolume_var anObj = aServant->_this();
+  TPythonDump()<<aServant<<" = "<<this<<".CreateBadOrientedVolume()";
   return anObj._retn();
 }
 
@@ -1419,6 +1437,7 @@ LessThan_ptr FilterManager_i::CreateLessThan()
 {
   SMESH::LessThan_i* aServant = new SMESH::LessThan_i();
   SMESH::LessThan_var anObj = aServant->_this();
+  TPythonDump()<<aServant<<" = "<<this<<".CreateLessThan()";
   return anObj._retn();
 }
 
@@ -1569,8 +1588,10 @@ SMESH::ElementType Filter_i::GetElementType()
 //=======================================================================
 void Filter_i::SetMesh( SMESH_Mesh_ptr theMesh )
 {
-  if ( myPredicate )
+  if(myPredicate){
     myPredicate->SetMesh( theMesh );
+    TPythonDump()<<this<<".SetMesh("<<theMesh<<")";
+  }
 }
 
 //=======================================================================
@@ -1596,7 +1617,9 @@ GetElementsId( Predicate_i* thePredicate,
     Controls::Filter::GetElementsId(aMesh,thePredicate->GetPredicate(),theSequence);
 }
 
-SMESH::long_array* Filter_i::GetElementsId( SMESH_Mesh_ptr theMesh )
+SMESH::long_array* 
+Filter_i::
+GetElementsId( SMESH_Mesh_ptr theMesh )
 {
   Controls::Filter::TIdSequence aSequence;
   GetElementsId(myPredicate,theMesh,aSequence);

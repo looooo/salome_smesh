@@ -428,6 +428,47 @@ FunctorType Length_i::GetFunctorType()
 }
 
 /*
+  Class       : Length2D_i
+  Description : Functor for calculating length of edge
+*/
+Length2D_i::Length2D_i()
+{
+  myNumericalFunctorPtr.reset( new Controls::Length2D() );
+  myFunctorPtr = myNumericalFunctorPtr;
+}
+
+FunctorType Length2D_i::GetFunctorType()
+{
+  return SMESH::FT_Length2D;
+}
+
+SMESH::Length2D::Values* Length2D_i::GetValues()
+{
+  INFOS("Length2D_i::GetValues");
+  SMESH::Controls::Length2D::TValues aValues;
+  myLength2DPtr->GetValues( aValues );
+  
+  long i = 0, iEnd = aValues.size();
+
+  SMESH::Length2D::Values_var aResult = new SMESH::Length2D::Values(iEnd);
+
+  SMESH::Controls::Length2D::TValues::const_iterator anIter;
+  for ( anIter = aValues.begin() ; anIter != aValues.end(); anIter++, i++ )
+  {
+    const SMESH::Controls::Length2D::Value&  aVal = *anIter;
+    SMESH::Length2D::Value &aValue = aResult[ i ];
+    
+    aValue.myLength = aVal.myLength;
+    aValue.myPnt1 = aVal.myPntId[ 0 ];
+    aValue.myPnt2 = aVal.myPntId[ 1 ];
+   
+  }
+
+  INFOS("Length2D_i::GetValuess~");
+  return aResult._retn();
+}
+
+/*
   Class       : MultiConnection_i
   Description : Functor for calculating number of faces conneted to the edge
 */
@@ -1037,6 +1078,12 @@ Length_ptr FilterManager_i::CreateLength()
   return anObj._retn();
 }
 
+Length2D_ptr FilterManager_i::CreateLength2D()
+{
+  SMESH::Length2D_i* aServant = new SMESH::Length2D_i();
+  SMESH::Length2D_var anObj = aServant->_this();
+  return anObj._retn();
+}
 
 MultiConnection_ptr FilterManager_i::CreateMultiConnection()
 {
@@ -1426,6 +1473,9 @@ CORBA::Boolean Filter_i::SetCriteria( const SMESH::Filter::Criteria& theCriteria
       case SMESH::FT_Length:
         aFunctor = aFilterMgr->CreateLength();
         break;
+      case SMESH::FT_Length2D:
+        aFunctor = aFilterMgr->CreateLength2D();
+        break;
       case SMESH::FT_AspectRatio:
         aFunctor = aFilterMgr->CreateAspectRatio();
         break;
@@ -1692,6 +1742,7 @@ static inline LDOMString toString( const long theType )
     case FT_FreeEdges       : return "Free edges";
     case FT_MultiConnection : return "Borders at multi-connections";
     case FT_Length          : return "Length";
+    case FT_Length2D        : return "Length2D";
     case FT_LessThan        : return "Less than";
     case FT_MoreThan        : return "More than";
     case FT_EqualTo         : return "Equal to";

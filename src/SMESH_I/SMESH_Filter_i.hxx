@@ -218,6 +218,22 @@ public:
   FunctorType                     GetFunctorType();
 };
 
+/*
+  Class       : Length2D_i
+  Description : Functor for calculating length of edge
+*/
+class Length2D_i: public virtual POA_SMESH::Length2D,
+		  public virtual NumericalFunctor_i
+{
+public:
+                                  Length2D_i();
+  SMESH::Length2D::Values*        GetValues();
+  FunctorType                     GetFunctorType();
+
+protected:
+  Controls::Length2DPtr          myLength2DPtr;
+};
+
 
 /*
   Class       : MultiConnection_i
@@ -602,6 +618,7 @@ public:
   Skew_ptr                  CreateSkew();
   Area_ptr                  CreateArea();
   Length_ptr                CreateLength();
+  Length2D_ptr              CreateLength2D();
   MultiConnection_ptr       CreateMultiConnection();
   
   BelongToGeom_ptr          CreateBelongToGeom();

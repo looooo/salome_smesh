@@ -91,7 +91,7 @@ class SMESH_MEDMesh_i:
 	SALOME_MED::double_array * getCoordinates(SALOME_MED::medModeSwitch typeSwitch)
 		throw(SALOME::SALOME_Exception);
 
-        double getCoordinate(CORBA::Long Number, CORBA::Long Axis)
+        CORBA::Double getCoordinate(CORBA::Long Number, CORBA::Long Axis)
 	  throw (SALOME::SALOME_Exception);
 
 	SALOME_MED::string_array * getCoordinatesNames()

@@ -846,6 +846,8 @@ void SMESHGUI::CreateAlgorithm( QString TypeAlgo, QString NameAlgo )
       Hyp = myComponentMesh->CreateHypothesis( TypeAlgo, myStudyId );
     else if ( TypeAlgo.compare("Hexa_3D") == 0 )
       Hyp = myComponentMesh->CreateHypothesis( TypeAlgo, myStudyId );
+    else if ( TypeAlgo.compare("Tetra_3D") == 0 )
+      Hyp = myComponentMesh->CreateHypothesis( TypeAlgo, myStudyId );
     
     if ( !Hyp->_is_nil() ) {
       SALOMEDS::SObject_var SHyp = myStudyAPI.AddNewAlgorithms( Hyp );
@@ -2283,7 +2285,7 @@ bool SMESHGUI::OnGUIEvent(int theCommandID,	QAD_Desktop* parent)
 	      double beforeMaxVolume = MEV->GetMaxElementVolume() ;
 	      double MaxVolume = smeshGUI->Parameter( res, 
 			 			      beforeMaxVolume,
-						      tr("SMESH_MAX_ELEMENT_AREA_HYPOTHESIS"), 
+						      tr("SMESH_MAX_ELEMENT_VOLUME_HYPOTHESIS"), 
 						      tr("SMESH_VALUE"), 
 						      1.0E-5, 1E6, 6 ) ;
 	      if ( res && MaxVolume != beforeMaxVolume ) {
@@ -2487,7 +2489,12 @@ bool SMESHGUI::OnGUIEvent(int theCommandID,	QAD_Desktop* parent)
       }
     case 5020: 
       {
-	smeshGUI->CreateAlgorithm("Hexa_3D","Hexaedral (i,j,k)");	
+	smeshGUI->CreateAlgorithm("Hexa_3D","Hexahedral (i,j,k)");	
+	break;
+      }
+    case 5021: 
+      {
+	smeshGUI->CreateAlgorithm("Tetra_3D","Tetrahedral (Netgen)");	
 	break;
       }
 

@@ -27,3 +27,73 @@
 //  $Header$
 
 using namespace std;
+
+#include "SMESH_MaxElementVolume_i.hxx"
+#include "SMESH_Gen.hxx"
+#include "SMESH_HypothesisFactory.hxx"
+
+#include "Utils_CorbaException.hxx"
+#include "utilities.h"
+
+//=============================================================================
+/*!
+ *  Constructor: 
+ *  _name is related to the class name: prefix = SMESH_ ; suffix = _i .
+ */
+//=============================================================================
+
+SMESH_MaxElementVolume_i::SMESH_MaxElementVolume_i(const char* anHyp,
+						   int studyId,
+						   ::SMESH_Gen* genImpl)
+{
+  MESSAGE("SMESH_MaxElementVolume_i::SMESH_MaxElementVolume_i");
+  _impl = new ::SMESH_MaxElementVolume(genImpl->_hypothesisFactory.GetANewId(),
+				       studyId,
+				       genImpl);
+  _baseImpl = _impl;
+}
+
+//=============================================================================
+/*!
+ *  
+ */
+//=============================================================================
+
+SMESH_MaxElementVolume_i::~SMESH_MaxElementVolume_i()
+{
+  MESSAGE("SMESH_MaxElementVolume_i::~SMESH_MaxElementVolume_i()");
+}
+
+//=============================================================================
+/*!
+ *  
+ */
+//=============================================================================
+
+void SMESH_MaxElementVolume_i::SetMaxElementVolume(CORBA::Double volume)
+  throw (SALOME::SALOME_Exception)
+{
+  ASSERT(_impl);
+  try
+    {
+      _impl->SetMaxVolume(volume);
+    }
+  catch (SALOME_Exception& S_ex)
+    {
+      THROW_SALOME_CORBA_EXCEPTION(S_ex.what(), \
+				   SALOME::BAD_PARAM);
+    }
+}
+
+//=============================================================================
+/*!
+ *  
+ */
+//=============================================================================
+
+CORBA::Double SMESH_MaxElementVolume_i::GetMaxElementVolume()
+{
+  ASSERT(_impl);
+  return _impl->GetMaxVolume();
+}
+

@@ -26,3 +26,33 @@
 //  Module : SMESH
 //  $Header$
 
+#ifndef _SMESH_MAXELEMENTVOLUME_I_HXX_
+#define _SMESH_MAXELEMENTVOLUME_I_HXX_
+
+#include <SALOMEconfig.h>
+#include CORBA_SERVER_HEADER(SMESH_BasicHypothesis)
+
+#include "SMESH_Hypothesis_i.hxx"
+
+#include "SMESH_MaxElementVolume.hxx"
+
+class SMESH_MaxElementVolume_i:
+  public POA_SMESH::SMESH_MaxElementVolume,
+  public SMESH_Hypothesis_i
+{
+public:
+  SMESH_MaxElementVolume_i(const char* anHyp,
+			   int studyId,
+			   ::SMESH_Gen* genImpl);
+  virtual ~SMESH_MaxElementVolume_i();
+
+  void SetMaxElementVolume(CORBA::Double volume)
+    throw (SALOME::SALOME_Exception);
+
+  CORBA::Double GetMaxElementVolume();
+
+protected:
+  ::SMESH_MaxElementVolume* _impl;
+};
+
+#endif

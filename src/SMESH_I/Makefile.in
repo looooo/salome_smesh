@@ -78,5 +78,10 @@ CXXFLAGS+= $(OCC_CXXFLAGS) $(MED2_INCLUDES) $(HDF5_INCLUDES) -I${KERNEL_ROOT_DIR
 
 LDFLAGS+= $(HDF5_LIBS) $(MED2_LIBS) -lSMESHimpl -lSalomeContainer -lSalomeNS -lSalomeDS -lRegistry -lSalomeHDFPersist -lOpUtil -lGEOMClient -lSMESHDS -lSMDS -lMEFISTO2D -lMeshDriverMED -lSalomeLifeCycleCORBA -L${KERNEL_ROOT_DIR}/lib/salome -L${GEOM_ROOT_DIR}/lib/salome
 
+ifeq (@WITHNETGEN@,yes)
+  LIB_SRC += SMESH_Tetra_3D_i.cxx
+  LDFLAGS += -lNETGEN
+endif
+
 @CONCLUDE@
 

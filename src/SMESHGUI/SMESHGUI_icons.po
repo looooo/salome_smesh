@@ -168,6 +168,10 @@ msgstr "mesh_tree_algo_mefisto.png"
 msgid "ICON_SMESH_TREE_ALGO_Quadrangle_2D"
 msgstr "mesh_tree_algo_quad.png"
 
+#mesh_tree_algo_tetra
+msgid "ICON_SMESH_TREE_ALGO_Tetra_3D"
+msgstr "mesh_tree_algo_tetra.png"
+
 #mesh_tree_hypo
 msgid "ICON_SMESH_TREE_HYPO"
 msgstr "mesh_tree_hypo.png"

@@ -39,7 +39,16 @@ LIB_SRC =
 
 SWIG_DEF = libSMESH_Swig.i
 EXPORT_PYSCRIPTS = libSMESH_Swig.py \
-                   SMESH_test0.py SMESH_test1.py SMESH_test2.py SMESH_test3.py SMESH_mechanic.py SMESH_fixation.py batchmode_smesh.py
+                   SMESH_test0.py\
+		   SMESH_test1.py \
+		   SMESH_test2.py \
+		   SMESH_test3.py \
+		   SMESH_mechanic.py \
+		   SMESH_mechanic_tetra.py \
+		   SMESH_fixation.py \
+		   batchmode_smesh.py \
+		   SMESH_box_tetra.py \
+		   SMESH_box2_tetra.py
 
 LIB_CLIENT_IDL = SALOMEDS.idl \
 		 SALOME_Exception.idl \

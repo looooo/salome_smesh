@@ -196,7 +196,7 @@ SMESH_MEDMesh_i::existConnectivity(SALOME_MED::medConnectivity connectivityType,
  * CORBA: Accessor for Coordinate
  */
 //=============================================================================
-double SMESH_MEDMesh_i::getCoordinate(CORBA::Long Number, CORBA::Long Axis)
+CORBA::Double SMESH_MEDMesh_i::getCoordinate(CORBA::Long Number, CORBA::Long Axis)
   throw (SALOME::SALOME_Exception)
 {
   MESSAGE("!!!!!! NOT YET IMPLEMENTED !!!!");

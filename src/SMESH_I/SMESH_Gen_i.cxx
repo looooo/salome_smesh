@@ -449,14 +449,18 @@ SALOMEDS::TMPFile * SMESH_Gen_i::Save(SALOMEDS::SComponent_ptr theComponent,
 //****************************
 
 	itBig = Study->NewChildIterator(theComponent);
+	SCRUTE(Tag_HypothesisRoot);
+	SCRUTE(Tag_AlgorithmsRoot);
 	for (; itBig->More(); itBig->Next())
 	{
 		SALOMEDS::SObject_var gotBranch = itBig->Value();
+		SCRUTE(gotBranch->Name());
+		SCRUTE(gotBranch->Tag());
+		SCRUTE(gotBranch->GetID());
 
 //************branch 1 : hypothesis
 		if (gotBranch->Tag() == Tag_HypothesisRoot)
 		{						//hypothesis = tag 1
-
 			double length, maxElementsArea, maxElementsVolume;
 			int numberOfSegments;
 
@@ -474,8 +478,9 @@ SALOMEDS::TMPFile * SMESH_Gen_i::Save(SALOMEDS::SComponent_ptr theComponent,
 					SMESH::SMESH_Hypothesis_var myHyp =
 						SMESH::SMESH_Hypothesis::_narrow(_orb->
 						string_to_object(anIOR->Value()));
+					SCRUTE(myHyp->GetName());
+					fprintf(destFile, "%li\n", myHyp->GetId());
 					fprintf(destFile, "%s\n", myHyp->GetName());
-
 					if (strcmp(myHyp->GetName(), "LocalLength") == 0)
 					{
 						SMESH::SMESH_LocalLength_var LL =
@@ -531,7 +536,6 @@ SALOMEDS::TMPFile * SMESH_Gen_i::Save(SALOMEDS::SComponent_ptr theComponent,
 //************branch 2 : algorithms
 		else if (gotBranch->Tag() == Tag_AlgorithmsRoot)
 		{						//algos = tag 2
-
 			destFile = fopen(algofile.ToCString(), "w");
 			it = Study->NewChildIterator(gotBranch);
 			for (; it->More(); it->Next())
@@ -545,6 +549,9 @@ SALOMEDS::TMPFile * SMESH_Gen_i::Save(SALOMEDS::SComponent_ptr theComponent,
 					SMESH::SMESH_Algo_var myAlgo =
 						SMESH::SMESH_Algo::_narrow(_orb->
 						string_to_object(anIOR->Value()));
+					SCRUTE(anIOR->Value());
+					SCRUTE(myAlgo->_is_nil());
+					fprintf(destFile, "%i\n", myAlgo->GetId());
 					fprintf(destFile, "%s\n", myAlgo->GetName());
 				}
 			}
@@ -929,16 +936,21 @@ SALOMEDS::TMPFile * SMESH_Gen_i::Save(SALOMEDS::SComponent_ptr theComponent,
 		MESSAGE("End of Meshes Save");
 	}
 
+	MESSAGE("hdf_file->CloseOnDisk()");
 	hdf_file->CloseOnDisk();
+
+	MESSAGE("delete hdf_file");
 	delete hdf_file;
 	hdf_file = 0;
 
 	// Convert temporary files to stream
+	MESSAGE("Convert temporary files to stream");
 	aStreamFile =
 		SALOMEDS_Tool::PutFilesToStream(tmpDir.ToCString(), aFileSeq.in(),
 		isMultiFile);
 
 	// Remove temporary files and directory
+	MESSAGE("Remove temporary files and directory");
 	if (!isMultiFile)
 		SALOMEDS_Tool::RemoveTemporaryFiles(tmpDir.ToCString(), aFileSeq.in(),
 			true);
@@ -974,75 +986,29 @@ void SMESH_Gen_i::loadHypothesis(char * name, HDFfile * hdf_file,
 	dataset->ReadFromDisk(name_of_file);
 	SCRUTE(name_of_file);
 	dataset->CloseOnDisk();
-	hdfGroup->CloseOnDisk();	
+	hdfGroup->CloseOnDisk();
 	delete[]name_of_file;
-
-	char * aLine = new char[100];
-	FILE * loadedFile = fopen(hypofile, "r");
-	while (!feof(loadedFile))
+	
+	ifstream loadedFile(hypofile);
+	while (!loadedFile.eof())
 	{
-		fscanf(loadedFile, "%s", aLine);
-		//SCRUTE(aLine);
-		if (strcmp(aLine, "LocalLength") == 0)
-		{
-			SMESH::SMESH_Hypothesis_var myHyp =
-				this->CreateHypothesis(aLine, studyId);
-			SMESH::SMESH_LocalLength_var LL =
-				SMESH::SMESH_LocalLength::_narrow(myHyp);
-			fscanf(loadedFile, "%s", aLine);
-			length = atof(aLine);
-			LL->SetLength(length);
-			string iorString = _orb->object_to_string(LL);
-			sprintf(objectId, "%ld", LL->GetId());
-			_SMESHCorbaObj[string("Hypo_") + string(objectId)] =
-				iorString;
-		}
-		else if (strcmp(aLine, "NumberOfSegments") == 0)
-		{
-			SMESH::SMESH_Hypothesis_var myHyp =
-				this->CreateHypothesis(aLine, studyId);
-			SMESH::SMESH_NumberOfSegments_var NOS =
-				SMESH::SMESH_NumberOfSegments::_narrow(myHyp);
-			fscanf(loadedFile, "%s", aLine);
-			numberOfSegments = atoi(aLine);
-			NOS->SetNumberOfSegments(numberOfSegments);
-			string iorString = _orb->object_to_string(NOS);
-			sprintf(objectId, "%ld", NOS->GetId());
-			_SMESHCorbaObj[string("Hypo_") + string(objectId)] =
-				iorString;
-		}
-		else if (strcmp(aLine, "MaxElementArea") == 0)
-		{
-			SMESH::SMESH_Hypothesis_var myHyp =
-				this->CreateHypothesis(aLine, studyId);
-			SMESH::SMESH_MaxElementArea_var MEA =
-				SMESH::SMESH_MaxElementArea::_narrow(myHyp);
-			fscanf(loadedFile, "%s", aLine);
-			maxElementsArea = atof(aLine);
-			MEA->SetMaxElementArea(maxElementsArea);
-			string iorString = _orb->object_to_string(MEA);
-			sprintf(objectId, "%ld", MEA->GetId());
-			_SMESHCorbaObj[string("Hypo_") + string(objectId)] =
-				iorString;
-		}
-		else if (strcmp(aLine, "MaxElementVolume") == 0)
-		{
-			SMESH::SMESH_Hypothesis_var myHyp =
-				this->CreateHypothesis(aLine, studyId);
-			SMESH::SMESH_MaxElementVolume_var MEV =
-				SMESH::SMESH_MaxElementVolume::_narrow(myHyp);
-			fscanf(loadedFile, "%s", aLine);
-			maxElementsVolume = atof(aLine);
-			MEV->SetMaxElementVolume(maxElementsVolume);
-			string iorString = _orb->object_to_string(MEV);
-			sprintf(objectId, "%ld", MEV->GetId());
-			_SMESHCorbaObj[string("Hypo_") + string(objectId)] =
-				iorString;
-		}
-
+		int hypothesisID;
+		string hypothesisName;
+		loadedFile >> hypothesisID;
+		loadedFile >> hypothesisName;
+		if(hypothesisName.length()==0) break;
+		SMESH_Hypothesis_i * corbaHyp =
+			_hypothesisFactory_i.Create(hypothesisName.c_str(), studyId, &_impl);
+		SMESH_Hypothesis * localHyp = corbaHyp->getImpl();
+		localHyp->SetID(hypothesisID);
+		localHyp->LoadFrom(loadedFile);
+		
+		SMESH::SMESH_Hypothesis_var varHyp = corbaHyp->_this();
+		string iorString = _orb->object_to_string(varHyp);
+		sprintf(objectId, "%ld", varHyp->GetId());
+		_SMESHCorbaObj[string("Hypo_") + string(objectId)] =
+			iorString;
 	}
-	fclose(loadedFile);
-	delete[]aLine;
 	MESSAGE("End of Hypos Load");
 }
 
@@ -1069,12 +1035,19 @@ void SMESH_Gen_i::loadAlgorithms(char * name, HDFfile * hdf_file,
 	FILE * loadedFile = fopen(algofile, "r");
 	while (!feof(loadedFile))
 	{
+		int hypothesisID;
+		fscanf(loadedFile, "%i", &hypothesisID);
 		fscanf(loadedFile, "%s\n", aLine);
 		//SCRUTE(aLine);
 		if (strcmp(aLine, "") != 0)
 		{
-			SMESH::SMESH_Hypothesis_var myHyp =
-				this->CreateHypothesis(aLine, studyId);
+			SMESH_Hypothesis_i * corbaHyp =
+				_hypothesisFactory_i.Create(aLine, studyId, &_impl);
+			SMESH_Hypothesis * localHyp = corbaHyp->getImpl();
+			localHyp->SetID(hypothesisID);
+			
+			SMESH::SMESH_Hypothesis_var myHyp = corbaHyp->_this();
+			
 			SMESH::SMESH_Algo_var myAlgo =
 				SMESH::SMESH_Algo::_narrow(myHyp);
 			string iorString = _orb->object_to_string(myAlgo);

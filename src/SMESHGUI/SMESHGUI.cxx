@@ -155,15 +155,16 @@ namespace{
 			    SMESH::SMESH_Gen_ptr theComponentMesh,
 			    int theCommandID)
   {
-    QString filter;
+    QStringList filter;
     string myExtension;
   
     if(theCommandID == 113){
-      filter = QObject::tr("MED files (*.med)");
+      filter.append(QObject::tr("MED files (*.med)"));
+      filter.append(QObject::tr("All files (*)"));
     }else if (theCommandID == 112){
-      filter = QObject::tr("IDEAS files (*.unv)");
+      filter.append(QObject::tr("IDEAS files (*.unv)"));
     }else if (theCommandID == 111){
-      filter = QObject::tr("DAT files (*.dat)");
+      filter.append(QObject::tr("DAT files (*.dat)"));
     }
     QString filename = QAD_FileDlg::getFileName(parent,
 						"",
@@ -272,7 +273,7 @@ namespace{
 	  QAD_WaitCursor wc;
 	  switch ( theCommandID ) {
 	  case 122:
-	    aMesh->ExportMED( aFilename.latin1(), true ); // currently, automatic groups are always created
+	    aMesh->ExportToMED( aFilename.latin1(), true, SMESH::MED_V2_1 ); // currently, automatic groups are always created
 	    break;
 	  case 121:
 	    aMesh->ExportDAT( aFilename.latin1() );

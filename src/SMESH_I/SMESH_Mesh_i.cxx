@@ -41,18 +41,18 @@
 #include "OpUtil.hxx"
 
 #include "TCollection_AsciiString.hxx"
+#include <TColStd_MapOfInteger.hxx>
+#include <TColStd_MapIteratorOfMapOfInteger.hxx>
+#include <TColStd_SequenceOfInteger.hxx>
 #include "SMESHDS_Command.hxx"
 #include "SMESHDS_CommandType.hxx"
 #include "SMESH_MeshEditor_i.hxx"
 #include "SMESH_Gen_i.hxx"
 #include "DriverMED_R_SMESHDS_Mesh.h"
 
-#include <TColStd_MapOfInteger.hxx>
-#include <TColStd_MapIteratorOfMapOfInteger.hxx>
-#include <TColStd_SequenceOfInteger.hxx>
-
 #include <string>
 #include <iostream>
+// _CS_gbo_050504 Ajout explicite du sstream pour ostringstream 
 #include <sstream>
 
 #ifdef _DEBUG_
@@ -1049,10 +1049,13 @@ SMESH::SMESH_MeshEditor_ptr SMESH_Mesh_i::GetMeshEditor()
  */
 //=============================================================================
 
-void SMESH_Mesh_i::ExportMED(const char *file, CORBA::Boolean auto_groups) throw(SALOME::SALOME_Exception)
+void SMESH_Mesh_i::ExportToMED( const char* file, 
+				CORBA::Boolean auto_groups, 
+				SMESH::MED_VERSION theVersion )
+  throw(SALOME::SALOME_Exception)
 {
   Unexpect aCatch(SALOME_SalomeException);
-
+  
   char* aMeshName = "Mesh";
   SALOMEDS::Study_ptr aStudy = _gen_i->GetCurrentStudy();
   if ( !aStudy->_is_nil() ) {
@@ -1062,10 +1065,10 @@ void SMESH_Mesh_i::ExportMED(const char *file, CORBA::Boolean auto_groups) throw
       //SCRUTE(file);
       //SCRUTE(aMeshName);
       //SCRUTE(aMeshSO->GetID());
-
+      
       // asv : 27.10.04 : fix of 6903: check for StudyLocked before adding attributes 
       if ( !aStudy->GetProperties()->IsLocked() ) 
-      {
+	{
 	SALOMEDS::GenericAttribute_var anAttr;
 	SALOMEDS::StudyBuilder_var aStudyBuilder = aStudy->NewBuilder();
 	SALOMEDS::AttributeExternalFileDef_var aFileName;
@@ -1078,10 +1081,17 @@ void SMESH_Mesh_i::ExportMED(const char *file, CORBA::Boolean auto_groups) throw
         aFileType = SALOMEDS::AttributeFileType::_narrow(anAttr);
         ASSERT(!aFileType->_is_nil());
         aFileType->SetValue("FICHIERMED");
-      }
+	}
     }
   }
-  _impl->ExportMED( file, aMeshName, auto_groups );
+  _impl->ExportMED( file, aMeshName, auto_groups, theVersion );
+}
+
+void SMESH_Mesh_i::ExportMED( const char* file, 
+			      CORBA::Boolean auto_groups)
+  throw(SALOME::SALOME_Exception)
+{
+  ExportToMED(file,auto_groups,SMESH::MED_V2_1);
 }
 
 void SMESH_Mesh_i::ExportDAT(const char *file) throw(SALOME::SALOME_Exception)

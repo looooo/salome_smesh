@@ -631,7 +631,11 @@ throw(SALOME_Exception)
  */
 //=============================================================================
 
-void SMESH_Mesh::ExportMED(const char *file, const char* theMeshName, bool theAutoGroups) throw(SALOME_Exception)
+void SMESH_Mesh::ExportMED(const char *file, 
+			   const char* theMeshName, 
+			   bool theAutoGroups,
+			   int theVersion) 
+  throw(SALOME_Exception)
 {
   Unexpect aCatch(SalomeException);
   DriverMED_W_SMESHDS_Mesh myWriter;

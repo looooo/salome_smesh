@@ -132,6 +132,15 @@ module SMESH
     DRS_FAIL            // general failure (exception etc.)
   }; 
 
+  /*!
+   * Enumeration for DriverMED (used by Perform() method)
+   */  
+  enum MED_VERSION // in the order of severity
+  {
+    MED_V2_1,
+    MED_V2_2
+  };
+
   typedef sequence<log_block> log_array;
 
 
@@ -315,11 +324,17 @@ module SMESH
        raises (SALOME::SALOME_Exception);
 
     /*!
-     * Export Mesh with DAT and MED Formats
+     * Export Mesh to MED Formats
      */
-    void ExportDAT( in string file )
+    void ExportToMED( in string file, in boolean auto_groups, in MED_VERSION theVersion )
       raises (SALOME::SALOME_Exception);
     void ExportMED( in string file, in boolean auto_groups )
+      raises (SALOME::SALOME_Exception);
+
+    /*!
+     * Export Mesh to DAT, UNV and STL Formats
+     */
+    void ExportDAT( in string file )
       raises (SALOME::SALOME_Exception);
     void ExportUNV( in string file )
       raises (SALOME::SALOME_Exception);

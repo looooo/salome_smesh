@@ -2614,20 +2614,20 @@ inline static bool isDefined(const gp_XYZ& theXYZ)
 //           are merged in myElemXYZIDs.
 //=======================================================================
 
-void SMESH_Pattern::mergePoints (map<set<void*>,list<list<int> > >& indGroups,
+void SMESH_Pattern::mergePoints (map<TNodeSet, list<list<int> > >&  indGroups,
                                  map< int, list< list< int >* > > & reverseConnectivity)
 {
-  map< set< void* >, list< list< int > > >::iterator indListIt;
+  map< TNodeSet, list< list< int > > >::iterator indListIt;
   for ( indListIt = indGroups.begin(); indListIt != indGroups.end(); indListIt++ )
   {
     list<list< int > > groups = indListIt->second;
     if ( groups.size() < 2 )
       continue;
 
-//     const set< void* > & nodes = indListIt->first;
-//     set< void* >::const_iterator n = nodes.begin();
+//     const TNodeSet & nodes = indListIt->first;
+//     TNodeSet::const_iterator n = nodes.begin();
 //     for ( ; n != nodes.end(); n++ )
-//       cout << ((SMDS_MeshNode*) *n );
+//       cout << *n ;
 
     // find tolerance
     Bnd_Box box;
@@ -2718,7 +2718,7 @@ bool SMESH_Pattern::Apply (std::set<const SMDS_MeshFace*> theFaces,
     pointIndex.insert( make_pair( & myPoints[ i ], i ));
 
   // to merge nodes on edges of the elements being refined
-  typedef set<void*> TLink;
+  typedef set<const SMDS_MeshNode*> TLink;
   map< TLink, list< list< int > > > linkPointIndListMap;
   map< int, list< list< int >* > >  reverseConnectivity;
 
@@ -2752,18 +2752,22 @@ bool SMESH_Pattern::Apply (std::set<const SMDS_MeshFace*> theFaces,
     int nbNodes = (*face)->NbNodes(), eID = nbNodes + 1;
     for ( int i = 0; i < nbNodes; i++ )
     {
+      const SMDS_MeshNode* n1 = myOrderedNodes[ i ];
+      const SMDS_MeshNode* n2 = myOrderedNodes[ i + 1 == nbNodes ? 0 : i + 1 ];
       // make a link of node pointers
       TLink link;
-      link.insert( (void*) myOrderedNodes[ i ] );
-      link.insert( (void*) myOrderedNodes[ i + 1 == nbNodes ? 0 : i + 1 ]);
+      link.insert( n1 );
+      link.insert( n2 );
       // add the link to the map
       list< list< int > >& groups = linkPointIndListMap[ link ];
       groups.push_back();
       list< int >& indList = groups.back();
       list< TPoint* > & linkPoints = getShapePoints( eID++ );
-      // add points to the map
       list< TPoint* >::iterator p = linkPoints.begin();
-      for ( ; p != linkPoints.end(); p++ )
+      // map the first link point to n1
+      myXYZIdToNodeMap[ pointIndex[ *p ] + ind1 ] = n1;
+      // add points to the map excluding the end points
+      for ( p++; *p != linkPoints.back(); p++ )
         indList.push_back( pointIndex[ *p ] + ind1 );
     }
     ind1 += myPoints.size();
@@ -2813,8 +2817,7 @@ bool SMESH_Pattern::Apply (std::set<const SMDS_MeshVolume*> theVolumes,
     pointIndex.insert( make_pair( & myPoints[ i ], i ));
 
   // to merge nodes on edges and faces of the elements being refined
-  typedef set<void*> TSubNodes;
-  map< TSubNodes, list< list< int > > > subPointIndListMap;
+  map< TNodeSet, list< list< int > > > subPointIndListMap;
   map< int, list< list< int >* > >  reverseConnectivity;
 
   int ind1 = 0; // lowest point index for an element
@@ -2847,25 +2850,25 @@ bool SMESH_Pattern::Apply (std::set<const SMDS_MeshVolume*> theVolumes,
     for ( int Id = SMESH_Block::ID_V000; Id <= SMESH_Block::ID_F1yz; Id++ )
     {
       // make a set of sub-points
-      TSubNodes subNodes;
+      TNodeSet subNodes;
       vector< int > subIDs;
       if ( SMESH_Block::IsVertexID( Id )) {
-        subNodes.insert( (void*) myOrderedNodes[ Id - 1 ]);
+        // use nodes of refined volumes for merge
       }
       else if ( SMESH_Block::IsEdgeID( Id )) {
         SMESH_Block::GetEdgeVertexIDs( Id, subIDs );
-        subNodes.insert( (void*) myOrderedNodes[ subIDs.front() - 1 ]);
-        subNodes.insert( (void*) myOrderedNodes[ subIDs.back() - 1 ]);
+        subNodes.insert( myOrderedNodes[ subIDs.front() - 1 ]);
+        subNodes.insert( myOrderedNodes[ subIDs.back() - 1 ]);
       }
       else {
         SMESH_Block::GetFaceEdgesIDs( Id, subIDs );
         int e1 = subIDs[ 0 ], e2 = subIDs[ 1 ];
         SMESH_Block::GetEdgeVertexIDs( e1, subIDs );
-        subNodes.insert( (void*) myOrderedNodes[ subIDs.front() - 1 ]);
-        subNodes.insert( (void*) myOrderedNodes[ subIDs.back() - 1 ]);
+        subNodes.insert( myOrderedNodes[ subIDs.front() - 1 ]);
+        subNodes.insert( myOrderedNodes[ subIDs.back() - 1 ]);
         SMESH_Block::GetEdgeVertexIDs( e2, subIDs );
-        subNodes.insert( (void*) myOrderedNodes[ subIDs.front() - 1 ]);
-        subNodes.insert( (void*) myOrderedNodes[ subIDs.back() - 1 ]);
+        subNodes.insert( myOrderedNodes[ subIDs.front() - 1 ]);
+        subNodes.insert( myOrderedNodes[ subIDs.back() - 1 ]);
       }
       list< list< int > >& groups = subPointIndListMap[ subNodes ];
       groups.push_back();
@@ -2873,8 +2876,11 @@ bool SMESH_Pattern::Apply (std::set<const SMDS_MeshVolume*> theVolumes,
       // add points
       list< TPoint* > & points = getShapePoints( Id );
       list< TPoint* >::iterator p = points.begin();
-      for ( ; p != points.end(); p++ )
-        indList.push_back( pointIndex[ *p ] + ind1 );
+      if ( subNodes.empty() ) // vertex case
+        myXYZIdToNodeMap[ pointIndex[ *p ] + ind1 ] = myOrderedNodes[ Id - 1 ];
+      else
+        for ( ; p != points.end(); p++ )
+          indList.push_back( pointIndex[ *p ] + ind1 );
     }
     ind1 += myPoints.size();
   }
@@ -3157,7 +3163,10 @@ bool SMESH_Pattern::MakeMesh(SMESH_Mesh* theMesh)
   {
     nodesVector.resize( myXYZ.size() );
     for ( int i = 0; i < myXYZ.size(); ++i ) {
-      if ( isDefined( myXYZ[ i ] ))
+      map< int, const SMDS_MeshNode*>::iterator idNode = myXYZIdToNodeMap.find( i );
+      if ( idNode != myXYZIdToNodeMap.end() )
+        nodesVector[ i ] = idNode->second;
+      else if ( isDefined( myXYZ[ i ] ))
         nodesVector[ i ] = aMeshDS->AddNode (myXYZ[ i ].X(),
                                              myXYZ[ i ].Y(),
                                              myXYZ[ i ].Z());
@@ -3313,7 +3322,7 @@ bool SMESH_Pattern::MakeMesh(SMESH_Mesh* theMesh)
       subMesh->ComputeStateEngine( SMESH_subMesh::CHECK_COMPUTE_STATE );
   }
   if ( onMeshElements ) {
-    list< int > elemIDs, nodeIDs;
+    list< int > elemIDs;
     for ( int i = 0; i < myElements.size(); i++ )
     {
       int shapeID = shapeIDs[ i ];
@@ -3323,15 +3332,10 @@ bool SMESH_Pattern::MakeMesh(SMESH_Mesh* theMesh)
         if ( subMesh )
           subMesh->ComputeStateEngine( SMESH_subMesh::CHECK_COMPUTE_STATE );
       }
-      SMDS_ElemIteratorPtr nIt = myElements[ i ]->nodesIterator();
-      while ( nIt->more() ) {
-        nodeIDs.push_back( nIt->next()->GetID() );
-      }
       elemIDs.push_back( myElements[ i ]->GetID() );
     }
     // remove refined elements and their nodes
     editor.Remove( elemIDs, false );
-    editor.Remove( nodeIDs, true );
   }
 
   return setErrorCode( ERR_OK );

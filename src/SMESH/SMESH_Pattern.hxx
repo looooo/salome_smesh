@@ -270,7 +270,8 @@ class SMESH_Pattern {
   // in a good order, point UVs on edges are computed and points
   // are appended to theEdgesPointsList
 
-  void mergePoints (std::map<std::set<void*>,std::list<std::list<int> > >& xyzIndGroups,
+  typedef std::set<const SMDS_MeshNode*> TNodeSet;
+  void mergePoints (std::map<TNodeSet,std::list<std::list<int> > >&  xyzIndGroups,
                     std::map< int, std::list< std::list< int >* > >& reverseConnectivity);
   // Look for coincident points between myXYZs indexed with
   // list<int> of each element of xyzIndGroups. Coincident indices
@@ -302,6 +303,7 @@ class SMESH_Pattern {
   // to compute while applying to mesh elements, not to shapes
   std::vector<gp_XYZ>               myXYZ;
   std::list< std::list< int > >     myElemXYZIDs;
+  std::map< int, const SMDS_MeshNode*> myXYZIdToNodeMap; // map id to node of a refined element
   std::vector<const SMDS_MeshElement*> myElements; // refined elements
   std::vector<const SMDS_MeshNode*> myOrderedNodes;
 };

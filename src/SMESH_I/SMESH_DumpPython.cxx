@@ -488,6 +488,7 @@ TCollection_AsciiString SMESH_Gen_i::DumpPython_impl
   
   aScript += "def RebuildData(theStudy):";
   aScript += "\n\tsmesh = salome.lcc.FindOrLoadComponent(\"FactoryServer\", \"SMESH\")";
+  aScript += "\n\taFilterManager = smesh.CreateFilterManager()";
   if ( isPublished )
     aScript += "\n\tsmesh.SetCurrentStudy(theStudy)";
   else

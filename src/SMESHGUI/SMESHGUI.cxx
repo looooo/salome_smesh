@@ -240,9 +240,11 @@ namespace{
       SMESH::SMESH_Mesh_var aMesh = SMESH::IObjectToInterface<SMESH::SMESH_Mesh>(anIObject);
       if ( !aMesh->_is_nil() ) {
 	QString aFilter, aTitle = QObject::tr("Export mesh");
+	QMap<QString, SMESH::MED_VERSION> aFilterMap;
 	switch ( theCommandID ) {
 	case 122:
-	  aFilter = QObject::tr("MED files (*.med)");
+	  aFilterMap.insert( QObject::tr("MED 2.1 (*.med)"), SMESH::MED_V2_1 );
+	  aFilterMap.insert( QObject::tr("MED 2.2 (*.med)"), SMESH::MED_V2_2 );
 	  break;
 	case 121:
 	  aFilter = QObject::tr("DAT files (*.dat)");
@@ -264,7 +266,25 @@ namespace{
 	  return;
 	}}
 	
-	QString aFilename = QAD_FileDlg::getFileName(parent, "", aFilter, aTitle, false);
+	QString aFilename;
+	SMESH::MED_VERSION aFormat;
+	
+	if ( theCommandID != 122)
+	  aFilename = QAD_FileDlg::getFileName(parent, "", aFilter, aTitle, false);
+	else
+	  {
+	    QStringList filters;
+	    for ( QMap<QString, SMESH::MED_VERSION>::const_iterator it = aFilterMap.begin(); it != aFilterMap.end(); ++it )
+	      filters.push_back( it.key() );
+	    
+	    QAD_FileDlg* fd = new QAD_FileDlg( parent, false, true, true );
+	    fd->setCaption( aTitle );
+	    fd->setFilters( filters );
+	    fd->exec();
+	    aFilename = fd->selectedFile();
+	    aFormat = aFilterMap[fd->selectedFilter()];
+	    delete fd;
+	  }
 	if ( !aFilename.isEmpty() ) {
 	  // Check whether the file already exists and delete it if yes
 	  QFile aFile( aFilename );
@@ -273,7 +293,7 @@ namespace{
 	  QAD_WaitCursor wc;
 	  switch ( theCommandID ) {
 	  case 122:
-	    aMesh->ExportToMED( aFilename.latin1(), true, SMESH::MED_V2_1 ); // currently, automatic groups are always created
+	    aMesh->ExportToMED( aFilename.latin1(), false, aFormat ); // currently, automatic groups are never created
 	    break;
 	  case 121:
 	    aMesh->ExportDAT( aFilename.latin1() );

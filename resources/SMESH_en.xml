@@ -131,7 +131,7 @@
 <!-- ********************************* Settings  (menubar) ********************************* -->
 <menu-item label-id="Preferences" item-id="4" pos-id="">
    <submenu label-id="Mesh" item-id="100" pos-id="-1">
-    <submenu label-id="Display Mode" item-id="1000" pos-id="">
+   <submenu label-id="Display Mode" item-id="1000" pos-id="">
     	<popup-item item-id="10001" pos-id="" label-id="Wireframe" icon-id="mesh_wireframe.png" tooltip-id="" accel-id="" toggle-id="false" execute-action=""/>
  	<popup-item item-id="10002" pos-id="" label-id="Shading" icon-id="mesh_shading.png" tooltip-id="" accel-id="" toggle-id="true" execute-action=""/>
     	<popup-item item-id="10004" pos-id="" label-id="Nodes" icon-id="mesh_points.png" tooltip-id="" accel-id="" toggle-id="false" execute-action=""/>
@@ -147,7 +147,11 @@
     <separator pos-id=""/>
     <popup-item item-id="1006" pos-id="" label-id="Selection" icon-id="" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
     <separator pos-id=""/>
-    <popup-item item-id="1007" pos-id="" label-id="Quality controls" icon-id="" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
+    <submenu label-id="Quality controls" item-id="1007" pos-id="">
+    	<popup-item item-id="10070" pos-id="" label-id="Precision" icon-id="" tooltip-id="" accel-id="" toggle-id="false" execute-action=""/>
+ 	<popup-item item-id="10071" pos-id="" label-id="Display Entity" icon-id="" tooltip-id="" accel-id="" toggle-id="true" execute-action=""/>
+    </submenu>
+    <endsubmenu /> 
    </submenu>
    <endsubmenu />
    <separator pos-id="-1"/>

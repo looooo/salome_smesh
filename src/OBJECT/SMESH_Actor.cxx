@@ -736,7 +736,20 @@ void SMESH_ActorDef::SetControlMode(eControl theMode){
 	myControlActor->SetControlMode(aFunctor,myScalarBarActor,myLookupTable);
       }
     }
+
+    if(QAD_CONFIG->getSetting("SMESH:DispayEntity") == "true"){
+      if(myControlActor == my1DActor)
+	myEntityMode = eEdges;
+      else if(myControlActor == my2DActor)
+	myEntityMode = eFaces;
+      else if(myControlActor == my3DActor)
+	myEntityMode = eVolumes;
+    }
+
+  }else if(QAD_CONFIG->getSetting("SMESH:DispayEntity") == "true"){
+    myEntityMode = eAllEntity;
   }
+
   SetRepresentation(GetRepresentation());
 
   myTimeStamp->Modified();
@@ -1011,18 +1024,18 @@ void SMESH_ActorDef::SetVisibility(int theMode, bool theIsUpdateRepersentation){
     if(theIsUpdateRepersentation)
       SetRepresentation(GetRepresentation());
 
-    switch(myControlMode){
-    case eNone:
-      break;
-    case eFreeEdges:
-    case eFreeBorders:
-      my1DExtActor->VisibilityOn();
-      break;
-    case eLength2D:
-      my1DExtActor->VisibilityOn();
-    default:
-      if(myControlActor->GetUnstructuredGrid()->GetNumberOfCells())
-	myScalarBarActor->VisibilityOn();
+    if(myControlMode != eNone){
+      switch(myControlMode){
+      case eFreeEdges:
+      case eFreeBorders:
+	my1DExtActor->VisibilityOn();
+	break;
+      case eLength2D:
+	my1DExtActor->VisibilityOn();
+      default:
+	if(myControlActor->GetUnstructuredGrid()->GetNumberOfCells())
+	  myScalarBarActor->VisibilityOn();
+      }
     }
 
     if(myRepresentation != ePoint)
@@ -1037,8 +1050,11 @@ void SMESH_ActorDef::SetVisibility(int theMode, bool theIsUpdateRepersentation){
     if(myEntityMode & eVolumes)
       my3DActor->VisibilityOn();
     
-    if(myIsPointsLabeled) myPointLabels->VisibilityOn();
-    if(myIsCellsLabeled) myCellsLabels->VisibilityOn();
+    if(myIsPointsLabeled) 
+      myPointLabels->VisibilityOn();
+
+    if(myIsCellsLabeled) 
+      myCellsLabels->VisibilityOn();
   }
 
   Modified();

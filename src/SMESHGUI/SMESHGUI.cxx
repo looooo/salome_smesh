@@ -1662,12 +1662,23 @@ bool SMESHGUI::OnGUIEvent(int theCommandID, QAD_Desktop * parent)
       break;
     }
 
-  case 1007:
+  case 10070:
     {
       ( new SMESHGUI_PrecisionDlg( parent ) )->exec();
       break;
     }
 
+  case 10071:
+    {
+      parent->menuBar()->setItemChecked(10071, !parent->menuBar()->isItemChecked(10071));
+      if (parent->menuBar()->isItemChecked(10071)) {
+	QAD_CONFIG->addSetting("SMESH:DispayEntity","true");
+      }
+      else {
+	QAD_CONFIG->addSetting("SMESH:DispayEntity","false");
+      }
+      break;
+    }
   case 1006: 
     {
       SMESHGUI_Preferences_SelectionDlg* aDlg = 
@@ -2253,6 +2264,12 @@ bool SMESHGUI::SetSettings(QAD_Desktop * parent)
     parent->menuBar()->setItemChecked(1001, false);
     myAutomaticUpdate = false;
   }
+
+  QString anIsDisplayEntity = QAD_CONFIG->getSetting("SMESH:DispayEntity");
+  if(anIsDisplayEntity.compare("true") == 0)
+    parent->menuBar()->setItemChecked(10071,true);
+  else
+    parent->menuBar()->setItemChecked(10071,false);
 
   /* Selection */
   SMESH::UpdateSelectionProp();

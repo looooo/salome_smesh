@@ -1107,6 +1107,9 @@ msgstr "Taper"
 msgid "ASPECTRATIO_ELEMENTS"
 msgstr "Aspect Ratio"
 
+msgid "ASPECTRATIO_3D_ELEMENTS"
+msgstr "Aspect Ratio 3D"
+
 msgid "MINIMUMANGLE_ELEMENTS"
 msgstr "Minimum Angle"
 

@@ -335,6 +335,22 @@ FunctorType AspectRatio_i::GetFunctorType()
 
 
 /*
+  Class       : AspectRatio3D
+  Description : Functor for calculating aspect ratio 3D
+*/
+AspectRatio3D_i::AspectRatio3D_i()
+{
+  myNumericalFunctorPtr.reset( new Controls::AspectRatio3D() );
+  myFunctorPtr = myNumericalFunctorPtr;
+}
+
+FunctorType AspectRatio3D_i::GetFunctorType()
+{
+  return SMESH::FT_AspectRatio3D;
+}
+
+
+/*
   Class       : Warping_i
   Description : Functor for calculating warping
 */
@@ -974,6 +990,14 @@ AspectRatio_ptr FilterManager_i::CreateAspectRatio()
 }
 
 
+AspectRatio3D_ptr FilterManager_i::CreateAspectRatio3D()
+{
+  SMESH::AspectRatio3D_i* aServant = new SMESH::AspectRatio3D_i();
+  SMESH::AspectRatio3D_var anObj = aServant->_this();
+  return anObj._retn();
+}
+
+
 Warping_ptr FilterManager_i::CreateWarping()
 {
   SMESH::Warping_i* aServant = new SMESH::Warping_i();
@@ -1404,6 +1428,9 @@ CORBA::Boolean Filter_i::SetCriteria( const SMESH::Filter::Criteria& theCriteria
         break;
       case SMESH::FT_AspectRatio:
         aFunctor = aFilterMgr->CreateAspectRatio();
+        break;
+      case SMESH::FT_AspectRatio3D:
+        aFunctor = aFilterMgr->CreateAspectRatio3D();
         break;
       case SMESH::FT_Warping:
         aFunctor = aFilterMgr->CreateWarping();

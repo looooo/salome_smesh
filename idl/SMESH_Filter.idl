@@ -45,6 +45,7 @@ module SMESH
   enum FunctorType
   {
     FT_AspectRatio,
+    FT_AspectRatio3D,
     FT_Warping,   
     FT_MinimumAngle,
     FT_Taper,       
@@ -95,6 +96,7 @@ module SMESH
   };
   interface MinimumAngle    : NumericalFunctor{};
   interface AspectRatio     : NumericalFunctor{};
+  interface AspectRatio3D   : NumericalFunctor{};
   interface Warping         : NumericalFunctor{};
   interface Taper           : NumericalFunctor{};
   interface Skew            : NumericalFunctor{};
@@ -320,6 +322,7 @@ module SMESH
     */
     MinimumAngle      CreateMinimumAngle();
     AspectRatio       CreateAspectRatio();
+    AspectRatio3D     CreateAspectRatio3D();
     Warping           CreateWarping();
     Taper             CreateTaper();
     Skew              CreateSkew();

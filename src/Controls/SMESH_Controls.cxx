@@ -17,7 +17,7 @@
 // 
 //  See http://www.opencascade.org/SALOME/ or email : webmaster.salome@opencascade.org
 
-#include "SMESH_Controls.hxx"
+#include "SMESH_ControlsDef.hxx"
 
 #include <set>
 
@@ -33,7 +33,6 @@
 #include <Geom_CylindricalSurface.hxx>
 #include <Precision.hxx>
 #include <TColgp_Array1OfXYZ.hxx>
-#include <TColgp_SequenceOfXYZ.hxx>
 #include <TColStd_MapOfInteger.hxx>
 #include <TColStd_SequenceOfAsciiString.hxx>
 #include <TColStd_MapIteratorOfMapOfInteger.hxx>
@@ -53,73 +52,71 @@
                             AUXILIARY METHODS 
 */
 
-static inline double getAngle( const gp_XYZ& P1, const gp_XYZ& P2, const gp_XYZ& P3 )
-{
-  gp_Vec v1( P1 - P2 ), v2( P3 - P2 );
-
-  return v1.Magnitude() < gp::Resolution() ||
-         v2.Magnitude() < gp::Resolution() ? 0 : v1.Angle( v2 );
-}
-
-static inline double getArea( const gp_XYZ& P1, const gp_XYZ& P2, const gp_XYZ& P3 )
-{
-  gp_Vec aVec1( P2 - P1 );
-  gp_Vec aVec2( P3 - P1 );
-  return ( aVec1 ^ aVec2 ).Magnitude() * 0.5;
-}
-
-static inline double getArea( const gp_Pnt& P1, const gp_Pnt& P2, const gp_Pnt& P3 )
-{
-  return getArea( P1.XYZ(), P2.XYZ(), P3.XYZ() );
-}
-
-static inline double getDistance( const gp_XYZ& P1, const gp_XYZ& P2 )
-{
-  double aDist = gp_Pnt( P1 ).Distance( gp_Pnt( P2 ) );
-  return aDist;
-}
-
-static int getNbMultiConnection( SMDS_Mesh* theMesh, const int theId )
-{
-  if ( theMesh == 0 )
-    return 0;
-
-  const SMDS_MeshElement* anEdge = theMesh->FindElement( theId );
-  if ( anEdge == 0 || anEdge->GetType() != SMDSAbs_Edge || anEdge->NbNodes() != 2 )
-    return 0;
-
-  TColStd_MapOfInteger aMap;
-
-  int aResult = 0;
-  SMDS_ElemIteratorPtr anIter = anEdge->nodesIterator();
-  if ( anIter != 0 )
+namespace{
+  inline double getAngle( const gp_XYZ& P1, const gp_XYZ& P2, const gp_XYZ& P3 )
   {
-    while( anIter->more() )
-    {
-      const SMDS_MeshNode* aNode = (SMDS_MeshNode*)anIter->next();
-      if ( aNode == 0 )
-        return 0;
-      SMDS_ElemIteratorPtr anElemIter = aNode->GetInverseElementIterator();
-      while( anElemIter->more() )
-      {
-        const SMDS_MeshElement* anElem = anElemIter->next();
-        if ( anElem != 0 && anElem->GetType() != SMDSAbs_Edge )
-        {
-          int anId = anElem->GetID();
-
-          if ( anIter->more() )              // i.e. first node
-            aMap.Add( anId );
-          else if ( aMap.Contains( anId ) )
-            aResult++;
-        }
-      }
-    }
+    gp_Vec v1( P1 - P2 ), v2( P3 - P2 );
+    
+    return v1.Magnitude() < gp::Resolution() ||
+      v2.Magnitude() < gp::Resolution() ? 0 : v1.Angle( v2 );
   }
 
-  return aResult;
-}
+  inline double getArea( const gp_XYZ& P1, const gp_XYZ& P2, const gp_XYZ& P3 )
+  {
+    gp_Vec aVec1( P2 - P1 );
+    gp_Vec aVec2( P3 - P1 );
+    return ( aVec1 ^ aVec2 ).Magnitude() * 0.5;
+  }
 
+  inline double getArea( const gp_Pnt& P1, const gp_Pnt& P2, const gp_Pnt& P3 )
+  {
+    return getArea( P1.XYZ(), P2.XYZ(), P3.XYZ() );
+  }
 
+  inline double getDistance( const gp_XYZ& P1, const gp_XYZ& P2 )
+  {
+    double aDist = gp_Pnt( P1 ).Distance( gp_Pnt( P2 ) );
+    return aDist;
+  }
+
+  int getNbMultiConnection( SMDS_Mesh* theMesh, const int theId )
+  {
+    if ( theMesh == 0 )
+      return 0;
+    
+    const SMDS_MeshElement* anEdge = theMesh->FindElement( theId );
+    if ( anEdge == 0 || anEdge->GetType() != SMDSAbs_Edge || anEdge->NbNodes() != 2 )
+      return 0;
+    
+    TColStd_MapOfInteger aMap;
+    
+    int aResult = 0;
+    SMDS_ElemIteratorPtr anIter = anEdge->nodesIterator();
+    if ( anIter != 0 ) {
+      while( anIter->more() ) {
+	const SMDS_MeshNode* aNode = (SMDS_MeshNode*)anIter->next();
+	if ( aNode == 0 )
+	  return 0;
+	SMDS_ElemIteratorPtr anElemIter = aNode->GetInverseElementIterator();
+	while( anElemIter->more() ) {
+	  const SMDS_MeshElement* anElem = anElemIter->next();
+	  if ( anElem != 0 && anElem->GetType() != SMDSAbs_Edge ) {
+	    int anId = anElem->GetID();
+	    
+	    if ( anIter->more() )              // i.e. first node
+	      aMap.Add( anId );
+	    else if ( aMap.Contains( anId ) )
+	      aResult++;
+	  }
+	}
+      }
+    }
+    
+    return aResult;
+  }
+
+}  
+  
 using namespace SMESH::Controls;
 
 /*
@@ -141,10 +138,10 @@ void NumericalFunctor::SetMesh( SMDS_Mesh* theMesh )
   myMesh = theMesh;
 }
 
-bool NumericalFunctor::GetPoints(const int             theId,
-                                 TColgp_SequenceOfXYZ& theRes ) const
+bool NumericalFunctor::GetPoints(const int theId,
+                                 TSequenceOfXYZ& theRes) const
 {
-  theRes.Clear();
+  theRes.clear();
 
   if ( myMesh == 0 )
     return false;
@@ -153,9 +150,9 @@ bool NumericalFunctor::GetPoints(const int             theId,
 }
 
 bool NumericalFunctor::GetPoints(const SMDS_MeshElement* anElem,
-                                 TColgp_SequenceOfXYZ&   theRes )
+                                 TSequenceOfXYZ& theRes)
 {
-  theRes.Clear();
+  theRes.clear();
 
   if ( anElem == 0)
     return false;
@@ -167,8 +164,9 @@ bool NumericalFunctor::GetPoints(const SMDS_MeshElement* anElem,
     while( anIter->more() )
     {
       const SMDS_MeshNode* aNode = (SMDS_MeshNode*)anIter->next();
-      if ( aNode != 0 )
-        theRes.Append( gp_XYZ( aNode->X(), aNode->Y(), aNode->Z() ) );
+      if ( aNode != 0 ){
+        theRes.push_back( gp_XYZ( aNode->X(), aNode->Y(), aNode->Z() ) );
+      }
     }
   }
 
@@ -187,7 +185,7 @@ void  NumericalFunctor::SetPrecision( const long thePrecision )
 
 double NumericalFunctor::GetValue( long theId )
 {
-  TColgp_SequenceOfXYZ P;
+  TSequenceOfXYZ P;
   if ( GetPoints( theId, P ))
   {
     double aVal = GetValue( P );
@@ -196,7 +194,6 @@ double NumericalFunctor::GetValue( long theId )
       double prec = pow( 10., (double)( myPrecision ) );
       aVal = floor( aVal * prec + 0.5 ) / prec;
     }
-    
     return aVal;
   }
 
@@ -208,11 +205,11 @@ double NumericalFunctor::GetValue( long theId )
   Description : Functor for calculation of minimum angle
 */
 
-double MinimumAngle::GetValue( const TColgp_SequenceOfXYZ& P )
+double MinimumAngle::GetValue( const TSequenceOfXYZ& P )
 {
   double aMin;
 
-  if ( P.Length() == 3 )
+  if ( P.size() == 3 )
   {
     double A0 = getAngle( P( 3 ), P( 1 ), P( 2 ) );
     double A1 = getAngle( P( 1 ), P( 2 ), P( 3 ) );
@@ -220,7 +217,7 @@ double MinimumAngle::GetValue( const TColgp_SequenceOfXYZ& P )
 
     aMin = Min( A0, Min( A1, A2 ) );
   }
-  else if ( P.Length() == 4 )
+  else if ( P.size() == 4 )
   {
     double A0 = getAngle( P( 4 ), P( 1 ), P( 2 ) );
     double A1 = getAngle( P( 1 ), P( 2 ), P( 3 ) );
@@ -251,9 +248,9 @@ SMDSAbs_ElementType MinimumAngle::GetType() const
   Class       : AspectRatio
   Description : Functor for calculating aspect ratio
 */
-double AspectRatio::GetValue( const TColgp_SequenceOfXYZ& P )
+double AspectRatio::GetValue( const TSequenceOfXYZ& P )
 {
-  int nbNodes = P.Length();
+  int nbNodes = P.size();
 
   if ( nbNodes != 3 && nbNodes != 4 )
     return 0;
@@ -262,8 +259,8 @@ double AspectRatio::GetValue( const TColgp_SequenceOfXYZ& P )
 
   double aLen[ nbNodes ];
   for ( int i = 0; i < nbNodes - 1; i++ )
-    aLen[ i ] = getDistance( P( i + 1 ), P( i + 2 ) );
-  aLen[ nbNodes - 1 ] = getDistance( P( 1 ), P( nbNodes ) );
+    aLen[ i ] = getDistance( P(i+1), P(i+2) );
+  aLen[ nbNodes - 1 ] = getDistance( P( 1 ), P(nbNodes) );
 
   // Compute aspect ratio
 
@@ -307,64 +304,52 @@ SMDSAbs_ElementType AspectRatio::GetType() const
   Description : Functor for calculating aspect ratio
 */
 
-static inline double getHalfPerimeter(double theTria[3]){
-  return (theTria[0] + theTria[1] + theTria[2])/2.0;
+namespace{
+
+  inline double getHalfPerimeter(double theTria[3]){
+    return (theTria[0] + theTria[1] + theTria[2])/2.0;
+  }
+
+  inline double getArea(double theHalfPerim, double theTria[3]){
+    return sqrt(theHalfPerim*
+		(theHalfPerim-theTria[0])*
+		(theHalfPerim-theTria[1])*
+		(theHalfPerim-theTria[2]));
+  }
+
+  inline double getVolume(const TSequenceOfXYZ& P){
+    gp_Vec aVec1( P( 2 ) - P( 1 ) );
+    gp_Vec aVec2( P( 3 ) - P( 1 ) );
+    gp_Vec aVec3( P( 4 ) - P( 1 ) );
+    gp_Vec anAreaVec( aVec1 ^ aVec2 );
+    return abs(aVec3 * anAreaVec) / 6.0;
+  }
+
+  inline double getMaxHeight(double theLen[6])
+  {
+    double aHeight = max(theLen[0],theLen[1]);
+    aHeight = max(aHeight,theLen[2]);
+    aHeight = max(aHeight,theLen[3]);
+    aHeight = max(aHeight,theLen[4]);
+    aHeight = max(aHeight,theLen[5]);
+    return aHeight;
+  }
+
 }
 
-static inline double getArea(double theHalfPerim, double theTria[3]){
-  return sqrt(theHalfPerim*
-	      (theHalfPerim-theTria[0])*
-	      (theHalfPerim-theTria[1])*
-	      (theHalfPerim-theTria[2]));
-}
-
-static inline double getVolume(double theLen[6]){
-  double a2 = theLen[0]*theLen[0];
-  double b2 = theLen[1]*theLen[1];
-  double c2 = theLen[2]*theLen[2];
-  double d2 = theLen[3]*theLen[3];
-  double e2 = theLen[4]*theLen[4];
-  double f2 = theLen[5]*theLen[5];
-  double P = 4.0*a2*b2*d2;
-  double Q = a2*(b2+d2-e2)-b2*(a2+d2-f2)-d2*(a2+b2-c2);
-  double R = (b2+d2-e2)*(a2+d2-f2)*(a2+d2-f2);
-  return sqrt(P-Q+R)/12.0;
-}
-
-static inline double getHeight( const gp_Pnt& P1, const gp_Pnt& P2, 
-				const gp_Pnt& P3, const gp_Pnt& P4)
-{
-  gp_Vec aVec1( P2.XYZ() - P1.XYZ() );
-  gp_Vec aVec2( P3.XYZ() - P1.XYZ() );
-  gp_Vec aNorm = aVec1 ^ aVec2;
-  aNorm /= aNorm.Magnitude();
-  gp_Vec aVec3( P4.XYZ() - P1.XYZ() );
-  double aDist = aVec1 * aVec2;
-  return fabs( aDist );
-}
-
-static inline double getMaxHeight( const TColgp_SequenceOfXYZ& P )
-{
-  double aHeight = getHeight(P(1),P(2),P(3),P(4));
-  aHeight = max(aHeight,getHeight(P(1),P(2),P(4),P(3)));
-  aHeight = max(aHeight,getHeight(P(1),P(3),P(4),P(2)));
-  aHeight = max(aHeight,getHeight(P(2),P(3),P(4),P(1)));
-  return aHeight;
-}
-
-double AspectRatio3D::GetValue( const TColgp_SequenceOfXYZ& P )
+double AspectRatio3D::GetValue( const TSequenceOfXYZ& P )
 {
   double aQuality = 0.0;
-  int nbNodes = P.Length();
+  int nbNodes = P.size();
   switch(nbNodes){
   case 4:{
     double aLen[6] = {
-      getDistance(P(1),P(2)), // a
-      getDistance(P(2),P(3)), // b
-      getDistance(P(3),P(1)), // c
-      getDistance(P(2),P(4)), // d
-      getDistance(P(3),P(4)), // e
-      getDistance(P(1),P(4))  // f
+      getDistance(P( 1 ),P( 2 )), // a
+      getDistance(P( 2 ),P( 3 )), // b
+      getDistance(P( 3 ),P( 1 )), // c
+      getDistance(P( 2 ),P( 4 )), // d
+      getDistance(P( 3 ),P( 4 )), // e
+      getDistance(P( 1 ),P( 4 ))  // f
     };
     double aTria[4][3] = {
       {aLen[0],aLen[1],aLen[2]}, // abc
@@ -372,15 +357,204 @@ double AspectRatio3D::GetValue( const TColgp_SequenceOfXYZ& P )
       {aLen[1],aLen[3],aLen[4]}, // bde
       {aLen[2],aLen[4],aLen[5]}  // cef
     };
-    double aHalfPerim = getHalfPerimeter(aTria[0]);
-    double anArea = getArea(aHalfPerim,aTria[0]);
-    aHalfPerim = getHalfPerimeter(aTria[1]);
-    anArea += getArea(aHalfPerim,aTria[1]);
-    aHalfPerim = getHalfPerimeter(aTria[2]);
-    anArea += getArea(aHalfPerim,aTria[2]);
-    double aVolume = getVolume(aLen);
-    double aHeight = getMaxHeight(P);
-    aQuality = 1.0/3.0*aHeight*anArea/aVolume;
+    double aSumArea = 0.0;
+    double aHalfPerimeter = getHalfPerimeter(aTria[0]);
+    double anArea = getArea(aHalfPerimeter,aTria[0]);
+    aSumArea += anArea;
+    aHalfPerimeter = getHalfPerimeter(aTria[1]);
+    anArea = getArea(aHalfPerimeter,aTria[1]);
+    aSumArea += anArea;
+    aHalfPerimeter = getHalfPerimeter(aTria[2]);
+    anArea = getArea(aHalfPerimeter,aTria[2]);
+    aSumArea += anArea;
+    aHalfPerimeter = getHalfPerimeter(aTria[3]);
+    anArea = getArea(aHalfPerimeter,aTria[3]);
+    aSumArea += anArea;
+    double aVolume = getVolume(P);
+    double aHeight = getMaxHeight(aLen);
+    static double aCoeff = sqrt(6.0)/36.0;
+    aQuality = aCoeff*aHeight*aSumArea/aVolume;
+    break;
+  }
+  case 5:{
+    {
+      gp_XYZ aXYZ[4] = {P( 1 ),P( 2 ),P( 3 ),P( 5 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
+    {
+      gp_XYZ aXYZ[4] = {P( 1 ),P( 3 ),P( 4 ),P( 5 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
+    {
+      gp_XYZ aXYZ[4] = {P( 1 ),P( 2 ),P( 4 ),P( 5 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
+    {
+      gp_XYZ aXYZ[4] = {P( 2 ),P( 3 ),P( 4 ),P( 5 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
+    break;
+  }
+  case 6:{
+    {
+      gp_XYZ aXYZ[4] = {P( 1 ),P( 2 ),P( 4 ),P( 6 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
+    {
+      gp_XYZ aXYZ[4] = {P( 1 ),P( 2 ),P( 4 ),P( 3 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
+    {
+      gp_XYZ aXYZ[4] = {P( 1 ),P( 2 ),P( 5 ),P( 6 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
+    {
+      gp_XYZ aXYZ[4] = {P( 1 ),P( 2 ),P( 5 ),P( 3 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
+    {
+      gp_XYZ aXYZ[4] = {P( 2 ),P( 5 ),P( 4 ),P( 6 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
+    {
+      gp_XYZ aXYZ[4] = {P( 2 ),P( 5 ),P( 4 ),P( 3 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
+    break;
+  }
+  case 8:{
+    {
+      gp_XYZ aXYZ[4] = {P( 1 ),P( 2 ),P( 5 ),P( 3 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
+    {
+      gp_XYZ aXYZ[4] = {P( 1 ),P( 2 ),P( 5 ),P( 4 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
+    {
+      gp_XYZ aXYZ[4] = {P( 1 ),P( 2 ),P( 5 ),P( 7 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
+    {
+      gp_XYZ aXYZ[4] = {P( 1 ),P( 2 ),P( 5 ),P( 8 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
+    {
+      gp_XYZ aXYZ[4] = {P( 1 ),P( 2 ),P( 6 ),P( 3 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
+    {
+      gp_XYZ aXYZ[4] = {P( 1 ),P( 2 ),P( 6 ),P( 4 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
+    {
+      gp_XYZ aXYZ[4] = {P( 1 ),P( 2 ),P( 6 ),P( 7 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
+    {
+      gp_XYZ aXYZ[4] = {P( 1 ),P( 2 ),P( 6 ),P( 8 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
+    {
+      gp_XYZ aXYZ[4] = {P( 2 ),P( 6 ),P( 5 ),P( 3 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
+    {
+      gp_XYZ aXYZ[4] = {P( 2 ),P( 6 ),P( 5 ),P( 4 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
+    {
+      gp_XYZ aXYZ[4] = {P( 2 ),P( 6 ),P( 5 ),P( 7 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
+    {
+      gp_XYZ aXYZ[4] = {P( 2 ),P( 6 ),P( 5 ),P( 8 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
+    {
+      gp_XYZ aXYZ[4] = {P( 3 ),P( 4 ),P( 8 ),P( 1 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
+    {
+      gp_XYZ aXYZ[4] = {P( 3 ),P( 4 ),P( 8 ),P( 2 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
+    {
+      gp_XYZ aXYZ[4] = {P( 3 ),P( 4 ),P( 8 ),P( 5 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
+    {
+      gp_XYZ aXYZ[4] = {P( 3 ),P( 4 ),P( 8 ),P( 6 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
+    {
+      gp_XYZ aXYZ[4] = {P( 3 ),P( 4 ),P( 7 ),P( 1 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
+    {
+      gp_XYZ aXYZ[4] = {P( 3 ),P( 4 ),P( 7 ),P( 2 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
+    {
+      gp_XYZ aXYZ[4] = {P( 3 ),P( 4 ),P( 7 ),P( 5 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
+    {
+      gp_XYZ aXYZ[4] = {P( 3 ),P( 4 ),P( 7 ),P( 6 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
+    {
+      gp_XYZ aXYZ[4] = {P( 4 ),P( 8 ),P( 7 ),P( 1 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
+    {
+      gp_XYZ aXYZ[4] = {P( 4 ),P( 8 ),P( 7 ),P( 2 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
+    {
+      gp_XYZ aXYZ[4] = {P( 4 ),P( 8 ),P( 7 ),P( 5 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
+    {
+      gp_XYZ aXYZ[4] = {P( 4 ),P( 8 ),P( 7 ),P( 6 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
+    {
+      gp_XYZ aXYZ[4] = {P( 4 ),P( 8 ),P( 7 ),P( 2 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
+    {
+      gp_XYZ aXYZ[4] = {P( 4 ),P( 5 ),P( 8 ),P( 2 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
+    {
+      gp_XYZ aXYZ[4] = {P( 1 ),P( 4 ),P( 5 ),P( 3 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
+    {
+      gp_XYZ aXYZ[4] = {P( 3 ),P( 6 ),P( 7 ),P( 1 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
+    {
+      gp_XYZ aXYZ[4] = {P( 2 ),P( 3 ),P( 6 ),P( 4 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
+    {
+      gp_XYZ aXYZ[4] = {P( 5 ),P( 6 ),P( 8 ),P( 3 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
+    {
+      gp_XYZ aXYZ[4] = {P( 7 ),P( 8 ),P( 6 ),P( 1 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
+    {
+      gp_XYZ aXYZ[4] = {P( 1 ),P( 2 ),P( 4 ),P( 7 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
+    {
+      gp_XYZ aXYZ[4] = {P( 3 ),P( 4 ),P( 2 ),P( 5 )};
+      aQuality = max(GetValue(TSequenceOfXYZ(&aXYZ[0],&aXYZ[4])),aQuality);
+    }
     break;
   }
   }
@@ -405,9 +579,9 @@ SMDSAbs_ElementType AspectRatio3D::GetType() const
   Class       : Warping
   Description : Functor for calculating warping
 */
-double Warping::GetValue( const TColgp_SequenceOfXYZ& P )
+double Warping::GetValue( const TSequenceOfXYZ& P )
 {
-  if ( P.Length() != 4 )
+  if ( P.size() != 4 )
     return 0;
 
   gp_XYZ G = ( P( 1 ) + P( 2 ) + P( 3 ) + P( 4 ) ) / 4;
@@ -462,9 +636,9 @@ SMDSAbs_ElementType Warping::GetType() const
   Class       : Taper
   Description : Functor for calculating taper
 */
-double Taper::GetValue( const TColgp_SequenceOfXYZ& P )
+double Taper::GetValue( const TSequenceOfXYZ& P )
 {
-  if ( P.Length() != 4 )
+  if ( P.size() != 4 )
     return 0;
 
   // Compute taper
@@ -514,14 +688,14 @@ static inline double skewAngle( const gp_XYZ& p1, const gp_XYZ& p2, const gp_XYZ
   return v1.Magnitude() < gp::Resolution() || v2.Magnitude() < gp::Resolution() ? 0 : v1.Angle( v2 );
 }
 
-double Skew::GetValue( const TColgp_SequenceOfXYZ& P )
+double Skew::GetValue( const TSequenceOfXYZ& P )
 {
-  if ( P.Length() != 3 && P.Length() != 4 )
+  if ( P.size() != 3 && P.size() != 4 )
     return 0;
 
   // Compute skew
   static double PI2 = PI / 2;
-  if ( P.Length() == 3 )
+  if ( P.size() == 3 )
   {
     double A0 = fabs( PI2 - skewAngle( P( 3 ), P( 1 ), P( 2 ) ) );
     double A1 = fabs( PI2 - skewAngle( P( 1 ), P( 2 ), P( 3 ) ) );
@@ -562,11 +736,11 @@ SMDSAbs_ElementType Skew::GetType() const
   Class       : Area
   Description : Functor for calculating area
 */
-double Area::GetValue( const TColgp_SequenceOfXYZ& P )
+double Area::GetValue( const TSequenceOfXYZ& P )
 {
-  if ( P.Length() == 3 )
+  if ( P.size() == 3 )
     return getArea( P( 1 ), P( 2 ), P( 3 ) );
-  else if ( P.Length() == 4 )
+  else if ( P.size() == 4 )
     return getArea( P( 1 ), P( 2 ), P( 3 ) ) + getArea( P( 1 ), P( 3 ), P( 4 ) );
   else
     return 0;
@@ -587,9 +761,9 @@ SMDSAbs_ElementType Area::GetType() const
   Class       : Length
   Description : Functor for calculating length off edge
 */
-double Length::GetValue( const TColgp_SequenceOfXYZ& P )
+double Length::GetValue( const TSequenceOfXYZ& P )
 {
-  return ( P.Length() == 2 ? getDistance( P( 1 ), P( 2 ) ) : 0 );
+  return ( P.size() == 2 ? getDistance( P( 1 ), P( 2 ) ) : 0 );
 }
 
 double Length::GetBadRate( double Value, int /*nbNodes*/ ) const
@@ -607,7 +781,7 @@ SMDSAbs_ElementType Length::GetType() const
   Class       : MultiConnection
   Description : Functor for calculating number of faces conneted to the edge
 */
-double MultiConnection::GetValue( const TColgp_SequenceOfXYZ& P )
+double MultiConnection::GetValue( const TSequenceOfXYZ& P )
 {
   return 0;
 }
@@ -1426,7 +1600,6 @@ static gp_XYZ getNormale( const SMDS_MeshFace* theFace )
   gp_XYZ n;
   int aNbNode = theFace->NbNodes();
   TColgp_Array1OfXYZ anArrOfXYZ(1,4);
-  gp_XYZ p1, p2, p3, p4;
   SMDS_ElemIteratorPtr aNodeItr = theFace->nodesIterator();
   int i = 1;
   for ( ; aNodeItr->more() && i <= 4; i++ )
@@ -1435,12 +1608,12 @@ static gp_XYZ getNormale( const SMDS_MeshFace* theFace )
     anArrOfXYZ.SetValue(i, gp_XYZ( aNode->X(), aNode->Y(), aNode->Z() ) );
   }
   
-  gp_XYZ q1 = anArrOfXYZ.Value(2) - anArrOfXYZ.Value(1);
-  gp_XYZ q2 = anArrOfXYZ.Value(3) - anArrOfXYZ.Value(1);
+  gp_XYZ q1 = anArrOfXYZ.Value( 2 ) - anArrOfXYZ.Value( 1 );
+  gp_XYZ q2 = anArrOfXYZ.Value( 3 ) - anArrOfXYZ.Value( 1 );
   n  = q1 ^ q2;
   if ( aNbNode > 3 )
   {
-    gp_XYZ q3 = anArrOfXYZ.Value(4) - anArrOfXYZ.Value(1);
+    gp_XYZ q3 = anArrOfXYZ.Value( 4 ) - anArrOfXYZ.Value( 1 );
     n += q2 ^ q3;
   }
   double len = n.Modulus();

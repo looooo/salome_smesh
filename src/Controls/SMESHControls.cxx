@@ -17,7 +17,7 @@
 // 
 //  See http://www.opencascade.org/SALOME/ or email : webmaster.salome@opencascade.org 
 
-#include "SMESH_Controls.hxx"
+#include "SMESH_ControlsDef.hxx"
 
 int main(int argc, char** argv)
 {

@@ -41,18 +41,18 @@
 #include "OpUtil.hxx"
 
 #include "TCollection_AsciiString.hxx"
-#include <TColStd_MapOfInteger.hxx>
-#include <TColStd_MapIteratorOfMapOfInteger.hxx>
-#include <TColStd_SequenceOfInteger.hxx>
 #include "SMESHDS_Command.hxx"
 #include "SMESHDS_CommandType.hxx"
 #include "SMESH_MeshEditor_i.hxx"
 #include "SMESH_Gen_i.hxx"
 #include "DriverMED_R_SMESHDS_Mesh.h"
 
+#include <TColStd_MapOfInteger.hxx>
+#include <TColStd_MapIteratorOfMapOfInteger.hxx>
+#include <TColStd_SequenceOfInteger.hxx>
+
 #include <string>
 #include <iostream>
-// _CS_gbo_050504 Ajout explicite du sstream pour ostringstream 
 #include <sstream>
 
 #ifdef _DEBUG_

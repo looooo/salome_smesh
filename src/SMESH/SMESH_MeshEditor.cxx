@@ -28,15 +28,14 @@
 
 #include "SMESH_MeshEditor.hxx"
 
+#include "SMESH_ControlsDef.hxx"
+
 #include "SMDS_FaceOfNodes.hxx"
 #include "SMDS_VolumeTool.hxx"
 #include "SMESHDS_Group.hxx"
 #include "SMESHDS_Mesh.hxx"
 #include "SMESH_subMesh.hxx"
 
-#include "utilities.h"
-
-#include <TColgp_SequenceOfXYZ.hxx>
 #include <TopTools_ListIteratorOfListOfShape.hxx>
 #include <TopTools_ListOfShape.hxx>
 #include <gp_Vec.hxx>
@@ -48,7 +47,10 @@
 
 #include <map>
 
+#include "utilities.h"
+
 using namespace std;
+using namespace SMESH::Controls;
 
 typedef map<const SMDS_MeshNode*, const SMDS_MeshNode*>           TNodeNodeMap;
 typedef map<const SMDS_MeshNode*, list<const SMDS_MeshNode*> >    TNodeOfNodeListMap;
@@ -493,7 +495,7 @@ bool SMESH_MeshEditor::Reorient (const SMDS_MeshElement * theFace)
 static double getBadRate (const SMDS_MeshElement*               theElem,
                           SMESH::Controls::NumericalFunctorPtr& theCrit)
 {
-  TColgp_SequenceOfXYZ P;
+  TSequenceOfXYZ P;
   if ( !theElem || !theCrit->GetPoints( theElem, P ))
     return 1e100;
   return theCrit->GetBadRate( theCrit->GetValue( P ), theElem->NbNodes() );
@@ -649,7 +651,7 @@ double getAngle(const SMDS_MeshElement * tr1,
   double angle = 2*PI; // bad angle
 
   // get normals
-  TColgp_SequenceOfXYZ P1, P2;
+  TSequenceOfXYZ P1, P2;
   if ( !SMESH::Controls::NumericalFunctor::GetPoints( tr1, P1 ) ||
        !SMESH::Controls::NumericalFunctor::GetPoints( tr2, P2 ))
     return angle;
@@ -1315,13 +1317,13 @@ void centroidalSmooth(SMESHDS_Mesh *                       theMesh,
     nbElems++;
 
     gp_XYZ elemCenter(0.,0.,0.);
-    TColgp_SequenceOfXYZ aNodePoints;
+    TSequenceOfXYZ aNodePoints;
     SMDS_ElemIteratorPtr itN = elem->nodesIterator();
     while ( itN->more() )
     {
       const SMDS_MeshNode* aNode = static_cast<const SMDS_MeshNode*>( itN->next() );
       gp_XYZ aP( aNode->X(), aNode->Y(), aNode->Z() );
-      aNodePoints.Append( aP );
+      aNodePoints.push_back( aP );
       elemCenter += aP;
     }
     double elemArea = anAreaFunc.GetValue( aNodePoints );
@@ -1453,7 +1455,7 @@ void SMESH_MeshEditor::Smooth (set<const SMDS_MeshElement*> & theElems,
       const SMDS_MeshElement* elem = (*itElem);
       if ( !elem || elem->GetType() != SMDSAbs_Face )
         continue;
-      TColgp_SequenceOfXYZ aPoints;
+      TSequenceOfXYZ aPoints;
       if ( aQualityFunc.GetPoints( elem, aPoints )) {
         double aValue = aQualityFunc.GetValue( aPoints );
         if ( aValue > maxRatio )

@@ -27,8 +27,9 @@
 
 #include "SMESH_Object.h"
 #include "SMDS_Mesh.hxx"
-#include "SALOME_ExtractUnstructuredGrid.h"
 #include "SMESH_Actor.h"
+#include "SMESH_ControlsDef.hxx"
+#include "SALOME_ExtractUnstructuredGrid.h"
 
 #include CORBA_SERVER_HEADER(SALOME_Exception)
 
@@ -117,7 +118,6 @@ namespace{
 			     SMESH::log_array_var& theSeq,
 			     CORBA::Long theId)
   {
-    const SMESH::double_array& aCoords = theSeq[theId].coords;
     const SMESH::long_array& anIndexes = theSeq[theId].indexes;
     CORBA::Long anElemId = 0, aNbElems = theSeq[theId].number;
     if(3*aNbElems != anIndexes.length())
@@ -136,7 +136,6 @@ namespace{
 			     SMESH::log_array_var& theSeq,
 			     CORBA::Long theId)
   {
-    const SMESH::double_array& aCoords = theSeq[theId].coords;
     const SMESH::long_array& anIndexes = theSeq[theId].indexes;
     CORBA::Long anElemId = 0, aNbElems = theSeq[theId].number;
     if(4*aNbElems != anIndexes.length())
@@ -156,7 +155,6 @@ namespace{
 			     SMESH::log_array_var theSeq,
 			     CORBA::Long theId)
   {
-    const SMESH::double_array& aCoords = theSeq[theId].coords;
     const SMESH::long_array& anIndexes = theSeq[theId].indexes;
     CORBA::Long anElemId = 0, aNbElems = theSeq[theId].number;
     if(5*aNbElems != anIndexes.length())
@@ -177,7 +175,6 @@ namespace{
 			      SMESH::log_array_var& theSeq,
 			      CORBA::Long theId)
   {
-    const SMESH::double_array& aCoords = theSeq[theId].coords;
     const SMESH::long_array& anIndexes = theSeq[theId].indexes;
     CORBA::Long anElemId = 0, aNbElems = theSeq[theId].number;
     if(5*aNbElems != anIndexes.length())
@@ -198,7 +195,6 @@ namespace{
 				SMESH::log_array_var& theSeq,
 				CORBA::Long theId)
   {
-    const SMESH::double_array& aCoords = theSeq[theId].coords;
     const SMESH::long_array& anIndexes = theSeq[theId].indexes;
     CORBA::Long anElemId = 0, aNbElems = theSeq[theId].number;
     if(6*aNbElems != anIndexes.length())
@@ -220,7 +216,6 @@ namespace{
 			      SMESH::log_array_var& theSeq,
 			      CORBA::Long theId)
   {
-    const SMESH::double_array& aCoords = theSeq[theId].coords;
     const SMESH::long_array& anIndexes = theSeq[theId].indexes;
     CORBA::Long anElemId = 0, aNbElems = theSeq[theId].number;
     if(7*aNbElems != anIndexes.length())
@@ -243,7 +238,6 @@ namespace{
 			     SMESH::log_array_var& theSeq,
 			     CORBA::Long theId)
   {
-    const SMESH::double_array& aCoords = theSeq[theId].coords;
     const SMESH::long_array& anIndexes = theSeq[theId].indexes;
     CORBA::Long anElemId = 0, aNbElems = theSeq[theId].number;
     if(9*aNbElems != anIndexes.length())
@@ -406,7 +400,6 @@ void SMESH_VisualObj::buildNodePrs()
 {
   vtkPoints* aPoints = vtkPoints::New();
   createPoints( aPoints );
-  int nbPoints = aPoints->GetNumberOfPoints();
   myGrid->SetPoints( aPoints );
   aPoints->Delete();
 
@@ -414,6 +407,7 @@ void SMESH_VisualObj::buildNodePrs()
 
   // Create cells
   /*
+  int nbPoints = aPoints->GetNumberOfPoints();
   vtkIdList *anIdList = vtkIdList::New();
   anIdList->SetNumberOfIds( 1 );
 
@@ -650,7 +644,6 @@ void SMESH_MeshObj::Update( int theIsClear )
       const SMESH::double_array& aCoords = aSeq[anId].coords;
       const SMESH::long_array& anIndexes = aSeq[anId].indexes;
       CORBA::Long anElemId = 0, aNbElems = aSeq[anId].number;
-      SMDS_MeshElement* anElem = NULL;
       CORBA::Long aCommand = aSeq[anId].commandType;
       
       switch(aCommand)

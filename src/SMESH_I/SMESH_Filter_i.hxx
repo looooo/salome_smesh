@@ -35,7 +35,7 @@
 #include <TopoDS_Shape.hxx>
 
 #include "SALOME_GenericObj_i.hh"
-#include "SMESH_Controls.hxx"
+#include "SMESH_ControlsDef.hxx"
 
 class SMESHDS_Mesh;
 
@@ -137,6 +137,19 @@ class AspectRatio_i: public virtual POA_SMESH::AspectRatio,
 {
 public:
                                   AspectRatio_i();
+  FunctorType                     GetFunctorType();
+};
+
+
+/*
+  Class       : AspectRatio3D_i
+  Description : Functor for calculating aspect ratio for 3D
+*/
+class AspectRatio3D_i: public virtual POA_SMESH::AspectRatio3D,
+		       public virtual NumericalFunctor_i
+{
+public:
+                                  AspectRatio3D_i();
   FunctorType                     GetFunctorType();
 };
 
@@ -583,6 +596,7 @@ public:
                             FilterManager_i();
   MinimumAngle_ptr          CreateMinimumAngle();
   AspectRatio_ptr           CreateAspectRatio();
+  AspectRatio3D_ptr         CreateAspectRatio3D();
   Warping_ptr               CreateWarping();
   Taper_ptr                 CreateTaper();
   Skew_ptr                  CreateSkew();

@@ -29,13 +29,12 @@
 
 #include "SMESH_DeviceActor.h"
 #include "SMESH_ExtractGeometry.h"
+#include "SMESH_ControlsDef.hxx"
 
 #include "SALOME_Transform.h"
 #include "SALOME_TransformFilter.h"
 #include "SALOME_PassThroughFilter.h"
 #include "SALOME_ExtractUnstructuredGrid.h"
-
-#include "utilities.h"
 
 // VTK Includes
 #include <vtkObjectFactory.h>
@@ -61,12 +60,12 @@
 
 #include <vtkImplicitBoolean.h>
 
+#include "utilities.h"
+
 #ifdef _DEBUG_
 static int MYDEBUG = 0;
-static int MYDEBUGWITHFILES = 0;
 #else
 static int MYDEBUG = 0;
-static int MYDEBUGWITHFILES = 0;
 #endif
 
 using namespace std;
@@ -304,7 +303,7 @@ void SMESH_DeviceActor::SetExtControlMode(SMESH::Controls::FunctorPtr theFunctor
     anIdList->SetNumberOfIds(2);
     
     FreeEdges::TBorders::const_iterator anIter = aBorders.begin();
-    for(vtkIdType aVtkId; anIter != aBorders.end(); anIter++){
+    for(; anIter != aBorders.end(); anIter++){
       const FreeEdges::Border& aBorder = *anIter;
       int aNode[2] = {
 	myVisualObj->GetNodeVTKId(aBorder.myPntId[0]),

@@ -146,7 +146,8 @@ class SMESH_Actor : public SALOME_Actor{
   bool GetCellsLabeled(){ return myIsCellsLabeled;}
 
   enum eControl{eNone, eLengthEdges, eFreeBorders, eFreeEdges, eMultiConnection, 
-		eArea, eTaper, eAspectRatio, eMinimumAngle, eWarping, eSkew};
+		eArea, eTaper, eAspectRatio, eMinimumAngle, eWarping, eSkew,
+		eAspectRatio3D};
   void SetControlMode(eControl theMode);
   eControl GetControlMode(){ return myColorMode;}
 

@@ -30,10 +30,10 @@
 #include "SMESH_Actor.h"
 #include "SMESH_ActorUtils.h"
 #include "SMESH_DeviceActor.h"
+#include "SMESH_ControlsDef.hxx"
 #include "SALOME_ExtractUnstructuredGrid.h"
 
 #include "QAD_Config.h"
-#include "utilities.h"
 #include <qstringlist.h>
 
 #include <vtkTimeStamp.h>
@@ -69,12 +69,12 @@
 #include <vtkPlane.h>
 #include <vtkImplicitBoolean.h>
 
+#include "utilities.h"
+
 #ifdef _DEBUG_
 static int MYDEBUG = 0;
-static int MYDEBUGWITHFILES = 0;
 #else
 static int MYDEBUG = 0;
-static int MYDEBUGWITHFILES = 0;
 #endif
 
 static int aLineWidthInc = 2;
@@ -676,6 +676,14 @@ void SMESH_Actor::SetControlMode(eControl theMode){
       aControl->SetPrecision( myControlsPrecision );
       aFunctor.reset( aControl );
       myControlActor = my2DActor;
+      break;
+    }
+    case eAspectRatio3D:
+    {
+      SMESH::Controls::AspectRatio3D* aControl = new SMESH::Controls::AspectRatio3D();
+      aControl->SetPrecision( myControlsPrecision );
+      aFunctor.reset( aControl );
+      myControlActor = my3DActor;
       break;
     }
     case eMinimumAngle:

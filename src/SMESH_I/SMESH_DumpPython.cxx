@@ -226,6 +226,7 @@ Engines::TMPFile* SMESH_Gen_i::DumpPython (CORBA::Object_ptr theStudy,
 
   // Map study entries to object names
   Resource_DataMapOfAsciiStringAsciiString aMap;
+  Resource_DataMapOfAsciiStringAsciiString aMapNames;
   TCollection_AsciiString s ("qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM0987654321_");
 
   SALOMEDS::ChildIterator_var Itr = aStudy->NewChildIterator(aSO);
@@ -233,7 +234,9 @@ Engines::TMPFile* SMESH_Gen_i::DumpPython (CORBA::Object_ptr theStudy,
     SALOMEDS::SObject_var aValue = Itr->Value();
 
     TCollection_AsciiString aName (aValue->GetName());
+    TCollection_AsciiString aGUIName (aName);
     if (aName.Length() > 0) {
+      aMapNames.Bind(TCollection_AsciiString(aValue->GetID()), aGUIName);
       int p, p2 = 1, e = aName.Length();
       while ((p = aName.FirstLocationNotInSet(s, p2, e))) {
         aName.SetValue(p, '_');
@@ -254,9 +257,8 @@ Engines::TMPFile* SMESH_Gen_i::DumpPython (CORBA::Object_ptr theStudy,
 
   // Add trace of API methods calls and replace study entries by names
   bool aValidScript;
-  //TCollection_AsciiString aScript = myGen.DumpPython
   TCollection_AsciiString aScript = DumpPython_impl
-    (aStudy->StudyId(), aMap, isPublished, aValidScript, aSavedTrace);
+    (aStudy->StudyId(), aMap, aMapNames, isPublished, aValidScript, aSavedTrace);
 
   int aLen = aScript.Length(); 
   unsigned char* aBuffer = new unsigned char[aLen+1];
@@ -417,6 +419,7 @@ Handle(TColStd_HSequenceOfInteger) FindEntries (TCollection_AsciiString& theStri
 TCollection_AsciiString SMESH_Gen_i::DumpPython_impl
                         (int theStudyID, 
                          Resource_DataMapOfAsciiStringAsciiString& theObjectNames,
+                         Resource_DataMapOfAsciiStringAsciiString& theNames,
                          bool isPublished, 
                          bool& aValidScript,
                          const TCollection_AsciiString& theSavedTrace)
@@ -430,8 +433,9 @@ TCollection_AsciiString SMESH_Gen_i::DumpPython_impl
   aScript += "import string\n";
   aScript += "import os\n";
   aScript += "import sys\n";
+  aScript += "import re\n";
   aScript += "sys.path.append( os.path.dirname(__file__) )\n";
-  aScript += "exec(\"from \"+string.replace(__name__,\"SMESH\",\"GEOM\")+\" import *\")\n\n";
+  aScript += "exec(\"from \"+re.sub(\"SMESH$\",\"GEOM\",__name__)+\" import *\")\n\n";
   
   aScript += "def RebuildData(theStudy):";
   aScript += "\n\tsmesh = salome.lcc.FindOrLoadComponent(\"FactoryServer\", \"SMESH\")";
@@ -516,26 +520,29 @@ TCollection_AsciiString SMESH_Gen_i::DumpPython_impl
     anUpdatedScript += seqRemoved.Value(ir);
     anUpdatedScript += "))\n\tif SO is not None: aStudyBuilder.RemoveObjectWithChildren(SO)";
   }
-  anUpdatedScript += "\n";
 
   // Set object names
-  anUpdatedScript += "\n\tisGUIMode = ";
+  anUpdatedScript += "\n\n\tisGUIMode = ";
   anUpdatedScript += isPublished;
   anUpdatedScript += "\n\tif isGUIMode:";
   anUpdatedScript += "\n\t\tsmeshgui = salome.ImportComponentGUI(\"SMESH\")";
   anUpdatedScript += "\n\t\tsmeshgui.Init(theStudy._get_StudyId())";
   anUpdatedScript += "\n";
 
+  TCollection_AsciiString aGUIName;
   Resource_DataMapOfAsciiStringAsciiString mapEntries;
   for (Standard_Integer i = 1; i <= aLen; i += 2) {
     anEntry = aScript.SubString(aSeq->Value(i), aSeq->Value(i + 1));
-    if (theObjectNames.IsBound(anEntry) &&
-        !mapEntries.IsBound(anEntry) &&
-        !mapRemoved.IsBound(anEntry)) {
+    aName = geom->GetDumpName( anEntry.ToCString() );
+    if (aName.IsEmpty() && // Not a GEOM object
+        theNames.IsBound(anEntry) &&
+        !mapEntries.IsBound(anEntry) && // Not yet processed
+        !mapRemoved.IsBound(anEntry)) { // Was not removed
       aName = theObjectNames.Find(anEntry);
+      aGUIName = theNames.Find(anEntry);
       mapEntries.Bind(anEntry, aName);
       anUpdatedScript += "\n\t\tsmeshgui.SetName(salome.ObjectToID(";
-      anUpdatedScript += aName + "), \"" + aName + "\")";
+      anUpdatedScript += aName + "), \"" + aGUIName + "\")";
     }
   }
   anUpdatedScript += "\n\n\t\tsalome.sg.updateObjBrowser(0)";

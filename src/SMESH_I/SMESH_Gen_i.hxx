@@ -296,6 +296,7 @@ public:
 
   TCollection_AsciiString DumpPython_impl (int theStudyID, 
                                            Resource_DataMapOfAsciiStringAsciiString& theObjectNames,
+                                           Resource_DataMapOfAsciiStringAsciiString& theNames,
                                            bool isPublished, 
                                            bool& aValidScript,
                                            const TCollection_AsciiString& theSavedTrace);

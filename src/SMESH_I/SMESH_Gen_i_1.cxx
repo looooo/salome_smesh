@@ -773,7 +773,19 @@ bool SMESH_Gen_i::AddHypothesisToShape(SALOMEDS::Study_ptr         theStudy,
   SALOMEDS::SObject_var aMeshOrSubMesh =
     GetMeshOrSubmeshByShape( theStudy, theMesh, theShape );
   if ( aMeshOrSubMesh->_is_nil() )
-    return false;
+  {
+    // publish submesh
+    TopoDS_Shape aShape = GeomObjectToShape( theShape );
+    SMESH_Mesh_i* mesh_i = objectToServant<SMESH_Mesh_i>( theMesh );
+    if ( !aShape.IsNull() && mesh_i && mesh_i->GetImpl().GetMeshDS() ) {
+      SMESHDS_Mesh* meshDS = mesh_i->GetImpl().GetMeshDS();
+      int shapeID = meshDS->ShapeToIndex( aShape );
+      SMESH::SMESH_subMesh_var aSubMesh = mesh_i->getSubMesh(shapeID);
+      aMeshOrSubMesh = PublishSubMesh( theStudy, theMesh, aSubMesh, theShape );
+    }
+    if ( aMeshOrSubMesh->_is_nil() )
+      return false;
+  }
 
   //Find or Create Applied Hypothesis root
   bool aIsAlgo = !SMESH::SMESH_Algo::_narrow( theHyp )->_is_nil();

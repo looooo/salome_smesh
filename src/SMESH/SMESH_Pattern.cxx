@@ -2495,7 +2495,7 @@ bool SMESH_Pattern::Apply (const SMDS_MeshFace* theFace,
       nodes.reverse();
     }
     else if ( n != nodes.begin() )
-      nodes.splice( nodes.end(), nodes, nodes.begin(), --n );
+      nodes.splice( nodes.end(), nodes, nodes.begin(), n );
   }
   list< gp_XYZ > xyzList;
   myOrderedNodes.resize( theFace->NbNodes() );
@@ -2708,9 +2708,13 @@ bool SMESH_Pattern::Apply (std::set<const SMDS_MeshFace*> theFaces,
     return setErrorCode( ERR_APPL_BAD_NB_VERTICES );
   }
 
+  myXYZ.clear();
+  myElemXYZIDs.clear();
+  myXYZIdToNodeMap.clear();
+  myElements.clear();
+
   myXYZ.resize( myPoints.size() * theFaces.size(), undefinedXYZ() );
   myElements.reserve( theFaces.size() );
-  myElemXYZIDs.clear();
 
   // to find point index
   map< TPoint*, int > pointIndex;
@@ -2807,9 +2811,13 @@ bool SMESH_Pattern::Apply (std::set<const SMDS_MeshVolume*> theVolumes,
     return setErrorCode( ERR_APPL_BAD_NB_VERTICES );
   }
 
+  myXYZ.clear();
+  myElemXYZIDs.clear();
+  myXYZIdToNodeMap.clear();
+  myElements.clear();
+
   myXYZ.resize( myPoints.size() * theVolumes.size(), undefinedXYZ() );
   myElements.reserve( theVolumes.size() );
-  myElemXYZIDs.clear();
 
   // to find point index
   map< TPoint*, int > pointIndex;

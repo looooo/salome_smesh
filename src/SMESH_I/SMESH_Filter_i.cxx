@@ -408,7 +408,8 @@ static TopoDS_Shape getShapeByName( const char* theName )
 Functor_i::Functor_i(): 
   SALOME::GenericObj_i( SMESH_Gen_i::GetPOA() )
 {
-  SMESH_Gen_i::GetPOA()->activate_object( this );
+  PortableServer::ObjectId_var anObjectId = 
+    SMESH_Gen_i::GetPOA()->activate_object( this );
 }
 
 Functor_i::~Functor_i()
@@ -1289,7 +1290,8 @@ FunctorType LogicalOR_i::GetFunctorType()
 FilterManager_i::FilterManager_i()
 : SALOME::GenericObj_i( SMESH_Gen_i::GetPOA() )
 {
-  SMESH_Gen_i::GetPOA()->activate_object( this );
+  PortableServer::ObjectId_var anObjectId = 
+    SMESH_Gen_i::GetPOA()->activate_object( this );
 }
 
 

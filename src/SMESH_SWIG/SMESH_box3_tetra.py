@@ -3,7 +3,7 @@
 # one has a race in common with the two others.
 # Hypothesis and algorithms for the mesh generation are global
 #
->
+
 import salome
 from salome import sg
 

@@ -2499,11 +2499,11 @@ bool SMESHGUI::CustomPopup(QAD_Desktop* parent, QPopupMenu* popup, const QString
 	      TVisualObjPtr aVisualObj = anActor->GetObject();
 	      if(aNbEdges == 0){
 		mi->popup()->removeItem( 6001 );
-		mi->popup()->removeItem( 6018 );
 		mi->popup()->removeItem( 6003 );
 		mi->popup()->removeItem( 6004 );
 	      }
 	      if(aNbFaces == 0){
+		mi->popup()->removeItem( 6018 );
 		mi->popup()->removeItem( 6002 );
 		mi->popup()->removeItem( 6011 );
 		mi->popup()->removeItem( 6012 );

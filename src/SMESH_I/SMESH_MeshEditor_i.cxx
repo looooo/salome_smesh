@@ -43,7 +43,79 @@
 #include <gp_Ax2.hxx>
 #include <gp_Vec.hxx>
 
+#include <sstream>
+
 using namespace std;
+
+//=======================================================================
+//function : addArray
+//purpose  : put array contents into theStr like this: "[ 1, 2, 5 ]"
+//=======================================================================
+
+template <class _array>
+  TCollection_AsciiString& addArray(TCollection_AsciiString& theStr,
+                                    const _array &           IDs)
+{
+  ostringstream sout; // can convert long int, and TCollection_AsciiString cant
+  sout << "[ ";
+  for (int i = 1; i <= IDs.length(); i++) {
+    sout << IDs[i-1];
+    if ( i < IDs.length() )
+      sout << ", ";
+  }
+  sout << " ]";
+  theStr += (char*) sout.str().c_str();
+  return theStr;
+}
+
+//=======================================================================
+//function : addObject
+//purpose  : add object to script string
+//=======================================================================
+
+static TCollection_AsciiString& addObject(TCollection_AsciiString& theStr,
+                                          CORBA::Object_ptr        theObject)
+{
+  SMESH_Gen_i* aSMESHGen = SMESH_Gen_i::GetSMESHGen();
+  SALOMEDS::SObject_var aSO =
+    aSMESHGen->ObjectToSObject(aSMESHGen->GetCurrentStudy(), theObject);
+  if ( !aSO->_is_nil() )
+    theStr += aSO->GetID();
+  else if ( !CORBA::is_nil( theObject ) )
+    theStr += aSMESHGen->GetORB()->object_to_string( theObject );
+  else
+    theStr += "None";
+  return theStr;
+}
+
+//=======================================================================
+//function : addAxis
+//purpose  : 
+//=======================================================================
+
+static TCollection_AsciiString& addAxis(TCollection_AsciiString&  theStr,
+                                        const SMESH::AxisStruct & theAxis)
+{
+  theStr += "SMESH.AxisStruct( ";
+  theStr += TCollection_AsciiString( theAxis.x  ) + ", ";
+  theStr += TCollection_AsciiString( theAxis.y  ) + ", ";
+  theStr += TCollection_AsciiString( theAxis.z  ) + ", ";
+  theStr += TCollection_AsciiString( theAxis.vx ) + ", ";
+  theStr += TCollection_AsciiString( theAxis.vy ) + ", ";
+  theStr += TCollection_AsciiString( theAxis.vz ) + " )";
+  return theStr;
+}
+
+//=======================================================================
+//function : addToPythonScript
+//purpose  : add theStr to python script of the current study
+//=======================================================================
+
+static inline void addToPythonScript(const TCollection_AsciiString& theStr)
+{
+  SMESH_Gen_i* aSMESHGen = SMESH_Gen_i::GetSMESHGen();
+  aSMESHGen->AddToPythonScript(aSMESHGen->GetCurrentStudy()->StudyId(), theStr);
+}
 
 //=============================================================================
 /*!
@@ -62,32 +134,22 @@ SMESH_MeshEditor_i::SMESH_MeshEditor_i(SMESH_Mesh* theMesh)
  */
 //=============================================================================
 
-CORBA::Boolean SMESH_MeshEditor_i::RemoveElements(const SMESH::
-	long_array & IDsOfElements)
+CORBA::Boolean
+  SMESH_MeshEditor_i::RemoveElements(const SMESH::long_array & IDsOfElements)
 {
   ::SMESH_MeshEditor anEditor( _myMesh );
   list< int > IdList;
 
-  // Update Python script
-  TCollection_AsciiString aStr ("isDone = mesh_editor.RemoveElements([");
-
-  for (int i = 0; i < IDsOfElements.length(); i++) {
-    // convert long_array into list< int >
+  for (int i = 0; i < IDsOfElements.length(); i++)
     IdList.push_back( IDsOfElements[i] );
 
-    if (i > 0) aStr += ", ";
-    aStr += TCollection_AsciiString((int)IDsOfElements[i]);
-  }
-
-  aStr += "])";
-
-  SMESH_Gen_i* aSMESHGen = SMESH_Gen_i::GetSMESHGen();
-  aSMESHGen->AddToPythonScript(aSMESHGen->GetCurrentStudy()->StudyId(), aStr);
-
-  aStr = "print \"RemoveElements: \", isDone";
-
-  aSMESHGen->AddToPythonScript(aSMESHGen->GetCurrentStudy()->StudyId(), aStr);
-
+  // Update Python script
+  TCollection_AsciiString str ("isDone = mesh_editor.RemoveElements(");
+  addArray( str, IDsOfElements ) += ")";
+  addToPythonScript( str );
+#ifdef _DEBUG_
+  addToPythonScript( "print \"RemoveElements: \", isDone" );
+#endif
   // Remove Elements
   return anEditor.Remove( IdList, false );
 };
@@ -106,6 +168,14 @@ CORBA::Boolean SMESH_MeshEditor_i::RemoveNodes(const SMESH::
   for (int i = 0; i < IDsOfNodes.length(); i++)
     IdList.push_back( IDsOfNodes[i] );
 
+  // Update Python script
+  TCollection_AsciiString str ("isDone = mesh_editor.RemoveNodes(");
+  addArray( str, IDsOfNodes ) += ")";
+  addToPythonScript( str );
+#ifdef _DEBUG_
+  addToPythonScript( "print \"RemoveNodes: \", isDone" );
+#endif
+
   return anEditor.Remove( IdList, true );
 };
 
@@ -117,14 +187,20 @@ CORBA::Boolean SMESH_MeshEditor_i::RemoveNodes(const SMESH::
 
 CORBA::Boolean SMESH_MeshEditor_i::AddEdge(const SMESH::long_array & IDsOfNodes)
 {
-	int NbNodes = IDsOfNodes.length();
-	if (NbNodes == 2)
-	{
-		CORBA::Long index1 = IDsOfNodes[0];
-		CORBA::Long index2 = IDsOfNodes[1];
-		GetMeshDS()->AddEdge(GetMeshDS()->FindNode(index1), GetMeshDS()->FindNode(index2));
-	}
-	return true;
+  int NbNodes = IDsOfNodes.length();
+  if (NbNodes == 2)
+  {
+    CORBA::Long index1 = IDsOfNodes[0];
+    CORBA::Long index2 = IDsOfNodes[1];
+    GetMeshDS()->AddEdge(GetMeshDS()->FindNode(index1), GetMeshDS()->FindNode(index2));
+
+    // Update Python script
+    TCollection_AsciiString str ("isDone = mesh_editor.AddEdge([");
+    str += TCollection_AsciiString((int) index1) + ", ";
+    str += TCollection_AsciiString((int) index2) + " ])";
+    addToPythonScript( str );
+  }
+  return true;
 }
 
 //=============================================================================
@@ -134,11 +210,18 @@ CORBA::Boolean SMESH_MeshEditor_i::AddEdge(const SMESH::long_array & IDsOfNodes)
 //=============================================================================
 
 CORBA::Boolean SMESH_MeshEditor_i::AddNode(CORBA::Double x,
-	CORBA::Double y, CORBA::Double z)
+                                           CORBA::Double y, CORBA::Double z)
 {
-	MESSAGE(" AddNode " << x << " , " << y << " , " << z)
-		int idNode = GetMeshDS()->AddNode(x, y, z)->GetID();
-	MESSAGE(" idNode " << idNode) return true;
+  GetMeshDS()->AddNode(x, y, z);
+
+  // Update Python script
+  TCollection_AsciiString str ("isDone = mesh_editor.AddNode(");
+  str += TCollection_AsciiString( x ) + ", ";
+  str += TCollection_AsciiString( y ) + ", ";
+  str += TCollection_AsciiString( z ) + " )";
+  addToPythonScript( str );
+
+  return true;
 }
 
 //=============================================================================
@@ -156,7 +239,6 @@ CORBA::Boolean SMESH_MeshEditor_i::AddFace(const SMESH::long_array & IDsOfNodes)
   }
 
   std::vector<const SMDS_MeshNode*> nodes (NbNodes);
-  //const SMDS_MeshNode* nodes [NbNodes];
   for (int i = 0; i < NbNodes; i++)
     nodes[i] = GetMeshDS()->FindNode(IDsOfNodes[i]);
 
@@ -172,6 +254,15 @@ CORBA::Boolean SMESH_MeshEditor_i::AddFace(const SMESH::long_array & IDsOfNodes)
   {
     GetMeshDS()->AddPolygonalFace(nodes);
   }
+
+  // Update Python script
+  TCollection_AsciiString str ("isDone = mesh_editor.AddFace(");
+  addArray( str, IDsOfNodes ) += ")";
+  addToPythonScript( str );
+#ifdef _DEBUG_
+  addToPythonScript( "print \"AddFace: \", isDone" );
+#endif
+
   return true;
 };
 
@@ -182,20 +273,29 @@ CORBA::Boolean SMESH_MeshEditor_i::AddFace(const SMESH::long_array & IDsOfNodes)
 //=============================================================================
 
 CORBA::Boolean SMESH_MeshEditor_i::AddVolume(const SMESH::
-	long_array & IDsOfNodes)
+                                             long_array & IDsOfNodes)
 {
-	int NbNodes = IDsOfNodes.length();
-	const SMDS_MeshNode* n[8];
-	for(int i=0;i<NbNodes;i++) n[i]=GetMeshDS()->FindNode(IDsOfNodes[i]);
+  int NbNodes = IDsOfNodes.length();
+  vector< const SMDS_MeshNode*> n(NbNodes);
+  for(int i=0;i<NbNodes;i++)
+    n[i]=GetMeshDS()->FindNode(IDsOfNodes[i]);
 
-	switch(NbNodes)
-	{
-	case 4:GetMeshDS()->AddVolume(n[0],n[1],n[2],n[3]); break;
-	case 5:GetMeshDS()->AddVolume(n[0],n[1],n[2],n[3],n[4]); break;
-	case 6:GetMeshDS()->AddVolume(n[0],n[1],n[2],n[3],n[4],n[5]); break;
-	case 8:GetMeshDS()->AddVolume(n[0],n[1],n[2],n[3],n[4],n[5],n[6],n[7]); break;
-	}
-	return true;
+  switch(NbNodes)
+  {
+  case 4:GetMeshDS()->AddVolume(n[0],n[1],n[2],n[3]); break;
+  case 5:GetMeshDS()->AddVolume(n[0],n[1],n[2],n[3],n[4]); break;
+  case 6:GetMeshDS()->AddVolume(n[0],n[1],n[2],n[3],n[4],n[5]); break;
+  case 8:GetMeshDS()->AddVolume(n[0],n[1],n[2],n[3],n[4],n[5],n[6],n[7]); break;
+  }
+  // Update Python script
+  TCollection_AsciiString str ("isDone = mesh_editor.AddVolume(");
+  addArray( str, IDsOfNodes ) += ")";
+  addToPythonScript( str );
+#ifdef _DEBUG_
+  addToPythonScript( "print \"AddVolume: \", isDone" );
+#endif
+  
+  return true;
 };
 
 //=============================================================================
@@ -218,6 +318,16 @@ CORBA::Boolean SMESH_MeshEditor_i::AddPolyhedralVolume
     q[j] = Quantities[j];
 
   GetMeshDS()->AddPolyhedralVolume(n, q);
+
+  // Update Python script
+  TCollection_AsciiString str ("isDone = mesh_editor.AddPolyhedralVolume(");
+  addArray( str, IDsOfNodes ) += ", ";
+  addArray( str, Quantities ) += ")";
+  addToPythonScript( str );
+#ifdef _DEBUG_
+  addToPythonScript( "print \"AddPolyhedralVolume: \", isDone" );
+#endif
+
   return true;
 };
 
@@ -233,7 +343,6 @@ CORBA::Boolean SMESH_MeshEditor_i::AddPolyhedralVolumeByFaces
   std::vector<const SMDS_MeshNode*> poly_nodes;
   std::vector<int> quantities (NbFaces);
 
-  std::vector<const SMDS_MeshFace*> faces (NbFaces);
   for (int i = 0; i < NbFaces; i++) {
     const SMDS_MeshElement* aFace = GetMeshDS()->FindElement(IdsOfFaces[i]);
     quantities[i] = aFace->NbNodes();
@@ -245,6 +354,15 @@ CORBA::Boolean SMESH_MeshEditor_i::AddPolyhedralVolumeByFaces
   }
 
   GetMeshDS()->AddPolyhedralVolume(poly_nodes, quantities);
+
+  // Update Python script
+  TCollection_AsciiString str ("isDone = mesh_editor.AddPolyhedralVolumeByFaces(");
+  addArray( str, IdsOfFaces ) += ")";
+  addToPythonScript( str );
+#ifdef _DEBUG_
+  addToPythonScript( "print \"AddPolyhedralVolume: \", isDone" );
+#endif
+
   return true;
 };
 
@@ -265,6 +383,14 @@ CORBA::Boolean SMESH_MeshEditor_i::MoveNode(CORBA::Long   NodeID,
   
   GetMeshDS()->MoveNode(node, x, y, z);
 
+  // Update Python script
+  TCollection_AsciiString str ("isDone = mesh_editor.MoveNode(");
+  str += TCollection_AsciiString((Standard_Integer) NodeID) + ", ";
+  str += TCollection_AsciiString((Standard_Real) x) + ", ";
+  str += TCollection_AsciiString((Standard_Real) y) + ", ";
+  str += TCollection_AsciiString((Standard_Real) z) + " )";
+  addToPythonScript( str );
+
   return true;
 }
 
@@ -281,6 +407,12 @@ CORBA::Boolean SMESH_MeshEditor_i::InverseDiag(CORBA::Long NodeID1,
   const SMDS_MeshNode * n2 = GetMeshDS()->FindNode( NodeID2 );
   if ( !n1 || !n2 )
     return false;
+
+  // Update Python script
+  TCollection_AsciiString str ("isDone = mesh_editor.InverseDiag(");
+  str += TCollection_AsciiString((Standard_Integer) NodeID1) + ", ";
+  str += TCollection_AsciiString((Standard_Integer) NodeID2) + " )";
+  addToPythonScript( str );
 
   ::SMESH_MeshEditor aMeshEditor( _myMesh );
   return aMeshEditor.InverseDiag ( n1, n2 );
@@ -299,6 +431,12 @@ CORBA::Boolean SMESH_MeshEditor_i::DeleteDiag(CORBA::Long NodeID1,
   const SMDS_MeshNode * n2 = GetMeshDS()->FindNode( NodeID2 );
   if ( !n1 || !n2 )
     return false;
+
+  // Update Python script
+  TCollection_AsciiString str ("isDone = mesh_editor.DeleteDiag(");
+  str += TCollection_AsciiString((Standard_Integer) NodeID1) + ", ";
+  str += TCollection_AsciiString((Standard_Integer) NodeID2) + " )";
+  addToPythonScript( str );
 
   ::SMESH_MeshEditor aMeshEditor( _myMesh );
   return aMeshEditor.DeleteDiag ( n1, n2 );
@@ -320,6 +458,14 @@ CORBA::Boolean SMESH_MeshEditor_i::Reorient(const SMESH::long_array & IDsOfEleme
     if ( elem )
       anEditor.Reorient( elem );
   }
+  // Update Python script
+  TCollection_AsciiString str ("isDone = mesh_editor.Reorient(");
+  addArray( str, IDsOfElements ) += ")";
+  addToPythonScript( str );
+#ifdef _DEBUG_
+  addToPythonScript( "print \"Reorient: \", isDone" );
+#endif
+
   return true;
 }
 
@@ -362,6 +508,15 @@ CORBA::Boolean
     aCrit.reset( new SMESH::Controls::AspectRatio() );
   else
     aCrit = aNumericalFunctor->GetNumericalFunctor();
+
+  // Update Python script
+  TCollection_AsciiString str ("isDone = mesh_editor.TriToQuad(");
+  addArray( str, IDsOfElements ) += ", None, ";
+  str += (Standard_Real) MaxAngle;
+  addToPythonScript( str + ")" );
+#ifdef _DEBUG_
+  addToPythonScript( "print \"TriToQuad: \", isDone" );
+#endif
 
   ::SMESH_MeshEditor anEditor( _myMesh );
   return anEditor.TriToQuad( faces, aCrit, MaxAngle );
@@ -408,6 +563,15 @@ CORBA::Boolean
   else
     aCrit = aNumericalFunctor->GetNumericalFunctor();
 
+
+  // Update Python script
+  TCollection_AsciiString str ("isDone = mesh_editor.QuadToTri(");
+  addArray( str, IDsOfElements ) += ", None ), ";
+  addToPythonScript( str );
+#ifdef _DEBUG_
+  addToPythonScript( "print \"QuadToTri: \", isDone" );
+#endif
+
   ::SMESH_MeshEditor anEditor( _myMesh );
   return anEditor.QuadToTri( faces, aCrit );
 }
@@ -430,6 +594,15 @@ CORBA::Boolean
     if ( elem && elem->GetType() == SMDSAbs_Face)
       faces.insert( elem );
   }
+
+  // Update Python script
+  TCollection_AsciiString str ("isDone = mesh_editor.SplitQuad(");
+  addArray( str, IDsOfElements ) += ", ";
+  str += TCollection_AsciiString( Diag13 );
+  addToPythonScript( str + ")" );
+#ifdef _DEBUG_
+  addToPythonScript( "print \"SplitQuad: \", isDone" );
+#endif
 
   ::SMESH_MeshEditor anEditor( _myMesh );
   return anEditor.QuadToTri( faces, Diag13 );
@@ -483,10 +656,27 @@ CORBA::Boolean
   }
   ::SMESH_MeshEditor::SmoothMethod method = ::SMESH_MeshEditor::LAPLACIAN;
   if ( Method != SMESH::SMESH_MeshEditor::LAPLACIAN_SMOOTH )
-     method = ::SMESH_MeshEditor::CENTROIDAL;
+    method = ::SMESH_MeshEditor::CENTROIDAL;
 
   ::SMESH_MeshEditor anEditor( _myMesh );
   anEditor.Smooth( elements, fixedNodes, method, MaxNbOfIterations, MaxAspectRatio );
+
+  // Update Python script
+  TCollection_AsciiString str ("isDone = mesh_editor.Smooth(");
+  addArray( str, IDsOfElements ) += ", ";
+  addArray( str, IDsOfFixedNodes ) += ", ";
+  str += (Standard_Integer) MaxNbOfIterations;
+  str += ", ";
+  str += (Standard_Real) MaxAspectRatio;
+  str += ", ";
+  if ( method == ::SMESH_MeshEditor::CENTROIDAL )
+    str += "SMESH.SMESH_MeshEditor.LAPLACIAN_SMOOTH )";
+  else
+    str += "SMESH.SMESH_MeshEditor.CENTROIDAL_SMOOTH )";
+  addToPythonScript( str );
+#ifdef _DEBUG_
+  addToPythonScript( "print \"SplitQuad: \", isDone" );
+#endif
 
   return true;
 }
@@ -516,6 +706,9 @@ CORBA::Boolean
 
 void SMESH_MeshEditor_i::RenumberNodes()
 {
+  // Update Python script
+  addToPythonScript( "mesh_editor.RenumberNodes()" );
+
   GetMeshDS()->Renumber( true );
 }
 
@@ -527,6 +720,9 @@ void SMESH_MeshEditor_i::RenumberNodes()
 
 void SMESH_MeshEditor_i::RenumberElements()
 {
+  // Update Python script
+  addToPythonScript( "mesh_editor.RenumberElements()" );
+
   GetMeshDS()->Renumber( false );
 }
 
@@ -536,7 +732,7 @@ void SMESH_MeshEditor_i::RenumberElements()
 //=======================================================================
 
 void SMESH_MeshEditor_i::RotationSweep(const SMESH::long_array & theIDsOfElements,
-                                       const SMESH::AxisStruct &  theAxis,
+                                       const SMESH::AxisStruct & theAxis,
                                        CORBA::Double             theAngleInRadians,
                                        CORBA::Long               theNbOfSteps,
                                        CORBA::Double             theTolerance)
@@ -557,6 +753,17 @@ void SMESH_MeshEditor_i::RotationSweep(const SMESH::long_array & theIDsOfElement
   ::SMESH_MeshEditor anEditor( _myMesh );
   anEditor.RotationSweep (elements, Ax1, theAngleInRadians,
                           theNbOfSteps, theTolerance);
+
+  // Update Python script
+  TCollection_AsciiString str = "axis = ";
+  addAxis( str, theAxis );
+  addToPythonScript( str );
+  str = ("mesh_editor.RotationSweep(");
+  addArray( str, theIDsOfElements ) += ", axis, ";
+  str += TCollection_AsciiString( theAngleInRadians ) + ", ";
+  str += TCollection_AsciiString( (int)theNbOfSteps ) + ", ";
+  str += TCollection_AsciiString( theTolerance      ) + " )";
+  addToPythonScript( str );
 }
 
 //=======================================================================
@@ -580,7 +787,7 @@ void SMESH_MeshEditor_i::RotationSweepObject(SMESH::SMESH_IDSource_ptr theObject
 //=======================================================================
 
 void SMESH_MeshEditor_i::ExtrusionSweep(const SMESH::long_array & theIDsOfElements,
-                                        const SMESH::DirStruct &   theStepVector,
+                                        const SMESH::DirStruct &  theStepVector,
                                         CORBA::Long               theNbOfSteps)
 {
   SMESHDS_Mesh* aMesh = GetMeshDS();
@@ -598,6 +805,17 @@ void SMESH_MeshEditor_i::ExtrusionSweep(const SMESH::long_array & theIDsOfElemen
 
   ::SMESH_MeshEditor anEditor( _myMesh );
   anEditor.ExtrusionSweep (elements, stepVec, theNbOfSteps);
+
+  // Update Python script
+  TCollection_AsciiString str = "stepVector = SMESH.DirStruct( SMESH.PointStruct ( ";
+  str += (TCollection_AsciiString) stepVec.X() + ", ";
+  str += (TCollection_AsciiString) stepVec.Y() + ", ";
+  str += (TCollection_AsciiString) stepVec.Z() + " ))";
+  addToPythonScript( str );
+  str = ("mesh_editor.ExtrusionSweep(");
+  addArray( str, theIDsOfElements ) += ", stepVector, ";
+  str += TCollection_AsciiString((int)theNbOfSteps) + " )";
+  addToPythonScript( str );
 }
 
 
@@ -678,6 +896,22 @@ SMESH::SMESH_MeshEditor::Extrusion_Error
 
   gp_Pnt refPnt( theRefPoint.x, theRefPoint.y, theRefPoint.z );
 
+  // Update Python script
+  TCollection_AsciiString str = "refPoint = SMESH.PointStruct( ";
+  str += (TCollection_AsciiString) refPnt.X() + ", ";
+  str += (TCollection_AsciiString) refPnt.Y() + ", ";
+  str += (TCollection_AsciiString) refPnt.Z() + " )";
+  addToPythonScript( str );
+  str = ("error = mesh_editor.ExtrusionAlongPath(");
+  addArray ( str, theIDsOfElements ) += ", ";
+  addObject( str, thePathMesh ) += ", salome.IDToObject(\"";
+  addObject( str, thePathShape ) += "\"), ";
+  str += TCollection_AsciiString( (int)theNodeStart ) + ", ";
+  str += TCollection_AsciiString( (int)theHasAngles ) + ", ";
+  addArray ( str, theAngles ) += ", ";
+  str += (TCollection_AsciiString) theHasRefPoint + ", refPoint )";
+  addToPythonScript( str );
+
   ::SMESH_MeshEditor anEditor( _myMesh );
   return convExtrError( anEditor.ExtrusionAlongTrack( elements, aSubMesh, nodeStart, theHasAngles, angles, theHasRefPoint, refPnt ) );
 }
@@ -707,7 +941,7 @@ SMESH::SMESH_MeshEditor::Extrusion_Error
 //=======================================================================
 
 void SMESH_MeshEditor_i::Mirror(const SMESH::long_array &           theIDsOfElements,
-                                const SMESH::AxisStruct &            theAxis,
+                                const SMESH::AxisStruct &           theAxis,
                                 SMESH::SMESH_MeshEditor::MirrorType theMirrorType,
                                 CORBA::Boolean                      theCopy)
 {
@@ -725,16 +959,28 @@ void SMESH_MeshEditor_i::Mirror(const SMESH::long_array &           theIDsOfElem
   gp_Vec V ( theAxis.vx, theAxis.vy, theAxis.vz );
 
   gp_Trsf aTrsf;
+  TCollection_AsciiString typeStr, copyStr( theCopy );
   switch ( theMirrorType ) {
   case  SMESH::SMESH_MeshEditor::POINT:
     aTrsf.SetMirror( P );
+    typeStr = "SMESH.SMESH_MeshEditor.POINT";
     break;
   case  SMESH::SMESH_MeshEditor::AXIS:
     aTrsf.SetMirror( gp_Ax1( P, V ));
+    typeStr = "SMESH.SMESH_MeshEditor.AXIS";
     break;
   default:
     aTrsf.SetMirror( gp_Ax2( P, V ));
+    typeStr = "SMESH.SMESH_MeshEditor.PLANE";
   }
+
+  // Update Python script
+  TCollection_AsciiString str ("mesh_editor.Mirror(");
+  addArray( str, theIDsOfElements ) += ", ";
+  addAxis( str, theAxis )           += ", ";
+  str += typeStr                     + ", ";
+  str += copyStr                     + " )";
+  addToPythonScript( str );
 
   ::SMESH_MeshEditor anEditor( _myMesh );
   anEditor.Transform (elements, aTrsf, theCopy);
@@ -760,7 +1006,7 @@ void SMESH_MeshEditor_i::MirrorObject(SMESH::SMESH_IDSource_ptr           theObj
 //=======================================================================
 
 void SMESH_MeshEditor_i::Translate(const SMESH::long_array & theIDsOfElements,
-                                   const SMESH::DirStruct &   theVector,
+                                   const SMESH::DirStruct &  theVector,
                                    CORBA::Boolean            theCopy)
 {
   SMESHDS_Mesh* aMesh = GetMeshDS();
@@ -779,6 +1025,17 @@ void SMESH_MeshEditor_i::Translate(const SMESH::long_array & theIDsOfElements,
 
   ::SMESH_MeshEditor anEditor( _myMesh );
   anEditor.Transform (elements, aTrsf, theCopy);
+
+  // Update Python script
+  TCollection_AsciiString str = "vector = SMESH.DirStruct( SMESH.PointStruct ( ";
+  str += (TCollection_AsciiString) P->x + ", ";
+  str += (TCollection_AsciiString) P->y + ", ";
+  str += (TCollection_AsciiString) P->z + " ))";
+  addToPythonScript( str );
+  str = ("mesh_editor.Translate(");
+  addArray( str, theIDsOfElements ) += ", vector, ";
+  str += (TCollection_AsciiString) theCopy + " )";
+  addToPythonScript( str );
 }
 
 //=======================================================================
@@ -800,7 +1057,7 @@ void SMESH_MeshEditor_i::TranslateObject(SMESH::SMESH_IDSource_ptr theObject,
 //=======================================================================
 
 void SMESH_MeshEditor_i::Rotate(const SMESH::long_array & theIDsOfElements,
-                                const SMESH::AxisStruct &  theAxis,
+                                const SMESH::AxisStruct & theAxis,
                                 CORBA::Double             theAngle,
                                 CORBA::Boolean            theCopy)
 {
@@ -820,9 +1077,18 @@ void SMESH_MeshEditor_i::Rotate(const SMESH::long_array & theIDsOfElements,
   gp_Trsf aTrsf;
   aTrsf.SetRotation( gp_Ax1( P, V ), theAngle);
   
-
   ::SMESH_MeshEditor anEditor( _myMesh );
   anEditor.Transform (elements, aTrsf, theCopy);
+
+  // Update Python script
+  TCollection_AsciiString str ("axis = ");
+  addAxis( str, theAxis );
+  addToPythonScript( str );
+  str = ("mesh_editor.Rotate(");
+  addArray( str, theIDsOfElements ) += ", axis, ";
+  str += (TCollection_AsciiString) theAngle + ", ";
+  str += (TCollection_AsciiString) theCopy + " )";
+  addToPythonScript( str );
 }
 
 //=======================================================================
@@ -875,8 +1141,8 @@ void SMESH_MeshEditor_i::MergeNodes (const SMESH::array_of_long_array& GroupsOfN
 {
   SMESHDS_Mesh* aMesh = GetMeshDS();
 
+  TCollection_AsciiString str( "mesh_editor.MergeNodes([" );
   ::SMESH_MeshEditor::TListOfListOfNodes aListOfListOfNodes;
-  list<const SMDS_MeshElement*> elements;
   for (int i = 0; i < GroupsOfNodes.length(); i++)
   {
     const SMESH::long_array& aNodeGroup = GroupsOfNodes[ i ];
@@ -891,9 +1157,16 @@ void SMESH_MeshEditor_i::MergeNodes (const SMESH::array_of_long_array& GroupsOfN
     }
     if ( aListOfNodes.size() < 2 )
       aListOfListOfNodes.pop_back();
+
+    if ( i > 0 )
+      str += ",";
+    addArray( str, aNodeGroup );
   }
   ::SMESH_MeshEditor anEditor( _myMesh );
   anEditor.MergeNodes( aListOfListOfNodes );
+
+  // Update Python script
+  addToPythonScript( str + "])" );
 }
 
 //=======================================================================
@@ -905,6 +1178,9 @@ void SMESH_MeshEditor_i::MergeEqualElements()
 {
   ::SMESH_MeshEditor anEditor( _myMesh );
   anEditor.MergeEqualElements();
+
+  // Update Python script
+  addToPythonScript( "mesh_editor.MergeEqualElements()" );
 }
 
 //=======================================================================
@@ -964,6 +1240,18 @@ SMESH::SMESH_MeshEditor::Sew_Error
       !aSide2ThirdNode)
     return SMESH::SMESH_MeshEditor::SEW_BORDER2_NOT_FOUND;
 
+  // Update Python script
+  TCollection_AsciiString str ("error = mesh_editor.SewFreeBorders( ");
+  str += TCollection_AsciiString( (int) FirstNodeID1  )  + ", ";
+  str += TCollection_AsciiString( (int) SecondNodeID1 )  + ", ";
+  str += TCollection_AsciiString( (int) LastNodeID1   )  + ", ";
+  str += TCollection_AsciiString( (int) FirstNodeID2  )  + ", ";
+  str += TCollection_AsciiString( (int) SecondNodeID2 )  + ", ";
+  str += TCollection_AsciiString( (int) LastNodeID2   )  + ", ";
+  str += TCollection_AsciiString( CreatePolygons      )  + ", ";
+  str += TCollection_AsciiString( CreatePolyedrs      )  + ") ";
+  addToPythonScript( str );
+
   ::SMESH_MeshEditor anEditor( _myMesh );
   return convError( anEditor.SewFreeBorder (aBorderFirstNode,
                                             aBorderSecondNode,
@@ -1004,6 +1292,15 @@ SMESH::SMESH_MeshEditor::Sew_Error
   if (!aSide2FirstNode  ||
       !aSide2SecondNode)
     return SMESH::SMESH_MeshEditor::SEW_BORDER2_NOT_FOUND;
+
+  // Update Python script
+  TCollection_AsciiString str ("error = mesh_editor.SewConformFreeBorders( ");
+  str += TCollection_AsciiString( (int) FirstNodeID1  )  + ", ";
+  str += TCollection_AsciiString( (int) SecondNodeID1 )  + ", ";
+  str += TCollection_AsciiString( (int) LastNodeID1   )  + ", ";
+  str += TCollection_AsciiString( (int) FirstNodeID2  )  + ", ";
+  str += TCollection_AsciiString( (int) SecondNodeID2 )  + ")";
+  addToPythonScript( str );
 
   ::SMESH_MeshEditor anEditor( _myMesh );
   return convError( anEditor.SewFreeBorder (aBorderFirstNode,
@@ -1046,6 +1343,17 @@ SMESH::SMESH_MeshEditor::Sew_Error
   if (!aSide2FirstNode  ||
       !aSide2SecondNode)
     return SMESH::SMESH_MeshEditor::SEW_BAD_SIDE_NODES;
+
+  // Update Python script
+  TCollection_AsciiString str ("error = mesh_editor.SewBorderToSide( ");
+  str += TCollection_AsciiString( (int) FirstNodeIDOnFreeBorder  ) + ", ";
+  str += TCollection_AsciiString( (int) SecondNodeIDOnFreeBorder ) + ", ";
+  str += TCollection_AsciiString( (int) LastNodeIDOnFreeBorder   ) + ", ";
+  str += TCollection_AsciiString( (int) FirstNodeIDOnSide        ) + ", ";
+  str += TCollection_AsciiString( (int) LastNodeIDOnSide         ) + ", ";
+  str += TCollection_AsciiString( CreatePolygons                 ) + ", ";
+  str += TCollection_AsciiString( CreatePolyedrs                 ) + ") ";
+  addToPythonScript( str );
 
   ::SMESH_MeshEditor anEditor( _myMesh );
   return convError( anEditor.SewFreeBorder (aBorderFirstNode,
@@ -1101,6 +1409,16 @@ SMESH::SMESH_MeshEditor::Sew_Error
     if ( elem )
       aSide2Elems.insert( elem );
   }
+  // Update Python script
+  TCollection_AsciiString str ("error = mesh_editor.SewSideElements( ");
+  addArray( str, IDsOfSide1Elements ) += ", ";
+  addArray( str, IDsOfSide2Elements ) += ", ";
+  str += TCollection_AsciiString( (int) NodeID1OfSide1ToMerge ) + ", ";
+  str += TCollection_AsciiString( (int) NodeID1OfSide2ToMerge ) + ", ";
+  str += TCollection_AsciiString( (int) NodeID2OfSide1ToMerge ) + ", ";
+  str += TCollection_AsciiString( (int) NodeID2OfSide2ToMerge ) + ")";
+  addToPythonScript( str );
+
   ::SMESH_MeshEditor anEditor( _myMesh );
   return convError( anEditor.SewSideElements (aSide1Elems, aSide2Elems,
                                               aFirstNode1ToMerge,

@@ -138,7 +138,7 @@ public:
   map<int, ::SMESH_subMesh*> _mapSubMesh;   //NRI
 
 private:
-
+  SMESH::log_array_var createUpdateAllCommand(SMESH::log_array_var log, int * index);
   ::SMESH_Mesh* _impl;  // :: force no namespace here
   SMESH_Gen_i* _gen_i;
   //   CORBA::ORB_ptr _orb;

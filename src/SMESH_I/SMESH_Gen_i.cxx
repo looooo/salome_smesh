@@ -1521,6 +1521,7 @@ void SMESH_Gen_i::loadMesh(char * name, HDFfile * hdf_file,
 			myReader->SetMeshId(myMeshId);
 			myReader->SetFile(datafilename);
 			myReader->Read();
+			mySMESHDSMesh->logFullUpdate();
 			MESSAGE("Loaded a mesh with " << mySMESHDSMesh->NbNodes() <<" nodes");
 		}
 	}

@@ -127,7 +127,8 @@ throw(SALOME_Exception)
 
 //=============================================================================
 /*!
- * 
+ * @TODO Doing a full update after computation is not optimal when doing a local
+ * remeshing.
  */
 //=============================================================================
 
@@ -139,7 +140,7 @@ throw(SALOME_Exception)
 /* 
 Algo : s'appuie ou non sur une geometrie
 Si geometrie:
-Vertex : rien à faire (range le point)
+Vertex : rien ï¿½faire (range le point)
 Edge, Wire, collection d'edge et wire : 1D
 Face, Shell, collection de Face et Shells : 2D
 Solid, Collection de Solid : 3D
@@ -183,6 +184,8 @@ Solid, Collection de Solid : 3D
 		}
 		smToCompute = sm->GetFirstToCompute();
 	}
+
+	aMesh.GetMeshDS()->logFullUpdate();
 
 	return ret;
 }
@@ -436,6 +439,8 @@ SMESH_Mesh * SMESH_Gen::Import(int studyId, const char * fileName,
 	reader->SetMesh(mesh->GetMeshDS());
 	reader->SetFile(string(fileName));
 	reader->Read();
+	
+	mesh->GetMeshDS()->logFullUpdate();
 	
 	return mesh;
 }

@@ -49,7 +49,8 @@ module SMESH
       ADD_PRISM,
       ADD_HEXAHEDRON,
       REMOVE_NODE,
-      REMOVE_ELEMENT
+      REMOVE_ELEMENT,
+	  REMOVE_ALL
     };
 
   struct log_block

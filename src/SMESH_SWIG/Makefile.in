@@ -82,7 +82,8 @@ EXPORT_PYSCRIPTS = libSMESH_Swig.py \
 		   SMESH_demo_hexa2_upd.py \
 		   SMESH_hexaedre.py \
 		   SMESH_Sphere.py \
-		   SMESH_GroupFromGeom.py
+		   SMESH_GroupFromGeom.py \
+		   SMESH_GroupLyingOnGeom.py
 
 LIB_CLIENT_IDL = SALOMEDS.idl \
 		 SALOME_Exception.idl \

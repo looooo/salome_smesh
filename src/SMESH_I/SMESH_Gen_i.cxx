@@ -515,9 +515,8 @@ SMESH::SMESH_Mesh_ptr SMESH_Gen_i::CreateMesh( GEOM::GEOM_Object_ptr theShapeObj
 
     // Update Python script
     TCollection_AsciiString aStr (aSO->GetID());
-    aStr += " = smesh.CreateMesh(salome.IDToObject(\"";
-    aStr += theShapeObject->GetStudyEntry();
-    aStr += "\"))";
+    aStr += " = smesh.CreateMesh(";
+    SMESH_Gen_i::AddObject(aStr, theShapeObject) += ")";
 
     AddToPythonScript(myCurrentStudy->StudyId(), aStr);
   }
@@ -627,9 +626,6 @@ SMESH::mesh_array* SMESH_Gen_i::CreateMeshesFromMED( const char* theFileName,
   aStr += Standard_CString(theFileName);
   aStr += "\")";
 
-  AddToPythonScript(myCurrentStudy->StudyId(), aStr);
-
-  aStr = "print \"CreateMeshesFromMED: \", status";
   AddToPythonScript(myCurrentStudy->StudyId(), aStr);
 
   return aResult._retn();
@@ -811,16 +807,14 @@ CORBA::Boolean SMESH_Gen_i::Compute( SMESH::SMESH_Mesh_ptr theMesh,
                                   SALOME::BAD_PARAM );
 
   // Update Python script
-  SALOMEDS::SObject_var aSO = ObjectToSObject(myCurrentStudy, theMesh);
   TCollection_AsciiString aStr ("isDone = smesh.Compute(");
-  aStr += aSO->GetID();
-  aStr += ", salome.IDToObject(\"";
-  aStr += theShapeObject->GetStudyEntry();
-  aStr += "\"))";
+  SMESH_Gen_i::AddObject(aStr, theMesh) += ", ";
+  SMESH_Gen_i::AddObject(aStr, theShapeObject) += ")";
 
   AddToPythonScript(myCurrentStudy->StudyId(), aStr);
 
-  aStr = "print \"Compute: \", isDone";
+  aStr = "if isDone == 0: print \"Mesh ";
+  SMESH_Gen_i::AddObject(aStr, theMesh) += " computation failed\"";
   AddToPythonScript(myCurrentStudy->StudyId(), aStr);
 
   try {

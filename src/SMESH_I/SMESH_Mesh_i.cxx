@@ -1217,17 +1217,37 @@ SMESH::SMESH_MeshEditor_ptr SMESH_Mesh_i::GetMeshEditor()
 
 //=============================================================================
 /*!
- *  
+ *  Export in different formats
  */
 //=============================================================================
 
-void SMESH_Mesh_i::ExportToMED( const char* file, 
+void SMESH_Mesh_i::ExportToMED (const char* file, 
 				CORBA::Boolean auto_groups, 
-				SMESH::MED_VERSION theVersion )
+				SMESH::MED_VERSION theVersion)
   throw(SALOME::SALOME_Exception)
 {
   Unexpect aCatch(SALOME_SalomeException);
-  
+
+  // Update Python script
+  TCollection_AsciiString aStr;
+  SMESH_Gen_i::AddObject(aStr, _this()) += ".ExportToMED(\"";
+  aStr += TCollection_AsciiString((char*)file) + "\", ";
+  aStr += TCollection_AsciiString((int)auto_groups) + ", ";
+  switch (theVersion) {
+  case SMESH::MED_V2_1:
+    aStr += "SMESH.MED_V2_1)";
+    break;
+  case SMESH::MED_V2_2:
+    aStr += "SMESH.MED_V2_2)";
+    break;
+  default:
+    aStr += TCollection_AsciiString(theVersion) + ")";
+    break;
+  }
+
+  SMESH_Gen_i::AddToCurrentPyScript(aStr);
+
+  // Perform Export
   char* aMeshName = "Mesh";
   SALOMEDS::Study_ptr aStudy = _gen_i->GetCurrentStudy();
   if ( !aStudy->_is_nil() ) {
@@ -1259,27 +1279,59 @@ void SMESH_Mesh_i::ExportToMED( const char* file,
   _impl->ExportMED( file, aMeshName, auto_groups, theVersion );
 }
 
-void SMESH_Mesh_i::ExportMED( const char* file, 
+void SMESH_Mesh_i::ExportMED (const char* file, 
 			      CORBA::Boolean auto_groups)
   throw(SALOME::SALOME_Exception)
 {
   ExportToMED(file,auto_groups,SMESH::MED_V2_1);
 }
 
-void SMESH_Mesh_i::ExportDAT(const char *file) throw(SALOME::SALOME_Exception)
+void SMESH_Mesh_i::ExportDAT (const char *file)
+  throw(SALOME::SALOME_Exception)
 {
   Unexpect aCatch(SALOME_SalomeException);
+
+  // Update Python script
+  TCollection_AsciiString aStr;
+  SMESH_Gen_i::AddObject(aStr, _this()) += ".ExportDAT(\"";
+  aStr += TCollection_AsciiString((char*)file) + "\")";
+
+  SMESH_Gen_i::AddToCurrentPyScript(aStr);
+
+  // Perform Export
   _impl->ExportDAT(file);
 }
-void SMESH_Mesh_i::ExportUNV(const char *file) throw(SALOME::SALOME_Exception)
+
+void SMESH_Mesh_i::ExportUNV (const char *file)
+  throw(SALOME::SALOME_Exception)
 {
   Unexpect aCatch(SALOME_SalomeException);
+
+  // Update Python script
+  TCollection_AsciiString aStr;
+  SMESH_Gen_i::AddObject(aStr, _this()) += ".ExportUNV(\"";
+  aStr += TCollection_AsciiString((char*)file) + "\")";
+
+  SMESH_Gen_i::AddToCurrentPyScript(aStr);
+
+  // Perform Export
   _impl->ExportUNV(file);
 }
 
-void SMESH_Mesh_i::ExportSTL(const char *file, const bool isascii) throw(SALOME::SALOME_Exception)
+void SMESH_Mesh_i::ExportSTL (const char *file, const bool isascii)
+  throw(SALOME::SALOME_Exception)
 {
   Unexpect aCatch(SALOME_SalomeException);
+
+  // Update Python script
+  TCollection_AsciiString aStr;
+  SMESH_Gen_i::AddObject(aStr, _this()) += ".ExportToMED(\"";
+  aStr += TCollection_AsciiString((char*)file) + "\", ";
+  aStr += TCollection_AsciiString((int)isascii) + ")";
+
+  SMESH_Gen_i::AddToCurrentPyScript(aStr);
+
+  // Perform Export
   _impl->ExportSTL(file, isascii);
 }
 

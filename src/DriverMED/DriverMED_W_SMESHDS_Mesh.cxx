@@ -224,7 +224,6 @@ Driver_Mesh::Status DriverMED_W_SMESHDS_Mesh::Perform()
       bool anIsXDimension = false;
       bool anIsYDimension = false;
       bool anIsZDimension = false;
-      cout<<"anIsDimension = "<<anIsXDimension<<", "<<anIsYDimension<<", "<<anIsZDimension<<endl;
       {
 	SMDS_NodeIteratorPtr aNodesIter = myMesh->nodesIterator();
 	double aBounds[6];
@@ -250,7 +249,6 @@ Driver_Mesh::Status DriverMED_W_SMESHDS_Mesh::Perform()
 	anIsXDimension = (aBounds[1] - aBounds[0]) + abs(aBounds[1]) + abs(aBounds[0]) > EPS;
 	anIsYDimension = (aBounds[3] - aBounds[2]) + abs(aBounds[3]) + abs(aBounds[2]) > EPS;
 	anIsZDimension = (aBounds[5] - aBounds[4]) + abs(aBounds[5]) + abs(aBounds[4]) > EPS;
-	cout<<"anIsDimension = "<<anIsXDimension<<", "<<anIsYDimension<<", "<<anIsZDimension<<endl;
 	aMeshDimension = anIsXDimension + anIsYDimension + anIsZDimension;
 	if(!aMeshDimension)
 	  aMeshDimension = 3;

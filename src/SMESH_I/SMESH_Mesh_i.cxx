@@ -1131,6 +1131,17 @@ CORBA::Long SMESH_Mesh_i::NbNodes()throw(SALOME::SALOME_Exception)
  *  
  */
 //=============================================================================
+CORBA::Long SMESH_Mesh_i::NbElements()throw (SALOME::SALOME_Exception)
+{
+  Unexpect aCatch(SALOME_SalomeException);
+  return NbEdges() + NbFaces() + NbVolumes();
+}
+  
+//=============================================================================
+/*!
+ *  
+ */
+//=============================================================================
 CORBA::Long SMESH_Mesh_i::NbEdges()throw(SALOME::SALOME_Exception)
 {
   Unexpect aCatch(SALOME_SalomeException);
@@ -1237,3 +1248,98 @@ SMESH::long_array* SMESH_Mesh_i::GetIDs()
   
   return aResult._retn();
 }
+
+//=============================================================================
+/*!
+ *  
+ */
+//=============================================================================
+  
+SMESH::long_array* SMESH_Mesh_i::GetElementsId()
+     throw (SALOME::SALOME_Exception)
+{
+  Unexpect aCatch(SALOME_SalomeException);
+  MESSAGE("SMESH_Mesh_i::GetElementsId");
+  SMESH::long_array_var aResult = new SMESH::long_array();
+  SMESHDS_Mesh* aSMESHDS_Mesh = _impl->GetMeshDS();
+
+  if ( aSMESHDS_Mesh == NULL )
+    return aResult._retn();
+
+  long nbElements = NbElements();
+  aResult->length( nbElements );
+  SMDS_ElemIteratorPtr anIt = aSMESHDS_Mesh->elementsIterator();
+  for ( int i = 0, n = nbElements; i < n && anIt->more(); i++ )
+    aResult[i] = anIt->next()->GetID();
+
+  return aResult._retn();
+}
+
+
+//=============================================================================
+/*!
+ *  
+ */
+//=============================================================================
+
+SMESH::long_array* SMESH_Mesh_i::GetElementsByType( SMESH::ElementType theElemType )
+    throw (SALOME::SALOME_Exception)
+{
+  Unexpect aCatch(SALOME_SalomeException);
+  MESSAGE("SMESH_subMesh_i::GetElementsByType");
+  SMESH::long_array_var aResult = new SMESH::long_array();
+  SMESHDS_Mesh* aSMESHDS_Mesh = _impl->GetMeshDS();
+
+  if ( aSMESHDS_Mesh == NULL )
+    return aResult._retn();
+
+  long nbElements = NbElements();
+
+  // No sense in returning ids of elements along with ids of nodes:
+  // when theElemType == SMESH::ALL, return node ids only if
+  // there are no elements
+  if ( theElemType == SMESH::NODE || theElemType == SMESH::ALL && nbElements == 0 )
+    return GetNodesId();
+
+  aResult->length( nbElements );
+
+  int i = 0;
+
+  SMDS_ElemIteratorPtr anIt = aSMESHDS_Mesh->elementsIterator();
+  while ( i < nbElements && anIt->more() ) {
+    const SMDS_MeshElement* anElem = anIt->next();
+    if ( theElemType == SMESH::ALL || anElem->GetType() == (SMDSAbs_ElementType)theElemType )
+      aResult[i++] = anElem->GetID();
+  }
+
+  aResult->length( i );
+
+  return aResult._retn();
+}
+
+//=============================================================================
+/*!
+ *  
+ */
+//=============================================================================
+  
+SMESH::long_array* SMESH_Mesh_i::GetNodesId()
+  throw (SALOME::SALOME_Exception)
+{
+  Unexpect aCatch(SALOME_SalomeException);
+  MESSAGE("SMESH_subMesh_i::GetNodesId");
+  SMESH::long_array_var aResult = new SMESH::long_array();
+  SMESHDS_Mesh* aSMESHDS_Mesh = _impl->GetMeshDS();
+
+  if ( aSMESHDS_Mesh == NULL )
+    return aResult._retn();
+
+  long nbNodes = NbNodes();
+  aResult->length( nbNodes );
+  SMDS_NodeIteratorPtr anIt = aSMESHDS_Mesh->nodesIterator();
+  for ( int i = 0, n = nbNodes; i < n && anIt->more(); i++ )
+    aResult[i] = anIt->next()->GetID();
+
+  return aResult._retn();
+}
+

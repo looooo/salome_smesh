@@ -165,6 +165,9 @@ public:
   CORBA::Long NbNodes()
     throw (SALOME::SALOME_Exception);
   
+  CORBA::Long NbElements()
+    throw (SALOME::SALOME_Exception);
+  
   CORBA::Long NbEdges()
     throw (SALOME::SALOME_Exception);
   
@@ -195,6 +198,15 @@ public:
   CORBA::Long NbSubMesh()
     throw (SALOME::SALOME_Exception);
 
+  SMESH::long_array* GetElementsId()
+    throw (SALOME::SALOME_Exception);
+
+  SMESH::long_array* GetElementsByType( SMESH::ElementType theElemType )
+    throw (SALOME::SALOME_Exception);
+  
+  SMESH::long_array* GetNodesId()
+    throw (SALOME::SALOME_Exception);
+  
   char* Dump();
   
   // Internal methods not available through CORBA

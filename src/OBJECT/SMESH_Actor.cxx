@@ -629,14 +629,16 @@ void SMESH_ActorDef::SetControlMode(eControl theMode){
   my3DActor->GetMapper()->SetScalarVisibility(false);
   myScalarBarActor->SetVisibility(false);
 
-  if(theMode != eNone){
+  bool anIsScalarVisible = theMode > eNone;
+
+  if(anIsScalarVisible){
     SMESH::Controls::FunctorPtr aFunctor;
-    SMESH::Controls::NumericalFunctor* aNumFunctor = NULL;
     switch(theMode){
     case eLength:
     {
-      aNumFunctor = new SMESH::Controls::Length();
-      aFunctor.reset( aNumFunctor );
+      SMESH::Controls::Length* aControl = new SMESH::Controls::Length();
+      aControl->SetPrecision( myControlsPrecision );
+      aFunctor.reset( aControl );
       myControlActor = my1DActor;
       break;
     }
@@ -660,59 +662,63 @@ void SMESH_ActorDef::SetControlMode(eControl theMode){
       break;
     case eArea:
     {
-      aNumFunctor = new SMESH::Controls::Area();
-      aFunctor.reset( aNumFunctor );
+      SMESH::Controls::Area* aControl = new SMESH::Controls::Area();
+      aControl->SetPrecision( myControlsPrecision );
+      aFunctor.reset( aControl );
       myControlActor = my2DActor;
       break;
     }
     case eTaper:
     {
-      aNumFunctor = new SMESH::Controls::Taper();
-      aFunctor.reset( aNumFunctor );
+      SMESH::Controls::Taper* aControl = new SMESH::Controls::Taper();
+      aControl->SetPrecision( myControlsPrecision );
+      aFunctor.reset( aControl );
       myControlActor = my2DActor;
       break;
     }
     case eAspectRatio:
     {
-      aNumFunctor = new SMESH::Controls::AspectRatio();
-      aFunctor.reset( aNumFunctor );
+      SMESH::Controls::AspectRatio* aControl = new SMESH::Controls::AspectRatio();
+      aControl->SetPrecision( myControlsPrecision );
+      aFunctor.reset( aControl );
       myControlActor = my2DActor;
       break;
     }
     case eAspectRatio3D:
     {
-      aNumFunctor = new SMESH::Controls::AspectRatio3D();
-      aFunctor.reset( aNumFunctor );
+      SMESH::Controls::AspectRatio3D* aControl = new SMESH::Controls::AspectRatio3D();
+      aControl->SetPrecision( myControlsPrecision );
+      aFunctor.reset( aControl );
       myControlActor = my3DActor;
       break;
     }
     case eMinimumAngle:
     {
-      aNumFunctor = new SMESH::Controls::MinimumAngle();
-      aFunctor.reset( aNumFunctor );
+      SMESH::Controls::MinimumAngle* aControl = new SMESH::Controls::MinimumAngle();
+      aControl->SetPrecision( myControlsPrecision );
+      aFunctor.reset( aControl );
       myControlActor = my2DActor;
       break;
     }
     case eWarping:
     {
-      aNumFunctor = new SMESH::Controls::Warping();
-      aFunctor.reset( aNumFunctor );
+      SMESH::Controls::Warping* aControl = new SMESH::Controls::Warping();
+      aControl->SetPrecision( myControlsPrecision );
+      aFunctor.reset( aControl );
       myControlActor = my2DActor;
       break;
     }
     case eSkew:
     {
-      aNumFunctor = new SMESH::Controls::Skew();
-      aFunctor.reset( aNumFunctor );
+      SMESH::Controls::Skew* aControl = new SMESH::Controls::Skew();
+      aControl->SetPrecision( myControlsPrecision );
+      aFunctor.reset( aControl );
       myControlActor = my2DActor;
       break;
     }
     default:
       return;
     }
-
-    if(aNumFunctor)
-      aNumFunctor->SetPrecision( myControlsPrecision );
 
     vtkUnstructuredGrid* aGrid = myControlActor->GetUnstructuredGrid();
     vtkIdType aNbCells = aGrid->GetNumberOfCells();

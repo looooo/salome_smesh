@@ -1656,9 +1656,9 @@ static void sweepElement(SMESHDS_Mesh*                         aMesh,
 //=======================================================================
 
 static void makeWalls (SMESHDS_Mesh*                 aMesh,
-                       TNodeOfNodeListMap&           mapNewNodes,
-                       TElemOfElemListMap&           newElemsMap,
-                       TElemOfVecOfNnlmiMap&         elemNewNodesMap,
+                       TNodeOfNodeListMap &          mapNewNodes,
+                       TElemOfElemListMap &          newElemsMap,
+                       TElemOfVecOfNnlmiMap &        elemNewNodesMap,
                        set<const SMDS_MeshElement*>& elemSet)
 {
   ASSERT( newElemsMap.size() == elemNewNodesMap.size() );
@@ -1691,38 +1691,42 @@ static void makeWalls (SMESHDS_Mesh*                 aMesh,
   {
     const SMDS_MeshElement* elem = itElem->first;
     vector<TNodeOfNodeListMapItr>& vecNewNodes = itElemNodes->second;
+
+    if ( elem->GetType() == SMDSAbs_Edge )
+    {
+      // create a ceiling edge
+      aMesh->AddEdge(vecNewNodes[ 0 ]->second.back(),
+                     vecNewNodes[ 1 ]->second.back() );
+    }
+    if ( elem->GetType() != SMDSAbs_Face )
+      continue;
+
     bool hasFreeLinks = false;
 
     set<const SMDS_MeshElement*> avoidSet;
     avoidSet.insert( elem );
 
-    // loop on element nodes
+    // loop on a face nodes
+    set<const SMDS_MeshNode*> aFaceLastNodes;
     int iNode, nbNodes = vecNewNodes.size();
-    vector<const SMDS_MeshNode*> lastNewNode( nbNodes ); // to make ceiling
     for ( iNode = 0; iNode < nbNodes; iNode++ )
     {
-      lastNewNode[ iNode ] = vecNewNodes[ iNode ]->second.back();
-
+      aFaceLastNodes.insert( vecNewNodes[ iNode ]->second.back() );
       // look for free links of a face
-
-      if ( elem->GetType() == SMDSAbs_Face )
+      int iNext = ( iNode + 1 == nbNodes ) ? 0 : iNode + 1;
+      const SMDS_MeshNode* n1 = vecNewNodes[ iNode ]->first;
+      const SMDS_MeshNode* n2 = vecNewNodes[ iNext ]->first;
+      // check if a link is free
+      if ( ! SMESH_MeshEditor::FindFaceInSet ( n1, n2, elemSet, avoidSet ))
       {
-        // get 2 nodes
-        int iNext = ( iNode + 1 == nbNodes ) ? 0 : iNode + 1;
-        const SMDS_MeshNode* n1 = vecNewNodes[ iNode ]->first;
-        const SMDS_MeshNode* n2 = vecNewNodes[ iNext ]->first;
-        // check if a link is free
-        if ( ! SMESH_MeshEditor::FindFaceInSet ( n1, n2, elemSet, avoidSet ))
-        {
-          hasFreeLinks = true;
-          // make an edge and a ceiling for a new edge
-          if ( !aMesh->FindEdge( n1, n2 ))
-            aMesh->AddEdge( n1, n2 );
-          n1 = vecNewNodes[ iNode ]->second.back();
-          n2 = vecNewNodes[ iNext ]->second.back();
-          if ( !aMesh->FindEdge( n1, n2 ))
-            aMesh->AddEdge( n1, n2 );
-        }
+        hasFreeLinks = true;
+        // make an edge and a ceiling for a new edge
+        if ( !aMesh->FindEdge( n1, n2 ))
+          aMesh->AddEdge( n1, n2 );
+        n1 = vecNewNodes[ iNode ]->second.back();
+        n2 = vecNewNodes[ iNext ]->second.back();
+        if ( !aMesh->FindEdge( n1, n2 ))
+          aMesh->AddEdge( n1, n2 );
       }
     }
     // sweep free links into faces
@@ -1777,27 +1781,29 @@ static void makeWalls (SMESHDS_Mesh*                 aMesh,
       }
     } // sweep free links into faces
 
-    // create a ceiling element, faces will be reversed
-
-    switch ( nbNodes ) {
-    case 2:
-      aMesh->AddEdge(lastNewNode[ 0 ], lastNewNode[ 1 ]);
-      break;
-    case 3:
-      if (!hasFreeLinks ||
-          !aMesh->FindFace( lastNewNode[ 0 ], lastNewNode[ 2 ], lastNewNode[ 1 ]))
-        aMesh->AddFace (lastNewNode[ 0 ], lastNewNode[ 2 ], lastNewNode[ 1 ]);
-      break;
-    case 4:
-      if (!hasFreeLinks ||
-          !aMesh->FindFace (lastNewNode[ 0 ], lastNewNode[ 3 ],
-                            lastNewNode[ 2 ], lastNewNode[ 1 ]))
-        aMesh->AddFace (lastNewNode[ 0 ], lastNewNode[ 3 ],
-                        lastNewNode[ 2 ], lastNewNode[ 1 ]);
-      break;
+    // make a ceiling face with a normal external to a volume
+      
+    SMDS_VolumeTool lastVol( itElem->second.back() );
+    int iF = lastVol.GetFaceIndex( aFaceLastNodes );
+    if ( iF >= 0 )
+    {
+      lastVol.SetExternalNormal();
+      const SMDS_MeshNode** nodes = lastVol.GetFaceNodes( iF );
+      switch ( lastVol.NbFaceNodes( iF ) ) {
+      case 3:
+        if (!hasFreeLinks ||
+            !aMesh->FindFace( nodes[ 0 ], nodes[ 1 ], nodes[ 2 ]))
+          aMesh->AddFace( nodes[ 0 ], nodes[ 1 ], nodes[ 2 ] );
+        break;
+      case 4:
+        if (!hasFreeLinks ||
+            !aMesh->FindFace( nodes[ 0 ], nodes[ 1 ], nodes[ 2 ], nodes[ 3 ]))
+          aMesh->AddFace( nodes[ 0 ], nodes[ 1 ], nodes[ 2 ], nodes[ 3 ] );
+        break;
+      }
     }
 
-  } // loop on elements
+  } // loop on swept elements
 }
 
 //=======================================================================

@@ -48,7 +48,8 @@ EXPORT_PYSCRIPTS = libSMESH_Swig.py \
 		   SMESH_fixation.py \
 		   batchmode_smesh.py \
 		   SMESH_box_tetra.py \
-		   SMESH_box2_tetra.py
+		   SMESH_box2_tetra.py \
+		   SMESH_box3_tetra.py
 
 LIB_CLIENT_IDL = SALOMEDS.idl \
 		 SALOME_Exception.idl \

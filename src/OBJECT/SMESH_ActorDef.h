@@ -148,9 +148,6 @@ class SMESH_ActorDef : public SMESH_Actor{
   virtual void SetControlMode(eControl theMode);
   virtual eControl GetControlMode(){ return myControlMode;}
 
-  enum e1DControl{e1DNone, e1DColored, e1DHighlited};
-  e1DControl Get1DControlMode(){ return my1DColorMode;}
-
   virtual vtkScalarBarActor* GetScalarBarActor(){ return myScalarBarActor;}
 
   virtual void SetPlaneParam(float theDir[3], float theDist, vtkPlane* thePlane);
@@ -189,7 +186,6 @@ class SMESH_ActorDef : public SMESH_Actor{
   SMESH_DeviceActor* my3DActor;
   SMESH_DeviceActor* myControlActor;
 
-  e1DControl my1DColorMode;
   vtkProperty* my1DProp;
   SMESH_DeviceActor* my1DActor;
   vtkProperty* my1DExtProp;

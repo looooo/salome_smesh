@@ -967,6 +967,9 @@ msgstr "Length"
 msgid "SMESHGUI_FilterTable::ASPECT_RATIO"
 msgstr "Aspect ratio"
 
+msgid "SMESHGUI_FilterTable::ASPECT_RATIO_3D"
+msgstr "Aspect ratio 3D"
+
 msgid "SMESHGUI_FilterTable::WARPING"
 msgstr "Warping"
 

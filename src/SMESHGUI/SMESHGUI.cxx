@@ -545,11 +545,11 @@ namespace{
 	  switch ( theCommandID ){
 	  case 6001:
 	    aTitle = QObject::tr( "LENGTH_EDGES" );
-	    aControl = SMESH_Actor::eLengthEdges;
+	    aControl = SMESH_Actor::eLength;
 	    break;
 	  case 6018:
 	    aTitle = QObject::tr( "LENGTH2D_EDGES" );
-	    aControl = SMESH_Actor::eLength;
+	    aControl = SMESH_Actor::eLength2D;
 	    break;
 	  case 6002:
 	    aTitle = QObject::tr( "FREE_EDGES" );
@@ -2445,9 +2445,9 @@ bool SMESHGUI::CustomPopup(QAD_Desktop* parent, QPopupMenu* popup, const QString
 	    if ( mi && mi->popup() ) {
 	      SMESH_Actor::eControl cMode = anActor->GetControlMode();
 	      switch ( cMode ) {
-	      case SMESH_Actor::eLengthEdges:
-		mi->popup()->setItemChecked( 6001, true ); break;
 	      case SMESH_Actor::eLength:
+		mi->popup()->setItemChecked( 6001, true ); break;
+	      case SMESH_Actor::eLength2D:
 		mi->popup()->setItemChecked( 6018, true ); break;
 	      case SMESH_Actor::eFreeEdges:
 		mi->popup()->setItemChecked( 6002, true );

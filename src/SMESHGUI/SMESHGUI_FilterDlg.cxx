@@ -1286,6 +1286,7 @@ const QMap<int, QString>& SMESHGUI_FilterTable::getCriteria( const int theType )
     static QMap<int, QString> aCriteria;
     if ( aCriteria.isEmpty() )
     {
+      aCriteria[ SMESH::FT_AspectRatio3D] = tr( "ASPECT_RATIO_3D" );
       aCriteria[ SMESH::FT_RangeOfIds   ] = tr( "RANGE_OF_IDS" );
       aCriteria[ SMESH::FT_BelongToGeom ] = tr( "BELONG_TO_GEOM" );
     }

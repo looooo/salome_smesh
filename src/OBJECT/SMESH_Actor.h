@@ -93,7 +93,7 @@ class SMESH_Actor: public SALOME_Actor
   virtual void SetCellsLabeled(bool theIsCellsLabeled) = 0;
   virtual bool GetCellsLabeled() = 0;
 
-  enum eControl{eNone, eLengthEdges, eLength, eFreeBorders, eFreeEdges, eMultiConnection, 
+  enum eControl{eNone, eLength, eLength2D, eFreeBorders, eFreeEdges, eMultiConnection, 
 		eArea, eTaper, eAspectRatio, eMinimumAngle, eWarping, eSkew,
 		eAspectRatio3D};
   virtual void SetControlMode(eControl theMode) = 0;

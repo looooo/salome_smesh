@@ -24,7 +24,7 @@
 //  File   : SMESH_Actor.cxx
 //  Author : Nicolas REJNERI
 //  Module : SMESH
-//  $Header$Header: /home/server/cvs/SMESH/SMESH_SRC/src/OBJECT/SMESH_DeviceActor.cxx,v 1.5.2.1 2004/12/23 10:31:24 apo Exp $
+//  $Header$Header$
 
 
 #include "SMESH_DeviceActor.h"
@@ -260,10 +260,10 @@ void SMESH_DeviceActor::SetControlMode(SMESH::Controls::FunctorPtr theFunctor,
   theScalarBarActor->SetVisibility(anIsInitialized);
 }
 
-void SMESH_DeviceActor::SetLength2DControlMode(SMESH::Controls::FunctorPtr theFunctor,
-					       SMESH_DeviceActor* theDeviceActor,
-					       vtkScalarBarActor* theScalarBarActor,
-					       vtkLookupTable* theLookupTable)
+void SMESH_DeviceActor::SetExtControlMode(SMESH::Controls::FunctorPtr theFunctor,
+					  SMESH_DeviceActor* theDeviceActor,
+					  vtkScalarBarActor* theScalarBarActor,
+					  vtkLookupTable* theLookupTable)
 {
   bool anIsInitialized = theFunctor;
 

@@ -125,7 +125,7 @@ throw (SALOME::SALOME_Exception)
  * CORBA: Accessor for attributes identifiers
  */
 //=============================================================================
-Engines::long_array*  SMESH_MEDFamily_i::getAttributesIdentifiers() 
+SALOME_MED::long_array*  SMESH_MEDFamily_i::getAttributesIdentifiers() 
 throw (SALOME::SALOME_Exception)
 {
   if (_subMeshDS==NULL)
@@ -138,7 +138,7 @@ throw (SALOME::SALOME_Exception)
 				   ,SALOME::BAD_PARAM);
     };
   
-  Engines::long_array_var myseq= new Engines::long_array;
+  SALOME_MED::long_array_var myseq= new SALOME_MED::long_array;
   myseq->length(_numberOfAttribute);
   for (int i=0;i<_numberOfAttribute;i++)
     {
@@ -175,7 +175,7 @@ CORBA::Long SMESH_MEDFamily_i::getAttributeIdentifier(CORBA::Long i)
  * CORBA: Accessor for attributes values
  */
 //=============================================================================
-Engines::long_array*  SMESH_MEDFamily_i::getAttributesValues() 
+SALOME_MED::long_array*  SMESH_MEDFamily_i::getAttributesValues() 
   throw (SALOME::SALOME_Exception)
 {
   if (_subMeshDS==NULL)
@@ -189,7 +189,7 @@ Engines::long_array*  SMESH_MEDFamily_i::getAttributesValues()
 				   ,SALOME::BAD_PARAM);
     };
 
-  Engines::long_array_var myseq= new Engines::long_array;
+  SALOME_MED::long_array_var myseq= new SALOME_MED::long_array;
   myseq->length(_numberOfAttribute);
   for (int i=0;i<_numberOfAttribute;i++)
     {
@@ -223,7 +223,7 @@ CORBA::Long  SMESH_MEDFamily_i::getAttributeValue(CORBA::Long i)
  * CORBA: Accessor for attributes desriptions
  */
 //=============================================================================
-Engines::string_array * SMESH_MEDFamily_i::getAttributesDescriptions() 
+SALOME_MED::string_array * SMESH_MEDFamily_i::getAttributesDescriptions() 
   throw (SALOME::SALOME_Exception)
 {
   if (_subMeshDS==NULL)
@@ -235,7 +235,7 @@ Engines::string_array * SMESH_MEDFamily_i::getAttributesDescriptions()
       THROW_SALOME_CORBA_EXCEPTION("No attributes"\
 				   ,SALOME::BAD_PARAM);
     }
-  Engines::string_array_var myseq = new Engines::string_array;
+  SALOME_MED::string_array_var myseq = new SALOME_MED::string_array;
   for (int i=0;i<_numberOfAttribute;i++)
     {
       myseq[i]=CORBA::string_dup(_attributeDescription[i].c_str());

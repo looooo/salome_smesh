@@ -168,7 +168,7 @@ CORBA::Long SMESH_MEDMesh_i::getMeshDimension()throw(SALOME::SALOME_Exception)
  * CORBA: Accessor for Coordinates System
  */
 //=============================================================================
-char *SMESH_MEDMesh_i::getCoordinateSystem() throw(SALOME::SALOME_Exception)
+char *SMESH_MEDMesh_i::getCoordinatesSystem() throw(SALOME::SALOME_Exception)
 {
 	if (_mesh_i == 0)
 		THROW_SALOME_CORBA_EXCEPTION("No associated Mesh",
@@ -192,13 +192,13 @@ char *SMESH_MEDMesh_i::getCoordinateSystem() throw(SALOME::SALOME_Exception)
  * CORBA: Accessor for Coordinates
  */
 //=============================================================================
-Engines::double_array * SMESH_MEDMesh_i::getCoordinates(
+SALOME_MED::double_array * SMESH_MEDMesh_i::getCoordinates(
 	SALOME_MED::medModeSwitch typeSwitch) throw(SALOME::SALOME_Exception)
 {
 	if (_mesh_i == 0)
 		THROW_SALOME_CORBA_EXCEPTION("No associated Mesh",
 			SALOME::INTERNAL_ERROR);
-	Engines::double_array_var myseq = new Engines::double_array;
+	SALOME_MED::double_array_var myseq = new SALOME_MED::double_array;
 	try
 	{
 		// PN  : En dur
@@ -250,13 +250,13 @@ Engines::double_array * SMESH_MEDMesh_i::getCoordinates(
  * CORBA: Accessor for Coordinates Names
  */
 //=============================================================================
-Engines::string_array *
+SALOME_MED::string_array *
 	SMESH_MEDMesh_i::getCoordinatesNames()throw(SALOME::SALOME_Exception)
 {
 	if (_mesh_i == 0)
 		THROW_SALOME_CORBA_EXCEPTION("No associated Mesh",
 			SALOME::INTERNAL_ERROR);
-	Engines::string_array_var myseq = new Engines::string_array;
+	SALOME_MED::string_array_var myseq = new SALOME_MED::string_array;
 	try
 	{
 		// PN : en dur
@@ -281,13 +281,13 @@ Engines::string_array *
  * CORBA: Accessor for Coordinates Units
  */
 //=============================================================================
-Engines::string_array *
+SALOME_MED::string_array *
 	SMESH_MEDMesh_i::getCoordinatesUnits()throw(SALOME::SALOME_Exception)
 {
 	if (_mesh_i == 0)
 		THROW_SALOME_CORBA_EXCEPTION("No associated Mesh",
 			SALOME::INTERNAL_ERROR);
-	Engines::string_array_var myseq = new Engines::string_array;
+	SALOME_MED::string_array_var myseq = new SALOME_MED::string_array;
 	try
 	{
 		// PN : en dur
@@ -453,7 +453,7 @@ CORBA::Long SMESH_MEDMesh_i::getNumberOfElements(SALOME_MED::
  * CORBA: Accessor for connectivities
  */
 //=============================================================================
-Engines::long_array *
+SALOME_MED::long_array *
 	SMESH_MEDMesh_i::getConnectivity(SALOME_MED::medModeSwitch typeSwitch,
 	SALOME_MED::medConnectivity mode, SALOME_MED::medEntityMesh entity,
 	SALOME_MED::medGeometryElement geomElement) throw(SALOME::SALOME_Exception)
@@ -482,7 +482,7 @@ Engines::long_array *
  * CORBA: Accessor for connectivities
  */
 //=============================================================================
-Engines::long_array *
+SALOME_MED::long_array *
 	SMESH_MEDMesh_i::getConnectivityIndex(SALOME_MED::medConnectivity mode,
 	SALOME_MED::medEntityMesh entity) throw(SALOME::SALOME_Exception)
 {
@@ -499,7 +499,7 @@ Engines::long_array *
 CORBA::Long SMESH_MEDMesh_i::getElementNumber(SALOME_MED::medConnectivity mode,
 	SALOME_MED::medEntityMesh entity,
 	SALOME_MED::medGeometryElement type,
-	const Engines::long_array & connectivity)throw(SALOME::SALOME_Exception)
+	const SALOME_MED::long_array & connectivity)throw(SALOME::SALOME_Exception)
 {
 	const char *LOC = "getElementNumber ";
 	MESSAGE(LOC << "Pas Implemente dans SMESH");
@@ -513,7 +513,7 @@ CORBA::Long SMESH_MEDMesh_i::getElementNumber(SALOME_MED::medConnectivity mode,
  * not implemented for MED_ALL_ENTITIES and MED_MAILLE
  */
 //=============================================================================
-Engines::long_array *
+SALOME_MED::long_array *
 	SMESH_MEDMesh_i::getReverseConnectivity(SALOME_MED::
 	medConnectivity mode) throw(SALOME::SALOME_Exception)
 {
@@ -527,7 +527,7 @@ Engines::long_array *
  * CORBA: Accessor for connectivities
  */
 //=============================================================================
-Engines::long_array *
+SALOME_MED::long_array *
 	SMESH_MEDMesh_i::getReverseConnectivityIndex(SALOME_MED::
 	medConnectivity mode) throw(SALOME::SALOME_Exception)
 {

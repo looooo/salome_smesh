@@ -293,7 +293,7 @@ CORBA::Long SMESH_MEDSupport_i::getNumberOfElements(SALOME_MED::
  */
 //=============================================================================
 
-Engines::long_array * SMESH_MEDSupport_i::getNumber(
+SALOME_MED::long_array * SMESH_MEDSupport_i::getNumber(
 	SALOME_MED::medGeometryElement geomElement) throw(SALOME::SALOME_Exception)
 {
 	if (_subMeshDS==NULL)
@@ -304,7 +304,7 @@ Engines::long_array * SMESH_MEDSupport_i::getNumber(
 	if (geomElement != SALOME_MED::MED_NONE)
 		THROW_SALOME_CORBA_EXCEPTION("Not implemented", SALOME::BAD_PARAM);
 
-	Engines::long_array_var myseq = new Engines::long_array;
+	SALOME_MED::long_array_var myseq = new SALOME_MED::long_array;
 
 	int i = 0;
 	myseq->length(_subMeshDS->NbNodes());
@@ -330,7 +330,7 @@ Engines::long_array * SMESH_MEDSupport_i::getNumber(
  */
 //=============================================================================
 
-Engines::long_array *
+SALOME_MED::long_array *
 	SMESH_MEDSupport_i::getNumberIndex()throw(SALOME::SALOME_Exception)
 {
 	MESSAGE("Not implemented for SMESH_i");
@@ -344,7 +344,7 @@ Engines::long_array *
  */
 //=============================================================================
 
-CORBA::Long SMESH_MEDSupport_i::getNumberOfGaussPoints(SALOME_MED::
+CORBA::Long SMESH_MEDSupport_i::getNumberOfGaussPoint(SALOME_MED::
 	medGeometryElement geomElement) throw(SALOME::SALOME_Exception)
 {
 	MESSAGE("Not implemented for SMESH_i");

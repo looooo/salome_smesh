@@ -317,6 +317,35 @@ namespace{
 		(theHalfPerim-theTria[2]));
   }
 
+  inline double getVolume(double theLen[6]){
+    double a2 = theLen[0]*theLen[0];
+    double b2 = theLen[1]*theLen[1];
+    double c2 = theLen[2]*theLen[2];
+    double d2 = theLen[3]*theLen[3];
+    double e2 = theLen[4]*theLen[4];
+    double f2 = theLen[5]*theLen[5];
+    double P = 4.0*a2*b2*d2;
+    double Q = a2*(b2+d2-e2)-b2*(a2+d2-f2)-d2*(a2+b2-c2);
+    double R = (b2+d2-e2)*(a2+d2-f2)*(a2+d2-f2);
+    return sqrt(P-Q+R)/12.0;
+  }
+
+  inline double getVolume2(double theLen[6]){
+    double a2 = theLen[0]*theLen[0];
+    double b2 = theLen[1]*theLen[1];
+    double c2 = theLen[2]*theLen[2];
+    double d2 = theLen[3]*theLen[3];
+    double e2 = theLen[4]*theLen[4];
+    double f2 = theLen[5]*theLen[5];
+
+    double P = a2*e2*(b2+c2+d2+f2-a2-e2);
+    double Q = b2*f2*(a2+c2+d2+e2-b2-f2);
+    double R = c2*d2*(a2+b2+e2+f2-c2-d2);
+    double S = a2*b2*d2+b2*c2*e2+a2*c2*f2+d2*e2*f2;
+    
+    return sqrt(P+Q+R-S)/12.0;
+  }
+
   inline double getVolume(const TSequenceOfXYZ& P){
     gp_Vec aVec1( P( 2 ) - P( 1 ) );
     gp_Vec aVec2( P( 3 ) - P( 1 ) );
@@ -371,6 +400,7 @@ double AspectRatio3D::GetValue( const TSequenceOfXYZ& P )
     anArea = getArea(aHalfPerimeter,aTria[3]);
     aSumArea += anArea;
     double aVolume = getVolume(P);
+    //double aVolume = getVolume(aLen);
     double aHeight = getMaxHeight(aLen);
     static double aCoeff = sqrt(6.0)/36.0;
     aQuality = aCoeff*aHeight*aSumArea/aVolume;

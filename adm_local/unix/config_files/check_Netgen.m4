@@ -20,21 +20,22 @@ Netgen_ok=no
 if test "$WITHNETGEN" = yes; then
 
   echo
+  echo
   echo -------------------------------------------------
   echo You are about to choose to use somehow the
   echo Netgen Library to generate Tetrahedric mesh.
   echo
   echo WARNING
-  echo -------
-  echo You should then be sure to have a Netgen Library
-  echo compiled without -DOPENGL compilation option and
-  echo to have the object nglib.o in your library
-  echo libnginterface.a. If it is not the case recompile
-  echo the Netgen distribution accordingly.
-  echo ask your system administrator
+  echo ----------------------------------------------------------
+  echo ----------------------------------------------------------
+  echo You are strongly advised to consult the file
+  echo SMESH_SRC/src/NETGEN/ReadMeForNgUsers, particularly about
+  echo assumptions made on the installation of the Netgen
+  echo application and libraries.
+  echo Ask your system administrator for those details.
+  echo ----------------------------------------------------------
+  echo ----------------------------------------------------------
   echo 
-  echo
-  echo -------------------------------------------------
   echo
 
   NETGEN_HOME=$withval

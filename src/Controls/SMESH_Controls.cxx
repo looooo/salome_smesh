@@ -1020,6 +1020,148 @@ SMDSAbs_ElementType MultiConnection::GetType() const
   return SMDSAbs_Edge;
 }
 
+/*
+  Class       : MultiConnection2D
+  Description : Functor for calculating number of faces conneted to the edge
+*/
+double MultiConnection2D::GetValue( const TSequenceOfXYZ& P )
+{
+  return 0;
+}
+
+double MultiConnection2D::GetValue( long theElementId )
+{
+  TSequenceOfXYZ P;
+  int aResult = 0;
+  
+  if (GetPoints(theElementId,P)){
+    double  aVal;
+    const SMDS_MeshElement* anFaceElem = myMesh->FindElement( theElementId );
+    SMDSAbs_ElementType aType = anFaceElem->GetType();
+    
+    int len = P.size();
+    
+    TColStd_MapOfInteger aMap;
+    int aResult = 0;
+    
+    switch (aType){
+    case SMDSAbs_All:
+    case SMDSAbs_Node: 
+    case SMDSAbs_Edge:
+    case SMDSAbs_Face:
+      if (len == 3){ // triangles
+	int Nb[3] = {0,0,0};
+
+	int i=0;
+	SMDS_ElemIteratorPtr anIter = anFaceElem->nodesIterator();
+	if ( anIter != 0 ) {
+	  while( anIter->more() ) {
+	    const SMDS_MeshNode* aNode = (SMDS_MeshNode*)anIter->next();
+	    if ( aNode == 0 ){
+	      break;
+	    }
+	    SMDS_ElemIteratorPtr anElemIter = aNode->GetInverseElementIterator();
+	    while( anElemIter->more() ) {
+	      const SMDS_MeshElement* anElem = anElemIter->next();
+	      if ( anElem != 0 && anElem->GetType() != SMDSAbs_Edge ) {
+		int anId = anElem->GetID();
+
+		if ( anIter->more() )              // i.e. first node
+		  aMap.Add( anId );
+		else if ( aMap.Contains( anId ) ){
+		  Nb[i]++;
+		}
+	      }
+	      else if ( anElem != 0 && anElem->GetType() == SMDSAbs_Edge ) i++;
+	    }
+	  }
+	}
+	
+	aResult = Max(Max(Nb[0],Nb[1]),Nb[2]);
+      }
+      break;
+    case SMDSAbs_Volume:
+    default: aResult=0;
+    }
+    
+  }
+  return aResult;//getNbMultiConnection( myMesh, theId );
+}
+
+double MultiConnection2D::GetBadRate( double Value, int /*nbNodes*/ ) const
+{
+  return Value;
+}
+
+SMDSAbs_ElementType MultiConnection2D::GetType() const
+{
+  return SMDSAbs_Face;
+}
+
+MultiConnection2D::Value::Value(long thePntId1, long thePntId2)
+{
+  myPntId[0] = thePntId1;  myPntId[1] = thePntId2;
+  if(thePntId1 > thePntId2){
+    myPntId[1] = thePntId1;  myPntId[0] = thePntId2;
+  }
+}
+
+bool MultiConnection2D::Value::operator<(const MultiConnection2D::Value& x) const{
+  if(myPntId[0] < x.myPntId[0]) return true;
+  if(myPntId[0] == x.myPntId[0])
+    if(myPntId[1] < x.myPntId[1]) return true;
+  return false;
+}
+
+void MultiConnection2D::GetValues(MValues& theValues){
+  SMDS_FaceIteratorPtr anIter = myMesh->facesIterator();
+  for(; anIter->more(); ){
+    const SMDS_MeshFace* anElem = anIter->next();
+    long anElemId = anElem->GetID();
+    SMDS_ElemIteratorPtr aNodesIter = anElem->nodesIterator();
+    long aNodeId[3];
+
+    //int aNbConnects=0;
+    const SMDS_MeshNode* aNode0;
+    const SMDS_MeshNode* aNode1;
+    const SMDS_MeshNode* aNode2;
+    if(aNodesIter->more()){
+      aNode0 = (SMDS_MeshNode*) aNodesIter->next();
+      aNode1 = aNode0;
+      const SMDS_MeshNode* aNodes = (SMDS_MeshNode*) aNode1;
+      aNodeId[0] = aNodeId[1] = aNodes->GetID();
+    }
+    for(; aNodesIter->more(); ){
+      aNode2 = (SMDS_MeshNode*) aNodesIter->next();
+      long anId = aNode2->GetID();
+      aNodeId[2] = anId;
+      
+      Value aValue(aNodeId[1],aNodeId[2]);
+      MValues::iterator aItr = theValues.find(aValue);
+      if (aItr != theValues.end()){
+	aItr->second += 1;
+	//aNbConnects = nb;
+      } else {
+	theValues[aValue] = 1;
+	//aNbConnects = 1;
+      }
+      //cout << "NodeIds: "<<aNodeId[1]<<","<<aNodeId[2]<<" nbconn="<<aNbConnects<<endl;
+      aNodeId[1] = aNodeId[2];
+      aNode1 = aNode2;
+    }
+    Value aValue(aNodeId[0],aNodeId[2]);
+    MValues::iterator aItr = theValues.find(aValue);
+    if (aItr != theValues.end()){
+      aItr->second += 1;
+      //aNbConnects = nb;
+    } else {
+      theValues[aValue] = 1;
+      //aNbConnects = 1;
+    }
+    //cout << "NodeIds: "<<aNodeId[0]<<","<<aNodeId[2]<<" nbconn="<<aNbConnects<<endl;
+  }
+
+}
 
 /*
                             PREDICATES

@@ -54,6 +54,7 @@ module SMESH
     FT_FreeBorders,
     FT_FreeEdges,
     FT_MultiConnection,
+    FT_MultiConnection2D,
     FT_Length,
     FT_Length2D,
     FT_BelongToGeom,
@@ -108,13 +109,23 @@ module SMESH
     struct Value
     {
       double myLength;
-      long myElemId;
       long myPnt1, myPnt2;
     };
     typedef sequence<Value> Values;
     Values GetValues();
   };
-  interface MultiConnection : NumericalFunctor{};
+  interface MultiConnection   : NumericalFunctor{};
+  interface MultiConnection2D : NumericalFunctor
+  {
+    struct Value
+    {
+      long myNbConnects;
+      long myPnt1, myPnt2;
+    };
+    
+    typedef sequence<Value> Values;
+    Values GetValues();
+  };
 
   /*!
   * Predicates are intended for verification of criteria,
@@ -342,6 +353,7 @@ module SMESH
     Length            CreateLength();
     Length2D          CreateLength2D();
     MultiConnection   CreateMultiConnection();
+    MultiConnection2D CreateMultiConnection2D();
 
     /*!
     *  Create logical functors ( predicates )

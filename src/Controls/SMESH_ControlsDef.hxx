@@ -254,6 +254,26 @@ namespace SMESH{
     };
     
     /*
+      Class       : MultiConnection2D
+      Description : Functor for calculating number of faces conneted to the edge
+    */
+    class MultiConnection2D: public virtual NumericalFunctor{
+    public:
+      virtual double GetValue( long theElementId );
+      virtual double GetValue( const TSequenceOfXYZ& thePoints );
+      virtual double GetBadRate( double Value, int nbNodes ) const;
+      virtual SMDSAbs_ElementType GetType() const;
+      struct Value{
+	long myPntId[2];
+	Value(long thePntId1, long thePntId2);
+	bool operator<(const Value& x) const;
+      };
+      typedef std::map<Value,int> MValues;
+
+      void GetValues(MValues& theValues);
+    };
+    typedef boost::shared_ptr<MultiConnection2D> MultiConnection2DPtr;
+    /*
       PREDICATES
     */
     /*

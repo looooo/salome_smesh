@@ -247,6 +247,22 @@ public:
   FunctorType                     GetFunctorType();
 };
 
+/*
+  Class       : MultiConnection2D_i
+  Description : Functor for calculating number of faces conneted to the edge
+*/
+class MultiConnection2D_i: public virtual POA_SMESH::MultiConnection2D,
+			   public virtual NumericalFunctor_i
+{
+public:
+                                     MultiConnection2D_i();
+  SMESH::MultiConnection2D::Values*  GetValues();
+  FunctorType                        GetFunctorType();
+
+protected:
+  Controls::MultiConnection2DPtr     myMulticonnection2DPtr;
+};
+
 
 /*
                             PREDICATES
@@ -620,6 +636,7 @@ public:
   Length_ptr                CreateLength();
   Length2D_ptr              CreateLength2D();
   MultiConnection_ptr       CreateMultiConnection();
+  MultiConnection2D_ptr     CreateMultiConnection2D();
   
   BelongToGeom_ptr          CreateBelongToGeom();
   BelongToPlane_ptr         CreateBelongToPlane();

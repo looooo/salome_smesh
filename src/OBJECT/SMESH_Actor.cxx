@@ -660,6 +660,10 @@ void SMESH_ActorDef::SetControlMode(eControl theMode){
       aFunctor.reset(new SMESH::Controls::MultiConnection());
       myControlActor = my1DActor;
       break;
+    case eMultiConnection2D:
+      aFunctor.reset(new SMESH::Controls::MultiConnection2D());
+      myControlActor = my2DActor;
+      break;
     case eArea:
     {
       SMESH::Controls::Area* aControl = new SMESH::Controls::Area();
@@ -730,6 +734,9 @@ void SMESH_ActorDef::SetControlMode(eControl theMode){
 	my1DExtActor->SetExtControlMode(aFunctor,myControlActor);
 	break;
       case eLength2D:
+	my1DExtActor->SetExtControlMode(aFunctor,myControlActor,myScalarBarActor,myLookupTable);
+	break;
+      case eMultiConnection2D:
 	my1DExtActor->SetExtControlMode(aFunctor,myControlActor,myScalarBarActor,myLookupTable);
 	break;
       default:
@@ -1031,6 +1038,8 @@ void SMESH_ActorDef::SetVisibility(int theMode, bool theIsUpdateRepersentation){
 	my1DExtActor->VisibilityOn();
 	break;
       case eLength2D:
+	my1DExtActor->VisibilityOn();
+      case eMultiConnection2D:
 	my1DExtActor->VisibilityOn();
       default:
 	if(myControlActor->GetUnstructuredGrid()->GetNumberOfCells())

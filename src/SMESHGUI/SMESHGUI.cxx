@@ -563,6 +563,10 @@ namespace{
 	    aTitle = QObject::tr( "MULTI_BORDERS" );
 	    aControl = SMESH_Actor::eMultiConnection;
 	    break;
+	  case 6019:
+	    aTitle = QObject::tr( "MULTI2D_BORDERS" );
+	    aControl = SMESH_Actor::eMultiConnection2D;
+	    break;
 	  case 6011:
 	    aTitle = QObject::tr( "AREA_ELEMENTS" );
 	    aControl = SMESH_Actor::eArea;
@@ -2081,6 +2085,7 @@ bool SMESHGUI::OnGUIEvent(int theCommandID, QAD_Desktop * parent)
   case 6011:
   case 6001:
   case 6018:
+  case 6019:
   case 6002:
   case 6003:
   case 6004:    
@@ -2428,30 +2433,40 @@ bool SMESHGUI::CustomPopup(QAD_Desktop* parent, QPopupMenu* popup, const QString
 
 	    // Display Entity
 	    mi = popup->findItem( 1135 );
-	    if ( mi && mi->popup() ) {
+	    int aIsSomething=0;
+	    if (aNbVolumes>0) aIsSomething++;
+	    if (aNbFaces>0) aIsSomething++;
+	    if (aNbEdges>0) aIsSomething++;
+	    if ( mi && (aIsSomething <= 1)){
+	      popup->removeItem(1135);
+	    }else if ( mi && mi->popup() ) {
 	      QPopupMenu* aPopup = mi->popup();
 	      unsigned int aMode = anActor->GetEntityMode();
-
+	      
+	      bool aIsVolumesMode = aMode & SMESH_Actor::eVolumes;
+	      bool aIsFacesMode   = aMode & SMESH_Actor::eFaces;
+	      bool aIsEdgesMode   = aMode & SMESH_Actor::eEdges;
+	      
 	      if(aNbVolumes == 0)
 		aPopup->removeItem( 219 );
 	      else
-		aPopup->setItemChecked( 219, aMode & SMESH_Actor::eVolumes );
+		aPopup->setItemChecked( 219, aIsVolumesMode );
 
 	      if(aNbFaces == 0)
 		aPopup->removeItem( 218 );
 	      else
-		aPopup->setItemChecked( 218, aMode & SMESH_Actor::eFaces );
+		aPopup->setItemChecked( 218, aIsFacesMode );
 
 
 	      if(aNbEdges == 0)
 		aPopup->removeItem( 217 );
 	      else
-		aPopup->setItemChecked( 217, aMode & SMESH_Actor::eEdges );
+		aPopup->setItemChecked( 217, aIsEdgesMode );
 
 
-	      bool aIsRemove = (aNbVolumes == 0 || aMode & SMESH_Actor::eVolumes);
-	      aIsRemove &= (aNbFaces == 0 || aMode & SMESH_Actor::eFaces);
-	      aIsRemove &= (aNbEdges == 0 || aMode & SMESH_Actor::eEdges);
+	      bool aIsRemove = (aNbVolumes == 0 || aIsVolumesMode);
+	      aIsRemove &= (aNbFaces == 0 || aIsFacesMode);
+	      aIsRemove &= (aNbEdges == 0 || aIsEdgesMode);
 
 	      if(aIsRemove)
 		aPopup->removeItem( 220 );
@@ -2476,6 +2491,8 @@ bool SMESHGUI::CustomPopup(QAD_Desktop* parent, QPopupMenu* popup, const QString
 		break;
 	      case SMESH_Actor::eMultiConnection:
 		mi->popup()->setItemChecked( 6004, true ); break;
+	      case SMESH_Actor::eMultiConnection2D:
+		mi->popup()->setItemChecked( 6019, true ); break;
 	      case SMESH_Actor::eArea:
 		mi->popup()->setItemChecked( 6011, true ); break;
 	      case SMESH_Actor::eTaper:
@@ -2511,6 +2528,7 @@ bool SMESHGUI::CustomPopup(QAD_Desktop* parent, QPopupMenu* popup, const QString
 		mi->popup()->removeItem( 6014 );
 		mi->popup()->removeItem( 6015 );
 		mi->popup()->removeItem( 6016 );
+		mi->popup()->removeItem( 6019 );
 	      }
 	      if(aNbVolumes == 0){
 		mi->popup()->removeItem( 6017 );

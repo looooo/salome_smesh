@@ -29,7 +29,9 @@ int main(int argc, char** argv)
   new Skew();
   new Area();
   new Length();
+  //  new Length2D();
   new MultiConnection();
+  //  new MultiConnection2D();
   new FreeBorders();
   new LessThan();
   new MoreThan();

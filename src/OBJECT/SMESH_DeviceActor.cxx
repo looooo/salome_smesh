@@ -24,7 +24,7 @@
 //  File   : SMESH_Actor.cxx
 //  Author : Nicolas REJNERI
 //  Module : SMESH
-//  $Header$Header$
+//  $Header$Header: /home/server/cvs/SMESH/SMESH_SRC/src/OBJECT/SMESH_DeviceActor.cxx,v 1.5.2.4 2004/12/27 12:49:55 apo Exp $
 
 
 #include "SMESH_DeviceActor.h"
@@ -312,6 +312,69 @@ void SMESH_DeviceActor::SetExtControlMode(SMESH::Controls::FunctorPtr theFunctor
 	  aConnectivity->InsertNextCell( anIdList );
 	  aCellTypesArray->InsertNextValue( VTK_LINE );
 	  aScalars->SetValue(i,aValue.myLength);
+	}
+      }
+      
+      vtkIntArray* aCellLocationsArray = vtkIntArray::New();
+      aCellLocationsArray->SetNumberOfComponents( 1 );
+      aCellLocationsArray->SetNumberOfTuples( aNbCells );
+      
+      aConnectivity->InitTraversal();
+      for( vtkIdType idType = 0, *pts, npts; aConnectivity->GetNextCell( npts, pts ); idType++ )
+	aCellLocationsArray->SetValue( idType, aConnectivity->GetTraversalLocation( npts ) );
+      
+      aDataSet->SetCells( aCellTypesArray, aCellLocationsArray,aConnectivity );
+      SetUnstructuredGrid(aDataSet);
+
+      aDataSet->GetCellData()->SetScalars(aScalars);
+      aScalars->Delete();
+      
+      theLookupTable->SetRange(aScalars->GetRange());
+      theLookupTable->Build();
+      
+      myMergeFilter->SetScalars(aDataSet);
+      aDataSet->Delete();
+    }
+    else if (MultiConnection2D* aMultiConnection2D = dynamic_cast<MultiConnection2D*>(theFunctor.get())){
+      SMESH::Controls::MultiConnection2D::MValues aValues;
+
+      myVisualObj->UpdateFunctor(theFunctor);
+
+      aMultiConnection2D->GetValues(aValues);
+      vtkUnstructuredGrid* aDataSet = vtkUnstructuredGrid::New();
+      vtkUnstructuredGrid* aGrid = myVisualObj->GetUnstructuredGrid();
+      aDataSet->SetPoints(aGrid->GetPoints());
+      
+      vtkIdType aNbCells = aValues.size();
+      vtkDoubleArray *aScalars = vtkDoubleArray::New();
+      aScalars->SetNumberOfComponents(1);
+      aScalars->SetNumberOfTuples(aNbCells);
+
+      vtkIdType aCellsSize = 3*aNbCells;
+      vtkCellArray* aConnectivity = vtkCellArray::New();
+      aConnectivity->Allocate( aCellsSize, 0 );
+      
+      vtkUnsignedCharArray* aCellTypesArray = vtkUnsignedCharArray::New();
+      aCellTypesArray->SetNumberOfComponents( 1 );
+      aCellTypesArray->Allocate( aNbCells * aCellTypesArray->GetNumberOfComponents() );
+      
+      vtkIdList *anIdList = vtkIdList::New();
+      anIdList->SetNumberOfIds(2);
+      
+      MultiConnection2D::MValues::const_iterator anIter = aValues.begin();
+      int i = 0;
+      for(vtkIdType aVtkId; anIter != aValues.end(); anIter++,i++){
+	const MultiConnection2D::Value& aValue = (*anIter).first;
+	int aNode[2] = {
+	  myVisualObj->GetNodeVTKId(aValue.myPntId[0]),
+	  myVisualObj->GetNodeVTKId(aValue.myPntId[1])
+	};
+	if(aNode[0] >= 0 && aNode[1] >= 0){
+	  anIdList->SetId( 0, aNode[0] );
+	  anIdList->SetId( 1, aNode[1] );
+	  aConnectivity->InsertNextCell( anIdList );
+	  aCellTypesArray->InsertNextValue( VTK_LINE );
+	  aScalars->SetValue(i,(*anIter).second);
 	}
       }
       

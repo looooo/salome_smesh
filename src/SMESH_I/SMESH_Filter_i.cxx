@@ -483,6 +483,46 @@ FunctorType MultiConnection_i::GetFunctorType()
   return SMESH::FT_MultiConnection;
 }
 
+/*
+  Class       : MultiConnection2D_i
+  Description : Functor for calculating number of faces conneted to the edge
+*/
+MultiConnection2D_i::MultiConnection2D_i()
+{
+  myNumericalFunctorPtr.reset( new Controls::MultiConnection2D() );
+  myFunctorPtr = myNumericalFunctorPtr;
+}
+
+FunctorType MultiConnection2D_i::GetFunctorType()
+{
+  return SMESH::FT_MultiConnection2D;
+}
+
+SMESH::MultiConnection2D::Values* MultiConnection2D_i::GetValues()
+{
+  INFOS("MultiConnection2D_i::GetValues");
+  SMESH::Controls::MultiConnection2D::MValues aValues;
+  myMulticonnection2DPtr->GetValues( aValues );
+  
+  long i = 0, iEnd = aValues.size();
+
+  SMESH::MultiConnection2D::Values_var aResult = new SMESH::MultiConnection2D::Values(iEnd);
+
+  SMESH::Controls::MultiConnection2D::MValues::const_iterator anIter;
+  for ( anIter = aValues.begin() ; anIter != aValues.end(); anIter++, i++ )
+  {
+    const SMESH::Controls::MultiConnection2D::Value&  aVal = (*anIter).first;
+    SMESH::MultiConnection2D::Value &aValue = aResult[ i ];
+    
+    aValue.myPnt1 = aVal.myPntId[ 0 ];
+    aValue.myPnt2 = aVal.myPntId[ 1 ];
+    aValue.myNbConnects = (*anIter).second;
+   
+  }
+
+  INFOS("Multiconnection2D_i::GetValuess~");
+  return aResult._retn();
+}
 
 /*
                             PREDICATES
@@ -1092,6 +1132,12 @@ MultiConnection_ptr FilterManager_i::CreateMultiConnection()
   return anObj._retn();
 }
 
+MultiConnection2D_ptr FilterManager_i::CreateMultiConnection2D()
+{
+  SMESH::MultiConnection2D_i* aServant = new SMESH::MultiConnection2D_i();
+  SMESH::MultiConnection2D_var anObj = aServant->_this();
+  return anObj._retn();
+}
 
 BelongToGeom_ptr FilterManager_i::CreateBelongToGeom()
 {
@@ -1470,6 +1516,9 @@ CORBA::Boolean Filter_i::SetCriteria( const SMESH::Filter::Criteria& theCriteria
       case SMESH::FT_MultiConnection:
         aFunctor = aFilterMgr->CreateMultiConnection();
         break;
+      case SMESH::FT_MultiConnection2D:
+	aFunctor = aFilterMgr->CreateMultiConnection2D();
+	break;
       case SMESH::FT_Length:
         aFunctor = aFilterMgr->CreateLength();
         break;
@@ -1741,6 +1790,7 @@ static inline LDOMString toString( const long theType )
     case FT_FreeBorders     : return "Free borders";
     case FT_FreeEdges       : return "Free edges";
     case FT_MultiConnection : return "Borders at multi-connections";
+    case FT_MultiConnection2D: return "Borders at multi-connections 2D";
     case FT_Length          : return "Length";
     case FT_Length2D        : return "Length2D";
     case FT_LessThan        : return "Less than";
@@ -1772,7 +1822,9 @@ static inline SMESH::FunctorType toFunctorType( const LDOMString& theStr )
   else if ( theStr.equals( "Free borders"                 ) ) return FT_FreeBorders;
   else if ( theStr.equals( "Free edges"                   ) ) return FT_FreeEdges;
   else if ( theStr.equals( "Borders at multi-connections" ) ) return FT_MultiConnection;
+  //  else if ( theStr.equals( "Borders at multi-connections 2D" ) ) return FT_MultiConnection2D;
   else if ( theStr.equals( "Length"                       ) ) return FT_Length;
+  //  else if ( theStr.equals( "Length2D"                     ) ) return FT_Length2D;
   else if ( theStr.equals( "Range of IDs"                 ) ) return FT_RangeOfIds;
   else if ( theStr.equals( "Less than"                    ) ) return FT_LessThan;
   else if ( theStr.equals( "More than"                    ) ) return FT_MoreThan;

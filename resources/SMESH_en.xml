@@ -79,6 +79,7 @@
         <separator pos-id=""/>
 	<popup-item item-id="6002" pos-id="" label-id="Free Edges" icon-id="mesh_free_edges_2d.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
 	<popup-item item-id="6018" pos-id="" label-id="Length 2D" icon-id="mesh_length_2d.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
+        <popup-item item-id="6019" pos-id="" label-id="Borders at Multi-Connection 2D" icon-id="mesh_multi_edges_2d.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
 	<popup-item item-id="6011" pos-id="" label-id="Area" icon-id="mesh_area.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
         <popup-item item-id="6012" pos-id="" label-id="Taper" icon-id="mesh_taper.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
         <popup-item item-id="6013" pos-id="" label-id="Aspect Ratio" icon-id="mesh_aspect.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
@@ -259,6 +260,7 @@
         <separator pos-id=""/>
 	<popup-item item-id="6002" pos-id="" label-id="Free Edges" icon-id="mesh_free_edges_2d.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
 	<popup-item item-id="6018" pos-id="" label-id="Length 2D" icon-id="mesh_length_2d.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
+        <popup-item item-id="6019" pos-id="" label-id="Borders at Multi-Connection 2D" icon-id="mesh_multi_edges_2d.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
 	<popup-item item-id="6011" pos-id="" label-id="Area" icon-id="mesh_area.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
         <popup-item item-id="6012" pos-id="" label-id="Taper" icon-id="mesh_taper.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
         <popup-item item-id="6013" pos-id="" label-id="Aspect Ratio" icon-id="mesh_aspect.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
@@ -313,6 +315,7 @@
         <separator pos-id=""/>
 	<popup-item item-id="6002" pos-id="" label-id="Free Edges" icon-id="mesh_free_edges_2d.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
 	<popup-item item-id="6018" pos-id="" label-id="Length 2D" icon-id="mesh_length_2d.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
+        <popup-item item-id="6019" pos-id="" label-id="Borders at Multi-Connection 2D" icon-id="mesh_multi_edges_2d.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
 	<popup-item item-id="6011" pos-id="" label-id="Area" icon-id="mesh_area.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
         <popup-item item-id="6012" pos-id="" label-id="Taper" icon-id="mesh_taper.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
         <popup-item item-id="6013" pos-id="" label-id="Aspect Ratio" icon-id="mesh_aspect.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
@@ -369,6 +372,7 @@
         <separator pos-id=""/>
 	<popup-item item-id="6002" pos-id="" label-id="Free Edges" icon-id="mesh_free_edges_2d.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
 	<popup-item item-id="6018" pos-id="" label-id="Length 2D" icon-id="mesh_length_2d.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
+        <popup-item item-id="6019" pos-id="" label-id="Borders at Multi-Connection 2D" icon-id="mesh_multi_edges_2d.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
 	<popup-item item-id="6011" pos-id="" label-id="Area" icon-id="mesh_area.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
         <popup-item item-id="6012" pos-id="" label-id="Taper" icon-id="mesh_taper.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
         <popup-item item-id="6013" pos-id="" label-id="Aspect Ratio" icon-id="mesh_aspect.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
@@ -419,6 +423,7 @@
         <separatorTB/>
 	<toolbutton-item item-id="6002" label-id="Free Edges" icon-id="mesh_free_edges_2d.png" tooltip-id="Free edges" accel-id="" toggle-id="" execute-action=""/>
 	<toolbutton-item item-id="6018" label-id="Length 2D" icon-id="mesh_length_2d.png" tooltip-id="Length2D" accel-id="" toggle-id="" execute-action=""/>
+        <toolbutton-item item-id="6019" label-id="Borders at Multi-Connection 2D" icon-id="mesh_multi_edges_2d.png" tooltip-id="Multiconnection 2D" accel-id="" toggle-id="" execute-action=""/>
 	<toolbutton-item item-id="6011" label-id="Area" icon-id="mesh_area.png" tooltip-id="Area" accel-id="" toggle-id="" execute-action=""/>
 	<toolbutton-item item-id="6012" label-id="Taper" icon-id="mesh_taper.png" tooltip-id="Taper" accel-id="" toggle-id="" execute-action=""/>
 	<toolbutton-item item-id="6013" label-id="Aspect Ratio" icon-id="mesh_aspect.png" tooltip-id="Aspect Ratio" accel-id="" toggle-id="" execute-action=""/>

@@ -79,7 +79,7 @@ module SMESH
   {
   };
 
-  interface SMESH_Tetra_3D : SMESH_3D_Algo
+  interface SMESH_NETGEN_3D : SMESH_3D_Algo
   {
   };
 };

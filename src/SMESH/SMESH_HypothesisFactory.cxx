@@ -46,7 +46,7 @@ using namespace std;
 #include "SMESH_MEFISTO_2D.hxx"
 #include "SMESH_Quadrangle_2D.hxx"
 #include "SMESH_Hexa_3D.hxx"
-#include "SMESH_Tetra_3D.hxx"
+#include "SMESH_NETGEN_3D.hxx"
 
 //---------------------------------------
 
@@ -94,7 +94,7 @@ _creatorMap["Regular_1D"] = new SMESH_HypothesisCreator<SMESH_Regular_1D>;
 _creatorMap["MEFISTO_2D"] = new SMESH_HypothesisCreator<SMESH_MEFISTO_2D>;
 _creatorMap["Quadrangle_2D"] = new SMESH_HypothesisCreator<SMESH_Quadrangle_2D>;
 _creatorMap["Hexa_3D"] = new SMESH_HypothesisCreator<SMESH_Hexa_3D>;
-_creatorMap["Tetra_3D"] = new SMESH_HypothesisCreator<SMESH_Tetra_3D>;
+_creatorMap["NETGEN_3D"] = new SMESH_HypothesisCreator<SMESH_NETGEN_3D>;
 //---------------------------------------
 }
 

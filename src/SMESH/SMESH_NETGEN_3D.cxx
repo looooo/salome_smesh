@@ -1,5 +1,5 @@
 //=============================================================================
-// File      : SMESH_Tetra_3D.cxx
+// File      : SMESH_NETGEN_3D.cxx
 // Created   : lundi 27 Janvier 2003
 // Author    : Nadir BOUHAMOU (CEA)
 // Project   : SALOME
@@ -8,7 +8,7 @@
 //=============================================================================
 using namespace std;
 
-#include "SMESH_Tetra_3D.hxx"
+#include "SMESH_NETGEN_3D.hxx"
 #include "SMESH_MEFISTO_2D.hxx"
 #include "SMESH_Gen.hxx"
 #include "SMESH_Mesh.hxx"
@@ -42,12 +42,12 @@ using namespace std;
  */
 //=============================================================================
 
-SMESH_Tetra_3D::SMESH_Tetra_3D(int hypId, int studyId,
+SMESH_NETGEN_3D::SMESH_NETGEN_3D(int hypId, int studyId,
 			     SMESH_Gen* gen)
   : SMESH_3D_Algo(hypId, studyId, gen)
 {
-  MESSAGE("SMESH_Tetra_3D::SMESH_Tetra_3D");
-  _name = "Tetra_3D";
+  MESSAGE("SMESH_NETGEN_3D::SMESH_NETGEN_3D");
+  _name = "NETGEN_3D";
 //   _shapeType = TopAbs_SOLID;
   _shapeType = (1 << TopAbs_SHELL) | (1 << TopAbs_SOLID);// 1 bit /shape type
 //   MESSAGE("_shapeType octal " << oct << _shapeType);
@@ -64,9 +64,9 @@ SMESH_Tetra_3D::SMESH_Tetra_3D(int hypId, int studyId,
  */
 //=============================================================================
 
-SMESH_Tetra_3D::~SMESH_Tetra_3D()
+SMESH_NETGEN_3D::~SMESH_NETGEN_3D()
 {
-  MESSAGE("SMESH_Tetra_3D::~SMESH_Tetra_3D");
+  MESSAGE("SMESH_NETGEN_3D::~SMESH_NETGEN_3D");
 }
 
 //=============================================================================
@@ -75,10 +75,10 @@ SMESH_Tetra_3D::~SMESH_Tetra_3D()
  */
 //=============================================================================
 
-bool SMESH_Tetra_3D::CheckHypothesis(SMESH_Mesh& aMesh,
+bool SMESH_NETGEN_3D::CheckHypothesis(SMESH_Mesh& aMesh,
 				     const TopoDS_Shape& aShape)
 {
-  MESSAGE("SMESH_Tetra_3D::CheckHypothesis");
+  MESSAGE("SMESH_NETGEN_3D::CheckHypothesis");
 
   _hypMaxElementVolume = NULL;
 
@@ -115,11 +115,11 @@ bool SMESH_Tetra_3D::CheckHypothesis(SMESH_Mesh& aMesh,
  */
 //=============================================================================
 
-bool SMESH_Tetra_3D::Compute(SMESH_Mesh& aMesh,
+bool SMESH_NETGEN_3D::Compute(SMESH_Mesh& aMesh,
 			     const TopoDS_Shape& aShape)
   throw (SALOME_Exception)
 {
-  MESSAGE("SMESH_Tetra_3D::Compute with maxElmentsize = " << _maxElementVolume);
+  MESSAGE("SMESH_NETGEN_3D::Compute with maxElmentsize = " << _maxElementVolume);
 
   bool isOk = false;
   SMESHDS_Mesh* meshDS = aMesh.GetMeshDS();
@@ -128,7 +128,7 @@ bool SMESH_Tetra_3D::Compute(SMESH_Mesh& aMesh,
 
   map<int, const SMDS_MeshNode*> netgenToDS;
 
-  MESSAGE("SMESH_Tetra_3D::Compute Checking the mesh Faces");
+  MESSAGE("SMESH_NETGEN_3D::Compute Checking the mesh Faces");
 
   // check if all faces were meshed by a triangle mesher (here MESFISTO_2D)
 
@@ -193,7 +193,7 @@ bool SMESH_Tetra_3D::Compute(SMESH_Mesh& aMesh,
       NbTotOfTria += nbTria;
       int index = 0;
 
-      MESSAGE("SMESH_Tetra_3D::Compute The mesh Face " << (i+1) << " has " << nbNodes << " face internal Nodes, " << nbTria << " triangles");
+      MESSAGE("SMESH_NETGEN_3D::Compute The mesh Face " << (i+1) << " has " << nbNodes << " face internal Nodes, " << nbTria << " triangles");
 
       SCRUTE(orientationMeshFace);
 
@@ -250,7 +250,7 @@ bool SMESH_Tetra_3D::Compute(SMESH_Mesh& aMesh,
   SCRUTE(NbTotOfTria);
   SCRUTE(NbTotOfNodesFaces);
 
-  MESSAGE("SMESH_Tetra_3D::Compute Checking the mesh Edges");
+  MESSAGE("SMESH_NETGEN_3D::Compute Checking the mesh Edges");
 
   // check if all edges were meshed by a edge mesher (here Regular_1D)
 
@@ -297,7 +297,7 @@ bool SMESH_Tetra_3D::Compute(SMESH_Mesh& aMesh,
       int nbSegs = aSubMeshDSEdge->NbElements();
       NbTotOfSegs += nbSegs;
 
-      MESSAGE("SMESH_Tetra_3D::Compute The mesh Edge " << (i+1) << " has " << nbNodes << " edge internal Nodes, " << nbSegs << " segments");
+      MESSAGE("SMESH_NETGEN_3D::Compute The mesh Edge " << (i+1) << " has " << nbNodes << " edge internal Nodes, " << nbSegs << " segments");
 
       SMDS_Iterator<const SMDS_MeshNode *> * iteratorNodes = aSubMeshDSEdge->GetNodes();
       SCRUTE(nbNodes);
@@ -320,7 +320,7 @@ bool SMESH_Tetra_3D::Compute(SMESH_Mesh& aMesh,
   SCRUTE(NbTotOfNodesEdges);
   SCRUTE(NbTotOfSegs);
 
-  MESSAGE("SMESH_Tetra_3D::Compute Checking the mesh Vertices");
+  MESSAGE("SMESH_NETGEN_3D::Compute Checking the mesh Vertices");
 
   vector<SMESH_subMesh*> meshVertices;
   for (TopExp_Explorer exp(aShape,TopAbs_VERTEX);exp.More();exp.Next())
@@ -353,7 +353,7 @@ bool SMESH_Tetra_3D::Compute(SMESH_Mesh& aMesh,
       int nbNodes = aSubMeshDSVertex->NbNodes();
       NbTotOfNodesVertices += nbNodes;
 
-      MESSAGE("SMESH_Tetra_3D::Compute The mesh Vertex " << (i+1) << " has " << nbNodes << " Nodes");
+      MESSAGE("SMESH_NETGEN_3D::Compute The mesh Vertex " << (i+1) << " has " << nbNodes << " Nodes");
 
       SMDS_Iterator<const SMDS_MeshNode *> * iteratorNodes = aSubMeshDSVertex->GetNodes();
       SCRUTE(nbNodes);
@@ -375,7 +375,7 @@ bool SMESH_Tetra_3D::Compute(SMESH_Mesh& aMesh,
 
   SCRUTE(NbTotOfNodesVertices);
 
-  MESSAGE("SMESH_Tetra_3D::Compute --> Analysis of all shell mesh");
+  MESSAGE("SMESH_NETGEN_3D::Compute --> Analysis of all shell mesh");
 
   vector<SMESH_subMesh*> meshShells;
   TopoDS_Shell aShell;
@@ -394,13 +394,13 @@ bool SMESH_Tetra_3D::Compute(SMESH_Mesh& aMesh,
 
   if (numberOfShells == 1)
     {
-      MESSAGE("SMESH_Tetra_3D::Compute Only one shell --> generation of the mesh using directly Netgen");
+      MESSAGE("SMESH_NETGEN_3D::Compute Only one shell --> generation of the mesh using directly Netgen");
 
       /*
 	Prepare the Netgen surface mesh from the SMESHDS
       */
 
-      MESSAGE("SMESH_Tetra_3D::Compute Prepare the Netgen surface mesh from the SMESHDS");
+      MESSAGE("SMESH_NETGEN_3D::Compute Prepare the Netgen surface mesh from the SMESHDS");
 
       int spaceDimension = 3;
       int nbNodesByTri = 3;
@@ -670,7 +670,7 @@ bool SMESH_Tetra_3D::Compute(SMESH_Mesh& aMesh,
 	Feed the Netgen surface mesh
       */
 
-      MESSAGE("SMESH_Tetra_3D::Compute Feed the Netgen surface mesh");
+      MESSAGE("SMESH_NETGEN_3D::Compute Feed the Netgen surface mesh");
 
       Ng_Mesh * Netgen_mesh;
 
@@ -706,7 +706,7 @@ bool SMESH_Tetra_3D::Compute(SMESH_Mesh& aMesh,
 	Generate the volume mesh
       */
 
-      MESSAGE("SMESH_Tetra_3D::Compute Generate the volume mesh");
+      MESSAGE("SMESH_NETGEN_3D::Compute Generate the volume mesh");
 
       SCRUTE(Netgen_NbOfNodes);
       SCRUTE(Netgen_NbOfTria);
@@ -737,14 +737,14 @@ bool SMESH_Tetra_3D::Compute(SMESH_Mesh& aMesh,
 	  (Netgen_NbOfNodesNew <= Netgen_NbOfNodes) ||
 	  (Netgen_NbOfTetra <= 0))
 	{
-	  MESSAGE("SMESH_Tetra_3D::Compute The Volume Mesh Generation has failed ...");
+	  MESSAGE("SMESH_NETGEN_3D::Compute The Volume Mesh Generation has failed ...");
 	  SCRUTE(status);
 
 	  /*
 	    Free the memory needed by to generate the Netgen Mesh
 	  */
 
-	  MESSAGE("SMESH_Tetra_3D::Compute Free the memory needed by to generate the Netgen Mesh");
+	  MESSAGE("SMESH_NETGEN_3D::Compute Free the memory needed by to generate the Netgen Mesh");
 
 	  delete [] Netgen_Coordinates;
 	  delete [] Netgen_Connectivity;
@@ -760,7 +760,7 @@ bool SMESH_Tetra_3D::Compute(SMESH_Mesh& aMesh,
 	  return false;
 	}
 
-      MESSAGE("SMESH_Tetra_3D::Compute End of Volume Mesh Generation");
+      MESSAGE("SMESH_NETGEN_3D::Compute End of Volume Mesh Generation");
       SCRUTE(status);
 
       double * Netgen_CoordinatesNew = new double [spaceDimension*Netgen_NbOfNodesNew];
@@ -790,7 +790,7 @@ bool SMESH_Tetra_3D::Compute(SMESH_Mesh& aMesh,
 	Feed back the SMESHDS with the generated Nodes and Volume Elements
       */
 
-      MESSAGE("SMESH_Tetra_3D::Compute Feed back the SMESHDS with the generated Nodes and Volume Elements");
+      MESSAGE("SMESH_NETGEN_3D::Compute Feed back the SMESHDS with the generated Nodes and Volume Elements");
 
       int NbTotOfNodesShell = Netgen_NbOfNodesNew - Netgen_NbOfNodes;
 
@@ -801,7 +801,7 @@ bool SMESH_Tetra_3D::Compute(SMESH_Mesh& aMesh,
       for (int i=0; i<NbTotOfNodesShell; i++)
 	listNodeShellCoresNetgenSmesh[i] = 0;
 
-      MESSAGE("SMESH_Tetra_3D::Compute --> Adding the New Nodes to SMESHDS");
+      MESSAGE("SMESH_NETGEN_3D::Compute --> Adding the New Nodes to SMESHDS");
 
       for (int i=0; i<NbTotOfNodesShell; i++)
 	{
@@ -832,7 +832,7 @@ bool SMESH_Tetra_3D::Compute(SMESH_Mesh& aMesh,
 	    ASSERT(listNodeShellCoresNetgenSmesh[i] != listNodeShellCoresNetgenSmesh[j]);
 	}
 
-      MESSAGE("SMESH_Tetra_3D::Compute --> Adding the New elements (Tetrahedrons) to the SMESHDS");
+      MESSAGE("SMESH_NETGEN_3D::Compute --> Adding the New elements (Tetrahedrons) to the SMESHDS");
 
       for (int i=0; i<Netgen_NbOfTetra; i++)
 	{
@@ -881,7 +881,7 @@ bool SMESH_Tetra_3D::Compute(SMESH_Mesh& aMesh,
 	Free the memory needed by to generate the Netgen Mesh
       */
 
-      MESSAGE("SMESH_Tetra_3D::Compute Free the memory needed by to generate the Netgen Mesh");
+      MESSAGE("SMESH_NETGEN_3D::Compute Free the memory needed by to generate the Netgen Mesh");
 
       delete [] Netgen_Coordinates;
       delete [] Netgen_Connectivity;
@@ -902,13 +902,13 @@ bool SMESH_Tetra_3D::Compute(SMESH_Mesh& aMesh,
       */
 
       {
-	MESSAGE("SMESH_Tetra_3D::Compute Verification of the Shell mesh");
+	MESSAGE("SMESH_NETGEN_3D::Compute Verification of the Shell mesh");
 
 	TopoDS_Shape aShapeShell = meshShells[0]->GetSubShape();
 	SMESH_Algo* algoShell = _gen->GetAlgo(aMesh, aShapeShell);
 	string algoShellName = algoShell->GetName();
 	SCRUTE(algoShellName);
-	if (algoShellName != "Tetra_3D")
+	if (algoShellName != "NETGEN_3D")
 	  {
 	    SCRUTE(algoShellName);
 	    ASSERT(0);
@@ -921,7 +921,7 @@ bool SMESH_Tetra_3D::Compute(SMESH_Mesh& aMesh,
 	int nbNodes = aSubMeshDSShell->NbNodes();
 	int nbTetra = aSubMeshDSShell->NbElements();
 
-	MESSAGE("SMESH_Tetra_3D::Compute The mesh Shell has " << nbNodes << " shell internal Nodes, " << nbTetra << " tetrahedrons");
+	MESSAGE("SMESH_NETGEN_3D::Compute The mesh Shell has " << nbNodes << " shell internal Nodes, " << nbTetra << " tetrahedrons");
 
 	SMDS_Iterator<const SMDS_MeshNode *> * iteratorNodes = aSubMeshDSShell->GetNodes();
 
@@ -974,7 +974,7 @@ bool SMESH_Tetra_3D::Compute(SMESH_Mesh& aMesh,
   else
     {
       SCRUTE(numberOfShells);
-      MESSAGE("SMESH_Tetra_3D::Compute ERROR More than one shell ????? ");
+      MESSAGE("SMESH_NETGEN_3D::Compute ERROR More than one shell ????? ");
       return false;
     }
 
@@ -988,7 +988,7 @@ bool SMESH_Tetra_3D::Compute(SMESH_Mesh& aMesh,
  */
 //=============================================================================
 
-ostream & SMESH_Tetra_3D::SaveTo(ostream & save)
+ostream & SMESH_NETGEN_3D::SaveTo(ostream & save)
 {
   return save << this;
 }
@@ -999,7 +999,7 @@ ostream & SMESH_Tetra_3D::SaveTo(ostream & save)
  */
 //=============================================================================
 
-istream & SMESH_Tetra_3D::LoadFrom(istream & load)
+istream & SMESH_NETGEN_3D::LoadFrom(istream & load)
 {
   return load >> (*this);
 }
@@ -1010,7 +1010,7 @@ istream & SMESH_Tetra_3D::LoadFrom(istream & load)
  */
 //=============================================================================
 
-ostream & operator << (ostream & save, SMESH_Tetra_3D & hyp)
+ostream & operator << (ostream & save, SMESH_NETGEN_3D & hyp)
 {
   return save;
 }
@@ -1021,7 +1021,7 @@ ostream & operator << (ostream & save, SMESH_Tetra_3D & hyp)
  */
 //=============================================================================
 
-istream & operator >> (istream & load, SMESH_Tetra_3D & hyp)
+istream & operator >> (istream & load, SMESH_NETGEN_3D & hyp)
 {
   return load;
 }

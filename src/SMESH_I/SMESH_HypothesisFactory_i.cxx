@@ -44,7 +44,7 @@ using namespace std;
 #include "SMESH_MEFISTO_2D_i.hxx"
 #include "SMESH_Quadrangle_2D_i.hxx"
 #include "SMESH_Hexa_3D_i.hxx"
-#include "SMESH_Tetra_3D_i.hxx"
+#include "SMESH_NETGEN_3D_i.hxx"
 
 //---------------------------------------
 

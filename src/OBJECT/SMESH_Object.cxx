@@ -438,6 +438,32 @@ void SMESH_VisualObjDef::buildNodePrs()
 // function : buildElemPrs
 // purpose  : Create VTK cells for elements
 //=================================================================================
+
+namespace{
+  typedef std::vector<const SMDS_MeshElement*> TConnect;
+
+  int GetConnect(const SMDS_ElemIteratorPtr& theNodesIter, 
+		 TConnect& theConnect)
+  {
+    theConnect.clear();
+    for(; theNodesIter->more();)
+      theConnect.push_back(theNodesIter->next());
+    return theConnect.size();
+  }
+  
+  inline 
+  void SetId(vtkIdList *theIdList, 
+	     const SMESH_VisualObjDef::TMapOfIds& theSMDS2VTKNodes, 
+	     const TConnect& theConnect, 
+	     int thePosition,
+	     int theId)
+  {
+    theIdList->SetId(thePosition,theSMDS2VTKNodes.find(theConnect[theId]->GetID())->second);
+  }
+
+}
+
+
 void SMESH_VisualObjDef::buildElemPrs()
 {
   // Create points
@@ -455,8 +481,8 @@ void SMESH_VisualObjDef::buildElemPrs()
   static SMDSAbs_ElementType aTypes[ 3 ] = { SMDSAbs_Edge, SMDSAbs_Face, SMDSAbs_Volume };
 
   // get entity data
-  map< int, int >         nbEnts;
-  map< int, TEntityList > anEnts;
+  map<SMDSAbs_ElementType,int> nbEnts;
+  map<SMDSAbs_ElementType,TEntityList> anEnts;
 
   for ( int i = 0; i <= 2; i++ )
     nbEnts[ aTypes[ i ] ] = GetEntities( aTypes[ i ], anEnts[ aTypes[ i ] ] );
@@ -490,12 +516,16 @@ void SMESH_VisualObjDef::buildElemPrs()
   
   vtkIdList *anIdList = vtkIdList::New();
   vtkIdType iElem = 0;
-  
+
+  TConnect aConnect;
+  aConnect.reserve(VTK_CELL_SIZE);
+
   for ( int i = 0; i <= 2; i++ ) // iterate through edges, faces and volumes
   {
     if( nbEnts[ aTypes[ i ] ] > 0 )
     {
-      const TEntityList& aList = anEnts[ aTypes[ i ] ];
+      const SMDSAbs_ElementType& aType = aTypes[ i ];
+      const TEntityList& aList = anEnts[ aType ];
       TEntityList::const_iterator anIter;
       for ( anIter = aList.begin(); anIter != aList.end(); ++anIter )
       {
@@ -510,14 +540,48 @@ void SMESH_VisualObjDef::buildElemPrs()
         myVTK2SMDSElems.insert( TMapOfIds::value_type( iElem, anId ) );
 
         SMDS_ElemIteratorPtr aNodesIter = anElem->nodesIterator();
-        for( vtkIdType aNodeId = 0; aNodesIter->more(); aNodeId++ )
-        {
-          const SMDS_MeshElement* aNode = aNodesIter->next();
-          anIdList->SetId( aNodeId, mySMDS2VTKNodes[aNode->GetID()] );
-        }
+	switch(aType){
+	case SMDSAbs_Volume:{
+	  int* aConnectivities = NULL;
+	  GetConnect(aNodesIter,aConnect);
+	  // Convertions connectivities from SMDS to VTK
+	  switch(aNbNodes){
+	  case 4:{
+	    static int anIds[] = {0,2,1,3};
+	    aConnectivities = anIds;
+	    break;
+	  }
+	  case 5:{
+	    static int anIds[] = {0,3,2,1,4};
+	    aConnectivities = anIds;
+	    break;
+	  }
+	  case 6:{
+	    static int anIds[] = {0,1,2,3,4,5};
+	    aConnectivities = anIds;
+	    break;
+	  }
+	  case 8:{
+	    static int anIds[] = {0,3,2,1,4,7,6,5};
+	    aConnectivities = anIds;
+	    break;
+	  }}
+
+	  if(aConnectivities)
+	    for( vtkIdType aNodeId = 0; aNodeId < aNbNodes; aNodeId++ )
+	      SetId(anIdList,mySMDS2VTKNodes,aConnect,aNodeId,aConnectivities[aNodeId]);
+	  
+	  break;
+	}
+	default:
+	  for( vtkIdType aNodeId = 0; aNodesIter->more(); aNodeId++ ){
+	    const SMDS_MeshElement* aNode = aNodesIter->next();
+	    anIdList->SetId( aNodeId, mySMDS2VTKNodes[aNode->GetID()] );
+	  }
+	}
 
         aConnectivity->InsertNextCell( anIdList );
-        aCellTypesArray->InsertNextValue( getCellType( aTypes[ i ], aNbNodes ) );
+        aCellTypesArray->InsertNextValue( getCellType( aType, aNbNodes ) );
 
         iElem++;
       }

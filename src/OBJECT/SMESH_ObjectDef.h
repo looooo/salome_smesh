@@ -53,12 +53,10 @@ class SMDS_MeshElement;
 */
 class SMESH_VisualObjDef: public SMESH_VisualObj
 {
-protected:
-
+public:
   typedef std::list<const SMDS_MeshElement*>   TEntityList;
   typedef std::map<vtkIdType,vtkIdType>  TMapOfIds;
   
-public:
                             SMESH_VisualObjDef();
   virtual                   ~SMESH_VisualObjDef();
   

@@ -1,5 +1,6 @@
 #
-# Tetrahedrization of the geometry union of 2 boxes having a face in common
+# Tetrahedrization of the geometry union of 3 boxes aligned where the middle
+# one has a race in common with the two others.
 # Hypothesis and algorithms for the mesh generation are global
 #
 
@@ -18,7 +19,7 @@ ShapeTypeShell     = 3
 ShapeTypeFace      = 4
 ShapeTypeEdge      = 6
 
-# ---- define 2 boxes box1 and box2
+# ---- define 3 boxes box1, box2 and box3
 
 box1 = geompy.MakeBox(0., 0., 0., 100., 200., 300.)
 
@@ -46,17 +47,28 @@ print "number of Shells in box2 : ",len(subShellList)
 print "number of Faces in box2 : ",len(subFaceList)
 print "number of Edges in box2 : ",len(subEdgeList)
 
+box3 = geompy.MakeBox(0., 0., 300., 200., 200., 500.)
+
+idbox3 = geompy.addToStudy(box3,"box3")
+
+print "Analysis of the geometry box3 :"
+subShellList=geompy.SubShapeAll(box3,ShapeTypeShell)
+subFaceList=geompy.SubShapeAll(box3,ShapeTypeFace)
+subEdgeList=geompy.SubShapeAll(box3,ShapeTypeEdge)
+
+print "number of Shells in box3 : ",len(subShellList)
+print "number of Faces in box3 : ",len(subFaceList)
+print "number of Edges in box3 : ",len(subEdgeList)
+
 blocs = []
 blocs.append(box1._get_Name())
 blocs.append(box2._get_Name())
-
-# append the tow boxes to make ine shel, referrencing only once
-# the internal interface
+blocs.append(box3._get_Name())
 
 shell = geompy.Partition(blocs)
 idshell = geompy.addToStudy(shell,"shell")
 
-print "Analysis of the geometry shell (union of box1 and box2) :"
+print "Analysis of the geometry shell (union of box1, box2 and box3) :"
 subShellList=geompy.SubShapeAll(shell,ShapeTypeShell)
 subFaceList=geompy.SubShapeAll(shell,ShapeTypeFace)
 subEdgeList=geompy.SubShapeAll(shell,ShapeTypeEdge)

@@ -129,6 +129,9 @@ public:
   SMESH_subMesh *GetSubMeshContaining(const TopoDS_Shape & aSubShape)
     throw(SALOME_Exception);
   
+  SMESH_subMesh *GetSubMeshContaining(const int aShapeID)
+    throw(SALOME_Exception);
+  
   const list < SMESH_subMesh * >&
   GetSubMeshUsingHypothesis(SMESHDS_Hypothesis * anHyp)
     throw(SALOME_Exception);

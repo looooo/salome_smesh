@@ -660,6 +660,24 @@ throw(SALOME_Exception)
   return aSubMesh;
 }
 
+//=============================================================================
+/*!
+ * Get the SMESH_subMesh object implementation. Dont create it, return null
+ * if it does not exist.
+ */
+//=============================================================================
+
+SMESH_subMesh *SMESH_Mesh::GetSubMeshContaining(const int aShapeID)
+throw(SALOME_Exception)
+{
+  Unexpect aCatch(SalomeException);
+  
+  map <int, SMESH_subMesh *>::iterator i_sm = _mapSubMesh.find(aShapeID);
+  if (i_sm == _mapSubMesh.end())
+    return NULL;
+  return i_sm->second;
+}
+
 //=======================================================================
 //function : IsUsedHypothesis
 //purpose  : Return True if anHyp is used to mesh aSubShape

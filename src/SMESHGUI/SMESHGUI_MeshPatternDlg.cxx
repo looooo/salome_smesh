@@ -176,7 +176,6 @@ QFrame* SMESHGUI_MeshPatternDlg::createMainFrame( QWidget* theParent )
   // Pictures 2d and 3d
   for ( int i = 0; i < 2; i++ )
   {
-    QWidget* aPreview, *aPicture;
     if ( i == 0 )
     {
       myPicture2d = new SMESHGUI_PatternWidget( aPatGrp ),
@@ -798,7 +797,7 @@ void SMESHGUI_MeshPatternDlg::displayPreview()
     vtkProperty* aProp = vtkProperty::New();
     aProp->SetRepresentationToWireframe();
     aProp->SetColor( 250, 0, 250 );
-    if ( SMESH_Actor* anActor = SMESH::FindActorByObject( myMesh ) )
+    if ( SMESH::FindActorByObject( myMesh ) )
       aProp->SetLineWidth( SMESH::GetFloat( "SMESH:SettingsWidth", 1 ) +1 );
     else
       aProp->SetLineWidth( 1 );

@@ -958,10 +958,8 @@ bool Length2D::Value::operator<(const Length2D::Value& x) const{
 void Length2D::GetValues(TValues& theValues){
   TValues aValues;
   SMDS_FaceIteratorPtr anIter = myMesh->facesIterator();
-  int i = 0;
   for(; anIter->more(); ){
     const SMDS_MeshFace* anElem = anIter->next();
-    long anElemId = anElem->GetID();
     SMDS_ElemIteratorPtr aNodesIter = anElem->nodesIterator();
     long aNodeId[2];
     gp_Pnt P[3];

@@ -24,7 +24,7 @@
 //  File   : SMESH_Actor.cxx
 //  Author : Nicolas REJNERI
 //  Module : SMESH
-//  $Header$Header: /home/server/cvs/SMESH/SMESH_SRC/src/OBJECT/SMESH_DeviceActor.cxx,v 1.5.2.4 2004/12/27 12:49:55 apo Exp $
+//  $Header$Header$
 
 
 #include "SMESH_DeviceActor.h"
@@ -299,8 +299,7 @@ void SMESH_DeviceActor::SetExtControlMode(SMESH::Controls::FunctorPtr theFunctor
       anIdList->SetNumberOfIds(2);
       
       Length2D::TValues::const_iterator anIter = aValues.begin();
-      int i = 0;
-      for(vtkIdType aVtkId; anIter != aValues.end(); anIter++,i++){
+      for(vtkIdType aVtkId = 0; anIter != aValues.end(); anIter++,aVtkId++){
 	const Length2D::Value& aValue = *anIter;
 	int aNode[2] = {
 	  myVisualObj->GetNodeVTKId(aValue.myPntId[0]),
@@ -311,7 +310,7 @@ void SMESH_DeviceActor::SetExtControlMode(SMESH::Controls::FunctorPtr theFunctor
 	  anIdList->SetId( 1, aNode[1] );
 	  aConnectivity->InsertNextCell( anIdList );
 	  aCellTypesArray->InsertNextValue( VTK_LINE );
-	  aScalars->SetValue(i,aValue.myLength);
+	  aScalars->SetValue(aVtkId,aValue.myLength);
 	}
       }
       

@@ -906,7 +906,6 @@ void SMESHGUI_FilterTable::onAddBtn()
   int aType = GetType();
   addRow( myTables[ aType ], aType );
 
-  Table* aTable = myTables[ aType ];
   Update();
 }
 
@@ -1347,9 +1346,6 @@ SMESHGUI_FilterTable::Table* SMESHGUI_FilterTable::createTable( QWidget*  thePar
 
   static int aLenCr = abs(  aMaxLenCr -
                             aMetrics.width( tr( "CRITERION" ) ) ) / aMetrics.width( ' ' ) + 5;
-
-  static int aLenCo = abs(  maxLength( getCompare(), aMetrics ) -
-                            aMetrics.width( tr( "COMPARE" ) ) ) / aMetrics.width( ' ' ) + 5;
 
   QString aCrStr;
   aCrStr.fill( ' ', aLenCr );
@@ -2319,7 +2315,7 @@ void SMESHGUI_FilterDlg::filterSelectionSource( const int theType,
 
       if ( aSelMap.Extent() > 0 )
       {
-        if(SMESH_Actor *anActor = SMESH::FindActorByEntry( anIter.Key()->getEntry() ) )
+        if( SMESH::FindActorByEntry( anIter.Key()->getEntry() ) )
         {
           for ( int i = 1; i <= aSelMap.Extent(); i++ )
             aToBeFiltered.Add( aSelMap(i) );

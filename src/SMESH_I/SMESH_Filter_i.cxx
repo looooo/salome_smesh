@@ -1554,7 +1554,6 @@ SMESH::FilterManager_ptr SMESH_Gen_i::CreateFilterManager()
 {
   SMESH::FilterManager_i* aFilter = new SMESH::FilterManager_i();
   SMESH::FilterManager_var anObj = aFilter->_this();
-  TPythonDump()<<aFilter<<" = smesh.CreateFilterManager()";
   return anObj._retn();
 }
 
@@ -1846,12 +1845,13 @@ CORBA::Boolean Filter_i::SetCriteria( const SMESH::Filter::Criteria& theCriteria
   if ( myPredicate != 0 )
     myPredicate->Destroy();
 
-    SMESH::FilterManager_i* aFilter = new SMESH::FilterManager_i();
-    FilterManager_ptr aFilterMgr = aFilter->_this();
-
+  SMESH::FilterManager_i* aFilter = new SMESH::FilterManager_i();
+  FilterManager_ptr aFilterMgr = aFilter->_this();
+  
   // CREATE two lists ( PREDICATES  and LOG OP )
 
   // Criterion
+  TPythonDump()<<"aCriteria = []";
   std::list<SMESH::Predicate_ptr> aPredicates;
   std::list<int>                  aBinaries;
   for ( int i = 0, n = theCriteria.length(); i < n; i++ )
@@ -1866,10 +1866,10 @@ CORBA::Boolean Filter_i::SetCriteria( const SMESH::Filter::Criteria& theCriteria
     ElementType aTypeOfElem   = theCriteria[ i ].TypeOfElement;
     long        aPrecision    = theCriteria[ i ].Precision;
 
-    TPythonDump()<<this<<".SetCriteria(SMESH.Filter.Criteria("<<
+    TPythonDump()<<"aCriteria.append(SMESH.Filter.Criterion("<<
       aCriterion<<","<<aCompare<<","<<aThreshold<<","<<aUnary<<","<<aBinary<<","<<
       aTolerance<<",'"<<aThresholdStr<<"',"<<aTypeOfElem<<","<<aPrecision<<"))";
-    
+
     SMESH::Predicate_ptr aPredicate = SMESH::Predicate::_nil();
     SMESH::NumericalFunctor_ptr aFunctor = SMESH::NumericalFunctor::_nil();
 
@@ -2007,6 +2007,7 @@ CORBA::Boolean Filter_i::SetCriteria( const SMESH::Filter::Criteria& theCriteria
     aBinaries.push_back( aBinary );
 
   } // end of for
+  TPythonDump()<<this<<".SetCriteria(aCriteria)";
 
   // CREATE ONE PREDICATE FROM PREVIOUSLY CREATED MAP
 
@@ -2439,7 +2440,7 @@ FilterLibrary_i::~FilterLibrary_i()
 //=======================================================================
 Filter_ptr FilterLibrary_i::Copy( const char* theFilterName )
 {
-  Filter_ptr aRes;
+  Filter_ptr aRes = Filter::_nil();
   LDOM_Node aFilter = findFilter( theFilterName, myDoc );
 
   if ( aFilter.isNull() )

@@ -41,40 +41,22 @@ namespace SMESH
     virtual ~TPythonDump();
     
     TPythonDump& 
-    operator<<(long int theArg){
-      myStream<<theArg;
-      return *this;
-    }
+    operator<<(long int theArg);
 
     TPythonDump& 
-    operator<<(int theArg){
-      myStream<<theArg;
-      return *this;
-    }
+    operator<<(int theArg);
 
     TPythonDump& 
-    operator<<(double theArg){
-      myStream<<theArg;
-      return *this;
-    }
+    operator<<(double theArg);
 
     TPythonDump& 
-    operator<<(float theArg){
-      myStream<<theArg;
-      return *this;
-    }
+    operator<<(float theArg);
 
     TPythonDump& 
-    operator<<(const void* theArg){
-      myStream<<theArg;
-      return *this;
-    }
+    operator<<(const void* theArg);
 
     TPythonDump& 
-    operator<<(const char* theArg){
-      myStream<<theArg;
-      return *this;
-    }
+    operator<<(const char* theArg);
 
     TPythonDump& 
     operator<<(const SMESH::ElementType& theArg);

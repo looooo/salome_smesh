@@ -11,6 +11,12 @@
 #include <TColStd_HSequenceOfInteger.hxx>
 #include <TCollection_AsciiString.hxx>
 
+#ifdef _DEBUG_
+static int MYDEBUG = 0;
+#else
+static int MYDEBUG = 0;
+#endif
+
 namespace SMESH
 {
 
@@ -31,8 +37,51 @@ namespace SMESH
 	std::string aString = myStream.str();
 	TCollection_AsciiString aCollection(Standard_CString(aString.c_str()));
 	aSMESHGen->AddToPythonScript(aStudy->StudyId(),aCollection);
+	if(MYDEBUG) MESSAGE(aString);
       }
     }
+  }
+
+  TPythonDump& 
+  TPythonDump::
+  operator<<(long int theArg){
+    myStream<<theArg;
+    return *this;
+  }
+
+  TPythonDump& 
+  TPythonDump::
+  operator<<(int theArg){
+    myStream<<theArg;
+    return *this;
+  }
+
+  TPythonDump& 
+  TPythonDump::
+  operator<<(double theArg){
+    myStream<<theArg;
+    return *this;
+  }
+
+  TPythonDump& 
+  TPythonDump::
+  operator<<(float theArg){
+    myStream<<theArg;
+    return *this;
+  }
+
+  TPythonDump& 
+  TPythonDump::
+  operator<<(const void* theArg){
+    myStream<<theArg;
+    return *this;
+  }
+
+  TPythonDump& 
+  TPythonDump::
+  operator<<(const char* theArg){
+    myStream<<theArg;
+    return *this;
   }
 
   TPythonDump& 
@@ -106,7 +155,7 @@ namespace SMESH
   TPythonDump::
   operator<<(SMESH::FilterManager_i* theArg)
   {
-    myStream<<"aFilterManager"<<theArg;
+    myStream<<"aFilterManager";
     return *this;
   }
 
@@ -439,6 +488,7 @@ TCollection_AsciiString SMESH_Gen_i::DumpPython_impl
   
   aScript += "def RebuildData(theStudy):";
   aScript += "\n\tsmesh = salome.lcc.FindOrLoadComponent(\"FactoryServer\", \"SMESH\")";
+  aScript += "\n\taFilterManager = smesh.CreateFilterManager()";
   if ( isPublished )
     aScript += "\n\tsmesh.SetCurrentStudy(theStudy)";
   else

@@ -1277,6 +1277,7 @@ const QMap<int, QString>& SMESHGUI_FilterTable::getCriteria( const int theType )
       aCriteria[ SMESH::FT_BelongToGeom     ] = tr( "BELONG_TO_GEOM" );
       aCriteria[ SMESH::FT_BelongToPlane    ] = tr( "BELONG_TO_PLANE" );
       aCriteria[ SMESH::FT_BelongToCylinder ] = tr( "BELONG_TO_CYLINDER" );
+      aCriteria[ SMESH::FT_Length2D         ] = tr( "LENGTH2D" );
     }
     return aCriteria;
   }

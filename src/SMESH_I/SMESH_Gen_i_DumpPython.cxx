@@ -117,23 +117,16 @@ void SMESH_Gen_i::AddToCurrentPyScript (const TCollection_AsciiString& theString
 TCollection_AsciiString& SMESH_Gen_i::AddObject(TCollection_AsciiString& theStr,
                                                 CORBA::Object_ptr        theObject)
 {
-  GEOM::GEOM_Object_var geomObj = GEOM::GEOM_Object::_narrow( theObject );
-  if ( !geomObj->_is_nil() ) {
-    theStr += "salome.IDToObject(\"";
-    theStr += geomObj->GetStudyEntry();
-    theStr += "\")";
-  }
-  else {
-    SMESH_Gen_i* aSMESHGen = SMESH_Gen_i::GetSMESHGen();
-    SALOMEDS::SObject_var aSO =
-      aSMESHGen->ObjectToSObject(aSMESHGen->GetCurrentStudy(), theObject);
-    if ( !aSO->_is_nil() )
-      theStr += aSO->GetID();
-    else if ( !CORBA::is_nil( theObject ) )
-      theStr += aSMESHGen->GetORB()->object_to_string( theObject );
-    else
-      theStr += "None";
-  }
+  SMESH_Gen_i* aSMESHGen = SMESH_Gen_i::GetSMESHGen();
+  SALOMEDS::SObject_var aSO =
+    aSMESHGen->ObjectToSObject(aSMESHGen->GetCurrentStudy(), theObject);
+  if ( !aSO->_is_nil() )
+    theStr += aSO->GetID();
+  else if ( !CORBA::is_nil( theObject ) )
+    theStr += GetORB()->object_to_string( theObject );
+  else
+    theStr += "None";
+
   return theStr;
 }
 
@@ -233,9 +226,22 @@ TCollection_AsciiString SMESH_Gen_i::DumpPython_impl
   aScript += "import geompy\n\n";
   aScript += "import SMESH\n";
   aScript += "import StdMeshers\n\n";
+  aScript += "#import GEOM module\n";
+  aScript += "import string\n";
+  aScript += "import os\n";
+  aScript += "import sys\n";
+  aScript += "sys.path.append( os.path.dirname(__file__) )\n";
+  aScript += "exec(\"from \"+string.replace(__name__,\"SMESH\",\"GEOM\")+\" import *\")\n\n";
+  
   aScript += "def RebuildData(theStudy):";
   aScript += "\n\tsmesh = salome.lcc.FindOrLoadComponent(\"FactoryServer\", \"SMESH\")";
-  aScript += "\n\tsmesh.SetCurrentStudy(theStudy)";
+  if ( isPublished )
+    aScript += "\n\tsmesh.SetCurrentStudy(theStudy)";
+  else
+    aScript += "\n\tsmesh.SetCurrentStudy(None)";
+
+  Standard_Integer posToInertGlobalVars = aScript.Length();
+  TCollection_AsciiString globalVars;
 
   // Dump trace of restored study
   if (theSavedTrace.Length() > 0) {
@@ -258,6 +264,7 @@ TCollection_AsciiString SMESH_Gen_i::DumpPython_impl
     return aScript;
 
   // Replace entries by the names
+  GEOM::GEOM_Gen_ptr geom = GetGeomEngine();
   TColStd_SequenceOfAsciiString seqRemoved;
   Resource_DataMapOfAsciiStringAsciiString mapRemoved;
   Resource_DataMapOfAsciiStringAsciiString aNames;
@@ -280,13 +287,17 @@ TCollection_AsciiString SMESH_Gen_i::DumpPython_impl
         theObjectNames(anEntry) = aName;
       }
     } else {
+      // is a GEOM object?
+      aName = geom->GetDumpName( anEntry.ToCString() );
+      if ( aName.IsEmpty() ) {
       // ? Removed Object ?
-      do {
-        aName = aBaseName + TCollection_AsciiString(++objectCounter);
-      } while (theObjectNames.IsBound(aName));
+        do {
+          aName = aBaseName + TCollection_AsciiString(++objectCounter);
+        } while (theObjectNames.IsBound(aName));
+        seqRemoved.Append(aName);
+        mapRemoved.Bind(anEntry, "1");
+      }
       theObjectNames.Bind(anEntry, aName);
-      seqRemoved.Append(aName);
-      mapRemoved.Bind(anEntry, "1");
     }
     theObjectNames.Bind(aName, anEntry); // to detect same name of diff objects
 

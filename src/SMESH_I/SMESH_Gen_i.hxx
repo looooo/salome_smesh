@@ -428,4 +428,16 @@ private:
   std::map < int, Handle(TColStd_HSequenceOfAsciiString) > myPythonScripts;
 };
 
+
+namespace SMESH
+{
+  template<class T>
+  T
+  DownCast(CORBA::Object_ptr theArg)
+  {
+    return dynamic_cast<T>(SMESH_Gen_i::GetServant(theArg).in());
+  }
+}
+
+
 #endif

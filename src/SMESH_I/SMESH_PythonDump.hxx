@@ -23,63 +23,79 @@
 #include <SALOMEconfig.h>
 #include CORBA_SERVER_HEADER(SMESH_Mesh)
 
-#include <TCollection_AsciiString.hxx>
+#include <sstream>
 
 namespace SMESH
 {
-  TCollection_AsciiString& 
-  operator<<(TCollection_AsciiString& theString, 
-	     const char* theArg);
-
-  TCollection_AsciiString& 
-  operator<<(TCollection_AsciiString& theString, 
-	     int theArg);
-
-  TCollection_AsciiString& 
-  operator<<(TCollection_AsciiString& theString, 
-	     float theArg);
-
   class FilterLibrary_i;
-  TCollection_AsciiString& 
-  operator<<(TCollection_AsciiString& theString, 
-	     SMESH::FilterLibrary_i* theArg);
-
   class FilterManager_i;
-  TCollection_AsciiString& 
-  operator<<(TCollection_AsciiString& theString, 
-	     SMESH::FilterManager_i* theArg);
-
   class Filter_i;
-  TCollection_AsciiString& 
-  operator<<(TCollection_AsciiString& theString, 
-	     SMESH::Filter_i* theArg);
-
   class Functor_i;
-  TCollection_AsciiString& 
-  operator<<(TCollection_AsciiString& theString, 
-	     SMESH::Functor_i* theArg);
-
-  TCollection_AsciiString& 
-  operator<<(TCollection_AsciiString& theString, 
-	     CORBA::Object_ptr theArg);
-
-  TCollection_AsciiString& 
-  operator<<(TCollection_AsciiString& theString, 
-	     const SMESH::long_array& theArg);
 
   class TPythonDump
   {
-    TCollection_AsciiString myString;
+    std::ostringstream myStream;
     static size_t myCounter;
   public:
     TPythonDump();
     virtual ~TPythonDump();
     
-    template<class T>
-    TCollection_AsciiString& 
-    operator<<(T theArg){
-      return myString<<theArg;
+    TPythonDump& 
+    operator<<(long int theArg){
+      myStream<<theArg;
+      return *this;
     }
+
+    TPythonDump& 
+    operator<<(int theArg){
+      myStream<<theArg;
+      return *this;
+    }
+
+    TPythonDump& 
+    operator<<(double theArg){
+      myStream<<theArg;
+      return *this;
+    }
+
+    TPythonDump& 
+    operator<<(float theArg){
+      myStream<<theArg;
+      return *this;
+    }
+
+    TPythonDump& 
+    operator<<(const void* theArg){
+      myStream<<theArg;
+      return *this;
+    }
+
+    TPythonDump& 
+    operator<<(const char* theArg){
+      myStream<<theArg;
+      return *this;
+    }
+
+    TPythonDump& 
+    operator<<(const SMESH::ElementType& theArg);
+
+    TPythonDump& 
+    operator<<(const SMESH::long_array& theArg);
+
+    TPythonDump& 
+    operator<<(CORBA::Object_ptr theArg);
+
+    TPythonDump& 
+    operator<<(SMESH::FilterLibrary_i* theArg);
+
+    TPythonDump& 
+    operator<<(SMESH::FilterManager_i* theArg);
+
+    TPythonDump& 
+    operator<<(SMESH::Filter_i* theArg);
+
+    TPythonDump& 
+    operator<<(SMESH::Functor_i* theArg);
   };
 }
 

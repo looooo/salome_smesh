@@ -1660,6 +1660,20 @@ msgstr "It is impossible to load pattern\nThere are no elements in it"
 msgid "SMESHGUI_MeshPatternDlg::ERR_READ_BAD_KEY_POINT"
 msgstr "It is impossible to load pattern\nKey-point not on a boundary"
 
+msgid "SMESHGUI_MeshPatternDlg::REFINE"
+msgstr "Refine selected mesh elements"
+
+msgid "SMESHGUI_MeshPatternDlg::NODE_1"
+msgstr "Node 1"
+
+msgid "SMESHGUI_MeshPatternDlg::NODE_2"
+msgstr "Node 2"
+
+msgid "SMESHGUI_MeshPatternDlg::MESH_FACES"
+msgstr "Mesh faces"
+
+msgid "SMESHGUI_MeshPatternDlg::MESH_VOLUMES"
+msgstr "Mesh volumes"
 
 #----------------------------------------------------
 

@@ -446,25 +446,6 @@ bool SMESH_Tetra_3D::Compute(SMESH_Mesh& aMesh,
 	  const SMESHDS_SubMesh * aSubMeshDSVertex =
 	    meshVertices[i]->GetSubMeshDS();
 
-// 	  const TColStd_ListOfInteger& indEltNodes =
-// 	    aSubMeshDSVertex->GetIDNodes();
-
-// 	  TColStd_ListIteratorOfListOfInteger itNodes(indEltNodes);
-
-// 	  for (; itNodes.More(); itNodes.Next())
-// 	    {
-// 	      int nodeId = itNodes.Value();
-// 	      Handle (SMDS_MeshElement) elt = meshDS->FindNode(nodeId);
-// 	      Handle (SMDS_MeshNode) node = meshDS->GetNode(1, elt);
-// 	      //MESSAGE("NODE -> ID = " << node->GetID() << " X = " << node->X() << " Y = " << node->Y() << " Z = " << node->Z());
-// 	      listNodeCoresNetgenSmesh[indexNodes] = node->GetID();
-// 	      int index = indexNodes*spaceDimension;
-// 	      Netgen_Coordinates[index] = node->X();
-// 	      Netgen_Coordinates[index+1] = node->Y();
-// 	      Netgen_Coordinates[index+2] = node->Z();
-// 	      indexNodes++;
-// 	    }
-
 	  SMDS_Iterator<const SMDS_MeshNode *> * iteratorNodes = aSubMeshDSVertex->GetNodes();
 
 	  while(iteratorNodes->more())
@@ -491,25 +472,6 @@ bool SMESH_Tetra_3D::Compute(SMESH_Mesh& aMesh,
 	  const SMESHDS_SubMesh *  aSubMeshDSEdge =
 	    meshEdges[i]->GetSubMeshDS();
 
-// 	  const TColStd_ListOfInteger& indEltNodes =
-// 	    aSubMeshDSEdge->GetIDNodes();
-
-// 	  TColStd_ListIteratorOfListOfInteger itNodes(indEltNodes);
-
-// 	  for (; itNodes.More(); itNodes.Next())
-// 	    {
-// 	      int nodeId = itNodes.Value();
-// 	      Handle (SMDS_MeshElement) elt = meshDS->FindNode(nodeId);
-// 	      Handle (SMDS_MeshNode) node = meshDS->GetNode1, elt);
-// 	      //MESSAGE("NODE -> ID = " << node->GetID() << " X = " << node->X() << " Y = " << node->Y() << " Z = " << node->Z());
-// 	      listNodeCoresNetgenSmesh[indexNodes] = node->GetID();
-// 	      int index = indexNodes*spaceDimension;
-// 	      Netgen_Coordinates[index] = node->X();
-// 	      Netgen_Coordinates[index+1] = node->Y();
-// 	      Netgen_Coordinates[index+2] = node->Z();
-// 	      indexNodes++;
-// 	    }
-
 	  SMDS_Iterator<const SMDS_MeshNode *> * iteratorNodes = aSubMeshDSEdge->GetNodes();
 
 	  while(iteratorNodes->more())
@@ -535,25 +497,6 @@ bool SMESH_Tetra_3D::Compute(SMESH_Mesh& aMesh,
 	{
 	  const SMESHDS_SubMesh * aSubMeshDSFace =
 	    meshFaces[i]->GetSubMeshDS();
-
-// 	  const TColStd_ListOfInteger& indEltNodes =
-// 	    aSubMeshDSFace->GetIDNodes();
-
-// 	  TColStd_ListIteratorOfListOfInteger itNodes(indEltNodes);
-
-// 	  for (; itNodes.More(); itNodes.Next())
-// 	    {
-// 	      int nodeId = itNodes.Value();
-// 	      Handle (SMDS_MeshElement) elt = meshDS->FindNode(nodeId);
-// 	      Handle (SMDS_MeshNode) node = meshDS->GetNode(1, elt);
-// 	      //MESSAGE("NODE -> ID = " << node->GetID() << " X = " << node->X() << " Y = " << node->Y() << " Z = " << node->Z());
-// 	      listNodeCoresNetgenSmesh[indexNodes] = nodeId;
-// 	      int index = indexNodes*spaceDimension;
-// 	      Netgen_Coordinates[index] = nodeX;
-// 	      Netgen_Coordinates[index+1] = nodeY;
-// 	      Netgen_Coordinates[index+2] = nodeZ;
-// 	      indexNodes++;
-// 	    }
 
 	  SMDS_Iterator<const SMDS_MeshNode *> * iteratorNodes = aSubMeshDSFace->GetNodes();
 
@@ -597,9 +540,6 @@ bool SMESH_Tetra_3D::Compute(SMESH_Mesh& aMesh,
 
 	  TopoDS_Shape aFace = shapeFaces[i];
 
-// 	  const TColStd_ListOfInteger& indEltTria =
-// 	    aSubMeshDSFace->GetIDElements();
-
 	  SMDS_Iterator<const SMDS_MeshElement *> * iteratorTriangle = aSubMeshDSFace->GetElements();
 
 	  TopoDS_Shape aShapeFace = meshFaces[i]->GetSubShape();
@@ -611,41 +551,6 @@ bool SMESH_Tetra_3D::Compute(SMESH_Mesh& aMesh,
 	  if (orientationMeshFace)
 	    {
 	      MESSAGE("The mesh and face have the same orientation");
-
-// 	      for (TColStd_ListIteratorOfListOfInteger itTrias(indEltTria); itTrias.More(); itTrias.Next())
-// 		{
-// 		  int triangleId = itTrias.Value();
-// 		  Handle (SMDS_MeshElement) elt = meshDS->FindElement(triangleId);
-// 		  int index = indexTrias*nbNodesByTri;
-// 		  int N1 = elt->GetConnection(1);
-// 		  int N2 = elt->GetConnection(2);
-// 		  int N3 = elt->GetConnection(3);
-
-// 		  int N1New = 0;
-// 		  int N2New = 0;
-// 		  int N3New = 0;
-
-// 		  for (int j=0; j<Netgen_NbOfNodes; j++)
-// 		    {
-// 		      int jp1 = j+1;
-
-// 		      if (N1 == listNodeCoresNetgenSmesh[j])
-// 			N1New = jp1;
-// 		      else if (N2 == listNodeCoresNetgenSmesh[j])
-// 			N2New = jp1;
-// 		      else if (N3 == listNodeCoresNetgenSmesh[j])
-// 			N3New = jp1;
-// 		    }
-
-// 		  N1 = N1New;
-// 		  N2 = N2New;
-// 		  N3 = N3New;
-
-// 		  Netgen_Connectivity[index] = N1;
-// 		  Netgen_Connectivity[index+1] = N2;
-// 		  Netgen_Connectivity[index+2] = N3;
-// 		  indexTrias++;
-// 		}
 
 	      while(iteratorTriangle->more())
 		{
@@ -692,41 +597,6 @@ bool SMESH_Tetra_3D::Compute(SMESH_Mesh& aMesh,
 	  else
 	    {
 	      MESSAGE("The mesh and face have different orientations");
-
-// 	      for (TColStd_ListIteratorOfListOfInteger itTrias(indEltTria); itTrias.More(); itTrias.Next())
-// 		{
-// 		  int triangleId = itTrias.Value();
-// 		  Handle (SMDS_MeshElement) elt = meshDS->FindElement(triangleId);
-// 		  int index = indexTrias*nbNodesByTri;
-// 		  int N1 = elt->GetConnection(1);
-// 		  int N2 = elt->GetConnection(3);
-// 		  int N3 = elt->GetConnection(2);
-
-// 		  int N1New = 0;
-// 		  int N2New = 0;
-// 		  int N3New = 0;
-
-// 		  for (int j=0; j<Netgen_NbOfNodes; j++)
-// 		    {
-// 		      int jp1 = j+1;
-
-// 		      if (N1 == listNodeCoresNetgenSmesh[j])
-// 			N1New = jp1;
-// 		      else if (N2 == listNodeCoresNetgenSmesh[j])
-// 			N2New = jp1;
-// 		      else if (N3 == listNodeCoresNetgenSmesh[j])
-// 			N3New = jp1;
-// 		    }
-
-// 		  N1 = N1New;
-// 		  N2 = N2New;
-// 		  N3 = N3New;
-
-// 		  Netgen_Connectivity[index] = N1;
-// 		  Netgen_Connectivity[index+1] = N2;
-// 		  Netgen_Connectivity[index+2] = N3;
-// 		  indexTrias++;
-// 		}
 
 	      while(iteratorTriangle->more())
 		{
@@ -853,6 +723,8 @@ bool SMESH_Tetra_3D::Compute(SMESH_Mesh& aMesh,
 
       status = Ng_GenerateVolumeMesh(Netgen_mesh, &Netgen_param);
 
+      SCRUTE(status);
+
       int Netgen_NbOfNodesNew = Ng_GetNP(Netgen_mesh);
 
       int Netgen_NbOfTetra = Ng_GetNE(Netgen_mesh);
@@ -935,13 +807,6 @@ bool SMESH_Tetra_3D::Compute(SMESH_Mesh& aMesh,
 	{
 	  int index = (i+Netgen_NbOfNodes)*spaceDimension;
 
-// 	  int myNodeId = meshDS->AddNode(Netgen_CoordinatesNew[index],
-// 					 Netgen_CoordinatesNew[index+1],
-// 					 Netgen_CoordinatesNew[index+2]);
-
-// 	  Handle (SMDS_MeshElement) elt = meshDS->FindNode(myNodeId);
-// 	  Handle (SMDS_MeshNode) node = meshDS->GetNode(1, elt);
-
 	  SMDS_MeshNode * node =
 	    meshDS->AddNode(Netgen_CoordinatesNew[index],
 			    Netgen_CoordinatesNew[index+1],
@@ -977,36 +842,10 @@ bool SMESH_Tetra_3D::Compute(SMESH_Mesh& aMesh,
 	  int tetraNode3 = Netgen_ConnectivityNew[index+2];
 	  int tetraNode4 = Netgen_ConnectivityNew[index+3];
 
-	  MESSAGE("SMESH_Tetra_3D::Compute --> Tetrahedron generated" << i << " with N1 = " << tetraNode1 << " N2 = " << tetraNode2 << " N3 = " << tetraNode3 << " N4 = " << tetraNode4);
-
 	  const SMDS_MeshNode * node1 = netgenToDS[tetraNode1-1];
 	  const SMDS_MeshNode * node2 = netgenToDS[tetraNode2-1];
 	  const SMDS_MeshNode * node3 = netgenToDS[tetraNode3-1];
 	  const SMDS_MeshNode * node4 = netgenToDS[tetraNode4-1];
-
-	  int nodeId = node1->GetID();
-	  double nodeX = node1->X();
-	  double nodeY = node1->Y();
-	  double nodeZ = node1->Z();
-	  MESSAGE("NODE 1 -> ID = " << nodeId << " X = " << nodeX << " Y = " << nodeY << " Z = " << nodeZ);
-
-          nodeId = node2->GetID();
-	  nodeX = node2->X();
-	  nodeY = node2->Y();
-	  nodeZ = node2->Z();
-	  MESSAGE("NODE 2 -> ID = " << nodeId << " X = " << nodeX << " Y = " << nodeY << " Z = " << nodeZ);
-
-	  nodeId = node3->GetID();
-	  nodeX = node3->X();
-	  nodeY = node3->Y();
-	  nodeZ = node3->Z();
-	  MESSAGE("NODE 3 -> ID = " << nodeId << " X = " << nodeX << " Y = " << nodeY << " Z = " << nodeZ);
-
-	  nodeId = node4->GetID();
-	  nodeX = node4->X();
-	  nodeY = node4->Y();
-	  nodeZ = node4->Z();
-	  MESSAGE("NODE 4 -> ID = " << nodeId << " X = " << nodeX << " Y = " << nodeY << " Z = " << nodeZ);
 
 	  index = tetraNode1;
 	  if (index <= Netgen_NbOfNodes)
@@ -1032,16 +871,8 @@ bool SMESH_Tetra_3D::Compute(SMESH_Mesh& aMesh,
 	  else
 	    tetraNode4 = listNodeShellCoresNetgenSmesh[index-Netgen_NbOfNodes-1];
 
-// 	  int tetraId = meshDS->AddVolume(nodeId1,nodeId2,nodeId3,nodeId4);
-
-// 	  Handle (SMDS_MeshElement) elt = meshDS->FindElement(tetraId);
-
-	  MESSAGE("SMESH_Tetra_3D::Compute Add Volume");
-
 	  SMDS_MeshVolume * elt =
 	    meshDS->AddVolume(node1,node2,node3,node4);
-
-	  MESSAGE("SMESH_Tetra_3D::Compute SetMeshElementOnShape");
 
 	  meshDS->SetMeshElementOnShape(elt, aShell);
 	}
@@ -1092,29 +923,13 @@ bool SMESH_Tetra_3D::Compute(SMESH_Mesh& aMesh,
 
 	MESSAGE("SMESH_Tetra_3D::Compute The mesh Shell has " << nbNodes << " shell internal Nodes, " << nbTetra << " tetrahedrons");
 
-// 	const TColStd_ListOfInteger& indEltNodes = aSubMeshDSShell->GetIDNodes();
-
 	SMDS_Iterator<const SMDS_MeshNode *> * iteratorNodes = aSubMeshDSShell->GetNodes();
 
 	SCRUTE(nbNodes);
 
-// 	SCRUTE(indEltNodes.Extent());
-
-// 	TColStd_ListIteratorOfListOfInteger itNodes(indEltNodes);
-
 	int index;
 
 	index = 0;
-
-// 	for (; itNodes.More(); itNodes.Next())
-// 	  {
-// 	    index++;
-// 	    int nodeId = itNodes.Value();
-// 	    Handle (SMDS_MeshElement) elt = meshDS->FindNode(nodeId);
-// 	    Handle (SMDS_MeshNode) node = meshDS->GetNode(1, elt);
-// 	    MESSAGE("NODE -> ID = " << node->GetID() << " X = " << node->X() << " Y = " << node->Y() << " Z = " << node->Z());
-// 	  }
-// 	SCRUTE(index);
 
 	while(iteratorNodes->more())
 	  {
@@ -1132,22 +947,7 @@ bool SMESH_Tetra_3D::Compute(SMESH_Mesh& aMesh,
 
 	SMDS_Iterator<const SMDS_MeshElement *> * iteratorTetra = aSubMeshDSShell->GetElements();
 
-// 	const TColStd_ListOfInteger& indEltTetra = aSubMeshDSShell->GetIDElements();
-
 	SCRUTE(nbTetra);
-
-// 	SCRUTE(indEltTetra.Extent());
-
-// 	TColStd_ListIteratorOfListOfInteger itTetras(indEltTetra);
-
-// 	index = 0;
-// 	for (; itTetras.More(); itTetras.Next())
-// 	  {
-// 	    index++;
-// 	    int tetraId = itTetras.Value();
-// 	    Handle (SMDS_MeshElement) elt = meshDS->FindElement(tetraId);
-// 	    MESSAGE("TETRAHEDRON -> ID = " << elt->GetID() << " N1 = " << elt->GetConnection(1) << " N2 = " << elt->GetConnection(2) << " N3 = " << elt->GetConnection(3) << " N4 = " << elt->GetConnection(4));
-// 	  }
 
 	index = 0;
 	while(iteratorTetra->more())

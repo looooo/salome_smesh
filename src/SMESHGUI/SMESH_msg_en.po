@@ -1432,12 +1432,46 @@ msgstr "Centroidal"
 msgid "SMESHGUI_ExtrusionDlg::EXTRUSION_ALONG_LINE"
 msgstr "Extrusion along a line"
 
-
 msgid "SMESHGUI_ExtrusionDlg::EXTRUSION_1D"
 msgstr "Extrusion of 1D elements"
 
 msgid "SMESHGUI_ExtrusionDlg::EXTRUSION_2D"
 msgstr "Extrusion of 2D elements"
+
+#----------------------------------------------------
+
+msgid "SMESHGUI_ExtrusionAlongPathDlg::EXTRUSION_ALONG_PATH"
+msgstr "Extrusion along a path"
+
+msgid "SMESHGUI_ExtrusionAlongPathDlg::EXTRUSION_1D"
+msgstr "Extrusion of 1D elements"
+
+msgid "SMESHGUI_ExtrusionAlongPathDlg::EXTRUSION_2D"
+msgstr "Extrusion of 2D elements"
+
+msgid "SMESHGUI_ExtrusionAlongPathDlg::SMESH_PATH"
+msgstr "Path"
+
+msgid "SMESHGUI_ExtrusionAlongPathDlg::SMESH_PATH_MESH"
+msgstr "Mesh"
+
+msgid "SMESHGUI_ExtrusionAlongPathDlg::SMESH_PATH_SHAPE"
+msgstr "Shape (edge or wire)"
+
+msgid "SMESHGUI_ExtrusionAlongPathDlg::SMESH_PATH_START"
+msgstr "Start point"
+
+msgid "SMESHGUI_ExtrusionAlongPathDlg::SMESH_USE_ANGLES"
+msgstr "Use Angles"
+
+msgid "SMESHGUI_ExtrusionAlongPathDlg::SMESH_ANGLES"
+msgstr "Angles"
+
+msgid "SMESHGUI_ExtrusionAlongPathDlg::SMESH_USE_BASE_POINT"
+msgstr "Use Base Point"
+
+msgid "SMESHGUI_ExtrusionAlongPathDlg::SMESH_BASE_POINT"
+msgstr "Base Point"
 
 #----------------------------------------------------
 

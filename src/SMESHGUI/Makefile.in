@@ -88,6 +88,7 @@ LIB_SRC =	SMESHGUI.cxx \
 		SMESHGUI_SmoothingDlg.cxx \
 		SMESHGUI_RenumberingDlg.cxx \
 		SMESHGUI_ExtrusionDlg.cxx \
+		SMESHGUI_ExtrusionAlongPathDlg.cxx \
 		SMESHGUI_RevolutionDlg.cxx \
 		SMESHGUI_RotationDlg.cxx \
 		SMESHGUI_TranslationDlg.cxx \
@@ -138,6 +139,7 @@ LIB_MOC = \
 		SMESHGUI_SmoothingDlg.h \
 		SMESHGUI_RenumberingDlg.h \
 		SMESHGUI_ExtrusionDlg.h \
+		SMESHGUI_ExtrusionAlongPathDlg.h \
 		SMESHGUI_RevolutionDlg.h \
 		SMESHGUI_RotationDlg.h \
 		SMESHGUI_TranslationDlg.h \

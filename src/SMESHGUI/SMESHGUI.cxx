@@ -53,6 +53,7 @@
 #include "SMESHGUI_SmoothingDlg.h"
 #include "SMESHGUI_RenumberingDlg.h"
 #include "SMESHGUI_ExtrusionDlg.h"
+#include "SMESHGUI_ExtrusionAlongPathDlg.h"
 #include "SMESHGUI_RevolutionDlg.h"
 #include "SMESHGUI_TranslationDlg.h"
 #include "SMESHGUI_RotationDlg.h"
@@ -1441,6 +1442,21 @@ bool SMESHGUI::OnGUIEvent(int theCommandID, QAD_Desktop * parent)
         SALOME_Selection *Sel = SALOME_Selection::Selection(
           myActiveStudy->getSelection() );
         new SMESHGUI_MeshPatternDlg( parent, Sel );
+      }
+      else {
+	QAD_MessageBox::warn1(QAD_Application::getDesktop(),
+			      tr("SMESH_WRN_WARNING"), tr("SMESH_WRN_VIEWER_VTK"),
+			      tr("SMESH_BUT_OK"));
+      }
+      break;
+    }
+  case 416: // Extrusion along a path
+    {
+      if(checkLock(aStudy)) break;
+      if (myActiveStudy->getActiveStudyFrame()->getTypeView() == VIEW_VTK) {
+	EmitSignalDeactivateDialog();
+	SALOME_Selection *Sel =	SALOME_Selection::Selection(myActiveStudy->getSelection());
+	new SMESHGUI_ExtrusionAlongPathDlg(parent, Sel);
       }
       else {
 	QAD_MessageBox::warn1(QAD_Application::getDesktop(),

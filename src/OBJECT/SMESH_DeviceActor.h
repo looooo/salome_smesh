@@ -94,6 +94,10 @@ class SMESH_DeviceActor: public vtkLODActor{
   void SetControlMode(SMESH::Controls::FunctorPtr theFunctor,
 		      vtkScalarBarActor* theScalarBarActor,
 		      vtkLookupTable* theLookupTable);
+  void SetLength2DControlMode(SMESH::Controls::FunctorPtr theFunctor,
+			      SMESH_DeviceActor* theDeviceActor,
+			      vtkScalarBarActor* theScalarBarActor,
+			      vtkLookupTable* theLookupTable);
   void SetExtControlMode(SMESH::Controls::FunctorPtr theFunctor,
 			 SMESH_DeviceActor* theDeviceActor);
 

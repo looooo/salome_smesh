@@ -24,7 +24,7 @@
 //  File   : SMESH_Actor.cxx
 //  Author : Nicolas REJNERI
 //  Module : SMESH
-//  $Header$
+//  $Header$Header: /home/server/cvs/SMESH/SMESH_SRC/src/OBJECT/SMESH_DeviceActor.cxx,v 1.5.2.1 2004/12/23 10:31:24 apo Exp $
 
 
 #include "SMESH_DeviceActor.h"
@@ -165,7 +165,7 @@ void SMESH_DeviceActor::SetUnstructuredGrid(vtkUnstructuredGrid* theGrid){
 
     myExtractUnstructuredGrid->SetInput(myExtractGeometry->GetOutput());
     myMergeFilter->SetGeometry(myExtractUnstructuredGrid->GetOutput());
-
+    
     theGrid = static_cast<vtkUnstructuredGrid*>(myMergeFilter->GetOutput());
 
     int anId = 0;
@@ -260,6 +260,86 @@ void SMESH_DeviceActor::SetControlMode(SMESH::Controls::FunctorPtr theFunctor,
   theScalarBarActor->SetVisibility(anIsInitialized);
 }
 
+void SMESH_DeviceActor::SetLength2DControlMode(SMESH::Controls::FunctorPtr theFunctor,
+					       SMESH_DeviceActor* theDeviceActor,
+					       vtkScalarBarActor* theScalarBarActor,
+					       vtkLookupTable* theLookupTable)
+{
+  bool anIsInitialized = theFunctor;
+
+  using namespace SMESH::Controls;
+  if (anIsInitialized){
+    if (Length2D* aLength2D = dynamic_cast<Length2D*>(theFunctor.get())){
+      SMESH::Controls::Length2D::TValues aValues;
+
+      myVisualObj->UpdateFunctor(theFunctor);
+
+      aLength2D->GetValues(aValues);
+      vtkUnstructuredGrid* aDataSet = vtkUnstructuredGrid::New();
+      vtkUnstructuredGrid* aGrid = myVisualObj->GetUnstructuredGrid();
+
+      aDataSet->SetPoints(aGrid->GetPoints());
+      
+      vtkIdType aNbCells = aValues.size();
+      
+      vtkDoubleArray *aScalars = vtkDoubleArray::New();
+      aScalars->SetNumberOfComponents(1);
+      aScalars->SetNumberOfTuples(aNbCells);
+
+      vtkIdType aCellsSize = 3*aNbCells;
+      vtkCellArray* aConnectivity = vtkCellArray::New();
+      aConnectivity->Allocate( aCellsSize, 0 );
+      
+      vtkUnsignedCharArray* aCellTypesArray = vtkUnsignedCharArray::New();
+      aCellTypesArray->SetNumberOfComponents( 1 );
+      aCellTypesArray->Allocate( aNbCells * aCellTypesArray->GetNumberOfComponents() );
+      
+      vtkIdList *anIdList = vtkIdList::New();
+      anIdList->SetNumberOfIds(2);
+      
+      Length2D::TValues::const_iterator anIter = aValues.begin();
+      int i = 0;
+      for(vtkIdType aVtkId; anIter != aValues.end(); anIter++,i++){
+	const Length2D::Value& aValue = *anIter;
+	int aNode[2] = {
+	  myVisualObj->GetNodeVTKId(aValue.myPntId[0]),
+	  myVisualObj->GetNodeVTKId(aValue.myPntId[1])
+	};
+	if(aNode[0] >= 0 && aNode[1] >= 0){
+	  anIdList->SetId( 0, aNode[0] );
+	  anIdList->SetId( 1, aNode[1] );
+	  aConnectivity->InsertNextCell( anIdList );
+	  aCellTypesArray->InsertNextValue( VTK_LINE );
+	  aScalars->SetValue(i,aValue.myLength);
+	}
+      }
+      
+      vtkIntArray* aCellLocationsArray = vtkIntArray::New();
+      aCellLocationsArray->SetNumberOfComponents( 1 );
+      aCellLocationsArray->SetNumberOfTuples( aNbCells );
+      
+      aConnectivity->InitTraversal();
+      for( vtkIdType idType = 0, *pts, npts; aConnectivity->GetNextCell( npts, pts ); idType++ )
+	aCellLocationsArray->SetValue( idType, aConnectivity->GetTraversalLocation( npts ) );
+      
+      aDataSet->SetCells( aCellTypesArray, aCellLocationsArray,aConnectivity );
+      SetUnstructuredGrid(aDataSet);
+
+      aDataSet->GetCellData()->SetScalars(aScalars);
+      aScalars->Delete();
+      
+      theLookupTable->SetRange(aScalars->GetRange());
+      theLookupTable->Build();
+      
+      SetUnstructuredGrid(aDataSet);
+      
+      myMergeFilter->SetScalars(aDataSet);
+      aDataSet->Delete();
+    }
+  }
+  GetMapper()->SetScalarVisibility(anIsInitialized);
+  theScalarBarActor->SetVisibility(anIsInitialized);
+}
 
 void SMESH_DeviceActor::SetExtControlMode(SMESH::Controls::FunctorPtr theFunctor,
 					  SMESH_DeviceActor* theDeviceActor)
@@ -330,8 +410,10 @@ void SMESH_DeviceActor::SetExtControlMode(SMESH::Controls::FunctorPtr theFunctor
 
     SetUnstructuredGrid(aDataSet);
     aDataSet->Delete();
-  }    
+  }
 }
+
+
 
 
 unsigned long int SMESH_DeviceActor::GetMTime(){

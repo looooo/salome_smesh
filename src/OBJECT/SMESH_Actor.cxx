@@ -284,7 +284,7 @@ SMESH_Actor::SMESH_Actor(){
   myName = "";
   myIO = NULL;
 
-  myColorMode = eNone;
+  myControlMode = eNone;
   my1DColorMode = e1DNone;
   myControlActor = my2DActor;
 
@@ -438,7 +438,7 @@ SMESH_Actor::SMESH_Actor(){
   aPtsTextProp->SetShadow(0);
   myPtsLabeledDataMapper->SetLabelTextProperty(aPtsTextProp);
   aPtsTextProp->Delete();
-    
+  
   myEntityMode = eAllEntity;
 
   myIsPointsLabeled = false;
@@ -623,7 +623,7 @@ void SMESH_Actor::SetCellsLabeled(bool theIsCellsLabeled){
 
 
 void SMESH_Actor::SetControlMode(eControl theMode){
-  myColorMode = eNone;
+  myControlMode = eNone;
   my1DColorMode = e1DNone;
 
   my1DActor->GetMapper()->SetScalarVisibility(false);
@@ -642,6 +642,12 @@ void SMESH_Actor::SetControlMode(eControl theMode){
       aControl->SetPrecision( myControlsPrecision );
       aFunctor.reset( aControl );
       myControlActor = my1DActor;
+      break;
+    }
+    case eLength:
+    {
+      aFunctor.reset(new SMESH::Controls::Length2D());
+      myControlActor = my2DActor;
       break;
     }
     case eFreeBorders:
@@ -719,11 +725,14 @@ void SMESH_Actor::SetControlMode(eControl theMode){
     vtkUnstructuredGrid* aGrid = myControlActor->GetUnstructuredGrid();
     vtkIdType aNbCells = aGrid->GetNumberOfCells();
     if(aNbCells){
-      myColorMode = theMode;
+      myControlMode = theMode;
       if(theMode == eFreeBorders || theMode == eFreeEdges){
 	my1DColorMode = e1DHighlited;
 	my1DExtActor->SetExtControlMode(aFunctor,myControlActor);
-      }else{
+      } else if (theMode == eLength){
+	my1DColorMode = e1DColored;
+	my1DExtActor->SetLength2DControlMode(aFunctor,myControlActor,myScalarBarActor,myLookupTable);
+      } else{
 	if(myControlActor == my1DActor)
 	  my1DColorMode = e1DColored;
 	myControlActor->SetControlMode(aFunctor,myScalarBarActor,myLookupTable);
@@ -988,8 +997,8 @@ void SMESH_Actor::SetVisibility(int theMode, bool theIsUpdateRepersentation){
     if(theIsUpdateRepersentation)
       SetRepresentation(GetRepresentation());
 
-    if(myColorMode != eNone){
-      if(my1DColorMode == e1DHighlited)
+    if(myControlMode != eNone){
+      if(my1DColorMode == e1DHighlited || myControlMode == eLength)
 	my1DExtActor->VisibilityOn();
       else if(myControlActor->GetUnstructuredGrid()->GetNumberOfCells())
 	myScalarBarActor->VisibilityOn();
@@ -1021,7 +1030,6 @@ void SMESH_Actor::SetVisibility(int theMode, bool theIsUpdateRepersentation){
   }
   Modified();
 }
-
 
 namespace{
 
@@ -1070,7 +1078,6 @@ void SMESH_Actor::SetEntityMode(unsigned int theMode){
   
   myEntityMode = theMode;
 }
-
 
 void SMESH_Actor::SetRepresentation(int theMode){ 
   int aNbEdges = myVisualObj->GetNbEntities(SMESH::EDGE);
@@ -1139,15 +1146,22 @@ void SMESH_Actor::SetRepresentation(int theMode){
   my3DActor->SetRepresentation(aReperesent);
 
   my1DExtActor->SetVisibility(false);
-  switch(my1DColorMode){
-  case e1DColored: 
+//   switch(my1DColorMode){
+//   case e1DColored: 
+//     aProp = aBackProp = my1DProp;
+//     if(myRepresentation != ePoint)
+//       aReperesent = SMESH_DeviceActor::eInsideframe;
+//     break;
+//   case e1DHighlited: 
+//     my1DExtActor->SetVisibility(true);
+//     break;
+//   }
+  if (my1DColorMode == e1DColored){
     aProp = aBackProp = my1DProp;
     if(myRepresentation != ePoint)
       aReperesent = SMESH_DeviceActor::eInsideframe;
-    break;
-  case e1DHighlited: 
+  } else if (my1DColorMode == e1DHighlited || myControlMode == eLength){
     my1DExtActor->SetVisibility(true);
-    break;
   }
   
   my1DActor->SetProperty(aProp);

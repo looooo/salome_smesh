@@ -547,6 +547,10 @@ namespace{
 	    aTitle = QObject::tr( "LENGTH_EDGES" );
 	    aControl = SMESH_Actor::eLengthEdges;
 	    break;
+	  case 6018:
+	    aTitle = QObject::tr( "LENGTH2D_EDGES" );
+	    aControl = SMESH_Actor::eLength;
+	    break;
 	  case 6002:
 	    aTitle = QObject::tr( "FREE_EDGES" );
 	    aControl = SMESH_Actor::eFreeEdges;
@@ -2065,6 +2069,7 @@ bool SMESHGUI::OnGUIEvent(int theCommandID, QAD_Desktop * parent)
   case 6012:
   case 6011:
   case 6001:
+  case 6018:
   case 6002:
   case 6003:
   case 6004:    
@@ -2442,6 +2447,8 @@ bool SMESHGUI::CustomPopup(QAD_Desktop* parent, QPopupMenu* popup, const QString
 	      switch ( cMode ) {
 	      case SMESH_Actor::eLengthEdges:
 		mi->popup()->setItemChecked( 6001, true ); break;
+	      case SMESH_Actor::eLength:
+		mi->popup()->setItemChecked( 6018, true ); break;
 	      case SMESH_Actor::eFreeEdges:
 		mi->popup()->setItemChecked( 6002, true );
 		mi->popup()->removeItem( 201 );
@@ -2475,6 +2482,7 @@ bool SMESHGUI::CustomPopup(QAD_Desktop* parent, QPopupMenu* popup, const QString
 	      TVisualObjPtr aVisualObj = anActor->GetObject();
 	      if(aNbEdges == 0){
 		mi->popup()->removeItem( 6001 );
+		mi->popup()->removeItem( 6018 );
 		mi->popup()->removeItem( 6003 );
 		mi->popup()->removeItem( 6004 );
 	      }

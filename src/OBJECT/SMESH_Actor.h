@@ -121,7 +121,7 @@ class SMESH_Actor : public SALOME_Actor{
 
   enum EReperesent { ePoint, eEdge, eSurface};
   virtual void SetRepresentation(int theMode);
-
+  
   enum EEntityMode { eEdges = 0x01, eFaces = 0x02, eVolumes = 0x04, eAllEntity = 0x07};
   unsigned int GetEntityMode() const { return myEntityMode;}
   void SetEntityMode(unsigned int theMode);
@@ -150,11 +150,11 @@ class SMESH_Actor : public SALOME_Actor{
   void SetCellsLabeled(bool theIsCellsLabeled);
   bool GetCellsLabeled(){ return myIsCellsLabeled;}
 
-  enum eControl{eNone, eLengthEdges, eFreeBorders, eFreeEdges, eMultiConnection, 
+  enum eControl{eNone, eLengthEdges, eLength, eFreeBorders, eFreeEdges, eMultiConnection, 
 		eArea, eTaper, eAspectRatio, eMinimumAngle, eWarping, eSkew,
 		eAspectRatio3D};
   void SetControlMode(eControl theMode);
-  eControl GetControlMode(){ return myColorMode;}
+  eControl GetControlMode(){ return myControlMode;}
 
   enum e1DControl{e1DNone, e1DColored, e1DHighlited};
   e1DControl Get1DControlMode(){ return my1DColorMode;}
@@ -192,7 +192,7 @@ class SMESH_Actor : public SALOME_Actor{
   SMESH_DeviceActor* myHighlitableActor;
   SMESH_DeviceActor* myNodeHighlitableActor;
 
-  eControl myColorMode;
+  eControl myControlMode;
   SMESH_DeviceActor* my2DActor;
   SMESH_DeviceActor* my3DActor;
   SMESH_DeviceActor* myControlActor;

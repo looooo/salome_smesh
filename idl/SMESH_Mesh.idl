@@ -161,13 +161,11 @@ module SMESH
        raises (SALOME::SALOME_Exception);
 
     /*!
-     * Export Mesh with DAT and MED Formats
+     * Export mesh to a file
+	 * @param fileName file name where to export the file
+	 * @param fileType Currently it could be either "DAT", "UNV" or "MED".
      */
-    void ExportDAT( in string file )
-      raises (SALOME::SALOME_Exception);
-    void ExportMED( in string file )
-      raises (SALOME::SALOME_Exception);
-    void ExportUNV( in string file )
+    void Export( in string fileName, in string fileType )
       raises (SALOME::SALOME_Exception);
 
     /*!

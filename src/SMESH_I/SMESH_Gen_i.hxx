@@ -96,6 +96,8 @@ public:
                                    const SMESH::shape_array& listOfSubShape)
     throw (SALOME::SALOME_Exception);
 
+	SMESH::SMESH_Mesh_ptr Import(CORBA::Long studyId, const char* fileName,
+		const char* fileType);
 
   // inherited methods from SALOMEDS::Driver
 

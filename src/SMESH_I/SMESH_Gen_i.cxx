@@ -55,14 +55,7 @@ using namespace std;
 #include "SMESH_MaxElementArea_i.hxx"
 #include "SMESH_MaxElementVolume_i.hxx"
 
-#include "SMESHDS_Document.hxx"
-
-#include "Document_Reader.h"
-#include "DriverMED_W_SMESHDS_Mesh.h"
-#include "DriverMED_R_SMESHDS_Mesh.h"
-#include "DriverMED_R_SMESHDS_Document.h"
-#include "DriverUNV_R_SMESHDS_Document.h"
-#include "DriverDAT_R_SMESHDS_Document.h"
+#include "SMESHDriver.h"
 
 #include "Utils_CorbaException.hxx"
 #include "utilities.h"
@@ -580,11 +573,11 @@ SALOMEDS::TMPFile* SMESH_Gen_i::Save(SALOMEDS::SComponent_ptr theComponent,
 	SMESHDS_Mesh* mySMESHDSMesh = myLocMesh.GetMeshDS();
 	
 	SCRUTE(mySMESHDSMesh->NbNodes());
-	if (mySMESHDSMesh->NbNodes()>0) {//checks if the mesh is not empty
-	  
-	  DriverMED_W_SMESHDS_Mesh* myWriter = new DriverMED_W_SMESHDS_Mesh;
+	if (mySMESHDSMesh->NbNodes()>0)
+	{
+	  //checks if the mesh is not empty	  
+	  Mesh_Writer * myWriter = SMESHDriver::GetMeshWriter("MED");
 	  myWriter->SetFile(meshfile.ToCString());
-	  
 	  myWriter->SetMesh(mySMESHDSMesh);
 	  myWriter->SetMeshId(gotBranch->Tag());
 	  myWriter->Add();
@@ -1134,47 +1127,22 @@ bool SMESH_Gen_i::Load(SALOMEDS::SComponent_ptr theComponent,
 				
 	  //********** 
 	  //********** Loading of mesh data
-	  if (strcmp(datafilename,"No data")!=0) {
-		  
-	    med_idt fid;
+	  if (strcmp(datafilename,"No data")!=0)
+	  {
 	    int ret;
-	    
-	    //****************************************************************************
-	    //*                      OUVERTURE DU FICHIER EN LECTURE                      *
-	    //****************************************************************************
-		  
-	    fid = MEDouvrir(datafilename,MED_LECT);
-	    if (fid < 0)
-	      {
-		printf(">> ERREUR : ouverture du fichier %s \n",datafilename);
-		exit(EXIT_FAILURE);
-	      }
-	    else {
-		    
-	      StudyContext_iStruct* myStudyContext = _mapStudyContext_i[studyId];
-	      int meshId = myNewMesh->GetId();
-	      SMESH_Mesh_i* meshServant = myStudyContext->mapMesh_i[meshId];
-	      ::SMESH_Mesh& myLocMesh = meshServant->GetImpl();
-	      SMESHDS_Mesh* mySMESHDSMesh = myLocMesh.GetMeshDS();
-		    
-	      DriverMED_R_SMESHDS_Mesh* myReader = new DriverMED_R_SMESHDS_Mesh;
-		    
-	      myReader->SetMesh(mySMESHDSMesh);
-	      myReader->SetMeshId(myMeshId);
-	      myReader->SetFileId(fid);
-	      myReader->ReadMySelf();
-	      //SCRUTE(mySMESHDSMesh->NbNodes());
-	      //myNewMesh->ExportUNV("/tmp/test.unv");//only to check out
-		    
-	      //****************************************************************************
-	      //*                      FERMETURE DU FICHIER                                 *
-	      //****************************************************************************
-	      ret = MEDfermer(fid);
-		    
-	      if (ret != 0)
-		printf(">> ERREUR : erreur a la fermeture du fichier %s\n",datafilename);
-		    
-	    }
+	    StudyContext_iStruct* myStudyContext = _mapStudyContext_i[studyId];
+	    int meshId = myNewMesh->GetId();
+	    SMESH_Mesh_i* meshServant = myStudyContext->mapMesh_i[meshId];
+	    ::SMESH_Mesh& myLocMesh = meshServant->GetImpl();
+	    SMESHDS_Mesh* mySMESHDSMesh = myLocMesh.GetMeshDS();
+
+	    Mesh_Reader* myReader = SMESHDriver::GetMeshReader("MED");
+	    myReader->SetMesh(mySMESHDSMesh);
+	    myReader->SetMeshId(myMeshId);
+	    myReader->SetFile(datafilename);
+	    myReader->Read();
+	    //SCRUTE(mySMESHDSMesh->NbNodes());
+	    //myNewMesh->ExportUNV("/tmp/test.unv");//only to check out
 	  }
 	}
 	//********** 
@@ -1735,6 +1703,46 @@ SMESH_topo* SMESH_Gen_i::ExploreMainShape(GEOM::GEOM_Gen_ptr geomEngine,
   return myTopo;
 }
       
+/**
+ * Import a mesh from a file
+ * @param fileName file name to be imported
+ * @param fileType Currently it could be either "DAT", "UNV" or "MED".
+ */
+SMESH::SMESH_Mesh_ptr SMESH_Gen_i::Import(CORBA::Long studyId,
+	const char* fileName, const char* fileType)
+{
+	MESSAGE("SMESH_Gen_I::Import");
+	SMESH_Mesh_i* meshServant;
+	try
+	{
+		if (_mapStudyContext_i.find(studyId) == _mapStudyContext_i.end())
+		{
+			_mapStudyContext_i[studyId] = new StudyContext_iStruct;      
+		}
+		StudyContext_iStruct* myStudyContext = _mapStudyContext_i[studyId];
+
+		// create a new mesh object servant, store it in a map in study context
+		meshServant = new SMESH_Mesh_i(this, NULL, studyId, _localId);
+		myStudyContext->mapMesh_i[_localId] = meshServant;
+		_localId++;
+
+		// create a new mesh object
+		meshServant->SetImpl(_impl.Import(studyId, fileName, fileType));
+	}
+	catch (SALOME_Exception& S_ex)
+	{
+		THROW_SALOME_CORBA_EXCEPTION(S_ex.what(), SALOME::BAD_PARAM);
+	}
+
+	// activate the CORBA servant of Mesh
+
+	SMESH::SMESH_Mesh_var mesh
+		= SMESH::SMESH_Mesh::_narrow(meshServant->_this());
+  
+	meshServant->SetIor(mesh);
+	return SMESH::SMESH_Mesh::_duplicate(mesh);
+}
+
 //=============================================================================
 /*! 
  * C factory, accessible with dlsym, after dlopen  

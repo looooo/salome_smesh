@@ -30,6 +30,7 @@
 #include "SMESH_subMesh.hxx"
 #include "SMDS_MeshElement.hxx"
 #include "SMDS_MeshNode.hxx"
+#include "SMESHDriver.h"
 
 #include <gp_Pnt.hxx>
 #include <BRep_Tool.hxx>
@@ -404,3 +405,38 @@ int SMESH_Gen::GetShapeDim(const TopoDS_Shape & aShape)
 //   SCRUTE(shapeDim);
 	return shapeDim;
 }
+
+/**
+ * Import a mesh from a file
+ * @param fileName file name to be imported
+ * @param fileType Currently it could be either "DAT", "UNV" or "MED".
+ * @todo
+ */
+SMESH_Mesh * SMESH_Gen::Import(int studyId, const char * fileName,
+	const char * fileType)
+{
+	MESSAGE("SMESH_Gen::Import("<<studyId<<","<<fileName<<","<<fileType<<")");
+
+	// Get studyContext, create it if it does'nt exist, with a SMESHDS_Document
+	StudyContextStruct *myStudyContext = GetStudyContext(studyId);
+
+	// will be used with document
+	/*Document_Reader * reader = SMESHDriver::GetDocumentReader(string(fileType));
+	reader->SetDocument(myStudyContext->myDocument);
+	reader->SetFile(string(fileName));
+	reader->Read();*/
+	// currently we only read one mesh from a file (limitation on MED files).
+
+	// create a new SMESH_mesh object 
+	SMESH_Mesh *mesh = new SMESH_Mesh(_localId++, studyId, this,
+		myStudyContext->myDocument);
+	myStudyContext->mapMesh[_localId] = mesh;
+	
+	Mesh_Reader * reader = SMESHDriver::GetMeshReader(string(fileType));
+	reader->SetMesh(mesh->GetMeshDS());
+	reader->SetFile(string(fileName));
+	reader->Read();
+	
+	return mesh;
+}
+

@@ -530,25 +530,6 @@ SMESH::SMESH_MeshEditor_ptr SMESH_Mesh_i::GetMeshEditor()
  */
 //=============================================================================
 
-void SMESH_Mesh_i::ExportMED(const char *file) throw(SALOME::SALOME_Exception)
-{
-	_impl->ExportMED(file);
-}
-void SMESH_Mesh_i::ExportDAT(const char *file) throw(SALOME::SALOME_Exception)
-{
-	_impl->ExportDAT(file);
-}
-void SMESH_Mesh_i::ExportUNV(const char *file) throw(SALOME::SALOME_Exception)
-{
-	_impl->ExportUNV(file);
-}
-
-//=============================================================================
-/*!
- *  
- */
-//=============================================================================
-
 SALOME_MED::MESH_ptr SMESH_Mesh_i::GetMEDMesh()throw(SALOME::SALOME_Exception)
 {
 	SMESH_MEDMesh_i *aMedMesh = new SMESH_MEDMesh_i(this);
@@ -624,4 +605,15 @@ CORBA::Long SMESH_Mesh_i::NbHexas()throw(SALOME::SALOME_Exception)
 CORBA::Long SMESH_Mesh_i::NbSubMesh()throw(SALOME::SALOME_Exception)
 {
 	return _impl->NbSubMesh();
+}
+
+/*!
+ * Export mesh to a file
+ * @param fileName file name where to export the file
+ * @param fileType Currently it could be either "DAT", "UNV" or "MED".
+ */
+void SMESH_Mesh_i::Export(const char* fileName, const char* fileType)
+	throw (SALOME::SALOME_Exception)
+{
+	_impl->Export(fileName, fileType);
 }

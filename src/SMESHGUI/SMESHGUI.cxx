@@ -87,26 +87,6 @@ using namespace std;
 #include "SALOMEGUI_QtCatchCorbaException.hxx"
 #include "utilities.h"
 
-#include "SMDS_Mesh.hxx"
-#include "SMESHDS_Document.hxx"
-#include "Document_Reader.h"
-#include "Document_Writer.h"
-#include "Mesh_Reader.h"
-#include "Mesh_Writer.h"
-
-#include "DriverDAT_R_SMESHDS_Document.h"
-#include "DriverMED_R_SMESHDS_Document.h"
-#include "DriverUNV_R_SMESHDS_Document.h"
-#include "DriverDAT_W_SMESHDS_Document.h"
-#include "DriverMED_W_SMESHDS_Document.h"
-#include "DriverUNV_W_SMESHDS_Document.h"
-#include "DriverDAT_R_SMESHDS_Mesh.h"
-#include "DriverMED_R_SMESHDS_Mesh.h"
-#include "DriverUNV_R_SMESHDS_Mesh.h"
-#include "DriverDAT_W_SMESHDS_Mesh.h"
-#include "DriverMED_W_SMESHDS_Mesh.h"
-#include "DriverUNV_W_SMESHDS_Mesh.h"
-
 // QT Includes
 #define	 INCLUDE_MENUITEM_DEF
 #include <qapplication.h>
@@ -236,8 +216,6 @@ SMESHGUI *SMESHGUI::GetOrCreateSMESHGUI(QAD_Desktop * desktop)
 
 		smeshGUI->myStudyAPI =
 			SMESHGUI_StudyAPI(smeshGUI->myStudy, smeshGUI->myComponentMesh);
-
-		smeshGUI->myDocument = new SMESHDS_Document(1);	//NBU
 
 		smeshGUI->mySimulationActors = vtkActorCollection::New();
 		smeshGUI->mySimulationActors2D = vtkActor2DCollection::New();
@@ -2104,8 +2082,7 @@ bool SMESHGUI::OnGUIEvent(int theCommandID, QAD_Desktop * parent)
 	case 112:
 	case 111:
 	{
-		Import_Document(parent, theCommandID);	//NBU
-		//Import_Mesh(parent,theCommandID);
+		smeshGUI->Import_Document(parent, theCommandID);
 		break;
 	}
 
@@ -3503,58 +3480,6 @@ SALOMEDS::Study::ListOfSObject *
  *
  */
 //=============================================================================
-void SMESHGUI::Import_Mesh(QAD_Desktop * parent, int theCommandID)
-{
-	QString filter;
-	string myExtension;
-	Mesh_Reader *myReader;
-
-	if (theCommandID == 113)
-	{
-		filter = tr("MED files (*.med)");
-		myExtension = string("MED");
-		myReader = new DriverMED_R_SMESHDS_Mesh;
-	}
-	else if (theCommandID == 112)
-	{
-		filter = tr("IDEAS files (*.unv)");
-		myExtension = string("UNV");
-	}
-	else if (theCommandID == 111)
-	{
-		filter = tr("DAT files (*.dat)");
-		myExtension = string("MED");
-		myReader = new DriverDAT_R_SMESHDS_Mesh;
-	}
-
-	QString filename = QAD_FileDlg::getFileName(parent,
-		"",
-		filter,
-		tr("Import mesh"),
-		true);
-	if (!filename.isEmpty())
-	{
-		QApplication::setOverrideCursor(Qt::waitCursor);
-		string myClass = string("SMESHDS_Mesh");
-//    Mesh_Reader* myReader = SMESHDriver::GetMeshReader(myExtension, myClass);
-
-		int myMeshId = (smeshGUI->myDocument)->NewMesh();
-		SMDS_Mesh *myMesh = (smeshGUI->myDocument)->GetMesh(myMeshId);
-
-		myReader->SetFile(string(filename.latin1()));
-		myReader->SetMesh(myMesh);
-		myReader->SetMeshId(myMeshId);
-		myReader->Read();
-
-		QApplication::restoreOverrideCursor();
-	}
-}
-
-//=============================================================================
-/*!
- *
- */
-//=============================================================================
 void SMESHGUI::Export_Mesh(QAD_Desktop * parent, int theCommandID)
 {
 	SALOME_Selection *Sel =
@@ -3577,7 +3502,7 @@ void SMESHGUI::Export_Mesh(QAD_Desktop * parent, int theCommandID)
 				if (!filename.isEmpty())
 				{
 					QApplication::setOverrideCursor(Qt::waitCursor);
-					aMesh->ExportMED(filename.latin1());
+					aMesh->Export(filename.latin1(), "MED");
 					QApplication::restoreOverrideCursor();
 				}
 			}
@@ -3591,7 +3516,7 @@ void SMESHGUI::Export_Mesh(QAD_Desktop * parent, int theCommandID)
 				if (!filename.isEmpty())
 				{
 					QApplication::setOverrideCursor(Qt::waitCursor);
-					aMesh->ExportDAT(filename.latin1());
+					aMesh->Export(filename.latin1(), "DAT");
 					QApplication::restoreOverrideCursor();
 				}
 			}
@@ -3605,11 +3530,11 @@ void SMESHGUI::Export_Mesh(QAD_Desktop * parent, int theCommandID)
 				if (!filename.isEmpty())
 				{
 					QApplication::setOverrideCursor(Qt::waitCursor);
-					aMesh->ExportUNV(filename.latin1());
+					aMesh->Export(filename.latin1(), "UNV");
 					QApplication::restoreOverrideCursor();
 				}
 				else
-					aMesh->ExportDAT(filename.latin1());
+					aMesh->Export(filename.latin1(), "DAT");
 
 				QApplication::restoreOverrideCursor();
 
@@ -3642,90 +3567,49 @@ void SMESHGUI::Import_Document(QAD_Desktop * parent, int theCommandID)
 {
 	QString filter;
 	string myExtension;
-	Document_Reader *myReader;
 
 	if (theCommandID == 113)
 	{
 		filter = tr("MED files (*.med)");
 		myExtension = string("MED");
-		myReader = new DriverMED_R_SMESHDS_Document;
 	}
 	else if (theCommandID == 112)
 	{
 		filter = tr("IDEAS files (*.unv)");
 		myExtension = string("UNV");
-		myReader = new DriverUNV_R_SMESHDS_Document;
 	}
 	else if (theCommandID == 111)
 	{
 		filter = tr("DAT files (*.dat)");
 		myExtension = string("DAT");
-		myReader = new DriverDAT_R_SMESHDS_Document;
 	}
 
-	QString filename = QAD_FileDlg::getFileName(parent,
-		"",
-		filter,
-		tr("Import document"),
-		true);
+	QString filename = QAD_FileDlg::getFileName(parent, "", filter,
+		tr("Import document"), true);
+
 	if (!filename.isEmpty())
 	{
 		QApplication::setOverrideCursor(Qt::waitCursor);
-		string myClass = string("SMESHDS_Document");
-//    Document_Reader* myReader = SMESHDriver::GetDocumentReader(myExtension, myClass);
-		SMESHDS_Document *newDocument = new SMESHDS_Document(1);
-
-		myReader->SetFile(string(filename.latin1()));
-		myReader->SetDocument(smeshGUI->myDocument);
-		myReader->Read();
-		QApplication::restoreOverrideCursor();
-	}
-}
-
-void SMESHGUI::Export_Document(QAD_Desktop * parent, int theCommandID)
-{
-	QString filter;
-	Document_Writer *myWriter;
-	string myExtension;
-
-	if (theCommandID == 122)
-	{
-		filter = tr("MED files (*.med)");
-		myExtension = string("MED");
-		myWriter = new DriverMED_W_SMESHDS_Document;
-	}
-	else if (theCommandID == 121)
-	{
-		filter = tr("DAT files (*.dat)");
-		myExtension = string("DAT");
-		myWriter = new DriverDAT_W_SMESHDS_Document;
-	}
-	else if (theCommandID == 123)
-	{
-		filter = tr("IDEAS files (*.unv)");
-		myExtension = string("UNV");
-		myWriter = new DriverUNV_W_SMESHDS_Document;
-	}
-
-	QString filename = QAD_FileDlg::getFileName(parent,
-		"",
-		filter,
-		tr("Export document"),
-		false);
-	if (!filename.isEmpty())
-	{
-		QApplication::setOverrideCursor(Qt::waitCursor);
-		string myClass = string("SMESHDS_Document");
-		//Document_Writer* myWriter = SMESHDriver::GetDocumentWriter(myExtension, myClass);
-
-		myWriter->SetFile(string(filename.latin1()));
-		myWriter->SetDocument(smeshGUI->myDocument);
-
-		//StudyContextStruct* myStudyContext = _impl.GetStudyContext(myStudyId);
-		//Handle(SMESHDS_Document) myDocument = myStudyContext->myDocument;
-		//myWriter->SetDocument(myDocument);
-
-		myWriter->Write();
+		try
+		{
+			if (!myComponentMesh->_is_nil())
+			{
+				SMESH::SMESH_Mesh_var aMesh =
+					myComponentMesh->Import(myStudyId, filename.latin1(),
+					myExtension.c_str());
+	
+				if (!aMesh->_is_nil())
+				{
+					SALOMEDS::SObject_var SM = myStudyAPI.AddNewMesh(aMesh);
+					myStudyAPI.SetName(SM, filename);
+				}
+			}
+		}
+		catch(const SALOME::SALOME_Exception & S_ex)
+		{
+			QtCatchCorbaException(S_ex);
+		}
+		myActiveStudy->updateObjBrowser(true);
 		QApplication::restoreOverrideCursor();
 	}
 }

@@ -98,14 +98,14 @@ static int Penta_nbN [] = { 3, 3, 4, 4, 4 };
 static int Hexa_F [6][5] = { // FORWARD
   { 0, 1, 2, 3, 0 },         // opposite faces are neighbouring,
   { 4, 5, 6, 7, 4 },         // even face normal is internal, odd - external
-  { 1, 0, 4, 5, 1 },         // same index nodes nodes of opposite faces are linked
+  { 1, 0, 4, 5, 1 },         // same index nodes of opposite faces are linked
   { 2, 3, 7, 6, 2 }, 
   { 0, 3, 7, 4, 0 }, 
   { 1, 2, 6, 5, 1 }}; 
 static int Hexa_R [6][5] = { // REVERSED
   { 0, 3, 2, 1, 0 },         // opposite faces are neighbouring,
   { 4, 7, 6, 5, 4 },         // even face normal is external, odd - internal
-  { 1, 5, 4, 0, 1 },         // same index nodes nodes of opposite faces are linked
+  { 1, 5, 4, 0, 1 },         // same index nodes of opposite faces are linked
   { 2, 6, 7, 3, 2 }, 
   { 0, 4, 7, 3, 0 }, 
   { 1, 5, 6, 2, 1 }}; 
@@ -227,7 +227,7 @@ bool SMDS_VolumeTool::Set (const SMDS_MeshElement* theVolume)
         myFaceNbNodes = Penta_nbN;
       else
         myFaceNbNodes = Hexa_nbN;
-      break;
+
       // define volume orientation
       XYZ botNormal;
       GetFaceNormal( 0, botNormal.x, botNormal.y, botNormal.z );
@@ -238,7 +238,7 @@ bool SMDS_VolumeTool::Set (const SMDS_MeshElement* theVolume)
                  topNode->Z() - botNode->Z() );
       bool diffDir = ( botNormal.Dot( upDir ) < 0 );
       myVolForward = ( myVolumeNbNodes == 6 ? diffDir : !diffDir );
-
+      break;
     }
     default: myVolume = 0;
     }
@@ -251,10 +251,10 @@ bool SMDS_VolumeTool::Set (const SMDS_MeshElement* theVolume)
 //purpose  : Return nodes vector of an inverse volume
 //=======================================================================
 
-#define SWAP_NODES(nodes,i1,i2)                         \
-{                                                 \
+#define SWAP_NODES(nodes,i1,i2)           \
+{                                         \
   const SMDS_MeshNode* tmp = nodes[ i1 ]; \
-  nodes[ i1 ] = nodes[ i2 ];      \
+  nodes[ i1 ] = nodes[ i2 ];              \
   nodes[ i2 ] = tmp;                      \
 }
 void SMDS_VolumeTool::Inverse ()

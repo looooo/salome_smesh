@@ -213,11 +213,11 @@ bool SMESH_NETGEN_3D::Compute(SMESH_Mesh& aMesh,
 	{
 	  index++;
 	  const SMDS_MeshNode * node = iteratorNodes->next();
-	  int nodeId = node->GetID();
-	  double nodeX = node->X();
-	  double nodeY = node->Y();
-	  double nodeZ = node->Z();
-	  MESSAGE("NODE -> ID = " << nodeId << " X = " << nodeX << " Y = " << nodeY << " Z = " << nodeZ);
+// 	  int nodeId = node->GetID();
+// 	  double nodeX = node->X();
+// 	  double nodeY = node->Y();
+// 	  double nodeZ = node->Z();
+// 	  MESSAGE("NODE -> ID = " << nodeId << " X = " << nodeX << " Y = " << nodeY << " Z = " << nodeZ);
 	}
       delete iteratorNodes;
 
@@ -227,6 +227,7 @@ bool SMESH_NETGEN_3D::Compute(SMESH_Mesh& aMesh,
 
       SCRUTE(nbTria);
       index = 0;
+      int numberOfDegeneratedTriangle = 0;
       while(iteratorTriangle->more())
 	{
 	  index++;
@@ -235,17 +236,57 @@ bool SMESH_NETGEN_3D::Compute(SMESH_Mesh& aMesh,
 
 	  SMDS_Iterator<const SMDS_MeshElement *> * triangleNodesIt = triangle->nodesIterator();
 
-	  int triangleNode1 = (triangleNodesIt->next())->GetID();
-	  int triangleNode2 = (triangleNodesIt->next())->GetID();
-	  int triangleNode3 = (triangleNodesIt->next())->GetID();
+	  const SMDS_MeshNode * node1 = static_cast<const SMDS_MeshNode *>(triangleNodesIt->next());
+	  double node1X = node1->X();
+	  double node1Y = node1->Y();
+	  double node1Z = node1->Z();
 
-	  MESSAGE("TRIANGLE -> ID = " << triangleId << " N1 = " << triangleNode1 << " N2 = " << triangleNode2 << " N3 = " << triangleNode3);
+	  const SMDS_MeshNode * node2 = static_cast<const SMDS_MeshNode *>(triangleNodesIt->next());
+	  double node2X = node2->X();
+	  double node2Y = node2->Y();
+	  double node2Z = node2->Z();
 
+	  const SMDS_MeshNode * node3 = static_cast<const SMDS_MeshNode *>(triangleNodesIt->next());
+	  double node3X = node3->X();
+	  double node3Y = node3->Y();
+	  double node3Z = node3->Z();
+
+	  int triangleNode1 = node1->GetID();
+	  int triangleNode2 = node2->GetID();
+	  int triangleNode3 = node3->GetID();
+
+	  // Compute the triangle surface
+
+	  double vect1 = ((node2Y - node1Y)*(node3Z - node1Z) - (node2Z - node1Z)*(node3Y - node1Y));
+	  double vect2 = - ((node2X - node1X)*(node3Z - node1Z) - (node2Z - node1Z)*(node3X - node1X));
+	  double vect3 = ((node2X - node1X)*(node3Y - node1Y) - (node2Y - node1Y)*(node3X - node1X));
+	  double epsilon = 1.0e-6;
+
+	  bool triangleIsDegenerated = ((abs(vect1)<epsilon) && (abs(vect2)<epsilon) && (abs(vect3)<epsilon));
+
+	  if (triangleIsDegenerated)
+	    {
+// 	      MESSAGE("TRIANGLE -> ID = " << triangleId << " N1 = " << triangleNode1 << " N2 = " << triangleNode2 << " N3 = " << triangleNode3 << " is degenerated");
+// 	      MESSAGE("NODE -> ID = " << triangleNode1 << " X = " << node1X << " Y = " << node1Y << " Z = " << node1Z);
+// 	      MESSAGE("NODE -> ID = " << triangleNode2 << " X = " << node2X << " Y = " << node2Y << " Z = " << node2Z);
+// 	      MESSAGE("NODE -> ID = " << triangleNode3 << " X = " << node3X << " Y = " << node3Y << " Z = " << node3Z);
+	      numberOfDegeneratedTriangle++;
+	    }
+	  else
+	    {
+// 	      MESSAGE("TRIANGLE -> ID = " << triangleId << " N1 = " << triangleNode1 << " N2 = " << triangleNode2 << " N3 = " << triangleNode3 << " is normal");
+	    }
 	}
+
       delete iteratorTriangle;
+
+      if (numberOfDegeneratedTriangle > 0)
+	MESSAGE("WARNING THERE IS(ARE) " << numberOfDegeneratedTriangle << " degenerated triangle on this face");
 
       SCRUTE(index);
     }
+
+
 
   SCRUTE(NbTotOfTria);
   SCRUTE(NbTotOfNodesFaces);
@@ -305,12 +346,12 @@ bool SMESH_NETGEN_3D::Compute(SMESH_Mesh& aMesh,
       while(iteratorNodes->more())
 	{
 	  index++;
-	  const SMDS_MeshNode * node = iteratorNodes->next();
-	  int nodeId = node->GetID();
-	  double nodeX = node->X();
-	  double nodeY = node->Y();
-	  double nodeZ = node->Z();
-	  MESSAGE("NODE -> ID = " << nodeId << " X = " << nodeX << " Y = " << nodeY << " Z = " << nodeZ);
+ 	  const SMDS_MeshNode * node = iteratorNodes->next();
+// 	  int nodeId = node->GetID();
+// 	  double nodeX = node->X();
+// 	  double nodeY = node->Y();
+// 	  double nodeZ = node->Z();
+// 	  MESSAGE("NODE -> ID = " << nodeId << " X = " << nodeX << " Y = " << nodeY << " Z = " << nodeZ);
 	}
       delete iteratorNodes;
 
@@ -361,12 +402,12 @@ bool SMESH_NETGEN_3D::Compute(SMESH_Mesh& aMesh,
       while(iteratorNodes->more())
 	{
 	  index++;
-	  const SMDS_MeshNode * node = iteratorNodes->next();
-	  int nodeId = node->GetID();
-	  double nodeX = node->X();
-	  double nodeY = node->Y();
-	  double nodeZ = node->Z();
-	  MESSAGE("NODE -> ID = " << nodeId << " X = " << nodeX << " Y = " << nodeY << " Z = " << nodeZ);
+ 	  const SMDS_MeshNode * node = iteratorNodes->next();
+// 	  int nodeId = node->GetID();
+// 	  double nodeX = node->X();
+// 	  double nodeY = node->Y();
+// 	  double nodeZ = node->Z();
+// 	  MESSAGE("NODE -> ID = " << nodeId << " X = " << nodeX << " Y = " << nodeY << " Z = " << nodeZ);
 	}
       delete iteratorNodes;
 
@@ -455,7 +496,7 @@ bool SMESH_NETGEN_3D::Compute(SMESH_Mesh& aMesh,
 	      double nodeX = node->X();
 	      double nodeY = node->Y();
 	      double nodeZ = node->Z();
-	      MESSAGE("NODE -> ID = " << nodeId << " X = " << nodeX << " Y = " << nodeY << " Z = " << nodeZ);
+// 	      MESSAGE("NODE -> ID = " << nodeId << " X = " << nodeX << " Y = " << nodeY << " Z = " << nodeZ);
 	      listNodeCoresNetgenSmesh[indexNodes] = nodeId;
 	      int index = indexNodes*spaceDimension;
 	      Netgen_Coordinates[index] = nodeX;
@@ -481,7 +522,7 @@ bool SMESH_NETGEN_3D::Compute(SMESH_Mesh& aMesh,
 	      double nodeX = node->X();
 	      double nodeY = node->Y();
 	      double nodeZ = node->Z();
-	      MESSAGE("NODE -> ID = " << nodeId << " X = " << nodeX << " Y = " << nodeY << " Z = " << nodeZ);
+// 	      MESSAGE("NODE -> ID = " << nodeId << " X = " << nodeX << " Y = " << nodeY << " Z = " << nodeZ);
 	      listNodeCoresNetgenSmesh[indexNodes] = node->GetID();
 	      int index = indexNodes*spaceDimension;
 	      Netgen_Coordinates[index] = node->X();
@@ -507,7 +548,7 @@ bool SMESH_NETGEN_3D::Compute(SMESH_Mesh& aMesh,
 	      double nodeX = node->X();
 	      double nodeY = node->Y();
 	      double nodeZ = node->Z();
-	      MESSAGE("NODE -> ID = " << nodeId << " X = " << nodeX << " Y = " << nodeY << " Z = " << nodeZ);
+// 	      MESSAGE("NODE -> ID = " << nodeId << " X = " << nodeX << " Y = " << nodeY << " Z = " << nodeZ);
 	      listNodeCoresNetgenSmesh[indexNodes] = nodeId;
 	      int index = indexNodes*spaceDimension;
 	      Netgen_Coordinates[index] = nodeX;
@@ -563,7 +604,7 @@ bool SMESH_NETGEN_3D::Compute(SMESH_Mesh& aMesh,
 		  int triangleNode2 = (triangleNodesIt->next())->GetID();
 		  int triangleNode3 = (triangleNodesIt->next())->GetID();
 
-		  MESSAGE("TRIANGLE -> ID = " << triangleId << " N1 = " << triangleNode1 << " N2 = " << triangleNode2 << " N3 = " << triangleNode3);
+// 		  MESSAGE("TRIANGLE -> ID = " << triangleId << " N1 = " << triangleNode1 << " N2 = " << triangleNode2 << " N3 = " << triangleNode3);
 
 		  int N1New = 0;
 		  int N2New = 0;
@@ -609,7 +650,7 @@ bool SMESH_NETGEN_3D::Compute(SMESH_Mesh& aMesh,
 		  int triangleNode3 = (triangleNodesIt->next())->GetID();
 		  int triangleNode2 = (triangleNodesIt->next())->GetID();
 
-		  MESSAGE("TRIANGLE -> ID = " << triangleId << " N1 = " << triangleNode1 << " N2 = " << triangleNode2 << " N3 = " << triangleNode3);
+// 		  MESSAGE("TRIANGLE -> ID = " << triangleId << " N1 = " << triangleNode1 << " N2 = " << triangleNode2 << " N3 = " << triangleNode3);
 
 		  int N1New = 0;
 		  int N2New = 0;
@@ -939,7 +980,7 @@ bool SMESH_NETGEN_3D::Compute(SMESH_Mesh& aMesh,
 	    double nodeX = node->X();
 	    double nodeY = node->Y();
 	    double nodeZ = node->Z();
-	    MESSAGE("NODE -> ID = " << nodeId << " X = " << nodeX << " Y = " << nodeY << " Z = " << nodeZ);
+// 	    MESSAGE("NODE -> ID = " << nodeId << " X = " << nodeX << " Y = " << nodeY << " Z = " << nodeZ);
 	  }
 	delete iteratorNodes;
 
@@ -963,7 +1004,7 @@ bool SMESH_NETGEN_3D::Compute(SMESH_Mesh& aMesh,
 	    int tetraNode3 = (tetraNodesIt->next())->GetID();
 	    int tetraNode4 = (tetraNodesIt->next())->GetID();
 
-	    MESSAGE("TETRAHEDRON -> ID = " << tetraId << " N1 = " << tetraNode1 << " N2 = " << tetraNode2 << " N3 = " << tetraNode3 << " N4 = " << tetraNode4);
+// 	    MESSAGE("TETRAHEDRON -> ID = " << tetraId << " N1 = " << tetraNode1 << " N2 = " << tetraNode2 << " N3 = " << tetraNode3 << " N4 = " << tetraNode4);
 
 	  }
 	delete iteratorTetra;

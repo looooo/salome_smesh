@@ -103,7 +103,9 @@ void SMESH_Gen_i::RemoveLastFromPythonScript (int theStudyID)
 void SMESH_Gen_i::AddToCurrentPyScript (const TCollection_AsciiString& theString)
 {
   SMESH_Gen_i* aSMESHGen = SMESH_Gen_i::GetSMESHGen();
-  aSMESHGen->AddToPythonScript(aSMESHGen->GetCurrentStudy()->StudyId(), theString);
+  SALOMEDS::Study_ptr aStudy = aSMESHGen->GetCurrentStudy();
+  if (aStudy->_is_nil()) return;
+  aSMESHGen->AddToPythonScript(aStudy->StudyId(), theString);
 }
 
 

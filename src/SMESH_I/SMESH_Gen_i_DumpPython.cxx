@@ -81,6 +81,46 @@ void SMESH_Gen_i::AddToPythonScript (int theStudyID, const TCollection_AsciiStri
 }
 
 //=======================================================================
+//function : AddToCurrentPyScript
+//purpose  : 
+//=======================================================================
+
+void SMESH_Gen_i::AddToCurrentPyScript (const TCollection_AsciiString& theString)
+{
+  SMESH_Gen_i* aSMESHGen = SMESH_Gen_i::GetSMESHGen();
+  aSMESHGen->AddToPythonScript(aSMESHGen->GetCurrentStudy()->StudyId(), theString);
+}
+
+
+//=======================================================================
+//function : AddObject
+//purpose  : add object to script string
+//=======================================================================
+
+TCollection_AsciiString& SMESH_Gen_i::AddObject(TCollection_AsciiString& theStr,
+                                                CORBA::Object_ptr        theObject)
+{
+  GEOM::GEOM_Object_var geomObj = GEOM::GEOM_Object::_narrow( theObject );
+  if ( !geomObj->_is_nil() ) {
+    theStr += "salome.IDToObject(\"";
+    theStr += geomObj->GetStudyEntry();
+    theStr += "\")";
+  }
+  else {
+    SMESH_Gen_i* aSMESHGen = SMESH_Gen_i::GetSMESHGen();
+    SALOMEDS::SObject_var aSO =
+      aSMESHGen->ObjectToSObject(aSMESHGen->GetCurrentStudy(), theObject);
+    if ( !aSO->_is_nil() )
+      theStr += aSO->GetID();
+    else if ( !CORBA::is_nil( theObject ) )
+      theStr += aSMESHGen->GetORB()->object_to_string( theObject );
+    else
+      theStr += "None";
+  }
+  return theStr;
+}
+
+//=======================================================================
 //function : SavePython
 //purpose  : 
 //=======================================================================

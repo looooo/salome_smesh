@@ -1092,6 +1092,9 @@ msgstr "This command is available in VTK viewer only\nPlease, create VTK viewer 
 msgid "LENGTH_EDGES"
 msgstr "Length"
 
+msgid "LENGTH2D_EDGES"
+msgstr "Length2D"
+
 msgid "FREE_BORDERS"
 msgstr "Free borders"
 

@@ -3,7 +3,7 @@
 # one has a race in common with the two others.
 # Hypothesis and algorithms for the mesh generation are global
 #
-
+>
 import salome
 from salome import sg
 
@@ -149,12 +149,12 @@ mefisto2D = hypothesis._narrow(SMESH.SMESH_MEFISTO_2D)
 mefistoID = smeshgui.AddNewAlgorithms( salome.orb.object_to_string(mefisto2D) )
 smeshgui.SetName(mefistoID, "MEFISTO_2D")
 
-print "-------------------------- Tetra_3D"
+print "-------------------------- NETGEN_3D"
 
-hypothesis=gen.CreateHypothesis("Tetra_3D")
-tetra3D = hypothesis._narrow(SMESH.SMESH_Tetra_3D)
-tetraID = smeshgui.AddNewAlgorithms( salome.orb.object_to_string(tetra3D) )
-smeshgui.SetName(tetraID, "Tetra_3D")
+hypothesis=gen.CreateHypothesis("NETGEN_3D")
+netgen3D = hypothesis._narrow(SMESH.SMESH_NETGEN_3D)
+netgenID = smeshgui.AddNewAlgorithms( salome.orb.object_to_string(netgen3D) )
+smeshgui.SetName(netgenID, "NETGEN_3D")
 
 # ---- init a Mesh with the shell
 
@@ -175,7 +175,7 @@ ret=mesh.AddHypothesis(shell,mefisto2D)
 print ret
 ret=mesh.AddHypothesis(shell,hypArea)
 print ret
-ret=mesh.AddHypothesis(shell,tetra3D)
+ret=mesh.AddHypothesis(shell,netgen3D)
 print ret
 ret=mesh.AddHypothesis(shell,hypVolume)
 print ret
@@ -184,7 +184,7 @@ smeshgui.SetAlgorithms( idmesh, regularID)
 smeshgui.SetHypothesis( idmesh, idseg )
 smeshgui.SetAlgorithms( idmesh, mefistoID )
 smeshgui.SetHypothesis( idmesh, idarea )
-smeshgui.SetAlgorithms( idmesh, tetraID )
+smeshgui.SetAlgorithms( idmesh, netgenID )
 smeshgui.SetHypothesis( idmesh, idvolume )
 
 sg.updateObjBrowser(1)

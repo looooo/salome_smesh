@@ -203,19 +203,19 @@ print algoMef.GetId()
 idMef = smeshgui.AddNewAlgorithms( salome.orb.object_to_string(algoMef) )
 smeshgui.SetName( idMef, "MEFISTO_2D" )
 
-print "-------------------------- Tetra_3D"
+print "-------------------------- NETGEN_3D"
 
-alg3D = gen.CreateHypothesis( "Tetra_3D" )
+alg3D = gen.CreateHypothesis( "NETGEN_3D" )
 algo3D = alg3D._narrow( SMESH.SMESH_Algo )
 listHyp = algo3D.GetCompatibleHypothesis()
 for hyp in listHyp:
     print hyp
-algoNg = alg3D._narrow( SMESH.SMESH_Tetra_3D )
+algoNg = alg3D._narrow( SMESH.SMESH_NETGEN_3D )
 print algoNg.GetName()
 print algoNg.GetId()
 
 idNg = smeshgui.AddNewAlgorithms( salome.orb.object_to_string(algoNg) )
-smeshgui.SetName( idNg, "Tetra_2D" )
+smeshgui.SetName( idNg, "NETGEN_2D" )
 
 print "-------------------------- add hypothesis to main mechanic"
 
@@ -226,7 +226,7 @@ ret = mesh.AddHypothesis( shape_mesh, algoReg1D )   # Regular 1D/wire discretisa
 print ret
 ret = mesh.AddHypothesis( shape_mesh, algoMef )     # MEFISTO 2D
 print ret
-ret = mesh.AddHypothesis( shape_mesh, algoNg )     # Tetra 3D
+ret = mesh.AddHypothesis( shape_mesh, algoNg )     # NETGEN 3D
 print ret
 ret = mesh.AddHypothesis( shape_mesh, hypNbSeg )   # nb segments
 print ret
@@ -237,7 +237,7 @@ print ret
 
 smeshgui.SetAlgorithms( idmesh, idReg1D );  # Regular 1D/wire discretisation
 smeshgui.SetAlgorithms( idmesh, idMef );    # MEFISTO 2D
-smeshgui.SetAlgorithms( idmesh, idNg );    # Tetra 3D
+smeshgui.SetAlgorithms( idmesh, idNg );    # NETGEN 3D
 smeshgui.SetHypothesis( idmesh, idSeg );    # nb segments
 smeshgui.SetHypothesis( idmesh, idArea );  # max area
 smeshgui.SetHypothesis( idmesh, idVolume );  # max volume

@@ -1263,35 +1263,28 @@ int SMESH_ActorDef::RenderTranslucentGeometry(vtkViewport *vp)
 
 
 void SMESH_ActorDef::Render(vtkRenderer *ren){
-  unsigned long mTime = myTimeStamp->GetMTime();
+  unsigned long aTime = myTimeStamp->GetMTime();
   unsigned long anObjTime = myVisualObj->GetUnstructuredGrid()->GetMTime();
-  if(anObjTime > mTime)
+  unsigned long aClippingTime = myImplicitBoolean->GetMTime();
+  if(anObjTime > aTime || aClippingTime > aTime)
     Update();
 }
 
 
 void SMESH_ActorDef::Update(){
-  SetVisibility(GetVisibility());
-  unsigned long int anObjTime = myVisualObj->GetUnstructuredGrid()->GetMTime();
-  unsigned long int aClippingTime = myImplicitBoolean->GetMTime();
-  unsigned long int aTime = myTimeStamp->GetMTime();
   if(MYDEBUG) MESSAGE("SMESH_ActorDef::Update");
 
   if(GetControlMode() != eNone) {
-    if(anObjTime > aTime || aClippingTime > aTime){
-      SetControlMode(GetControlMode());
-      SetVisibility(GetVisibility());
-    }
+    SetControlMode(GetControlMode());
   }
   if(myIsPointsLabeled){
-    if(anObjTime > aTime || aClippingTime > aTime)
-      SetPointsLabeled(myIsPointsLabeled);
+    SetPointsLabeled(myIsPointsLabeled);
   }
   if(myIsCellsLabeled){
-    if(anObjTime > aTime || aClippingTime > aTime)
-      SetCellsLabeled(myIsCellsLabeled);
+    SetCellsLabeled(myIsCellsLabeled);
   }
-
+  SetVisibility(GetVisibility());
+  
   myTimeStamp->Modified();
   Modified();
 }
@@ -1498,7 +1491,6 @@ void SMESH_ActorDef::SetPlaneParam(float theDir[3], float theDist, vtkPlane* the
   float anOrigin[3];
   ::DistanceToPosition(GetUnstructuredGrid(),theDir,theDist,anOrigin);
   thePlane->SetOrigin(anOrigin);
-  Update();
 }
 
 

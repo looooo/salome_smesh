@@ -288,6 +288,8 @@ public:
 
   void AddToPythonScript (int theStudyID, const TCollection_AsciiString& theString);
 
+  void RemoveLastFromPythonScript (int theStudyID);
+
   static void AddToCurrentPyScript (const TCollection_AsciiString& theString);
 
   void SavePython (SALOMEDS::Study_ptr theStudy);

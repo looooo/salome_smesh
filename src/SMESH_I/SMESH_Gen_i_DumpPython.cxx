@@ -12,17 +12,17 @@
 //function : DumpPython
 //purpose  : 
 //=======================================================================
-Engines::TMPFile* SMESH_Gen_i::DumpPython (CORBA::Object_ptr theStudy, 
-                                           CORBA::Boolean isPublished, 
+Engines::TMPFile* SMESH_Gen_i::DumpPython (CORBA::Object_ptr theStudy,
+                                           CORBA::Boolean isPublished,
                                            CORBA::Boolean& isValidScript)
 {
   SALOMEDS::Study_var aStudy = SALOMEDS::Study::_narrow(theStudy);
   if (CORBA::is_nil(aStudy))
-    return new Engines::TMPFile(0);   
+    return new Engines::TMPFile(0);
 
   SALOMEDS::SObject_var aSO = aStudy->FindComponent(ComponentDataType());
   if (CORBA::is_nil(aSO))
-    return new Engines::TMPFile(0);  
+    return new Engines::TMPFile(0);
 
   // Map study entries to object names
   Resource_DataMapOfAsciiStringAsciiString aMap;
@@ -33,12 +33,14 @@ Engines::TMPFile* SMESH_Gen_i::DumpPython (CORBA::Object_ptr theStudy,
     SALOMEDS::SObject_var aValue = Itr->Value();
 
     TCollection_AsciiString aName (aValue->GetName());
-    int p, p2 = 1, e = aName.Length();
-    while ((p = aName.FirstLocationNotInSet(s, p2, e))) {
-      aName.SetValue(p, '_');
-      p2 = p;
-    }  
-    aMap.Bind(TCollection_AsciiString(aValue->GetID()), aName);
+    if (aName.Length() > 0) {
+      int p, p2 = 1, e = aName.Length();
+      while ((p = aName.FirstLocationNotInSet(s, p2, e))) {
+        aName.SetValue(p, '_');
+        p2 = p;
+      }
+      aMap.Bind(TCollection_AsciiString(aValue->GetID()), aName);
+    }
   }
 
   // Get trace of restored study
@@ -78,6 +80,19 @@ void SMESH_Gen_i::AddToPythonScript (int theStudyID, const TCollection_AsciiStri
     myPythonScripts[theStudyID] = new TColStd_HSequenceOfAsciiString;
   }
   myPythonScripts[theStudyID]->Append(theString);
+}
+
+//=============================================================================
+/*!
+ *  RemoveLastFromPythonScript
+ */
+//=============================================================================
+void SMESH_Gen_i::RemoveLastFromPythonScript (int theStudyID)
+{
+  if (myPythonScripts.find(theStudyID) != myPythonScripts.end()) {
+    int aLen = myPythonScripts[theStudyID]->Length();
+    myPythonScripts[theStudyID]->Remove(aLen);
+  }
 }
 
 //=======================================================================
@@ -232,16 +247,6 @@ TCollection_AsciiString SMESH_Gen_i::DumpPython_impl
     aScript += "\n";
     aScript += aNewLines;
   }
-//  if (myPythonScripts.find(theStudyID) != myPythonScripts.end()) {
-//    aScript += "\n";
-//    Handle(TColStd_HSequenceOfAsciiString) aPythonScript = myPythonScripts[theStudyID];
-//    Standard_Integer istr, aLen = aPythonScript->Length();
-//    for (istr = 1; istr <= aLen; istr++) {
-//      aScript += "\n\t";
-//      aScript += aPythonScript->Value(istr);
-//    }
-//    aScript += "\n";
-//  }
 
   // Find entries to be replaced by names
   Handle(TColStd_HSequenceOfInteger) aSeq = FindEntries(aScript);
@@ -251,9 +256,11 @@ TCollection_AsciiString SMESH_Gen_i::DumpPython_impl
     return aScript;
 
   // Replace entries by the names
+  TColStd_SequenceOfAsciiString seqRemoved;
+  Resource_DataMapOfAsciiStringAsciiString mapRemoved;
   Resource_DataMapOfAsciiStringAsciiString aNames;
   Standard_Integer objectCounter = 0, aStart = 1, aScriptLength = aScript.Length();
-  TCollection_AsciiString anUpdatedScript, anEntry, aName, aBaseName("geomObj_");
+  TCollection_AsciiString anUpdatedScript, anEntry, aName, aBaseName("smeshObj_");
 
   for (Standard_Integer i = 1; i <= aLen; i += 2) {
     anUpdatedScript += aScript.SubString(aStart, aSeq->Value(i) - 1);
@@ -271,10 +278,13 @@ TCollection_AsciiString SMESH_Gen_i::DumpPython_impl
         theObjectNames(anEntry) = aName;
       }
     } else {
+      // ? Removed Object ?
       do {
         aName = aBaseName + TCollection_AsciiString(++objectCounter);
       } while (theObjectNames.IsBound(aName));
       theObjectNames.Bind(anEntry, aName);
+      seqRemoved.Append(aName);
+      mapRemoved.Bind(anEntry, "1");
     }
     theObjectNames.Bind(aName, anEntry); // to detect same name of diff objects
 
@@ -283,9 +293,18 @@ TCollection_AsciiString SMESH_Gen_i::DumpPython_impl
     aStart = aSeq->Value(i + 1) + 1;
   }
 
-  // add final part of the script
+  // add final part of aScript
   if (aSeq->Value(aLen) < aScriptLength)
     anUpdatedScript += aScript.SubString(aSeq->Value(aLen) + 1, aScriptLength);
+
+  // Remove removed objects
+  anUpdatedScript += "\n\taStudyBuilder = theStudy.NewBuilder()";
+  for (int ir = 1; ir <= seqRemoved.Length(); ir++) {
+    anUpdatedScript += "\n\tSO = theStudy.FindObjectIOR(theStudy.ConvertObjectToIOR(";
+    anUpdatedScript += seqRemoved.Value(ir);
+    anUpdatedScript += "))\n\tif SO is not None: aStudyBuilder.RemoveObjectWithChildren(SO)";
+  }
+  anUpdatedScript += "\n";
 
   // Set object names
   anUpdatedScript += "\n\tisGUIMode = 1";
@@ -297,13 +316,13 @@ TCollection_AsciiString SMESH_Gen_i::DumpPython_impl
   Resource_DataMapOfAsciiStringAsciiString mapEntries;
   for (Standard_Integer i = 1; i <= aLen; i += 2) {
     anEntry = aScript.SubString(aSeq->Value(i), aSeq->Value(i + 1));
-    if (theObjectNames.IsBound(anEntry) && !mapEntries.IsBound(anEntry)) {
+    if (theObjectNames.IsBound(anEntry) &&
+        !mapEntries.IsBound(anEntry) &&
+        !mapRemoved.IsBound(anEntry)) {
       aName = theObjectNames.Find(anEntry);
       mapEntries.Bind(anEntry, aName);
       anUpdatedScript += "\n\t\tsmeshgui.SetName(salome.ObjectToID(";
       anUpdatedScript += aName + "), \"" + aName + "\")";
-      //anUpdatedScript += "\n\t\tsmeshgui.SetName(\"";
-      //anUpdatedScript += anEntry + "\", \"" + aName + "\")";
     }
   }
   anUpdatedScript += "\n\n\t\tsalome.sg.updateObjBrowser(0)";

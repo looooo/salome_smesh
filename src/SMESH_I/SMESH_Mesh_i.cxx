@@ -337,21 +337,12 @@ SMESH::Hypothesis_Status SMESH_Mesh_i::AddHypothesis(GEOM::GEOM_Object_ptr aSubS
   if(MYDEBUG) MESSAGE( " AddHypothesis(): status = " << status );
 
   // Update Python script
-  SALOMEDS::SObject_var aMeshSO = SMESH_Gen_i::ObjectToSObject(_gen_i->GetCurrentStudy(), _this());
-  SALOMEDS::SObject_var aHypoSO = SMESH_Gen_i::ObjectToSObject(_gen_i->GetCurrentStudy(), anHyp);
-
   TCollection_AsciiString aStr ("status = ");
-  aStr += aMeshSO->GetID();
-  aStr += ".AddHypothesis(salome.IDToObject(\"";
-  aStr += aSubShapeObject->GetStudyEntry();
-  aStr += "\"), ";
-  aStr += aHypoSO->GetID();
-  aStr += ")";
+  SMESH_Gen_i::AddObject(aStr, _this()) += ".AddHypothesis(";
+  SMESH_Gen_i::AddObject(aStr, aSubShapeObject) += ", ";
+  SMESH_Gen_i::AddObject(aStr, anHyp) += ")";
 
-  _gen_i->AddToPythonScript(_gen_i->GetCurrentStudy()->StudyId(), aStr);
-
-  aStr = "print \"AddHypothesis: \", status";
-  _gen_i->AddToPythonScript(_gen_i->GetCurrentStudy()->StudyId(), aStr);
+  SMESH_Gen_i::AddToCurrentPyScript(aStr);
 
   return ConvertHypothesisStatus(status);
 }
@@ -416,6 +407,14 @@ SMESH::Hypothesis_Status SMESH_Mesh_i::RemoveHypothesis(GEOM::GEOM_Object_ptr aS
   if ( !SMESH_Hypothesis::IsStatusFatal(status) )
     _gen_i->RemoveHypothesisFromShape(_gen_i->GetCurrentStudy(), _this(),
                                       aSubShapeObject, anHyp );
+
+  // Update Python script
+  TCollection_AsciiString aStr ("status = ");
+  SMESH_Gen_i::AddObject(aStr, _this()) += ".RemoveHypothesis(";
+  SMESH_Gen_i::AddObject(aStr, aSubShapeObject) += ", ";
+  SMESH_Gen_i::AddObject(aStr, anHyp) += ")";
+
+  SMESH_Gen_i::AddToCurrentPyScript(aStr);
 
   return ConvertHypothesisStatus(status);
 }
@@ -525,9 +524,21 @@ SMESH::SMESH_subMesh_ptr SMESH_Mesh_i::GetSubMesh(GEOM::GEOM_Object_ptr aSubShap
     if ( subMesh->_is_nil() )
       subMesh = createSubMesh( aSubShapeObject );
 
-    if ( _gen_i->CanPublishInStudy( subMesh ))
-      _gen_i->PublishSubMesh (_gen_i->GetCurrentStudy(), aMesh,
-                              subMesh, aSubShapeObject, theName );
+    if ( _gen_i->CanPublishInStudy( subMesh )) {
+      SALOMEDS::SObject_var aSO =
+        _gen_i->PublishSubMesh(_gen_i->GetCurrentStudy(), aMesh,
+                               subMesh, aSubShapeObject, theName );
+
+      // Update Python script
+      TCollection_AsciiString aStr (aSO->GetID());
+      aStr += " = ";
+      SMESH_Gen_i::AddObject(aStr, _this()) += ".GetSubMesh(";
+      SMESH_Gen_i::AddObject(aStr, aSubShapeObject) += ", \"";
+      aStr += (char*)theName;
+      aStr += "\")";
+
+      SMESH_Gen_i::AddToCurrentPyScript(aStr);
+    }
   }
   catch(SALOME_Exception & S_ex) {
     THROW_SALOME_CORBA_EXCEPTION(S_ex.what(), SALOME::BAD_PARAM);
@@ -560,12 +571,49 @@ void SMESH_Mesh_i::RemoveSubMesh( SMESH::SMESH_subMesh_ptr theSubMesh )
 	aSubShapeObject = GEOM::GEOM_Object::_narrow( aRef->GetObject() );
 
       aStudy->NewBuilder()->RemoveObjectWithChildren( anSO );
+
+      // Update Python script
+      TCollection_AsciiString aStr;
+      SMESH_Gen_i::AddObject(aStr, _this()) += ".RemoveSubMesh(";
+      aStr += anSO->GetID();
+      aStr += ")";
+
+      SMESH_Gen_i::AddToCurrentPyScript(aStr);
     }
   }
 
   removeSubMesh( theSubMesh, aSubShapeObject.in() );
 }
 
+//=============================================================================
+/*!
+ *  ElementTypeString
+ */
+//=============================================================================
+inline TCollection_AsciiString ElementTypeString (SMESH::ElementType theElemType)
+{
+  TCollection_AsciiString aStr;
+  switch (theElemType) {
+  case SMESH::ALL:
+    aStr = "SMESH.ALL";
+    break;
+  case SMESH::NODE:
+    aStr = "SMESH.NODE";
+    break;
+  case SMESH::EDGE:
+    aStr = "SMESH.EDGE";
+    break;
+  case SMESH::FACE:
+    aStr = "SMESH.FACE";
+    break;
+  case SMESH::VOLUME:
+    aStr = "SMESH.VOLUME";
+    break;
+  default:
+    break;
+  }
+  return aStr;
+}
 
 //=============================================================================
 /*!
@@ -581,8 +629,19 @@ SMESH::SMESH_Group_ptr SMESH_Mesh_i::CreateGroup( SMESH::ElementType theElemType
   SMESH::SMESH_Group_var aNewGroup =
     SMESH::SMESH_Group::_narrow( createGroup( theElemType, theName ));
 
-  _gen_i->PublishGroup( _gen_i->GetCurrentStudy(), _this(),
-                       aNewGroup, GEOM::GEOM_Object::_nil(), theName);
+  if ( _gen_i->CanPublishInStudy( aNewGroup ) ) {
+    SALOMEDS::SObject_var aSO =
+      _gen_i->PublishGroup(_gen_i->GetCurrentStudy(), _this(),
+                           aNewGroup, GEOM::GEOM_Object::_nil(), theName);
+
+    // Update Python script
+    TCollection_AsciiString aStr (aSO->GetID());
+    aStr += " = ";
+    SMESH_Gen_i::AddObject(aStr, _this()) += ".CreateGroup(";
+    aStr += ElementTypeString(theElemType) + ", \"" + (char*)theName + "\")";
+
+    SMESH_Gen_i::AddToCurrentPyScript(aStr);
+  }
 
   return aNewGroup._retn();
 }
@@ -593,9 +652,9 @@ SMESH::SMESH_Group_ptr SMESH_Mesh_i::CreateGroup( SMESH::ElementType theElemType
  *  
  */
 //=============================================================================
-SMESH::SMESH_GroupOnGeom_ptr SMESH_Mesh_i::CreateGroupFromGEOM( SMESH::ElementType    theElemType,
-                                                               const char*           theName,
-                                                               GEOM::GEOM_Object_ptr theGeomObj)
+SMESH::SMESH_GroupOnGeom_ptr SMESH_Mesh_i::CreateGroupFromGEOM (SMESH::ElementType    theElemType,
+                                                                const char*           theName,
+                                                                GEOM::GEOM_Object_ptr theGeomObj)
      throw(SALOME::SALOME_Exception)
 {
   Unexpect aCatch(SALOME_SalomeException);
@@ -605,13 +664,25 @@ SMESH::SMESH_GroupOnGeom_ptr SMESH_Mesh_i::CreateGroupFromGEOM( SMESH::ElementTy
   if ( !aShape.IsNull() ) {
     aNewGroup = SMESH::SMESH_GroupOnGeom::_narrow
       ( createGroup( theElemType, theName, aShape ));
-    if ( _gen_i->CanPublishInStudy( aNewGroup ) )
-      _gen_i->PublishGroup( _gen_i->GetCurrentStudy(), _this(), 
-                           aNewGroup, theGeomObj, theName );
+    if ( _gen_i->CanPublishInStudy( aNewGroup ) ) {
+      SALOMEDS::SObject_var aSO =
+        _gen_i->PublishGroup(_gen_i->GetCurrentStudy(), _this(), 
+                             aNewGroup, theGeomObj, theName);
+
+      // Update Python script
+      TCollection_AsciiString aStr (aSO->GetID());
+      aStr += " = ";
+      SMESH_Gen_i::AddObject(aStr, _this()) += ".CreateGroupFromGEOM(";
+      aStr += ElementTypeString(theElemType) + ", \"" + (char*)theName + "\", ";
+      SMESH_Gen_i::AddObject(aStr, theGeomObj) += ")";
+
+      SMESH_Gen_i::AddToCurrentPyScript(aStr);
+    }
   }
 
   return aNewGroup._retn();
 }
+
 //=============================================================================
 /*!
  *  
@@ -631,10 +702,20 @@ void SMESH_Mesh_i::RemoveGroup( SMESH::SMESH_GroupBase_ptr theGroup )
 
   SALOMEDS::Study_ptr aStudy = _gen_i->GetCurrentStudy();
   if ( !aStudy->_is_nil() )  {
-    // Remove group's SObject
     SALOMEDS::SObject_var aGroupSO = _gen_i->ObjectToSObject( aStudy, theGroup );
-    if ( !aGroupSO->_is_nil() )
+
+    if ( !aGroupSO->_is_nil() ) {
+      // Update Python script
+      TCollection_AsciiString aStr;
+      SMESH_Gen_i::AddObject(aStr, _this()) += ".RemoveGroup(";
+      aStr += aGroupSO->GetID();
+      aStr += ")";
+
+      SMESH_Gen_i::AddToCurrentPyScript(aStr);
+
+      // Remove group's SObject
       aStudy->NewBuilder()->RemoveObject( aGroupSO );
+    }
   }
 
   // Remove the group from SMESH data structures
@@ -659,13 +740,26 @@ void SMESH_Mesh_i::RemoveGroupWithContents( SMESH::SMESH_GroupBase_ptr theGroup 
   
   SMESH::long_array_var anIds = aGroup->GetListOfID();
   SMESH::SMESH_MeshEditor_var aMeshEditor = SMESH_Mesh_i::GetMeshEditor();
-    
+
+  // Update Python script
+  TCollection_AsciiString aStr;
+  SMESH_Gen_i::AddObject(aStr, _this()) += ".RemoveGroupWithContents(";
+  SMESH_Gen_i::AddObject(aStr, theGroup) += ")";
+
+  SMESH_Gen_i::AddToCurrentPyScript(aStr);
+
+  // Remove contents
   if ( aGroup->GetType() == SMESH::NODE )
     aMeshEditor->RemoveNodes( anIds );
   else
     aMeshEditor->RemoveElements( anIds );
-  
+
+  // Remove group
   RemoveGroup( theGroup );
+
+  // Clear python lines, created by RemoveNodes/Elements() and RemoveGroup()
+  _gen_i->RemoveLastFromPythonScript(_gen_i->GetCurrentStudy()->StudyId());
+  _gen_i->RemoveLastFromPythonScript(_gen_i->GetCurrentStudy()->StudyId());
 }
 
 //=============================================================================
@@ -681,13 +775,12 @@ SMESH::SMESH_Group_ptr SMESH_Mesh_i::UnionGroups( SMESH::SMESH_GroupBase_ptr the
 {
   try
   {
-    SMESH::SMESH_Group_var aResGrp;
-
     if ( theGroup1->_is_nil() || theGroup2->_is_nil() ||
          theGroup1->GetType() != theGroup2->GetType() )
       return SMESH::SMESH_Group::_nil();
 
-    aResGrp = CreateGroup( theGroup1->GetType(), theName );
+    // Create Union
+    SMESH::SMESH_Group_var aResGrp = CreateGroup( theGroup1->GetType(), theName );
     if ( aResGrp->_is_nil() )
       return SMESH::SMESH_Group::_nil();
 
@@ -712,6 +805,21 @@ SMESH::SMESH_Group_ptr SMESH_Mesh_i::UnionGroups( SMESH::SMESH_GroupBase_ptr the
 
     aResGrp->Add( aResIds );
 
+    // Clear python lines, created by CreateGroup() and Add()
+    SALOMEDS::Study_ptr aStudy = _gen_i->GetCurrentStudy();
+    _gen_i->RemoveLastFromPythonScript(aStudy->StudyId());
+    _gen_i->RemoveLastFromPythonScript(aStudy->StudyId());
+
+    // Update Python script
+    TCollection_AsciiString aStr;
+    SMESH_Gen_i::AddObject(aStr, aResGrp) += " = ";
+    SMESH_Gen_i::AddObject(aStr, _this()) += ".UnionGroups(";
+    SMESH_Gen_i::AddObject(aStr, theGroup1) += ", ";
+    SMESH_Gen_i::AddObject(aStr, theGroup2) += ", \"";
+    aStr += TCollection_AsciiString((char*)theName) + "\")";
+
+    SMESH_Gen_i::AddToCurrentPyScript(aStr);
+
     return aResGrp._retn();
   }
   catch( ... )
@@ -731,21 +839,20 @@ SMESH::SMESH_Group_ptr SMESH_Mesh_i::IntersectGroups( SMESH::SMESH_GroupBase_ptr
                                                       const char* theName )
   throw (SALOME::SALOME_Exception)
 {
-  SMESH::SMESH_Group_var aResGrp;
-  
   if ( theGroup1->_is_nil() || theGroup2->_is_nil() || 
        theGroup1->GetType() != theGroup2->GetType() )
-    return aResGrp;
-  
-  aResGrp = CreateGroup( theGroup1->GetType(), theName );
+    return SMESH::SMESH_Group::_nil();
+
+  // Create Intersection
+  SMESH::SMESH_Group_var aResGrp = CreateGroup( theGroup1->GetType(), theName );
   if ( aResGrp->_is_nil() )
     return aResGrp;
-  
+
   SMESH::long_array_var anIds1 = theGroup1->GetListOfID();
   SMESH::long_array_var anIds2 = theGroup2->GetListOfID();
-  
+
   TColStd_MapOfInteger aMap1;
-  
+
   for ( int i1 = 0, n1 = anIds1->length(); i1 < n1; i1++ )
     aMap1.Add( anIds1[ i1 ] );
 
@@ -754,15 +861,30 @@ SMESH::SMESH_Group_ptr SMESH_Mesh_i::IntersectGroups( SMESH::SMESH_GroupBase_ptr
   for ( int i2 = 0, n2 = anIds2->length(); i2 < n2; i2++ )
     if ( aMap1.Contains( anIds2[ i2 ] ) )
       aSeq.Append( anIds2[ i2 ] );
-  
+
   SMESH::long_array_var aResIds = new SMESH::long_array;
   aResIds->length( aSeq.Length() );
-  
+
   for ( int resI = 0, resN = aSeq.Length(); resI < resN; resI++ )
     aResIds[ resI ] = aSeq( resI + 1 );
-  
+
   aResGrp->Add( aResIds );
-  
+
+  // Clear python lines, created by CreateGroup() and Add()
+  SALOMEDS::Study_ptr aStudy = _gen_i->GetCurrentStudy();
+  _gen_i->RemoveLastFromPythonScript(aStudy->StudyId());
+  _gen_i->RemoveLastFromPythonScript(aStudy->StudyId());
+
+  // Update Python script
+  TCollection_AsciiString aStr;
+  SMESH_Gen_i::AddObject(aStr, aResGrp) += " = ";
+  SMESH_Gen_i::AddObject(aStr, _this()) += ".IntersectGroups(";
+  SMESH_Gen_i::AddObject(aStr, theGroup1) += ", ";
+  SMESH_Gen_i::AddObject(aStr, theGroup2) += ", \"";
+  aStr += TCollection_AsciiString((char*)theName) + "\")";
+
+  SMESH_Gen_i::AddToCurrentPyScript(aStr);
+
   return aResGrp._retn();
 }
 
@@ -777,21 +899,20 @@ SMESH::SMESH_Group_ptr SMESH_Mesh_i::CutGroups( SMESH::SMESH_GroupBase_ptr theGr
                                                 const char* theName )
   throw (SALOME::SALOME_Exception)
 {
-  SMESH::SMESH_Group_var aResGrp;
-  
   if ( theGroup1->_is_nil() || theGroup2->_is_nil() || 
        theGroup1->GetType() != theGroup2->GetType() )
-    return aResGrp;
-  
-  aResGrp = CreateGroup( theGroup1->GetType(), theName );
+    return SMESH::SMESH_Group::_nil();
+
+  // Perform Cutting
+  SMESH::SMESH_Group_var aResGrp = CreateGroup( theGroup1->GetType(), theName );
   if ( aResGrp->_is_nil() )
     return aResGrp;
-  
+
   SMESH::long_array_var anIds1 = theGroup1->GetListOfID();
   SMESH::long_array_var anIds2 = theGroup2->GetListOfID();
-  
+
   TColStd_MapOfInteger aMap2;
-  
+
   for ( int i2 = 0, n2 = anIds2->length(); i2 < n2; i2++ )
     aMap2.Add( anIds2[ i2 ] );
 
@@ -806,9 +927,24 @@ SMESH::SMESH_Group_ptr SMESH_Mesh_i::CutGroups( SMESH::SMESH_GroupBase_ptr theGr
 
   for ( int resI = 0, resN = aSeq.Length(); resI < resN; resI++ )
     aResIds[ resI ] = aSeq( resI + 1 );  
-  
+
   aResGrp->Add( aResIds );
-  
+
+  // Clear python lines, created by CreateGroup() and Add()
+  SALOMEDS::Study_ptr aStudy = _gen_i->GetCurrentStudy();
+  _gen_i->RemoveLastFromPythonScript(aStudy->StudyId());
+  _gen_i->RemoveLastFromPythonScript(aStudy->StudyId());
+
+  // Update Python script
+  TCollection_AsciiString aStr;
+  SMESH_Gen_i::AddObject(aStr, aResGrp) += " = ";
+  SMESH_Gen_i::AddObject(aStr, _this()) += ".CutGroups(";
+  SMESH_Gen_i::AddObject(aStr, theGroup1) += ", ";
+  SMESH_Gen_i::AddObject(aStr, theGroup2) += ", \"";
+  aStr += TCollection_AsciiString((char*)theName) + "\")";
+
+  SMESH_Gen_i::AddToCurrentPyScript(aStr);
+
   return aResGrp._retn();
 }
 
@@ -1068,13 +1204,10 @@ void SMESH_Mesh_i::SetImpl(::SMESH_Mesh * impl)
 SMESH::SMESH_MeshEditor_ptr SMESH_Mesh_i::GetMeshEditor()
 {
   // Update Python script
-  SALOMEDS::SObject_var aSO =
-    SMESH_Gen_i::ObjectToSObject(_gen_i->GetCurrentStudy(), _this());
   TCollection_AsciiString aStr ("mesh_editor = ");
-  aStr += aSO->GetID();
-  aStr += ".GetMeshEditor()";
+  SMESH_Gen_i::AddObject(aStr, _this()) += ".GetMeshEditor()";
 
-  _gen_i->AddToPythonScript(_gen_i->GetCurrentStudy()->StudyId(), aStr);
+  SMESH_Gen_i::AddToCurrentPyScript(aStr);
 
   // Create MeshEditor
   SMESH_MeshEditor_i *aMeshEditor = new SMESH_MeshEditor_i( _impl );

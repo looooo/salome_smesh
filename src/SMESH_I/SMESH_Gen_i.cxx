@@ -1450,6 +1450,8 @@ void SMESH_Gen_i::loadMesh(char * name, HDFfile * hdf_file,
 	char *datafilename = new char[dataset->GetSize()];
 	dataset->ReadFromDisk(datafilename);
 	dataset->CloseOnDisk();	
+	MESSAGE("datafilename="<<datafilename<<" but this is ignored. We will read from "<<meshfile);
+	datafilename=meshfile;
 
 	//********** Loading of the reference on the shape
 	//********** and mesh initialization
@@ -1476,7 +1478,7 @@ void SMESH_Gen_i::loadMesh(char * name, HDFfile * hdf_file,
 		sprintf(objectId, "%ld", myNewMesh->GetId());
 		_SMESHCorbaObj[string("Mesh_") + string(objectId)] = iorString;
 
-		SCRUTE(datafilename);
+		
 		//********** 
 		//********** Loading of mesh data
 		if (strcmp(datafilename, "No data") != 0)

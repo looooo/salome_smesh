@@ -90,7 +90,7 @@ _creatorMap["Regular_1D"] = new HypothesisCreator_i<SMESH_Regular_1D_i>;
 _creatorMap["MEFISTO_2D"] = new HypothesisCreator_i<SMESH_MEFISTO_2D_i>;
 _creatorMap["Quadrangle_2D"] = new HypothesisCreator_i<SMESH_Quadrangle_2D_i>;
 _creatorMap["Hexa_3D"] = new HypothesisCreator_i<SMESH_Hexa_3D_i>;
-_creatorMap["Tetra_3D"] = new HypothesisCreator_i<SMESH_Tetra_3D_i>;
+_creatorMap["NETGEN_3D"] = new HypothesisCreator_i<SMESH_NETGEN_3D_i>;
 
 //---------------------------------------
 }

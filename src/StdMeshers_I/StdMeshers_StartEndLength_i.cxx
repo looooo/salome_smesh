@@ -29,10 +29,13 @@
 
 using namespace std;
 #include "StdMeshers_StartEndLength_i.hxx"
+#include "SMESH_Gen_i.hxx"
 #include "SMESH_Gen.hxx"
 
 #include "Utils_CorbaException.hxx"
 #include "utilities.h"
+
+#include <TCollection_AsciiString.hxx>
 
 //=============================================================================
 /*!
@@ -88,6 +91,18 @@ void StdMeshers_StartEndLength_i::SetLength(CORBA::Double theLength,
     THROW_SALOME_CORBA_EXCEPTION( S_ex.what(),
 				  SALOME::BAD_PARAM );
   }
+
+  // Update Python script
+  SMESH_Gen_i* aSMESHGen = SMESH_Gen_i::GetSMESHGen();
+  SALOMEDS::SObject_var aSO = SMESH_Gen_i::ObjectToSObject(aSMESHGen->GetCurrentStudy(), _this());
+  TCollection_AsciiString aStr (aSO->GetID());
+  aStr += ".SetLength(";
+  aStr += TCollection_AsciiString((double)theLength);
+  aStr += ", ";
+  aStr += TCollection_AsciiString((int)theIsStart);
+  aStr += ")";
+
+  aSMESHGen->AddToPythonScript(aSMESHGen->GetCurrentStudy()->StudyId(), aStr);
 }
 
 //=============================================================================

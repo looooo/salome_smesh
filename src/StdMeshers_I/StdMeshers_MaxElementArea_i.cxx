@@ -29,10 +29,13 @@
 
 using namespace std;
 #include "StdMeshers_MaxElementArea_i.hxx"
+#include "SMESH_Gen_i.hxx"
 #include "SMESH_Gen.hxx"
 
 #include "Utils_CorbaException.hxx"
 #include "utilities.h"
+
+#include <TCollection_AsciiString.hxx>
 
 //=============================================================================
 /*!
@@ -87,6 +90,16 @@ void StdMeshers_MaxElementArea_i::SetMaxElementArea( CORBA::Double theArea )
     THROW_SALOME_CORBA_EXCEPTION( S_ex.what(),
 				  SALOME::BAD_PARAM );
   }
+
+  // Update Python script
+  SMESH_Gen_i* aSMESHGen = SMESH_Gen_i::GetSMESHGen();
+  SALOMEDS::SObject_var aSO = SMESH_Gen_i::ObjectToSObject(aSMESHGen->GetCurrentStudy(), _this());
+  TCollection_AsciiString aStr (aSO->GetID());
+  aStr += ".SetMaxElementArea(";
+  aStr += TCollection_AsciiString((double)theArea);
+  aStr += ")";
+
+  aSMESHGen->AddToPythonScript(aSMESHGen->GetCurrentStudy()->StudyId(), aStr);
 }
 
 //=============================================================================

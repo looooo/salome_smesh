@@ -106,7 +106,7 @@ namespace SMESH{
       NumericalFunctor();
       virtual void SetMesh( SMDS_Mesh* theMesh );
       virtual double GetValue( long theElementId );
-      virtual double GetValue(const TSequenceOfXYZ& thePoints) = 0;
+      virtual double GetValue(const TSequenceOfXYZ& thePoints) {};
       virtual SMDSAbs_ElementType GetType() const = 0;
       virtual double GetBadRate( double Value, int nbNodes ) const = 0;
       long  GetPrecision() const;
@@ -220,7 +220,27 @@ namespace SMESH{
       virtual SMDSAbs_ElementType GetType() const;
     };
   
-  
+    /*
+      Class       : Length2D
+      Description : Functor for calculating length of edge
+    */
+    class Length2D: public virtual NumericalFunctor{
+    public:
+      virtual double GetValue( long theElementId );
+      virtual double GetBadRate( double Value, int nbNodes ) const;
+      virtual SMDSAbs_ElementType GetType() const;
+      struct Value{
+	double myLength;
+	long myPntId[2];
+	Value(double theLength, long thePntId1, long thePntId2);
+	bool operator<(const Value& x) const;
+      };
+      typedef std::set<Value> TValues;
+      void GetValues(TValues& theValues);
+      
+    };
+    typedef boost::shared_ptr<Length2D> Length2DPtr;
+
     /*
       Class       : MultiConnection
       Description : Functor for calculating number of faces conneted to the edge

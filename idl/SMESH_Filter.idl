@@ -55,6 +55,7 @@ module SMESH
     FT_FreeEdges,
     FT_MultiConnection,
     FT_Length,
+    FT_Length2D,
     FT_BelongToGeom,
     FT_BelongToPlane,
     FT_BelongToCylinder,
@@ -102,6 +103,17 @@ module SMESH
   interface Skew            : NumericalFunctor{};
   interface Area            : NumericalFunctor{};
   interface Length          : NumericalFunctor{};
+  interface Length2D        : NumericalFunctor
+  {
+    struct Value
+    {
+      double myLength;
+      long myElemId;
+      long myPnt1, myPnt2;
+    };
+    typedef sequence<Value> Values;
+    Values GetValues();
+  };
   interface MultiConnection : NumericalFunctor{};
 
   /*!
@@ -328,6 +340,7 @@ module SMESH
     Skew              CreateSkew();
     Area              CreateArea();
     Length            CreateLength();
+    Length2D          CreateLength2D();
     MultiConnection   CreateMultiConnection();
 
     /*!

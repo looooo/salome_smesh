@@ -47,7 +47,6 @@
 #include "SMDS_MeshNode.hxx"
 
 
-
 /*
                             AUXILIARY METHODS 
 */
@@ -73,13 +72,33 @@ namespace{
     return getArea( P1.XYZ(), P2.XYZ(), P3.XYZ() );
   }
 
+
+
   inline double getDistance( const gp_XYZ& P1, const gp_XYZ& P2 )
   {
     double aDist = gp_Pnt( P1 ).Distance( gp_Pnt( P2 ) );
     return aDist;
   }
 
+
+
+
+
+
+
+
+
+
+
   int getNbMultiConnection( SMDS_Mesh* theMesh, const int theId )
+
+
+
+
+
+
+
+
   {
     if ( theMesh == 0 )
       return 0;
@@ -115,8 +134,10 @@ namespace{
     return aResult;
   }
 
-}  
-  
+}
+
+
+
 using namespace SMESH::Controls;
 
 /*
@@ -139,7 +160,7 @@ void NumericalFunctor::SetMesh( SMDS_Mesh* theMesh )
 }
 
 bool NumericalFunctor::GetPoints(const int theId,
-                                 TSequenceOfXYZ& theRes) const
+                                 TSequenceOfXYZ& theRes ) const
 {
   theRes.clear();
 
@@ -150,7 +171,7 @@ bool NumericalFunctor::GetPoints(const int theId,
 }
 
 bool NumericalFunctor::GetPoints(const SMDS_MeshElement* anElem,
-                                 TSequenceOfXYZ& theRes)
+                                 TSequenceOfXYZ& theRes )
 {
   theRes.clear();
 
@@ -259,8 +280,8 @@ double AspectRatio::GetValue( const TSequenceOfXYZ& P )
 
   double aLen[ nbNodes ];
   for ( int i = 0; i < nbNodes - 1; i++ )
-    aLen[ i ] = getDistance( P(i+1), P(i+2) );
-  aLen[ nbNodes - 1 ] = getDistance( P( 1 ), P(nbNodes) );
+    aLen[ i ] = getDistance( P( i + 1 ), P( i + 2 ) );
+  aLen[ nbNodes - 1 ] = getDistance( P( 1 ), P( nbNodes ) );
 
   // Compute aspect ratio
 
@@ -303,7 +324,6 @@ SMDSAbs_ElementType AspectRatio::GetType() const
   Class       : AspectRatio3D
   Description : Functor for calculating aspect ratio
 */
-
 namespace{
 
   inline double getHalfPerimeter(double theTria[3]){
@@ -354,6 +374,11 @@ namespace{
     return abs(aVec3 * anAreaVec) / 6.0;
   }
 
+
+
+
+
+
   inline double getMaxHeight(double theLen[6])
   {
     double aHeight = max(theLen[0],theLen[1]);
@@ -363,6 +388,15 @@ namespace{
     aHeight = max(aHeight,theLen[5]);
     return aHeight;
   }
+
+
+
+
+
+
+
+
+
 
 }
 
@@ -806,6 +840,194 @@ SMDSAbs_ElementType Length::GetType() const
   return SMDSAbs_Edge;
 }
 
+/*
+  Class       : Length2D
+  Description : Functor for calculating length of edge
+*/
+
+double Length2D::GetValue( long theElementId)
+{
+  TSequenceOfXYZ P;
+
+  if (GetPoints(theElementId,P)){
+    
+    double  aVal;// = GetValue( P );
+    const SMDS_MeshElement* aElem = myMesh->FindElement( theElementId );
+    SMDSAbs_ElementType aType = aElem->GetType();
+    
+    int len = P.size();
+    
+    switch (aType){
+    case SMDSAbs_All:
+    case SMDSAbs_Node: 
+    case SMDSAbs_Edge:
+      if (len == 2){
+	aVal = getDistance( P( 1 ), P( 2 ) );
+	break;
+      }
+    case SMDSAbs_Face:
+      if (len == 3){ // triangles
+	double L1 = getDistance(P( 1 ),P( 2 ));
+	double L2 = getDistance(P( 2 ),P( 3 ));
+	double L3 = getDistance(P( 3 ),P( 1 ));
+	aVal = Max(L1,Max(L2,L3));
+	break;
+      }
+      else if (len == 4){ // quadrangles
+	double L1 = getDistance(P( 1 ),P( 2 ));
+	double L2 = getDistance(P( 2 ),P( 3 ));
+	double L3 = getDistance(P( 3 ),P( 4 ));
+	double L4 = getDistance(P( 4 ),P( 1 ));
+	aVal = Max(Max(L1,L2),Max(L3,L4));
+	break;
+      }
+    case SMDSAbs_Volume:
+      if (len == 4){ // tetraidrs
+	double L1 = getDistance(P( 1 ),P( 2 ));
+	double L2 = getDistance(P( 2 ),P( 3 ));
+	double L3 = getDistance(P( 3 ),P( 1 ));
+	double L4 = getDistance(P( 1 ),P( 4 ));
+	double L5 = getDistance(P( 2 ),P( 4 ));
+	double L6 = getDistance(P( 3 ),P( 4 ));
+	aVal = Max(Max(Max(L1,L2),Max(L3,L4)),Max(L5,L6));
+	break;
+      } 
+      else if (len == 5){ // piramids
+	double L1 = getDistance(P( 1 ),P( 2 ));
+	double L2 = getDistance(P( 2 ),P( 3 ));
+	double L3 = getDistance(P( 3 ),P( 1 ));
+	double L4 = getDistance(P( 4 ),P( 1 ));
+	double L5 = getDistance(P( 1 ),P( 5 ));
+	double L6 = getDistance(P( 2 ),P( 5 ));
+	double L7 = getDistance(P( 3 ),P( 5 ));
+	double L8 = getDistance(P( 4 ),P( 5 ));
+      
+	aVal = Max(Max(Max(L1,L2),Max(L3,L4)),Max(L5,L6));
+	aVal = Max(aVal,Max(L7,L8));
+	break;
+      }
+      else if (len == 6){ // pentaidres
+	double L1 = getDistance(P( 1 ),P( 2 ));
+	double L2 = getDistance(P( 2 ),P( 3 ));
+	double L3 = getDistance(P( 3 ),P( 1 ));
+	double L4 = getDistance(P( 4 ),P( 5 ));
+	double L5 = getDistance(P( 5 ),P( 6 ));
+	double L6 = getDistance(P( 6 ),P( 4 ));
+	double L7 = getDistance(P( 1 ),P( 4 ));
+	double L8 = getDistance(P( 2 ),P( 5 ));
+	double L9 = getDistance(P( 3 ),P( 6 ));
+      
+	aVal = Max(Max(Max(L1,L2),Max(L3,L4)),Max(L5,L6));
+	aVal = Max(aVal,Max(Max(L7,L8),L9));
+	break;
+      }
+      else if (len == 8){ // hexaider
+	double L1 = getDistance(P( 1 ),P( 2 ));
+	double L2 = getDistance(P( 2 ),P( 3 ));
+	double L3 = getDistance(P( 3 ),P( 4 ));
+	double L4 = getDistance(P( 4 ),P( 1 ));
+	double L5 = getDistance(P( 5 ),P( 6 ));
+	double L6 = getDistance(P( 6 ),P( 7 ));
+	double L7 = getDistance(P( 7 ),P( 8 ));
+	double L8 = getDistance(P( 8 ),P( 5 ));
+	double L9 = getDistance(P( 1 ),P( 5 ));
+	double L10= getDistance(P( 2 ),P( 6 ));
+	double L11= getDistance(P( 3 ),P( 7 ));
+	double L12= getDistance(P( 4 ),P( 8 ));
+      
+	aVal = Max(Max(Max(L1,L2),Max(L3,L4)),Max(L5,L6));
+	aVal = Max(aVal,Max(Max(L7,L8),Max(L9,L10)));
+	aVal = Max(aVal,Max(L11,L12));
+	break;
+	
+      }
+      
+    default: aVal=-1; 
+    }
+    
+    if (aVal <0){
+      return 0.;
+    }
+
+    if ( myPrecision >= 0 )
+    {
+      double prec = pow( 10., (double)( myPrecision ) );
+      aVal = floor( aVal * prec + 0.5 ) / prec;
+    }
+    
+    return aVal;
+
+  }
+  return 0.;
+}
+
+double Length2D::GetBadRate( double Value, int /*nbNodes*/ ) const
+{
+  return Value;
+}
+
+SMDSAbs_ElementType Length2D::GetType() const
+{
+  return SMDSAbs_Face;
+}
+
+Length2D::Value::Value(double theLength,long thePntId1, long thePntId2):
+  myLength(theLength)
+{
+  myPntId[0] = thePntId1;  myPntId[1] = thePntId2;
+  if(thePntId1 > thePntId2){
+    myPntId[1] = thePntId1;  myPntId[0] = thePntId2;
+  }
+}
+
+bool Length2D::Value::operator<(const Length2D::Value& x) const{
+  if(myPntId[0] < x.myPntId[0]) return true;
+  if(myPntId[0] == x.myPntId[0])
+    if(myPntId[1] < x.myPntId[1]) return true;
+  return false;
+}
+
+void Length2D::GetValues(TValues& theValues){
+  TValues aValues;
+  SMDS_FaceIteratorPtr anIter = myMesh->facesIterator();
+  int i = 0;
+  for(; anIter->more(); ){
+    const SMDS_MeshFace* anElem = anIter->next();
+    long anElemId = anElem->GetID();
+    SMDS_ElemIteratorPtr aNodesIter = anElem->nodesIterator();
+    long aNodeId[2];
+    gp_Pnt P[3];
+    
+    double aLength;
+    const SMDS_MeshElement* aNode;
+    if(aNodesIter->more()){
+      aNode = aNodesIter->next();
+      const SMDS_MeshNode* aNodes = (SMDS_MeshNode*) aNode;
+      P[0] = P[1] = gp_Pnt(aNodes->X(),aNodes->Y(),aNodes->Z());
+      aNodeId[0] = aNodeId[1] = aNode->GetID();
+      aLength = 0;
+    }	
+    for(; aNodesIter->more(); ){
+      aNode = aNodesIter->next();
+      const SMDS_MeshNode* aNodes = (SMDS_MeshNode*) aNode;
+      long anId = aNode->GetID();
+      
+      P[2] = gp_Pnt(aNodes->X(),aNodes->Y(),aNodes->Z());
+
+      aLength = P[1].Distance(P[2]);
+      
+      Value aValue(aLength,aNodeId[1],anId);
+      aNodeId[1] = anId;
+      P[1] = P[2];
+      theValues.insert(aValue);
+    }
+    
+    aLength = P[0].Distance(P[1]);
+    
+    Value aValue(aLength,aNodeId[0],aNodeId[1]);
+    theValues.insert(aValue);
+  }
+}
 
 /*
   Class       : MultiConnection
@@ -1638,12 +1860,12 @@ static gp_XYZ getNormale( const SMDS_MeshFace* theFace )
     anArrOfXYZ.SetValue(i, gp_XYZ( aNode->X(), aNode->Y(), aNode->Z() ) );
   }
   
-  gp_XYZ q1 = anArrOfXYZ.Value( 2 ) - anArrOfXYZ.Value( 1 );
-  gp_XYZ q2 = anArrOfXYZ.Value( 3 ) - anArrOfXYZ.Value( 1 );
+  gp_XYZ q1 = anArrOfXYZ.Value(2) - anArrOfXYZ.Value(1);
+  gp_XYZ q2 = anArrOfXYZ.Value(3) - anArrOfXYZ.Value(1);
   n  = q1 ^ q2;
   if ( aNbNode > 3 )
   {
-    gp_XYZ q3 = anArrOfXYZ.Value( 4 ) - anArrOfXYZ.Value( 1 );
+    gp_XYZ q3 = anArrOfXYZ.Value(4) - anArrOfXYZ.Value(1);
     n += q2 ^ q3;
   }
   double len = n.Modulus();

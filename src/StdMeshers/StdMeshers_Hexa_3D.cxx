@@ -331,13 +331,31 @@ bool StdMeshers_Hexa_3D::Compute(SMESH_Mesh & aMesh,
 	// 1.8 - create a 3D structure for normalized values
 
 	MESSAGE("---");
-	int nbx = _cube.quad_Y0->nbPts[0];
-	int nby = _cube.quad_Y0->nbPts[1];
-	int nbz;
-	if (cx0.a1 != 0)
-		nbz = _cube.quad_X0->nbPts[1];
-	else
-		nbz = _cube.quad_X0->nbPts[0];
+	//SCRUTE(_cube.quad_X0->nbPts[0]);
+	//SCRUTE(_cube.quad_X0->nbPts[1]);
+	//SCRUTE(_cube.quad_X1->nbPts[0]);
+	//SCRUTE(_cube.quad_X1->nbPts[1]);
+	//SCRUTE(_cube.quad_Y0->nbPts[0]);
+	//SCRUTE(_cube.quad_Y0->nbPts[1]);
+	//SCRUTE(_cube.quad_Y1->nbPts[0]);
+	//SCRUTE(_cube.quad_Y1->nbPts[1]);
+	//SCRUTE(_cube.quad_Z0->nbPts[0]);
+	//SCRUTE(_cube.quad_Z0->nbPts[1]);
+	//SCRUTE(_cube.quad_Z1->nbPts[0]);
+	//SCRUTE(_cube.quad_Z1->nbPts[1]);
+
+	// Fix on Bug SMESH6034
+	//   StdMeshers_Hexa_3D does not work with different segment numbers on edges 
+	int nbx = _cube.quad_Z0->nbPts[0];
+ 	if (cz0.a1 == 0.) nbx = _cube.quad_Z0->nbPts[1];
+	
+ 	int nby = _cube.quad_X0->nbPts[0];
+ 	if (cx0.a1 == 0.) nby = _cube.quad_X0->nbPts[1];
+	
+ 	int nbz = _cube.quad_Y0->nbPts[0];
+ 	if (cy0.a1 != 0.) nbz = _cube.quad_Y0->nbPts[1];
+	// End of Fix on Bug SMESH6034
+
 	//SCRUTE(nbx);
 	//SCRUTE(nby);
 	//SCRUTE(nbz);
@@ -676,7 +694,7 @@ bool StdMeshers_Hexa_3D::Compute(SMESH_Mesh & aMesh,
 				int n7 = (k + 1) * nbx * nby + (j + 1) * nbx + i + 1;
 				int n8 = (k + 1) * nbx * nby + (j + 1) * nbx + i;
 
-//    MESSAGE(" "<<n1<<" "<<n2<<" "<<n3<<" "<<n4<<" "<<n5<<" "<<n6<<" "<<n7<<" "<<n8);
+				//MESSAGE(" "<<n1<<" "<<n2<<" "<<n3<<" "<<n4<<" "<<n5<<" "<<n6<<" "<<n7<<" "<<n8);
 				//MESSAGE(" "<<np[n1].nodeId<<" "<<np[n2].nodeId<<" "<<np[n3].nodeId<<" "<<np[n4].nodeId<<" "<<np[n5].nodeId<<" "<<np[n6].nodeId<<" "<<np[n7].nodeId<<" "<<np[n8].nodeId);
 
 				SMDS_MeshVolume * elt = meshDS->AddVolume(np[n1].node,

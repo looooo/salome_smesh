@@ -92,14 +92,11 @@ void StdMeshers_NumberOfSegments_i::SetNumberOfSegments( CORBA::Long theSegments
   }
 
   // Update Python script
-  SMESH_Gen_i* aSMESHGen = SMESH_Gen_i::GetSMESHGen();
-  SALOMEDS::SObject_var aSO = SMESH_Gen_i::ObjectToSObject(aSMESHGen->GetCurrentStudy(), _this());
-  TCollection_AsciiString aStr (aSO->GetID());
-  aStr += ".SetNumberOfSegments(";
-  aStr += TCollection_AsciiString((int)theSegmentsNumber);
-  aStr += ")";
+  TCollection_AsciiString aStr, aStrNb ((int)theSegmentsNumber);
+  SMESH_Gen_i::AddObject(aStr, _this()) += ".SetNumberOfSegments(";
+  aStr += aStrNb + ")";
 
-  aSMESHGen->AddToPythonScript(aSMESHGen->GetCurrentStudy()->StudyId(), aStr);
+  SMESH_Gen_i::AddToCurrentPyScript(aStr);
 }
 
 //=============================================================================

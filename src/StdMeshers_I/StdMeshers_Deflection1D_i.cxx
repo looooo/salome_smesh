@@ -92,14 +92,11 @@ void StdMeshers_Deflection1D_i::SetDeflection( CORBA::Double theValue )
   }
 
   // Update Python script
-  SMESH_Gen_i* aSMESHGen = SMESH_Gen_i::GetSMESHGen();
-  SALOMEDS::SObject_var aSO = SMESH_Gen_i::ObjectToSObject(aSMESHGen->GetCurrentStudy(), _this());
-  TCollection_AsciiString aStr (aSO->GetID());
-  aStr += ".SetDeflection(";
-  aStr += TCollection_AsciiString((double)theValue);
-  aStr += ")";
+  TCollection_AsciiString aStr, aStrVal ((double)theValue);
+  SMESH_Gen_i::AddObject(aStr, _this()) += ".SetDeflection(";
+  aStr += aStrVal + ")";
 
-  aSMESHGen->AddToPythonScript(aSMESHGen->GetCurrentStudy()->StudyId(), aStr);
+  SMESH_Gen_i::AddToCurrentPyScript(aStr);
 }
 
 //=============================================================================

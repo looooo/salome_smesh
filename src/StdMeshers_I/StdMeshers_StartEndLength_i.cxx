@@ -93,16 +93,11 @@ void StdMeshers_StartEndLength_i::SetLength(CORBA::Double theLength,
   }
 
   // Update Python script
-  SMESH_Gen_i* aSMESHGen = SMESH_Gen_i::GetSMESHGen();
-  SALOMEDS::SObject_var aSO = SMESH_Gen_i::ObjectToSObject(aSMESHGen->GetCurrentStudy(), _this());
-  TCollection_AsciiString aStr (aSO->GetID());
-  aStr += ".SetLength(";
-  aStr += TCollection_AsciiString((double)theLength);
-  aStr += ", ";
-  aStr += TCollection_AsciiString((int)theIsStart);
-  aStr += ")";
+  TCollection_AsciiString aStr, aStrLen ((double)theLength), aStrFlag ((int)theIsStart);
+  SMESH_Gen_i::AddObject(aStr, _this()) += ".SetLength(";
+  aStr += aStrLen + ", " + aStrFlag + ")";
 
-  aSMESHGen->AddToPythonScript(aSMESHGen->GetCurrentStudy()->StudyId(), aStr);
+  SMESH_Gen_i::AddToCurrentPyScript(aStr);
 }
 
 //=============================================================================

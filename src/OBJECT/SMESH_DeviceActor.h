@@ -55,7 +55,7 @@ class SMESH_ExtractGeometry;
 
 
 class SMESH_DeviceActor: public vtkLODActor{
-  friend class SMESH_Actor;
+  friend class SMESH_ActorDef;
 
  public:
   vtkTypeMacro(SMESH_DeviceActor,vtkLODActor);

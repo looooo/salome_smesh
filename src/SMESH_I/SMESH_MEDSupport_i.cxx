@@ -329,24 +329,69 @@ SALOME_MED::long_array * SMESH_MEDSupport_i::getNumber(
  * CORBA:  ??????????????????????????????
  */
 //=============================================================================
-
 SALOME_MED::long_array *
 	SMESH_MEDSupport_i::getNumberIndex()throw(SALOME::SALOME_Exception)
 {
 	MESSAGE("Not implemented for SMESH_i");
 	THROW_SALOME_CORBA_EXCEPTION("Not Implemented", SALOME::BAD_PARAM);
-	return 0;
+	return NULL;
 }
-
 //=============================================================================
 /*!
  * CORBA: Array containing indexes for elements included in the support  
  */
 //=============================================================================
-
 CORBA::Long SMESH_MEDSupport_i::getNumberOfGaussPoint(SALOME_MED::
 	medGeometryElement geomElement) throw(SALOME::SALOME_Exception)
 {
 	MESSAGE("Not implemented for SMESH_i");
 	return 0;
+}
+//=============================================================================
+/*!
+ * Gives the number of types of elements included in the support 
+ */
+//=============================================================================
+CORBA::Long SMESH_MEDSupport_i::getNumberOfTypes()
+  throw (SALOME::SALOME_Exception)
+{
+  MESSAGE("!!! NOT YET IMPLEMENTED !!!!");
+  THROW_SALOME_CORBA_EXCEPTION("Not Implemented", SALOME::BAD_PARAM);
+  return 0;
+}
+//=============================================================================
+/*!
+ * Gives CORBA: Array containing the numbers of Gauss point of elements
+ * included in the support 
+ */
+//=============================================================================
+SALOME_MED::long_array* SMESH_MEDSupport_i::getNumbersOfGaussPoint()
+  throw (SALOME::SALOME_Exception)
+{
+  MESSAGE("!!! NOT YET IMPLEMENTED !!!!");
+  THROW_SALOME_CORBA_EXCEPTION("Not Implemented", SALOME::BAD_PARAM);
+  return NULL;
+}
+//=============================================================================
+/*!
+ * build the object which will contain all the boundary elements of the mesh.
+ */
+//=============================================================================
+void SMESH_MEDSupport_i::getBoundaryElements()
+  throw (SALOME::SALOME_Exception)
+{
+  MESSAGE("!!! NOT YET IMPLEMENTED !!!!");
+  THROW_SALOME_CORBA_EXCEPTION("Not Implemented", SALOME::BAD_PARAM);
+}
+//=============================================================================
+/*!
+ * Gives information on the support
+ */
+//=============================================================================
+SALOME_MED::SUPPORT::supportInfos * SMESH_MEDSupport_i::getSupportGlobal()
+  throw (SALOME::SALOME_Exception)
+{
+  MESSAGE("!!! NOT YET IMPLEMENTED !!!!");
+  THROW_SALOME_CORBA_EXCEPTION("Not Implemented", SALOME::BAD_PARAM);
+  return NULL;
 }

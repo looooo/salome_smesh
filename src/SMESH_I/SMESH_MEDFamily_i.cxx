@@ -262,3 +262,41 @@ char *  SMESH_MEDFamily_i::getAttributeDescription( CORBA::Long i)
   ASSERT (i <= _numberOfAttribute);
   return CORBA::string_dup(_attributeDescription[i].c_str());
 }
+//=============================================================================
+/*!
+ * CORBA: Accessor for the number of groups
+ */
+//=============================================================================
+CORBA::Long SMESH_MEDFamily_i::getNumberOfGroups()
+    throw (SALOME::SALOME_Exception)
+{
+  MESSAGE("!!! NOT YET IMPLEMENTED !!!!");
+  THROW_SALOME_CORBA_EXCEPTION("Not Implemented", SALOME::BAD_PARAM);
+  return 0;
+}
+//=============================================================================
+/*!
+ * CORBA: Accessor for the name of the group i
+ */
+//=============================================================================
+char * SMESH_MEDFamily_i::getGroupName( CORBA::Long i)
+  throw (SALOME::SALOME_Exception)
+{
+  MESSAGE("!!! NOT YET IMPLEMENTED !!!!");
+  THROW_SALOME_CORBA_EXCEPTION("Not Implemented", SALOME::BAD_PARAM);
+  return NULL;
+}
+//=============================================================================
+/*!
+ * CORBA: Accessor for all the groups name
+ */
+//=============================================================================
+SALOME_MED::string_array* SMESH_MEDFamily_i::getGroupsNames()
+  throw (SALOME::SALOME_Exception)
+{
+  MESSAGE("!!! NOT YET IMPLEMENTED !!!!");
+  THROW_SALOME_CORBA_EXCEPTION("Not Implemented", SALOME::BAD_PARAM);
+  return NULL;
+}
+
+

@@ -162,7 +162,49 @@ CORBA::Long SMESH_MEDMesh_i::getMeshDimension()throw(SALOME::SALOME_Exception)
 			SALOME::INTERNAL_ERROR);
 	return 3;
 }
+//=============================================================================
+/*!
+ * CORBA: Accessor for the boolean _isAGrid
+ */
+//=============================================================================
+CORBA::Boolean SMESH_MEDMesh_i::getIsAGrid() throw (SALOME::SALOME_Exception)
+{
+  MESSAGE("!!!!!! NOT YET IMPLEMENTED !!!!!!");
 
+  THROW_SALOME_CORBA_EXCEPTION("Unimplemented Method", SALOME::BAD_PARAM);
+
+  return false;
+}
+//=============================================================================
+/*!
+ * CORBA: Accessor for the connectivities, to see if they exist
+ */
+//=============================================================================
+CORBA::Boolean
+SMESH_MEDMesh_i::existConnectivity(SALOME_MED::medConnectivity connectivityType,
+				   SALOME_MED::medEntityMesh entity)
+  throw (SALOME::SALOME_Exception)
+{
+  MESSAGE("!!!!!! IMPLEMENTED BUT ONLY PARTIALLY !!!!!!");
+
+
+  return false;
+
+}
+//=============================================================================
+/*!
+ * CORBA: Accessor for Coordinate
+ */
+//=============================================================================
+double SMESH_MEDMesh_i::getCoordinate(CORBA::Long Number, CORBA::Long Axis)
+  throw (SALOME::SALOME_Exception)
+{
+  MESSAGE("!!!!!! NOT YET IMPLEMENTED !!!!");
+
+  THROW_SALOME_CORBA_EXCEPTION("Unimplemented Method", SALOME::BAD_PARAM);
+
+  return 0.0;
+}
 //=============================================================================
 /*!
  * CORBA: Accessor for Coordinates System
@@ -454,9 +496,11 @@ CORBA::Long SMESH_MEDMesh_i::getNumberOfElements(SALOME_MED::
  */
 //=============================================================================
 SALOME_MED::long_array *
-	SMESH_MEDMesh_i::getConnectivity(SALOME_MED::medModeSwitch typeSwitch,
-	SALOME_MED::medConnectivity mode, SALOME_MED::medEntityMesh entity,
-	SALOME_MED::medGeometryElement geomElement) throw(SALOME::SALOME_Exception)
+SMESH_MEDMesh_i::getConnectivity(SALOME_MED::medModeSwitch typeSwitch,
+				 SALOME_MED::medConnectivity mode,
+				 SALOME_MED::medEntityMesh entity,
+				 SALOME_MED::medGeometryElement geomElement)
+  throw(SALOME::SALOME_Exception)
 {
 	if (_mesh_i == 0)
 		THROW_SALOME_CORBA_EXCEPTION("No associated Mesh",
@@ -483,8 +527,9 @@ SALOME_MED::long_array *
  */
 //=============================================================================
 SALOME_MED::long_array *
-	SMESH_MEDMesh_i::getConnectivityIndex(SALOME_MED::medConnectivity mode,
-	SALOME_MED::medEntityMesh entity) throw(SALOME::SALOME_Exception)
+SMESH_MEDMesh_i::getConnectivityIndex(SALOME_MED::medConnectivity mode,
+				      SALOME_MED::medEntityMesh entity)
+  throw(SALOME::SALOME_Exception)
 {
 	MESSAGE("Pas Implemente dans SMESH");
 	THROW_SALOME_CORBA_EXCEPTION("Unimplemented Method", SALOME::BAD_PARAM);
@@ -497,9 +542,10 @@ SALOME_MED::long_array *
  */
 //=============================================================================
 CORBA::Long SMESH_MEDMesh_i::getElementNumber(SALOME_MED::medConnectivity mode,
-	SALOME_MED::medEntityMesh entity,
-	SALOME_MED::medGeometryElement type,
-	const SALOME_MED::long_array & connectivity)throw(SALOME::SALOME_Exception)
+					      SALOME_MED::medEntityMesh entity,
+					      SALOME_MED::medGeometryElement type,
+					      const SALOME_MED::long_array & connectivity)
+  throw(SALOME::SALOME_Exception)
 {
 	const char *LOC = "getElementNumber ";
 	MESSAGE(LOC << "Pas Implemente dans SMESH");
@@ -641,7 +687,53 @@ SALOME_MED::GROUP_ptr SMESH_MEDMesh_i::getGroup(SALOME_MED::
 	MESSAGE(" Pas d implementation des groupes dans SMESH");
 	THROW_SALOME_CORBA_EXCEPTION("No group implementation", SALOME::BAD_PARAM);
 }
+//=============================================================================
+/*!
+ * CORBA: Returns references for the global numbering index
+ */
+//=============================================================================
+SALOME_MED::long_array*
+SMESH_MEDMesh_i::getGlobalNumberingIndex(SALOME_MED::medEntityMesh entity)
+  throw (SALOME::SALOME_Exception)
+{
+  MESSAGE("!!!! NOT YET IMPLEMENTED !!!!!");
 
+  THROW_SALOME_CORBA_EXCEPTION("Unimplemented Method", SALOME::BAD_PARAM);
+
+  return NULL;
+}
+//=============================================================================
+/*!
+ * CORBA: Returns references for the support of boundary elements of type
+ * entity
+ */
+//=============================================================================
+SALOME_MED::SUPPORT_ptr
+SMESH_MEDMesh_i::getBoundaryElements(SALOME_MED::medEntityMesh entity)
+  throw (SALOME::SALOME_Exception)
+{
+  MESSAGE("!!!! NOT YET IMPLEMENTED !!!!!");
+
+  THROW_SALOME_CORBA_EXCEPTION("Unimplemented Method", SALOME::BAD_PARAM);
+
+  return NULL;
+}
+//=============================================================================
+/*!
+ * CORBA: Returns references for the support of the skin of the support
+ * mySupport3D
+ */
+//=============================================================================
+SALOME_MED::SUPPORT_ptr
+SMESH_MEDMesh_i::getSkin(SALOME_MED::SUPPORT_ptr mySupport3D)
+  throw (SALOME::SALOME_Exception)
+{
+  MESSAGE("!!!! NOT YET IMPLEMENTED !!!!!");
+
+  THROW_SALOME_CORBA_EXCEPTION("Unimplemented Method", SALOME::BAD_PARAM);
+
+  return NULL;
+}
 //=============================================================================
 /*!
  * CORBA: 
@@ -1047,3 +1139,63 @@ void SMESH_MEDMesh_i::createFamilies() throw(SALOME::SALOME_Exception)
 		}
 	}
 };
+//=============================================================================
+/*!
+ * Gives informations of the considered mesh.
+ */
+//=============================================================================
+SALOME_MED::MESH::meshInfos * SMESH_MEDMesh_i::getMeshGlobal()
+  throw (SALOME::SALOME_Exception)
+{
+  MESSAGE("!!!! NOT YET IMPLEMENTED !!!!!");
+
+  THROW_SALOME_CORBA_EXCEPTION("Unimplemented Method", SALOME::BAD_PARAM);
+
+  return NULL;
+}
+//=============================================================================
+/*!
+ * Gives informations on coordinates of the considered mesh.
+ */
+//=============================================================================
+SALOME_MED::MESH::coordinateInfos * SMESH_MEDMesh_i::getCoordGlobal()
+  throw (SALOME::SALOME_Exception)
+{
+  MESSAGE("!!!! NOT YET IMPLEMENTED !!!!!");
+
+  THROW_SALOME_CORBA_EXCEPTION("Unimplemented Method", SALOME::BAD_PARAM);
+
+  return NULL;
+}
+//=============================================================================
+/*!
+ * Gives informations on connectivities of the considered mesh for the entity
+ * entity.
+ */
+//=============================================================================
+SALOME_MED::MESH::connectivityInfos *
+SMESH_MEDMesh_i::getConnectGlobal(SALOME_MED::medEntityMesh entity)
+  throw (SALOME::SALOME_Exception)
+{
+  MESSAGE("!!!! NOT YET IMPLEMENTED !!!!!");
+
+  THROW_SALOME_CORBA_EXCEPTION("Unimplemented Method", SALOME::BAD_PARAM);
+
+  return NULL;
+}
+//=============================================================================
+/*!
+ * Gives the type of the element number of entity entity
+ */
+//=============================================================================
+SALOME_MED::medGeometryElement
+SMESH_MEDMesh_i::getElementType(SALOME_MED::medEntityMesh entity,
+				CORBA::Long number)
+  throw (SALOME::SALOME_Exception)
+{
+  MESSAGE("!!!! NOT YET IMPLEMENTED !!!!!");
+
+  THROW_SALOME_CORBA_EXCEPTION("Unimplemented Method", SALOME::BAD_PARAM);
+
+  return NULL;
+}

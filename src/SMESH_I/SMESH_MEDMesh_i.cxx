@@ -86,13 +86,17 @@ SMESH_MEDMesh_i::~SMESH_MEDMesh_i()
  */
 //=============================================================================
 SMESH_MEDMesh_i::SMESH_MEDMesh_i(::SMESH_Mesh_i * m_i):_meshId(""),
-_compte(false),
-_creeFamily(false), _famIdent(0), _indexElts(0), _indexEnts(0)
+						       _compte(false),
+						       _creeFamily(false),
+						       _famIdent(0),
+						       _indexElts(0),
+						       _indexEnts(0)
 {
+	BEGIN_OF("Constructor SMESH_MEDMesh_i");
+
 	_mesh_i = m_i;
 	_meshDS = _mesh_i->GetImpl().GetMeshDS();
 
-	BEGIN_OF("Constructor SMESH_MEDMesh_i");
 	END_OF("Constructor SMESH_MEDMesh_i");
 }
 
@@ -478,6 +482,7 @@ CORBA::Long SMESH_MEDMesh_i::getNumberOfElements(SALOME_MED::
 		if (_mapIndToSeqElts.find(geomElement) != _mapIndToSeqElts.end())
 		{
 			int index = _mapIndToSeqElts[geomElement];
+
 			retour = _seq_elemId[index]->length();
 		}
 		return retour;
@@ -518,6 +523,7 @@ SMESH_MEDMesh_i::getConnectivity(SALOME_MED::medModeSwitch typeSwitch,
 			SALOME::BAD_PARAM);
 
 	int index = _mapIndToSeqElts[geomElement];
+
 	return _seq_elemId[index]._retn();
 }
 
@@ -976,6 +982,7 @@ void SMESH_MEDMesh_i::calculeNbElts() throw(SALOME::SALOME_Exception)
 			int index = _mapIndToSeqElts[medElement];
 			SCRUTE(index);
 			// Traitement de l arete
+
 			int longueur = _seq_elemId[index]->length();
 			_seq_elemId[index]->length(longueur + nb_of_nodes);
 
@@ -1197,5 +1204,5 @@ SMESH_MEDMesh_i::getElementType(SALOME_MED::medEntityMesh entity,
 
   THROW_SALOME_CORBA_EXCEPTION("Unimplemented Method", SALOME::BAD_PARAM);
 
-  return NULL;
+  return (SALOME_MED::medGeometryElement) 0;
 }

@@ -82,7 +82,8 @@ mesh_wrap.png \
 ModuleMesh.png \
 select1.png \
 SMESH_en.xml \
-SMESHCatalog.xml
+SMESHCatalog.xml \
+flight_solid.brep
 
 BIN_SCRIPT= \
 VERSION

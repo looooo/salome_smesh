@@ -639,7 +639,7 @@ void SMESH_Mesh::ExportMED(const char *file,
 {
   Unexpect aCatch(SalomeException);
   DriverMED_W_SMESHDS_Mesh myWriter;
-  myWriter.SetFile    ( file        );
+  myWriter.SetFile    ( file, MED::EVersion(theVersion) );
   myWriter.SetMesh    ( _myMeshDS   );
   if ( !theMeshName ) 
     myWriter.SetMeshId  ( _idDoc      );

@@ -61,6 +61,7 @@ EXPORT_PYSCRIPTS = libSMESH_Swig.py \
 		   SMESH_test2.py \
 		   SMESH_test3.py \
 	           SMESH_test4.py \
+	           SMESH_test5.py \
 		   SMESH_mechanic.py \
 		   SMESH_mechanic_tetra.py \
 		   SMESH_mechanic_editor.py \

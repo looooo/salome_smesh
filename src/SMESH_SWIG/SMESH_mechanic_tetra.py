@@ -29,11 +29,8 @@ import smeshpy
 import salome
 from salome import sg
 import math
-#import SMESH_BasicHypothesis_idl
 
 import geompy
-
-
 
 # ---------------------------- GEOM --------------------------------------
 geom = salome.lcc.FindOrLoadComponent("FactoryServer", "GEOM")
@@ -50,7 +47,6 @@ ShapeTypeFace      = 4
 ShapeTypeWire      = 5
 ShapeTypeEdge      = 6
 ShapeTypeVertex    = 7
-
 
 # ---- define contigous arcs and segment to define a closed wire
 
@@ -69,7 +65,6 @@ arc2 = geom.MakeArc( p4, p5, p6 )
 p7   = geom.MakePointStruct( 120.0, 30.0, 0.0 )
 arc3 = geom.MakeArc( p6, p7, p1 )
 
-
 # ---- define a closed wire with arcs and segment
 
 List1 = []
@@ -83,21 +78,17 @@ for S in List1 :
     ListIOR1.append( S._get_Name() )
 wire1 = geom.MakeWire( ListIOR1 )
 
-Id_wire1 = geompy.addToStudy( wire1, "wire1")
-
-
 # ---- define a planar face with wire
+
 WantPlanarFace = 1 #True
 face1 = geom.MakeFace( wire1, WantPlanarFace )
-Id_face1 = geompy.addToStudy( face1, "face1")
-
 
 # ---- create a shape by extrusion
+
 pO = geom.MakePointStruct( 0.0, 0.0,   0.0 )
 pz = geom.MakePointStruct( 0.0, 0.0, 100.0 )
 
 prism1    = geom.MakePrism( face1, pO, pz )
-Id_prism1 = geompy.addToStudy( prism1, "prism1")
 
 # ---- create two cylinders
 
@@ -109,44 +100,38 @@ height = 180.0
 cyl1  = geom.MakeCylinder( pc1, vz, radius, height )
 cyl2  = geom.MakeCylinder( pc2, vz, radius, height )
 
-Id_Cyl1 = geompy.addToStudy( cyl1, "cyl1" )
-Id_Cyl2 = geompy.addToStudy( cyl2, "cyl2" )
-
 # ---- cut with cyl1 
+
 shape  = geom.MakeBoolean( prism1, cyl1, 2 )
 
-# ---- fuse with cyl2 
-shape1 =  geom.MakeBoolean( shape, cyl2, 3 )
+# ---- fuse with cyl2 to obtain the final mechanic piece :)
 
-Id_shape1 = geompy.addToStudy( shape1, "shape1")
+mechanic =  geom.MakeBoolean( shape, cyl2, 3 )
 
-# ---- add a face sub shape in study to be meshed differently
+idMechanic = geompy.addToStudy( mechanic, "mechanic")
 
-IdSubFaceList = []
-IdSubFaceList.append(10)
-sub_face = geompy.SubShapeSorted( shape1, ShapeTypeFace, IdSubFaceList )
-name     = geompy.SubShapeName( sub_face._get_Name(), shape1._get_Name() )
+# ---- Analysis of the geometry
 
-Id_SubFace = geompy.addToStudyInFather( shape1, sub_face, name )
+print "Analysis of the geometry mechanic :"
 
-# ---- add a face sub shape in study to be meshed differently
+subShellList=geompy.SubShapeAll(mechanic,ShapeTypeShell)
+subFaceList=geompy.SubShapeAll(mechanic,ShapeTypeFace)
+subEdgeList=geompy.SubShapeAll(mechanic,ShapeTypeEdge)
 
-IdSubFaceL = []
-IdSubFaceL.append(7)
-sub_face2 = geompy.SubShapeSorted( shape1, ShapeTypeFace, IdSubFaceL )
-name      = geompy.SubShapeName( sub_face2._get_Name(), shape1._get_Name() )
-
-Id_SubFace2 = geompy.addToStudyInFather( shape1, sub_face2, name )
+print "number of Shells in mechanic : ",len(subShellList)
+print "number of Faces in mechanic : ",len(subFaceList)
+print "number of Edges in mechanic : ",len(subEdgeList)
 
 ### ---------------------------- SMESH --------------------------------------
 
-# ---- launch SMESH, init a Mesh with shape 'shape1'
+# ---- launch SMESH, init a Mesh with shape 'mechanic'
+
 gen  = smeshpy.smeshpy()
-mesh = gen.Init( Id_shape1 )
+mesh = gen.Init( idMechanic )
 
 idmesh = smeshgui.AddNewMesh( salome.orb.object_to_string(mesh) )
-smeshgui.SetName( idmesh, "Mesh_meca" )
-smeshgui.SetShape( Id_shape1, idmesh )
+smeshgui.SetName( idmesh, "Mesh_mechanic" )
+smeshgui.SetShape( idMechanic, idmesh )
 
 print "-------------------------- NumberOfSegments"
 
@@ -232,9 +217,9 @@ print algoNg.GetId()
 idNg = smeshgui.AddNewAlgorithms( salome.orb.object_to_string(algoNg) )
 smeshgui.SetName( idNg, "Tetra_2D" )
 
-print "-------------------------- add hypothesis to main shape1"
+print "-------------------------- add hypothesis to main mechanic"
 
-shape_mesh = salome.IDToObject( Id_shape1  )
+shape_mesh = salome.IDToObject( idMechanic  )
 submesh    = mesh.GetElementsOnShape( shape_mesh )
 
 ret = mesh.AddHypothesis( shape_mesh, algoReg1D )   # Regular 1D/wire discretisation
@@ -259,8 +244,8 @@ smeshgui.SetHypothesis( idmesh, idVolume );  # max volume
 
 sg.updateObjBrowser(1);
 
-print "-------------------------- compute the mesh of the boxe"
-ret=gen.Compute(mesh,Id_shape1)
+print "-------------------------- compute the mesh of the mechanic piece"
+ret=gen.Compute(mesh,idMechanic)
 print ret
 log=mesh.GetLog(0) # no erase trace
 for linelog in log:

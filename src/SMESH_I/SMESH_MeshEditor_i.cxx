@@ -681,7 +681,8 @@ void SMESH_MeshEditor_i::FindCoincidentNodes (CORBA::Double                  Tol
 {
   ::SMESH_MeshEditor::TListOfListOfNodes aListOfListOfNodes;
   ::SMESH_MeshEditor anEditor( _myMesh );
-  anEditor.FindCoincidentNodes( Tolerance, aListOfListOfNodes );
+  set<const SMDS_MeshNode*> nodes; // no input nodes
+  anEditor.FindCoincidentNodes( nodes, Tolerance, aListOfListOfNodes );
 
   GroupsOfNodes = new SMESH::array_of_long_array;
   GroupsOfNodes->length( aListOfListOfNodes.size() );

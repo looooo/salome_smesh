@@ -494,8 +494,6 @@ TCollection_AsciiString SMESH_Gen_i::DumpPython_impl
   else
     aScript += "\n\tsmesh.SetCurrentStudy(None)";
 
-  TCollection_AsciiString globalVars;
-
   // Dump trace of restored study
   if (theSavedTrace.Length() > 0) {
     aScript += "\n";
@@ -520,42 +518,50 @@ TCollection_AsciiString SMESH_Gen_i::DumpPython_impl
   GEOM::GEOM_Gen_ptr geom = GetGeomEngine();
   TColStd_SequenceOfAsciiString seqRemoved;
   Resource_DataMapOfAsciiStringAsciiString mapRemoved;
-  Resource_DataMapOfAsciiStringAsciiString aNames;
   Standard_Integer objectCounter = 0, aStart = 1, aScriptLength = aScript.Length();
   TCollection_AsciiString anUpdatedScript, anEntry, aName, aBaseName("smeshObj_");
+
+  // Collect names of GEOM objects to exclude same names for SMESH objects
+  GEOM::string_array_var aGeomNames = geom->GetAllDumpNames();
+  int ign = 0, nbgn = aGeomNames->length();
+  for (; ign < nbgn; ign++) {
+    aName = aGeomNames[ign];
+    theObjectNames.Bind(aName, "1");
+  }
 
   for (Standard_Integer i = 1; i <= aLen; i += 2) {
     anUpdatedScript += aScript.SubString(aStart, aSeq->Value(i) - 1);
     anEntry = aScript.SubString(aSeq->Value(i), aSeq->Value(i + 1));
-    if (theObjectNames.IsBound(anEntry)) {
-      aName = theObjectNames.Find(anEntry);
-      if (theObjectNames.IsBound(aName) && anEntry != theObjectNames(aName)) {
-        // diff objects have same name - make a new name
-        TCollection_AsciiString aName2;
-        Standard_Integer i = 0;
-        do {
-          aName2 = aName + "_" + ++i;
-        } while (theObjectNames.IsBound(aName2) && anEntry != theObjectNames(aName2));
-        aName = aName2;
-        theObjectNames(anEntry) = aName;
-      }
-    } else {
-      // is a GEOM object?
-      aName = geom->GetDumpName( anEntry.ToCString() );
-      if ( aName.IsEmpty() ) {
-      // ? Removed Object ?
+    // is a GEOM object?
+    aName = geom->GetDumpName( anEntry.ToCString() );
+    if (aName.IsEmpty()) {
+      // is a SMESH object
+      if (theObjectNames.IsBound(anEntry)) {
+        // The Object is in Study
+        aName = theObjectNames.Find(anEntry);
+        if (theObjectNames.IsBound(aName) && anEntry != theObjectNames(aName)) {
+          // diff objects have same name - make a new name
+          TCollection_AsciiString aName2;
+          Standard_Integer i = 0;
+          do {
+            aName2 = aName + "_" + ++i;
+          } while (theObjectNames.IsBound(aName2) && anEntry != theObjectNames(aName2));
+          aName = aName2;
+          theObjectNames(anEntry) = aName;
+        }
+      } else {
+        // Removed Object
         do {
           aName = aBaseName + TCollection_AsciiString(++objectCounter);
         } while (theObjectNames.IsBound(aName));
         seqRemoved.Append(aName);
         mapRemoved.Bind(anEntry, "1");
+        theObjectNames.Bind(anEntry, aName);
       }
-      theObjectNames.Bind(anEntry, aName);
+      theObjectNames.Bind(aName, anEntry); // to detect same name of diff objects
     }
-    theObjectNames.Bind(aName, anEntry); // to detect same name of diff objects
 
     anUpdatedScript += aName;
-    aNames.Bind(aName, "1");
     aStart = aSeq->Value(i + 1) + 1;
   }
 

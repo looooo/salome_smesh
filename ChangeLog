@@ -1,3 +1,16 @@
+2003-10-16 15:04  Nadir Bouhamou <nadir.bouhamou@cea.fr>
+
+	* adm_local/unix/config_files/: check_Netgen.m4
+	* resources/: mesh_algo_tetra.png, mesh_tree_algo_tetra.png
+	* src/: NETGEN
+	* src/NETGEN/: Makefile.in
+	* src/SMESH/: SMESH_Tetra_3D.cxx, SMESH_Tetra_3D.hxx
+	* src/SMESH_I/: SMESH_Tetra_3D_i.cxx, SMESH_Tetra_3D_i.hxx
+	* src/SMESH_SWIG/: SMESH_box2_tetra.py, SMESH_box_tetra.py,
+	SMESH_mechanic_tetra.py
+	first version of those files needed for the Netgen integration in the
+	SMESH Engine.
+
 2003-09-08 17:04  Jerome Robert <jerome.robert@eads.net>
 
 	* src/SMDS/: SMDS_Mesh.cxx, SMDS_VolumeOfNodes.cxx,

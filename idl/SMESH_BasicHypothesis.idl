@@ -78,6 +78,10 @@ module SMESH
   interface SMESH_Hexa_3D : SMESH_3D_Algo
   {
   };
+
+  interface SMESH_Tetra_3D : SMESH_3D_Algo
+  {
+  };
 };
 
 #endif

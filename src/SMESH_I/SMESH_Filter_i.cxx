@@ -1867,9 +1867,9 @@ CORBA::Boolean Filter_i::SetCriteria( const SMESH::Filter::Criteria& theCriteria
     long        aPrecision    = theCriteria[ i ].Precision;
 
     TPythonDump()<<"aCriteria.append(SMESH.Filter.Criterion("<<
-      aCriterion<<","<<aCompare<<","<<aThreshold<<","<<aUnary<<","<<aBinary<<","<<
-      aTolerance<<",'"<<aThresholdStr<<"',"<<aTypeOfElem<<","<<aPrecision<<"))";
-
+      aCriterion<<","<<aCompare<<","<<aThreshold<<",'"<<aThresholdStr<<"',"<<
+      aUnary<<","<<aBinary<<","<<aTolerance<<","<<aTypeOfElem<<","<<aPrecision<<"))";
+    
     SMESH::Predicate_ptr aPredicate = SMESH::Predicate::_nil();
     SMESH::NumericalFunctor_ptr aFunctor = SMESH::NumericalFunctor::_nil();
 

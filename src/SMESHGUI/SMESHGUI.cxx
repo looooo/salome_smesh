@@ -3701,9 +3701,6 @@ bool SMESHGUI::SetSettings(QAD_Desktop * parent)
 		smeshGUI->myAutomaticUpdate = false;
 	}
 
-	/* menus disable */
-	parent->menuBar()->setItemEnabled(11, false);	// IMPORT
-
 	return true;
 }
 
@@ -4231,7 +4228,7 @@ void SMESHGUI::Dump(SMESH_Actor * Mactor)
 void SMESHGUI::AddNodes(SMESH_Actor * Mactor, int number,
 	const SMESH::double_array & coords, const SMESH::long_array & indexes)
 {
-	MESSAGE("SMESHGUI::AddNodes(number="<<number<<")");
+	MESSAGE("SMESHGUI::AddNodes(number="<<number<<", indexes.length()="<<indexes.length()<<")");
 	QApplication::setOverrideCursor(Qt::waitCursor);
 	if (Mactor->GetMapper() == NULL)
 	{
@@ -4952,7 +4949,9 @@ void SMESHGUI::AddEdge(SMESH_Actor * Mactor, int idedge, int idnode1,
 void SMESHGUI::AddTriangles(SMESH_Actor * Mactor, int number,
 	const SMESH::double_array & coords, const SMESH::long_array & indexes)
 {
-	MESSAGE("SMESHGUI::AddTriangles(number="<<number<<")");
+	MESSAGE("SMESHGUI::AddTriangles(number="<<number<<", indexes.length="
+		<<indexes.length()<<")");
+
 	QApplication::setOverrideCursor(Qt::waitCursor);
 	//vtkUnstructuredGrid* ugrid = vtkUnstructuredGrid::SafeDownCast( Mactor->DataSource );
 	SMESH_Grid *ugrid = SMESH_Grid::SafeDownCast(Mactor->DataSource);

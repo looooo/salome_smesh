@@ -156,6 +156,19 @@ namespace SMESH{
   }
 
 
+  void RepaintViewFrame(VTKViewer_ViewFrame* theFrame)
+  {
+    theFrame->Repaint();
+  }
+
+
+  void RenderViewFrame(VTKViewer_ViewFrame* theFrame)
+  {
+    theFrame->getRW()->getRenderWindow()->Render();
+    theFrame->Repaint();
+  }
+
+
   SMESH_Actor* FindActorByEntry(QAD_StudyFrame *theStudyFrame, 
 				const char* theEntry)
   {
@@ -507,7 +520,7 @@ namespace SMESH{
   {
     theName = "";
     if(theIO->hasEntry()){
-      if(SMESH_Actor *anActor = FindActorByEntry(theIO->getEntry())){
+      if(FindActorByEntry(theIO->getEntry())){
 	TColStd_IndexedMapOfInteger aMapIndex;
 	theSel->GetIndex(theIO,aMapIndex);
 	for(int i = 1; i <= aMapIndex.Extent(); i++){
@@ -536,7 +549,7 @@ namespace SMESH{
   {
     theName = "";
     if(theIO->hasEntry()){
-      if(SMESH_Actor *anActor = FindActorByEntry(theIO->getEntry())){
+      if(FindActorByEntry(theIO->getEntry())){
 	TColStd_IndexedMapOfInteger aMapIndex;
 	theSel->GetIndex(theIO,aMapIndex);
 	typedef std::set<int> TIdContainer;

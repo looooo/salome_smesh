@@ -2381,9 +2381,9 @@ bool SMESHGUI::CustomPopup(QAD_Desktop* parent, QPopupMenu* popup, const QString
 	    popup->setItemChecked( 9010, anActor->GetPointsLabeled() ); // Numbering / Display Nodes #
 	    popup->setItemChecked( 9011, anActor->GetCellsLabeled() );  // Numbering / Display Elements #
 	    TVisualObjPtr aVisualObj = anActor->GetObject();
-	    int aNbEdges = aVisualObj->GetNbEntities(SMESH::EDGE);
-	    int aNbFaces = aVisualObj->GetNbEntities(SMESH::FACE);
-	    int aNbVolumes = aVisualObj->GetNbEntities(SMESH::VOLUME);
+	    int aNbEdges = aVisualObj->GetNbEntities(SMDSAbs_Edge);
+	    int aNbFaces = aVisualObj->GetNbEntities(SMDSAbs_Face);
+	    int aNbVolumes = aVisualObj->GetNbEntities(SMDSAbs_Volume);
 
 	    QMenuItem* mi = popup->findItem( 1131 );
 	    if ( mi && mi->popup() ) {

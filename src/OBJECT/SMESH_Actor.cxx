@@ -792,9 +792,9 @@ void SMESH_ActorDef::RemoveFromRender(vtkRenderer* theRenderer){
 
 
 bool SMESH_ActorDef::Init(TVisualObjPtr theVisualObj, 
-		       const char* theEntry, 
-		       const char* theName,
-		       int theIsClear)
+			  const char* theEntry, 
+			  const char* theName,
+			  int theIsClear)
 {
   Handle(SALOME_InteractiveObject) anIO = new SALOME_InteractiveObject(theEntry,"SMESH",theName);
   setIO(anIO);
@@ -1047,13 +1047,13 @@ namespace{
 }
 
 void SMESH_ActorDef::SetEntityMode(unsigned int theMode){
-  if(!myVisualObj->GetNbEntities(SMESH::EDGE))
+  if(!myVisualObj->GetNbEntities(SMDSAbs_Edge))
     theMode &= ~eEdges;
 
-  if(!myVisualObj->GetNbEntities(SMESH::FACE))
+  if(!myVisualObj->GetNbEntities(SMDSAbs_Face))
     theMode &= ~eFaces;
 
-  if(!myVisualObj->GetNbEntities(SMESH::VOLUME))
+  if(!myVisualObj->GetNbEntities(SMDSAbs_Volume))
     theMode &= ~eVolumes;
 
   if(!theMode)
@@ -1080,9 +1080,9 @@ void SMESH_ActorDef::SetEntityMode(unsigned int theMode){
 }
 
 void SMESH_ActorDef::SetRepresentation(int theMode){ 
-  int aNbEdges = myVisualObj->GetNbEntities(SMESH::EDGE);
-  int aNbFaces = myVisualObj->GetNbEntities(SMESH::FACE);
-  int aNbVolumes = myVisualObj->GetNbEntities(SMESH::VOLUME);
+  int aNbEdges = myVisualObj->GetNbEntities(SMDSAbs_Edge);
+  int aNbFaces = myVisualObj->GetNbEntities(SMDSAbs_Face);
+  int aNbVolumes = myVisualObj->GetNbEntities(SMDSAbs_Volume);
   if(theMode < 0){
     myRepresentation = eSurface;
     if(!aNbFaces && !aNbVolumes && aNbEdges){

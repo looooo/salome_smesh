@@ -50,6 +50,7 @@
 #include CORBA_CLIENT_HEADER(SALOMEDS_Attributes)
 
 #include "SMESH_Actor.h"
+#include "SMESH_ObjectDef.h"
 
 using namespace std;
 

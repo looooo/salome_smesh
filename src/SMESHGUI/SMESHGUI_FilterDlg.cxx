@@ -81,6 +81,10 @@
 #include <qobjectlist.h>
 #include <qvalidator.h>
 
+// IDL Headers
+#include "SALOMEconfig.h"
+#include CORBA_SERVER_HEADER(SMESH_Group)
+
 #define SPACING 5                  
 #define MARGIN  10
 

@@ -320,7 +320,8 @@ TCollection_AsciiString SMESH_Gen_i::DumpPython_impl
   anUpdatedScript += "\n";
 
   // Set object names
-  anUpdatedScript += "\n\tisGUIMode = 1";
+  anUpdatedScript += "\n\tisGUIMode = ";
+  anUpdatedScript += isPublished;
   anUpdatedScript += "\n\tif isGUIMode:";
   anUpdatedScript += "\n\t\tsmeshgui = salome.ImportComponentGUI(\"SMESH\")";
   anUpdatedScript += "\n\t\tsmeshgui.Init(theStudy._get_StudyId())";

@@ -528,16 +528,17 @@ SMESH::SMESH_subMesh_ptr SMESH_Mesh_i::GetSubMesh(GEOM::GEOM_Object_ptr aSubShap
       SALOMEDS::SObject_var aSO =
         _gen_i->PublishSubMesh(_gen_i->GetCurrentStudy(), aMesh,
                                subMesh, aSubShapeObject, theName );
+      if ( !aSO->_is_nil()) {
+        // Update Python script
+        TCollection_AsciiString aStr (aSO->GetID());
+        aStr += " = ";
+        SMESH_Gen_i::AddObject(aStr, _this()) += ".GetSubMesh(";
+        SMESH_Gen_i::AddObject(aStr, aSubShapeObject) += ", \"";
+        aStr += (char*)theName;
+        aStr += "\")";
 
-      // Update Python script
-      TCollection_AsciiString aStr (aSO->GetID());
-      aStr += " = ";
-      SMESH_Gen_i::AddObject(aStr, _this()) += ".GetSubMesh(";
-      SMESH_Gen_i::AddObject(aStr, aSubShapeObject) += ", \"";
-      aStr += (char*)theName;
-      aStr += "\")";
-
-      SMESH_Gen_i::AddToCurrentPyScript(aStr);
+        SMESH_Gen_i::AddToCurrentPyScript(aStr);
+      }
     }
   }
   catch(SALOME_Exception & S_ex) {
@@ -633,14 +634,15 @@ SMESH::SMESH_Group_ptr SMESH_Mesh_i::CreateGroup( SMESH::ElementType theElemType
     SALOMEDS::SObject_var aSO =
       _gen_i->PublishGroup(_gen_i->GetCurrentStudy(), _this(),
                            aNewGroup, GEOM::GEOM_Object::_nil(), theName);
+    if ( !aSO->_is_nil()) {
+      // Update Python script
+      TCollection_AsciiString aStr (aSO->GetID());
+      aStr += " = ";
+      SMESH_Gen_i::AddObject(aStr, _this()) += ".CreateGroup(";
+      aStr += ElementTypeString(theElemType) + ", \"" + (char*)theName + "\")";
 
-    // Update Python script
-    TCollection_AsciiString aStr (aSO->GetID());
-    aStr += " = ";
-    SMESH_Gen_i::AddObject(aStr, _this()) += ".CreateGroup(";
-    aStr += ElementTypeString(theElemType) + ", \"" + (char*)theName + "\")";
-
-    SMESH_Gen_i::AddToCurrentPyScript(aStr);
+      SMESH_Gen_i::AddToCurrentPyScript(aStr);
+    }
   }
 
   return aNewGroup._retn();
@@ -668,15 +670,16 @@ SMESH::SMESH_GroupOnGeom_ptr SMESH_Mesh_i::CreateGroupFromGEOM (SMESH::ElementTy
       SALOMEDS::SObject_var aSO =
         _gen_i->PublishGroup(_gen_i->GetCurrentStudy(), _this(), 
                              aNewGroup, theGeomObj, theName);
+      if ( !aSO->_is_nil()) {
+        // Update Python script
+        TCollection_AsciiString aStr (aSO->GetID());
+        aStr += " = ";
+        SMESH_Gen_i::AddObject(aStr, _this()) += ".CreateGroupFromGEOM(";
+        aStr += ElementTypeString(theElemType) + ", \"" + (char*)theName + "\", ";
+        SMESH_Gen_i::AddObject(aStr, theGeomObj) += ")";
 
-      // Update Python script
-      TCollection_AsciiString aStr (aSO->GetID());
-      aStr += " = ";
-      SMESH_Gen_i::AddObject(aStr, _this()) += ".CreateGroupFromGEOM(";
-      aStr += ElementTypeString(theElemType) + ", \"" + (char*)theName + "\", ";
-      SMESH_Gen_i::AddObject(aStr, theGeomObj) += ")";
-
-      SMESH_Gen_i::AddToCurrentPyScript(aStr);
+        SMESH_Gen_i::AddToCurrentPyScript(aStr);
+      }
     }
   }
 

@@ -130,9 +130,11 @@ class SMESH_MeshEditor {
 
   typedef std::list< std::list< const SMDS_MeshNode* > > TListOfListOfNodes;
 
-  void FindCoincidentNodes (const double         theTolerance,
-                            TListOfListOfNodes & theGroupsOfNodes);
-  // Return list of group of nodes close to each other within theTolerance
+  void FindCoincidentNodes (std::set<const SMDS_MeshNode*> & theNodes,
+                            const double                     theTolerance,
+                            TListOfListOfNodes &             theGroupsOfNodes);
+  // Return list of group of nodes close to each other within theTolerance.
+  // Search among theNodes or in the whole mesh if theNodes is empty.
 
   void MergeNodes (TListOfListOfNodes & theNodeGroups);
   // In each group, the cdr of nodes are substituted by the first one
@@ -220,7 +222,11 @@ class SMESH_MeshEditor {
                              int               theNodeIds[] );
   // Set 8 nodes of a hexahedron in a good order.
   // Return success status
-  
+
+  static void AddToSameGroups (const SMDS_MeshElement* elemToAdd,
+                               const SMDS_MeshElement* elemInGroups,
+                               SMESHDS_Mesh *          aMesh);
+  // Add elemToAdd to the groups the elemInGroups belongs to
 
   int FindShape (const SMDS_MeshElement * theElem);
   // Return an index of the shape theElem is on

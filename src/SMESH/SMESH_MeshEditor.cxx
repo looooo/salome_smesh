@@ -28,13 +28,14 @@
 
 #include "SMESH_MeshEditor.hxx"
 
-#include "SMESH_ControlsDef.hxx"
-
 #include "SMDS_FaceOfNodes.hxx"
 #include "SMDS_VolumeTool.hxx"
 #include "SMESHDS_Group.hxx"
 #include "SMESHDS_Mesh.hxx"
 #include "SMESH_subMesh.hxx"
+#include "SMESH_ControlsDef.hxx"
+
+#include "utilities.h"
 
 #include <TopTools_ListIteratorOfListOfShape.hxx>
 #include <TopTools_ListOfShape.hxx>
@@ -47,10 +48,7 @@
 
 #include <map>
 
-#include "utilities.h"
-
 using namespace std;
-using namespace SMESH::Controls;
 
 typedef map<const SMDS_MeshNode*, const SMDS_MeshNode*>           TNodeNodeMap;
 typedef map<const SMDS_MeshNode*, list<const SMDS_MeshNode*> >    TNodeOfNodeListMap;
@@ -495,7 +493,7 @@ bool SMESH_MeshEditor::Reorient (const SMDS_MeshElement * theFace)
 static double getBadRate (const SMDS_MeshElement*               theElem,
                           SMESH::Controls::NumericalFunctorPtr& theCrit)
 {
-  TSequenceOfXYZ P;
+  SMESH::Controls::TSequenceOfXYZ P;
   if ( !theElem || !theCrit->GetPoints( theElem, P ))
     return 1e100;
   return theCrit->GetBadRate( theCrit->GetValue( P ), theElem->NbNodes() );
@@ -570,13 +568,13 @@ bool SMESH_MeshEditor::QuadToTri (set<const SMDS_MeshElement*> &       theElems,
 }
 
 //=======================================================================
-//function : addToSameGroups
+//function : AddToSameGroups
 //purpose  : add elemToAdd to the groups the elemInGroups belongs to
 //=======================================================================
 
-static void addToSameGroups (const SMDS_MeshElement* elemToAdd,
-                             const SMDS_MeshElement* elemInGroups,
-                             SMESHDS_Mesh *          aMesh)
+void SMESH_MeshEditor::AddToSameGroups (const SMDS_MeshElement* elemToAdd,
+                                        const SMDS_MeshElement* elemInGroups,
+                                        SMESHDS_Mesh *          aMesh)
 {
   const set<SMESHDS_GroupBase*>& groups = aMesh->GetGroups();
   set<SMESHDS_GroupBase*>::const_iterator grIt = groups.begin();
@@ -632,7 +630,7 @@ bool SMESH_MeshEditor::QuadToTri (std::set<const SMDS_MeshElement*> & theElems,
     if ( aShapeId )
       aMesh->SetMeshElementOnShape( newElem, aShapeId );
 
-    addToSameGroups( newElem, elem, aMesh );
+    AddToSameGroups( newElem, elem, aMesh );
   }
 
   return true;
@@ -651,7 +649,7 @@ double getAngle(const SMDS_MeshElement * tr1,
   double angle = 2*PI; // bad angle
 
   // get normals
-  TSequenceOfXYZ P1, P2;
+  SMESH::Controls::TSequenceOfXYZ P1, P2;
   if ( !SMESH::Controls::NumericalFunctor::GetPoints( tr1, P1 ) ||
        !SMESH::Controls::NumericalFunctor::GetPoints( tr2, P2 ))
     return angle;
@@ -1317,7 +1315,7 @@ void centroidalSmooth(SMESHDS_Mesh *                       theMesh,
     nbElems++;
 
     gp_XYZ elemCenter(0.,0.,0.);
-    TSequenceOfXYZ aNodePoints;
+    SMESH::Controls::TSequenceOfXYZ aNodePoints;
     SMDS_ElemIteratorPtr itN = elem->nodesIterator();
     while ( itN->more() )
     {
@@ -1455,7 +1453,7 @@ void SMESH_MeshEditor::Smooth (set<const SMDS_MeshElement*> & theElems,
       const SMDS_MeshElement* elem = (*itElem);
       if ( !elem || elem->GetType() != SMDSAbs_Face )
         continue;
-      TSequenceOfXYZ aPoints;
+      SMESH::Controls::TSequenceOfXYZ aPoints;
       if ( aQualityFunc.GetPoints( elem, aPoints )) {
         double aValue = aQualityFunc.GetValue( aPoints );
         if ( aValue > maxRatio )
@@ -1930,17 +1928,26 @@ void SMESH_MeshEditor::Transform (set<const SMDS_MeshElement*> & theElems,
 //=======================================================================
 //function : FindCoincidentNodes
 //purpose  : Return list of group of nodes close to each other within theTolerance
+//           Search among theNodes or in the whole mesh if theNodes is empty.
 //=======================================================================
 
-void SMESH_MeshEditor::FindCoincidentNodes (const double         theTolerance,
-                                            TListOfListOfNodes & theGroupsOfNodes)
+void SMESH_MeshEditor::FindCoincidentNodes (set<const SMDS_MeshNode*> & theNodes,
+                                            const double                theTolerance,
+                                            TListOfListOfNodes &        theGroupsOfNodes)
 {
   double tol2 = theTolerance * theTolerance;
 
   list<const SMDS_MeshNode*> nodes;
-  SMDS_NodeIteratorPtr nIt = GetMeshDS()->nodesIterator();
-  while ( nIt->more() )
-    nodes.push_back( nIt->next() );
+  if ( theNodes.empty() )
+  { // get all nodes in the mesh
+    SMDS_NodeIteratorPtr nIt = GetMeshDS()->nodesIterator();
+    while ( nIt->more() )
+      nodes.push_back( nIt->next() );
+  }
+  else
+  {
+    nodes.insert( nodes.end(), theNodes.begin(), theNodes.end() );
+  }  
 
   list<const SMDS_MeshNode*>::iterator it2, it1 = nodes.begin();
   for ( ; it1 != nodes.end(); it1++ )
@@ -1997,7 +2004,7 @@ void SMESH_MeshEditor::MergeNodes (TListOfListOfNodes & theGroupsOfNodes)
       nodeNodeMap.insert( TNodeNodeMap::value_type( nToRemove, nToKeep ));
       if ( nToRemove != nToKeep ) {
         rmNodeIds.push_back( nToRemove->GetID() );
-        addToSameGroups( nToKeep, nToRemove, aMesh );
+        AddToSameGroups( nToKeep, nToRemove, aMesh );
       }
 
       SMDS_ElemIteratorPtr invElemIt = nToRemove->GetInverseElementIterator();

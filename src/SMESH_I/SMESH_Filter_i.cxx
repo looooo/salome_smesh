@@ -1554,6 +1554,7 @@ SMESH::FilterManager_ptr SMESH_Gen_i::CreateFilterManager()
 {
   SMESH::FilterManager_i* aFilter = new SMESH::FilterManager_i();
   SMESH::FilterManager_var anObj = aFilter->_this();
+  TPythonDump()<<"aFilterManager = smesh.CreateFilterManager()";
   return anObj._retn();
 }
 

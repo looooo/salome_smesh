@@ -93,6 +93,9 @@ class SMESH_Group_i:
   void Clear();
   CORBA::Long Add( const SMESH::long_array& theIDs );
   CORBA::Long Remove( const SMESH::long_array& theIDs );
+
+  CORBA::Long AddByPredicate( SMESH::Predicate_ptr thePredicate );
+  CORBA::Long RemoveByPredicate( SMESH::Predicate_ptr thePredicate );
 };
 
 // =========================

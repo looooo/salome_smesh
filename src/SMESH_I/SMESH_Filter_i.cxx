@@ -29,6 +29,7 @@
 #include "SMESH_Filter_i.hxx"
 
 #include "SMESH_Gen_i.hxx"
+#include "SMESH_PythonDump.hxx"
 
 #include "SMDS_Mesh.hxx"
 #include "SMDS_MeshNode.hxx"
@@ -63,6 +64,18 @@
 using namespace SMESH;
 using namespace SMESH::Controls;
 
+
+namespace SMESH
+{
+  Predicate_i* 
+  GetPredicate( Predicate_ptr thePredicate )
+  {
+    PortableServer::ServantBase_var aServant = SMESH_Gen_i::GetServant( thePredicate );
+    return dynamic_cast<Predicate_i*>(aServant.in());
+  }
+}
+
+
 /*
   Class       : BelongToGeom
   Description : Predicate for verifying whether entiy belong to
@@ -74,9 +87,9 @@ Controls::BelongToGeom::BelongToGeom()
   myType(SMDSAbs_All)
 {}
 
-void Controls::BelongToGeom::SetMesh( SMDS_Mesh* theMesh )
+void Controls::BelongToGeom::SetMesh( const SMDS_Mesh* theMesh )
 {
-  myMeshDS = dynamic_cast<SMESHDS_Mesh*>(theMesh);
+  myMeshDS = dynamic_cast<const SMESHDS_Mesh*>(theMesh);
 }
 
 void Controls::BelongToGeom::SetGeom( const TopoDS_Shape& theShape )
@@ -84,7 +97,7 @@ void Controls::BelongToGeom::SetGeom( const TopoDS_Shape& theShape )
   myShape = theShape;
 }
 
-static bool IsContains( SMESHDS_Mesh*           theMeshDS,
+static bool IsContains( const SMESHDS_Mesh*     theMeshDS,
                         const TopoDS_Shape&     theShape,
                         const SMDS_MeshElement* theElem,
                         TopAbs_ShapeEnum        theFindShapeEnum,
@@ -166,7 +179,9 @@ TopoDS_Shape Controls::BelongToGeom::GetShape()
   return myShape;
 }
 
-SMESHDS_Mesh* Controls::BelongToGeom::GetMeshDS()
+const SMESHDS_Mesh* 
+Controls::BelongToGeom::
+GetMeshDS() const
 {
   return myMeshDS;
 }
@@ -182,9 +197,9 @@ Controls::LyingOnGeom::LyingOnGeom()
   myType(SMDSAbs_All)
 {}
 
-void Controls::LyingOnGeom::SetMesh( SMDS_Mesh* theMesh )
+void Controls::LyingOnGeom::SetMesh( const SMDS_Mesh* theMesh )
 {
- myMeshDS = dynamic_cast<SMESHDS_Mesh*>(theMesh);
+  myMeshDS = dynamic_cast<const SMESHDS_Mesh*>(theMesh);
 }
 
 void Controls::LyingOnGeom::SetGeom( const TopoDS_Shape& theShape )
@@ -254,12 +269,14 @@ TopoDS_Shape Controls::LyingOnGeom::GetShape()
   return myShape;
 }
 
-SMESHDS_Mesh* Controls::LyingOnGeom::GetMeshDS()
+const SMESHDS_Mesh* 
+Controls::LyingOnGeom::
+GetMeshDS() const
 {
   return myMeshDS;
 }
 
-bool Controls::LyingOnGeom::Contains( SMESHDS_Mesh*           theMeshDS,
+bool Controls::LyingOnGeom::Contains( const SMESHDS_Mesh*     theMeshDS,
 				      const TopoDS_Shape&     theShape,
 				      const SMDS_MeshElement* theElem,
 				      TopAbs_ShapeEnum        theFindShapeEnum,
@@ -301,14 +318,18 @@ bool Controls::LyingOnGeom::Contains( SMESHDS_Mesh*           theMeshDS,
                             AUXILIARY METHODS
 */
 
-static inline SMDS_Mesh* MeshPtr2SMDSMesh( SMESH_Mesh_ptr theMesh )
+inline 
+const SMDS_Mesh* 
+MeshPtr2SMDSMesh( SMESH_Mesh_ptr theMesh )
 {
   SMESH_Mesh_i* anImplPtr = 
     dynamic_cast<SMESH_Mesh_i*>( SMESH_Gen_i::GetServant( theMesh ).in() );
   return anImplPtr ? anImplPtr->GetImpl().GetMeshDS() : 0;
 }
 
-static inline SMESH::long_array* toArray( const TColStd_ListOfInteger& aList )
+inline 
+SMESH::long_array* 
+toArray( const TColStd_ListOfInteger& aList )
 {
   SMESH::long_array_var anArray = new SMESH::long_array;
   anArray->length( aList.Extent() );
@@ -320,7 +341,9 @@ static inline SMESH::long_array* toArray( const TColStd_ListOfInteger& aList )
   return anArray._retn();
 }
 
-static inline SMESH::double_array* toArray( const TColStd_ListOfReal& aList )
+inline 
+SMESH::double_array* 
+toArray( const TColStd_ListOfReal& aList )
 {
   SMESH::double_array_var anArray = new SMESH::double_array;
   anArray->length( aList.Extent() );
@@ -1005,6 +1028,7 @@ Comparator_i::~Comparator_i()
 void Comparator_i::SetMargin( CORBA::Double theValue )
 {
   myComparatorPtr->SetMargin( theValue );
+  TPythonDump()<<this<<".SetMargin("<<float(theValue)<<")";
 }
 
 CORBA::Double Comparator_i::GetMargin()
@@ -1023,6 +1047,7 @@ void Comparator_i::SetNumFunctor( NumericalFunctor_ptr theFunct )
   {
     myComparatorPtr->SetNumFunctor( myNumericalFunctor->GetNumericalFunctor() );
     myNumericalFunctor->Register();
+    TPythonDump()<<this<<".SetNumFunctor("<<myNumericalFunctor<<")";
   }
 }
 
@@ -1111,12 +1136,12 @@ LogicalNOT_i::~LogicalNOT_i()
     myPredicate->Destroy();
 }
 
-void LogicalNOT_i::SetPredicate( Predicate_ptr thePred )
+void LogicalNOT_i::SetPredicate( Predicate_ptr thePredicate )
 {
   if ( myPredicate )
     myPredicate->Destroy();
 
-  myPredicate = dynamic_cast<Predicate_i*>( SMESH_Gen_i::GetServant( thePred ).in() );
+  myPredicate = SMESH::GetPredicate(thePredicate);
 
   if ( myPredicate ){
     myLogicalNOTPtr->SetPredicate(myPredicate->GetPredicate());
@@ -1167,7 +1192,7 @@ void LogicalBinary_i::SetPredicate1( Predicate_ptr thePredicate )
   if ( myPredicate1 )
     myPredicate1->Destroy();
 
-  myPredicate1 = dynamic_cast<Predicate_i*>( SMESH_Gen_i::GetServant( thePredicate ).in() );
+  myPredicate1 = SMESH::GetPredicate(thePredicate);
 
   if ( myPredicate1 ){
     myLogicalBinaryPtr->SetPredicate1(myPredicate1->GetPredicate());
@@ -1180,7 +1205,7 @@ void LogicalBinary_i::SetPredicate2( Predicate_ptr thePredicate )
   if ( myPredicate2 )
     myPredicate2->Destroy();
 
-  myPredicate2 = dynamic_cast<Predicate_i*>( SMESH_Gen_i::GetServant( thePredicate ).in() );
+  myPredicate2 = SMESH::GetPredicate(thePredicate);
 
   if ( myPredicate2 ){
     myLogicalBinaryPtr->SetPredicate2(myPredicate2->GetPredicate());
@@ -1297,6 +1322,7 @@ Area_ptr FilterManager_i::CreateArea()
 {
   SMESH::Area_i* aServant = new SMESH::Area_i();
   SMESH::Area_var anObj = aServant->_this();
+  TPythonDump()<<aServant<<" = "<<this<<".CreateArea()";
   return anObj._retn();
 }
 
@@ -1397,6 +1423,7 @@ MoreThan_ptr FilterManager_i::CreateMoreThan()
 {
   SMESH::MoreThan_i* aServant = new SMESH::MoreThan_i();
   SMESH::MoreThan_var anObj = aServant->_this();
+  TPythonDump()<<aServant<<" = "<<this<<".CreateMoreThan()";
   return anObj._retn();
 }
 
@@ -1469,6 +1496,7 @@ SMESH::FilterManager_ptr SMESH_Gen_i::CreateFilterManager()
 {
   SMESH::FilterManager_i* aFilter = new SMESH::FilterManager_i();
   SMESH::FilterManager_var anObj = aFilter->_this();
+  TPythonDump()<<aFilter<<" = smesh.CreateFilterManager()";
   return anObj._retn();
 }
 
@@ -1504,7 +1532,7 @@ void Filter_i::SetPredicate( Predicate_ptr thePredicate )
   if ( myPredicate )
     myPredicate->Destroy();
 
-  myPredicate = dynamic_cast<Predicate_i*>( SMESH_Gen_i::GetServant( thePredicate ).in() );
+  myPredicate = SMESH::GetPredicate(thePredicate);
 
   if ( myPredicate )
   {
@@ -1536,10 +1564,29 @@ void Filter_i::SetMesh( SMESH_Mesh_ptr theMesh )
 // name    : Filter_i::GetElementsId
 // Purpose : Get ids of entities
 //=======================================================================
+void
+Filter_i::
+GetElementsId( Predicate_i* thePredicate,
+	       const SMDS_Mesh* theMesh,
+	       Controls::Filter::TIdSequence& theSequence )
+{
+  Controls::Filter::GetElementsId(theMesh,thePredicate->GetPredicate(),theSequence);
+}
+
+void
+Filter_i::
+GetElementsId( Predicate_i* thePredicate,
+	       SMESH_Mesh_ptr theMesh,
+	       Controls::Filter::TIdSequence& theSequence )
+{
+  if(const SMDS_Mesh* aMesh = MeshPtr2SMDSMesh(theMesh))
+    Controls::Filter::GetElementsId(aMesh,thePredicate->GetPredicate(),theSequence);
+}
+
 SMESH::long_array* Filter_i::GetElementsId( SMESH_Mesh_ptr theMesh )
 {
-  SMDS_Mesh* aMesh = MeshPtr2SMDSMesh(theMesh);
-  Controls::Filter::TIdSequence aSequence = myFilter.GetElementsId(aMesh);
+  Controls::Filter::TIdSequence aSequence;
+  GetElementsId(myPredicate,theMesh,aSequence);
 
   SMESH::long_array_var anArray = new SMESH::long_array;
   long i = 0, iEnd = aSequence.size();

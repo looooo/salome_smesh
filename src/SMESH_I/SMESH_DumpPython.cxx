@@ -4,9 +4,183 @@
 // Module  : SMESH
 // $Header : $
 
+#include "SMESH_PythonDump.hxx"
 #include "SMESH_Gen_i.hxx"
+#include "SMESH_Filter_i.hxx"
 
 #include <TColStd_HSequenceOfInteger.hxx>
+
+namespace SMESH
+{
+  TCollection_AsciiString& 
+  operator<<(TCollection_AsciiString& theString, const char* theArg){
+    theString += Standard_CString(theArg);
+    return theString;
+  }
+
+  TCollection_AsciiString& 
+  operator<<(TCollection_AsciiString& theString, int theArg){
+    theString += TCollection_AsciiString(theArg);
+    return theString;
+  }
+
+  TCollection_AsciiString& 
+  operator<<(TCollection_AsciiString& theString, float theArg){
+    theString += TCollection_AsciiString(theArg);
+    return theString;
+  }
+
+  TCollection_AsciiString& 
+  operator<<(TCollection_AsciiString& theString, 
+	     const SMESH::long_array& theArg)
+  {
+    theString<<"[ ";
+    CORBA::Long i = 1, iEnd = theArg.length();
+    for(; i <= iEnd; i++) {
+      theString<<int(theArg[i-1]);
+      if(i < iEnd)
+	theString<< ", ";
+    }
+    theString<<" ]";
+    return theString;
+  }
+
+
+  TCollection_AsciiString& 
+  operator<<(TCollection_AsciiString& theString, 
+	     CORBA::Object_ptr theArg)
+  {
+    CORBA::String_var aString("None");
+    SMESH_Gen_i* aSMESHGen = SMESH_Gen_i::GetSMESHGen();
+    SALOMEDS::Study_ptr aStudy = aSMESHGen->GetCurrentStudy();
+    SALOMEDS::SObject_var aSObject = SMESH_Gen_i::ObjectToSObject(aStudy,theArg);
+    if(!aSObject->_is_nil()){
+      aString = aSObject->GetID();
+    }else if(!CORBA::is_nil(theArg)){
+      aString = SMESH_Gen_i::GetORB()->object_to_string(theArg);
+    }
+    theString<<aString.in();
+    return theString;
+  }
+
+  TCollection_AsciiString& 
+  operator<<(TCollection_AsciiString& theString, 
+	     SMESH::FilterLibrary_i* theArg)
+  {
+    theString += TCollection_AsciiString("aFilterLibrary_");
+    theString += TCollection_AsciiString(int(theArg));
+    return theString;
+  }
+
+  TCollection_AsciiString& 
+  operator<<(TCollection_AsciiString& theString, 
+	     SMESH::FilterManager_i* theArg)
+  {
+    theString += TCollection_AsciiString("aFilterManager_");
+    theString += TCollection_AsciiString(int(theArg));
+    return theString;
+  }
+
+  TCollection_AsciiString& 
+  operator<<(TCollection_AsciiString& theString, 
+	     SMESH::Functor_i* theArg)
+  {
+    FunctorType aFunctorType = theArg->GetFunctorType();
+    switch(aFunctorType){
+    case FT_AspectRatio:
+      theString += TCollection_AsciiString("anAspectRatio");
+      break;
+    case FT_AspectRatio3D:
+      theString += TCollection_AsciiString("anAspectRatio3D");
+      break;
+    case FT_Warping:
+      theString += TCollection_AsciiString("aWarping");
+      break;
+    case FT_MinimumAngle:
+      theString += TCollection_AsciiString("aMinimumAngle");
+      break;
+    case FT_Taper:
+      theString += TCollection_AsciiString("aTaper");
+      break;
+    case FT_Skew:
+      theString += TCollection_AsciiString("aSkew");
+      break;
+    case FT_Area:
+      theString += TCollection_AsciiString("aArea");
+      break;
+    case FT_FreeBorders:
+      theString += TCollection_AsciiString("aFreeBorders");
+      break;
+    case FT_FreeEdges:
+      theString += TCollection_AsciiString("aFreeEdges");
+      break;
+    case FT_MultiConnection:
+      theString += TCollection_AsciiString("aMultiConnection");
+      break;
+    case FT_MultiConnection2D:
+      theString += TCollection_AsciiString("aMultiConnection2D");
+      break;
+    case FT_Length:
+      theString += TCollection_AsciiString("aLength");
+      break;
+    case FT_Length2D:
+      theString += TCollection_AsciiString("aLength");
+      break;
+    case FT_BelongToGeom:
+      theString += TCollection_AsciiString("aBelongToGeom");
+      break;
+    case FT_BelongToPlane:
+      theString += TCollection_AsciiString("aBelongToPlane");
+      break;
+    case FT_BelongToCylinder:
+      theString += TCollection_AsciiString("aBelongToCylinder");
+      break;
+    case FT_LyingOnGeom:
+      theString += TCollection_AsciiString("aLyingOnGeom");
+      break;
+    case FT_RangeOfIds:
+      theString += TCollection_AsciiString("aRangeOfIds");
+      break;
+    case FT_BadOrientedVolume:
+      theString += TCollection_AsciiString("aBadOrientedVolume");
+      break;
+    case FT_LessThan:
+      theString += TCollection_AsciiString("aLessThan");
+      break;
+    case FT_MoreThan:
+      theString += TCollection_AsciiString("aMoreThan");
+      break;
+    case FT_EqualTo:
+      theString += TCollection_AsciiString("anEqualTo");
+      break;
+    case FT_LogicalNOT:
+      theString += TCollection_AsciiString("aLogicalNOT");
+      break;
+    case FT_LogicalAND:
+      theString += TCollection_AsciiString("aLogicalAND");
+      break;
+    case FT_LogicalOR:
+      theString += TCollection_AsciiString("aLogicalOR");
+      break;
+    case FT_Undefined:
+      theString += TCollection_AsciiString("anUndefined");
+      break;
+    }
+    theString += Standard_CString("_");
+    theString += TCollection_AsciiString(int(theArg));
+    return theString;
+  }
+
+  TPythonDump::
+  ~TPythonDump()
+  {
+    SMESH_Gen_i* aSMESHGen = SMESH_Gen_i::GetSMESHGen();
+    SALOMEDS::Study_ptr aStudy = aSMESHGen->GetCurrentStudy();
+    if(!aStudy->_is_nil()){
+      aSMESHGen->AddToPythonScript(aStudy->StudyId(),myString);
+    }
+  }
+}
 
 //=======================================================================
 //function : DumpPython

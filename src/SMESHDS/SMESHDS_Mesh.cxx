@@ -876,13 +876,14 @@ bool SMESHDS_Mesh::IsGroupOfSubShapes (const TopoDS_Shape& theShape) const
 /// Return the sub mesh linked to the a given TopoDS_Shape or NULL if the given
 /// TopoDS_Shape is unknown
 ///////////////////////////////////////////////////////////////////////////////
-SMESHDS_SubMesh * SMESHDS_Mesh::MeshElements(const TopoDS_Shape & S)
+SMESHDS_SubMesh * SMESHDS_Mesh::MeshElements(const TopoDS_Shape & S) const
 {
   if (myShape.IsNull()) MESSAGE("myShape is NULL");
 
   int Index = ShapeToIndex(S);
-  if (myShapeIndexToSubMesh.find(Index)!=myShapeIndexToSubMesh.end())
-    return myShapeIndexToSubMesh[Index];
+  TShapeIndexToSubMesh::const_iterator anIter = myShapeIndexToSubMesh.find(Index);
+  if (anIter != myShapeIndexToSubMesh.end())
+    return anIter->second;
   else
     return NULL;
 }
@@ -1033,7 +1034,7 @@ TopoDS_Shape SMESHDS_Mesh::IndexToShape(int ShapeIndex)
 //function : ShapeToIndex
 //purpose  : 
 //=======================================================================
-int SMESHDS_Mesh::ShapeToIndex(const TopoDS_Shape & S)
+int SMESHDS_Mesh::ShapeToIndex(const TopoDS_Shape & S) const
 {
   if (myShape.IsNull())
     MESSAGE("myShape is NULL");

@@ -204,7 +204,7 @@ public:
 			       const TopoDS_Shape & S);
   TopoDS_Shape ShapeToMesh() const;
   bool HasMeshElements(const TopoDS_Shape & S);
-  SMESHDS_SubMesh * MeshElements(const TopoDS_Shape & S);
+  SMESHDS_SubMesh * MeshElements(const TopoDS_Shape & S) const;
   SMESHDS_SubMesh * MeshElements(const int Index);
   std::list<int> SubMeshIndices();
   const std::map<int,SMESHDS_SubMesh*>& SubMeshes()
@@ -214,7 +214,7 @@ public:
   const std::list<const SMESHDS_Hypothesis*>& GetHypothesis(const TopoDS_Shape & S) const;
   SMESHDS_Script * GetScript();
   void ClearScript();
-  int ShapeToIndex(const TopoDS_Shape & aShape);
+  int ShapeToIndex(const TopoDS_Shape & aShape) const;
   TopoDS_Shape IndexToShape(int ShapeIndex);
 
   SMESHDS_SubMesh * NewSubMesh(int Index);
@@ -246,9 +246,15 @@ private:
 
   int                        myMeshID;
   TopoDS_Shape               myShape;
+
+  typedef std::map<int,SMESHDS_SubMesh*> TShapeIndexToSubMesh;
+  TShapeIndexToSubMesh myShapeIndexToSubMesh;
+
   TopTools_IndexedMapOfShape myIndexToShape;
-  std::map<int,SMESHDS_SubMesh*>  myShapeIndexToSubMesh;
-  std::set<SMESHDS_GroupBase*>    myGroups;
+
+  typedef std::set<SMESHDS_GroupBase*> TGroups;
+  TGroups myGroups;
+
   SMESHDS_Script*            myScript;
 };
 

@@ -81,7 +81,7 @@ namespace{
     return aDist;
   }
 
-  int getNbMultiConnection( SMDS_Mesh* theMesh, const int theId )
+  int getNbMultiConnection( const SMDS_Mesh* theMesh, const int theId )
   {
     if ( theMesh == 0 )
       return 0;
@@ -137,7 +137,7 @@ NumericalFunctor::NumericalFunctor():
   myPrecision = -1;
 }
 
-void NumericalFunctor::SetMesh( SMDS_Mesh* theMesh )
+void NumericalFunctor::SetMesh( const SMDS_Mesh* theMesh )
 {
   myMesh = theMesh;
 }
@@ -1030,7 +1030,6 @@ double MultiConnection2D::GetValue( long theElementId )
   int aResult = 0;
   
   if (GetPoints(theElementId,P)){
-    double  aVal;
     const SMDS_MeshElement* anFaceElem = myMesh->FindElement( theElementId );
     SMDSAbs_ElementType aType = anFaceElem->GetType();
     
@@ -1112,7 +1111,6 @@ void MultiConnection2D::GetValues(MValues& theValues){
   SMDS_FaceIteratorPtr anIter = myMesh->facesIterator();
   for(; anIter->more(); ){
     const SMDS_MeshFace* anElem = anIter->next();
-    long anElemId = anElem->GetID();
     SMDS_ElemIteratorPtr aNodesIter = anElem->nodesIterator();
     long aNodeId[3];
 
@@ -1172,7 +1170,7 @@ BadOrientedVolume::BadOrientedVolume()
   myMesh = 0;
 }
 
-void BadOrientedVolume::SetMesh( SMDS_Mesh* theMesh )
+void BadOrientedVolume::SetMesh( const SMDS_Mesh* theMesh )
 {
   myMesh = theMesh;
 }
@@ -1203,7 +1201,7 @@ FreeBorders::FreeBorders()
   myMesh = 0;
 }
 
-void FreeBorders::SetMesh( SMDS_Mesh* theMesh )
+void FreeBorders::SetMesh( const SMDS_Mesh* theMesh )
 {
   myMesh = theMesh;
 }
@@ -1228,7 +1226,7 @@ FreeEdges::FreeEdges()
   myMesh = 0;
 }
 
-void FreeEdges::SetMesh( SMDS_Mesh* theMesh )
+void FreeEdges::SetMesh( const SMDS_Mesh* theMesh )
 {
   myMesh = theMesh;
 }
@@ -1375,7 +1373,7 @@ RangeOfIds::RangeOfIds()
 // name    : SetMesh
 // Purpose : Set mesh 
 //=======================================================================
-void RangeOfIds::SetMesh( SMDS_Mesh* theMesh )
+void RangeOfIds::SetMesh( const SMDS_Mesh* theMesh )
 {
   myMesh = theMesh;
 }
@@ -1577,7 +1575,7 @@ Comparator::Comparator():
 Comparator::~Comparator()
 {}
 
-void Comparator::SetMesh( SMDS_Mesh* theMesh )
+void Comparator::SetMesh( const SMDS_Mesh* theMesh )
 {
   if ( myFunctor )
     myFunctor->SetMesh( theMesh );
@@ -1662,7 +1660,7 @@ bool LogicalNOT::IsSatisfy( long theId )
   return myPredicate && !myPredicate->IsSatisfy( theId );
 }
 
-void LogicalNOT::SetMesh( SMDS_Mesh* theMesh )
+void LogicalNOT::SetMesh( const SMDS_Mesh* theMesh )
 {
   if ( myPredicate )
     myPredicate->SetMesh( theMesh );
@@ -1689,7 +1687,7 @@ LogicalBinary::LogicalBinary()
 LogicalBinary::~LogicalBinary()
 {}
 
-void LogicalBinary::SetMesh( SMDS_Mesh* theMesh )
+void LogicalBinary::SetMesh( const SMDS_Mesh* theMesh )
 {
   if ( myPredicate1 )
     myPredicate1->SetMesh( theMesh );
@@ -1763,11 +1761,10 @@ void Filter::SetPredicate( PredicatePtr thePredicate )
   myPredicate = thePredicate;
 }
 
-
 template<class TElement, class TIterator, class TPredicate> 
-void FillSequence(const TIterator& theIterator,
-		  TPredicate& thePredicate,
-		  Filter::TIdSequence& theSequence)
+inline void FillSequence(const TIterator& theIterator,
+			 TPredicate& thePredicate,
+			 Filter::TIdSequence& theSequence)
 {
   if ( theIterator ) {
     while( theIterator->more() ) {
@@ -1779,40 +1776,46 @@ void FillSequence(const TIterator& theIterator,
   }
 }
 
-Filter::TIdSequence
-Filter::GetElementsId( SMDS_Mesh* theMesh )
+void
+Filter::
+GetElementsId( const SMDS_Mesh* theMesh, 
+	       PredicatePtr thePredicate, 
+	       TIdSequence& theSequence )
 {
-  TIdSequence aSequence;
-  if ( !theMesh || !myPredicate ) return aSequence;
+  theSequence.clear();
 
-  myPredicate->SetMesh( theMesh );
+  if ( !theMesh || !thePredicate ) 
+    return;
 
-  SMDSAbs_ElementType aType = myPredicate->GetType();
+  thePredicate->SetMesh( theMesh );
+
+  SMDSAbs_ElementType aType = thePredicate->GetType();
   switch(aType){
-  case SMDSAbs_Node:{
-    FillSequence<const SMDS_MeshNode*>(theMesh->nodesIterator(),myPredicate,aSequence);
+  case SMDSAbs_Node:
+    FillSequence<const SMDS_MeshNode*>(theMesh->nodesIterator(),thePredicate,theSequence);
+    break;
+  case SMDSAbs_Edge:
+    FillSequence<const SMDS_MeshElement*>(theMesh->edgesIterator(),thePredicate,theSequence);
+    break;
+  case SMDSAbs_Face:
+    FillSequence<const SMDS_MeshElement*>(theMesh->facesIterator(),thePredicate,theSequence);
+    break;
+  case SMDSAbs_Volume:
+    FillSequence<const SMDS_MeshElement*>(theMesh->volumesIterator(),thePredicate,theSequence);
+    break;
+  case SMDSAbs_All:
+    FillSequence<const SMDS_MeshElement*>(theMesh->edgesIterator(),thePredicate,theSequence);
+    FillSequence<const SMDS_MeshElement*>(theMesh->facesIterator(),thePredicate,theSequence);
+    FillSequence<const SMDS_MeshElement*>(theMesh->volumesIterator(),thePredicate,theSequence);
     break;
   }
-  case SMDSAbs_Edge:{
-    FillSequence<const SMDS_MeshElement*>(theMesh->edgesIterator(),myPredicate,aSequence);
-    break;
-  }
-  case SMDSAbs_Face:{
-    FillSequence<const SMDS_MeshElement*>(theMesh->facesIterator(),myPredicate,aSequence);
-    break;
-  }
-  case SMDSAbs_Volume:{
-    FillSequence<const SMDS_MeshElement*>(theMesh->volumesIterator(),myPredicate,aSequence);
-    break;
-  }
-  case SMDSAbs_All:{
-    FillSequence<const SMDS_MeshElement*>(theMesh->edgesIterator(),myPredicate,aSequence);
-    FillSequence<const SMDS_MeshElement*>(theMesh->facesIterator(),myPredicate,aSequence);
-    FillSequence<const SMDS_MeshElement*>(theMesh->volumesIterator(),myPredicate,aSequence);
-    break;
-  }
-  }
-  return aSequence;
+}
+
+void
+Filter::GetElementsId( const SMDS_Mesh* theMesh,
+		       Filter::TIdSequence& theSequence )
+{
+  GetElementsId(theMesh,myPredicate,theSequence);
 }
 
 /*
@@ -1876,7 +1879,7 @@ ManifoldPart::~ManifoldPart()
   myMesh = 0;
 }
 
-void ManifoldPart::SetMesh( SMDS_Mesh* theMesh )
+void ManifoldPart::SetMesh( const SMDS_Mesh* theMesh )
 {
   myMesh = theMesh;
   process();
@@ -2205,7 +2208,7 @@ ElementsOnSurface::~ElementsOnSurface()
   myMesh = 0;
 }
 
-void ElementsOnSurface::SetMesh( SMDS_Mesh* theMesh )
+void ElementsOnSurface::SetMesh( const SMDS_Mesh* theMesh )
 { 
   if ( myMesh == theMesh )
     return;

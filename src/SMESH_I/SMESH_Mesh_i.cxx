@@ -231,7 +231,8 @@ SMESH::SMESH_subMesh_ptr SMESH_Mesh_i::GetElementsOnShape(GEOM::
  * Translate the UpdateAll SMESHDS_Command to a set of SMESH::log_command.
  * As the input log need to be resized, it is realocated.
  * @param logBlock The log where to insert created commands
- * @param index The place where to insert created commands in log
+ * @param index The place where to insert created commands in log. It is updated
+ * with the place to put new elements.
  * @return The realocated and resized log.
  * @TODO Add support for other type of elements
  */
@@ -239,8 +240,8 @@ SMESH::log_array_var SMESH_Mesh_i::
 	createUpdateAllCommand(SMESH::log_array_var log, int * index)
 {
 	MESSAGE("SMESH_Mesh_i::createUpdateAllCommand");
-	SMESH::log_array_var aLog=new SMESH::log_array(log->length()+4);
-	aLog->length(log->length()+4);
+	SMESH::log_array_var aLog=new SMESH::log_array(log->length()+3);
+	aLog->length(log->length()+3);
 	
 	for(int i=0;i<*index;i++)
 	{		
@@ -298,7 +299,7 @@ SMESH::log_array_var SMESH_Mesh_i::
 		aLog[id].number*4,
 		triasIndices);
 
-	(*index)+=4;
+	(*index)=id;
 	return aLog;
 }
 
@@ -341,7 +342,7 @@ SMESH::log_array * SMESH_Mesh_i::GetLog(CORBA::Boolean clearAfterGet)
 			aLog[indexLog].commandType = comType;
 			if(comType==SMESHDS_UpdateAll)
 			{
-				aLog=createUpdateAllCommand(aLog, &indexLog);			
+				aLog=createUpdateAllCommand(aLog, &indexLog);
 			}
 			else
 			{
@@ -361,7 +362,7 @@ SMESH::log_array * SMESH_Mesh_i::GetLog(CORBA::Boolean clearAfterGet)
 					ii++;
 				}
 				indexLog++;
-			}			
+			}
 			its++;
 		}
 		if (clearAfterGet) _impl->ClearLog();

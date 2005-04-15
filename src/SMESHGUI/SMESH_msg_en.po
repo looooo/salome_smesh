@@ -448,9 +448,17 @@ msgstr "Add Edge"
 msgid "SMESH_ADD_TETRAS"
 msgstr "Add Tetrahedron"
 
+#Add Polygone button cr title
+msgid "SMESH_POLYGON"
+msgstr "Polygon"
+
 #Add Polygone
-msgid "SMESH_ADD_POLYGONE"
-msgstr "Add Polygone"
+msgid "SMESH_ADD_POLYGON"
+msgstr "Add Polygon"
+
+#Add Polygone Title
+msgid "SMESH_ADD_POLYGON_TITLE"
+msgstr "Add Polygon"
 
 #Add Polyedre
 msgid "SMESH_ADD_POLYEDRE"

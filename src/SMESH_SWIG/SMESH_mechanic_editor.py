@@ -288,10 +288,10 @@ angle180 =  180*3.141/180
 MeshEditor.RotateObject(mesh, axisXYZ, angle180, 0)
 
 #7 group smoothing
-FacesSmooth = [864, 933, 941, 950, 1005, 1013]
+FacesSmooth = [864, 933, 941, 950, 1005, 1013, 943, 928, 936, 1017]
 GroupSmooth = mesh.CreateGroup(SMESH.FACE,"Group of faces (smooth)")
 GroupSmooth.Add(FacesSmooth)
-MeshEditor.SmoothObject(GroupSmooth, [], 20, 2, SMESH.SMESH_MeshEditor.CENTROIDAL_SMOOTH)
+MeshEditor.SmoothObject(GroupSmooth, [], 20, 1, SMESH.SMESH_MeshEditor.CENTROIDAL_SMOOTH)
 
 #8 rotation sweep object
 FacesRotate = [492, 493, 502, 503]

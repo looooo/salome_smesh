@@ -466,7 +466,7 @@ msgstr "Add Polyedre"
 
 #Preview polyhedre
 msgid "SMESH_POLYEDRE_PREVIEW"
-msgstr "Preview polyedre"
+msgstr "Preview"
 
 #Add Hexahedron
 msgid "SMESH_ADD_HEXAS"

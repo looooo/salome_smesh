@@ -97,7 +97,7 @@
      <popup-item item-id="401" pos-id="" label-id="Edge" icon-id="mesh_line.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
      <popup-item item-id="4021" pos-id="" label-id="Triangle" icon-id="mesh_triangle.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
      <popup-item item-id="4022" pos-id="" label-id="Quadrangle" icon-id="mesh_quad.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
-     <popup-item item-id="4023" pos-id="" label-id="Polygone" icon-id="mesh_polygon.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
+     <popup-item item-id="4023" pos-id="" label-id="Polygon" icon-id="mesh_polygon.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
      <popup-item item-id="4031" pos-id="" label-id="Tetrahedron" icon-id="mesh_tetra.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
      <popup-item item-id="4032" pos-id="" label-id="Hexahedron" icon-id="mesh_hexa.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>
      <popup-item item-id="4033" pos-id="" label-id="Polyhedron" icon-id="mesh_polyhedron.png" tooltip-id="" accel-id="" toggle-id="" execute-action=""/>

@@ -33,6 +33,7 @@
 #include "SMDS_EdgePosition.hxx"
 #include "SMDS_PolyhedralVolumeOfNodes.hxx"
 #include "SMDS_FacePosition.hxx"
+#include "SMDS_SpacePosition.hxx"
 
 #include "SMESHDS_Group.hxx"
 #include "SMESHDS_Mesh.hxx"
@@ -1305,6 +1306,8 @@ void laplacianSmooth(const SMDS_MeshNode*                 theNode,
   while ( elemIt->more() )
   {
     const SMDS_MeshElement* elem = elemIt->next();
+    if ( elem->GetType() != SMDSAbs_Face )
+      continue;
 
     // put all nodes in array
     int nbNodes = 0, iNode = 0;
@@ -1336,16 +1339,20 @@ void laplacianSmooth(const SMDS_MeshNode*                 theNode,
       coord[2] += node->Z();
     }
     else { // smooth in 2D
-      gp_XY* uv = theUVMap[ node ];      
+      ASSERT( theUVMap.find( node ) != theUVMap.end() );
+      gp_XY* uv = theUVMap[ node ];
       coord[0] += uv->X();
       coord[1] += uv->Y();
     }
   }
   int nbNodes = nodeSet.size();
+  if ( !nbNodes )
+    return;
   coord[0] /= nbNodes;
   coord[1] /= nbNodes;
 
   if ( !theSurface.IsNull() ) {
+    ASSERT( theUVMap.find( theNode ) != theUVMap.end() );
     theUVMap[ theNode ]->SetCoord( coord[0], coord[1] );
     gp_Pnt p3d = theSurface->Value( coord[0], coord[1] );
     coord[0] = p3d.X();
@@ -1381,6 +1388,8 @@ void centroidalSmooth(const SMDS_MeshNode*                 theNode,
   while ( elemIt->more() )
   {
     const SMDS_MeshElement* elem = elemIt->next();
+    if ( elem->GetType() != SMDSAbs_Face )
+      continue;
     nbElems++;
 
     gp_XYZ elemCenter(0.,0.,0.);
@@ -1392,6 +1401,7 @@ void centroidalSmooth(const SMDS_MeshNode*                 theNode,
       gp_XYZ aP( aNode->X(), aNode->Y(), aNode->Z() );
       aNodePoints.push_back( aP );
       if ( !theSurface.IsNull() ) { // smooth in 2D
+        ASSERT( theUVMap.find( aNode ) != theUVMap.end() );
         gp_XY* uv = theUVMap[ aNode ];
         aP.SetCoord( uv->X(), uv->Y(), 0. );
       }
@@ -1404,6 +1414,7 @@ void centroidalSmooth(const SMDS_MeshNode*                 theNode,
   }
   aNewXYZ /= totalArea;
   if ( !theSurface.IsNull() ) {
+    ASSERT( theUVMap.find( theNode ) != theUVMap.end() );
     theUVMap[ theNode ]->SetCoord( aNewXYZ.X(), aNewXYZ.Y() );
     aNewXYZ = theSurface->Value( aNewXYZ.X(), aNewXYZ.Y() ).XYZ();
   }
@@ -1435,6 +1446,7 @@ static bool getClosestUV (Extrema_GenExtPS& projector,
   }
   return false;
 }
+
 //=======================================================================
 //function : Smooth
 //purpose  : Smooth theElements during theNbIterations or until a worst
@@ -1515,7 +1527,7 @@ void SMESH_MeshEditor::Smooth (set<const SMDS_MeshElement*> & theElems,
     // compute UV for them
     // ---------------------------------------------------------
     bool checkBoundaryNodes = false;
-    set<const SMDS_MeshNode*> setMovableNodes, checkedNodes;
+    set<const SMDS_MeshNode*> setMovableNodes;
     map< const SMDS_MeshNode*, gp_XY* > uvMap, uvMap2;
     list< gp_XY > listUV; // uvs the 2 maps refer to
     list< const SMDS_MeshElement* > elemsOnFace;
@@ -1528,8 +1540,12 @@ void SMESH_MeshEditor::Smooth (set<const SMDS_MeshElement*> & theElems,
     }
     int nbElemOnFace = 0;
     itElem = theElems.begin();
-    while ( itElem != theElems.end() ) // loop on not yet smoothed elements
+     // loop on not yet smoothed elements: look for elems on a face
+    while ( itElem != theElems.end() )
     {
+      if ( faceSubMesh && nbElemOnFace == faceSubMesh->NbElements() )
+        break; // all elements found
+
       const SMDS_MeshElement* elem = (*itElem);
       if ( !elem || elem->GetType() != SMDSAbs_Face || elem->NbNodes() < 3 ||
           ( faceSubMesh && !faceSubMesh->Contains( elem ))) {
@@ -1540,28 +1556,80 @@ void SMESH_MeshEditor::Smooth (set<const SMDS_MeshElement*> & theElems,
       theElems.erase( itElem++ );
       nbElemOnFace++;
 
-      // loop on elem nodes
+      // get movable nodes of elem
+      const SMDS_MeshNode* node;
+      SMDS_TypeOfPosition posType;
       SMDS_ElemIteratorPtr itN = elem->nodesIterator();
-      while ( itN->more() )
+      while ( itN->more() ) {
+        node = static_cast<const SMDS_MeshNode*>( itN->next() );
+        const SMDS_PositionPtr& pos = node->GetPosition();
+        posType = pos.get() ? pos->GetTypeOfPosition() : SMDS_TOP_3DSPACE;
+        if (posType != SMDS_TOP_EDGE &&
+            posType != SMDS_TOP_VERTEX && 
+            theFixedNodes.find( node ) == theFixedNodes.end())
+        {
+          // check if all faces around the node are on faceSubMesh
+          // because a node on edge may be bound to face
+          SMDS_ElemIteratorPtr eIt = node->GetInverseElementIterator();
+          bool all = true;
+          if ( faceSubMesh ) {
+            while ( eIt->more() && all ) {
+              const SMDS_MeshElement* e = eIt->next();
+              if ( e->GetType() == SMDSAbs_Face )
+                all = faceSubMesh->Contains( e );
+            }
+          }
+          if ( all )
+            setMovableNodes.insert( node );
+          else
+            checkBoundaryNodes = true;
+        }
+        if ( posType == SMDS_TOP_3DSPACE )
+          checkBoundaryNodes = true;
+      }
+
+      if ( surface.IsNull() )
+        continue;
+
+      // get nodes to check UV
+      list< const SMDS_MeshNode* > uvCheckNodes;
+      itN = elem->nodesIterator();
+      while ( itN->more() ) {
+        node = static_cast<const SMDS_MeshNode*>( itN->next() );
+        if ( uvMap.find( node ) == uvMap.end() )
+          uvCheckNodes.push_back( node );
+        // add nodes of elems sharing node
+//         SMDS_ElemIteratorPtr eIt = node->GetInverseElementIterator();
+//         while ( eIt->more() ) {
+//           const SMDS_MeshElement* e = eIt->next();
+//           if ( e != elem && e->GetType() == SMDSAbs_Face ) {
+//             SMDS_ElemIteratorPtr nIt = e->nodesIterator();
+//             while ( nIt->more() ) {
+//               const SMDS_MeshNode* n =
+//                 static_cast<const SMDS_MeshNode*>( nIt->next() );
+//               if ( uvMap.find( n ) == uvMap.end() )
+//                 uvCheckNodes.push_back( n );
+//             }
+//           }
+//         }
+      }
+      // check UV on face
+      list< const SMDS_MeshNode* >::iterator n = uvCheckNodes.begin();
+      for ( ; n != uvCheckNodes.end(); ++n )
       {
-        const SMDS_MeshNode* node =
-          static_cast<const SMDS_MeshNode*>( itN->next() );
-        if ( !checkedNodes.insert( node ).second )
-          continue;
-        // get UV on face
+        node = *n;
         gp_XY uv( 0, 0 );
-        bool project = !surface.IsNull();
+        bool project = true;
         gp_Pnt pNode ( node->X(), node->Y(), node->Z() );
         const SMDS_PositionPtr& pos = node->GetPosition();
-        SMDS_TypeOfPosition posType = SMDS_TOP_3DSPACE;
-        if ( faceSubMesh && pos.get() ) {
-          posType = pos->GetTypeOfPosition();
-          if ( posType == SMDS_TOP_FACE ) {
-            SMDS_FacePosition* fPos = ( SMDS_FacePosition* ) pos.get();
-            uv.SetCoord( fPos->GetUParameter(), fPos->GetVParameter() );
-            gp_Pnt pSurf = surface->Value( uv.X(), uv.Y() );
-            project = pSurf.SquareDistance( pNode ) > fToler2;
-          }
+        posType = pos.get() ? pos->GetTypeOfPosition() : SMDS_TOP_3DSPACE;
+        if (faceSubMesh && posType == SMDS_TOP_FACE )
+        {
+          // check if existing UV is OK
+          SMDS_FacePosition* fPos = ( SMDS_FacePosition* ) pos.get();
+          uv.SetCoord( fPos->GetUParameter(), fPos->GetVParameter() );
+          gp_Pnt pSurf = surface->Value( uv.X(), uv.Y() );
+          project = pSurf.SquareDistance( pNode ) > fToler2;
         }
         if ( project ) {
           if ( !getClosestUV( projector, pNode, uv ))
@@ -1571,44 +1639,15 @@ void SMESH_MeshEditor::Smooth (set<const SMDS_MeshElement*> & theElems,
           if ( isVPeriodic )
             uv.SetY( ElCLib::InPeriod( uv.Y(), v1, v2 ));
         }
-        if ( !surface.IsNull() ) {
-          listUV.push_back( uv );
-          uvMap.insert( make_pair( node, &listUV.back() ));
-        }
-
-        if ( posType == SMDS_TOP_3DSPACE )
-          checkBoundaryNodes = true;
-
-        // movable or not?
-        if (posType != SMDS_TOP_EDGE &&
-            posType != SMDS_TOP_VERTEX && 
-            theFixedNodes.find( node ) == theFixedNodes.end())
-        {
-          // check if all faces around the node are on faceSubMesh
-          SMDS_ElemIteratorPtr eIt = node->GetInverseElementIterator();
-          bool all = true;
-          while ( eIt->more() && all ) {
-            const SMDS_MeshElement* e = eIt->next();
-            if ( e->GetType() == SMDSAbs_Face )
-              all = faceSubMesh->Contains( e );
-          }
-          if ( all )
-            setMovableNodes.insert( node );
-          else
-            checkBoundaryNodes = true;
-        }
-
-      } // loop on elem nodes
-
-      if ( nbElemOnFace == faceSubMesh->NbElements() )
-        break; // all elements found
-
+        listUV.push_back( uv );
+        uvMap.insert( make_pair( node, &listUV.back() ));
+      }
     } // loop on not yet smoothed elements
 
-    if ( !faceSubMesh || elemsOnFace.size() != nbElemOnFace )
+    if ( !faceSubMesh || nbElemOnFace != faceSubMesh->NbElements() )
       checkBoundaryNodes = true;
 
-    // fix nodes on boundary of elemsOnFace
+    // fix nodes on mesh boundary
 
     if ( checkBoundaryNodes )
     {
@@ -1757,13 +1796,18 @@ void SMESH_MeshEditor::Smooth (set<const SMDS_MeshElement*> & theElems,
       } // loop on edge of a face
     } // if ( !face.IsNull() )
 
+    if ( setMovableNodes.empty() ) {
+      MESSAGE( "Face id : " << *fId << " - NO SMOOTHING: no nodes to move!!!");
+      continue; // goto next face
+    }
+
     // -------------
     // SMOOTHING //
     // -------------
 
-    set<const SMDS_MeshNode*>::iterator nodeToMove;
     int it = -1;
     double maxRatio = -1., maxDisplacement = -1.;
+    set<const SMDS_MeshNode*>::iterator nodeToMove;
     for ( it = 0; it < theNbIterations; it++ )
     {
       maxDisplacement = 0.;
@@ -1794,9 +1838,10 @@ void SMESH_MeshEditor::Smooth (set<const SMDS_MeshElement*> & theElems,
 
       // check elements quality
       maxRatio  = 0;
-      for ( itElem = theElems.begin(); itElem != theElems.end(); itElem++ )
+      list< const SMDS_MeshElement* >::iterator elemIt = elemsOnFace.begin();
+      for ( ; elemIt != elemsOnFace.end(); ++elemIt )
       {
-        const SMDS_MeshElement* elem = (*itElem);
+        const SMDS_MeshElement* elem = (*elemIt);
         if ( !elem || elem->GetType() != SMDSAbs_Face )
           continue;
         SMESH::Controls::TSequenceOfXYZ aPoints;
@@ -2730,8 +2775,12 @@ void SMESH_MeshEditor::Transform (set<const SMDS_MeshElement*> & theElems,
       const SMDS_MeshNode * newNode = node;
       if ( theCopy )
         newNode = aMesh->AddNode( coord[0], coord[1], coord[2] );
-      else
+      else {
         aMesh->MoveNode( node, coord[0], coord[1], coord[2] );
+        // node position on shape becomes invalid
+        const_cast< SMDS_MeshNode* > ( node )->SetPosition
+          ( SMDS_SpacePosition::originSpacePosition() );
+      }
       nodeMap.insert( TNodeNodeMap::value_type( node, newNode ));
 
       // keep inverse elements

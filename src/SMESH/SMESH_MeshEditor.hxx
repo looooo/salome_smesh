@@ -98,13 +98,16 @@ class SMESH_MeshEditor {
                std::set<const SMDS_MeshNode*> &    theFixedNodes,
                const SmoothMethod                  theSmoothMethod,
                const int                           theNbIterations,
-               double                              theTgtAspectRatio = 1.0);
+               double                              theTgtAspectRatio = 1.0,
+               const bool                          the2D = true);
   // Smooth theElements using theSmoothMethod during theNbIterations
   // or until a worst element has aspect ratio <= theTgtAspectRatio.
   // Aspect Ratio varies in range [1.0, inf].
   // If theElements is empty, the whole mesh is smoothed.
   // theFixedNodes contains additionally fixed nodes. Nodes built
   // on edges and boundary nodes are always fixed.
+  // If the2D, smoothing is performed using UV parameters of nodes
+  // on geometrical faces
 
 
   void RotationSweep (std::set<const SMDS_MeshElement*> & theElements,

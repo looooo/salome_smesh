@@ -52,6 +52,7 @@
 #include <gp_Trsf.hxx>
 #include <gp_Lin.hxx>
 #include <gp_XYZ.hxx>
+#include <gp_XY.hxx>
 #include <gp.hxx>
 #include <gp_Pln.hxx>
 #include <BRep_Tool.hxx>
@@ -1461,7 +1462,8 @@ void SMESH_MeshEditor::Smooth (set<const SMDS_MeshElement*> & theElems,
                                set<const SMDS_MeshNode*> &    theFixedNodes,
                                const SmoothMethod             theSmoothMethod,
                                const int                      theNbIterations,
-                               double                         theTgtAspectRatio)
+                               double                         theTgtAspectRatio,
+                               const bool                     the2D)
 {
   MESSAGE((theSmoothMethod==LAPLACIAN ? "LAPLACIAN" : "CENTROIDAL") << "--::Smooth()");
 
@@ -1481,17 +1483,18 @@ void SMESH_MeshEditor::Smooth (set<const SMDS_MeshElement*> & theElems,
   // get all face ids theElems are on
   set< int > faceIdSet;
   set< const SMDS_MeshElement* >::iterator itElem;
-  for ( itElem = theElems.begin(); itElem != theElems.end(); itElem++ ) {
-    int fId = FindShape( *itElem );
-    // check that corresponding submesh exists and a shape is face
-    if (fId &&
-        faceIdSet.find( fId ) == faceIdSet.end() &&
-        aMesh->MeshElements( fId )) {
-      TopoDS_Shape F = aMesh->IndexToShape( fId );
-      if ( !F.IsNull() && F.ShapeType() == TopAbs_FACE )
-        faceIdSet.insert( fId );
+  if ( the2D )
+    for ( itElem = theElems.begin(); itElem != theElems.end(); itElem++ ) {
+      int fId = FindShape( *itElem );
+      // check that corresponding submesh exists and a shape is face
+      if (fId &&
+          faceIdSet.find( fId ) == faceIdSet.end() &&
+          aMesh->MeshElements( fId )) {
+        TopoDS_Shape F = aMesh->IndexToShape( fId );
+        if ( !F.IsNull() && F.ShapeType() == TopAbs_FACE )
+          faceIdSet.insert( fId );
+      }
     }
-  }
   faceIdSet.insert( 0 ); // to smooth elements that are not on any TopoDS_Face
 
   // ===============================================
@@ -1505,7 +1508,7 @@ void SMESH_MeshEditor::Smooth (set<const SMDS_MeshElement*> & theElems,
     Handle(Geom_Surface) surface;
     SMESHDS_SubMesh* faceSubMesh = 0;
     TopoDS_Face face;
-    double fToler2 = 0, vPeriod = 0., uPeriod = 0.;
+    double fToler2 = 0, vPeriod = 0., uPeriod = 0., f,l;
     double u1 = 0, u2 = 0, v1 = 0, v2 = 0;
     bool isUPeriodic = false, isVPeriodic = false;
     if ( *fId ) {
@@ -1513,7 +1516,7 @@ void SMESH_MeshEditor::Smooth (set<const SMDS_MeshElement*> & theElems,
       surface = BRep_Tool::Surface( face );
       faceSubMesh = aMesh->MeshElements( *fId );
       fToler2 = BRep_Tool::Tolerance( face );
-      fToler2 *= fToler2;
+      fToler2 *= fToler2 * 10.;
       isUPeriodic = surface->IsUPeriodic();
       if ( isUPeriodic )
         vPeriod = surface->UPeriod();
@@ -1529,7 +1532,7 @@ void SMESH_MeshEditor::Smooth (set<const SMDS_MeshElement*> & theElems,
     bool checkBoundaryNodes = false;
     set<const SMDS_MeshNode*> setMovableNodes;
     map< const SMDS_MeshNode*, gp_XY* > uvMap, uvMap2;
-    list< gp_XY > listUV; // uvs the 2 maps refer to
+    list< gp_XY > listUV; // uvs the 2 uvMaps refer to
     list< const SMDS_MeshElement* > elemsOnFace;
 
     Extrema_GenExtPS projector;
@@ -1619,26 +1622,60 @@ void SMESH_MeshEditor::Smooth (set<const SMDS_MeshElement*> & theElems,
       {
         node = *n;
         gp_XY uv( 0, 0 );
-        bool project = true;
-        gp_Pnt pNode ( node->X(), node->Y(), node->Z() );
         const SMDS_PositionPtr& pos = node->GetPosition();
         posType = pos.get() ? pos->GetTypeOfPosition() : SMDS_TOP_3DSPACE;
-        if (faceSubMesh && posType == SMDS_TOP_FACE )
-        {
-          // check if existing UV is OK
+        // get existing UV
+        switch ( posType ) {
+        case SMDS_TOP_FACE: {
           SMDS_FacePosition* fPos = ( SMDS_FacePosition* ) pos.get();
           uv.SetCoord( fPos->GetUParameter(), fPos->GetVParameter() );
-          gp_Pnt pSurf = surface->Value( uv.X(), uv.Y() );
-          project = pSurf.SquareDistance( pNode ) > fToler2;
+          break;
         }
-        if ( project ) {
-          if ( !getClosestUV( projector, pNode, uv ))
+        case SMDS_TOP_EDGE: {
+          TopoDS_Shape S = aMesh->IndexToShape( pos->GetShapeId() );
+          Handle(Geom2d_Curve) pcurve;
+          if ( !S.IsNull() && S.ShapeType() == TopAbs_EDGE )
+            pcurve = BRep_Tool::CurveOnSurface( TopoDS::Edge( S ), face, f,l );
+          if ( !pcurve.IsNull() ) {
+            double u = (( SMDS_EdgePosition* ) pos.get() )->GetUParameter();
+            uv = pcurve->Value( u ).XY();
+          }
+          break;
+        }
+        case SMDS_TOP_VERTEX: {
+          TopoDS_Shape S = aMesh->IndexToShape( pos->GetShapeId() );
+          if ( !S.IsNull() && S.ShapeType() == TopAbs_VERTEX )
+            uv = BRep_Tool::Parameters( TopoDS::Vertex( S ), face ).XY();
+          break;
+        }
+        default:;
+        }
+        // check existing UV
+        bool project = true;
+        gp_Pnt pNode ( node->X(), node->Y(), node->Z() );
+        double dist1 = DBL_MAX, dist2 = 0;
+        if ( posType != SMDS_TOP_3DSPACE ) {
+          dist1 = pNode.SquareDistance( surface->Value( uv.X(), uv.Y() ));
+          project = dist1 > fToler2;
+        }
+        if ( project ) { // compute new UV
+          gp_XY newUV;
+          if ( !getClosestUV( projector, pNode, newUV )) {
             MESSAGE("Node Projection Failed " << node);
-          if ( isUPeriodic )
-            uv.SetX( ElCLib::InPeriod( uv.X(), u1, u2 ));
-          if ( isVPeriodic )
-            uv.SetY( ElCLib::InPeriod( uv.Y(), v1, v2 ));
+          }
+          else {
+            if ( isUPeriodic )
+              newUV.SetX( ElCLib::InPeriod( newUV.X(), u1, u2 ));
+            if ( isVPeriodic )
+              newUV.SetY( ElCLib::InPeriod( newUV.Y(), v1, v2 ));
+            // check new UV
+            if ( posType != SMDS_TOP_3DSPACE )
+              dist2 = pNode.SquareDistance( surface->Value( newUV.X(), newUV.Y() ));
+            if ( dist2 < dist1 )
+              uv = newUV;
+          }
         }
+        // store UV in the map
         listUV.push_back( uv );
         uvMap.insert( make_pair( node, &listUV.back() ));
       }

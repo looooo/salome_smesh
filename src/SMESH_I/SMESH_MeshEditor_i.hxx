@@ -81,13 +81,14 @@ class SMESH_MeshEditor_i: public POA_SMESH::SMESH_MeshEditor
                         const SMESH::long_array &              IDsOfFixedNodes,
                         CORBA::Long                            MaxNbOfIterations,
                         CORBA::Double                          MaxAspectRatio,
-                        SMESH::SMESH_MeshEditor::Smooth_Method Method);
+                        SMESH::SMESH_MeshEditor::Smooth_Method Method,
+                        CORBA::Boolean                         IsParametric);
   CORBA::Boolean SmoothObject(SMESH::SMESH_IDSource_ptr              theObject,
 			      const SMESH::long_array &              IDsOfFixedNodes,
 			      CORBA::Long                            MaxNbOfIterations,
 			      CORBA::Double                          MaxAspectRatio,
-			      SMESH::SMESH_MeshEditor::Smooth_Method Method);
-
+			      SMESH::SMESH_MeshEditor::Smooth_Method Method,
+                              CORBA::Boolean                         IsParametric);
 
   void RenumberNodes();
   void RenumberElements();

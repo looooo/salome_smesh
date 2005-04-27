@@ -541,13 +541,15 @@ module SMESH
                    in long_array    IDsOfFixedNodes,
                    in long          MaxNbOfIterations,
                    in double        MaxAspectRatio,
-                   in Smooth_Method Method);
+                   in Smooth_Method Method,
+                   in boolean       IsParametric);
 
     boolean SmoothObject(in SMESH_IDSource  theObject,
 			 in long_array      IDsOfFixedNodes,
 			 in long            MaxNbOfIterations,
 			 in double          MaxAspectRatio,
-			 in Smooth_Method   Method);
+			 in Smooth_Method   Method,
+                         in boolean         IsParametric);
 
     void RenumberNodes();
 

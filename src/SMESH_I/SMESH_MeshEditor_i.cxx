@@ -625,7 +625,8 @@ CORBA::Boolean
                              const SMESH::long_array &              IDsOfFixedNodes,
                              CORBA::Long                            MaxNbOfIterations,
                              CORBA::Double                          MaxAspectRatio,
-                             SMESH::SMESH_MeshEditor::Smooth_Method Method)
+                             SMESH::SMESH_MeshEditor::Smooth_Method Method,
+                             CORBA::Boolean                         IsParametric)
 {
   SMESHDS_Mesh* aMesh = GetMeshDS();
 
@@ -651,7 +652,8 @@ CORBA::Boolean
     method = ::SMESH_MeshEditor::CENTROIDAL;
 
   ::SMESH_MeshEditor anEditor( _myMesh );
-  anEditor.Smooth( elements, fixedNodes, method, MaxNbOfIterations, MaxAspectRatio );
+  anEditor.Smooth(elements, fixedNodes, method,
+                  MaxNbOfIterations, MaxAspectRatio, IsParametric );
 
   // Update Python script
   TCollection_AsciiString str ("isDone = mesh_editor.Smooth(");
@@ -661,9 +663,11 @@ CORBA::Boolean
   str += ", ";
   str += (Standard_Real) MaxAspectRatio;
   if ( method == ::SMESH_MeshEditor::CENTROIDAL )
-    str += ", SMESH.SMESH_MeshEditor.CENTROIDAL_SMOOTH )";
+    str += ", SMESH.SMESH_MeshEditor.CENTROIDAL_SMOOTH, ";
   else
-    str += ", SMESH.SMESH_MeshEditor.LAPLACIAN_SMOOTH )";
+    str += ", SMESH.SMESH_MeshEditor.LAPLACIAN_SMOOTH, ";
+  str += IsParametric;
+  str += " )";
   SMESH_Gen_i::AddToCurrentPyScript( str );
 #ifdef _DEBUG_
   SMESH_Gen_i::AddToCurrentPyScript( "print \"Smooth: \", isDone" );
@@ -683,11 +687,12 @@ CORBA::Boolean
 				   const SMESH::long_array &              IDsOfFixedNodes,
 				   CORBA::Long                            MaxNbOfIterations,
 				   CORBA::Double                          MaxAspectRatio,
-				   SMESH::SMESH_MeshEditor::Smooth_Method Method)
+				   SMESH::SMESH_MeshEditor::Smooth_Method Method,
+                                   CORBA::Boolean                         IsParametric)
 {
   SMESH::long_array_var anElementsId = theObject->GetIDs();
-  CORBA::Boolean isDone = Smooth
-    (anElementsId, IDsOfFixedNodes, MaxNbOfIterations, MaxAspectRatio, Method);
+  CORBA::Boolean isDone = Smooth (anElementsId, IDsOfFixedNodes, MaxNbOfIterations,
+                                  MaxAspectRatio, Method, IsParametric);
 
   // Clear python line(s), created by Smooth()
   SMESH_Gen_i* aSMESHGen = SMESH_Gen_i::GetSMESHGen();
@@ -703,10 +708,12 @@ CORBA::Boolean
   str += (Standard_Integer) MaxNbOfIterations;
   str += ", ";
   str += (Standard_Real) MaxAspectRatio;
-  if ( Method == SMESH::SMESH_MeshEditor::CENTROIDAL_SMOOTH )
-    str += ", SMESH.SMESH_MeshEditor.CENTROIDAL_SMOOTH )";
+  if ( Method == ::SMESH_MeshEditor::CENTROIDAL )
+    str += ", SMESH.SMESH_MeshEditor.CENTROIDAL_SMOOTH, ";
   else
-    str += ", SMESH.SMESH_MeshEditor.LAPLACIAN_SMOOTH )";
+    str += ", SMESH.SMESH_MeshEditor.LAPLACIAN_SMOOTH, ";
+  str += IsParametric;
+  str += " )";
   SMESH_Gen_i::AddToCurrentPyScript( str );
 #ifdef _DEBUG_
   SMESH_Gen_i::AddToCurrentPyScript( "print \"SmoothObject: \", isDone" );

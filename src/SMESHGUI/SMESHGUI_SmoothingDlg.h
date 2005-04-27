@@ -86,26 +86,27 @@ private:
     SMESH_Actor*                  myActor;
     Handle(SMESH_LogicalFilter)   myMeshOrSubMeshOrGroupFilter;
 
-    QButtonGroup* GroupConstructors;
-    QRadioButton* Constructor1;
-    QGroupBox* GroupButtons;
-    QPushButton* buttonOk;
-    QPushButton* buttonCancel;
-    QPushButton* buttonApply;
-    QGroupBox* GroupArguments;
-    QLabel* TextLabelElements;
-    QPushButton* SelectElementsButton;
-    QLineEdit* LineEditElements;
-    QCheckBox* CheckBoxMesh;
-    QLabel* TextLabelNodes;
-    QPushButton* SelectNodesButton;
-    QLineEdit* LineEditNodes;
-    QLabel* TextLabelMethod;
-    QComboBox* ComboBoxMethod;
-    QLabel* TextLabelLimit;
-    QSpinBox* SpinBox_IterationLimit;
-    QLabel* TextLabelAspectRatio;
+    QButtonGroup    * GroupConstructors;
+    QRadioButton    * Constructor1;
+    QGroupBox       * GroupButtons;
+    QPushButton     * buttonOk;
+    QPushButton     * buttonCancel;
+    QPushButton     * buttonApply;
+    QGroupBox       * GroupArguments;
+    QLabel          * TextLabelElements;
+    QPushButton     * SelectElementsButton;
+    QLineEdit       * LineEditElements;
+    QCheckBox       * CheckBoxMesh;
+    QLabel          * TextLabelNodes;
+    QPushButton     * SelectNodesButton;
+    QLineEdit       * LineEditNodes;
+    QLabel          * TextLabelMethod;
+    QComboBox       * ComboBoxMethod;
+    QLabel          * TextLabelLimit;
+    QSpinBox        * SpinBox_IterationLimit;
+    QLabel          * TextLabelAspectRatio;
     SMESHGUI_SpinBox* SpinBox_AspectRatio;
+    QCheckBox       * CheckBoxParametric;
     
 private slots:
 

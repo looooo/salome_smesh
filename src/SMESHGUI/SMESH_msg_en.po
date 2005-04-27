@@ -1468,6 +1468,9 @@ msgstr "Laplacian"
 msgid "SMESHGUI_SmoothingDlg::CENTROIDAL"
 msgstr "Centroidal"
 
+msgid "SMESHGUI_SmoothingDlg::IS_PARAMETRIC"
+msgstr "in parametric space"
+
 #----------------------------------------------------
 
 msgid "SMESHGUI_ExtrusionDlg::EXTRUSION_ALONG_LINE"

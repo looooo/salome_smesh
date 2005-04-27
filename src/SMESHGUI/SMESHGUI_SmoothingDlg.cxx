@@ -205,22 +205,31 @@ SMESHGUI_SmoothingDlg::SMESHGUI_SmoothingDlg( QWidget* parent, const char* name,
   SpinBox_AspectRatio = new SMESHGUI_SpinBox(GroupArguments, "SpinBox_AspectRatio");
   GroupArgumentsLayout->addWidget( SpinBox_AspectRatio, 5, 2 );
 
+  // Check box "Is Parametric"
+  CheckBoxParametric = new QCheckBox( GroupArguments, "CheckBoxParametric" );
+  CheckBoxParametric->setText( tr( "IS_PARAMETRIC" ) );
+  GroupArgumentsLayout->addMultiCellWidget( CheckBoxParametric, 6, 6, 0, 2 );
 
   SMESHGUI_SmoothingDlgLayout->addWidget( GroupArguments, 1, 0 );
   
   /* Initialisations */
   ComboBoxMethod->insertItem(tr("LAPLACIAN"));
   ComboBoxMethod->insertItem(tr("CENTROIDAL"));
+  ComboBoxMethod->setCurrentItem(0);
+
+  CheckBoxParametric->setChecked( TRUE );
 
   QIntValidator* anIntValidator = new QIntValidator(SpinBox_IterationLimit);
   SpinBox_IterationLimit->setValidator(anIntValidator);
   SpinBox_IterationLimit->setRange( 1, 999999 );
+  SpinBox_IterationLimit->setValue(20);
   SpinBox_AspectRatio->RangeStepAndValidator( 0.0, +999999.999, 0.1, 3 );
+  SpinBox_AspectRatio->SetValue(1.1);
 
   GroupArguments->show();
   myConstructorId = 0 ;
   Constructor1->setChecked( TRUE );
-  mySelection = Sel;  
+  mySelection = Sel;
 
   mySMESHGUI  = SMESHGUI::GetSMESHGUI() ;
   mySMESHGUI->SetActiveDialogBox( (QDialog*)this ) ;
@@ -281,13 +290,14 @@ void SMESHGUI_SmoothingDlg::Init()
 {
   myBusy = false;  
           
-  ComboBoxMethod->setCurrentItem(0);
+//   ComboBoxMethod->setCurrentItem(0);
   
-  SpinBox_IterationLimit->setValue(20);
-  SpinBox_AspectRatio->SetValue(1.1);
+//   SpinBox_IterationLimit->setValue(20);
+//   SpinBox_AspectRatio->SetValue(1.1);
   
   myEditCurrentArgument = LineEditElements;
   LineEditElements->setFocus();
+  LineEditNodes->clear();
   myElementsId = "";
   myNbOkElements = 0 ;
   myNbOkNodes = 0 ;
@@ -337,7 +347,7 @@ void SMESHGUI_SmoothingDlg::ClickOnApply()
 	    aNodesId[i] = aListNodesId[i].toInt();
 	}
       else
-	anElementsId->length(0);
+	aNodesId->length(0);
       
       long anIterationLimit = (long)SpinBox_IterationLimit->value();
       double aMaxAspectRatio = SpinBox_AspectRatio->GetValue();
@@ -351,7 +361,9 @@ void SMESHGUI_SmoothingDlg::ClickOnApply()
 	{
 	  SMESH::SMESH_MeshEditor_var aMeshEditor = myMesh->GetMeshEditor();
 	  QApplication::setOverrideCursor(Qt::waitCursor);
-	  aResult = aMeshEditor->Smooth(anElementsId.inout(), aNodesId.inout(), anIterationLimit, aMaxAspectRatio, aMethod);
+	  aResult = aMeshEditor->Smooth(anElementsId.inout(), aNodesId.inout(),
+                                        anIterationLimit, aMaxAspectRatio, aMethod,
+                                        CheckBoxParametric->isChecked());
 	  QApplication::restoreOverrideCursor();
 	}
       catch( ... )

@@ -803,11 +803,11 @@ msgstr "Pyramids"
 
 #Polygones :
 msgid "SMESH_MESHINFO_POLYGONES"
-msgstr "Polygones"
+msgstr "Polygons"
 
 #Polyedres :
 msgid "SMESH_MESHINFO_POLYEDRES"
-msgstr "Polyedres"
+msgstr "Polyhedrons"
 
 #Prisms :
 msgid "SMESH_MESHINFO_PRISMS"

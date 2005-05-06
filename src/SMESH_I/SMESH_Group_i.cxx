@@ -122,7 +122,7 @@ void SMESH_GroupBase_i::SetName( const char* theName )
   // Update Python script
   TCollection_AsciiString aStr, aStrName ((char*)theName);
   SMESH_Gen_i::AddObject(aStr, _this()) += ".SetName(\"";
-  aStr += aStrName + ")";
+  aStr += aStrName + "\")";
 
   SMESH_Gen_i::AddToCurrentPyScript(aStr);
 

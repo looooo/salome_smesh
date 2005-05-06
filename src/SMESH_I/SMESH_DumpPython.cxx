@@ -292,17 +292,13 @@ Engines::TMPFile* SMESH_Gen_i::DumpPython (CORBA::Object_ptr theStudy,
   SALOMEDS::ChildIterator_var Itr = aStudy->NewChildIterator(aSO);
   for (Itr->InitEx(true); Itr->More(); Itr->Next()) {
     SALOMEDS::SObject_var aValue = Itr->Value();
-
-    TCollection_AsciiString aName (aValue->GetName());
-    TCollection_AsciiString aGUIName (aName);
-    if (aName.Length() > 0) {
-      aMapNames.Bind(TCollection_AsciiString(aValue->GetID()), aGUIName);
-      int p, p2 = 1, e = aName.Length();
-      while ((p = aName.FirstLocationNotInSet(s, p2, e))) {
-        aName.SetValue(p, '_');
-        p2 = p;
-      }
-      aMap.Bind(TCollection_AsciiString(aValue->GetID()), aName);
+    CORBA::String_var anID = aValue->GetID();
+    CORBA::String_var aName = aValue->GetName();
+    TCollection_AsciiString aGUIName ( (char*) aName.in() );
+    TCollection_AsciiString anEnrty ( (char*) anID.in() );
+    if (aGUIName.Length() > 0) {
+      aMapNames.Bind( anEnrty, aGUIName );
+      aMap.Bind( anEnrty, aGUIName );
     }
   }
 
@@ -524,7 +520,8 @@ TCollection_AsciiString SMESH_Gen_i::DumpPython_impl
   TColStd_SequenceOfAsciiString seqRemoved;
   Resource_DataMapOfAsciiStringAsciiString mapRemoved;
   Standard_Integer objectCounter = 0, aStart = 1, aScriptLength = aScript.Length();
-  TCollection_AsciiString anUpdatedScript, anEntry, aName, aBaseName("smeshObj_");
+  TCollection_AsciiString anUpdatedScript, anEntry, aName, aBaseName("smeshObj_"),
+    allowedChars ("qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM0987654321_");
 
   // Collect names of GEOM objects to exclude same names for SMESH objects
   GEOM::string_array_var aGeomNames = geom->GetAllDumpNames();
@@ -545,18 +542,31 @@ TCollection_AsciiString SMESH_Gen_i::DumpPython_impl
       if (theObjectNames.IsBound(anEntry)) {
         // The Object is in Study
         aName = theObjectNames.Find(anEntry);
-        if ( aName.IsIntegerValue() ) // aName must not start with a digit
+        // check validity of aName
+        bool isValidName = true;
+        if ( aName.IsIntegerValue() ) { // aName must not start with a digit
           aName.Insert( 1, 'a' );
+          isValidName = false;
+        }
+        int p, p2=1; // replace not allowed chars
+        while ((p = aName.FirstLocationNotInSet(allowedChars, p2, aName.Length()))) {
+          aName.SetValue(p, '_');
+          p2=p;
+          isValidName = false;
+        }
         if (theObjectNames.IsBound(aName) && anEntry != theObjectNames(aName)) {
-          // diff objects have same name - make a new name
+          // diff objects have same name - make a new name by appending a digit
           TCollection_AsciiString aName2;
           Standard_Integer i = 0;
           do {
             aName2 = aName + "_" + ++i;
           } while (theObjectNames.IsBound(aName2) && anEntry != theObjectNames(aName2));
           aName = aName2;
-          theObjectNames(anEntry) = aName;
+          isValidName = false;
         }
+        if ( !isValidName )
+          theObjectNames(anEntry) = aName;
+
       } else {
         // Removed Object
         do {

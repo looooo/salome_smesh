@@ -7,15 +7,22 @@
 #include "SMESH_PythonDump.hxx"
 #include "SMESH_Gen_i.hxx"
 #include "SMESH_Filter_i.hxx"
+#include "SALOMEDSImpl_Study.hxx"
 
 #include <TColStd_HSequenceOfInteger.hxx>
 #include <TCollection_AsciiString.hxx>
+
 
 #ifdef _DEBUG_
 static int MYDEBUG = 0;
 #else
 static int MYDEBUG = 0;
 #endif
+
+static TCollection_AsciiString NotPublishedObjectName()
+{
+  return "__NOT__Published__Object__";
+}
 
 namespace SMESH
 {
@@ -130,16 +137,20 @@ namespace SMESH
   TPythonDump::
   operator<<(CORBA::Object_ptr theArg)
   {
-    CORBA::String_var aString("None");
+    TCollection_AsciiString aString("None");
     SMESH_Gen_i* aSMESHGen = SMESH_Gen_i::GetSMESHGen();
     SALOMEDS::Study_ptr aStudy = aSMESHGen->GetCurrentStudy();
     SALOMEDS::SObject_var aSObject = SMESH_Gen_i::ObjectToSObject(aStudy,theArg);
     if(!aSObject->_is_nil()){
       aString = aSObject->GetID();
     }else if(!CORBA::is_nil(theArg)){
-      aString = SMESH_Gen_i::GetORB()->object_to_string(theArg);
+      aString = "smeshObj_";
+      if ( aSMESHGen->CanPublishInStudy( theArg )) // not published SMESH object
+        aString += (int) theArg;
+      else
+        aString = NotPublishedObjectName();
     }
-    myStream<<aString.in();
+    myStream<<aString.ToCString();
     return *this;
   }
 
@@ -305,9 +316,9 @@ Engines::TMPFile* SMESH_Gen_i::DumpPython (CORBA::Object_ptr theStudy,
   TCollection_AsciiString aSavedTrace (oldValue);
 
   // Add trace of API methods calls and replace study entries by names
-  bool aValidScript;
-  TCollection_AsciiString aScript = DumpPython_impl
-    (aStudy->StudyId(), aMap, aMapNames, isPublished, aValidScript, aSavedTrace);
+  TCollection_AsciiString aScript =
+    SALOMEDSImpl_Study::GetDumpStudyComment("SMESH") + "\n\n" +
+      DumpPython_impl(aStudy->StudyId(), aMap, aMapNames, isPublished, isValidScript, aSavedTrace);
 
   int aLen = aScript.Length(); 
   unsigned char* aBuffer = new unsigned char[aLen+1];
@@ -315,7 +326,9 @@ Engines::TMPFile* SMESH_Gen_i::DumpPython (CORBA::Object_ptr theStudy,
 
   CORBA::Octet* anOctetBuf =  (CORBA::Octet*)aBuffer;
   Engines::TMPFile_var aStreamFile = new Engines::TMPFile(aLen+1, aLen+1, anOctetBuf, 1); 
-  isValidScript = aValidScript;
+
+  bool hasNotPublishedObjects = aScript.Location( NotPublishedObjectName(), 1, aLen);
+  isValidScript = isValidScript && !hasNotPublishedObjects;
 
   return aStreamFile._retn(); 
 }
@@ -368,16 +381,20 @@ void SMESH_Gen_i::AddToCurrentPyScript (const TCollection_AsciiString& theString
 TCollection_AsciiString& SMESH_Gen_i::AddObject(TCollection_AsciiString& theStr,
                                                 CORBA::Object_ptr        theObject)
 {
+  TCollection_AsciiString aString("None");
   SMESH_Gen_i* aSMESHGen = SMESH_Gen_i::GetSMESHGen();
-  SALOMEDS::SObject_var aSO =
+  SALOMEDS::SObject_var aSObject =
     aSMESHGen->ObjectToSObject(aSMESHGen->GetCurrentStudy(), theObject);
-  if ( !aSO->_is_nil() )
-    theStr += aSO->GetID();
-  else if ( !CORBA::is_nil( theObject ) )
-    theStr += GetORB()->object_to_string( theObject );
-  else
-    theStr += "None";
-
+  if ( !aSObject->_is_nil() ) {
+    aString = aSObject->GetID();
+  } else if ( !CORBA::is_nil( theObject )) {
+    aString = "smeshObj_";
+    if ( aSMESHGen->CanPublishInStudy( theObject )) // not published SMESH object
+      aString += (int) theObject;
+    else
+      aString = NotPublishedObjectName();
+  }
+  theStr += aString;
   return theStr;
 }
 
@@ -474,19 +491,7 @@ TCollection_AsciiString SMESH_Gen_i::DumpPython_impl
                          const TCollection_AsciiString& theSavedTrace)
 {
   TCollection_AsciiString aScript;
-  aScript += "import salome\n";
-  aScript += "import geompy\n\n";
-  aScript += "import SMESH\n";
-  aScript += "import StdMeshers\n\n";
-  aScript += "#import GEOM module\n";
-  aScript += "import string\n";
-  aScript += "import os\n";
-  aScript += "import sys\n";
-  aScript += "import re\n";
-  aScript += "sys.path.append( os.path.dirname(__file__) )\n";
-  aScript += "exec(\"from \"+re.sub(\"SMESH$\",\"GEOM\",__name__)+\" import *\")\n\n";
-  
-  aScript += "def RebuildData(theStudy):";
+  aScript = "def RebuildData(theStudy):";
   aScript += "\n\tsmesh = salome.lcc.FindOrLoadComponent(\"FactoryServer\", \"SMESH\")";
   aScript += "\n\taFilterManager = smesh.CreateFilterManager()";
   if ( isPublished )
@@ -529,6 +534,7 @@ TCollection_AsciiString SMESH_Gen_i::DumpPython_impl
     theObjectNames.Bind(aName, "1");
   }
 
+  bool importGeom = false;
   for (Standard_Integer i = 1; i <= aLen; i += 2) {
     anUpdatedScript += aScript.SubString(aStart, aSeq->Value(i) - 1);
     anEntry = aScript.SubString(aSeq->Value(i), aSeq->Value(i + 1));
@@ -539,6 +545,8 @@ TCollection_AsciiString SMESH_Gen_i::DumpPython_impl
       if (theObjectNames.IsBound(anEntry)) {
         // The Object is in Study
         aName = theObjectNames.Find(anEntry);
+        if ( aName.IsIntegerValue() ) // aName must not start with a digit
+          aName.Insert( 1, 'a' );
         if (theObjectNames.IsBound(aName) && anEntry != theObjectNames(aName)) {
           // diff objects have same name - make a new name
           TCollection_AsciiString aName2;
@@ -560,10 +568,23 @@ TCollection_AsciiString SMESH_Gen_i::DumpPython_impl
       }
       theObjectNames.Bind(aName, anEntry); // to detect same name of diff objects
     }
-
+    else
+    {
+      importGeom = true;
+    }
     anUpdatedScript += aName;
     aStart = aSeq->Value(i + 1) + 1;
   }
+
+  // set initial part of aSript
+  TCollection_AsciiString initPart = "import salome, SMESH, StdMeshers\n\n";
+  if ( importGeom )
+  {
+    initPart += ("import string, os, sys, re\n"
+                 "sys.path.insert( 0, os.path.dirname(__file__) )\n"
+                 "exec(\"from \"+re.sub(\"SMESH$\",\"GEOM\",__name__)+\" import *\")\n\n");
+  }
+  anUpdatedScript.Insert ( 1, initPart );
 
   // add final part of aScript
   if (aSeq->Value(aLen) < aScriptLength)

@@ -63,7 +63,7 @@ void DriverMED_W_SMESHDS_Mesh::SetFile(const std::string& theFileName,
 
 void DriverMED_W_SMESHDS_Mesh::SetFile(const std::string& theFileName)
 {
-  return SetFile(theFileName,MED::eV2_1);
+  return SetFile(theFileName,MED::eV2_2);
 }
 
 void DriverMED_W_SMESHDS_Mesh::SetMeshName(const std::string& theMeshName)

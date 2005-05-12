@@ -361,9 +361,12 @@ void SMESHGUI_SmoothingDlg::ClickOnApply()
 	{
 	  SMESH::SMESH_MeshEditor_var aMeshEditor = myMesh->GetMeshEditor();
 	  QApplication::setOverrideCursor(Qt::waitCursor);
-	  aResult = aMeshEditor->Smooth(anElementsId.inout(), aNodesId.inout(),
-                                        anIterationLimit, aMaxAspectRatio, aMethod,
-                                        CheckBoxParametric->isChecked());
+          if ( CheckBoxParametric->isChecked() )
+            aResult = aMeshEditor->SmoothParametric(anElementsId.inout(), aNodesId.inout(),
+                                                    anIterationLimit, aMaxAspectRatio, aMethod);
+          else
+            aResult = aMeshEditor->Smooth(anElementsId.inout(), aNodesId.inout(),
+                                          anIterationLimit, aMaxAspectRatio, aMethod);
 	  QApplication::restoreOverrideCursor();
 	}
       catch( ... )

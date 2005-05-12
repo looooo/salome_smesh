@@ -286,7 +286,21 @@ namespace{
 	    fd->exec();
 	    aFilename = fd->selectedFile();
 	    aFormat = aFilterMap[fd->selectedFilter()];
+	    
 	    delete fd;
+	    if( !aFilename.isEmpty()
+		&& (aMesh->NbPolygons()>1 or aMesh->NbPolyhedrons()>1) 
+		&& aFormat==SMESH::MED_V2_1){
+	      int aRet = QAD_MessageBox::warn2(QAD_Application::getDesktop(),
+					       QObject::tr("SMESH_WRN_WARNING"),
+					       QObject::tr("SMESH_EXPORT_MED_V2_1").arg(anIObject->getName()),
+					       QObject::tr("SMESH_BUT_YES"),
+					       QObject::tr("SMESH_BUT_NO"),
+					       0,1,0);
+	      if(aRet){
+		return;
+	      }
+	    }
 	  }
 	if ( !aFilename.isEmpty() ) {
 	  // Check whether the file already exists and delete it if yes

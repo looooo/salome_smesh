@@ -81,14 +81,34 @@ class SMESH_MeshEditor_i: public POA_SMESH::SMESH_MeshEditor
                         const SMESH::long_array &              IDsOfFixedNodes,
                         CORBA::Long                            MaxNbOfIterations,
                         CORBA::Double                          MaxAspectRatio,
-                        SMESH::SMESH_MeshEditor::Smooth_Method Method,
-                        CORBA::Boolean                         IsParametric);
+                        SMESH::SMESH_MeshEditor::Smooth_Method Method);
   CORBA::Boolean SmoothObject(SMESH::SMESH_IDSource_ptr              theObject,
 			      const SMESH::long_array &              IDsOfFixedNodes,
 			      CORBA::Long                            MaxNbOfIterations,
 			      CORBA::Double                          MaxAspectRatio,
+			      SMESH::SMESH_MeshEditor::Smooth_Method Method);
+  CORBA::Boolean SmoothParametric(const SMESH::long_array &              IDsOfElements,
+                                  const SMESH::long_array &              IDsOfFixedNodes,
+                                  CORBA::Long                            MaxNbOfIterations,
+                                  CORBA::Double                          MaxAspectRatio,
+                                  SMESH::SMESH_MeshEditor::Smooth_Method Method);
+  CORBA::Boolean SmoothParametricObject(SMESH::SMESH_IDSource_ptr              theObject,
+                                        const SMESH::long_array &              IDsOfFixedNodes,
+                                        CORBA::Long                            MaxNbOfIterations,
+                                        CORBA::Double                          MaxAspectRatio,
+                                        SMESH::SMESH_MeshEditor::Smooth_Method Method);
+  CORBA::Boolean smooth(const SMESH::long_array &              IDsOfElements,
+                        const SMESH::long_array &              IDsOfFixedNodes,
+                        CORBA::Long                            MaxNbOfIterations,
+                        CORBA::Double                          MaxAspectRatio,
+                        SMESH::SMESH_MeshEditor::Smooth_Method Method,
+                        bool                                   IsParametric);
+  CORBA::Boolean smoothObject(SMESH::SMESH_IDSource_ptr              theObject,
+			      const SMESH::long_array &              IDsOfFixedNodes,
+			      CORBA::Long                            MaxNbOfIterations,
+			      CORBA::Double                          MaxAspectRatio,
 			      SMESH::SMESH_MeshEditor::Smooth_Method Method,
-                              CORBA::Boolean                         IsParametric);
+                              bool                                   IsParametric);
 
   void RenumberNodes();
   void RenumberElements();

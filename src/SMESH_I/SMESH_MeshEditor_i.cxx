@@ -614,6 +614,70 @@ CORBA::Boolean
   return isDone;
 }
 
+//=======================================================================
+//function : Smooth
+//purpose  : 
+//=======================================================================
+
+CORBA::Boolean
+  SMESH_MeshEditor_i::Smooth(const SMESH::long_array &              IDsOfElements,
+                             const SMESH::long_array &              IDsOfFixedNodes,
+                             CORBA::Long                            MaxNbOfIterations,
+                             CORBA::Double                          MaxAspectRatio,
+                             SMESH::SMESH_MeshEditor::Smooth_Method Method)
+{
+  return smooth( IDsOfElements, IDsOfFixedNodes, MaxNbOfIterations,
+                MaxAspectRatio, Method, false );
+}
+
+//=======================================================================
+//function : SmoothParametric
+//purpose  : 
+//=======================================================================
+
+CORBA::Boolean
+  SMESH_MeshEditor_i::SmoothParametric(const SMESH::long_array &              IDsOfElements,
+                                       const SMESH::long_array &              IDsOfFixedNodes,
+                                       CORBA::Long                            MaxNbOfIterations,
+                                       CORBA::Double                          MaxAspectRatio,
+                                       SMESH::SMESH_MeshEditor::Smooth_Method Method)
+{
+  return smooth( IDsOfElements, IDsOfFixedNodes, MaxNbOfIterations,
+                MaxAspectRatio, Method, true );
+}
+
+//=======================================================================
+//function : SmoothObject
+//purpose  : 
+//=======================================================================
+
+CORBA::Boolean
+  SMESH_MeshEditor_i::SmoothObject(SMESH::SMESH_IDSource_ptr              theObject,
+				   const SMESH::long_array &              IDsOfFixedNodes,
+				   CORBA::Long                            MaxNbOfIterations,
+				   CORBA::Double                          MaxAspectRatio,
+				   SMESH::SMESH_MeshEditor::Smooth_Method Method)
+{
+  return smoothObject (theObject, IDsOfFixedNodes, MaxNbOfIterations,
+                       MaxAspectRatio, Method, false);
+}
+
+//=======================================================================
+//function : SmoothParametricObject
+//purpose  : 
+//=======================================================================
+
+CORBA::Boolean
+  SMESH_MeshEditor_i::SmoothParametricObject(SMESH::SMESH_IDSource_ptr              theObject,
+				   const SMESH::long_array &              IDsOfFixedNodes,
+				   CORBA::Long                            MaxNbOfIterations,
+				   CORBA::Double                          MaxAspectRatio,
+				   SMESH::SMESH_MeshEditor::Smooth_Method Method)
+{
+  return smoothObject (theObject, IDsOfFixedNodes, MaxNbOfIterations,
+                       MaxAspectRatio, Method, true);
+}
+
 //=============================================================================
 /*!
  *  
@@ -621,12 +685,12 @@ CORBA::Boolean
 //=============================================================================
 
 CORBA::Boolean
-  SMESH_MeshEditor_i::Smooth(const SMESH::long_array &              IDsOfElements,
+  SMESH_MeshEditor_i::smooth(const SMESH::long_array &              IDsOfElements,
                              const SMESH::long_array &              IDsOfFixedNodes,
                              CORBA::Long                            MaxNbOfIterations,
                              CORBA::Double                          MaxAspectRatio,
                              SMESH::SMESH_MeshEditor::Smooth_Method Method,
-                             CORBA::Boolean                         IsParametric)
+                             bool                                   IsParametric)
 {
   SMESHDS_Mesh* aMesh = GetMeshDS();
 
@@ -656,7 +720,8 @@ CORBA::Boolean
                   MaxNbOfIterations, MaxAspectRatio, IsParametric );
 
   // Update Python script
-  TCollection_AsciiString str ("isDone = mesh_editor.Smooth(");
+  TCollection_AsciiString str ("isDone = mesh_editor.");
+  str += (char*) (IsParametric ? "SmoothParametric( " : "Smooth( ");
   SMESH_Gen_i::AddArray( str, IDsOfElements ) += ", ";
   SMESH_Gen_i::AddArray( str, IDsOfFixedNodes ) += ", ";
   str += (Standard_Integer) MaxNbOfIterations;
@@ -683,15 +748,15 @@ CORBA::Boolean
 //=============================================================================
 
 CORBA::Boolean
-  SMESH_MeshEditor_i::SmoothObject(SMESH::SMESH_IDSource_ptr              theObject,
+  SMESH_MeshEditor_i::smoothObject(SMESH::SMESH_IDSource_ptr              theObject,
 				   const SMESH::long_array &              IDsOfFixedNodes,
 				   CORBA::Long                            MaxNbOfIterations,
 				   CORBA::Double                          MaxAspectRatio,
 				   SMESH::SMESH_MeshEditor::Smooth_Method Method,
-                                   CORBA::Boolean                         IsParametric)
+                                   bool                                   IsParametric)
 {
   SMESH::long_array_var anElementsId = theObject->GetIDs();
-  CORBA::Boolean isDone = Smooth (anElementsId, IDsOfFixedNodes, MaxNbOfIterations,
+  CORBA::Boolean isDone = smooth (anElementsId, IDsOfFixedNodes, MaxNbOfIterations,
                                   MaxAspectRatio, Method, IsParametric);
 
   // Clear python line(s), created by Smooth()
@@ -702,7 +767,8 @@ CORBA::Boolean
 #endif
 
   // Update Python script
-  TCollection_AsciiString str ("isDone = mesh_editor.SmoothObject(");
+  TCollection_AsciiString str ("isDone = mesh_editor.");
+  str += (char*) (IsParametric ? "SmoothParametricObject( " : "SmoothObject( ");
   SMESH_Gen_i::AddObject( str, theObject ) += ", ";
   SMESH_Gen_i::AddArray( str, IDsOfFixedNodes ) += ", ";
   str += (Standard_Integer) MaxNbOfIterations;

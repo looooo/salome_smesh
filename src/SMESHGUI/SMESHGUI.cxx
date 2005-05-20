@@ -289,7 +289,7 @@ namespace{
 	    
 	    delete fd;
 	    if( !aFilename.isEmpty()
-		&& (aMesh->NbPolygons()>1 or aMesh->NbPolyhedrons()>1) 
+		&& (aMesh->NbPolygons()>0 or aMesh->NbPolyhedrons()>0) 
 		&& aFormat==SMESH::MED_V2_1){
 	      int aRet = QAD_MessageBox::warn2(QAD_Application::getDesktop(),
 					       QObject::tr("SMESH_WRN_WARNING"),

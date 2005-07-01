@@ -99,6 +99,7 @@
 #include "SalomeApp_Application.h"
 #include "SalomeApp_Preferences.h"
 #include "SalomeApp_VTKSelector.h"
+#include "SalomeApp_Operation.h"
 
 #include "SalomeApp_ImportOperation.h"
 
@@ -1098,6 +1099,13 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
   SUIT_ResourceMgr* mgr = resourceMgr();
   if( !mgr )
     return false;
+
+  SUIT_Operation* anOp = getOperation( theCommandID );
+  if ( anOp != 0 )
+  {
+    anOp->start();
+    return true;
+  }
 
   SUIT_ViewWindow* view = application()->desktop()->activeWindow();
   SVTK_ViewWindow* vtkwnd = dynamic_cast<SVTK_ViewWindow*>( view );
@@ -3212,3 +3220,74 @@ void SMESHGUI::createPreferences()
 void SMESHGUI::preferencesChanged( const QString&, const QString& )
 {
 }
+
+//=======================================================================
+// function : onOperationCommited
+// purpose  : SLOT called when operation commited. Set default selection mode
+//=======================================================================
+void SMESHGUI::onOperationCommited( SUIT_Operation* )
+{
+  SVTK_ViewWindow* vtkWnd =
+    dynamic_cast<SVTK_ViewWindow*>( application()->desktop()->activeWindow() );
+  if ( vtkWnd )
+    vtkWnd->SetSelectionMode( ActorSelection );
+}
+
+//=======================================================================
+// function : onOperationAborted
+// purpose  : SLOT called when operation commited. Set default selection mode
+//=======================================================================
+void SMESHGUI::onOperationAborted( SUIT_Operation* )
+{
+  SVTK_ViewWindow* vtkWnd =
+    dynamic_cast<SVTK_ViewWindow*>( application()->desktop()->activeWindow() );
+  if ( vtkWnd )
+    vtkWnd->SetSelectionMode( ActorSelection );
+}
+
+//=======================================================================
+// function : getOperation
+// purpose  : Get operation corresponding to the given Id
+//=======================================================================
+SalomeApp_Operation* SMESHGUI::getOperation( const int theId )
+{
+  if ( myOperations.contains( theId ) )
+    return myOperations[ theId ];
+
+  // to do:
+  SalomeApp_Operation* anOp = 0;
+  /*switch( theId )
+  {
+    case ... :
+      anOp = ...;
+    break;
+  }*/
+
+  if ( anOp != 0 )
+  {
+    anOp->setModule( this );
+    connect( anOp, SIGNAL( aborted( SUIT_Operation* ) ),
+             this, SLOT( onOperationAborted( SUIT_Operation* ) ) );
+    connect( anOp, SIGNAL( commited( SUIT_Operation* ) ),
+             this, SLOT( onOperationCommited( SUIT_Operation* ) ) );
+    myOperations[ theId ] = anOp;
+    
+  }
+
+  return anOp;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

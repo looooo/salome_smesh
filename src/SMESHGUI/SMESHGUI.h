@@ -43,9 +43,11 @@ class SUIT_Study;
 class SUIT_ViewWindow;
 class SUIT_ResourceMgr;
 class SUIT_ViewManager;
+class SUIT_Operation;
 
 class SalomeApp_Study;
 class SalomeApp_SelectionMgr;
+class SalomeApp_Operation;
 
 
 //=================================================================================
@@ -108,6 +110,8 @@ public slots:
 private slots:
   void OnGUIEvent();
   void onViewManagerAdded( SUIT_ViewManager* );
+  void onOperationCommited( SUIT_Operation* );
+  void onOperationAborted( SUIT_Operation* );
 
 signals:
   void SignalDeactivateActiveDialog() ;
@@ -120,11 +124,14 @@ protected:
   void createPopupItem( const int, const QString&, const QString&,
                         const QString& = QString::null, const int = -1 );
 
+  SalomeApp_Operation*             getOperation( const int );
+
 private :
   static SMESH::SMESH_Gen_var      myComponentSMESH;
   QDialog*                         myActiveDialogBox;
   int                              myState;
   QMap<int,QString>                myRules;
+  QMap<int, SalomeApp_Operation*>  myOperations;
 };
 
 #endif

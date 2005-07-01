@@ -60,71 +60,83 @@ class SMESHGUI : public SalomeApp_Module
 
 public :
   SMESHGUI();
-  ~SMESHGUI();
+  virtual ~SMESHGUI();
 
-  static SMESH::SMESH_Gen_var     GetSMESHGen();
-  static SMESHGUI*                GetSMESHGUI();
-  static SalomeApp_SelectionMgr*  selectionMgr();
-  static SUIT_ResourceMgr*        resourceMgr();
-  static SUIT_Desktop*            desktop() ;
-  static SalomeApp_Study*         activeStudy();
-  bool                            isActiveStudyLocked();
+  static SMESH::SMESH_Gen_var       GetSMESHGen();
+  static SMESHGUI*                  GetSMESHGUI();
+  static SalomeApp_SelectionMgr*    selectionMgr();
+  static SUIT_ResourceMgr*          resourceMgr();
+  static SUIT_Desktop*              desktop();
+  static SalomeApp_Study*           activeStudy();
+  bool                              isActiveStudyLocked();
 
-  static bool                     automaticUpdate();
+  static bool                       automaticUpdate();
 
-  virtual QString     engineIOR() const;
-  virtual void        initialize( CAM_Application* );
-  virtual void        windows( QMap<int, int>& ) const;
-  virtual void        viewManagers( QStringList& ) const;
+  virtual QString                   engineIOR() const;
+  virtual void                      initialize( CAM_Application* );
+  virtual void                      windows( QMap<int, int>& ) const;
+  virtual void                      viewManagers( QStringList& ) const;
 
-  QDialog*            GetActiveDialogBox() ;
-  void                SetActiveDialogBox(QDialog* aDlg) ;
+  QDialog*                          GetActiveDialogBox();
+  void                              SetActiveDialogBox(QDialog* aDlg);
 
-  void                ResetState() ;
-  void                SetState(int aState) ;
-  bool                DefineDlgPosition(QWidget* aDlg, int& x, int& y) ;
+  void                              ResetState();
+  void                              SetState( int aState );
+  bool                              DefineDlgPosition( QWidget* aDlg, int& x, int& y);
 
-  virtual bool OnGUIEvent        ( int id );
-  virtual bool OnMousePress      ( QMouseEvent*, SUIT_ViewWindow* );
-  virtual bool OnMouseMove       ( QMouseEvent*, SUIT_ViewWindow* );
-  virtual bool OnKeyPress        ( QKeyEvent*, SUIT_ViewWindow* );
+  virtual bool                      OnGUIEvent( int id );
+  virtual bool                      OnMousePress( QMouseEvent*, SUIT_ViewWindow* );
+  virtual bool                      OnMouseMove( QMouseEvent*, SUIT_ViewWindow* );
+  virtual bool                      OnKeyPress( QKeyEvent*, SUIT_ViewWindow* );
 
-  virtual void contextMenuPopup( const QString&, QPopupMenu*, QString& );
+  virtual void                      contextMenuPopup( const QString&, QPopupMenu*, QString& );
 
-  virtual bool SetSettings       ( SUIT_Desktop* );
-  virtual void BuildPresentation ( const Handle(SALOME_InteractiveObject)&,
-                                   SUIT_ViewWindow* = 0 );
+  virtual bool                      SetSettings( SUIT_Desktop* );
+  virtual void                      BuildPresentation( const Handle(SALOME_InteractiveObject)&,
+                                                       SUIT_ViewWindow* = 0 );
 
   /* Non modal dialog boxes management */
-  void EmitSignalDeactivateDialog() ;
-  void EmitSignalStudyFrameChanged() ;
-  void EmitSignalCloseAllDialogs() ;
+  void                              EmitSignalDeactivateDialog();
+  void                              EmitSignalStudyFrameChanged();
+  void                              EmitSignalCloseAllDialogs();
 
-  virtual void                createPreferences();
-  virtual void                preferencesChanged( const QString&, const QString& );
+  virtual void                      createPreferences();
+  virtual void                      preferencesChanged( const QString&, const QString& );
+
+  virtual void                      update( const int );
 
 public slots:
-  virtual bool                deactivateModule( SUIT_Study* );
-  virtual bool                activateModule( SUIT_Study* );
+
+  virtual bool                      deactivateModule( SUIT_Study* );
+  virtual bool                      activateModule( SUIT_Study* );
 
 private slots:
-  void OnGUIEvent();
-  void onViewManagerAdded( SUIT_ViewManager* );
-  void onOperationCommited( SUIT_Operation* );
-  void onOperationAborted( SUIT_Operation* );
+
+  void                              OnGUIEvent();
+  void                              onViewManagerAdded( SUIT_ViewManager* );
+  void                              onOperationCommited( SUIT_Operation* );
+  void                              onOperationAborted( SUIT_Operation* );
 
 signals:
-  void SignalDeactivateActiveDialog() ;
-  void SignalStudyFrameChanged() ;
-  void SignalCloseAllDialogs() ;
+  void                              SignalDeactivateActiveDialog();
+  void                              SignalStudyFrameChanged();
+  void                              SignalCloseAllDialogs();
 
 protected:
-  void createSMESHAction( const int, const QString&, const QString& = QString(""),
-                          const int = 0, const bool = false );
-  void createPopupItem( const int, const QString&, const QString&,
-                        const QString& = QString::null, const int = -1 );
+
+  void                              createSMESHAction( const int,
+                                                       const QString&,
+                                                       const QString& = "",
+                                                       const int = 0,
+                                                       const bool = false );
+  void                              createPopupItem( const int,
+                                                     const QString&,
+                                                     const QString&,
+                                                     const QString& = QString::null,
+                                                     const int = -1 );
 
   SalomeApp_Operation*             getOperation( const int );
+  virtual void                     updateControls();
 
 private :
   static SMESH::SMESH_Gen_var      myComponentSMESH;

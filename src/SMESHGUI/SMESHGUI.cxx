@@ -100,6 +100,7 @@
 #include "SalomeApp_Preferences.h"
 #include "SalomeApp_VTKSelector.h"
 #include "SalomeApp_Operation.h"
+#include "SalomeApp_UpdateFlags.h"
 
 #include "SalomeApp_ImportOperation.h"
 
@@ -3277,9 +3278,26 @@ SalomeApp_Operation* SMESHGUI::getOperation( const int theId )
   return anOp;
 }
 
+//=======================================================================
+// function : update
+// purpose  : Update something
+//=======================================================================
+void SMESHGUI::update( const int flags )
+{
+  if ( flags & UF_Viewer | flag & UF_Forced )
+    SMESH::UpdateView();
+  else
+    SalomeApp_Module::update( flags );
+}
 
-
-
+//=======================================================================
+// function : updateControls
+// purpose  : Update state of controls
+//=======================================================================
+void SMESHGUI::updateControls()
+{
+  // to do
+}
 
 
 

@@ -59,6 +59,8 @@ public:
   SMDS_VolumeIteratorPtr volumesIterator() const;
   SMDS_ElemIteratorPtr elementsIterator() const;  
 
+  SMDSAbs_ElementType GetElementType( const int id, const bool iselem ) const;
+  
   SMDS_Mesh *AddSubMesh();
   
   virtual SMDS_MeshNode* AddNodeWithID(double x, double y, double z, int ID);

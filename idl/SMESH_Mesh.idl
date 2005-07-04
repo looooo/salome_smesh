@@ -154,7 +154,7 @@ module SMESH
      */
     long_array GetIDs();
   };
-  
+
   interface SMESH_GroupBase;
   interface SMESH_Group;
   interface SMESH_GroupOnGeom;
@@ -411,6 +411,12 @@ module SMESH
     long_array GetNodesId()
       raises (SALOME::SALOME_Exception);
 
+    /*!
+     * Return type of mesh element
+     */    
+    ElementType GetElementType( in long id, in boolean iselem )
+      raises (SALOME::SALOME_Exception);
+
     string Dump();
   };
 
@@ -441,6 +447,12 @@ module SMESH
       raises (SALOME::SALOME_Exception);
 
     /*!
+     * Return type of submesh element
+     */
+    ElementType GetElementType( in long id, in boolean iselem )
+      raises (SALOME::SALOME_Exception);
+      
+    /*!
      * 
      */
     long_array GetNodesId()
@@ -461,7 +473,8 @@ module SMESH
     /*!
      * Get the internal Id 
      */
-    long GetId();    
+    long GetId();
+
 
     /*!
      * Get MED subMesh

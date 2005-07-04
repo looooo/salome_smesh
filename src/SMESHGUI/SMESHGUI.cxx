@@ -2473,7 +2473,7 @@ void SMESHGUI::createPopupItem( const int id,
   if( pId!=-1 )
     parentId = popupMgr()->actionId( action( pId ) );
 
-  if( !popupMgr()->contains( popupMgr()->actionId( action( id ) ) ) )
+//  if( !popupMgr()->contains( popupMgr()->actionId( action( id ) ) ) )
     popupMgr()->insert( action( id ), parentId, 0 );
 
   QChar lc = QtxPopupMgr::Selection::defEquality();

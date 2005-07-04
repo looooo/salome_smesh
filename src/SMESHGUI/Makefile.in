@@ -107,6 +107,7 @@ LIB_SRC =	SMESHGUI.cxx \
 		SMESHGUI_VTKUtils.cxx \
 		SMESHGUI_Selection.cxx \
 		SMESHGUI_CreatePolyhedralVolumeDlg.cxx \
+		SMESHGUI_Dialog.cxx \
 		SMESHGUI_Operation.cxx 
 
 LIB_MOC = \
@@ -150,6 +151,7 @@ LIB_MOC = \
 		SMESHGUI_SewingDlg.h \
 		SMESHGUI_PrecisionDlg.h \
 		SMESHGUI_MergeNodesDlg.h \
+		SMESHGUI_Dialog.h \
 		SMESHGUI_CreatePolyhedralVolumeDlg.h \
 		SMESHGUI_Operation.h
     

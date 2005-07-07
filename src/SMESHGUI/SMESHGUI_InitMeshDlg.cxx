@@ -57,7 +57,7 @@ SMESHGUI_InitMeshDlg::SMESHGUI_InitMeshDlg( SMESHGUI* theModule )
     GroupC1->layout()->setSpacing(6);
     GroupC1->layout()->setMargin(11);
    
-    myMeshNameLabel = new QLabel(tr("SMESH_NAME"), GroupC1, "TextLabel_NameMesh");
+    new QLabel(tr("SMESH_NAME"), GroupC1, "TextLabel_NameMesh");
     GroupC1->addSpace(1);
     myMeshName = new QLineEdit(GroupC1, "LineEdit_NameMesh");
     
@@ -72,8 +72,6 @@ SMESHGUI_InitMeshDlg::SMESHGUI_InitMeshDlg( SMESHGUI* theModule )
     setObjectType( Algo, _smesh + ALGORITHM, -1 );
     
     main->addWidget( GroupC1 );
-    
-    updateControlState();
 }
 
 //=================================================================================

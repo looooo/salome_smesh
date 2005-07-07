@@ -43,8 +43,11 @@
 
 #include <SalomeApp_SelectionMgr.h>
 #include <SalomeApp_Tools.h>
+#include <SalomeApp_UpdateFlags.h>
 
 #include <TColStd_MapOfInteger.hxx>
+
+#include <GEOMBase.h>
 
 //=================================================================================
 // function : Constructor
@@ -107,7 +110,6 @@ void SMESHGUI_InitMeshOp::startOperation()
     myHypothesisFilter = new SMESH_TypeFilter (HYPOTHESIS);
     
   init();
-  myDlg->clearSelection();
   myDlg->show();
 }
 
@@ -230,10 +232,9 @@ bool SMESHGUI_InitMeshOp::onApply()
       }
     }
   }
-  // commit transaction
 
-  //update( UF_Model | UF_ObjBrowser );
-  module()->updateObjBrowser( true, 0 );
+  update( UF_Model | UF_ObjBrowser );
+
   init();
   return true;
 }
@@ -264,7 +265,11 @@ QString SMESHGUI_InitMeshOp::defaultMeshName() const
 void SMESHGUI_InitMeshOp::init()
 {
   if( myDlg )
+  {
     myDlg->setMeshName( defaultMeshName() );
+    myDlg->clearSelection();
+    myDlg->updateControlState();
+  }    
 }
 
 //=================================================================================
@@ -294,4 +299,25 @@ SMESH::SMESH_Mesh_var SMESHGUI_InitMeshOp::initMesh ( GEOM::GEOM_Object_ptr theS
   }
   
   return aMesh._retn();
+}
+
+//=================================================================================
+// function : defaultMeshName()
+// purpose  :
+//=================================================================================
+void SMESHGUI_InitMeshOp::onSelectionChanged( int id )
+{
+  if( !myDlg->hasSelection( id ) )
+    return;
+    
+  if( id==SMESHGUI_InitMeshDlg::GeomObj )
+  {
+    QStringList selGeom;
+    myDlg->selectedObject( SMESHGUI_InitMeshDlg::GeomObj, selGeom );
+
+    _PTR(SObject) aGeomSO = studyDS()->FindObjectID( selGeom.first() );
+    GEOM::GEOM_Object_var myGeomShape = GEOM::GEOM_Object::_narrow( _CAST(SObject,aGeomSO)->GetObject() );
+    if( myGeomShape->_is_nil() || !GEOMBase::IsShape( myGeomShape ) )
+      myDlg->clearSelection( id );
+  }
 }

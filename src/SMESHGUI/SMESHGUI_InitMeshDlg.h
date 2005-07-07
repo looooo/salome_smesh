@@ -52,7 +52,6 @@ public:
     QString meshName() const;
 
 private:
-  QLabel*     myMeshNameLabel;
   QLineEdit*  myMeshName;
   
 };

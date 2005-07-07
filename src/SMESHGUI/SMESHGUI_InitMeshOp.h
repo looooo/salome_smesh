@@ -65,6 +65,7 @@ protected slots:
 
 private slots:
   void onActivateObject( int );
+  void onSelectionChanged( int );
 
 private:
   SMESHGUI_InitMeshDlg  *myDlg;

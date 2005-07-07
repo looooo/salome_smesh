@@ -6,6 +6,8 @@
 
 #include "SUIT_SelectionFilter.h"
 
+#include <qstring.h>
+
 #include <TopAbs_ShapeEnum.hxx>
 #include <TColStd_MapOfInteger.hxx>
 
@@ -29,14 +31,14 @@ class SUIT_DataOwner;
 class SMESH_NumberFilter : public SUIT_SelectionFilter
 {
  public:
-  SMESH_NumberFilter (const char*            theKind,
+  SMESH_NumberFilter (const QString&         theKind,
                       const TopAbs_ShapeEnum theSubShapeType,
                       const int              theNumber,
                       const TopAbs_ShapeEnum theShapeType = TopAbs_SHAPE,
                       GEOM::GEOM_Object_ptr  theMainObj = GEOM::GEOM_Object::_nil(),
                       const bool             theIsClosedOnly = false );
 
-  SMESH_NumberFilter (const char*                 theKind,
+  SMESH_NumberFilter (const QString&              theKind,
                       const TopAbs_ShapeEnum      theSubShapeType,
                       const int                   theNumber,
                       const TColStd_MapOfInteger& theShapeTypes,
@@ -58,7 +60,7 @@ class SMESH_NumberFilter : public SUIT_SelectionFilter
   GEOM::GEOM_Object_ptr getGeom (const SUIT_DataOwner*) const;
 
  private:
-  char*                 myKind;
+  QString               myKind;
   TopAbs_ShapeEnum      mySubShapeType;
   int                   myNumber;
   bool                  myIsClosedOnly;

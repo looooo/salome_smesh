@@ -28,14 +28,14 @@
 // name    : SMESH_NumberFilter::SMESH_NumberFilter
 // Purpose : Constructor
 //=======================================================================
-SMESH_NumberFilter::SMESH_NumberFilter (const char*            theKind,
+SMESH_NumberFilter::SMESH_NumberFilter (const QString&         theKind,
                                         const TopAbs_ShapeEnum theSubShapeType,
                                         const int              theNumber,
                                         const TopAbs_ShapeEnum theShapeType,
                                         GEOM::GEOM_Object_ptr  theMainObj,
                                         const bool             theIsClosedOnly)
 {
-  myKind = (char*)theKind;
+  myKind = theKind;
   mySubShapeType = theSubShapeType;
   myNumber = theNumber;
   myIsClosedOnly = theIsClosedOnly;
@@ -47,14 +47,14 @@ SMESH_NumberFilter::SMESH_NumberFilter (const char*            theKind,
 // name    : SMESH_NumberFilter::SMESH_NumberFilter
 // Purpose : Constructor
 //=======================================================================
-SMESH_NumberFilter::SMESH_NumberFilter (const char*                 theKind,
+SMESH_NumberFilter::SMESH_NumberFilter (const QString&              theKind,
                                         const TopAbs_ShapeEnum      theSubShapeType,
                                         const int                   theNumber,
                                         const TColStd_MapOfInteger& theShapeTypes,
                                         GEOM::GEOM_Object_ptr       theMainObj,
                                         const bool                  theIsClosedOnly )
 {
-  myKind = (char*)theKind;
+  myKind = theKind;
   mySubShapeType = theSubShapeType;
   myNumber = theNumber;
   myIsClosedOnly = theIsClosedOnly;
@@ -144,6 +144,11 @@ GEOM::GEOM_Object_ptr SMESH_NumberFilter::getGeom
   _PTR(SObject) aSO(study->FindObjectID(entry.latin1()));
   if (!aSO)
     return GEOM::GEOM_Object::_nil();
+
+  _PTR(SComponent) objComponent = aSO->GetFatherComponent();
+  if( !objComponent || objComponent->ComponentDataType()!=myKind )
+    return GEOM::GEOM_Object::_nil();
+
 
   CORBA::Object_var anObject = _CAST(SObject,aSO)->GetObject();
   anObj = GEOM::GEOM_Object::_narrow(anObject);

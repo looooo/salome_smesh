@@ -35,10 +35,9 @@
 // name    : SMESHGUI_Operation
 // Purpose : Constructor
 //=======================================================================
-SMESHGUI_Operation::SMESHGUI_Operation( SalomeApp_Application* app )
-: SalomeApp_Operation( app )
+SMESHGUI_Operation::SMESHGUI_Operation()
+: SalomeApp_Operation()
 {
-  
 }
 
 SMESHGUI_Operation::~SMESHGUI_Operation()
@@ -116,6 +115,22 @@ SVTK_Selector* SMESHGUI_Operation::selector() const
 //=======================================================================
 void SMESHGUI_Operation::startOperation()
 {
+  if( dlg() )
+  {
+    disconnect( dlg(), SIGNAL( dlgOk() ), this, SLOT( onOk() ) );
+    disconnect( dlg(), SIGNAL( dlgApply() ), this, SLOT( onApply() ) );
+    disconnect( dlg(), SIGNAL( dlgCancel() ), this, SLOT( onCancel() ) );
+    
+    if( dlg()->testButtonFlags( QtxDialog::OK ) )
+      connect( dlg(), SIGNAL( dlgOk() ), this, SLOT( onOk() ) );
+      
+    if( dlg()->testButtonFlags( QtxDialog::Apply ) )
+      connect( dlg(), SIGNAL( dlgApply() ), this, SLOT( onApply() ) );
+      
+    if( dlg()->testButtonFlags( QtxDialog::Cancel ) )
+      connect( dlg(), SIGNAL( dlgCancel() ), this, SLOT( onCancel() ) );
+  }    
+
   SalomeApp_Operation::startOperation();
 }
 
@@ -175,7 +190,7 @@ int SMESHGUI_Operation::typeById( const QString& str, const SelectedObjectType o
   else  
   {
     int pos = str.find( idChar() );
-    QString entry = str.left( pos-1 ),
+    QString entry = str.left( pos ),
             _id = str.mid( pos+1 );
     bool ok;
     int id = _id.toInt( &ok );
@@ -199,7 +214,7 @@ int SMESHGUI_Operation::typeById( const QString& str, const SelectedObjectType o
 // name    : prefix
 // Purpose : Get prefix for module types
 //=======================================================================
-int SMESHGUI_Operation::prefix( const QString& name ) const
+int SMESHGUI_Operation::prefix( const QString& name )
 {
   if( name == "GEOM" )
     return 100;
@@ -259,4 +274,79 @@ void SMESHGUI_Operation::selected( QStringList& names, SalomeApp_Dialog::TypesLi
 QChar SMESHGUI_Operation::idChar() const
 {
   return '#';
+}
+
+//=======================================================================
+// name    : setDialogActive
+// Purpose : 
+//=======================================================================
+void SMESHGUI_Operation::setDialogActive( const bool active )
+{
+  SalomeApp_Operation::setDialogActive( active );
+
+  SMESHGUI_Dialog* d = dynamic_cast<SMESHGUI_Dialog*>( dlg() );
+  if( d )
+    d->setContentActive( active );
+
+}
+
+//=======================================================================
+// name    : studyDS
+// Purpose :
+//=======================================================================
+_PTR(Study) SMESHGUI_Operation::studyDS() const
+{
+  SalomeApp_Study* s = dynamic_cast<SalomeApp_Study*>( study() );
+  if( s )
+    return s->studyDS();
+}
+
+//=======================================================================
+// name    : onOk
+// Purpose :
+//=======================================================================
+void SMESHGUI_Operation::onOk()
+{
+  if( onApply() )
+    commit();
+  else
+    abort();
+}
+
+//=======================================================================
+// name    : onApply
+// Purpose :
+//=======================================================================
+bool SMESHGUI_Operation::onApply()
+{
+  return false;
+}
+
+//=======================================================================
+// name    : onClose
+// Purpose :
+//=======================================================================
+void SMESHGUI_Operation::onCancel()
+{
+  abort();
+}
+
+//=======================================================================
+// name    : commitOperation
+// Purpose :
+//=======================================================================
+void SMESHGUI_Operation::commitOperation()
+{
+  selectionMgr()->clearFilters();
+  SalomeApp_Operation::commitOperation();
+}
+
+//=======================================================================
+// name    : abortOperation
+// Purpose :
+//=======================================================================
+void SMESHGUI_Operation::abortOperation()
+{
+  selectionMgr()->clearFilters();
+  SalomeApp_Operation::abortOperation();
 }

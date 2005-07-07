@@ -13,8 +13,11 @@
 #define SMESHGUI_Operation_H
 
 #include <SalomeApp_Operation.h>
+#include <SMESHGUI_Dialog.h>
 #include <SALOME_InteractiveObject.hxx>
 #include <SVTK_Selection.h>
+
+#include <SALOMEDSClient.hxx>
 
 class SMESHGUI;
 class SVTK_ViewWindow;
@@ -32,9 +35,12 @@ class SMESHGUI_Operation : public SalomeApp_Operation
   Q_OBJECT
 
 public:
-  SMESHGUI_Operation( SalomeApp_Application* );
+  SMESHGUI_Operation();
   virtual ~SMESHGUI_Operation();
 
+  static  int       prefix( const QString& );
+  // Return hard-coded prefix using to differ intersecting types
+  
 protected:
   typedef enum
   {
@@ -52,27 +58,33 @@ protected:
                                       const TColStd_MapOfInteger&, const bool );
 
   virtual void      startOperation();
+  virtual void      commitOperation();
+  virtual void      abortOperation();
   virtual bool      isReadyToStart();
 
   SMESHGUI*         getSMESHGUI() const;
   SVTK_ViewWindow*  viewWindow() const;
   SVTK_Selector*    selector() const;
 
+  _PTR(Study)       studyDS() const;
 
 
-  virtual int       prefix( const QString& ) const;
-  // Return hard-coded prefix using to differ intersecting types
-
-  virtual void      selected( QStringList&, SalomeApp_Dialog::TypesList&, QStringList& ) const;
-  // Get names, types and ids of selected objects
-
-  virtual int       typeById( const QString&, const SelectedObjectType ) const;
-  // Find type by id
-
-  virtual QChar     idChar() const;
-  // Char using to divide <entry> and <id> in string id representation
-  // By default, '#'
+  //! Get names, types and ids of selected objects
+  virtual void      selected( QStringList&, SMESHGUI_Dialog::TypesList&, QStringList& ) const;
   
+  //! Find type by id
+  virtual int       typeById( const QString&, const SelectedObjectType ) const;
+  
+  //! Char using to divide <entry> and <id> in string id representation. By default, '#'
+  virtual QChar     idChar() const;
+  
+  //! Set accroding dialog active or inactive
+  virtual void      setDialogActive( const bool );
+
+protected slots:
+  virtual void onOk();
+  virtual bool onApply();
+  virtual void onCancel();
 };
 
 #endif

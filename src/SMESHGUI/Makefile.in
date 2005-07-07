@@ -62,6 +62,7 @@ LIB_SRC =	SMESHGUI.cxx \
 		SMESHGUI_InitMeshDlg.cxx \
 		SMESHGUI_InitMeshOp.cxx \
 		SMESHGUI_AddSubMeshDlg.cxx \
+		SMESHGUI_AddSubMeshOp.cxx \
 		SMESHGUI_TransparencyDlg.cxx \
 		SMESHGUI_ClippingDlg.cxx \
 		SMESHGUI_GroupDlg.cxx \
@@ -121,6 +122,7 @@ LIB_MOC = \
 		SMESHGUI_InitMeshDlg.h \
 		SMESHGUI_InitMeshOp.h \
 		SMESHGUI_AddSubMeshDlg.h \
+		SMESHGUI_AddSubMeshOp.h \
 		SMESHGUI_TransparencyDlg.h \
 		SMESHGUI_ClippingDlg.h \
 		SMESHGUI_GroupDlg.h \

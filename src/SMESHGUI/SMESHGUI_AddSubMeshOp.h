@@ -21,40 +21,59 @@
 //
 //
 //
-//  File   : SMESHGUI_AddSubMeshDlg.h
+//  File   : SMESHGUI_AddSubMeshOp.h
 //  Author : Nicolas REJNERI
 //  Module : SMESH
 //  $Header$
 
-#ifndef DIALOGBOX_ADD_SUBMESH_H
-#define DIALOGBOX_ADD_SUBMESH_H
+#ifndef OPERATION_ADD_SUB_MESH_H
+#define OPERATION_ADD_SUB_MESH_H
 
-#include <SMESHGUI_Dialog.h>
+#include <SMESHGUI_Operation.h>
 
-class QLineEdit;
+#include <SALOMEconfig.h>
+#include CORBA_SERVER_HEADER(GEOM_Gen)
+#include CORBA_SERVER_HEADER(SMESH_Gen)
+
+
+class SMESHGUI_AddSubMeshDlg;
+class SUIT_SelectionFilter;
 
 //=================================================================================
-// class    : SMESHGUI_AddSubMeshDlg
+// class    : SMESHGUI_AddSubMeshOp
 // purpose  :
 //=================================================================================
-class SMESHGUI_AddSubMeshDlg : public SMESHGUI_Dialog
-{ 
+class SMESHGUI_AddSubMeshOp : public SMESHGUI_Operation
+{
     Q_OBJECT
 
 public:
-    enum { MeshObj, GeomObj, Hypo, Algo };
-    
-public:
-    SMESHGUI_AddSubMeshDlg( SMESHGUI* );
-    ~SMESHGUI_AddSubMeshDlg();
+  SMESHGUI_AddSubMeshOp();
+  ~SMESHGUI_AddSubMeshOp();
 
-    void    init();
-    void    updateControlState( const bool );
-    QString subMeshName() const;
+  virtual SalomeApp_Dialog* dlg() const;
+  void    init();
+  
+protected:
+  virtual void startOperation();
+  virtual void selectionDone();
+
+  bool isValid() const;
+
+  SMESH::SMESH_subMesh_var addSubMesh( SMESH::SMESH_Mesh_ptr,
+                                       GEOM::GEOM_Object_ptr,
+                                       const QString& );
+
+protected slots:
+  virtual bool onApply();
+
+private slots:
+  void onActivateObject( int );
+  void onSelectionChanged( int );
 
 private:
-    QLineEdit* myMeshName;
-
+  SMESHGUI_AddSubMeshDlg  *myDlg;
+  SUIT_SelectionFilter    *myMeshFilter, *myGeomFilter, *myHypothesisFilter, *myAlgorithmFilter;
 };
 
-#endif // DIALOGBOX_ADD_SUBMESH_H
+#endif // OPERATION_INIT_MESH_H

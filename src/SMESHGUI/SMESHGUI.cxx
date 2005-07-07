@@ -26,7 +26,7 @@
 
 #include "SMESHGUI.h"
 #include "SMESHGUI_InitMeshOp.h"
-#include "SMESHGUI_AddSubMeshDlg.h"
+#include "SMESHGUI_AddSubMeshOp.h"
 #include "SMESHGUI_NodesDlg.h"
 #include "SMESHGUI_TransparencyDlg.h"
 #include "SMESHGUI_ClippingDlg.h"
@@ -1369,7 +1369,8 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
   case 702:					// ADD SUB MESH
     {
       if(checkLock(aStudy)) break;
-      if( vtkwnd ) {
+      startOperation( 702 );
+/*      if( vtkwnd ) {
 	EmitSignalDeactivateDialog();
 	new SMESHGUI_AddSubMeshDlg( this );
       }
@@ -1377,15 +1378,13 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
 	SUIT_MessageBox::warn1(desktop(),
 			      tr("SMESH_WRN_WARNING"), tr("SMESH_WRN_VIEWER_VTK"),
 			      tr("SMESH_BUT_OK"));
-      }
+      }*/
       break;
     }
 
   case 703:					// INIT MESH
     {
       if(checkLock(aStudy)) break;
-      //EmitSignalDeactivateDialog();
-      //new SMESHGUI_InitMeshDlg( this );
       startOperation( 703 );
       break;
     }
@@ -3306,10 +3305,22 @@ void SMESHGUI::updateControls()
 //=======================================================================
 SalomeApp_Operation* SMESHGUI::createOperation( const int id ) const
 {
-  if( id==703 )
-    return new SMESHGUI_InitMeshOp();
-  else
-    return SalomeApp_Module::createOperation( id );
+  SalomeApp_Operation* op = 0;
+  switch( id )
+  {
+    case 702:
+      op = new SMESHGUI_AddSubMeshOp();
+      break;
+      
+    case 703:
+      op = new SMESHGUI_InitMeshOp();
+      break;
+      
+    default:
+      op = SalomeApp_Module::createOperation( id );
+      break;
+  }
+  return op;
 }
 
 

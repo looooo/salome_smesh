@@ -21,40 +21,54 @@
 //
 //
 //
-//  File   : SMESHGUI_InitMeshDlg.h
+//  File   : SMESHGUI_InitMeshOp.h
 //  Author : Nicolas REJNERI
 //  Module : SMESH
 //  $Header$
 
-#ifndef DIALOGBOX_INIT_MESH_H
-#define DIALOGBOX_INIT_MESH_H
+#ifndef OPERATION_INIT_MESH_H
+#define OPERATION_INIT_MESH_H
 
-#include <SMESHGUI_Dialog.h>
+#include <SMESHGUI_Operation.h>
+
+#include <SALOMEconfig.h>
+#include CORBA_SERVER_HEADER(GEOM_Gen)
+#include CORBA_SERVER_HEADER(SMESH_Gen)
+
+class SMESHGUI_InitMeshDlg;
+class SUIT_SelectionFilter;
 
 //=================================================================================
-// class    : SMESHGUI_InitMeshDlg
+// class    : SMESHGUI_InitMeshOp
 // purpose  :
 //=================================================================================
-class SMESHGUI_InitMeshDlg : public SMESHGUI_Dialog
-{ 
+class SMESHGUI_InitMeshOp : public SMESHGUI_Operation
+{
     Q_OBJECT
 
 public:
-    enum { GeomObj, Hypo, Algo };
+  SMESHGUI_InitMeshOp();
+  ~SMESHGUI_InitMeshOp();
 
-public:
-    SMESHGUI_InitMeshDlg( SMESHGUI* );
-    ~SMESHGUI_InitMeshDlg();
+  virtual SalomeApp_Dialog* dlg() const;
+  void    init();
+  QString defaultMeshName() const;
+  
+protected:
+  virtual void startOperation();
+  virtual void selectionDone();
 
-    void    updateControlState();
+  SMESH::SMESH_Mesh_var initMesh( GEOM::GEOM_Object_ptr, const QString& );
 
-    void    setMeshName( const QString& );
-    QString meshName() const;
+protected slots:
+  virtual bool onApply();
+
+private slots:
+  void onActivateObject( int );
 
 private:
-  QLabel*     myMeshNameLabel;
-  QLineEdit*  myMeshName;
-  
+  SMESHGUI_InitMeshDlg  *myDlg;
+  SUIT_SelectionFilter  *myGeomFilter, *myHypothesisFilter, *myAlgorithmFilter;
 };
 
-#endif // DIALOGBOX_INIT_MESH_H
+#endif // OPERATION_INIT_MESH_H

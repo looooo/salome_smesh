@@ -123,6 +123,7 @@ signals:
   void                              SignalCloseAllDialogs();
 
 protected:
+  virtual SalomeApp_Operation*      createOperation( const int ) const;
 
   void                              createSMESHAction( const int,
                                                        const QString&,

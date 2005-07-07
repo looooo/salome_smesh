@@ -25,7 +25,7 @@
 //  $Header$
 
 #include "SMESHGUI.h"
-#include "SMESHGUI_InitMeshDlg.h"
+#include "SMESHGUI_InitMeshOp.h"
 #include "SMESHGUI_AddSubMeshDlg.h"
 #include "SMESHGUI_NodesDlg.h"
 #include "SMESHGUI_TransparencyDlg.h"
@@ -1384,8 +1384,9 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
   case 703:					// INIT MESH
     {
       if(checkLock(aStudy)) break;
-      EmitSignalDeactivateDialog();
-      new SMESHGUI_InitMeshDlg( this );
+      //EmitSignalDeactivateDialog();
+      //new SMESHGUI_InitMeshDlg( this );
+      startOperation( 703 );
       break;
     }
 
@@ -3299,7 +3300,17 @@ void SMESHGUI::updateControls()
   // to do
 }
 
-
+//=======================================================================
+// function : updateControls
+// purpose  : Update state of controls
+//=======================================================================
+SalomeApp_Operation* SMESHGUI::createOperation( const int id ) const
+{
+  if( id==703 )
+    return new SMESHGUI_InitMeshOp();
+  else
+    return SalomeApp_Module::createOperation( id );
+}
 
 
 

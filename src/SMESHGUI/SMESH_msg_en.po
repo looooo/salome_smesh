@@ -2802,7 +2802,14 @@ msgid "SMESHGUI::PREF_ELEMENTS"
 msgstr "Elements"
 
 # =====================================================
-
 msgid "SMESHGUI_Operation::NO_MODULE"
 msgstr "There is no MESH module to start operation"
 
+msgid "SMESHGUI_Dialog::DLG_MESH"
+msgstr "Meshes"
+
+msgid "SMESHGUI_Dialog::DLG_HYPO"
+msgstr "Hypothesises"
+
+msgid "SMESHGUI_Dialog::DLG_ALGO"
+msgstr "Algorithms"

@@ -63,7 +63,8 @@ public:
   
   SMESH_Actor* getActor( int ind ) const;
 
-  static int       type( SalomeApp_DataOwner* owner, _PTR(Study) study);
+  static int       type( const QString&, _PTR(Study) );
+  static int       type( SalomeApp_DataOwner* owner, _PTR(Study) );
   static QString   typeName( const int type);
 
 private:

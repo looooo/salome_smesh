@@ -966,6 +966,7 @@ void SMESHGUI::ResetState()
 //=============================================================================
 void SMESHGUI::EmitSignalDeactivateDialog()
 {
+  printf( "sln: EmitSignalDeactivateDialog EmitSignalDeactivateDialog EmitSignalDeactivateDialog\n" );
   emit SignalDeactivateActiveDialog();
 }
 

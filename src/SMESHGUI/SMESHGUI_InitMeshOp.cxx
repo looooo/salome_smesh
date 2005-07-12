@@ -60,6 +60,7 @@ SMESHGUI_InitMeshOp::SMESHGUI_InitMeshOp()
   myHypothesisFilter( 0 ),
   myAlgorithmFilter( 0 )
 {
+  setAutoResumed( true );
 }
 
 //=================================================================================
@@ -321,3 +322,29 @@ void SMESHGUI_InitMeshOp::onSelectionChanged( int id )
       myDlg->clearSelection( id );
   }
 }
+
+//=================================================================================
+// function : isValid
+// purpose  :
+//=================================================================================
+bool SMESHGUI_InitMeshOp::isValid( SUIT_Operation* theOtherOp ) const
+{
+  if ( theOtherOp && theOtherOp->inherits( "SMESHGUI_AddSubMeshOp" ) )
+    return true;
+  else
+    return false;
+    
+}
+
+
+
+
+
+
+
+
+
+
+
+
+

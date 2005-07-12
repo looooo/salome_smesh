@@ -53,6 +53,8 @@ public:
   virtual SalomeApp_Dialog* dlg() const;
   void    init();
   QString defaultMeshName() const;
+
+  virtual bool isValid( SUIT_Operation* theOtherOp ) const;
   
 protected:
   virtual void startOperation();

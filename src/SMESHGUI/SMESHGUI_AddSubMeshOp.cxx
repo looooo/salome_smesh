@@ -62,6 +62,7 @@ SMESHGUI_AddSubMeshOp::SMESHGUI_AddSubMeshOp()
   myHypothesisFilter( 0 ),
   myAlgorithmFilter( 0 )
 {
+  setAutoResumed( true );
 }
 
 //=================================================================================
@@ -356,4 +357,17 @@ SMESH::SMESH_subMesh_var SMESHGUI_AddSubMeshOp::addSubMesh( SMESH::SMESH_Mesh_pt
   }
 
   return aSubMesh._retn();
+}
+
+//=================================================================================
+// function : isValid
+// purpose  :
+//=================================================================================
+bool SMESHGUI_AddSubMeshOp::isValid( SUIT_Operation* theOtherOp ) const
+{
+  if ( theOtherOp && theOtherOp->inherits( "SMESHGUI_InitMeshOp" ) )
+    return true;
+  else
+    return false;
+
 }

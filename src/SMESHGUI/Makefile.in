@@ -59,6 +59,7 @@ LIB_SRC =	SMESHGUI.cxx \
 		SMESHGUI_MeshPatternDlg.cxx \
 		SMESHGUI_SpinBox.cxx \
 		SMESHGUI_NodesDlg.cxx \
+		SMESHGUI_NodesOp.cxx \
 		SMESHGUI_InitMeshDlg.cxx \
 		SMESHGUI_InitMeshOp.cxx \
 		SMESHGUI_AddSubMeshDlg.cxx \
@@ -78,6 +79,7 @@ LIB_SRC =	SMESHGUI.cxx \
 		SMESHGUI_MoveNodesDlg.cxx \
 		SMESHGUI_AddMeshElementDlg.cxx \
 		SMESHGUI_EditHypothesesDlg.cxx \
+		SMESHGUI_EditHypothesesOp.cxx \
 		SMESHGUI_CreateHypothesesDlg.cxx \
 		SMESHGUI_XmlHandler.cxx \
 		SMESHGUI_Filter.cxx \
@@ -88,6 +90,7 @@ LIB_SRC =	SMESHGUI.cxx \
 		SMESHGUI_aParameter.cxx \
 		SMESHGUI_DeleteGroupDlg.cxx \
 		SMESHGUI_GroupOpDlg.cxx \
+		SMESHGUI_GroupOp.cxx \
 		SMESHGUI_SmoothingDlg.cxx \
 		SMESHGUI_RenumberingDlg.cxx \
 		SMESHGUI_ExtrusionDlg.cxx \
@@ -110,7 +113,8 @@ LIB_SRC =	SMESHGUI.cxx \
 		SMESHGUI_Selection.cxx \
 		SMESHGUI_CreatePolyhedralVolumeDlg.cxx \
 		SMESHGUI_Dialog.cxx \
-		SMESHGUI_Operation.cxx 
+		SMESHGUI_Operation.cxx \
+		SMESHGUI_SelectionOp.cxx
 
 LIB_MOC = \
 		SMESHGUI.h \
@@ -118,6 +122,7 @@ LIB_MOC = \
 		SMESHGUI_MeshPatternDlg.h \
 		SMESHGUI_CreatePatternDlg.h \
 		SMESHGUI_NodesDlg.h \
+		SMESHGUI_NodesOp.h \
 		SMESHGUI_SpinBox.h \
 		SMESHGUI_InitMeshDlg.h \
 		SMESHGUI_InitMeshOp.h \
@@ -137,6 +142,7 @@ LIB_MOC = \
 		SMESHGUI_MoveNodesDlg.h \
 		SMESHGUI_AddMeshElementDlg.h \
 		SMESHGUI_EditHypothesesDlg.h \
+		SMESHGUI_EditHypothesesOp.h \
 		SMESHGUI_CreateHypothesesDlg.h \
 		SMESHGUI_FilterDlg.h \
 		SMESHGUI_FilterLibraryDlg.h \
@@ -144,6 +150,7 @@ LIB_MOC = \
 		SMESHGUI_MultiEditDlg.h \
 		SMESHGUI_DeleteGroupDlg.h \
 		SMESHGUI_GroupOpDlg.h \
+		SMESHGUI_GroupOp.h \
 		SMESHGUI_SmoothingDlg.h \
 		SMESHGUI_RenumberingDlg.h \
 		SMESHGUI_ExtrusionDlg.h \
@@ -157,7 +164,8 @@ LIB_MOC = \
 		SMESHGUI_MergeNodesDlg.h \
 		SMESHGUI_Dialog.h \
 		SMESHGUI_CreatePolyhedralVolumeDlg.h \
-		SMESHGUI_Operation.h
+		SMESHGUI_Operation.h \
+		SMESHGUI_SelectionOp.h
     
 LIB_CLIENT_IDL = SALOME_Exception.idl \
 		 GEOM_Gen.idl \

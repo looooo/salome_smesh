@@ -21,42 +21,57 @@
 //
 //
 //
-//  File   : SMESHGUI_AddSubMeshDlg.h
+//  File   : SMESHGUI_EditHypothesesOp.h
 //  Author : Nicolas REJNERI
 //  Module : SMESH
 //  $Header$
 
-#ifndef DIALOGBOX_ADD_SUBMESH_H
-#define DIALOGBOX_ADD_SUBMESH_H
+#ifndef OPERATION_EDIT_HYPOTHESES_H
+#define OPERATION_EDIT_HYPOTHESES_H
 
-#include <SMESHGUI_Dialog.h>
+#include <SMESHGUI_SelectionOp.h>
 
-class QLineEdit;
+class SMESHGUI_EditHypothesesDlg;
 
 //=================================================================================
-// class    : SMESHGUI_AddSubMeshDlg
+// class    : SMESHGUI_EditHypothesesOp
 // purpose  :
 //=================================================================================
-class SMESHGUI_AddSubMeshDlg : public SMESHGUI_Dialog
-{ 
+class SMESHGUI_EditHypothesesOp : public SMESHGUI_SelectionOp
+{
     Q_OBJECT
 
 public:
-    enum { MeshObj, GeomObj, Hypo, Algo };
-    
-public:
-    SMESHGUI_AddSubMeshDlg( SMESHGUI* );
-    ~SMESHGUI_AddSubMeshDlg();
+  SMESHGUI_EditHypothesesOp();
+  ~SMESHGUI_EditHypothesesOp();
 
-    void    setSubMeshName( const QString& );
-    QString subMeshName() const;
+  virtual SalomeApp_Dialog* dlg() const;
+  virtual void              initDialog();
 
-signals:
-    void nameChanged( const QString& );
+protected:
+  virtual void startOperation();
+  virtual void selectionDone();
+  virtual SUIT_SelectionFilter* createFilter( const int ) const;
+  void updateDialog();
+
+protected slots:
+  virtual bool onApply();
+
+private slots:
+  void onSelectionChanged( int );
+  void onUpdate();
 
 private:
-    QLineEdit* myMeshName;
+  void initGeom();
+  void initHypDefinition();
+  void initAlgoDefinition();
+  void initHypAssignation();
+  void initAlgoAssignation();
+  bool storeMeshOrSubMesh();
 
+private:
+  SMESHGUI_EditHypothesesDlg   *myDlg;
+  bool                          myImportedMesh;
 };
 
-#endif // DIALOGBOX_ADD_SUBMESH_H
+#endif

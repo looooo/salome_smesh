@@ -29,99 +29,65 @@
 #ifndef DIALOGBOX_EDIT_HYPOTHESES_H
 #define DIALOGBOX_EDIT_HYPOTHESES_H
 
-//#include "SMESH_TypeFilter.hxx"
-#include "SUIT_SelectionFilter.h"
-#include "SalomeApp_SelectionMgr.h"
+#include <qstring.h>
+#include <qmap.h>
+#include <qlistbox.h>
 
-// QT Includes
-#include <qdialog.h>
+#include <SMESHGUI_Dialog.h>
 
-// IDL Headers
-#include <SALOMEconfig.h>
-#include CORBA_SERVER_HEADER(GEOM_Gen)
-#include CORBA_SERVER_HEADER(SMESH_Mesh)
+typedef QMap< QString, int > MapIOR;
+typedef QMap< QString, QString > MapIORText;
 
-#include <map>
-#include <string>
+class ListBoxIOR : public QListBoxText
+{
+public:
+  enum { RTTI_IOR = 1000 };
 
-class QGroupBox;
-class QLabel;
-class QLineEdit;
-class QPushButton;
-class QListBox;
-class QListBoxItem;
-class SMESHGUI;
+public:
+  ListBoxIOR (QListBox* listbox,
+              const QString& ior,
+              const QString& text = QString::null )
+  : QListBoxText(listbox, text), myIOR(ior) {}
+  virtual ~ListBoxIOR() {};
+  virtual int rtti() const { return RTTI_IOR; }
+  QString GetIOR() const { return myIOR; }
 
-typedef map<std::string, int> MapIOR;
+private:
+  QString myIOR;
+};
+
 
 //=================================================================================
 // class    : SMESHGUI_EditHypothesesDlg
 // purpose  :
 //=================================================================================
-class SMESHGUI_EditHypothesesDlg : public QDialog
+class SMESHGUI_EditHypothesesDlg : public SMESHGUI_Dialog
 {
     Q_OBJECT
 
 public:
-    SMESHGUI_EditHypothesesDlg (SMESHGUI*,
-				const char* name = 0,
-				bool modal = FALSE,
-				WFlags fl = 0);
+    enum { MeshOrSubMesh, GeomShape };
+    typedef enum { HypoDef, HypoAssign, AlgoDef, AlgoAssign } ListType;
+    
+public:
+    SMESHGUI_EditHypothesesDlg( SMESHGUI* );
     ~SMESHGUI_EditHypothesesDlg();
 
-protected:
-    virtual void closeEvent (QCloseEvent*);
-    virtual void enterEvent (QEvent*);
+    void setListsEnabled( const bool );
+    int  hypoCount() const;
+    int  algoCount() const;
+    bool isModified() const;
+    int  findItem( QListBox*, const QString& );
+
+signals:
+    void needToUpdate();
+    
+private:
+    bool      isOld(QListBoxItem* hypItem);
 
 private:
-    void Init();
-
-    void InitHypDefinition();
-    void InitAlgoDefinition();
-    void InitHypAssignation();
-    void InitAlgoAssignation();
-
-    void InitGeom();
-
-    void UpdateControlState();
-
-    bool StoreMesh();
-    bool StoreSubMesh();
-
-    bool IsOld(QListBoxItem* hypItem);
-
-private:
-    SMESHGUI*                     mySMESHGUI;
-    SalomeApp_SelectionMgr*       mySelectionMgr;
-
-    GEOM::GEOM_Object_var         myGeomShape;
-    QLineEdit*                    myEditCurrentArgument; 
-
-    SMESH::SMESH_Mesh_var         myMesh;
-    SMESH::SMESH_subMesh_var      mySubMesh;
-
-    //Handle(SALOME_TypeFilter)     myGeomFilter;
-    //Handle(SMESH_TypeFilter)      myMeshOrSubMeshFilter;
-    SUIT_SelectionFilter*         myGeomFilter;
-    SUIT_SelectionFilter*         myMeshOrSubMeshFilter;
-
-    MapIOR                        myMapOldHypos, myMapOldAlgos;
-    int                           myNbModification;
-
-    bool                          myImportedMesh;
-
-    QGroupBox*    GroupButtons;
-    QPushButton*  buttonOk;
-    QPushButton*  buttonApply;
-    QPushButton*  buttonCancel;
-
-    QGroupBox*    GroupC1;
-    QLabel*       TextLabelC1A1;
-    QPushButton*  SelectButtonC1A1;
-    QLineEdit*    LineEditC1A1;
-    QLabel*       TextLabelC1A2;
-    QPushButton*  SelectButtonC1A2;
-    QLineEdit*    LineEditC1A2;
+    MapIOR  myMapOldHypos, myMapOldAlgos;
+    int     myNbModification;
 
     QGroupBox*    GroupHypotheses;
     QLabel*       TextHypDefinition;
@@ -136,16 +102,11 @@ private:
     QListBox*     ListAlgoAssignation;
 
 private slots:
-    void ClickOnOk();
-    bool ClickOnApply();
-    void ClickOnCancel();
-    void SetEditCurrentArgument();
-    void SelectionIntoArgument();
-    void DeactivateActiveDialog();
-    void ActivateThisDialog();
-
     void removeItem(QListBoxItem*);
     void addItem(QListBoxItem*);
+
+private:
+  friend class SMESHGUI_EditHypothesesOp;
 };
 
 #endif // DIALOGBOX_EDIT_HYPOTHESES_H

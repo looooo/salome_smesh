@@ -27,84 +27,32 @@
 #ifndef SMESHGUI_GroupOpDlg_H
 #define SMESHGUI_GroupOpDlg_H
 
-#include <qdialog.h>
-
-#include <SALOMEconfig.h>
-#include CORBA_SERVER_HEADER(SMESH_Group)
-
-class QCloseEvent;
-class QLabel;
-class QFrame;
-class QPushButton;
-class SalomeApp_SelectionMgr;
-class QLineEdit;
-class SMESHGUI;
-class SVTK_ViewWindow;
-class SVTK_Selector;
+#include <SMESHGUI_Dialog.h>
 
 /*
   Class       : SMESHGUI_GroupOpDlg
   Description : Perform boolean operations on groups
 */
 
-class SMESHGUI_GroupOpDlg : public QDialog
+class SMESHGUI;
+class QLineEdit;
+
+class SMESHGUI_GroupOpDlg : public SMESHGUI_Dialog
 { 
   Q_OBJECT
-    
+
 public:
-  enum { UNION, INTERSECT, CUT };
-    
-public:
-                            SMESHGUI_GroupOpDlg( SMESHGUI*, const int );
-  virtual                   ~SMESHGUI_GroupOpDlg();
+  SMESHGUI_GroupOpDlg( SMESHGUI*, const int );
+  virtual ~SMESHGUI_GroupOpDlg();
 
-  void                      Init();
-  
-private:
+  void    setName( const QString& );
+  QString name() const;
 
-  void                      closeEvent( QCloseEvent* e ) ;
-  void                      enterEvent ( QEvent * ) ;            
-  
-private slots:
-
-  void                      onOk();
-  bool                      onApply();
-  void                      onClose();
-
-  void                      onDeactivate();
-  void                      onSelectionDone();
-  void                      onFocusChanged();
+signals:
+  void nameChanged( const QString& );
 
 private:
-
-  QFrame*                   createButtonFrame( QWidget* );
-  QFrame*                   createMainFrame  ( QWidget* );
-  bool                      isValid();
-  void                      reset();
-  
-private:
-
-  QPushButton*              myOkBtn;
-  QPushButton*              myApplyBtn;
-  QPushButton*              myCloseBtn;
-  
   QLineEdit*                myNameEdit;
-  QLineEdit*                myEdit1;
-  QLineEdit*                myEdit2;
-  QPushButton*              myBtn1;
-  QPushButton*              myBtn2;
-  
-  SMESHGUI*                 mySMESHGUI;
-  SalomeApp_SelectionMgr*   mySelectionMgr;
-  int                       myMode;
-  SVTK_ViewWindow*          myViewWindow;
-  SVTK_Selector*            mySelector;
-  
-  QLineEdit*                myFocusWg;
-  
-  SMESH::SMESH_GroupBase_var    myGroup1;
-  SMESH::SMESH_GroupBase_var    myGroup2;
-  
 };
 
 #endif

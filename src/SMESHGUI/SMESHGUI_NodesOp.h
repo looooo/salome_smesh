@@ -21,42 +21,59 @@
 //
 //
 //
-//  File   : SMESHGUI_AddSubMeshDlg.h
+//  File   : SMESHGUI_NodesOp.h
 //  Author : Nicolas REJNERI
 //  Module : SMESH
 //  $Header$
 
-#ifndef DIALOGBOX_ADD_SUBMESH_H
-#define DIALOGBOX_ADD_SUBMESH_H
+#ifndef OPERATION_NODES_H
+#define OPERATION_NODES_H
 
-#include <SMESHGUI_Dialog.h>
+namespace SMESH{
+  struct TNodeSimulation;
+}
 
-class QLineEdit;
+#include <SMESHGUI_SelectionOp.h>
+
+// IDL Headers
+#include <SALOMEconfig.h>
+#include CORBA_SERVER_HEADER(SMESH_Mesh)
+
+class SMESHGUI_NodesDlg;
+
 
 //=================================================================================
-// class    : SMESHGUI_AddSubMeshDlg
+// class    : SMESHGUI_NodesOp
 // purpose  :
 //=================================================================================
-class SMESHGUI_AddSubMeshDlg : public SMESHGUI_Dialog
+class SMESHGUI_NodesOp : public SMESHGUI_SelectionOp
 { 
     Q_OBJECT
 
 public:
-    enum { MeshObj, GeomObj, Hypo, Algo };
+    SMESHGUI_NodesOp();
+    ~SMESHGUI_NodesOp();
+
+    virtual SalomeApp_Dialog* dlg() const;
     
-public:
-    SMESHGUI_AddSubMeshDlg( SMESHGUI* );
-    ~SMESHGUI_AddSubMeshDlg();
+protected:
+    virtual void startOperation();
+    virtual void selectionDone();
+    virtual void commitOperation();
+    virtual void abortOperation();
 
-    void    setSubMeshName( const QString& );
-    QString subMeshName() const;
+    void initDialog();
 
-signals:
-    void nameChanged( const QString& );
+protected slots:
+    virtual bool onApply();
+    
+private slots:
+    void onValueChanged( double );
 
 private:
-    QLineEdit* myMeshName;
-
+    SMESH::SMESH_Mesh_var   myMesh;
+    SMESH::TNodeSimulation* mySimulation;
+    SMESHGUI_NodesDlg*      myDlg;
 };
 
-#endif // DIALOGBOX_ADD_SUBMESH_H
+#endif // DIALOGBOX_NODES_H

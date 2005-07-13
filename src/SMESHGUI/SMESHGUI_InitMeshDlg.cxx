@@ -60,6 +60,7 @@ SMESHGUI_InitMeshDlg::SMESHGUI_InitMeshDlg( SMESHGUI* theModule )
     new QLabel(tr("SMESH_NAME"), GroupC1, "TextLabel_NameMesh");
     GroupC1->addSpace(1);
     myMeshName = new QLineEdit(GroupC1, "LineEdit_NameMesh");
+    connect( myMeshName, SIGNAL( textChanged( const QString& ) ), this, SIGNAL( nameChanged( const QString& ) ) );
     
     createObject( tr("SMESH_OBJECT_GEOM"), GroupC1, GeomObj );
     createObject( tr("SMESH_OBJECT_HYPOTHESIS"), GroupC1, Hypo );
@@ -81,17 +82,6 @@ SMESHGUI_InitMeshDlg::SMESHGUI_InitMeshDlg( SMESHGUI* theModule )
 SMESHGUI_InitMeshDlg::~SMESHGUI_InitMeshDlg()
 {
   // no need to delete child widgets, Qt does it all for us
-}
-
-//=================================================================================
-// function : updateControlState
-// purpose  :
-//=================================================================================
-void SMESHGUI_InitMeshDlg::updateControlState()
-{
-  bool isEnabled = !meshName().isEmpty() &&
-                   hasSelection( GeomObj ) && hasSelection( Hypo ) && hasSelection( Algo );
-  setButtonEnabled( isEnabled, OK | Apply );
 }
 
 //=================================================================================

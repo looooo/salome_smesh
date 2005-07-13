@@ -59,6 +59,7 @@ SMESHGUI_AddSubMeshDlg::SMESHGUI_AddSubMeshDlg( SMESHGUI* theModule )
     new QLabel(tr("SMESH_NAME"), GroupC1, "TextLabel_NameMesh");
     GroupC1->addSpace(1);
     myMeshName = new QLineEdit(GroupC1, "LineEdit_NameMesh");
+    connect( myMeshName, SIGNAL( textChanged( const QString& ) ), this, SIGNAL( nameChanged( const QString& ) ) );
 
     createObject( tr("SMESH_OBJECT_MESH"), GroupC1, MeshObj );
     createObject( tr("SMESH_OBJECT_GEOM"), GroupC1, GeomObj );
@@ -85,29 +86,19 @@ SMESHGUI_AddSubMeshDlg::~SMESHGUI_AddSubMeshDlg()
 }
 
 //=================================================================================
-// function : updateControlState()
-// purpose  :
-//=================================================================================
-void SMESHGUI_AddSubMeshDlg::updateControlState( const bool isEnabled )
-{
-  setButtonEnabled( isEnabled, OK | Apply );
-}
-
-//=================================================================================
-// function : init()
-// purpose  :
-//=================================================================================
-void SMESHGUI_AddSubMeshDlg::init()
-{
-  clearSelection();
-  myMeshName->setText( tr( "SMESH_SUBMESH" ) );
-}
-
-//=================================================================================
 // function : subMeshName
 // purpose  :
 //=================================================================================
 QString SMESHGUI_AddSubMeshDlg::subMeshName() const
 {
   return myMeshName->text().stripWhiteSpace();
+}
+
+//=================================================================================
+// function : setSubMeshName
+// purpose  :
+//=================================================================================
+void SMESHGUI_AddSubMeshDlg::setSubMeshName( const QString& name )
+{
+  myMeshName->setText( name );
 }

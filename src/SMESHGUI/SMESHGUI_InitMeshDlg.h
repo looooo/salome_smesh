@@ -46,10 +46,11 @@ public:
     SMESHGUI_InitMeshDlg( SMESHGUI* );
     ~SMESHGUI_InitMeshDlg();
 
-    void    updateControlState();
-
     void    setMeshName( const QString& );
     QString meshName() const;
+
+signals:
+    void nameChanged( const QString& );
 
 private:
   QLineEdit*  myMeshName;

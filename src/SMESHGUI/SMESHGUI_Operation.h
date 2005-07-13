@@ -51,15 +51,17 @@ protected:
   } SelectedObjectType;
 
 protected:
+  Selection_Mode    selectionMode() const;
   void              setSelectionMode( const Selection_Mode );
   void              highlight( const Handle( SALOME_InteractiveObject )&,
                                const bool, const bool = true );
   void              addOrRemoveIndex( const Handle( SALOME_InteractiveObject )&,
                                       const TColStd_MapOfInteger&, const bool );
 
+  //! sets the dialog widgets to state just after operation start
+  virtual void      initDialog();
+
   virtual void      startOperation();
-  virtual void      commitOperation();
-  virtual void      abortOperation();
   virtual bool      isReadyToStart();
 
   SMESHGUI*         getSMESHGUI() const;

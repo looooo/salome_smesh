@@ -1,5 +1,3 @@
-//  SMESH SMESHGUI : GUI for SMESH component
-//
 //  Copyright (C) 2003  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 //  CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS 
 // 
@@ -21,42 +19,55 @@
 //
 //
 //
-//  File   : SMESHGUI_AddSubMeshDlg.h
-//  Author : Nicolas REJNERI
+//  File   : SMESHGUI_GroupOp.h
+//  Author : Sergey LITONIN
 //  Module : SMESH
-//  $Header$
 
-#ifndef DIALOGBOX_ADD_SUBMESH_H
-#define DIALOGBOX_ADD_SUBMESH_H
 
-#include <SMESHGUI_Dialog.h>
+#ifndef SMESHGUI_GroupOp_H
+#define SMESHGUI_GroupOp_H
 
-class QLineEdit;
+#include <SMESHGUI_SelectionOp.h>
 
-//=================================================================================
-// class    : SMESHGUI_AddSubMeshDlg
-// purpose  :
-//=================================================================================
-class SMESHGUI_AddSubMeshDlg : public SMESHGUI_Dialog
+class SMESHGUI_GroupOpDlg;
+
+/*
+  Class       : SMESHGUI_GroupOp
+  Description : Perform boolean operations on groups
+*/
+
+class SMESHGUI_GroupOp : public SMESHGUI_SelectionOp
 { 
-    Q_OBJECT
+  Q_OBJECT
 
 public:
-    enum { MeshObj, GeomObj, Hypo, Algo };
-    
+  enum { UNION, INTERSECT, CUT };
+  
 public:
-    SMESHGUI_AddSubMeshDlg( SMESHGUI* );
-    ~SMESHGUI_AddSubMeshDlg();
+  SMESHGUI_GroupOp( const int );
+  virtual ~SMESHGUI_GroupOp();
+  
+  virtual SalomeApp_Dialog* dlg() const;  
 
-    void    setSubMeshName( const QString& );
-    QString subMeshName() const;
+protected:
+  virtual void startOperation();
+  virtual void initDialog();
+  virtual void selectionDone();
+  
+  virtual SUIT_SelectionFilter* createFilter( const int ) const;
 
-signals:
-    void nameChanged( const QString& );
+  bool isValid() const;
+  void updateDialog();
+  
+protected slots:
+  virtual bool onApply();
+
+private slots:
+  void onNameChanged( const QString& );
 
 private:
-    QLineEdit* myMeshName;
-
+  SMESHGUI_GroupOpDlg  *myDlg;
+  int                   myMode;
 };
 
-#endif // DIALOGBOX_ADD_SUBMESH_H
+#endif

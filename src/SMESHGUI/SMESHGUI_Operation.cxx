@@ -40,9 +40,25 @@ SMESHGUI_Operation::SMESHGUI_Operation()
 {
 }
 
+//=======================================================================
+// name    : ~SMESHGUI_Operation
+// Purpose : Destructor
+//=======================================================================
 SMESHGUI_Operation::~SMESHGUI_Operation()
 {
-  
+}
+
+//=======================================================================
+// name    : selectionMode
+// Purpose : Returns selection mode
+//=======================================================================
+Selection_Mode SMESHGUI_Operation::selectionMode() const
+{
+  SVTK_ViewWindow* wnd = viewWindow();
+  if( wnd )
+    return wnd->SelectionMode();
+  else
+    return ActorSelection;
 }
 
 //=======================================================================
@@ -129,7 +145,9 @@ void SMESHGUI_Operation::startOperation()
       
     if( dlg()->testButtonFlags( QtxDialog::Cancel ) )
       connect( dlg(), SIGNAL( dlgCancel() ), this, SLOT( onCancel() ) );
-  }    
+
+    initDialog();
+  }
 
   SalomeApp_Operation::startOperation();
 }
@@ -332,21 +350,9 @@ void SMESHGUI_Operation::onCancel()
 }
 
 //=======================================================================
-// name    : commitOperation
+// name    : initDialog
 // Purpose :
 //=======================================================================
-void SMESHGUI_Operation::commitOperation()
+void SMESHGUI_Operation::initDialog()
 {
-  selectionMgr()->clearFilters();
-  SalomeApp_Operation::commitOperation();
-}
-
-//=======================================================================
-// name    : abortOperation
-// Purpose :
-//=======================================================================
-void SMESHGUI_Operation::abortOperation()
-{
-  selectionMgr()->clearFilters();
-  SalomeApp_Operation::abortOperation();
 }

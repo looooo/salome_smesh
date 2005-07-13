@@ -228,13 +228,13 @@ void SMESHGUI_NodesOp::startOperation()
 {
   if( !myDlg )
   {
-    myDlg = new SMESHGUI_NodesDlg( getSMESHGUI() );
+    myDlg = new SMESHGUI_NodesDlg();
     connect( myDlg, SIGNAL( valueChanged( double ) ), this, SLOT( onValueChanged( double ) ) );
     connect( myDlg, SIGNAL( dlgClose() ), this, SLOT( onCancel() ) );
   }
 
   SMESHGUI_SelectionOp::startOperation();
-    
+
   mySimulation = new SMESH::TNodeSimulation( viewWindow() );
   myDlg->show();
 }
@@ -245,7 +245,8 @@ void SMESHGUI_NodesOp::startOperation()
 //=================================================================================
 void SMESHGUI_NodesOp::commitOperation()
 {
-  delete mySimulation;
+  if( mySimulation )
+    delete mySimulation;
   mySimulation = 0;
   SMESHGUI_SelectionOp::commitOperation();
 }
@@ -256,7 +257,8 @@ void SMESHGUI_NodesOp::commitOperation()
 //=================================================================================
 void SMESHGUI_NodesOp::abortOperation()
 {
-  delete mySimulation;
+  if( mySimulation )
+    delete mySimulation;
   mySimulation = 0;
   SMESHGUI_SelectionOp::abortOperation();
 }

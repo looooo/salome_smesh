@@ -29,7 +29,7 @@
 #ifndef OPERATION_ADD_SUB_MESH_H
 #define OPERATION_ADD_SUB_MESH_H
 
-#include <SMESHGUI_Operation.h>
+#include <SMESHGUI_SelectionOp.h>
 
 #include <SALOMEconfig.h>
 #include CORBA_SERVER_HEADER(GEOM_Gen)
@@ -43,7 +43,7 @@ class SUIT_SelectionFilter;
 // class    : SMESHGUI_AddSubMeshOp
 // purpose  :
 //=================================================================================
-class SMESHGUI_AddSubMeshOp : public SMESHGUI_Operation
+class SMESHGUI_AddSubMeshOp : public SMESHGUI_SelectionOp
 {
     Q_OBJECT
 
@@ -52,14 +52,15 @@ public:
   ~SMESHGUI_AddSubMeshOp();
 
   virtual SalomeApp_Dialog* dlg() const;
-  void    init();
+  virtual void              initDialog();
   virtual bool isValid( SUIT_Operation* theOtherOp ) const;
   
 protected:
   virtual void startOperation();
   virtual void selectionDone();
+  virtual SUIT_SelectionFilter* createFilter( const int ) const;
 
-  bool isValid() const;
+  void updateDialog();
 
   SMESH::SMESH_subMesh_var addSubMesh( SMESH::SMESH_Mesh_ptr,
                                        GEOM::GEOM_Object_ptr,
@@ -67,14 +68,13 @@ protected:
 
 protected slots:
   virtual bool onApply();
+  virtual void onSelectionChanged( int );
 
 private slots:
-  void onActivateObject( int );
-  void onSelectionChanged( int );
+  void onNameChanged( const QString& );
 
 private:
   SMESHGUI_AddSubMeshDlg  *myDlg;
-  SUIT_SelectionFilter    *myMeshFilter, *myGeomFilter, *myHypothesisFilter, *myAlgorithmFilter;
 };
 
 #endif // OPERATION_INIT_MESH_H

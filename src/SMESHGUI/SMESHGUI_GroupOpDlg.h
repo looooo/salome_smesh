@@ -42,7 +42,7 @@ class SMESHGUI_GroupOpDlg : public SMESHGUI_Dialog
   Q_OBJECT
 
 public:
-  SMESHGUI_GroupOpDlg( SMESHGUI*, const int );
+  SMESHGUI_GroupOpDlg( const int );
   virtual ~SMESHGUI_GroupOpDlg();
 
   void    setName( const QString& );

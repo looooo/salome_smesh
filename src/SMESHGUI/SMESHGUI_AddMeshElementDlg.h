@@ -29,108 +29,30 @@
 #ifndef DIALOGBOX_ADD_FACE_H
 #define DIALOGBOX_ADD_FACE_H
 
-#include "SalomeApp_SelectionMgr.h"
+#include <SMESHGUI_Dialog.h>
 
-#include "SMDSAbs_ElementType.hxx"
-
-
-// QT Includes
-#include <qvariant.h>
-#include <qdialog.h>
-
-class QVBoxLayout; 
-class QHBoxLayout; 
-class QGridLayout; 
-class QButtonGroup;
-class QGroupBox;
-class QLabel;
-class QLineEdit;
-class QPushButton;
-class QRadioButton;
 class QCheckBox;
-class SMESHGUI;
-class SMESH_Actor;
-class SMDS_Mesh;
-class SVTK_ViewWindow;
-class SVTK_Selector;
-
-namespace SMESH{
-  struct TElementSimulation;
-}
-
-// IDL Headers
-#include <SALOMEconfig.h>
-#include CORBA_SERVER_HEADER(SMESH_Mesh)
 
 //=================================================================================
 // class    : SMESHGUI_AddMeshElementDlg
 // purpose  :
 //=================================================================================
-class SMESHGUI_AddMeshElementDlg : public QDialog
+class SMESHGUI_AddMeshElementDlg : public SMESHGUI_Dialog
 { 
     Q_OBJECT
 
 public:
-    SMESHGUI_AddMeshElementDlg( SMESHGUI*,
-			        const char* = 0, 
-                                SMDSAbs_ElementType ElementType = SMDSAbs_Edge,
-			        int nbNodes = 2, bool modal = FALSE, WFlags fl = 0 );
+    SMESHGUI_AddMeshElementDlg( const QString&, const bool );
     ~SMESHGUI_AddMeshElementDlg();
 
+    bool isReverse() const;
+    void setBusy( const bool );
+
+signals:
+    void reverse( int );
+
 private:
-    void Init ();
-    void closeEvent (QCloseEvent*);
-    void hideEvent (QHideEvent*);                 /* ESC key */
-    void enterEvent (QEvent*);                    /* mouse enter the QWidget */
-    void displaySimulation();
-
-    SMESHGUI*                   mySMESHGUI;              /* Current SMESHGUI object */
-    SalomeApp_SelectionMgr*     mySelectionMgr;          /* User shape selection */
-    int                         myNbOkNodes;               /* to check when arguments is defined */
-    bool                        myBusy;
-    SVTK_ViewWindow*            myViewWindow;
-    SVTK_Selector*              mySelector;
-
-    QLineEdit*                  myEditCurrentArgument;   /* Current  LineEdit */
-
-    int                         myElementType;
-    int                         myNbNodes;
-    bool                        myIsPoly;
-
-    SMESH::SMESH_Mesh_var       myMesh;
-    SMESH_Actor*                myActor;
-    SMESH::TElementSimulation*  mySimulation;
-    
-    QButtonGroup* GroupConstructors;
-    QRadioButton* Constructor1;
-    QGroupBox   * GroupButtons;
-    QPushButton * buttonOk;
-    QPushButton * buttonCancel;
-    QPushButton * buttonApply;
-    QGroupBox   * GroupC1;
-    QLabel      * TextLabelC1A1;
-    QPushButton * SelectButtonC1A1;
-    QLineEdit   * LineEditC1A1;
-
-    QCheckBox   * Reverse;
-
-private slots:
-
-    void ClickOnOk();
-    void ClickOnCancel();
-    void ClickOnApply();
-    void SetEditCurrentArgument() ;
-    void SelectionIntoArgument() ;
-    void DeactivateActiveDialog() ;
-    void ActivateThisDialog() ;
-    void CheckBox( int );
-    void onTextChange(const QString&);
-
-protected:
-    QGridLayout* SMESHGUI_AddMeshElementDlgLayout;
-    QGridLayout* GroupConstructorsLayout;
-    QGridLayout* GroupButtonsLayout;
-    QGridLayout* GroupC1Layout;
+  QCheckBox* myReverse;
 };
 
 #endif // DIALOGBOX_ADD_FACE_H

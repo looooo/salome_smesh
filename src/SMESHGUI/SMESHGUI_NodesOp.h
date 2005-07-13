@@ -62,7 +62,7 @@ protected:
     virtual void commitOperation();
     virtual void abortOperation();
 
-    void initDialog();
+    virtual void initDialog();
 
 protected slots:
     virtual bool onApply();

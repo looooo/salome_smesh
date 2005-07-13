@@ -83,7 +83,7 @@ void SMESHGUI_EditHypothesesOp::startOperation()
 {
   if( !myDlg )
   {
-    myDlg = new SMESHGUI_EditHypothesesDlg( getSMESHGUI() );
+    myDlg = new SMESHGUI_EditHypothesesDlg();
     connect( myDlg, SIGNAL( needToUpdate() ), this, SLOT( onUpdate() ) );
   }
 

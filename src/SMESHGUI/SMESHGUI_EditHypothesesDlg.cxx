@@ -43,8 +43,8 @@
 //            The dialog will by default be modeless, unless you set 'modal' to
 //            TRUE to construct a modal dialog.
 //=================================================================================
-SMESHGUI_EditHypothesesDlg::SMESHGUI_EditHypothesesDlg( SMESHGUI* theModule )
-: SMESHGUI_Dialog( theModule, false, true )
+SMESHGUI_EditHypothesesDlg::SMESHGUI_EditHypothesesDlg()
+: SMESHGUI_Dialog( false, true )
 {
     setName("SMESHGUI_EditHypothesesDlg");
     setCaption(tr("SMESH_EDIT_HYPOTHESES"));

@@ -44,8 +44,8 @@
 //            The dialog will by default be modeless, unless you set 'modal' to
 //            TRUE to construct a modal dialog.
 //=================================================================================
-SMESHGUI_InitMeshDlg::SMESHGUI_InitMeshDlg( SMESHGUI* theModule )
-: SMESHGUI_Dialog( theModule, false, true )
+SMESHGUI_InitMeshDlg::SMESHGUI_InitMeshDlg()
+: SMESHGUI_Dialog( false, true )
 {
     setCaption(tr("SMESH_INIT_MESH"));
 

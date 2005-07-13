@@ -41,8 +41,8 @@
 // class    : SMESHGUI_NodesDlg()
 // purpose  :
 //=================================================================================
-SMESHGUI_NodesDlg::SMESHGUI_NodesDlg( SMESHGUI* theModule )
-: SMESHGUI_Dialog( theModule, false, false, OK | Apply | Close )
+SMESHGUI_NodesDlg::SMESHGUI_NodesDlg()
+: SMESHGUI_Dialog( false, false, OK | Apply | Close )
 {
   QPixmap image0( resMgr()->loadPixmap("SMESH", tr("ICON_DLG_NODE")));
   setName("SMESHGUI_NodesDlg");
@@ -112,6 +112,8 @@ SMESHGUI_NodesDlg::SMESHGUI_NodesDlg( SMESHGUI* theModule )
   connect(SpinBox_Z, SIGNAL(valueChanged(double)), this, SIGNAL(valueChanged(double)));
   
   SMESHGUI_NodesDlgLayout->addWidget(GroupCoordinates, 1, 0);
+
+  setFocusProxy( SpinBox_X );
 }
 
 //=======================================================================
@@ -142,7 +144,4 @@ void SMESHGUI_NodesDlg::setCoords( const double x, const double y, const double 
   SpinBox_X->setValue( x );
   SpinBox_Y->setValue( y );
   SpinBox_Z->setValue( z );
-  SpinBox_X->clearFocus();
-  SpinBox_Y->clearFocus();
-  SpinBox_Z->clearFocus();
 }

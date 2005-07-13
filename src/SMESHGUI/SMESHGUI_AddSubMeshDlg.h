@@ -45,7 +45,7 @@ public:
     enum { MeshObj, GeomObj, Hypo, Algo };
     
 public:
-    SMESHGUI_AddSubMeshDlg( SMESHGUI* );
+    SMESHGUI_AddSubMeshDlg();
     ~SMESHGUI_AddSubMeshDlg();
 
     void    setSubMeshName( const QString& );

@@ -27,7 +27,7 @@
 #include "SMESHGUI.h"
 #include "SMESHGUI_InitMeshOp.h"
 #include "SMESHGUI_AddSubMeshOp.h"
-#include "SMESHGUI_NodesDlg.h"
+#include "SMESHGUI_NodesOp.h"
 #include "SMESHGUI_TransparencyDlg.h"
 #include "SMESHGUI_ClippingDlg.h"
 #include "SMESHGUI_GroupDlg.h"
@@ -41,14 +41,14 @@
 #include "SMESHGUI_Hypotheses.h"
 #include "SMESHGUI_HypothesesUtils.h"
 #include "SMESHGUI_MoveNodesDlg.h"
-#include "SMESHGUI_AddMeshElementDlg.h"
-#include "SMESHGUI_EditHypothesesDlg.h"
+#include "SMESHGUI_AddMeshElementOp.h"
+#include "SMESHGUI_EditHypothesesOp.h"
 #include "SMESHGUI_CreateHypothesesDlg.h"
 #include "SMESHGUI_FilterDlg.h"
 #include "SMESHGUI_FilterLibraryDlg.h"
 #include "SMESHGUI_SingleEditDlg.h"
 #include "SMESHGUI_MultiEditDlg.h"
-#include "SMESHGUI_GroupOpDlg.h"
+#include "SMESHGUI_GroupOp.h"
 #include "SMESHGUI_DeleteGroupDlg.h"
 #include "SMESHGUI_SmoothingDlg.h"
 #include "SMESHGUI_RenumberingDlg.h"
@@ -1227,7 +1227,8 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
   case 400:					// NODES
     {
       if(checkLock(aStudy)) break;
-
+      startOperation( 400 );
+/*
       if ( vtkwnd ) {
 	EmitSignalDeactivateDialog();
 
@@ -1238,7 +1239,7 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
 			      tr("SMESH_WRN_WARNING"), 
 			      tr("SMESH_WRN_VIEWER_VTK"),
 			      tr("SMESH_BUT_OK"));
-      }
+      }     */
       break;
     }
 
@@ -1393,24 +1394,21 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
   case 704:					// EDIT Hypothesis 
     {
       if(checkLock(aStudy)) break;
-      EmitSignalDeactivateDialog();
-      new SMESHGUI_EditHypothesesDlg( this );
+      startOperation( 704 );
       break;
     }
 
   case 705:					//  EDIT Global Hypothesis
     {
       if(checkLock(aStudy)) break;
-      EmitSignalDeactivateDialog();
-      new SMESHGUI_EditHypothesesDlg( this );
+      startOperation( 704 );
       break;
     }
 
   case 706:					//  EDIT Local Hypothesis
     {
       if(checkLock(aStudy)) break;
-      EmitSignalDeactivateDialog();
-      new SMESHGUI_EditHypothesesDlg( this );
+      startOperation( 704 );
       break;
     }
 
@@ -1438,9 +1436,9 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
       */
       EmitSignalDeactivateDialog();
       if ( theCommandID == 407 )
-        new SMESHGUI_TrianglesInversionDlg(this);
+        startOperation( 407 );
       else
-        new SMESHGUI_UnionOfTwoTrianglesDlg(this);
+        startOperation( 408 );
       break;
     }
     case 409: // Change orientation
@@ -1694,24 +1692,8 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
     case 811: // Intersect groups
     case 812: // Cut groups
     {
-      if ( !vtkwnd )
-      {
-        SUIT_MessageBox::warn1( desktop(), tr( "SMESH_WRN_WARNING" ),
-          tr( "NOT_A_VTK_VIEWER" ),tr( "SMESH_BUT_OK" ) );
-        break;
-      }
-
-      if ( checkLock( aStudy ) )
-        break;
-
-      EmitSignalDeactivateDialog();
-
-      int aMode;
-      if      ( theCommandID == 810 ) aMode = SMESHGUI_GroupOpDlg::UNION;
-      else if ( theCommandID == 811 ) aMode = SMESHGUI_GroupOpDlg::INTERSECT;
-      else                            aMode = SMESHGUI_GroupOpDlg::CUT;
-
-      ( new SMESHGUI_GroupOpDlg( this, aMode ) )->show();
+      if( !checkLock( aStudy ) )
+        startOperation( theCommandID );
       break;
     }
 
@@ -2003,7 +1985,8 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
   case 4032:					// HEXA
     {
       if(checkLock(aStudy)) break;
-      if ( vtkwnd ) {
+      startOperation( theCommandID );
+/*      if ( vtkwnd ) {
 	EmitSignalDeactivateDialog();
         SMDSAbs_ElementType type    = SMDSAbs_Edge;
         int                 nbNodes = 2;
@@ -2028,7 +2011,7 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
 	SUIT_MessageBox::warn1(desktop(),
 			      tr("SMESH_WRN_WARNING"), tr("SMESH_WRN_VIEWER_VTK"),
 			      tr("SMESH_BUT_OK"));
-      }
+      }*/
       break;
     }
   case 4033:					// POLYHEDRON
@@ -3308,13 +3291,57 @@ SalomeApp_Operation* SMESHGUI::createOperation( const int id ) const
 {
   SalomeApp_Operation* op = 0;
   switch( id )
-  {
+  {     
+    case 400:
+      op = new SMESHGUI_NodesOp();
+      break;
+
+    case 401:
+      op = new SMESHGUI_AddMeshElementOp( SMDSAbs_Edge, 2 );
+      break;
+      
+    case 4021:
+      op = new SMESHGUI_AddMeshElementOp( SMDSAbs_Face, 3 );
+      break;
+      
+    case 4022:
+      op = new SMESHGUI_AddMeshElementOp( SMDSAbs_Face, 4 );
+      break;
+      
+    case 4023:
+      op = new SMESHGUI_AddMeshElementOp( SMDSAbs_Face, 5 ); // 5 - identificator for POLYGON
+      break;
+      
+    case 4031:
+      op = new SMESHGUI_AddMeshElementOp( SMDSAbs_Volume, 4 );
+      break;
+      
+    case 4032:
+      op = new SMESHGUI_AddMeshElementOp( SMDSAbs_Volume, 8 );
+      break;
+            
     case 702:
       op = new SMESHGUI_AddSubMeshOp();
       break;
       
     case 703:
       op = new SMESHGUI_InitMeshOp();
+      break;
+
+    case 704:
+      op = new SMESHGUI_EditHypothesesOp();
+      break;
+
+    case 810:
+      op = new SMESHGUI_GroupOp( SMESHGUI_GroupOp::UNION );
+      break;
+
+    case 811:
+      op = new SMESHGUI_GroupOp( SMESHGUI_GroupOp::INTERSECT );
+      break;
+
+    case 812:
+      op = new SMESHGUI_GroupOp( SMESHGUI_GroupOp::CUT );
       break;
       
     default:

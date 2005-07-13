@@ -54,11 +54,8 @@
 // purpose  :
 //=================================================================================
 SMESHGUI_InitMeshOp::SMESHGUI_InitMeshOp()
-: SMESHGUI_Operation(),
-  myDlg( 0 ),
-  myGeomFilter( 0 ),
-  myHypothesisFilter( 0 ),
-  myAlgorithmFilter( 0 )
+: SMESHGUI_SelectionOp(),
+  myDlg( 0 )
 {
   setAutoResumed( true );
 }
@@ -71,15 +68,6 @@ SMESHGUI_InitMeshOp::~SMESHGUI_InitMeshOp()
 {
   if( myDlg )
     delete myDlg;
-    
-  if( myGeomFilter )
-    delete myGeomFilter;
-  
-  if( myAlgorithmFilter )
-    delete myAlgorithmFilter;
-
-  if( myHypothesisFilter )
-    delete myHypothesisFilter;    
 }
 
 //=================================================================================
@@ -90,27 +78,12 @@ void SMESHGUI_InitMeshOp::startOperation()
 {
   if( !myDlg )
   {
-    myDlg = new SMESHGUI_InitMeshDlg( getSMESHGUI() );
-    connect( myDlg, SIGNAL( objectActivated( int ) ), this, SLOT( onActivateObject( int ) ) );
+    myDlg = new SMESHGUI_InitMeshDlg();
+    connect( myDlg, SIGNAL( nameChanged( const QString& ) ), this, SLOT( onNameChanged( const QString& ) ) );
   }
 
-  SMESHGUI_Operation::startOperation();
+  SMESHGUI_SelectionOp::startOperation();
 
-  if( !myGeomFilter )
-  {
-    TColStd_MapOfInteger allTypesMap;
-    for (int i = 0; i < 10; i++)
-      allTypesMap.Add(i);
-    myGeomFilter       = new SMESH_NumberFilter ("GEOM", TopAbs_SHAPE, 0, allTypesMap);
-  }
-
-  if( !myAlgorithmFilter )
-    myAlgorithmFilter  = new SMESH_TypeFilter (ALGORITHM);
-
-  if( !myHypothesisFilter )
-    myHypothesisFilter = new SMESH_TypeFilter (HYPOTHESIS);
-    
-  init();
   myDlg->show();
 }
 
@@ -129,36 +102,33 @@ SalomeApp_Dialog* SMESHGUI_InitMeshOp::dlg() const
 //=================================================================================
 void SMESHGUI_InitMeshOp::selectionDone()
 {
-  QStringList names, ids;
-  SMESHGUI_Dialog::TypesList types;
-  selected( names, types, ids );
+  SMESHGUI_SelectionOp::selectionDone();
   if( myDlg )
-  {
-    myDlg->selectObject( names, types, ids );
-    myDlg->updateControlState();
-  }
+    updateDialog();
 }
 
 //=================================================================================
-// function : onActivateObject
+// function : createFilter
 // purpose  :
 //=================================================================================
-void SMESHGUI_InitMeshOp::onActivateObject( int obj )
+SUIT_SelectionFilter* SMESHGUI_InitMeshOp::createFilter( const int id ) const
 {
-  SalomeApp_SelectionMgr* mgr = selectionMgr();
+  if( id==SMESHGUI_InitMeshDlg::GeomObj )
+  {
+    TColStd_MapOfInteger allTypesMap;
+    for (int i = 0; i < 10; i++)
+      allTypesMap.Add(i);
+    return new SMESH_NumberFilter( "GEOM", TopAbs_SHAPE, 0, allTypesMap );
+  }
 
-  if( !mgr )
-    return;
-    
-  mgr->clearFilters();
-  if( obj==SMESHGUI_InitMeshDlg::GeomObj )
-    mgr->installFilter( myGeomFilter );
-    
-  else if( obj==SMESHGUI_InitMeshDlg::Hypo )
-    mgr->installFilter( myHypothesisFilter );
+  else if( id==SMESHGUI_InitMeshDlg::Hypo )
+    return new SMESH_TypeFilter (HYPOTHESIS);
 
-  else if( obj==SMESHGUI_InitMeshDlg::Algo )
-    mgr->installFilter( myAlgorithmFilter );
+  else if( id==SMESHGUI_InitMeshDlg::Algo )
+    return new SMESH_TypeFilter (ALGORITHM);
+
+  else
+    return 0;
 }
 
 //=================================================================================
@@ -236,7 +206,7 @@ bool SMESHGUI_InitMeshOp::onApply()
 
   update( UF_Model | UF_ObjBrowser );
 
-  init();
+  initDialog();
   return true;
 }
 
@@ -263,13 +233,13 @@ QString SMESHGUI_InitMeshOp::defaultMeshName() const
 // function : init()
 // purpose  :
 //=================================================================================
-void SMESHGUI_InitMeshOp::init()
+void SMESHGUI_InitMeshOp::initDialog()
 {
+  SMESHGUI_SelectionOp::initDialog();
   if( myDlg )
   {
     myDlg->setMeshName( defaultMeshName() );
-    myDlg->clearSelection();
-    myDlg->updateControlState();
+    updateDialog();
   }    
 }
 
@@ -324,27 +294,39 @@ void SMESHGUI_InitMeshOp::onSelectionChanged( int id )
 }
 
 //=================================================================================
+// function : onNameChanged()
+// purpose  :
+//=================================================================================
+void SMESHGUI_InitMeshOp::onNameChanged( const QString& )
+{
+  updateDialog();
+}
+
+//=================================================================================
+// function : updateDialog()
+// purpose  :
+//=================================================================================
+void SMESHGUI_InitMeshOp::updateDialog()
+{
+  if( !myDlg )
+    return;
+    
+  bool isEnabled = !myDlg->meshName().isEmpty() &&
+                   myDlg->hasSelection( SMESHGUI_InitMeshDlg::GeomObj ) &&
+                   myDlg->hasSelection( SMESHGUI_InitMeshDlg::Hypo ) &&
+                   myDlg->hasSelection( SMESHGUI_InitMeshDlg::Algo );
+  myDlg->setButtonEnabled( isEnabled, QtxDialog::OK | QtxDialog::Apply );
+}
+
+//=================================================================================
 // function : isValid
 // purpose  :
 //=================================================================================
 bool SMESHGUI_InitMeshOp::isValid( SUIT_Operation* theOtherOp ) const
 {
-  if ( theOtherOp && theOtherOp->inherits( "SMESHGUI_AddSubMeshOp" ) )
+  //if ( theOtherOp && theOtherOp->inherits( "SMESHGUI_AddSubMeshOp" ) )
     return true;
-  else
+  /*else
     return false;
-    
+    */
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

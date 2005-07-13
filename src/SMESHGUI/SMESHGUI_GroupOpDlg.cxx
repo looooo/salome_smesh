@@ -44,8 +44,8 @@
 // name    : SMESHGUI_GroupOpDlg::SMESHGUI_GroupOpDlg
 // Purpose : Constructor
 //=======================================================================
-SMESHGUI_GroupOpDlg::SMESHGUI_GroupOpDlg( SMESHGUI* theModule, const int aMode )
-: SMESHGUI_Dialog( theModule, false, true )
+SMESHGUI_GroupOpDlg::SMESHGUI_GroupOpDlg( const int aMode )
+: SMESHGUI_Dialog( false, true )
 {
   QString caption;
   if( aMode == 0 )

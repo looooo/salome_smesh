@@ -43,7 +43,7 @@ public:
     enum { GeomObj, Hypo, Algo };
 
 public:
-    SMESHGUI_InitMeshDlg( SMESHGUI* );
+    SMESHGUI_InitMeshDlg();
     ~SMESHGUI_InitMeshDlg();
 
     void    setMeshName( const QString& );

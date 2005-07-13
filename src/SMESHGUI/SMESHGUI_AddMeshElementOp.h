@@ -21,40 +21,66 @@
 //
 //
 //
-//  File   : SMESHGUI_NodesDlg.h
+//  File   : SMESHGUI_AddMeshElementOp.h
 //  Author : Nicolas REJNERI
 //  Module : SMESH
 //  $Header$
 
-#ifndef DIALOGBOX_NODES_H
-#define DIALOGBOX_NODES_H
+#ifndef OPERATION_ADD_FACE_H
+#define OPERATION_ADD_FACE_H
 
-#include <SMESHGUI_Dialog.h>
+namespace SMESH{
+  struct TElementSimulation;
+}
 
-class SMESHGUI_SpinBox;
+// IDL Headers
+#include <SALOMEconfig.h>
+#include CORBA_SERVER_HEADER(SMESH_Mesh)
+
+#include <SMESHGUI_SelectionOp.h>
+#include <SMDSAbs_ElementType.hxx>
+
+class SMESHGUI_AddMeshElementDlg;
 
 //=================================================================================
-// class    : SMESHGUI_NodesDlg
+// class    : SMESHGUI_AddMeshElementOp
 // purpose  :
 //=================================================================================
-class SMESHGUI_NodesDlg : public SMESHGUI_Dialog
+class SMESHGUI_AddMeshElementOp : public SMESHGUI_SelectionOp
 { 
     Q_OBJECT
 
 public:
-    SMESHGUI_NodesDlg();
-    ~SMESHGUI_NodesDlg();
+    SMESHGUI_AddMeshElementOp( const SMDSAbs_ElementType, const int );
+    ~SMESHGUI_AddMeshElementOp();
 
-    void coords( double&, double&, double& ) const;
-    void setCoords( const double, const double, const double );
+    virtual SalomeApp_Dialog* dlg() const;
+
+protected:
+    virtual void startOperation();
+    virtual void selectionDone();
+    virtual void commitOperation();
+    virtual void abortOperation();
+
+    void updateDialog();
     
-signals:
-    void valueChanged( double );
+protected slots:
+    virtual bool onApply();
+    void onTextChanged( int, const QStringList& );
+    void onReverse( int );
 
 private:
-    SMESHGUI_SpinBox* SpinBox_X;
-    SMESHGUI_SpinBox* SpinBox_Y;
-    SMESHGUI_SpinBox* SpinBox_Z;
+    void displaySimulation();
+
+private:
+    int                         myElementType;
+    int                         myNbNodes;
+    bool                        myIsPoly;
+
+    SMESH::SMESH_Mesh_var       myMesh;
+    SMESH::TElementSimulation*  mySimulation;
+
+    SMESHGUI_AddMeshElementDlg* myDlg;
 };
 
-#endif // DIALOGBOX_NODES_H
+#endif // DIALOGBOX_ADD_FACE_H

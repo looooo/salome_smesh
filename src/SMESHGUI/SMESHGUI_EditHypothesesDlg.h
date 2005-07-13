@@ -70,7 +70,7 @@ public:
     typedef enum { HypoDef, HypoAssign, AlgoDef, AlgoAssign } ListType;
     
 public:
-    SMESHGUI_EditHypothesesDlg( SMESHGUI* );
+    SMESHGUI_EditHypothesesDlg();
     ~SMESHGUI_EditHypothesesDlg();
 
     void setListsEnabled( const bool );

@@ -43,8 +43,8 @@
 //            The dialog will by default be modeless, unless you set 'modal' to
 //            TRUE to construct a modal dialog.
 //=================================================================================
-SMESHGUI_AddSubMeshDlg::SMESHGUI_AddSubMeshDlg( SMESHGUI* theModule )
-: SMESHGUI_Dialog( theModule, false, true )
+SMESHGUI_AddSubMeshDlg::SMESHGUI_AddSubMeshDlg()
+: SMESHGUI_Dialog( false, true )
 {
     setCaption(tr("SMESH_ADD_SUBMESH"));
 

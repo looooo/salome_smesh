@@ -21,7 +21,7 @@
 //
 //
 //
-//  File   : SMESHGUI_AddSubMeshDlg.cxx
+//  File   : SMESHGUI_AddSubMeshOp.cxx
 //  Author : Nicolas REJNERI
 //  Module : SMESH
 //  $Header$
@@ -55,12 +55,8 @@
 // purpose  :
 //=================================================================================
 SMESHGUI_AddSubMeshOp::SMESHGUI_AddSubMeshOp()
-: SMESHGUI_Operation(),
-  myDlg( 0 ),
-  myMeshFilter( 0 ),
-  myGeomFilter( 0 ),
-  myHypothesisFilter( 0 ),
-  myAlgorithmFilter( 0 )
+: SMESHGUI_SelectionOp(),
+  myDlg( 0 )
 {
   setAutoResumed( true );
 }
@@ -73,18 +69,6 @@ SMESHGUI_AddSubMeshOp::~SMESHGUI_AddSubMeshOp()
 {
   if( myDlg )
     delete myDlg;
-
-  if( myMeshFilter )
-    delete myMeshFilter;
-        
-  if( myGeomFilter )
-    delete myGeomFilter;
-  
-  if( myAlgorithmFilter )
-    delete myAlgorithmFilter;
-
-  if( myHypothesisFilter )
-    delete myHypothesisFilter;    
 }
 
 //=================================================================================
@@ -95,31 +79,12 @@ void SMESHGUI_AddSubMeshOp::startOperation()
 {
   if( !myDlg )
   {
-    myDlg = new SMESHGUI_AddSubMeshDlg( getSMESHGUI() );
-    connect( myDlg, SIGNAL( objectActivated( int ) ), this, SLOT( onActivateObject( int ) ) );
-    connect( myDlg, SIGNAL( selectionChanged( int ) ), this, SLOT( onSelectionChanged( int ) ) );
+    myDlg = new SMESHGUI_AddSubMeshDlg();
+    connect( myDlg, SIGNAL( nameChanged( const QString& ) ), this, SLOT( onNameChanged( const QString& ) ) );
   }
 
-  SMESHGUI_Operation::startOperation();
+  SMESHGUI_SelectionOp::startOperation();
 
-  if( !myGeomFilter )
-  {
-    TColStd_MapOfInteger allTypesMap;
-    for (int i = 0; i < 10; i++)
-      allTypesMap.Add(i);
-    myGeomFilter       = new SMESH_NumberFilter ("GEOM", TopAbs_SHAPE, 0, allTypesMap);
-  }
-
-  if( !myMeshFilter )
-    myMeshFilter       = new SMESH_TypeFilter (MESH);
-    
-  if( !myAlgorithmFilter )
-    myAlgorithmFilter  = new SMESH_TypeFilter (ALGORITHM);
-
-  if( !myHypothesisFilter )
-    myHypothesisFilter = new SMESH_TypeFilter (HYPOTHESIS);
-    
-  init();
   myDlg->show();
 }
 
@@ -138,40 +103,36 @@ SalomeApp_Dialog* SMESHGUI_AddSubMeshOp::dlg() const
 //=================================================================================
 void SMESHGUI_AddSubMeshOp::selectionDone()
 {
-  QStringList names, ids;
-  SMESHGUI_Dialog::TypesList types;
-  selected( names, types, ids );
+  SMESHGUI_SelectionOp::selectionDone();
   if( myDlg )
-  {
-    myDlg->selectObject( names, types, ids );
-    myDlg->updateControlState( isValid() );
-  }
+    updateDialog();
 }
 
 //=================================================================================
-// function : onActivateObject
+// function : createFilter
 // purpose  :
 //=================================================================================
-void SMESHGUI_AddSubMeshOp::onActivateObject( int obj )
+SUIT_SelectionFilter* SMESHGUI_AddSubMeshOp::createFilter( const int id ) const
 {
-  SalomeApp_SelectionMgr* mgr = selectionMgr();
+  if( id==SMESHGUI_AddSubMeshDlg::GeomObj )
+  {
+    TColStd_MapOfInteger allTypesMap;
+    for (int i = 0; i < 10; i++)
+      allTypesMap.Add(i);
+    return new SMESH_NumberFilter ("GEOM", TopAbs_SHAPE, 0, allTypesMap);
+  }
 
-  if( !mgr )
-    return;
-    
-  mgr->clearFilters();
+  if( id==SMESHGUI_AddSubMeshDlg::MeshObj )
+    return new SMESH_TypeFilter (MESH);
 
-  if( obj==SMESHGUI_AddSubMeshDlg::MeshObj )
-    mgr->installFilter( myMeshFilter );
+  else if( id==SMESHGUI_AddSubMeshDlg::Algo )
+    return new SMESH_TypeFilter (ALGORITHM);
 
-  else if( obj==SMESHGUI_AddSubMeshDlg::GeomObj )
-    mgr->installFilter( myGeomFilter );
-    
-  else if( obj==SMESHGUI_AddSubMeshDlg::Hypo )
-    mgr->installFilter( myHypothesisFilter );
+  else if( id==SMESHGUI_AddSubMeshDlg::Hypo )
+    return new SMESH_TypeFilter (HYPOTHESIS);
 
-  else if( obj==SMESHGUI_AddSubMeshDlg::Algo )
-    mgr->installFilter( myAlgorithmFilter );
+  else
+    return 0;
 }
 
 //=================================================================================
@@ -250,45 +211,23 @@ bool SMESHGUI_AddSubMeshOp::onApply()
   }
   
   update( UF_Model | UF_ObjBrowser );
-  init();
+  initDialog();
   
   return (nbSuccess > 0);
 }
 
 //=================================================================================
-// function : init()
+// function : initDialog()
 // purpose  :
 //=================================================================================
-void SMESHGUI_AddSubMeshOp::init()
+void SMESHGUI_AddSubMeshOp::initDialog()
 {
+  SMESHGUI_SelectionOp::initDialog();
   if( myDlg )
-  {    
-    myDlg->init();
-    myDlg->updateControlState( false );
+  {
+    myDlg->setSubMeshName( tr( "SMESH_SUBMESH" ) );
+    updateDialog();
   }
-}
-
-//=================================================================================
-// function : isValid()
-// purpose  :
-//=================================================================================
-bool SMESHGUI_AddSubMeshOp::isValid() const
-{
-  bool isEnabled = !myDlg->subMeshName().isEmpty() &&
-                   myDlg->hasSelection( SMESHGUI_AddSubMeshDlg::MeshObj ) &&
-                   myDlg->hasSelection( SMESHGUI_AddSubMeshDlg::GeomObj ) &&
-                   myDlg->hasSelection( SMESHGUI_AddSubMeshDlg::Hypo ) &&
-                   myDlg->hasSelection( SMESHGUI_AddSubMeshDlg::Algo );
-                   
-  bool isImportedMesh = false;
-
-  QStringList selMesh;
-  myDlg->selectedObject( SMESHGUI_AddSubMeshDlg::MeshObj, selMesh );
-  _PTR(SObject) SO = studyDS()->FindObjectID( selMesh.first() );
-  GEOM::GEOM_Object_var myGeomShape = SMESH::GetShapeOnMeshOrSubMesh(SO);
-  isImportedMesh = myGeomShape->_is_nil();
-
-  return isEnabled && !isImportedMesh;
 }
 
 //=================================================================================
@@ -338,7 +277,7 @@ void SMESHGUI_AddSubMeshOp::onSelectionChanged( int id )
 }
 
 //=================================================================================
-// function : onSelectionChanged()
+// function : addSubMesh()
 // purpose  :
 //=================================================================================
 SMESH::SMESH_subMesh_var SMESHGUI_AddSubMeshOp::addSubMesh( SMESH::SMESH_Mesh_ptr theMesh,
@@ -360,14 +299,50 @@ SMESH::SMESH_subMesh_var SMESHGUI_AddSubMeshOp::addSubMesh( SMESH::SMESH_Mesh_pt
 }
 
 //=================================================================================
+// function : updateDialog()
+// purpose  :
+//=================================================================================
+void SMESHGUI_AddSubMeshOp::updateDialog()
+{
+  if( !myDlg )
+    return;
+    
+  bool isEnabled = !myDlg->subMeshName().isEmpty() &&
+                   myDlg->hasSelection( SMESHGUI_AddSubMeshDlg::MeshObj ) &&
+                   myDlg->hasSelection( SMESHGUI_AddSubMeshDlg::GeomObj ) &&
+                   myDlg->hasSelection( SMESHGUI_AddSubMeshDlg::Hypo ) &&
+                   myDlg->hasSelection( SMESHGUI_AddSubMeshDlg::Algo );
+
+  bool isImportedMesh = false;
+
+  QStringList selMesh;
+  myDlg->selectedObject( SMESHGUI_AddSubMeshDlg::MeshObj, selMesh );
+  _PTR(SObject) SO = studyDS()->FindObjectID( selMesh.first() );
+  GEOM::GEOM_Object_var myGeomShape = SMESH::GetShapeOnMeshOrSubMesh(SO);
+  isImportedMesh = myGeomShape->_is_nil();
+
+  isEnabled = isEnabled && !isImportedMesh;
+  
+  myDlg->setButtonEnabled( isEnabled, QtxDialog::OK | QtxDialog::Apply );
+}
+
+//=================================================================================
+// function : onNameChanged()
+// purpose  :
+//=================================================================================
+void SMESHGUI_AddSubMeshOp::onNameChanged( const QString& )
+{
+  updateDialog();
+}
+
+//=================================================================================
 // function : isValid
 // purpose  :
 //=================================================================================
 bool SMESHGUI_AddSubMeshOp::isValid( SUIT_Operation* theOtherOp ) const
 {
-  if ( theOtherOp && theOtherOp->inherits( "SMESHGUI_InitMeshOp" ) )
+  //if ( theOtherOp && theOtherOp->inherits( "SMESHGUI_InitMeshOp" ) )
     return true;
-  else
-    return false;
-
+  /*else
+    return false;*/
 }

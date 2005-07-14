@@ -116,8 +116,7 @@ LIB_SRC =	SMESHGUI.cxx \
 		SMESHGUI_CreatePolyhedralVolumeDlg.cxx \
 		SMESHGUI_Dialog.cxx \
 		SMESHGUI_Operation.cxx \
-		SMESHGUI_SelectionOp.cxx \
-		SMESHGUI_SelectionIdsOp.cxx
+		SMESHGUI_SelectionOp.cxx
 
 LIB_MOC = \
 		SMESHGUI.h \
@@ -170,8 +169,7 @@ LIB_MOC = \
 		SMESHGUI_Dialog.h \
 		SMESHGUI_CreatePolyhedralVolumeDlg.h \
 		SMESHGUI_Operation.h \
-		SMESHGUI_SelectionOp.h \
-		SMESHGUI_SelectionIdsOp.h
+		SMESHGUI_SelectionOp.h
     
 LIB_CLIENT_IDL = SALOME_Exception.idl \
 		 GEOM_Gen.idl \

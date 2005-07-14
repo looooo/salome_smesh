@@ -27,7 +27,6 @@
 //  $Header$
 
 #include <SMESHGUI_Dialog.h>
-#include <SMESHGUI_Operation.h>
 #include <SMESH_Type.h>
 #include <SUIT_Session.h>
 #include <SalomeApp_Application.h>
@@ -39,10 +38,10 @@
 SMESHGUI_Dialog::SMESHGUI_Dialog( const bool modal, const bool allowResize, const int flags )
 : SalomeApp_Dialog( desktop(), "", modal, allowResize, flags )
 {
-  int prefix = SMESHGUI_Operation::prefix( "SMESH" );
-  typeName( prefix + MESH ) = tr( "DLG_MESH" );
-  typeName( prefix + HYPOTHESIS ) = tr( "DLG_HYPO" );
-  typeName( prefix + ALGORITHM ) = tr( "DLG_ALGO" );
+  int pr = prefix( "SMESH" );
+  typeName( pr + MESH ) = tr( "DLG_MESH" );
+  typeName( pr + HYPOTHESIS ) = tr( "DLG_HYPO" );
+  typeName( pr + ALGORITHM ) = tr( "DLG_ALGO" );
 }
 
 //=================================================================================
@@ -91,4 +90,20 @@ SUIT_Desktop* SMESHGUI_Dialog::desktop() const
       d = app->desktop();
   }
   return d;
+}
+
+//=======================================================================
+// name    : prefix
+// Purpose : Get prefix for module types
+//=======================================================================
+int SMESHGUI_Dialog::prefix( const QString& name )
+{
+  if( name == "GEOM" )
+    return 100;
+  else if( name == "SMESH" )
+    return 200;
+  else if( name == "SMESH element" )
+    return 300;
+  else
+    return 0;
 }

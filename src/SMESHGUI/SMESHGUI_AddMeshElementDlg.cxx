@@ -27,7 +27,6 @@
 //  $Header$
 
 #include "SMESHGUI_AddMeshElementDlg.h"
-#include <SMESHGUI_Operation.h>
 
 #include <SUIT_ResourceMgr.h>
 
@@ -96,7 +95,7 @@ SMESHGUI_AddMeshElementDlg::SMESHGUI_AddMeshElementDlg( const QString& elemName,
   createObject( tr( "SMESH_ID_NODES" ), GroupC1, 0 );
   setNameIndication( 0, ListOfNames );
   setReadOnly( 0, false );
-  setObjectType( 0, SMESHGUI_Operation::prefix( "SMESH element" ) + SMDSAbs_Node, -1 );
+  setObjectType( 0, prefix( "SMESH element" ) + SMDSAbs_Node, -1 );
 
   myReverse = 0;
   if ( reverse ) {

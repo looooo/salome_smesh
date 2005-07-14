@@ -161,7 +161,7 @@ namespace SMESH {
 // purpose  : constructor
 //=================================================================================
 SMESHGUI_AddMeshElementOp::SMESHGUI_AddMeshElementOp( const SMDSAbs_ElementType t, const int nbNodes )
-: SMESHGUI_SelectionIdsOp( NodeSelection ),
+: SMESHGUI_SelectionOp( NodeSelection ),
   myElementType( t ),
   myNbNodes( nbNodes ),
   myIsPoly( myElementType==SMDSAbs_Face && myNbNodes==5 ),
@@ -212,10 +212,11 @@ void SMESHGUI_AddMeshElementOp::startOperation()
     }
     
     myDlg = new SMESHGUI_AddMeshElementDlg( elemName, myElementType == SMDSAbs_Face );
+    connect( myDlg, SIGNAL( objectChanged( int, const QStringList& ) ), this, SLOT( onTextChanged( int, const QStringList& ) ) );
     connect( myDlg, SIGNAL( reverse( int ) ), this, SLOT( onReverse( int ) ) );
   }
 
-  SMESHGUI_SelectionIdsOp::startOperation();
+  SMESHGUI_SelectionOp::startOperation();
 
   mySimulation = new SMESH::TElementSimulation( viewWindow() );
   updateDialog();
@@ -233,7 +234,7 @@ void SMESHGUI_AddMeshElementOp::onSelectionChanged( int id )
     
   mySimulation->SetVisibility(false);
 
-  SMESHGUI_SelectionIdsOp::onSelectionChanged( id );
+  SMESHGUI_SelectionOp::onSelectionChanged( id );
 
   updateDialog();
   displaySimulation();
@@ -248,7 +249,7 @@ void SMESHGUI_AddMeshElementOp::commitOperation()
   if( mySimulation )
     delete mySimulation;
   mySimulation = 0;
-  SMESHGUI_SelectionIdsOp::commitOperation();
+  SMESHGUI_SelectionOp::commitOperation();
 }
 
 //=================================================================================
@@ -260,7 +261,7 @@ void SMESHGUI_AddMeshElementOp::abortOperation()
   if( mySimulation )
     delete mySimulation;
   mySimulation = 0;
-  SMESHGUI_SelectionIdsOp::abortOperation();
+  SMESHGUI_SelectionOp::abortOperation();
 }
 
 //=================================================================================

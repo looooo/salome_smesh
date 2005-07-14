@@ -33,7 +33,7 @@ namespace SMESH{
   struct TElementSimulation;
 }
 
-#include <SMESHGUI_SelectionIdsOp.h>
+#include <SMESHGUI_SelectionOp.h>
 #include <SMDSAbs_ElementType.hxx>
 
 class SMESHGUI_AddMeshElementDlg;
@@ -42,7 +42,7 @@ class SMESHGUI_AddMeshElementDlg;
 // class    : SMESHGUI_AddMeshElementOp
 // purpose  :
 //=================================================================================
-class SMESHGUI_AddMeshElementOp : public SMESHGUI_SelectionIdsOp
+class SMESHGUI_AddMeshElementOp : public SMESHGUI_SelectionOp
 { 
     Q_OBJECT
 

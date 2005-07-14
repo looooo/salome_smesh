@@ -51,6 +51,9 @@ public:
   //! set all content to enable (parameter is true) or disable state
   void setContentActive( const bool ) const;
 
+  //! Return hard-coded prefix using to differ overlapping types
+  static int   prefix( const QString& );
+  
 protected:
   //! find desktop of active application
   SUIT_Desktop* desktop() const;

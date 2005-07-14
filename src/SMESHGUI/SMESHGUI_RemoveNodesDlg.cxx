@@ -27,7 +27,6 @@
 //  $Header$
 
 #include "SMESHGUI_RemoveNodesDlg.h"
-#include <SMESHGUI_Operation.h>
 
 #include <SUIT_ResourceMgr.h>
 
@@ -90,7 +89,7 @@ SMESHGUI_RemoveNodesDlg::SMESHGUI_RemoveNodesDlg()
     createObject( tr("SMESH_ID_NODES" ), GroupC1, 0 );
     setNameIndication( 0, ListOfNames );
     setReadOnly( 0, false );
-    setObjectType( 0, SMESHGUI_Operation::prefix( "SMESH element" ) + SMDSAbs_Node, -1 );
+    setObjectType( 0, prefix( "SMESH element" ) + SMDSAbs_Node, -1 );
 
     main->addWidget(GroupC1);
 }

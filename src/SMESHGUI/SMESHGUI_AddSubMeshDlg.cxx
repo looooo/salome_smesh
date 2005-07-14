@@ -27,7 +27,6 @@
 //  $Header$
 
 #include "SMESHGUI_AddSubMeshDlg.h"
-#include <SMESHGUI_Operation.h>
 
 #include <SMESH_Type.h>
 
@@ -69,7 +68,7 @@ SMESHGUI_AddSubMeshDlg::SMESHGUI_AddSubMeshDlg()
     setNameIndication( MeshObj, OneName );
     setNameIndication( GeomObj, OneName );
 
-    int _smesh = SMESHGUI_Operation::prefix( "SMESH" );
+    int _smesh = prefix( "SMESH" );
     setObjectType( Hypo, _smesh + HYPOTHESIS, -1 );
     setObjectType( Algo, _smesh + ALGORITHM, -1 );
 

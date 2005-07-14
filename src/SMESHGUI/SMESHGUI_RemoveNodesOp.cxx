@@ -36,7 +36,7 @@
 // purpose  : 
 //=================================================================================
 SMESHGUI_RemoveNodesOp::SMESHGUI_RemoveNodesOp()
-: SMESHGUI_SelectionIdsOp( NodeSelection ),
+: SMESHGUI_SelectionOp( NodeSelection ),
   myDlg( 0 )
 {
 }
@@ -67,9 +67,12 @@ SalomeApp_Dialog* SMESHGUI_RemoveNodesOp::dlg() const
 void SMESHGUI_RemoveNodesOp::startOperation()
 {
   if( !myDlg )
+  {
     myDlg = new SMESHGUI_RemoveNodesDlg();
+    connect( myDlg, SIGNAL( objectChanged( int, const QStringList& ) ), this, SLOT( onTextChanged( int, const QStringList& ) ) );
+  }
 
-  SMESHGUI_SelectionIdsOp::startOperation();
+  SMESHGUI_SelectionOp::startOperation();
 
   myDlg->show();
 }
@@ -80,7 +83,7 @@ void SMESHGUI_RemoveNodesOp::startOperation()
 //=================================================================================
 void SMESHGUI_RemoveNodesOp::selectionDone()
 {
-  SMESHGUI_SelectionIdsOp::selectionDone();
+  SMESHGUI_SelectionOp::selectionDone();
   updateDialog();
 } 
 

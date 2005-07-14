@@ -28,34 +28,62 @@
 #define SMESHGUI_SelectionOp_H
 
 #include <SMESHGUI_Operation.h>
+#include <SMESHGUI_Dialog.h>
+#include <SVTK_Selection.h>
+#include <SALOME_InteractiveObject.hxx>
+
+#include <SALOMEconfig.h>
+#include CORBA_SERVER_HEADER(SMESH_Gen)
+
+
+class SUIT_SelectionFilter;
+class TColStd_MapOfInteger;
+class SVTK_ViewWindow;
+class SVTK_Selector;
+class SMESH_Actor;
 
 /*
   Class       : SMESHGUI_SelectionOp
   Description : Base operation for all operations using object selection in viewer or objectbrowser
                 through common widgets created by SalomeApp_Dialog::createObject
 */
-
-class SUIT_SelectionFilter;
-
 class SMESHGUI_SelectionOp : public SMESHGUI_Operation
 { 
   Q_OBJECT
 
 public:
+  typedef QValueList<int> IdList; //! List of node or element ids
+  
+public:
   SMESHGUI_SelectionOp( const Selection_Mode = ActorSelection );
   virtual ~SMESHGUI_SelectionOp();
+
+  static void  extractIds( const QStringList&, IdList&, const QChar );  
+
+protected:
+  typedef enum
+  {
+    Object,
+    MeshNode,
+    MeshElement
+
+  } EntityType;
+  /*!
+      This enumeration is used in typeById method to distinguish objects, mesh nodes and mesh elements,
+      because node end element ids may overlap
+  */
   
 protected:
   virtual void                  startOperation();
   virtual void                  commitOperation();
-  virtual void                  abortOperation();  
-  
+  virtual void                  abortOperation();
   virtual void                  selectionDone();
 
   //! sets the dialog widgets to state just after operation start
   virtual void                  initDialog();
 
-  /*! Creates filter being used when certain object selection widget is active
+  /*!
+   *  Creates filter being used when certain object selection widget is active
    *  If no filter must be used, then function must return 0
    *  if id is negative, then function must return filter for common using independently of active widget
    */
@@ -64,6 +92,44 @@ protected:
   //! Remove only filters set by this operation (they are in map myFilters )
   void removeCustomFilters() const;
 
+  //! Return what selection mode is set in VTK viewer
+  Selection_Mode    selectionMode() const;
+
+  //! Set selection mode in VTK viewer
+  void              setSelectionMode( const Selection_Mode );
+
+  //! Hilight object in VTK viewer
+  void              highlight( const Handle( SALOME_InteractiveObject )&,
+                               const bool, const bool = true );
+                               
+  //! Select some nodes or elements in VTK
+  void              addOrRemoveIndex( const Handle( SALOME_InteractiveObject )&,
+                                      const TColStd_MapOfInteger&, const bool );
+
+  SVTK_ViewWindow*  viewWindow() const;
+  SVTK_Selector*    selector() const;
+
+  //! Get names, types and ids of selected objects
+  virtual void      selected( QStringList&, SMESHGUI_Dialog::TypesList&, QStringList& ) const;
+
+  //! Find type by id
+  virtual int       typeById( const QString&, const EntityType ) const;
+
+  //! Char using to divide <entry> and <id> in string id representation. By default, '#'
+  virtual QChar     idChar() const;
+
+  //! Try to find in certain object selection widget selected node or element ids and return it
+  void                   selectedIds( const int, IdList& ) const;
+
+  //! Find in QStringList correct node or element ids representation and append integer(id) to IdList
+  void                   extractIds( const QStringList&, IdList& ) const;
+
+  //! Return selected mesh if selection mode isn't ActorSelection and only one object is selected
+  SMESH::SMESH_Mesh_var  mesh() const;
+
+  //! Return actor according to selected mesh if selection mode isn't ActorSelection
+  SMESH_Actor*           actor() const;
+  
 protected slots:
   //! Installs filter corresponding to certain object selection widget
   virtual void onActivateObject( int );
@@ -77,6 +143,15 @@ protected slots:
   */
   virtual void onSelectionChanged( int );
 
+  /*! Default implementation allowing user to edit selected ids "by hands".
+      In order to run default mechanism, you must set for some
+      object selection widget the "name indication" to "ListOfNames",
+      "read only" state to false and connect the dialog's signal "objectChanged"
+      to this slot
+      Warning: this mechanism can process only integer ids, NOT MESH OR GROUP NAMES!!!
+  */
+  virtual void  onTextChanged( int, const QStringList& );
+  
 private:
   typedef QMap<int, SUIT_SelectionFilter*> Filters;
   

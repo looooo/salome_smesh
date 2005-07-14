@@ -35,12 +35,7 @@ namespace SMESH{
 
 #include <SMESHGUI_SelectionOp.h>
 
-// IDL Headers
-#include <SALOMEconfig.h>
-#include CORBA_SERVER_HEADER(SMESH_Mesh)
-
 class SMESHGUI_NodesDlg;
-
 
 //=================================================================================
 // class    : SMESHGUI_NodesOp
@@ -71,7 +66,6 @@ private slots:
     void onValueChanged( double );
 
 private:
-    SMESH::SMESH_Mesh_var   myMesh;
     SMESH::TNodeSimulation* mySimulation;
     SMESHGUI_NodesDlg*      myDlg;
 };

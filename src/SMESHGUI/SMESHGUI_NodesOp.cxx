@@ -275,26 +275,23 @@ void SMESHGUI_NodesOp::selectionDone()
   SMESH::SetPointRepresentation(true);
 
   const SALOME_ListIO& aList = selector()->StoredIObjects();
-  if (aList.Extent() == 1) {
+  if (aList.Extent() == 1)
+  {
     Handle(SALOME_InteractiveObject) anIO = aList.First();
-    if (anIO->hasEntry()) {
-      myMesh = SMESH::GetMeshByIO(anIO);
-      if (myMesh->_is_nil()) return;
+    if (anIO->hasEntry())
+    {
       QString aText;
-      if (SMESH::GetNameOfSelectedNodes(selector(),anIO,aText) == 1) {
-	if (SMESH_Actor* anActor = SMESH::FindActorByObject(myMesh.in())) {
-	  if (SMDS_Mesh* aMesh = anActor->GetObject()->GetMesh()) {
-	    if (const SMDS_MeshNode* aNode = aMesh->FindNode(aText.toInt())) {
-        myDlg->setCoords( aNode->X(), aNode->Y(), aNode->Z() );
-            }
-	  }
-	}
-      }
-      double x, y, z;
-      myDlg->coords( x, y, z );
-      mySimulation->SetPosition( x, y, z );
+      if( SMESH::GetNameOfSelectedNodes( selector(), anIO, aText ) == 1 )
+        if( SMESH_Actor* anActor = actor() )
+          if( SMDS_Mesh* aMesh = anActor->GetObject()->GetMesh() )
+            if( const SMDS_MeshNode* aNode = aMesh->FindNode( aText.toInt() ) )
+              myDlg->setCoords( aNode->X(), aNode->Y(), aNode->Z() );
     }
-  } 
+  }
+    
+  double x, y, z;
+  myDlg->coords( x, y, z );
+  mySimulation->SetPosition( x, y, z );
 }
 
 //=================================================================================
@@ -315,7 +312,7 @@ bool SMESHGUI_NodesOp::onApply()
   if( getSMESHGUI()->isActiveStudyLocked() || !mySimulation )
     return false;
 
-  if (myMesh->_is_nil()) {
+  if( mesh()->_is_nil()) {
     SUIT_MessageBox::warn1( myDlg, tr("SMESH_WRN_WARNING"),
                             tr("MESH_IS_NOT_SELECTED"), tr("SMESH_BUT_OK"));
     return false;
@@ -323,7 +320,7 @@ bool SMESHGUI_NodesOp::onApply()
 
   double x, y, z; myDlg->coords( x, y, z );
   mySimulation->SetVisibility(false);
-  SMESH::AddNode(myMesh,x,y,z);
+  SMESH::AddNode( mesh(), x, y, z );
   SMESH::SetPointRepresentation(true);
 
   // select myMesh
@@ -337,7 +334,7 @@ bool SMESHGUI_NodesOp::onApply()
         if (SMESH_Actor *anActor = dynamic_cast<SMESH_Actor*>(anAct)) {
           if (anActor->hasIO()) {
             if (SMESH_MeshObj *aMeshObj = dynamic_cast<SMESH_MeshObj*>(anActor->GetObject().get())) {
-              if (myMesh->_is_equivalent(aMeshObj->GetMeshServer())) {
+              if ( mesh()->_is_equivalent(aMeshObj->GetMeshServer())) {
                 aList.Clear();
                 aList.Append(anActor->getIO());
                 selectionMgr()->setSelectedObjects(aList, false);

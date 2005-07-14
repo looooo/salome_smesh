@@ -29,7 +29,7 @@
 #ifndef OPERATION_REMOVE_NODES_H
 #define OPERATION_REMOVE_NODES_H
 
-#include <SMESHGUI_SelectionIdsOp.h>
+#include <SMESHGUI_SelectionOp.h>
 
 class SMESHGUI_RemoveNodesDlg;
 
@@ -37,7 +37,7 @@ class SMESHGUI_RemoveNodesDlg;
 // class    : SMESHGUI_RemoveNodesOp
 // purpose  :
 //=================================================================================
-class SMESHGUI_RemoveNodesOp : public SMESHGUI_SelectionIdsOp
+class SMESHGUI_RemoveNodesOp : public SMESHGUI_SelectionOp
 {
     Q_OBJECT
 

@@ -28,6 +28,7 @@
 #include "SMESHGUI_InitMeshOp.h"
 #include "SMESHGUI_AddSubMeshOp.h"
 #include "SMESHGUI_NodesOp.h"
+#include "SMESHGUI_DeleteOp.h"
 #include "SMESHGUI_TransparencyDlg.h"
 #include "SMESHGUI_ClippingDlg.h"
 #include "SMESHGUI_GroupDlg.h"
@@ -714,115 +715,6 @@ namespace{
 
     return RefType;
   }
-
-  void OnEditDelete()
-  {
-    // VSR 17/11/04: check if all objects selected belong to SMESH component --> start
-    SalomeApp_SelectionMgr* aSel = SMESHGUI::selectionMgr();
-    SALOME_ListIO selected; aSel->selectedObjects( selected );
-
-    QString aParentComponent = QString::null;
-    for( SALOME_ListIteratorOfListIO anIt( selected ); anIt.More(); anIt.Next() )
-    {
-      QString cur = anIt.Value()->getComponentDataType();
-      if( aParentComponent.isNull() )
-        aParentComponent = cur;
-      else if( !aParentComponent.isEmpty() && aParentComponent!=cur )
-        aParentComponent = "";
-    }
-
-    if ( aParentComponent != SMESHGUI::GetSMESHGUI()->name() )  {
-      SUIT_MessageBox::warn1 ( SMESHGUI::desktop(),
-			      QObject::tr("ERR_ERROR"),
-			      QObject::tr("NON_SMESH_OBJECTS_SELECTED").arg( SMESHGUI::GetSMESHGUI()->moduleName() ),
-			      QObject::tr("BUT_OK") );
-      return;
-    }
-    // VSR 17/11/04: check if all objects selected belong to SMESH component <-- finish
-    if (SUIT_MessageBox::warn2
-	(SMESHGUI::desktop(),
-	 QObject::tr("SMESH_WRN_WARNING"),
-	 QObject::tr("SMESH_REALLY_DELETE"),
-	 QObject::tr("SMESH_BUT_YES"), QObject::tr("SMESH_BUT_NO"), 1, 0, 0) != 1)
-      return;
-
-    SalomeApp_Application* anApp = dynamic_cast<SalomeApp_Application*>( SUIT_Session::session()->activeApplication() );
-    SUIT_ViewManager* vm = anApp->activeViewManager();
-    int nbSf = vm->getViewsCount();
-
-    _PTR(Study) aStudy = SMESH::GetActiveStudyDocument();
-    _PTR(StudyBuilder) aStudyBuilder = aStudy->NewBuilder();
-    _PTR(GenericAttribute) anAttr;
-    _PTR(AttributeIOR) anIOR;
-
-    SALOME_ListIteratorOfListIO It(selected);
-
-    aStudyBuilder->NewCommand();  // There is a transaction
-    for(; It.More(); It.Next()){
-      Handle(SALOME_InteractiveObject) IObject = It.Value();
-      if(IObject->hasEntry()){
-	_PTR(SObject) SO = aStudy->FindObjectID(IObject->getEntry());
-
-	/* Erase child graphical objects */
-	_PTR(ChildIterator) it = aStudy->NewChildIterator(SO);
-	for(it->InitEx(true); it->More(); it->Next()){
-	  _PTR(SObject) CSO = it->Value();
-	  if(CSO->FindAttribute(anAttr, "AttributeIOR")){
-	    anIOR = anAttr;
-
-	    QPtrVector<SUIT_ViewWindow> aViews = vm->getViews();
-	    for(int i = 0; i < nbSf; i++){
-	      SUIT_ViewWindow *sf = aViews[i];
-	      CORBA::String_var anEntry = CSO->GetID().c_str();
-	      if(SMESH_Actor* anActor = SMESH::FindActorByEntry(sf,anEntry.in())){
-		SMESH::RemoveActor(sf,anActor);
-	      }
-	    }
-	  }
-	}
-
-	/* Erase main graphical object */
-	QPtrVector<SUIT_ViewWindow> aViews = vm->getViews();
-	for(int i = 0; i < nbSf; i++){
-	  SUIT_ViewWindow *sf = aViews[i];
-	  if(SMESH_Actor* anActor = SMESH::FindActorByEntry(sf,IObject->getEntry())){
-	    SMESH::RemoveActor(sf,anActor);
-	  }
-	}
-
-	// Remove object(s) from data structures
-	_PTR(SObject) obj = aStudy->FindObjectID(IObject->getEntry());
-	if(obj){
-	  SMESH::SMESH_GroupBase_var aGroup = SMESH::SMESH_GroupBase::_narrow( SMESH::SObjectToObject( obj ) );
-	  SMESH::SMESH_subMesh_var   aSubMesh = SMESH::SMESH_subMesh::_narrow( SMESH::SObjectToObject( obj ) );
-
-	  if ( !aGroup->_is_nil() ) {                          // DELETE GROUP
-	    SMESH::SMESH_Mesh_var aMesh = aGroup->GetMesh();
-	    aMesh->RemoveGroup( aGroup );
-	  }
-	  else if ( !aSubMesh->_is_nil() ) {                   // DELETE SUBMESH
-	    SMESH::SMESH_Mesh_var aMesh = aSubMesh->GetFather();
-	    aMesh->RemoveSubMesh( aSubMesh );
-	  }
-	  else {// default action: remove SObject from the study
-	    // san - it's no use opening a transaction here until UNDO/REDO is provided in SMESH
-	    //SUIT_Operation *op = new SALOMEGUI_ImportOperation(myActiveStudy);
-	    //op->start();
-	    aStudyBuilder->RemoveObjectWithChildren( obj );
-	    //op->finish();
-	  }
-	}
-
-      } /* IObject->hasEntry() */
-    } /* more/next */
-    aStudyBuilder->CommitCommand();
-
-    /* Clear any previous selection */
-    SALOME_ListIO l1;
-    aSel->setSelectedObjects( l1 );
-
-    SMESHGUI::GetSMESHGUI()->updateObjBrowser();
-  }
 }
 
 extern "C" {
@@ -1115,9 +1007,8 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
   QAction* act = action( theCommandID );
 
   switch (theCommandID)	{
-  case 33:					// DELETE
-    if(checkLock(aStudy)) break;
-    ::OnEditDelete();
+  case 33:  // DELETE
+      startOperation( 33 );
     break;
 
   case 113:					// IMPORT
@@ -3292,7 +3183,11 @@ SalomeApp_Operation* SMESHGUI::createOperation( const int id ) const
 {
   SalomeApp_Operation* op = 0;
   switch( id )
-  {     
+  {
+    case 33:
+      op = new SMESHGUI_DeleteOp();
+      break;
+    
     case 400:
       op = new SMESHGUI_NodesOp();
       break;

@@ -2813,3 +2813,4 @@ msgstr "Hypothesises"
 
 msgid "SMESHGUI_Dialog::DLG_ALGO"
 msgstr "Algorithms"
+

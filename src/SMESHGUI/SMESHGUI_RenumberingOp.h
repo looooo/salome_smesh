@@ -21,27 +21,45 @@
 //
 //
 //
-//  File   : SMESHGUI_RenumberingDlg.h
-//  Author : Michael ZORIN
+//  File   : SMESHGUI_RenumberingOp.h
+//  Author : Alexander SOLOVYOV
 //  Module : SMESH
 //  $Header:
 
-#ifndef DIALOGBOX_RENUMBERING_H
-#define DIALOGBOX_RENUMBERING_H
+#ifndef OPERATION_RENUMBERING_H
+#define OPERATION_RENUMBERING_H
 
-#include <SMESHGUI_Dialog.h>
+#include <SMESHGUI_SelectionOp.h>
+
+class SMESHGUI_RenumberingDlg;
 
 //=================================================================================
-// class    : SMESHGUI_RenumberingDlg
+// class    : SMESHGUI_RenumberingOp
 // purpose  : If the unit == 0 nodes will be renumbered, if the unit == 1 the elements will.
 //=================================================================================
-class SMESHGUI_RenumberingDlg : public SMESHGUI_Dialog
+class SMESHGUI_RenumberingOp : public SMESHGUI_SelectionOp
 { 
-    Q_OBJECT
+  Q_OBJECT
 
 public:
-    SMESHGUI_RenumberingDlg( const int );
-    ~SMESHGUI_RenumberingDlg();
+  SMESHGUI_RenumberingOp( const int );
+  ~SMESHGUI_RenumberingOp();
+
+  virtual SalomeApp_Dialog* dlg() const;
+
+protected:
+  virtual void startOperation();
+  virtual void selectionDone();
+  virtual SUIT_SelectionFilter* createFilter( const int ) const;
+
+  void updateDialog();
+
+protected slots:
+  virtual bool onApply();
+
+private:
+  int                       myMode;
+  SMESHGUI_RenumberingDlg*  myDlg;
 };
 
 #endif // DIALOGBOX_RENUMBERING_H

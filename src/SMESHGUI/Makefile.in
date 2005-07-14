@@ -80,6 +80,7 @@ LIB_SRC =	SMESHGUI.cxx \
 		SMESHGUI_aParameterDlg.cxx \
 		SMESHGUI_Swig.cxx \
 		SMESHGUI_MoveNodesDlg.cxx \
+		SMESHGUI_MoveNodesOp.cxx \
 		SMESHGUI_EditHypothesesDlg.cxx \
 		SMESHGUI_EditHypothesesOp.cxx \
 		SMESHGUI_CreateHypothesesDlg.cxx \
@@ -95,6 +96,7 @@ LIB_SRC =	SMESHGUI.cxx \
 		SMESHGUI_GroupOp.cxx \
 		SMESHGUI_SmoothingDlg.cxx \
 		SMESHGUI_RenumberingDlg.cxx \
+		SMESHGUI_RenumberingOp.cxx \
 		SMESHGUI_ExtrusionDlg.cxx \
 		SMESHGUI_ExtrusionAlongPathDlg.cxx \
 		SMESHGUI_RevolutionDlg.cxx \
@@ -146,6 +148,7 @@ LIB_MOC = \
 		SMESHGUI_Preferences_SelectionDlg.h \
 		SMESHGUI_aParameterDlg.h \
 		SMESHGUI_MoveNodesDlg.h \
+		SMESHGUI_MoveNodesOp.h \
 		SMESHGUI_EditHypothesesDlg.h \
 		SMESHGUI_EditHypothesesOp.h \
 		SMESHGUI_CreateHypothesesDlg.h \
@@ -158,6 +161,7 @@ LIB_MOC = \
 		SMESHGUI_GroupOp.h \
 		SMESHGUI_SmoothingDlg.h \
 		SMESHGUI_RenumberingDlg.h \
+		SMESHGUI_RenumberingOp.h \
 		SMESHGUI_ExtrusionDlg.h \
 		SMESHGUI_ExtrusionAlongPathDlg.h \
 		SMESHGUI_RevolutionDlg.h \

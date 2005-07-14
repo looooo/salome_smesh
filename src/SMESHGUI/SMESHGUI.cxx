@@ -41,7 +41,7 @@
 #include "SMESHGUI_Preferences_SelectionDlg.h"
 #include "SMESHGUI_Hypotheses.h"
 #include "SMESHGUI_HypothesesUtils.h"
-#include "SMESHGUI_MoveNodesDlg.h"
+#include "SMESHGUI_MoveNodesOp.h"
 #include "SMESHGUI_AddMeshElementOp.h"
 #include "SMESHGUI_EditHypothesesOp.h"
 #include "SMESHGUI_CreateHypothesesDlg.h"
@@ -52,7 +52,7 @@
 #include "SMESHGUI_GroupOp.h"
 #include "SMESHGUI_DeleteGroupDlg.h"
 #include "SMESHGUI_SmoothingDlg.h"
-#include "SMESHGUI_RenumberingDlg.h"
+#include "SMESHGUI_RenumberingOp.h"
 #include "SMESHGUI_ExtrusionDlg.h"
 #include "SMESHGUI_ExtrusionAlongPathDlg.h"
 #include "SMESHGUI_RevolutionDlg.h"
@@ -1146,15 +1146,16 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
 
   case 406:					// MOVE NODE
     {
-      if ( !vtkwnd )
+/*      if ( !vtkwnd )
       {
         SUIT_MessageBox::warn1( desktop(), tr( "SMESH_WRN_WARNING" ),
           tr( "NOT_A_VTK_VIEWER" ),tr( "SMESH_BUT_OK" ) );
         break;
-      }
+      }*/
 
       if(checkLock(aStudy)) break;
-      new SMESHGUI_MoveNodesDlg(this);
+      startOperation( 406 );
+//      new SMESHGUI_MoveNodesDlg(this);
       break;
     }
 
@@ -1952,7 +1953,8 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
   case 4051:					// RENUMBERING NODES
     {
       if(checkLock(aStudy)) break;
-      if( vtkwnd ) {
+      startOperation( 4051 );
+/*      if( vtkwnd ) {
 	EmitSignalDeactivateDialog();
 	new SMESHGUI_RenumberingDlg( this, "", 0);
       }
@@ -1961,13 +1963,14 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
 	  SUIT_MessageBox::warn1(desktop(),
 				tr("SMESH_WRN_WARNING"), tr("SMESH_WRN_VIEWER_VTK"),
 				tr("SMESH_BUT_OK"));
-	}
+	}*/
       break;
     }
   case 4052:					// RENUMBERING ELEMENTS
     {
       if(checkLock(aStudy)) break;
-      if ( vtkwnd ) {
+      startOperation( 4052 );
+/*      if ( vtkwnd ) {
 	EmitSignalDeactivateDialog();
 	new SMESHGUI_RenumberingDlg( this, "", 1);
       }
@@ -1976,7 +1979,7 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
 	  SUIT_MessageBox::warn1(desktop(),
 				tr("SMESH_WRN_WARNING"), tr("SMESH_WRN_VIEWER_VTK"),
 				tr("SMESH_BUT_OK"));
-	}
+	}*/
       break;
     }
   case 4061:                                   // TRANSLATION
@@ -3195,6 +3198,10 @@ SalomeApp_Operation* SMESHGUI::createOperation( const int id ) const
     case 401:
       op = new SMESHGUI_AddMeshElementOp( SMDSAbs_Edge, 2 );
       break;
+
+    case 406:  // MOVE NODE
+      op = new SMESHGUI_MoveNodesOp();
+      break;
       
     case 4021:
       op = new SMESHGUI_AddMeshElementOp( SMDSAbs_Face, 3 );
@@ -3219,7 +3226,15 @@ SalomeApp_Operation* SMESHGUI::createOperation( const int id ) const
     case 4041:
       op = new SMESHGUI_RemoveNodesOp();
       break;
-      
+
+    case 4051:  // RENUMBERING NODES
+      op = new SMESHGUI_RenumberingOp( 0 );
+      break;
+
+    case 4052:  // RENUMBERING ELEMENTS
+      op = new SMESHGUI_RenumberingOp( 1 );
+      break;
+            
     case 702:
       op = new SMESHGUI_AddSubMeshOp();
       break;

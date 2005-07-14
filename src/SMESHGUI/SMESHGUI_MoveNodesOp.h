@@ -21,27 +21,52 @@
 //
 //
 //
-//  File   : SMESHGUI_RenumberingDlg.h
-//  Author : Michael ZORIN
+//  File   : SMESHGUI_MoveNodesOp.h
+//  Author : Alexander SOLOVYOV
 //  Module : SMESH
-//  $Header:
+//  $Header$
 
-#ifndef DIALOGBOX_RENUMBERING_H
-#define DIALOGBOX_RENUMBERING_H
+#ifndef OPERATION_MOVE_NODES_H
+#define OPERATION_MOVE_NODES_H
 
-#include <SMESHGUI_Dialog.h>
+#include <SMESHGUI_SelectionOp.h>
+
+class SMESHGUI_MoveNodesDlg;
+class SALOME_Actor;
 
 //=================================================================================
-// class    : SMESHGUI_RenumberingDlg
-// purpose  : If the unit == 0 nodes will be renumbered, if the unit == 1 the elements will.
+// class    : SMESHGUI_MoveNodesOp
+// purpose  :
 //=================================================================================
-class SMESHGUI_RenumberingDlg : public SMESHGUI_Dialog
+class SMESHGUI_MoveNodesOp : public SMESHGUI_SelectionOp
 { 
-    Q_OBJECT
+  Q_OBJECT
 
 public:
-    SMESHGUI_RenumberingDlg( const int );
-    ~SMESHGUI_RenumberingDlg();
+  SMESHGUI_MoveNodesOp();
+  virtual ~SMESHGUI_MoveNodesOp();
+
+  virtual SalomeApp_Dialog* dlg() const;
+
+protected:
+  virtual void startOperation();
+  virtual void selectionDone();
+  virtual void initDialog();
+  virtual void commitOperation();
+  virtual void abortOperation();  
+
+  void updateDialog();
+
+protected slots:
+  virtual bool onApply();
+  virtual void redisplayPreview();
+
+private:
+  void erasePreview();
+  
+private:
+  SALOME_Actor*               myPreviewActor;
+  SMESHGUI_MoveNodesDlg*      myDlg;  
 };
 
-#endif // DIALOGBOX_RENUMBERING_H
+#endif // DIALOGBOX_MOVE_NODES_H

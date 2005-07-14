@@ -127,7 +127,7 @@ void SMESHGUI_GroupOp::startOperation()
 {
   if( !myDlg )
   {
-    myDlg = new SMESHGUI_GroupOpDlg( getSMESHGUI(), myMode );
+    myDlg = new SMESHGUI_GroupOpDlg( myMode );
     connect( myDlg, SIGNAL( nameChanged( const QString& ) ), this, SLOT( onNameChanged( const QString& ) ) );
   }
 

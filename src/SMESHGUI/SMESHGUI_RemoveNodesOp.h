@@ -21,61 +21,43 @@
 //
 //
 //
-//  File   : SMESHGUI_AddMeshElementOp.h
+//  File   : SMESHGUI_RemoveNodesOp.h
 //  Author : Nicolas REJNERI
 //  Module : SMESH
 //  $Header$
 
-#ifndef OPERATION_ADD_FACE_H
-#define OPERATION_ADD_FACE_H
-
-namespace SMESH{
-  struct TElementSimulation;
-}
+#ifndef OPERATION_REMOVE_NODES_H
+#define OPERATION_REMOVE_NODES_H
 
 #include <SMESHGUI_SelectionIdsOp.h>
-#include <SMDSAbs_ElementType.hxx>
 
-class SMESHGUI_AddMeshElementDlg;
+class SMESHGUI_RemoveNodesDlg;
 
 //=================================================================================
-// class    : SMESHGUI_AddMeshElementOp
+// class    : SMESHGUI_RemoveNodesOp
 // purpose  :
 //=================================================================================
-class SMESHGUI_AddMeshElementOp : public SMESHGUI_SelectionIdsOp
-{ 
+class SMESHGUI_RemoveNodesOp : public SMESHGUI_SelectionIdsOp
+{
     Q_OBJECT
 
 public:
-    SMESHGUI_AddMeshElementOp( const SMDSAbs_ElementType, const int );
-    ~SMESHGUI_AddMeshElementOp();
+    SMESHGUI_RemoveNodesOp();
+    ~SMESHGUI_RemoveNodesOp();
 
     virtual SalomeApp_Dialog* dlg() const;
 
 protected:
     virtual void startOperation();
-    virtual void commitOperation();
-    virtual void abortOperation();
+    virtual void selectionDone();
 
     void updateDialog();
-    
+
 protected slots:
     virtual bool onApply();
-    virtual void onSelectionChanged( int );
-
-    void onReverse( int );
 
 private:
-    void displaySimulation();
-
-private:
-    int                         myElementType;
-    int                         myNbNodes;
-    bool                        myIsPoly;
-
-    SMESH::TElementSimulation*  mySimulation;
-
-    SMESHGUI_AddMeshElementDlg* myDlg;
+    SMESHGUI_RemoveNodesDlg*      myDlg;
 };
 
-#endif // DIALOGBOX_ADD_FACE_H
+#endif // DIALOGBOX_REMOVE_NODES_H

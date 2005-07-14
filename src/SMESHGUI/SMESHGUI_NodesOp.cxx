@@ -230,7 +230,6 @@ void SMESHGUI_NodesOp::startOperation()
   {
     myDlg = new SMESHGUI_NodesDlg();
     connect( myDlg, SIGNAL( valueChanged( double ) ), this, SLOT( onValueChanged( double ) ) );
-    connect( myDlg, SIGNAL( dlgClose() ), this, SLOT( onCancel() ) );
   }
 
   SMESHGUI_SelectionOp::startOperation();

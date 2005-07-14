@@ -136,6 +136,7 @@ void SMESHGUI_Operation::startOperation()
     disconnect( dlg(), SIGNAL( dlgOk() ), this, SLOT( onOk() ) );
     disconnect( dlg(), SIGNAL( dlgApply() ), this, SLOT( onApply() ) );
     disconnect( dlg(), SIGNAL( dlgCancel() ), this, SLOT( onCancel() ) );
+    disconnect( dlg(), SIGNAL( dlgClose() ), this, SLOT( onCancel() ) );
     
     if( dlg()->testButtonFlags( QtxDialog::OK ) )
       connect( dlg(), SIGNAL( dlgOk() ), this, SLOT( onOk() ) );
@@ -145,6 +146,9 @@ void SMESHGUI_Operation::startOperation()
       
     if( dlg()->testButtonFlags( QtxDialog::Cancel ) )
       connect( dlg(), SIGNAL( dlgCancel() ), this, SLOT( onCancel() ) );
+      
+    if( dlg()->testButtonFlags( QtxDialog::Close ) )
+      connect( dlg(), SIGNAL( dlgClose() ), this, SLOT( onCancel() ) );
 
     initDialog();
   }
@@ -315,8 +319,7 @@ void SMESHGUI_Operation::setDialogActive( const bool active )
 _PTR(Study) SMESHGUI_Operation::studyDS() const
 {
   SalomeApp_Study* s = dynamic_cast<SalomeApp_Study*>( study() );
-  if( s )
-    return s->studyDS();
+  return s->studyDS();
 }
 
 //=======================================================================

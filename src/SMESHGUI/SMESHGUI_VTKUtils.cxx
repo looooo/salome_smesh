@@ -147,6 +147,8 @@ namespace SMESH{
   {
     if(SalomeApp_Application* anApp = theModule->getApp())
       return dynamic_cast<SVTK_ViewWindow*>(anApp->desktop()->activeWindow());
+    else
+      return 0;
   }
 
   SVTK_ViewWindow* FindVtkViewWindow( SUIT_ViewManager* theMgr,

@@ -129,12 +129,3 @@ bool SMESHGUI_AddMeshElementDlg::isReverse() const
   else
     return false;
 }
-
-//=================================================================================
-// function : ~SMESHGUI_AddMeshElementDlg()
-// purpose  : Destroys the object and frees any allocated resources
-//=================================================================================
-void SMESHGUI_AddMeshElementDlg::setBusy( const bool b )
-{
-  myIsBusy = b;
-}

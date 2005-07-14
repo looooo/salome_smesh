@@ -31,7 +31,7 @@
 #include "SMESHGUI_TransparencyDlg.h"
 #include "SMESHGUI_ClippingDlg.h"
 #include "SMESHGUI_GroupDlg.h"
-#include "SMESHGUI_RemoveNodesDlg.h"
+#include "SMESHGUI_RemoveNodesOp.h"
 #include "SMESHGUI_RemoveElementsDlg.h"
 #include "SMESHGUI_MeshInfosDlg.h"
 #include "SMESHGUI_StandardMeshInfosDlg.h"
@@ -2031,7 +2031,8 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
   case 4041:					// REMOVES NODES
     {
       if(checkLock(aStudy)) break;
-      if ( vtkwnd ) {
+      startOperation( 4041 );
+/*      if ( vtkwnd ) {
 	EmitSignalDeactivateDialog();
 	new SMESHGUI_RemoveNodesDlg(this);
       }
@@ -2039,7 +2040,7 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
 	SUIT_MessageBox::warn1(desktop(),
 			      tr("SMESH_WRN_WARNING"), tr("SMESH_WRN_VIEWER_VTK"),
 			      tr("SMESH_BUT_OK"));
-      }
+      }*/
       break;
     }
   case 4042:					// REMOVES ELEMENTS
@@ -3319,7 +3320,11 @@ SalomeApp_Operation* SMESHGUI::createOperation( const int id ) const
     case 4032:
       op = new SMESHGUI_AddMeshElementOp( SMDSAbs_Volume, 8 );
       break;
-            
+
+    case 4041:
+      op = new SMESHGUI_RemoveNodesOp();
+      break;
+      
     case 702:
       op = new SMESHGUI_AddSubMeshOp();
       break;

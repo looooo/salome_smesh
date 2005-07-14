@@ -46,7 +46,6 @@ public:
     ~SMESHGUI_AddMeshElementDlg();
 
     bool isReverse() const;
-    void setBusy( const bool );
 
 signals:
     void reverse( int );

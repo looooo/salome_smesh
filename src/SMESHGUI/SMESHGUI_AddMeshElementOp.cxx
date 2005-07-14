@@ -37,21 +37,12 @@
 #include <SVTK_Selector.h>
 #include <SMESH_Actor.h>
 #include <SMESH_ActorUtils.h>
-#include <SMESHGUI_Utils.h>
 #include <SMESHGUI_VTKUtils.h>
-#include <SMESHGUI_MeshUtils.h>
-
-#include <SALOME_ListIO.hxx>
 
 #include <vtkCell.h>
 #include <vtkDataSetMapper.h>
 #include <vtkUnstructuredGrid.h>
 #include <vtkIdList.h>
-
-#include <TColStd_MapOfInteger.hxx>
-
-#include <SMDS_Mesh.hxx>
-#include <SMDS_MeshNode.hxx>
 
 namespace SMESH {
 
@@ -170,7 +161,7 @@ namespace SMESH {
 // purpose  : constructor
 //=================================================================================
 SMESHGUI_AddMeshElementOp::SMESHGUI_AddMeshElementOp( const SMDSAbs_ElementType t, const int nbNodes )
-: SMESHGUI_SelectionOp( NodeSelection ),
+: SMESHGUI_SelectionIdsOp( NodeSelection ),
   myElementType( t ),
   myNbNodes( nbNodes ),
   myIsPoly( myElementType==SMDSAbs_Face && myNbNodes==5 ),
@@ -221,13 +212,10 @@ void SMESHGUI_AddMeshElementOp::startOperation()
     }
     
     myDlg = new SMESHGUI_AddMeshElementDlg( elemName, myElementType == SMDSAbs_Face );
-    connect( myDlg, SIGNAL( objectChanged( int, const QStringList& ) ),
-             this,  SLOT( onTextChanged( int, const QStringList& ) ) );
-    connect( myDlg, SIGNAL( dlgClose() ), this, SLOT( onCancel() ) );
     connect( myDlg, SIGNAL( reverse( int ) ), this, SLOT( onReverse( int ) ) );
   }
 
-  SMESHGUI_SelectionOp::startOperation();
+  SMESHGUI_SelectionIdsOp::startOperation();
 
   mySimulation = new SMESH::TElementSimulation( viewWindow() );
   updateDialog();
@@ -235,29 +223,17 @@ void SMESHGUI_AddMeshElementOp::startOperation()
 }
 
 //=================================================================================
-// function : selectionDone()
+// function : onSelectionChanged()
 // purpose  :
 //=================================================================================
-void SMESHGUI_AddMeshElementOp::selectionDone()
+void SMESHGUI_AddMeshElementOp::onSelectionChanged( int id )
 {
   if( !mySimulation )
     return;
     
   mySimulation->SetVisibility(false);
 
-  // get selected mesh
-  SALOME_ListIO aList;
-  selectionMgr()->selectedObjects(aList,SVTK_Viewer::Type());
-
-  if( aList.Extent() != 1)
-    return;
-
-  Handle(SALOME_InteractiveObject) anIO = aList.First();
-  myMesh = SMESH::GetMeshByIO(anIO);
-
-  QStringList names, ids; SalomeApp_Dialog::TypesList types;
-  selected( names, types, ids );
-  myDlg->selectObject( names, types, ids );
+  SMESHGUI_SelectionIdsOp::onSelectionChanged( id );
 
   updateDialog();
   displaySimulation();
@@ -272,7 +248,7 @@ void SMESHGUI_AddMeshElementOp::commitOperation()
   if( mySimulation )
     delete mySimulation;
   mySimulation = 0;
-  SMESHGUI_SelectionOp::commitOperation();
+  SMESHGUI_SelectionIdsOp::commitOperation();
 }
 
 //=================================================================================
@@ -284,7 +260,7 @@ void SMESHGUI_AddMeshElementOp::abortOperation()
   if( mySimulation )
     delete mySimulation;
   mySimulation = 0;
-  SMESHGUI_SelectionOp::abortOperation();
+  SMESHGUI_SelectionIdsOp::abortOperation();
 }
 
 //=================================================================================
@@ -296,7 +272,7 @@ bool SMESHGUI_AddMeshElementOp::onApply()
   if( !mySimulation )
     return false;
 
-  QStringList ids; myDlg->selectedObject( 0, ids );
+  IdList ids; selectedIds( 0, ids );
   if( ids.count()>=myNbNodes && !getSMESHGUI()->isActiveStudyLocked() ) {
     //myBusy = true;
     SMESH::long_array_var anArrayOfIdeces = new SMESH::long_array;
@@ -305,25 +281,13 @@ bool SMESHGUI_AddMeshElementOp::onApply()
     
     for (int i = 0; i < myNbNodes; i++)
     {
-      QString id_str = ids[ i ];
-      int pos = id_str.find( idChar() );
-      int id = -1;
-      if( pos>=0 )
-        id = id_str.mid( pos+1 ).toInt();
-
-      if( id==-1 )
-      {
-        printf( "SMESHGUI_AddMeshElementOp::onApply(): Error!!!\n" );
-        return false;
-      }
-      
       if (reverse)
-        anArrayOfIdeces[ myNbNodes - i - 1 ] = id;
+        anArrayOfIdeces[ myNbNodes - i - 1 ] = ids[i];
       else
-        anArrayOfIdeces[i] = id;
+        anArrayOfIdeces[i] = ids[i];
     }
 
-    SMESH::SMESH_MeshEditor_var aMeshEditor = myMesh->GetMeshEditor();
+    SMESH::SMESH_MeshEditor_var aMeshEditor = mesh()->GetMeshEditor();
     switch (myElementType) {
     case SMDSAbs_Edge:
       aMeshEditor->AddEdge(anArrayOfIdeces.inout()); break;
@@ -349,64 +313,22 @@ bool SMESHGUI_AddMeshElementOp::onApply()
 }
 
 //=================================================================================
-// function : onTextChanged()
-// purpose  :
-//=================================================================================
-void SMESHGUI_AddMeshElementOp::onTextChanged( int, const QStringList& aListId )
-{
-    myDlg->setBusy( true );
-    TColStd_MapOfInteger newIndices;
-    SALOME_ListIO list; selectionMgr()->selectedObjects( list );
-    if( list.Extent()==0 )
-      return;
-
-    SMESH_Actor* anActor = SMESH::FindActorByObject( myMesh.in() );
-    if( !anActor )
-      return;
-      
-    SMDS_Mesh* aMesh = anActor->GetObject()->GetMesh();
-
-    for (int i = 0; i < aListId.count(); i++)
-      if( const SMDS_MeshNode * n = aMesh->FindNode( aListId[ i ].toInt() ) )
-        newIndices.Add( n->GetID() );
-
-    selector()->AddOrRemoveIndex( list.First(), newIndices, false );
-    highlight( list.First(), true, true );
-
-    selectionDone();
-    myDlg->setBusy( false );
-}
-
-//=================================================================================
 // function : displaySimulation()
 // purpose  :
 //=================================================================================
 void SMESHGUI_AddMeshElementOp::displaySimulation()
 {
-  QStringList ids; myDlg->selectedObject( 0, ids );
+  IdList ids; selectedIds( 0, ids );
+  
   if( ids.count()>=myNbNodes ) {
     SMESH::TElementSimulation::TVTKIds anIds;
 
-    SMESH_Actor* anActor = SMESH::FindActorByObject( myMesh.in() );
+    SMESH_Actor* anActor = actor();
     if( !anActor )
       return;
     
-    for (int i = 0; i < myNbNodes; i++)
-    {
-      QString id_str = ids[ i ];
-      int pos = id_str.find( idChar() );
-      int id = -1;
-      if( pos>=0 )
-        id = id_str.mid( pos+1 ).toInt();
-
-      if( id==-1 )
-      {
-        printf( "SMESHGUI_AddMeshElementOp::displaySimulation(): Error!!!\n" );
-        return;
-      }
-      
-      anIds.push_back( anActor->GetObject()->GetNodeVTKId( id ) );
-    }
+    for (int i = 0; i < myNbNodes; i++)    
+      anIds.push_back( anActor->GetObject()->GetNodeVTKId( ids[i] ) );
 
     if( myDlg->isReverse() )
       reverse( anIds.begin(), anIds.end() );
@@ -453,7 +375,7 @@ void SMESHGUI_AddMeshElementOp::updateDialog()
 {
   if( myDlg )
   {
-    QStringList ids; myDlg->selectedObject( 0, ids );
+    IdList ids; selectedIds( 0, ids );
     myDlg->setButtonEnabled( ids.count()>=myNbNodes, QtxDialog::OK | QtxDialog::Apply );
   }
 }

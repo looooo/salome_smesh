@@ -29,97 +29,19 @@
 #ifndef DIALOGBOX_REMOVE_NODES_H
 #define DIALOGBOX_REMOVE_NODES_H
 
-#include "SalomeApp_SelectionMgr.h"
-
-// QT Includes
-#include <qvariant.h>
-#include <qdialog.h>
-
-// Open CASCADE Includes
-#include <TColStd_IndexedMapOfInteger.hxx>
-
-class QVBoxLayout; 
-class QHBoxLayout; 
-class QGridLayout; 
-class QButtonGroup;
-class QGroupBox;
-class QLabel;
-class QLineEdit;
-class QPushButton;
-class QRadioButton;
-
-class SMESHGUI;
-class SMESH_Actor;
-class SVTK_Selector;
-class SVTK_ViewWindow;
-
-// IDL Headers
-#include <SALOMEconfig.h>
-#include CORBA_SERVER_HEADER(SMESH_Mesh)
+#include <SMESHGUI_Dialog.h>
 
 //=================================================================================
 // class    : SMESHGUI_RemoveNodesDlg
 // purpose  :
 //=================================================================================
-class SMESHGUI_RemoveNodesDlg : public QDialog
+class SMESHGUI_RemoveNodesDlg : public SMESHGUI_Dialog
 {
     Q_OBJECT
 
 public:
-    SMESHGUI_RemoveNodesDlg(SMESHGUI* theModule,
-			    const char* name = 0,
-			    bool modal = FALSE,
-			    WFlags fl = 0);
+    SMESHGUI_RemoveNodesDlg();
     ~SMESHGUI_RemoveNodesDlg();
-
-private:
-
-    void Init() ;
-    void closeEvent( QCloseEvent* e ) ;
-    void enterEvent ( QEvent * ) ;                         /* mouse enter the QWidget */
-    void hideEvent ( QHideEvent * );                       /* ESC key */
-
-    SalomeApp_SelectionMgr*       mySelectionMgr;
-    SVTK_ViewWindow*              myViewWindow;
-    SVTK_Selector*                mySelector;
-    SMESHGUI*                     mySMESHGUI;
-
-    int                           myNbOkNodes;             /* to check when arguments is defined */
-    int                           myConstructorId;         /* Current constructor id = radio button id */
-    QLineEdit*                    myEditCurrentArgument;   /* Current  LineEdit */
-
-    bool                          myBusy;
-    SMESH::SMESH_Mesh_var         myMesh;
-    SMESH_Actor*                  myActor;
-    
-    QButtonGroup* GroupConstructors;
-    QRadioButton* Constructor1;
-    QGroupBox* GroupButtons;
-    QPushButton* buttonOk;
-    QPushButton* buttonCancel;
-    QPushButton* buttonApply;
-    QGroupBox* GroupC1;
-    QLabel* TextLabelC1A1;
-    QPushButton* SelectButtonC1A1;
-    QLineEdit* LineEditC1A1;
-
-private slots:
-
-    void ConstructorsClicked(int constructorId);
-    void ClickOnOk();
-    void ClickOnCancel();
-    void ClickOnApply();
-    void SetEditCurrentArgument() ;
-    void SelectionIntoArgument() ;
-    void DeactivateActiveDialog() ;
-    void ActivateThisDialog() ;
-    void onTextChange(const QString&);
-
-protected:
-    QGridLayout* SMESHGUI_RemoveNodesDlgLayout;
-    QGridLayout* GroupConstructorsLayout;
-    QGridLayout* GroupButtonsLayout;
-    QGridLayout* GroupC1Layout;
 };
 
 #endif // DIALOGBOX_REMOVE_NODES_H

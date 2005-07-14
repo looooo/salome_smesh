@@ -35,12 +35,13 @@ protected:
   virtual void      initDialog();
 
   virtual void      startOperation();
-  virtual bool      isReadyToStart();
+  virtual bool      isReadyToStart() const;
   
   //! Set according dialog active or inactive
   virtual void      setDialogActive( const bool );
 
   SMESHGUI*         getSMESHGUI() const;
+  bool              isStudyLocked( const bool = true ) const;
 
   _PTR(Study)       studyDS() const;
 

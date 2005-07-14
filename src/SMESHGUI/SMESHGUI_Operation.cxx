@@ -83,18 +83,17 @@ void SMESHGUI_Operation::startOperation()
 // name    : isReadyToStart
 // Purpose : Verify whether operation is ready to start
 //=======================================================================
-bool SMESHGUI_Operation::isReadyToStart()
+bool SMESHGUI_Operation::isReadyToStart() const
 {
   if ( !SalomeApp_Operation::isReadyToStart() )
     return false;
-    
-  if ( getSMESHGUI() == 0 )
+  else if ( getSMESHGUI() == 0 )
   {
     SUIT_MessageBox::warn1( desktop(), tr( "SMESH_WRN_WARNING" ),
       tr( "NO_MODULE" ), tr( "SMESH_BUT_OK" ) );
     return false;
   }
-
+  
   return true;
 }
 
@@ -159,3 +158,28 @@ void SMESHGUI_Operation::onCancel()
 void SMESHGUI_Operation::initDialog()
 {
 }
+
+/*!
+ * \brief Verifies whether study of operation is locked
+  * \param theMess - specifies whether message box must be shown if study is locked
+  * \return State of study.
+*
+* Verifies whether study of operation is locked. If second parameter is TRUE and study
+* is locked when corresponding message box appears
+*/
+bool SMESHGUI_Operation::isStudyLocked( const bool theMess ) const
+{
+  if ( studyDS() )
+  {
+    if ( studyDS()->GetProperties()->IsLocked() )
+    {
+      if ( theMess )
+        SUIT_MessageBox::warn1 ( SMESHGUI::desktop(), QObject::tr( "WRN_WARNING" ),
+          QObject::tr( "WRN_STUDY_LOCKED" ), QObject::tr( "BUT_OK" ) );
+      return true;
+    }
+  }
+  
+  return false;
+}
+

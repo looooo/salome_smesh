@@ -151,7 +151,7 @@ void SMESHGUI_MoveNodesOp::initDialog()
 //=======================================================================
 bool SMESHGUI_MoveNodesOp::onApply()
 {
-  if( getSMESHGUI()->isActiveStudyLocked() )
+  if( isStudyLocked() )
     return false;
 
   if( !myDlg->hasSelection( 0 ) )

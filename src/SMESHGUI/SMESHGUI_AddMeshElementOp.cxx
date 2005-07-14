@@ -274,7 +274,7 @@ bool SMESHGUI_AddMeshElementOp::onApply()
     return false;
 
   IdList ids; selectedIds( 0, ids );
-  if( ids.count()>=myNbNodes && !getSMESHGUI()->isActiveStudyLocked() ) {
+  if( ids.count()>=myNbNodes && !isStudyLocked() ) {
     //myBusy = true;
     SMESH::long_array_var anArrayOfIdeces = new SMESH::long_array;
     anArrayOfIdeces->length(myNbNodes);

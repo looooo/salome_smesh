@@ -125,7 +125,7 @@ void SMESHGUI_RenumberingOp::updateDialog()
 //=================================================================================
 bool SMESHGUI_RenumberingOp::onApply()
 {
-  if( getSMESHGUI()->isActiveStudyLocked() )
+  if( isStudyLocked() )
     return false;
 
   if( myDlg->hasSelection( 0 ) )

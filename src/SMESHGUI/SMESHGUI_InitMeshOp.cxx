@@ -137,7 +137,7 @@ SUIT_SelectionFilter* SMESHGUI_InitMeshOp::createFilter( const int id ) const
 //=================================================================================
 bool SMESHGUI_InitMeshOp::onApply()
 {
-  if( getSMESHGUI()->isActiveStudyLocked() )
+  if( isStudyLocked() )
     return false;
 
   QString myNameMesh = myDlg->meshName();

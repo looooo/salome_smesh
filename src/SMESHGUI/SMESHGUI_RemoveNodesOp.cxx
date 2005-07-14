@@ -106,7 +106,7 @@ void SMESHGUI_RemoveNodesOp::updateDialog()
 //=================================================================================
 bool SMESHGUI_RemoveNodesOp::onApply()
 {
-  if( getSMESHGUI()->isActiveStudyLocked() )
+  if( isStudyLocked() )
     return false;
 
   IdList ids; selectedIds( 0, ids );

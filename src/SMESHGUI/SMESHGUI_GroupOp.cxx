@@ -80,7 +80,7 @@ SalomeApp_Dialog* SMESHGUI_GroupOp::dlg() const
 //=======================================================================
 bool SMESHGUI_GroupOp::onApply()
 {
-  if( !myDlg || !isValid() || getSMESHGUI()->isActiveStudyLocked() )
+  if( !myDlg || !isValid() || isStudyLocked() )
     return false;
 
   QStringList selGroup[2];

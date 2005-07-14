@@ -109,7 +109,7 @@ void SMESHGUI_EditHypothesesOp::selectionDone()
 //=================================================================================
 bool SMESHGUI_EditHypothesesOp::onApply()
 {
-  if( getSMESHGUI()->isActiveStudyLocked() )
+  if( isStudyLocked() )
     return false;
 
   bool aRes = false;

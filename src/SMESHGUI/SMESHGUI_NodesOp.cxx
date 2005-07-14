@@ -309,7 +309,7 @@ void SMESHGUI_NodesOp::initDialog()
 //=================================================================================
 bool SMESHGUI_NodesOp::onApply()
 {
-  if( getSMESHGUI()->isActiveStudyLocked() || !mySimulation )
+  if( isStudyLocked() || !mySimulation )
     return false;
 
   if( mesh()->_is_nil()) {

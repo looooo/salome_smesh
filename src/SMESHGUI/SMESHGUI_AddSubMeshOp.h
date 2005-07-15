@@ -53,7 +53,6 @@ public:
 
   virtual SalomeApp_Dialog* dlg() const;
   virtual void              initDialog();
-  virtual bool isValid( SUIT_Operation* theOtherOp ) const;
   
 protected:
   virtual void startOperation();

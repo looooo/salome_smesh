@@ -21,31 +21,32 @@
 //
 //
 //
-//  File   : SMESHGUI_RemoveNodesOp.h
+//  File   : SMESHGUI_RemoveOp.h
 //  Author : Nicolas REJNERI
 //  Module : SMESH
 //  $Header$
 
-#ifndef OPERATION_REMOVE_NODES_H
-#define OPERATION_REMOVE_NODES_H
+#ifndef OPERATION_REMOVE_H
+#define OPERATION_REMOVE_H
 
 #include <SMESHGUI_SelectionOp.h>
 
-class SMESHGUI_RemoveNodesDlg;
+class SMESHGUI_RemoveDlg;
 
 //=================================================================================
-// class    : SMESHGUI_RemoveNodesOp
+// class    : SMESHGUI_RemoveOp
 // purpose  :
 //=================================================================================
-class SMESHGUI_RemoveNodesOp : public SMESHGUI_SelectionOp
+class SMESHGUI_RemoveOp : public SMESHGUI_SelectionOp
 {
     Q_OBJECT
 
 public:
-    SMESHGUI_RemoveNodesOp();
-    ~SMESHGUI_RemoveNodesOp();
+    SMESHGUI_RemoveOp( const bool elems );
+    ~SMESHGUI_RemoveOp();
 
     virtual SalomeApp_Dialog* dlg() const;
+    virtual void initDialog();
 
 protected:
     virtual void startOperation();
@@ -57,7 +58,8 @@ protected slots:
     virtual bool onApply();
 
 private:
-    SMESHGUI_RemoveNodesDlg*      myDlg;
+    SMESHGUI_RemoveDlg*      myDlg;
+    bool                     myIsElem;
 };
 
-#endif // DIALOGBOX_REMOVE_NODES_H
+#endif // DIALOGBOX_REMOVE_H

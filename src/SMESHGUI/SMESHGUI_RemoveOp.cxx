@@ -21,54 +21,55 @@
 //
 //
 //
-//  File   : SMESHGUI_RemoveNodesOp.cxx
+//  File   : SMESHGUI_RemoveOp.cxx
 //  Author : Alexander SOLOVYOV
 //  Module : SMESH
 //  $Header$
 
-#include "SMESHGUI_RemoveNodesOp.h"
-#include <SMESHGUI_RemoveNodesDlg.h>
+#include "SMESHGUI_RemoveOp.h"
+#include <SMESHGUI_RemoveDlg.h>
 #include <SMESHGUI.h>
 #include <SMESHGUI_VTKUtils.h>
 
 //=================================================================================
-// function : 
+// function : SMESHGUI_RemoveOp
 // purpose  : 
 //=================================================================================
-SMESHGUI_RemoveNodesOp::SMESHGUI_RemoveNodesOp()
-: SMESHGUI_SelectionOp( NodeSelection ),
-  myDlg( 0 )
+SMESHGUI_RemoveOp::SMESHGUI_RemoveOp( const bool elems )
+: SMESHGUI_SelectionOp( elems ? CellSelection : NodeSelection ),
+  myDlg( 0 ),
+  myIsElem( elems )
 {
 }
 
 //=================================================================================
-// function :
+// function : ~SMESHGUI_RemoveOp
 // purpose  :
 //=================================================================================
-SMESHGUI_RemoveNodesOp::~SMESHGUI_RemoveNodesOp()
+SMESHGUI_RemoveOp::~SMESHGUI_RemoveOp()
 {
   if( myDlg )
     delete myDlg;
 }
 
 //=================================================================================
-// function :
+// function : dlg
 // purpose  :
 //=================================================================================
-SalomeApp_Dialog* SMESHGUI_RemoveNodesOp::dlg() const
+SalomeApp_Dialog* SMESHGUI_RemoveOp::dlg() const
 {
   return myDlg;
 }  
 
 //=================================================================================
-// function :
+// function : startOperation
 // purpose  :
 //=================================================================================
-void SMESHGUI_RemoveNodesOp::startOperation()
+void SMESHGUI_RemoveOp::startOperation()
 {
   if( !myDlg )
   {
-    myDlg = new SMESHGUI_RemoveNodesDlg();
+    myDlg = new SMESHGUI_RemoveDlg( myIsElem );
     connect( myDlg, SIGNAL( objectChanged( int, const QStringList& ) ), this, SLOT( onTextChanged( int, const QStringList& ) ) );
   }
 
@@ -78,20 +79,30 @@ void SMESHGUI_RemoveNodesOp::startOperation()
 }
 
 //=================================================================================
-// function :
+// function : selectionDone
 // purpose  :
 //=================================================================================
-void SMESHGUI_RemoveNodesOp::selectionDone()
+void SMESHGUI_RemoveOp::selectionDone()
 {
   SMESHGUI_SelectionOp::selectionDone();
   updateDialog();
 } 
 
 //=================================================================================
-// function :
+// function : initDialog
 // purpose  :
 //=================================================================================
-void SMESHGUI_RemoveNodesOp::updateDialog()
+void SMESHGUI_RemoveOp::initDialog()
+{
+  SMESHGUI_SelectionOp::initDialog();
+  updateDialog();
+}
+
+//=================================================================================
+// function : updateDialog
+// purpose  :
+//=================================================================================
+void SMESHGUI_RemoveOp::updateDialog()
 {
   if( !myDlg )
     return;
@@ -101,10 +112,10 @@ void SMESHGUI_RemoveNodesOp::updateDialog()
 }
 
 //=================================================================================
-// function :
+// function : onApply
 // purpose  :
 //=================================================================================
-bool SMESHGUI_RemoveNodesOp::onApply()
+bool SMESHGUI_RemoveOp::onApply()
 {
   if( isStudyLocked() )
     return false;
@@ -120,7 +131,10 @@ bool SMESHGUI_RemoveNodesOp::onApply()
   try
   {
     SMESH::SMESH_MeshEditor_var aMeshEditor = mesh()->GetMeshEditor();
-    aResult = aMeshEditor->RemoveNodes( anArrayOfIdeces.inout() );
+    if( myIsElem )
+      aResult = aMeshEditor->RemoveElements( anArrayOfIdeces.inout() );
+    else
+      aResult = aMeshEditor->RemoveNodes( anArrayOfIdeces.inout() );
   }
   catch(...)
   {

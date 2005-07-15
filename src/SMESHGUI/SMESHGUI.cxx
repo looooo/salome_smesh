@@ -32,8 +32,7 @@
 #include "SMESHGUI_TransparencyDlg.h"
 #include "SMESHGUI_ClippingDlg.h"
 #include "SMESHGUI_GroupDlg.h"
-#include "SMESHGUI_RemoveNodesOp.h"
-#include "SMESHGUI_RemoveElementsDlg.h"
+#include "SMESHGUI_RemoveOp.h"
 #include "SMESHGUI_MeshInfosDlg.h"
 #include "SMESHGUI_StandardMeshInfosDlg.h"
 #include "SMESHGUI_Preferences_ColorDlg.h"
@@ -53,7 +52,7 @@
 #include "SMESHGUI_DeleteGroupDlg.h"
 #include "SMESHGUI_SmoothingDlg.h"
 #include "SMESHGUI_RenumberingOp.h"
-#include "SMESHGUI_ExtrusionDlg.h"
+#include "SMESHGUI_ExtrusionOp.h"
 #include "SMESHGUI_ExtrusionAlongPathDlg.h"
 #include "SMESHGUI_RevolutionDlg.h"
 #include "SMESHGUI_TranslationDlg.h"
@@ -1337,17 +1336,19 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
     case 410: // Union of triangles
     case 411: // Cutting of quadrangles
     {
-      if ( !vtkwnd )
+/*      if ( !vtkwnd )
       {
         SUIT_MessageBox::warn1( desktop(), tr( "SMESH_WRN_WARNING" ),
           tr( "NOT_A_VTK_VIEWER" ),tr( "SMESH_BUT_OK" ) );
         break;
-      }
+      }*/
 
       if ( checkLock( aStudy ) )
         break;
 
-      EmitSignalDeactivateDialog();
+      startOperation( theCommandID );
+
+/*      EmitSignalDeactivateDialog();
       SMESHGUI_MultiEditDlg* aDlg = NULL;
       if ( theCommandID == 409 )
         aDlg = new SMESHGUI_ChangeOrientationDlg(this);
@@ -1359,7 +1360,7 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
       int x, y ;
       DefineDlgPosition( aDlg, x, y );
       aDlg->move( x, y );
-      aDlg->show();
+      aDlg->show();*/
       break;
     }
   case 412: // Smoothing
@@ -1378,15 +1379,17 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
     }
   case 413: // Extrusion
     {
-      if (checkLock(aStudy)) break;
-      if (vtkwnd) {
+      if( checkLock( aStudy) )
+        break;
+      startOperation( 413 );
+/*      if (vtkwnd) {
 	EmitSignalDeactivateDialog();
 	new SMESHGUI_ExtrusionDlg ( this );
       } else {
 	SUIT_MessageBox::warn1(desktop(),
                                tr("SMESH_WRN_WARNING"), tr("SMESH_WRN_VIEWER_VTK"),
                                tr("SMESH_BUT_OK"));
-      }
+      }*/
       break;
     }
   case 414: // Revolution
@@ -1938,7 +1941,8 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
   case 4042:					// REMOVES ELEMENTS
     {
       if(checkLock(aStudy)) break;
-      if( vtkwnd ) {
+      startOperation( 4042 );
+/*      if( vtkwnd ) {
 	EmitSignalDeactivateDialog();
 	new SMESHGUI_RemoveElementsDlg(this);
       }
@@ -1947,7 +1951,7 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
 	  SUIT_MessageBox::warn1(desktop(),
 				tr("SMESH_WRN_WARNING"), tr("SMESH_WRN_VIEWER_VTK"),
 				tr("SMESH_BUT_OK"));
-	}
+	}*/
       break;
     }
   case 4051:					// RENUMBERING NODES
@@ -3223,10 +3227,14 @@ SalomeApp_Operation* SMESHGUI::createOperation( const int id ) const
       op = new SMESHGUI_AddMeshElementOp( SMDSAbs_Volume, 8 );
       break;
 
-    case 4041:
-      op = new SMESHGUI_RemoveNodesOp();
+    case 4041:  //REMOVE NODES
+      op = new SMESHGUI_RemoveOp( false );
       break;
 
+    case 4042:  //REMOVE ELEMENTS
+      op = new SMESHGUI_RemoveOp( true );
+      break;
+      
     case 4051:  // RENUMBERING NODES
       op = new SMESHGUI_RenumberingOp( 0 );
       break;
@@ -3258,6 +3266,22 @@ SalomeApp_Operation* SMESHGUI::createOperation( const int id ) const
     case 812:
       op = new SMESHGUI_GroupOp( SMESHGUI_GroupOp::CUT );
       break;
+
+/*    case 409: // Change orientation
+      op = new SMESHGUI_ChangeOrientationOp();
+      break;
+      
+    case 410: // Union of triangles
+      op = new SMESHGUI_UnionOfTrianglesDlg();
+      break;*/
+      
+/*    case 411: // Cutting of quadrangles
+      op = new SMESHGUI_CuttingOfQuadsDlg();
+      break;*/
+
+    case 413:
+      op = new SMESHGUI_ExtrusionOp();
+      break;
       
     default:
       op = SalomeApp_Module::createOperation( id );
@@ -3265,12 +3289,3 @@ SalomeApp_Operation* SMESHGUI::createOperation( const int id ) const
   }
   return op;
 }
-
-
-
-
-
-
-
-
-

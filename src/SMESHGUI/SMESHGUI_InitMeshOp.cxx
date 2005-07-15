@@ -317,16 +317,3 @@ void SMESHGUI_InitMeshOp::updateDialog()
                    myDlg->hasSelection( SMESHGUI_InitMeshDlg::Algo );
   myDlg->setButtonEnabled( isEnabled, QtxDialog::OK | QtxDialog::Apply );
 }
-
-//=================================================================================
-// function : isValid
-// purpose  :
-//=================================================================================
-bool SMESHGUI_InitMeshOp::isValid( SUIT_Operation* theOtherOp ) const
-{
-  //if ( theOtherOp && theOtherOp->inherits( "SMESHGUI_AddSubMeshOp" ) )
-    return true;
-  /*else
-    return false;
-    */
-}

@@ -69,9 +69,8 @@ LIB_SRC =	SMESHGUI.cxx \
 		SMESHGUI_TransparencyDlg.cxx \
 		SMESHGUI_ClippingDlg.cxx \
 		SMESHGUI_GroupDlg.cxx \
-		SMESHGUI_RemoveNodesDlg.cxx \
-		SMESHGUI_RemoveNodesOp.cxx \
-		SMESHGUI_RemoveElementsDlg.cxx \
+		SMESHGUI_RemoveDlg.cxx \
+		SMESHGUI_RemoveOp.cxx \
 		SMESHGUI_MeshInfosDlg.cxx \
 		SMESHGUI_StandardMeshInfosDlg.cxx \
 		SMESHGUI_Preferences_ColorDlg.cxx \
@@ -98,6 +97,7 @@ LIB_SRC =	SMESHGUI.cxx \
 		SMESHGUI_RenumberingDlg.cxx \
 		SMESHGUI_RenumberingOp.cxx \
 		SMESHGUI_ExtrusionDlg.cxx \
+		SMESHGUI_ExtrusionOp.cxx \
 		SMESHGUI_ExtrusionAlongPathDlg.cxx \
 		SMESHGUI_RevolutionDlg.cxx \
 		SMESHGUI_RotationDlg.cxx \
@@ -138,9 +138,8 @@ LIB_MOC = \
 		SMESHGUI_TransparencyDlg.h \
 		SMESHGUI_ClippingDlg.h \
 		SMESHGUI_GroupDlg.h \
-		SMESHGUI_RemoveNodesDlg.h \
-		SMESHGUI_RemoveNodesOp.h \
-		SMESHGUI_RemoveElementsDlg.h \
+		SMESHGUI_RemoveDlg.h \
+		SMESHGUI_RemoveOp.h \
 		SMESHGUI_MeshInfosDlg.h \
 		SMESHGUI_StandardMeshInfosDlg.h \
 		SMESHGUI_Preferences_ColorDlg.h \
@@ -163,6 +162,7 @@ LIB_MOC = \
 		SMESHGUI_RenumberingDlg.h \
 		SMESHGUI_RenumberingOp.h \
 		SMESHGUI_ExtrusionDlg.h \
+		SMESHGUI_ExtrusionOp.h \
 		SMESHGUI_ExtrusionAlongPathDlg.h \
 		SMESHGUI_RevolutionDlg.h \
 		SMESHGUI_RotationDlg.h \

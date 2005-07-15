@@ -21,27 +21,27 @@
 //
 //
 //
-//  File   : SMESHGUI_RemoveNodesDlg.h
+//  File   : SMESHGUI_RemoveDlg.h
 //  Author : Nicolas REJNERI
 //  Module : SMESH
 //  $Header$
 
-#ifndef DIALOGBOX_REMOVE_NODES_H
-#define DIALOGBOX_REMOVE_NODES_H
+#ifndef DIALOGBOX_REMOVE_H
+#define DIALOGBOX_REMOVE_H
 
 #include <SMESHGUI_Dialog.h>
 
 //=================================================================================
-// class    : SMESHGUI_RemoveNodesDlg
+// class    : SMESHGUI_RemoveDlg
 // purpose  :
 //=================================================================================
-class SMESHGUI_RemoveNodesDlg : public SMESHGUI_Dialog
+class SMESHGUI_RemoveDlg : public SMESHGUI_Dialog
 {
     Q_OBJECT
 
 public:
-    SMESHGUI_RemoveNodesDlg();
-    ~SMESHGUI_RemoveNodesDlg();
+    SMESHGUI_RemoveDlg( const bool elem );
+    ~SMESHGUI_RemoveDlg();
 };
 
-#endif // DIALOGBOX_REMOVE_NODES_H
+#endif // DIALOGBOX_REMOVE_H

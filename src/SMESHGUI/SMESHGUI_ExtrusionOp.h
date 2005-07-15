@@ -21,54 +21,48 @@
 //
 //
 //
-//  File   : SMESHGUI_ExtrusionDlg.h
-//  Author : Michael ZORIN
+//  File   : SMESHGUI_ExtrusionOp.h
+//  Author : Alexander SOLOVYOV
 //  Module : SMESH
 //  $Header: 
 
-#ifndef DIALOGBOX_EXTRUSION_H
-#define DIALOGBOX_EXTRUSION_H
+#ifndef OPERATION_EXTRUSION_H
+#define OPERATION_EXTRUSION_H
 
-#include <SMESHGUI_Dialog.h>
+#include <SMESHGUI_SelectionOp.h>
 
-class QButtonGroup;
-class QCheckBox;
-class QSpinBox;
-class QGroupBox;
-class SMESHGUI_SpinBox;
+class SMESHGUI_ExtrusionDlg;
 
 //=================================================================================
-// class    : SMESHGUI_ExtrusionDlg
+// class    : SMESHGUI_ExtrusionOp
 // purpose  :
 //=================================================================================
-class SMESHGUI_ExtrusionDlg : public SMESHGUI_Dialog
+class SMESHGUI_ExtrusionOp : public SMESHGUI_SelectionOp
 {
   Q_OBJECT
 
 public:
-  SMESHGUI_ExtrusionDlg();
-  ~SMESHGUI_ExtrusionDlg();
-
-  void init();
-  int  constructorId() const;
-  void coords( double&, double&, double& ) const;
-  int  nbStep() const;
-  bool isSelectMesh() const;
-
-signals:
-  void constructorClicked( int );
+  SMESHGUI_ExtrusionOp();
+  ~SMESHGUI_ExtrusionOp();
   
-private slots:
-  void onConstructorsClicked( int );
-  void onSelectMesh( bool );
+  virtual SalomeApp_Dialog* dlg() const;
+  virtual void initDialog();
+
+protected:
+  virtual void startOperation();
+  virtual SUIT_SelectionFilter* createFilter( const int ) const;
+
+  void updateDialog();
+  SMESH::SMESH_Mesh_var extractIds( IdList& ) const;
+
+protected slots:
+  virtual bool onApply();
+  virtual void onChangeType( int );
+  virtual void onSelectionChanged( int );
+  virtual void onActivateObject( int );
 
 private:
-  QButtonGroup*     myGroupConstructors;
-  QGroupBox*        myGroupArguments;
-
-  QCheckBox*        myCheckBoxMesh;
-  SMESHGUI_SpinBox *myDx, *myDy, *myDz;
-  QSpinBox         *myNbSteps;
+  SMESHGUI_ExtrusionDlg*      myDlg;
 };
 
 #endif // DIALOGBOX_EXTRUSION_H

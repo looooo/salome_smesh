@@ -334,15 +334,3 @@ void SMESHGUI_AddSubMeshOp::onNameChanged( const QString& )
 {
   updateDialog();
 }
-
-//=================================================================================
-// function : isValid
-// purpose  :
-//=================================================================================
-bool SMESHGUI_AddSubMeshOp::isValid( SUIT_Operation* theOtherOp ) const
-{
-  //if ( theOtherOp && theOtherOp->inherits( "SMESHGUI_InitMeshOp" ) )
-    return true;
-  /*else
-    return false;*/
-}

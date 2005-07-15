@@ -21,12 +21,12 @@
 //
 //
 //
-//  File   : SMESHGUI_RemoveNodesDlg.cxx
+//  File   : SMESHGUI_RemoveDlg.cxx
 //  Author : Nicolas REJNERI
 //  Module : SMESH
 //  $Header$
 
-#include "SMESHGUI_RemoveNodesDlg.h"
+#include "SMESHGUI_RemoveDlg.h"
 
 #include <SUIT_ResourceMgr.h>
 
@@ -38,25 +38,26 @@
 #include <qradiobutton.h>
 
 //=================================================================================
-// class    : SMESHGUI_RemoveNodesDlg()
+// class    : SMESHGUI_RemoveDlg()
 // purpose  :
 //=================================================================================
-SMESHGUI_RemoveNodesDlg::SMESHGUI_RemoveNodesDlg()
+SMESHGUI_RemoveDlg::SMESHGUI_RemoveDlg( const bool elem )
 : SMESHGUI_Dialog( false, true, OK | Apply | Close )
 {
-    QPixmap image0( resMgr()->loadPixmap("SMESH", tr("ICON_DLG_REM_NODE")));
-    QPixmap image1( resMgr()->loadPixmap("SMESH", tr("ICON_SELECT")));
+    QString entity = elem ? "ELEMENT" : "NODE";
+    QString name = QString( "ICON_DLG_REM_%1" ).arg( entity );
+    QPixmap image0( resMgr()->loadPixmap("SMESH", tr( name ) ) );
 
-    setName("SMESHGUI_RemoveNodesDlg");
+    setName("SMESHGUI_RemoveDlg");
     resize(303, 185);
-    setCaption(tr("SMESH_REMOVE_NODES_TITLE" ));
+    setCaption( tr( QString( "SMESH_REMOVE_%1S_TITLE" ).arg( entity ) ) );
     setSizeGripEnabled(TRUE);
 
     QVBoxLayout* main = new QVBoxLayout( mainFrame() );
 
     /***************************************************************/
     QButtonGroup* GroupConstructors = new QButtonGroup( mainFrame(), "GroupConstructors");
-    GroupConstructors->setTitle(tr("SMESH_NODES" ));
+    GroupConstructors->setTitle(tr( QString( "SMESH_%1S" ).arg( entity ) ) );
     GroupConstructors->setExclusive(TRUE);
     GroupConstructors->setColumnLayout(0, Qt::Vertical);
     GroupConstructors->layout()->setSpacing(0);
@@ -86,18 +87,22 @@ SMESHGUI_RemoveNodesDlg::SMESHGUI_RemoveNodesDlg()
 //    GroupC1->layout()->setSpacing(0);
 //    GroupC1->layout()->setMargin(0);
 
-    createObject( tr("SMESH_ID_NODES" ), GroupC1, 0 );
+    createObject( tr( QString( "SMESH_ID_%1S" ).arg( entity ) ), GroupC1, 0 );
     setNameIndication( 0, ListOfNames );
     setReadOnly( 0, false );
-    setObjectType( 0, prefix( "SMESH element" ) + SMDSAbs_Node, -1 );
+    int pr = prefix( "SMESH element" );
+    if( elem )
+      setObjectType( 0, pr + SMDSAbs_Edge, pr + SMDSAbs_Face, pr + SMDSAbs_Volume, -1 );
+    else
+      setObjectType( 0, pr + SMDSAbs_Node, -1 );
 
     main->addWidget(GroupC1);
 }
 
 //=================================================================================
-// function : ~SMESHGUI_RemoveNodesDlg()
+// function : ~SMESHGUI_RemoveDlg()
 // purpose  : Destroys the object and frees any allocated resources
 //=================================================================================
-SMESHGUI_RemoveNodesDlg::~SMESHGUI_RemoveNodesDlg()
+SMESHGUI_RemoveDlg::~SMESHGUI_RemoveDlg()
 {
 }

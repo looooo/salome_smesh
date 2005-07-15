@@ -44,6 +44,8 @@ protected:
   bool              isStudyLocked( const bool = true ) const;
 
   _PTR(Study)       studyDS() const;
+  
+  virtual bool      isValid( SUIT_Operation* ) const;
 
 protected slots:
   virtual void onOk();

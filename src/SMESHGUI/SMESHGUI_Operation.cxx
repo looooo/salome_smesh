@@ -183,3 +183,11 @@ bool SMESHGUI_Operation::isStudyLocked( const bool theMess ) const
   return false;
 }
 
+//=======================================================================
+// name    : isValid
+// Purpose :
+//=======================================================================
+bool SMESHGUI_Operation::isValid( SUIT_Operation* op ) const
+{
+  return( op && op->inherits( "SMESHGUI_Operation" ) );
+}

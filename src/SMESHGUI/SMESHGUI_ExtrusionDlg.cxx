@@ -47,7 +47,7 @@
 // purpose  : constructor
 //=================================================================================
 SMESHGUI_ExtrusionDlg::SMESHGUI_ExtrusionDlg()
-: SMESHGUI_Dialog( false, true, OK | Apply | Close )
+: SMESHGUI_Dialog( 0, false, true, OK | Apply | Close )
 {
   QPixmap image0( resMgr()->loadPixmap( "SMESH", tr( "ICON_DLG_EDGE") ) ),
           image1( resMgr()->loadPixmap( "SMESH", tr( "ICON_DLG_TRIANGLE") ) );

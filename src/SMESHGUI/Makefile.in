@@ -44,7 +44,9 @@ EXPORT_HEADERS= SMESHGUI_Swig.hxx \
 		SMESHGUI_SpinBox.h \
 		SMESHGUI_aParameter.h \
 		SMESHGUI_aParameterDlg.h \
-		SMESHGUI_Selection.h
+		SMESHGUI_Selection.h \
+		SMESHGUI_Operation.h \
+		SMESHGUI_Dialog.h
 
 # .po files to transform in .qm
 PO_FILES = \
@@ -84,6 +86,7 @@ LIB_SRC =	SMESHGUI.cxx \
 		SMESHGUI_EditHypothesesDlg.cxx \
 		SMESHGUI_EditHypothesesOp.cxx \
 		SMESHGUI_CreateHypothesesDlg.cxx \
+		SMESHGUI_CreateHypothesesOp.cxx \
 		SMESHGUI_XmlHandler.cxx \
 		SMESHGUI_Filter.cxx \
 		SMESHGUI_FilterDlg.cxx \
@@ -154,6 +157,7 @@ LIB_MOC = \
 		SMESHGUI_EditHypothesesDlg.h \
 		SMESHGUI_EditHypothesesOp.h \
 		SMESHGUI_CreateHypothesesDlg.h \
+		SMESHGUI_CreateHypothesesOp.h \
 		SMESHGUI_FilterDlg.h \
 		SMESHGUI_FilterLibraryDlg.h \
 		SMESHGUI_SingleEditDlg.h \

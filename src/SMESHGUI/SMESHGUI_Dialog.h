@@ -43,17 +43,17 @@ class SMESHGUI_Dialog : public SalomeApp_Dialog
   Q_OBJECT
   
 public:
-  SMESHGUI_Dialog( const bool = false, const bool = false, const int = OK | Cancel | Apply );
+  SMESHGUI_Dialog( QWidget* = 0, const bool = false, const bool = false, const int = OK | Cancel | Apply );
   virtual ~SMESHGUI_Dialog();
 
   virtual void show();
 
   //! set all content to enable (parameter is true) or disable state
-  void setContentActive( const bool ) const;
+  virtual void setContentActive( const bool ) const;
 
   //! Return hard-coded prefix using to differ overlapping types
   static int   prefix( const QString& );
-  
+
 protected:
   //! find desktop of active application
   SUIT_Desktop* desktop() const;

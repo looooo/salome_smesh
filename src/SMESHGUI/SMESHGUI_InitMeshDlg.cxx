@@ -44,7 +44,7 @@
 //            TRUE to construct a modal dialog.
 //=================================================================================
 SMESHGUI_InitMeshDlg::SMESHGUI_InitMeshDlg()
-: SMESHGUI_Dialog( false, true )
+: SMESHGUI_Dialog( 0, false, true )
 {
     setCaption(tr("SMESH_INIT_MESH"));
 

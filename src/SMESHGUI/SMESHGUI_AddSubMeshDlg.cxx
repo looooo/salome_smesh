@@ -43,7 +43,7 @@
 //            TRUE to construct a modal dialog.
 //=================================================================================
 SMESHGUI_AddSubMeshDlg::SMESHGUI_AddSubMeshDlg()
-: SMESHGUI_Dialog( false, true )
+: SMESHGUI_Dialog( 0, false, true )
 {
     setCaption(tr("SMESH_ADD_SUBMESH"));
 

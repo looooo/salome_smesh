@@ -42,7 +42,7 @@
  */
 //=================================================================================
 SMESHGUI_StandardMeshInfosDlg::SMESHGUI_StandardMeshInfosDlg()
-: SMESHGUI_Dialog( false, false, OK )
+: SMESHGUI_Dialog( 0, false, false, OK )
 {
   setCaption(tr("SMESH_STANDARD_MESHINFO_TITLE" ));
 

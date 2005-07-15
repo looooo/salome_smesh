@@ -28,67 +28,42 @@
 #ifndef DIALOGBOX_CREATE_HYPOTHESES_H
 #define DIALOGBOX_CREATE_HYPOTHESES_H
 
-// QT Includes
-#include <qvariant.h>
-#include <qdialog.h>
-#include <qstringlist.h>
+#include "SMESHGUI_Dialog.h"
 
-// IDL Headers
-#include <SALOMEconfig.h>
-#include CORBA_SERVER_HEADER(GEOM_Gen)
-#include CORBA_SERVER_HEADER(SMESH_Mesh)
-
-#include <map>
-#include <string>
-
-class QButtonGroup;
-class QGroupBox;
-class QPushButton;
 class QListView;
 class QListViewItem;
-class SMESHGUI;
 
-//=================================================================================
-// class    : SMESHGUI_CreateHypothesesDlg
-// purpose  :
-//=================================================================================
-class SMESHGUI_CreateHypothesesDlg : public QDialog
+/*!
+ * \brief Dialog for creation of hypotheses and algorithms
+*/
+class SMESHGUI_CreateHypothesesDlg : public SMESHGUI_Dialog
 {
-    Q_OBJECT
+  Q_OBJECT
 
 public:
-    SMESHGUI_CreateHypothesesDlg (SMESHGUI*,
-				  const char* name = 0,
-				  bool modal = FALSE,
-				  bool isAlgo = FALSE);
-    ~SMESHGUI_CreateHypothesesDlg ();
 
-private:
+  SMESHGUI_CreateHypothesesDlg ( bool isAlgo );
+  virtual ~SMESHGUI_CreateHypothesesDlg();
 
-    void Init() ;
-    void closeEvent( QCloseEvent* e ) ;
-    void enterEvent ( QEvent * ) ;
+  void          init( const QStringList& theHypList,
+                      const QStringList& thePluginNames,
+                      const QStringList& theLabels,
+                      const QStringList& theIconIds );
 
-    void InitAlgoDefinition();
-
-    SMESHGUI*     mySMESHGUI;
-    bool          myIsAlgo;
-
-    QGroupBox*    GroupButtons;
-    QPushButton*  buttonCancel;
-    QPushButton*  buttonApply;
-
-    QGroupBox* GroupAlgorithms;
-    QListView* ListAlgoDefinition;
+  QString       hypName() const;
 
 private slots:
 
-    void ClickOnCancel();
-    void ClickOnApply();
-    void ActivateThisDialog() ;
+  void          onHypSelected();
+  void          onDoubleClicked( QListViewItem* );
 
-    void onSelectionChanged();
-    void onDoubleClicked(QListViewItem*);
+private:
+
+  QListView*    myList;
+  bool          myIsAlgo;
 };
 
 #endif // DIALOGBOX_CREATE_HYPOTHESES_H
+
+
+

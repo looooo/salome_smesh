@@ -42,7 +42,7 @@
 // purpose  :
 //=================================================================================
 SMESHGUI_NodesDlg::SMESHGUI_NodesDlg()
-: SMESHGUI_Dialog( false, false, OK | Apply | Close )
+: SMESHGUI_Dialog( 0, false, false, OK | Apply | Close )
 {
   QPixmap image0( resMgr()->loadPixmap("SMESH", tr("ICON_DLG_NODE")));
   setName("SMESHGUI_NodesDlg");

@@ -35,8 +35,9 @@
 // function : SMESHGUI_Dialog
 // purpose  : Constructor
 //=================================================================================
-SMESHGUI_Dialog::SMESHGUI_Dialog( const bool modal, const bool allowResize, const int flags )
-: SalomeApp_Dialog( desktop(), "", modal, allowResize, flags )
+SMESHGUI_Dialog::SMESHGUI_Dialog( QWidget* parent, const bool modal,
+                                  const bool allowResize, const int flags )
+: SalomeApp_Dialog( parent == 0 ? desktop() : parent, "", modal, allowResize, flags )
 {
   int pr = prefix( "SMESH" );
   typeName( pr + MESH ) = tr( "DLG_MESH" );
@@ -107,3 +108,4 @@ int SMESHGUI_Dialog::prefix( const QString& name )
   else
     return 0;
 }
+

@@ -44,7 +44,7 @@
 //            TRUE to construct a modal dialog.
 //=================================================================================
 SMESHGUI_EditHypothesesDlg::SMESHGUI_EditHypothesesDlg()
-: SMESHGUI_Dialog( false, true )
+: SMESHGUI_Dialog( 0, false, true )
 {
     setName("SMESHGUI_EditHypothesesDlg");
     setCaption(tr("SMESH_EDIT_HYPOTHESES"));

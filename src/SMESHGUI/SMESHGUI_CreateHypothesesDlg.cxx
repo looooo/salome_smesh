@@ -27,11 +27,6 @@
 
 #include "SMESHGUI_CreateHypothesesDlg.h"
 
-#include "SMESHGUI_HypothesesUtils.h"
-#include "SMESHGUI_Hypotheses.h"
-#include "SMESHGUI_Utils.h"
-#include "SMESHGUI.h"
-
 #include "SUIT_Desktop.h"
 #include "SUIT_ResourceMgr.h"
 
@@ -47,248 +42,144 @@
 #include <qlistview.h>
 #include <qheader.h>
 
-using namespace std;
-
-//=================================================================================
-// function : SMESHGUI_CreateHypothesesDlg()
-// purpose  : Constructs a SMESHGUI_CreateHypothesesDlg which is a child of 'parent', with the
-//            name 'name' and widget flags set to 'f'.
-//            The dialog will by default be modeless, unless you set 'modal' to
-//            TRUE to construct a modal dialog.
-//=================================================================================
-SMESHGUI_CreateHypothesesDlg::SMESHGUI_CreateHypothesesDlg (SMESHGUI* theModule,
-                                                            const char* name,
-                                                            bool modal,
-                                                            bool isAlgo)
-     : QDialog( SMESH::GetDesktop( theModule ), name, modal, WStyle_Customize | WStyle_NormalBorder |
-               WStyle_Title | WStyle_SysMenu | WDestructiveClose),
-       myIsAlgo(isAlgo),
-       mySMESHGUI( theModule )
+/*!
+ * \brief Constructor
+  * \param theIsAlgo - If TRUE when operator is used for creation of gypotheses
+*
+* Constructor does nothing
+*/
+SMESHGUI_CreateHypothesesDlg::SMESHGUI_CreateHypothesesDlg ( bool isAlgo )
+: SMESHGUI_Dialog( 0, false, true, Apply | Cancel ),
+  myIsAlgo(isAlgo)
 {
-  if (!name)
-    setName("SMESHGUI_CreateHypothesesDlg");
-  setCaption(isAlgo ? tr("SMESH_CREATE_ALGORITHMS" ) : tr("SMESH_CREATE_HYPOTHESES" ));
-  setSizeGripEnabled(TRUE);
+  setCaption(  isAlgo ? tr( "SMESH_CREATE_ALGORITHMS"  ) : tr( "SMESH_CREATE_HYPOTHESES"  )  );
+  setSizeGripEnabled( TRUE  );
 
-  QGridLayout* SMESHGUI_CreateHypothesesDlgLayout = new QGridLayout(this);
-  SMESHGUI_CreateHypothesesDlgLayout->setSpacing(6);
-  SMESHGUI_CreateHypothesesDlgLayout->setMargin(11);
+  QGridLayout* SMESHGUI_CreateHypothesesDlgLayout = new QGridLayout( mainFrame() );
+  SMESHGUI_CreateHypothesesDlgLayout->setSpacing( 6 );
+  SMESHGUI_CreateHypothesesDlgLayout->setMargin( 11 );
 
   /***************************************************************/
-  GroupAlgorithms = new QGroupBox(this, "GroupAlgorithms");
-  GroupAlgorithms->setTitle(isAlgo ? tr("SMESH_AVAILABLE_ALGORITHMS") : tr("SMESH_AVAILABLE_HYPOTHESES"));
-  GroupAlgorithms->setColumnLayout(0, Qt::Vertical);
-  GroupAlgorithms->layout()->setSpacing(0);
-  GroupAlgorithms->layout()->setMargin(0);
+  QGroupBox* GroupAlgorithms = new QGroupBox( mainFrame(), "GroupAlgorithms" );
+  GroupAlgorithms->setTitle( isAlgo ? tr( "SMESH_AVAILABLE_ALGORITHMS" ) : tr( "SMESH_AVAILABLE_HYPOTHESES" ) );
+  GroupAlgorithms->setColumnLayout( 0, Qt::Vertical );
+  GroupAlgorithms->layout()->setSpacing( 0 );
+  GroupAlgorithms->layout()->setMargin( 0 );
 
-  QGridLayout* hypLayout = new QGridLayout(GroupAlgorithms->layout());
-  hypLayout->setGeometry(QRect(12, 18, 139, 250));
-  hypLayout->setAlignment(Qt::AlignTop);
-  hypLayout->setSpacing(6);
-  hypLayout->setMargin(11);
+  QGridLayout* hypLayout = new QGridLayout( GroupAlgorithms->layout() );
+  hypLayout->setGeometry( QRect( 12, 18, 139, 250 ) );
+  hypLayout->setAlignment( Qt::AlignTop );
+  hypLayout->setSpacing( 6 );
+  hypLayout->setMargin( 11 );
 
-  ListAlgoDefinition = new QListView(GroupAlgorithms, "ListAlgoDefinition");
-  ListAlgoDefinition->setMinimumSize(400, 200);
-  ListAlgoDefinition->addColumn("");
-  ListAlgoDefinition->header()->hide();
-  ListAlgoDefinition->setSelectionMode(QListView::Single);
-  ListAlgoDefinition->setResizeMode(QListView::AllColumns);
-  ListAlgoDefinition->setRootIsDecorated(true);
+  myList = new QListView( GroupAlgorithms, "myList" );
+  myList->setMinimumSize( 400, 200 );
+  myList->addColumn( "" );
+  myList->header()->hide();
+  myList->setSelectionMode( QListView::Single );
+  myList->setResizeMode( QListView::AllColumns );
+  myList->setRootIsDecorated( true );
 
-  hypLayout->addWidget(ListAlgoDefinition, 0, 0);
-  SMESHGUI_CreateHypothesesDlgLayout->addWidget(GroupAlgorithms, 0, 0);
+  hypLayout->addWidget( myList, 0, 0 );
+  SMESHGUI_CreateHypothesesDlgLayout->addWidget( GroupAlgorithms, 0, 0 );
 
-  /***************************************************************/
-  GroupButtons = new QGroupBox(this, "GroupButtons");
-  GroupButtons->setColumnLayout(0, Qt::Vertical);
-  GroupButtons->layout()->setSpacing(0);
-  GroupButtons->layout()->setMargin(0);
-  QGridLayout* GroupButtonsLayout = new QGridLayout(GroupButtons->layout());
-  GroupButtonsLayout->setAlignment(Qt::AlignTop);
-  GroupButtonsLayout->setSpacing(6);
-  GroupButtonsLayout->setMargin(11);
+  setButtonText( Apply, tr( "SMESH_BUT_CREATE" ) );
 
-  buttonApply = new QPushButton(GroupButtons, "buttonApply");
-  buttonApply->setText(tr("SMESH_BUT_CREATE" ));
-  buttonApply->setAutoDefault(TRUE);
-  buttonApply->setDefault(FALSE);
-  buttonApply->setEnabled(FALSE);
-  GroupButtonsLayout->addWidget(buttonApply, 0, 1);
+  // connect signals and slots
+  connect( myList, SIGNAL( selectionChanged() ), SLOT( onHypSelected() ) );
+  connect( myList, SIGNAL( doubleClicked( QListViewItem* ) ), SLOT( onDoubleClicked( QListViewItem* ) ) );
 
-  QSpacerItem* spacer_9 = new QSpacerItem(20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
-  GroupButtonsLayout->addItem(spacer_9, 0, 2);
-
-  buttonCancel = new QPushButton(GroupButtons, "buttonCancel");
-  buttonCancel->setText(tr("SMESH_BUT_CLOSE" ));
-  buttonCancel->setAutoDefault(TRUE);
-  buttonCancel->setDefault(TRUE);
-  buttonCancel->setEnabled(TRUE);
-  GroupButtonsLayout->addWidget(buttonCancel, 0, 3);
-
-  SMESHGUI_CreateHypothesesDlgLayout->addWidget(GroupButtons, 1, 0);
-  /***************************************************************/
-
-  Init();
+  // update button state
+  onHypSelected();
 }
 
-//=================================================================================
-// function : ~SMESHGUI_CreateHypothesesDlg()
-// purpose  : Destroys the object and frees any allocated resources
-//=================================================================================
+/*!
+ * \brief Destructor
+*/
 SMESHGUI_CreateHypothesesDlg::~SMESHGUI_CreateHypothesesDlg()
 {
-  // no need to delete child widgets, Qt does it all for us
 }
 
-//=================================================================================
-// function : Init()
-// purpose  :
-//=================================================================================
-void SMESHGUI_CreateHypothesesDlg::Init()
+/*!
+ * \brief Get Name of hypotheses or algorithm
+  * \return Name of hypotheses or algorithm
+*/
+QString SMESHGUI_CreateHypothesesDlg::hypName() const
 {
-  mySMESHGUI->SetActiveDialogBox((QDialog*)this);
-
-  InitAlgoDefinition();
-
-  /* signals and slots connections */
-  connect(buttonCancel, SIGNAL(clicked()), this, SLOT(ClickOnCancel()));
-  connect(buttonApply , SIGNAL(clicked()), this, SLOT(ClickOnApply()));
-
-//  connect(mySMESHGUI, SIGNAL (SignalDeactivateActiveDialog()), this, SLOT(DeactivateActiveDialog()));
-  connect(mySMESHGUI, SIGNAL (SignalCloseAllDialogs()), this, SLOT(ClickOnCancel()));
-
-  connect(ListAlgoDefinition, SIGNAL(selectionChanged()), this, SLOT(onSelectionChanged()));
-  connect(ListAlgoDefinition, SIGNAL(doubleClicked(QListViewItem*)), this, SLOT(onDoubleClicked(QListViewItem*)));
-
-  int x, y;
-  mySMESHGUI->DefineDlgPosition(this, x, y);
-  this->move(x, y);
-  this->show();
+  QListViewItem* item = myList->selectedItem();
+  return item ? item->text( 1 ) : "";
 }
 
-//=================================================================================
-// function : ClickOnCancel()
-// purpose  :
-//=================================================================================
-void SMESHGUI_CreateHypothesesDlg::ClickOnCancel()
+/*!
+ * \brief Enable/Disable "Apply" button 
+*
+* Private slot called when selection in list box changed enables/disables "Apply" button
+*/
+void SMESHGUI_CreateHypothesesDlg::onHypSelected()
 {
-  close();
+  QListViewItem* item = myList->selectedItem();
+  setButtonEnabled( item && item->depth() > 0, Apply );
 }
 
-//=================================================================================
-// function : ClickOnApply()
-// purpose  :
-//=================================================================================
-void SMESHGUI_CreateHypothesesDlg::ClickOnApply()
+/*!
+ * \brief Emits dlgApply signal
+  * \param i - clicked item
+*
+* Private slot called when item of list box is double clicked emits dlgApply signal
+*/
+void SMESHGUI_CreateHypothesesDlg::onDoubleClicked ( QListViewItem* i )
 {
-  if (mySMESHGUI->isActiveStudyLocked())
-    return;
-  QListViewItem* item = ListAlgoDefinition->selectedItem();
-  if (!item)
-    return;
-  QString aHypType = item->text(1);
-  MESSAGE("Apply " << aHypType);
-  char* sHypType = (char*)aHypType.latin1();
-
-  HypothesisData* aHypData = SMESH::GetHypothesisData(sHypType);
-  if (!aHypData)
-    return;
-  QString aClientLibName = aHypData->ClientLibName;
-  MESSAGE("Client lib name = " << aClientLibName);
-
-  if (aClientLibName == "") {
-    // Call hypothesis creation server method (without GUI)
-    QString aHypName = aHypData->Label;
-    SMESH::CreateHypothesis(sHypType, aHypName, myIsAlgo);
-  } else {
-    // Get hypotheses creator client (GUI)
-    SMESHGUI_GenericHypothesisCreator* aCreator =
-      SMESH::GetHypothesisCreator(sHypType);
-
-    // Create hypothesis/algorithm
-    aCreator->CreateHypothesis(myIsAlgo, this);
-  }
-
-//  buttonApply->setEnabled(FALSE);
-  return;
+  if ( i && i->depth() > 0 )
+    emit dlgApply();
 }
 
-//=================================================================================
-// function : ActivateThisDialog()
-// purpose  :
-//=================================================================================
-void SMESHGUI_CreateHypothesesDlg::ActivateThisDialog()
+/*!
+ * \brief Initialize dialog
+  * \param theHypList - List of hypotheses
+  * \param theHypList - Plugin names
+  * \param theHypList - Labels
+  * \param theHypList - Icons' identifiers
+*
+* Initializes dialog with parameters. This method is called by operation before showing
+* dialog
+*/
+void SMESHGUI_CreateHypothesesDlg::init( const QStringList& theHypList,
+                                         const QStringList& thePluginNames,
+                                         const QStringList& theLabels,
+                                         const QStringList& theIconIds )
 {
-  mySMESHGUI->EmitSignalDeactivateDialog();
-  GroupButtons->setEnabled(true);
-  return;
-}
-
-//=================================================================================
-// function : enterEvent()
-// purpose  :
-//=================================================================================
-void SMESHGUI_CreateHypothesesDlg::enterEvent (QEvent*)
-{
-  ActivateThisDialog();
-  return;
-}
-
-//=================================================================================
-// function : closeEvent()
-// purpose  :
-//=================================================================================
-void SMESHGUI_CreateHypothesesDlg::closeEvent (QCloseEvent* e)
-{
-  mySMESHGUI->ResetState();
-  QDialog::closeEvent(e);
-}
-
-//=================================================================================
-// function : onSelectionChanged()
-// purpose  :
-//=================================================================================
-void SMESHGUI_CreateHypothesesDlg::onSelectionChanged()
-{
-  QListViewItem* item = ListAlgoDefinition->selectedItem();
-  buttonApply->setEnabled(item && item->depth() > 0);
-}
-
-//=================================================================================
-// function : onDoubleClicked()
-// purpose  :
-//=================================================================================
-void SMESHGUI_CreateHypothesesDlg::onDoubleClicked (QListViewItem* i)
-{
-  if (i && i->depth() > 0)
-    this->ClickOnApply();
-}
-
-//=================================================================================
-// function : InitAlgoDefinition()
-// purpose  :
-//=================================================================================
-void SMESHGUI_CreateHypothesesDlg::InitAlgoDefinition()
-{
-  ListAlgoDefinition->clear();
-  QStringList HypList = SMESH::GetAvailableHypotheses(myIsAlgo);
-  for (int i = 0; i < HypList.count(); ++i) {
-    HypothesisData* aHypData = SMESH::GetHypothesisData(HypList[i]);
+  myList->clear();
+  for ( int i = 0; i < theHypList.count(); ++i )
+  {
     QListViewItem* parentItem = 0;
-    QListViewItem* childItem = ListAlgoDefinition->firstChild();
-    while (childItem) {
-      if (childItem->text(0) == aHypData->PluginName) {
-	parentItem = childItem;
-	break;
+    QListViewItem* childItem = myList->firstChild();
+    while ( childItem )
+    {
+      if ( childItem->text( 0 ) == thePluginNames[ i ] )
+      {
+        parentItem = childItem;
+        break;
       }
       childItem = childItem->nextSibling();
     }
-    if (!parentItem)
-      parentItem = new QListViewItem(ListAlgoDefinition, aHypData->PluginName);
-    parentItem->setOpen(true);
-    QListViewItem* aItem = new QListViewItem(parentItem, aHypData->Label, HypList[i]);
-    QPixmap aPixMap (SMESH::GetResourceMgr( mySMESHGUI )->loadPixmap("SMESH", tr(aHypData->IconId)));
-    if (!aPixMap.isNull())
-      aItem->setPixmap(0, aPixMap);
+    
+    if ( !parentItem )
+      parentItem = new QListViewItem( myList, thePluginNames[ i ] );
+    parentItem->setOpen( true );
+    QListViewItem* aItem =
+      new QListViewItem( parentItem, theLabels[ i ], theHypList[ i ] );
+    QPixmap aPixMap( resMgr()->loadPixmap( "SMESH", tr( theIconIds[ i ] ) ) );
+    if ( !aPixMap.isNull() )
+      aItem->setPixmap( 0, aPixMap );
   }
 }
+
+
+
+
+
+
+
+
+
+

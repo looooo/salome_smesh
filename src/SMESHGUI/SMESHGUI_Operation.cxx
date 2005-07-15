@@ -17,6 +17,8 @@
 #include <SUIT_MessageBox.h>
 #include <SUIT_Desktop.h>
 
+#include <qstringlist.h>
+
 /*
   Class       : SMESHGUI_Operation
   Description : Base class for all SMESH operations
@@ -94,6 +96,8 @@ bool SMESHGUI_Operation::isReadyToStart() const
       tr( "NO_MODULE" ), tr( "SMESH_BUT_OK" ) );
     return false;
   }
+  else if ( isStudyLocked() )
+    return false;
   
   return true;
 }
@@ -184,11 +188,39 @@ bool SMESHGUI_Operation::isStudyLocked( const bool theMess ) const
   return false;
 }
 
-//=======================================================================
-// name    : isValid
-// Purpose :
-//=======================================================================
-bool SMESHGUI_Operation::isValid( SUIT_Operation* op ) const
+/*!
+ * \brief Verifies whether given operator is valid for this one
+  * \param theOtherOp - other operation
+  * \return Returns TRUE if the given operator is valid for this one, FALSE otherwise
+*
+* Virtual method redefined from base class verifies whether given operator is valid for
+* this one (i.e. can be started "above" this operator). In current implementation method
+* retuns false if theOtherOp operation is not intended for deleting objects or mesh
+* elements.
+*/
+bool SMESHGUI_Operation::isValid( SUIT_Operation* theOtherOp ) const
 {
-  return( op && op->inherits( "SMESHGUI_Operation" ) );
+  static QStringList anOps;
+  if ( anOps.count() == 0 )
+  {
+    anOps.append( "SMESHGUI_DeleteOp" );
+    // to do add other operations here
+  }
+
+  return theOtherOp && theOtherOp->inherits( "SMESHGUI_Operation" ) &&
+         ( !anOps.contains( theOtherOp->className() ) || anOps.contains( className() ) );
+
+  return true;
 }
+
+
+
+
+
+
+
+
+
+
+
+

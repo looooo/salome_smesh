@@ -44,7 +44,7 @@
 #include "SMESHGUI_MoveNodesOp.h"
 #include "SMESHGUI_AddMeshElementOp.h"
 #include "SMESHGUI_EditHypothesesOp.h"
-#include "SMESHGUI_CreateHypothesesDlg.h"
+#include "SMESHGUI_CreateHypothesesOp.h"
 #include "SMESHGUI_FilterDlg.h"
 #include "SMESHGUI_FilterLibraryDlg.h"
 #include "SMESHGUI_SingleEditDlg.h"
@@ -751,7 +751,6 @@ void SMESHGUI::ResetState()
 //=============================================================================
 void SMESHGUI::EmitSignalDeactivateDialog()
 {
-  printf( "sln: EmitSignalDeactivateDialog EmitSignalDeactivateDialog EmitSignalDeactivateDialog\n" );
   emit SignalDeactivateActiveDialog();
 }
 
@@ -1956,20 +1955,11 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
     
 
   case 5000: // HYPOTHESIS
-    {
-      if(checkLock(aStudy)) break;
-      EmitSignalDeactivateDialog();
-      new SMESHGUI_CreateHypothesesDlg ( this, "", FALSE, false );
-      break;
-    }
+    startOperation( 5000 );
+  break;
   case 5010: // ALGO
-    {
-      if(checkLock(aStudy)) break;
-      EmitSignalDeactivateDialog();
-      new SMESHGUI_CreateHypothesesDlg ( this, "", FALSE, true);
-      break;
-    }
-
+    startOperation( 5010 );
+  break;    
   case 5105: // Library of selection filters
   {
     static QValueList<int> aTypes;
@@ -3179,6 +3169,14 @@ SalomeApp_Operation* SMESHGUI::createOperation( const int id ) const
     case 413:
       op = new SMESHGUI_ExtrusionOp();
       break;
+
+    case 5000:
+      op = new SMESHGUI_CreateHypothesesOp( false );
+      break;
+
+    case 5010:
+      op = new SMESHGUI_CreateHypothesesOp( true );
+      break;      
 
 /*    case 900:
       op = new SMESHGUI_MeshInfosOp();

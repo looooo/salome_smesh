@@ -42,7 +42,7 @@
 // purpose  :
 //=================================================================================
 SMESHGUI_RemoveDlg::SMESHGUI_RemoveDlg( const bool elem )
-: SMESHGUI_Dialog( false, true, OK | Apply | Close )
+: SMESHGUI_Dialog( 0, false, true, OK | Apply | Close )
 {
     QString entity = elem ? "ELEMENT" : "NODE";
     QString name = QString( "ICON_DLG_REM_%1" ).arg( entity );

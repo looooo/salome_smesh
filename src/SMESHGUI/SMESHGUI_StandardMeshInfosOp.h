@@ -21,30 +21,39 @@
 //
 //
 //
-//  File   : SMESHGUI_StandardMeshInfosDlg.h
-//  Author : Michael ZORIN
+//  File   : SMESHGUI_StandardMeshInfos.h
+//  Author : Alexander SOLOVYOV
 //  Module : SMESH
 //  $Header: 
 
-#ifndef SMESHGUI_STANDARDMESHINFOSDLG_H
-#define SMESHGUI_STANDARDMESHINFOSDLG_H
+#ifndef SMESHGUI_STANDARDMESHINFOSOP_H
+#define SMESHGUI_STANDARDMESHINFOSOP_H
 
-#include <SMESHGUI_Dialog.h>
+#include <SMESHGUI_SelectionOp.h>
 
-class QTextBrowser;
+class SMESHGUI_StandardMeshInfosDlg;
 
-class SMESHGUI_StandardMeshInfosDlg : public SMESHGUI_Dialog
+class SMESHGUI_StandardMeshInfosOp : public SMESHGUI_SelectionOp
 { 
     Q_OBJECT
 
 public:
-    SMESHGUI_StandardMeshInfosDlg();
-    ~SMESHGUI_StandardMeshInfosDlg();
+    SMESHGUI_StandardMeshInfosOp();
+    ~SMESHGUI_StandardMeshInfosOp();
 
-    void setInfo( const QString& );
+    virtual SalomeApp_Dialog* dlg() const;
+
+protected:
+    virtual void startOperation();
+    virtual SUIT_SelectionFilter* createFilter( const int ) const;
+    void fillMeshInfos();
+
+protected slots:
+    virtual void onOk();
+    virtual void onSelectionChanged( int );
 
 private:
-    QTextBrowser* myInfo;
+    SMESHGUI_StandardMeshInfosDlg* myDlg;
 };
 
-#endif // SMESHGUI_STANDARDMESHINFOSDLG_H
+#endif // SMESHGUI_STANDARDMESHINFOSOP_H

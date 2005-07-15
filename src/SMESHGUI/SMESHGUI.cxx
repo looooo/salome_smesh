@@ -25,6 +25,7 @@
 //  $Header$
 
 #include "SMESHGUI.h"
+#include "SMESHGUI_ExportMeshOp.h"
 #include "SMESHGUI_InitMeshOp.h"
 #include "SMESHGUI_AddSubMeshOp.h"
 #include "SMESHGUI_NodesOp.h"
@@ -34,7 +35,7 @@
 #include "SMESHGUI_GroupDlg.h"
 #include "SMESHGUI_RemoveOp.h"
 #include "SMESHGUI_MeshInfosDlg.h"
-#include "SMESHGUI_StandardMeshInfosDlg.h"
+#include "SMESHGUI_StandardMeshInfosOp.h"
 #include "SMESHGUI_Preferences_ColorDlg.h"
 #include "SMESHGUI_Preferences_ScalarBarDlg.h"
 #include "SMESHGUI_Preferences_SelectionDlg.h"
@@ -161,8 +162,6 @@ namespace{
   void ImportMeshesFromFile(SMESH::SMESH_Gen_ptr theComponentMesh,
 			    int theCommandID);
 
-  void ExportMeshToFile(int theCommandID);
-
   void SetDisplayMode(int theCommandID);
 
   void SetDisplayEntity(int theCommandID);
@@ -251,111 +250,6 @@ namespace{
 	wc.suspend();
 	SalomeApp_Tools::QtCatchCorbaException(S_ex);
 	wc.resume();
-      }
-    }
-  }
-
-
-  void ExportMeshToFile( int theCommandID )
-  {
-    SalomeApp_SelectionMgr *aSel = SMESHGUI::selectionMgr();
-    SALOME_ListIO selected;
-    if( aSel )
-      aSel->selectedObjects( selected );
-
-    if(selected.Extent()){
-      Handle(SALOME_InteractiveObject) anIObject = selected.First();
-      SMESH::SMESH_Mesh_var aMesh = SMESH::IObjectToInterface<SMESH::SMESH_Mesh>(anIObject);
-      if ( !aMesh->_is_nil() ) {
-	QString aFilter, aTitle = QObject::tr("Export mesh");
-	QMap<QString, SMESH::MED_VERSION> aFilterMap;
-	switch ( theCommandID ) {
-	case 125:
-	case 122:
-	  aFilterMap.insert( QObject::tr("MED 2.1 (*.med)"), SMESH::MED_V2_1 );
-	  aFilterMap.insert( QObject::tr("MED 2.2 (*.med)"), SMESH::MED_V2_2 );
-	  break;
-	case 124:
-	case 121:
-	  aFilter = QObject::tr("DAT files (*.dat)");
-	  break;
-	case 126:
-	case 123: {
-	  if(aMesh->NbPyramids()){
-	    int aRet = SUIT_MessageBox::warn2(SMESHGUI::desktop(),
-					     QObject::tr("SMESH_WRN_WARNING"),
-					     QObject::tr("SMESH_EXPORT_UNV").arg(anIObject->getName()),
-					     QObject::tr("SMESH_BUT_YES"),
-					     QObject::tr("SMESH_BUT_NO"),
-					     0,1,0);
-	    if(aRet)
-	      return;
-	  }
-	  aFilter = QObject::tr("IDEAS files (*.unv)");
-	  break;
-	default:
-	  return;
-	}}
-
-	QString aFilename;
-	SMESH::MED_VERSION aFormat;
-
-	if ( theCommandID != 122 && theCommandID != 125 )
-	  aFilename = SUIT_FileDlg::getFileName(SMESHGUI::desktop(), "", aFilter, aTitle, false);
-	else
-	  {
-	    QStringList filters;
-	    for ( QMap<QString, SMESH::MED_VERSION>::const_iterator it = aFilterMap.begin(); it != aFilterMap.end(); ++it )
-	      filters.push_back( it.key() );
-	    
-	    SUIT_FileDlg* fd = new SUIT_FileDlg( SMESHGUI::desktop(), false, true, true );
-	    fd->setCaption( aTitle );
-	    fd->setFilters( filters );
-	    bool is_ok = false;
-	    while(!is_ok){
-	      fd->exec();
-	      aFilename = fd->selectedFile();
-	      aFormat = aFilterMap[fd->selectedFilter()];
-	      is_ok = true;
-	      if( !aFilename.isEmpty()
-		  && (aMesh->NbPolygons()>0 or aMesh->NbPolyhedrons()>0) 
-		  && aFormat==SMESH::MED_V2_1){
-		int aRet = SUIT_MessageBox::warn2(SMESHGUI::desktop(),
-						  QObject::tr("SMESH_WRN_WARNING"),
-						  QObject::tr("SMESH_EXPORT_MED_V2_1").arg(anIObject->getName()),
-						  QObject::tr("SMESH_BUT_YES"),
-						  QObject::tr("SMESH_BUT_NO"),
-						  0,1,0);
-		if(aRet){
-		  is_ok = false;
-		}
-	      }
-	    }
-	    delete fd;
-	  }
-	if ( !aFilename.isEmpty() ) {
-	  // Check whether the file already exists and delete it if yes
-	  QFile aFile( aFilename );
-	  if ( aFile.exists() )
-	    aFile.remove();
-	  SUIT_OverrideCursor wc;
-	  switch ( theCommandID ) {
-	  case 125:
-	  case 122:
-	    aMesh->ExportToMED( aFilename.latin1(), false, aFormat ); // currently, automatic groups are never created
-	    break;
-	  case 124:
-	  case 121:
-	    aMesh->ExportDAT( aFilename.latin1() );
-	    break;
-	  case 126:
-	  case 123:
-	    aMesh->ExportUNV( aFilename.latin1() );
-	    break;
-	  default:
-	    break;
-	  }
-	}
       }
     }
   }
@@ -1026,7 +920,8 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
   case 125:
   case 126:
     {
-      ::ExportMeshToFile(theCommandID);
+      startOperation( theCommandID );
+      //::ExportMeshToFile(theCommandID);
       break;
     }
 
@@ -1631,12 +1526,13 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
       }
       else
         new SMESHGUI_MeshInfosDlg(this, "", false);
+      startOperation( 900 );
       break;
     }
 
   case 902:					// STANDARD MESH INFOS
     {
-      EmitSignalDeactivateDialog();
+/*      EmitSignalDeactivateDialog();
       SalomeApp_SelectionMgr *aSel = SMESHGUI::selectionMgr();
       SALOME_ListIO selected;
       if( aSel )
@@ -1655,7 +1551,8 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
 	aSel->setSelectedObjects( selected );
       }
       else
-        new SMESHGUI_StandardMeshInfosDlg( this, "", false);
+        new SMESHGUI_StandardMeshInfosDlg( this, "", false);*/
+      startOperation( 902 );
       break;
     } 
     
@@ -3282,7 +3179,27 @@ SalomeApp_Operation* SMESHGUI::createOperation( const int id ) const
     case 413:
       op = new SMESHGUI_ExtrusionOp();
       break;
+
+/*    case 900:
+      op = new SMESHGUI_MeshInfosOp();
+      break;*/
       
+    case 902:
+      op = new SMESHGUI_StandardMeshInfosOp();
+      break;
+
+    case 121: case 124:
+      op = new SMESHGUI_ExportMeshOp( SMESHGUI_ExportMeshOp::DAT );
+      break;
+      
+    case 122: case 125:
+      op = new SMESHGUI_ExportMeshOp( SMESHGUI_ExportMeshOp::MED );
+      break;
+      
+    case 123: case 126:
+      op = new SMESHGUI_ExportMeshOp( SMESHGUI_ExportMeshOp::UNV );
+      break;
+                        
     default:
       op = SalomeApp_Module::createOperation( id );
       break;

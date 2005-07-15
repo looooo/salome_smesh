@@ -70,8 +70,9 @@ void SMESHGUI_Operation::startOperation()
     if( dlg()->testButtonFlags( QtxDialog::Cancel ) )
       connect( dlg(), SIGNAL( dlgCancel() ), this, SLOT( onCancel() ) );
       
-    if( dlg()->testButtonFlags( QtxDialog::Close ) )
-      connect( dlg(), SIGNAL( dlgClose() ), this, SLOT( onCancel() ) );
+    //if( dlg()->testButtonFlags( QtxDialog::Close ) )
+    //if dialog hasn't close, cancel, no and etc buttons, dlgClose will be emitted when dialog is closed not by OK
+    connect( dlg(), SIGNAL( dlgClose() ), this, SLOT( onCancel() ) );
 
     initDialog();
   }

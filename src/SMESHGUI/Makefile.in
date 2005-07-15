@@ -73,6 +73,7 @@ LIB_SRC =	SMESHGUI.cxx \
 		SMESHGUI_RemoveOp.cxx \
 		SMESHGUI_MeshInfosDlg.cxx \
 		SMESHGUI_StandardMeshInfosDlg.cxx \
+		SMESHGUI_StandardMeshInfosOp.cxx \
 		SMESHGUI_Preferences_ColorDlg.cxx \
 		SMESHGUI_Preferences_ScalarBarDlg.cxx \
 		SMESHGUI_Preferences_SelectionDlg.cxx \
@@ -119,7 +120,8 @@ LIB_SRC =	SMESHGUI.cxx \
 		SMESHGUI_Dialog.cxx \
 		SMESHGUI_Operation.cxx \
 		SMESHGUI_SelectionOp.cxx \
-		SMESHGUI_DeleteOp.cxx
+		SMESHGUI_DeleteOp.cxx \
+		SMESHGUI_ExportMeshOp.cxx
 
 LIB_MOC = \
 		SMESHGUI.h \
@@ -142,6 +144,7 @@ LIB_MOC = \
 		SMESHGUI_RemoveOp.h \
 		SMESHGUI_MeshInfosDlg.h \
 		SMESHGUI_StandardMeshInfosDlg.h \
+		SMESHGUI_StandardMeshInfosOp.h \
 		SMESHGUI_Preferences_ColorDlg.h \
 		SMESHGUI_Preferences_ScalarBarDlg.h \
 		SMESHGUI_Preferences_SelectionDlg.h \
@@ -175,7 +178,8 @@ LIB_MOC = \
 		SMESHGUI_CreatePolyhedralVolumeDlg.h \
 		SMESHGUI_Operation.h \
 		SMESHGUI_DeleteOp.h \
-		SMESHGUI_SelectionOp.h
+		SMESHGUI_SelectionOp.h \
+		SMESHGUI_ExportMeshOp.h
     
 LIB_CLIENT_IDL = SALOME_Exception.idl \
 		 GEOM_Gen.idl \

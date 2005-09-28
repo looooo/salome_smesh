@@ -8,9 +8,9 @@
 #include "SMESH_Type.h"
 #include "SMESH_Actor.h"
 
-#include "SalomeApp_SelectionMgr.h"
+#include "LightApp_SelectionMgr.h"
 #include "SalomeApp_Study.h"
-#include "SalomeApp_VTKSelector.h"
+#include "LightApp_VTKSelector.h"
 
 #include "SUIT_Session.h"
 
@@ -25,7 +25,7 @@
 //purpose  : 
 //=======================================================================
 SMESHGUI_Selection::SMESHGUI_Selection()
-: SalomeApp_Selection()
+: LightApp_Selection()
 {
 }
 
@@ -41,13 +41,16 @@ SMESHGUI_Selection::~SMESHGUI_Selection()
 //function : init
 //purpose  : 
 //=======================================================================
-void SMESHGUI_Selection::init( const QString& client, SalomeApp_SelectionMgr* mgr )
+void SMESHGUI_Selection::init( const QString& client, LightApp_SelectionMgr* mgr )
 {
-  SalomeApp_Selection::init( client, mgr );
+  LightApp_Selection::init( client, mgr );
 
   if( mgr && study() )
   {
-    _PTR(Study) aStudy = study()->studyDS();
+    SalomeApp_Study* aSStudy = dynamic_cast<SalomeApp_Study*>(study());
+    if (!aSStudy)
+      return;
+    _PTR(Study) aStudy = aSStudy->studyDS();
 
     SUIT_DataOwnerPtrList sel;
     mgr->selected( sel, client );
@@ -57,7 +60,7 @@ void SMESHGUI_Selection::init( const QString& client, SalomeApp_SelectionMgr* mg
     for( ; anIt!=aLast; anIt++ )
     {
       SUIT_DataOwner* owner = ( SUIT_DataOwner* )( (*anIt ).get() );
-      SalomeApp_DataOwner* sowner = dynamic_cast<SalomeApp_DataOwner*>( owner );
+      LightApp_DataOwner* sowner = dynamic_cast<LightApp_DataOwner*>( owner );
       if( sowner )
         myTypes.append( typeName( type( sowner, aStudy ) ) );
       else
@@ -100,8 +103,8 @@ QtxValue SMESHGUI_Selection::param( const int ind, const QString& p ) const
 SMESH_Actor* SMESHGUI_Selection::getActor( int ind ) const
 {
   if ( ind >= 0 && ind < myDataOwners.count() ) {
-    const SalomeApp_SVTKDataOwner* owner = 
-      dynamic_cast<const SalomeApp_SVTKDataOwner*> ( myDataOwners[ ind ].get() );
+    const LightApp_SVTKDataOwner* owner = 
+      dynamic_cast<const LightApp_SVTKDataOwner*> ( myDataOwners[ ind ].get() );
     if ( owner )    
       return dynamic_cast<SMESH_Actor*>( owner->GetActor() );
   }
@@ -236,7 +239,7 @@ int SMESHGUI_Selection::numberOfNodes( int ind ) const
   if ( ind >= 0 && ind < myTypes.count() && myTypes[ind] != "Unknown" )
   {
     CORBA::Object_var obj =
-      SMESH::DataOwnerToObject( static_cast<SalomeApp_DataOwner*>( myDataOwners[ ind ].get() ));
+      SMESH::DataOwnerToObject( static_cast<LightApp_DataOwner*>( myDataOwners[ ind ].get() ));
     if ( ! CORBA::is_nil( obj )) {
       SMESH::SMESH_Mesh_var mesh = SMESH::SMESH_Mesh::_narrow( obj );
       if ( ! mesh->_is_nil() )
@@ -262,7 +265,7 @@ QVariant SMESHGUI_Selection::isComputable( int ind ) const
   if ( ind >= 0 && ind < myTypes.count() && myTypes[ind] != "Unknown" )
   {
     Handle(SALOME_InteractiveObject) io =
-      static_cast<SalomeApp_DataOwner*>( myDataOwners[ ind ].get() )->IO();
+      static_cast<LightApp_DataOwner*>( myDataOwners[ ind ].get() )->IO();
     if ( !io.IsNull() ) {
       SMESH::SMESH_Mesh_var mesh = SMESH::GetMeshByIO(io) ; // m,sm,gr->m
       if ( !mesh->_is_nil() ) {
@@ -286,11 +289,14 @@ QVariant SMESHGUI_Selection::hasReference( int ind ) const
 {
   if ( ind >= 0 && ind < myTypes.count() && myTypes[ind] != "Unknown" )
   {
-    SalomeApp_DataOwner* owner = dynamic_cast<SalomeApp_DataOwner*>( myDataOwners[ ind ].operator->() );
+    LightApp_DataOwner* owner = dynamic_cast<LightApp_DataOwner*>( myDataOwners[ ind ].operator->() );
     if( owner )
     {
-      _PTR(SObject) obj ( study()->studyDS()->FindObjectID( owner->entry().latin1() ) ), ref;
-      return QVariant( obj->ReferencedObject( ref ), 0 );
+      SalomeApp_Study* aStudy = dynamic_cast<SalomeApp_Study*>(study());
+      if (aStudy) {
+        _PTR(SObject) obj ( aStudy->studyDS()->FindObjectID( owner->entry().latin1() ) ), ref;
+        return QVariant( obj->ReferencedObject( ref ), 0 );
+      }
     }
   }
   return QVariant( false, 0 );
@@ -305,7 +311,7 @@ QVariant SMESHGUI_Selection::isVisible( int ind ) const
 {
   if ( ind >= 0 && ind < myTypes.count() && myTypes[ind] != "Unknown" )
   {
-    QString entry = static_cast<SalomeApp_DataOwner*>( myDataOwners[ ind ].get() )->entry();
+    QString entry = static_cast<LightApp_DataOwner*>( myDataOwners[ ind ].get() )->entry();
     SMESH_Actor* actor = SMESH::FindActorByEntry( entry.latin1() );
     if ( actor && actor->hasIO() ) {
       SVTK_RenderWindowInteractor* renderInter = SMESH::GetCurrentVtkView()->getRWInteractor();
@@ -320,7 +326,7 @@ QVariant SMESHGUI_Selection::isVisible( int ind ) const
 //function : type
 //purpose  :
 //=======================================================================
-int SMESHGUI_Selection::type( SalomeApp_DataOwner* owner, _PTR(Study) study )
+int SMESHGUI_Selection::type( LightApp_DataOwner* owner, _PTR(Study) study )
 {
   return type( owner->entry(), study );
 }

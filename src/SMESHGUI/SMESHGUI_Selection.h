@@ -29,22 +29,22 @@
 #ifndef SMESHGUI_SELECTION_HeaderFile
 #define SMESHGUI_SELECTION_HeaderFile
 
-#include "SalomeApp_Selection.h"
+#include "LightApp_Selection.h"
 #include "SALOMEDSClient_definitions.hxx"
 #include "SUIT_DataOwner.h"
 
-class SalomeApp_SelectionMgr;
+class LightApp_SelectionMgr;
 class SALOMEDSClient_Study;
-class SalomeApp_DataOwner;
+class LightApp_DataOwner;
 class SMESH_Actor;
 
-class SMESHGUI_Selection : public SalomeApp_Selection
+class SMESHGUI_Selection : public LightApp_Selection
 {
 public:
   SMESHGUI_Selection();
   virtual ~SMESHGUI_Selection();
 
-  virtual void     init( const QString&, SalomeApp_SelectionMgr* );
+  virtual void     init( const QString&, LightApp_SelectionMgr* );
   virtual QtxValue param( const int , const QString& paramName ) const;
 
   // got from object, not from actor
@@ -64,7 +64,7 @@ public:
   SMESH_Actor* getActor( int ind ) const;
 
   static int       type( const QString&, _PTR(Study) );
-  static int       type( SalomeApp_DataOwner* owner, _PTR(Study) study);
+  static int       type( LightApp_DataOwner* owner, _PTR(Study) study);
   static QString   typeName( const int type);
 
 private:

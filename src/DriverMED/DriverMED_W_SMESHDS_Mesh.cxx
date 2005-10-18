@@ -326,7 +326,6 @@ Driver_Mesh::Status DriverMED_W_SMESHDS_Mesh::Perform()
       {
         anElemFamMap[*anElemsIter] = aFamId;
       }
-//      delete (*aFamsIter);
     }
 
     // Storing SMDS nodes to the MED file for the MED mesh

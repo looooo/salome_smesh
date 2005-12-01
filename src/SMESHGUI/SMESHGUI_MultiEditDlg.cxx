@@ -44,7 +44,7 @@
 #include "SUIT_ResourceMgr.h"
 #include "SUIT_Desktop.h"
 
-#include "SalomeApp_SelectionMgr.h"
+#include "LightApp_SelectionMgr.h"
 #include "SALOME_ListIO.hxx"
 #include "SALOME_ListIteratorOfListIO.hxx"
 
@@ -437,7 +437,7 @@ void SMESHGUI_MultiEditDlg::onClose()
   SMESH::RemoveFilters();
   SMESH::SetPickable();
 
-  mySelectionMgr->clearSelected();
+  //mySelectionMgr->clearSelected();
   mySelectionMgr->clearFilters();
 
   reject();
@@ -941,7 +941,7 @@ bool SMESHGUI_MultiEditDlg::onApply()
   bool aResult = process(aMeshEditor, anIds.inout());
   if (aResult) {
     if (myActor) {
-      mySelectionMgr->clearSelected();
+      //mySelectionMgr->clearSelected();
       SMESH::UpdateView();
     }
 

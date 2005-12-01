@@ -537,7 +537,7 @@ void SMESHGUI_GroupDlg::setSelectionMode (int theMode)
     return;
 
   if (mySelectionMode != theMode) {
-    mySelectionMgr->clearSelected();
+    // [PAL10408] mySelectionMgr->clearSelected();
     mySelectionMgr->clearFilters();
     SMESH::SetPointRepresentation(false);
     if (theMode < 4) {
@@ -842,7 +842,7 @@ void SMESHGUI_GroupDlg::onObjectSelectionChanged()
         aGroupMainShape = GEOM::GEOM_Object::_duplicate(myGeomGroup);
       _PTR(SObject) aGroupMainShapeSO =
         //aStudy->FindObjectIOR(aStudy->ConvertObjectToIOR(aGroupMainShape));
-        aStudy->FindObjectIOR(aGroupMainShape->GetStudyEntry());
+        aStudy->FindObjectID(aGroupMainShape->GetStudyEntry());
 
       // The mesh SObject
       _PTR(SObject) aMeshSO = SMESH::FindSObject(myMesh);
@@ -1222,7 +1222,7 @@ void SMESHGUI_GroupDlg::onAdd()
     if (aGroupType == aType) {
       _PTR(SObject) aGroupSO =
         //aStudy->FindObjectIOR(aStudy->ConvertObjectToIOR(myGeomGroup));
-        aStudy->FindObjectIOR(myGeomGroup->GetStudyEntry());
+        aStudy->FindObjectID(myGeomGroup->GetStudyEntry());
       // Construct filter
       SMESH::FilterManager_var aFilterMgr = SMESH::GetFilterManager();
       SMESH::Filter_var aFilter = aFilterMgr->CreateFilter();

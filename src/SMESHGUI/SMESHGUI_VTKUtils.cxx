@@ -31,7 +31,7 @@
 #include <SUIT_Session.h>
 #include <SUIT_Study.h>
 
-#include "SalomeApp_SelectionMgr.h"
+#include "LightApp_SelectionMgr.h"
 
 #include "SVTK_Selector.h"
 #include "SVTK_ViewModel.h"
@@ -50,7 +50,7 @@
 #include "SMESH_ObjectDef.h"
 
 #include <SalomeApp_Application.h>
-#include <SalomeApp_SelectionMgr.h>
+#include <LightApp_SelectionMgr.h>
 #include <SalomeApp_Study.h>
 
 #include <SALOMEDSClient_Study.hxx>
@@ -370,7 +370,7 @@ namespace SMESH{
 
   void UpdateView(){
     if(SVTK_ViewWindow* aWnd = SMESH::GetCurrentVtkView()){
-      SalomeApp_SelectionMgr* mgr = SMESHGUI::selectionMgr();
+      LightApp_SelectionMgr* mgr = SMESHGUI::selectionMgr();
       SALOME_ListIO selected; mgr->selectedObjects( selected );
 
       if( selected.Extent() == 0){
@@ -634,7 +634,7 @@ namespace SMESH{
   }
 
   //----------------------------------------------------------------------------
-  int GetNameOfSelectedNodes(SalomeApp_SelectionMgr *theMgr,
+  int GetNameOfSelectedNodes(LightApp_SelectionMgr *theMgr,
 			     const Handle(SALOME_InteractiveObject)& theIO,
 			     QString& theName)
   {
@@ -652,7 +652,7 @@ namespace SMESH{
     return -1;
   }
 
-  int GetNameOfSelectedNodes(SalomeApp_SelectionMgr *theMgr, QString& theName){
+  int GetNameOfSelectedNodes(LightApp_SelectionMgr *theMgr, QString& theName){
     theName = "";
     SALOME_ListIO selected; theMgr->selectedObjects( selected );
     if(selected.Extent() == 1){
@@ -663,7 +663,7 @@ namespace SMESH{
   }
 
 
-  int GetNameOfSelectedElements(SalomeApp_SelectionMgr *theMgr,
+  int GetNameOfSelectedElements(LightApp_SelectionMgr *theMgr,
 				const Handle(SALOME_InteractiveObject)& theIO,
 				QString& theName)
   {
@@ -687,7 +687,7 @@ namespace SMESH{
   }
 
 
-  int GetNameOfSelectedElements(SalomeApp_SelectionMgr *theMgr, QString& theName)
+  int GetNameOfSelectedElements(LightApp_SelectionMgr *theMgr, QString& theName)
   {
     theName = "";
     SALOME_ListIO selected; theMgr->selectedObjects( selected );
@@ -699,7 +699,7 @@ namespace SMESH{
     return -1;
   }
 
-  int GetSelected(SalomeApp_SelectionMgr*      theMgr,
+  int GetSelected(LightApp_SelectionMgr*       theMgr,
 		  TColStd_IndexedMapOfInteger& theMap,
 		  const bool                   theIsElement)
   {
@@ -717,7 +717,7 @@ namespace SMESH{
   }
 
 
-  int GetEdgeNodes( SalomeApp_SelectionMgr* theMgr, int& theId1, int& theId2 )
+  int GetEdgeNodes( LightApp_SelectionMgr* theMgr, int& theId1, int& theId2 )
   {
     SALOME_ListIO selected; theMgr->selectedObjects( selected );
 

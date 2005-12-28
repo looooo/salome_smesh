@@ -45,6 +45,7 @@ EXPORT_HEADERS= \
 	SMESH_subMesh_i.hxx \
 	SMESH_Mesh_i.hxx \
 	SMESH_Hypothesis_i.hxx \
+	SMESH_PythonDump.hxx \
 	SMESH.hxx
 
 EXPORT_PYSCRIPTS = smeshpy.py
@@ -70,7 +71,8 @@ LIB_SRC = \
         SMESH_3D_Algo_i.cxx \
 	SMESH_Filter_i.cxx \
 	SMESH_Group_i.cxx \
-	SMESH_Pattern_i.cxx
+	SMESH_Pattern_i.cxx \
+	SMESH_2smeshpy.cxx
 
 LIB_SERVER_IDL = SMESH_Gen.idl SMESH_Hypothesis.idl SMESH_Mesh.idl \
                  SALOME_Component.idl SALOME_Exception.idl \
@@ -90,7 +92,7 @@ CXXFLAGS+= $(OCC_CXXFLAGS) $(HDF5_INCLUDES) -I${KERNEL_ROOT_DIR}/include/salome 
 
 LDFLAGS+= -L${KERNEL_ROOT_DIR}/lib/salome -lSalomeContainer -lSalomeNS -lRegistry -lSalomeHDFPersist -lSalomeLifeCycleCORBA -lTOOLSDS -lSalomeGenericObj \
 	  -L${GEOM_ROOT_DIR}/lib/salome -lGEOMClient -lSMESHimpl -lSMESHControls \
-    -L${CASROOT}/lin/lib -lTKCDF -lTKBO
+    $(OCC_LDPATH) -lTKCDF -lTKBO
 
 
 LDFLAGSFORBIN += -lSMDS -lSMESHDS \
@@ -100,6 +102,6 @@ LDFLAGSFORBIN += -lSMDS -lSMESHDS \
 		-lOpUtil -lSALOMELocalTrace -lSALOMEBasics -lSalomeNotification -lCASCatch \
 		-lSalomeHDFPersist -lSalomeLifeCycleCORBA -lTOOLSDS -lSalomeGenericObj \
 	  	-L${GEOM_ROOT_DIR}/lib/salome -lGEOMClient -lSMESHimpl -lSMESHControls -lNMTTools -lNMTDS \
-     -L${CASROOT}/lin/lib -lTKCDF -lTKBO -lTKMath
+     $(OCC_LDPATH) -lTKCDF -lTKBO -lTKMath
 
 @CONCLUDE@

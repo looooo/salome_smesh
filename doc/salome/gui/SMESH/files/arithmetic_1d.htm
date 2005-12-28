@@ -1,0 +1,254 @@
+<!doctype HTML public "-//W3C//DTD HTML 4.0 Frameset//EN">
+
+<html>
+
+<head>
+<title>Arithmetic 1D</title>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+<meta name="generator" content="RoboHelp by eHelp Corporation www.ehelp.com">
+<link rel="stylesheet" href="../default_ns.css"><script type="text/javascript" language="JavaScript" title="WebHelpSplitCss">
+<!--
+if (navigator.appName !="Netscape")
+{   document.write("<link rel='stylesheet' href='../default.css'>");}
+//-->
+</script>
+<style type="text/css">
+<!--
+img_whs1 { border:none; width:332px; height:238px; float:none; border-style:none; }
+img_whs2 { border:none; width:309px; height:316px; float:none; }
+p.whs3 { margin-left:0px; }
+img_whs4 { border:none; width:332px; height:212px; float:none; border-style:none; }
+img_whs5 { border:none; width:267px; height:339px; float:none; }
+p.whs6 { font-weight:bold; }
+img_whs7 { border:none; width:367px; height:224px; border-style:none; float:right; }
+img_whs8 { border:none; width:252px; height:243px; float:none; }
+p.whs9 { font-weight:bold; margin-left:40px; }
+img_whs10 { border:none; width:431px; height:233px; border-style:none; float:right; }
+img_whs11 { border:none; width:395px; height:387px; float:none; }
+img_whs12 { border:none; width:332px; height:264px; float:none; border-style:none; }
+img_whs13 { border:none; width:333px; height:386px; float:none; border-style:none; }
+img_whs14 { border:none; width:333px; height:285px; float:none; border-style:none; }
+img_whs15 { border:none; width:287px; height:305px; float:none; }
+-->
+</style><script type="text/javascript" language="JavaScript">
+<!--
+if ((navigator.appName == "Netscape") && (parseInt(navigator.appVersion) == 4))
+{
+  var strNSS = "<style type='text/css'>";
+  strNSS += "p.whs3 {margin-left:1pt; }";
+  strNSS +="</style>";
+  document.write(strNSS);
+}
+//-->
+</script>
+<script type="text/javascript" language="JavaScript" title="WebHelpInlineScript">
+<!--
+function reDo() {
+  if (innerWidth != origWidth || innerHeight != origHeight)
+     location.reload();
+}
+if ((parseInt(navigator.appVersion) == 4) && (navigator.appName == "Netscape")) {
+	origWidth = innerWidth;
+	origHeight = innerHeight;
+	onresize = reDo;
+}
+onerror = null; 
+//-->
+</script>
+<style type="text/css">
+<!--
+div.WebHelpPopupMenu { position:absolute; left:0px; top:0px; z-index:4; visibility:hidden; }
+-->
+</style><script type="text/javascript" language="javascript1.2" src="../whmsg.js"></script>
+<script type="text/javascript" language="javascript" src="../whver.js"></script>
+<script type="text/javascript" language="javascript1.2" src="../whproxy.js"></script>
+<script type="text/javascript" language="javascript1.2" src="../whutils.js"></script>
+<script type="text/javascript" language="javascript1.2" src="../whtopic.js"></script>
+</head>
+<body><script type="text/javascript" language="javascript1.2">
+<!--
+if (window.gbWhTopic)
+{
+	if (window.addTocInfo)
+	{
+	addTocInfo("MESH module\nCreating meshes\nDefining hypotheses\n1D Meshing Hypotheses");
+addButton("show",BTN_TEXT,"Show","","","","",0,0,"","","");
+
+	}
+	if (window.writeBtnStyle)
+		writeBtnStyle();
+
+	if (window.writeIntopicBar)
+		writeIntopicBar(1);
+
+	if (window.setRelStartPage)
+	{
+	setRelStartPage("../smesh.htm");
+
+		autoSync(1);
+		sendSyncInfo();
+		sendAveInfoOut();
+	}
+}
+else
+	if (window.gbIE4)
+		document.location.reload();
+//-->
+</script>
+<h1>1D Meshing Hypotheses</h1>
+
+<h3>Arithmetic 1D hypothesis</h3>
+
+<p><span style="font-weight: bold;"><B>Arithmetic 1D</B></span> hypothesis allows 
+ to split edges into segments with a length that changes in arithmetic 
+ progression (Lk = Lk-1 + d) beginning from a given starting length and 
+ up to a given end length.</p>
+
+<p>&nbsp;</p>
+
+<p><img src="../pics/a-arithmetic1d.png" x-maintain-ratio="TRUE" width="332px" height="238px" border="0" class="img_whs1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="../pics/b-ithmetic1d.png" x-maintain-ratio="TRUE" width="309px" height="316px" border="0" class="img_whs2"></p>
+
+<p>&nbsp;</p>
+
+<p class="whs3"><span style="font-weight: bold;"><B>See Also</B></span> 
+ a sample TUI Script of a <a href="../defining_hypotheses_tui.htm#bookmark">Defining 
+ Arithmetic 1D hypothesis</a> operation. &nbsp;</p>
+
+<h3><span style="font-weight: bold;"><B>Deflection</B></span> 1D hypothesis</h3>
+
+<p><span style="font-weight: bold;"><B>Deflection ID </B></span>hypothesis can 
+ be applied for meshing curvilinear edges composing your geometrical object. 
+ It uses only one parameter: the value of deflection. &nbsp;</p>
+
+<p>A geometrical edge is divided into equal segments. The maximum distance 
+ between a point on the edge within a segment and the line connecting the 
+ ends of the segment should not exceed the specified value of deflection 
+ . Then mesh nodes are constructed at end segment locations and 1D mesh 
+ elements are constructed on segments.</p>
+
+<p>&nbsp;</p>
+
+<p><img src="../pics/a-deflection1d.png" x-maintain-ratio="TRUE" width="332px" height="212px" border="0" class="img_whs4"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="../pics/b-flection1d.png" x-maintain-ratio="TRUE" width="267px" height="339px" border="0" class="img_whs5"></p>
+
+<p>&nbsp;</p>
+
+<p class="whs3"><span style="font-weight: bold;"><B>See Also</B></span> 
+ a sample TUI Script of a <a href="../defining_hypotheses_tui.htm#bookmark9">Defining 
+ Deflection 1D hypothesis</a> operation. &nbsp;</p>
+
+<p>&nbsp;</p>
+
+<p class="whs6"><img src="../image41.gif" x-maintain-ratio="TRUE" width="367px" height="224px" align="right" border="0" class="img_whs7"></p>
+
+<h3>Average Length hypothesis</h3>
+
+<p><span style="font-weight: bold;"><B>Average Length </B></span>hypothesis can 
+ be applied for meshing of edges composing your geometrical object. Definition 
+ of this hypothesis consists of setting the <span style="font-weight: bold;"><B>length</B></span> 
+ of segments, which will split these edges. The points on the edges generated 
+ by these segments will represent nodes of your mesh. Later these nodes 
+ will be used for meshing of the faces abutting to these edges.</p>
+
+<p>&nbsp;</p>
+
+<p><img src="../pics/a-averagelength.png" x-maintain-ratio="TRUE" width="332px" height="212px" border="0" class="img_whs4"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="../pics/b-erage_length.png" x-maintain-ratio="TRUE" width="252px" height="243px" border="0" class="img_whs8"></p>
+
+<p>&nbsp;</p>
+
+<p class="whs3"><span style="font-weight: bold;"><B>See Also</B></span> 
+ a sample TUI Script of a <a href="../defining_hypotheses_tui.htm#bookmark3">Defining 
+ Average Length hypothesis</a> operation. &nbsp;</p>
+
+<p>&nbsp;</p>
+
+<p class="whs9"><img src="../image46.gif" x-maintain-ratio="TRUE" width="431px" height="233px" align="right" border="0" class="img_whs10"></p>
+
+<h3>Number of segments hypothesis </h3>
+
+<p><span style="font-weight: bold;"><B>Number of segments </B></span>hypothesis 
+ can be applied for meshing of edges composing your geometrical object. 
+ Definition of this hypothesis consists of setting the <span style="font-weight: bold;"><B>number</B></span> 
+ of segments, which will split these edges. In other words your edges will 
+ be split into a definite number of segments with approximately the same 
+ length. The points on the edges generated by these segments will represent 
+ nodes of your mesh. Later these nodes will be used for meshing of the 
+ faces abutting to these edges.</p>
+
+<p>&nbsp;</p>
+
+<p class="whs3">You can set the type of distribution for this 
+ hypothesis in the <span style="font-weight: bold;"><B>Hypothesis Construction</B></span> 
+ dialog bog : </p>
+
+<p class="whs3">&nbsp;</p>
+
+<p class="whs3"><span style="font-weight: bold;"><B>Equidistant 
+ Distribution</B></span> - all segments will have the same length</p>
+
+<p><img src="../pics/a-nbsegments1.png" x-maintain-ratio="TRUE" width="332px" height="238px" border="0" class="img_whs1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="../pics/b-mberofsegments.png" x-maintain-ratio="TRUE" width="395px" height="387px" border="0" class="img_whs11"></p>
+
+<p>&nbsp;</p>
+
+<p class="whs6">Scale Distribution - <span style="font-weight: normal;">each 
+ next segment differs from the previous according to the formula:</span> 
+ A<span style="vertical-align: Sub;">i+1</span> = A<span style="vertical-align: Sub;">i 
+ </span>* k, <span style="font-weight: normal;">where</span> k <span style="font-weight: normal;">is</span> 
+ Scale Factor </p>
+
+<p class="whs6"><img src="../pics/a-nbsegments2.png" x-maintain-ratio="TRUE" width="332px" height="264px" border="0" class="img_whs12">\</p>
+
+<p class="whs6">&nbsp;</p>
+
+<p class="whs6">Distribution with Table Density - <span style="font-weight: normal;">you 
+ input a number of pairs</span> t - F(t) <span style="font-weight: normal;">and 
+ the program computes the formula, which will rule the change of length 
+ of segments.</span></p>
+
+<p class="whs6">&nbsp;</p>
+
+<p class="whs6"><img src="../pics/a-nbsegments3.png" x-maintain-ratio="TRUE" width="333px" height="386px" border="0" class="img_whs13"></p>
+
+<p class="whs6">&nbsp;</p>
+
+<p class="whs6">Distribution with Analytic Density - <span 
+ style="font-weight: normal;">you input the formula, which will rule the 
+ change of length of segments</span></p>
+
+<h3><img src="../pics/a-nbsegments4.png" x-maintain-ratio="TRUE" width="333px" height="285px" border="0" class="img_whs14"></h3>
+
+<p class="whs3"><span style="font-weight: bold;"><B>See Also</B></span> 
+ a sample TUI Script of a <a href="../defining_hypotheses_tui.htm#bookmark9">Defining 
+ Number of Segments hypothesis</a> operation. &nbsp;</p>
+
+<h3>&nbsp;</h3>
+
+<h3>Start and End Length hypothesis.</h3>
+
+<p><span style="font-weight: bold;"><B>Start and End Length</B></span> hypothesis 
+ allows to divide a geometrical edge into segments so that the first and 
+ the last segments have a specified length. The length of each but the 
+ first segment differs from length of the previous one by a constant factor. 
+ Then mesh nodes are constructed at segment ends location and 1D mesh elements 
+ are constructed on them.</p>
+
+<p>&nbsp;</p>
+
+<p><img src="../pics/a-startendlength.png" x-maintain-ratio="TRUE" width="332px" height="238px" border="0" class="img_whs1"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="../pics/b-art_end_length.png" x-maintain-ratio="TRUE" width="287px" height="305px" border="0" class="img_whs15"></p>
+
+<p class="whs3">&nbsp;</p>
+
+<p class="whs3"><span style="font-weight: bold;"><B>See Also</B></span> 
+ a sample TUI Script of a <a href="../defining_hypotheses_tui.htm#bookmark3">Defining 
+ Start and End Length &nbsp;hypothesis</a> 
+ operation. &nbsp;</p>
+
+<p>&nbsp;</p>
+
+<script type="text/javascript" language="javascript1.2">
+<!--
+if (window.writeIntopicBar)
+	writeIntopicBar(0);
+//-->
+</script>
+</body>
+</html>

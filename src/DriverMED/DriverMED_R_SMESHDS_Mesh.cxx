@@ -127,7 +127,7 @@ DriverMED_R_SMESHDS_Mesh
 	EBooleen anIsNodeNum = aNodeInfo->IsElemNum();
 	TInt aNbElems = aNodeInfo->GetNbElem();
 	if(MYDEBUG) MESSAGE("Perform - aNodeInfo->GetNbElem() = "<<aNbElems<<"; anIsNodeNum = "<<anIsNodeNum);
-        DriverMED_FamilyPtr aFamily = myFamilies.begin()->second;
+        DriverMED_FamilyPtr aFamily;
         for(TInt iElem = 0; iElem < aNbElems; iElem++){
 	  TCCoordSlice aCoordSlice = aNodeInfo->GetCoordSlice(iElem);
           double aCoords[3] = {0.0, 0.0, 0.0};

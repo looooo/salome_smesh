@@ -941,7 +941,10 @@ bool SMESHGUI_MultiEditDlg::onApply()
   bool aResult = process(aMeshEditor, anIds.inout());
   if (aResult) {
     if (myActor) {
-      //mySelectionMgr->clearSelected();
+      SALOME_ListIO sel;
+      mySelectionMgr->selectedObjects( sel );
+      mySelector->ClearIndex();
+      mySelectionMgr->setSelectedObjects( sel );
       SMESH::UpdateView();
     }
 

@@ -89,6 +89,7 @@ SMESHGUI_GroupDlg::SMESHGUI_GroupDlg( SMESHGUI* theModule, const char* name,
                 WStyle_Title | WStyle_SysMenu | WDestructiveClose),
      mySMESHGUI( theModule ),
      mySelectionMgr( SMESH::GetSelectionMgr( theModule ) ),
+     mySelector(SMESH::GetViewWindow( theModule )->GetSelector()),
      myIsBusy( false ),
      myActor( 0 )
 {
@@ -103,7 +104,6 @@ SMESHGUI_GroupDlg::SMESHGUI_GroupDlg( SMESHGUI* theModule, const char* name,
     myGeomGroupLine->setEnabled(false);
   }
 
-  mySelector = (SMESH::GetViewWindow( mySMESHGUI ))->GetSelector();
 
   /* Move widget on the botton right corner of main widget */
   int x, y ;
@@ -121,11 +121,10 @@ SMESHGUI_GroupDlg::SMESHGUI_GroupDlg( SMESHGUI* theModule, const char* name,
                 WStyle_Title | WStyle_SysMenu | WDestructiveClose),
      mySMESHGUI( theModule ),
      mySelectionMgr( SMESH::GetSelectionMgr( theModule ) ),
+     mySelector(SMESH::GetViewWindow( theModule )->GetSelector()),
      myIsBusy( false )
 {
   if (!name) setName("SMESHGUI_GroupDlg");
-
-  mySelector = (SMESH::GetViewWindow( mySMESHGUI ))->GetSelector();
 
   initDialog(false);
   if (!theGroup->_is_nil())

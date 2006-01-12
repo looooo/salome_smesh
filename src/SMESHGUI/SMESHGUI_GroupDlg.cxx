@@ -562,14 +562,14 @@ void SMESHGUI_GroupDlg::setSelectionMode (int theMode)
 	  aViewWindow->SetSelectionMode(VolumeSelection);
       }
     } else {
-      if ( SVTK_ViewWindow* aViewWindow = SMESH::GetViewWindow( mySMESHGUI ))
-	aViewWindow->SetSelectionMode(ActorSelection);
       if (theMode == 4)
 	mySelectionMgr->installFilter(mySubMeshFilter);
       else if (theMode == 5)
 	mySelectionMgr->installFilter(myGroupFilter);
       else if (theMode == 6)
 	mySelectionMgr->installFilter(myMeshFilter);
+      if ( SVTK_ViewWindow* aViewWindow = SMESH::GetViewWindow( mySMESHGUI ))
+	aViewWindow->SetSelectionMode(ActorSelection);
     }
     mySelectionMode = theMode;
   }

@@ -56,32 +56,34 @@ class SMDS_MeshFace;
 ///////////////////////////////////////////////////////////////////////////////
 class SMDS_WNT_EXPORT SMDS_MeshElement:public SMDS_MeshObject
 {
+public:
 
-  public:
-	SMDS_ElemIteratorPtr nodesIterator() const;
-	SMDS_ElemIteratorPtr edgesIterator() const;
-	SMDS_ElemIteratorPtr facesIterator() const;
-	virtual SMDS_ElemIteratorPtr
-		elementsIterator(SMDSAbs_ElementType type) const;
+  SMDS_ElemIteratorPtr nodesIterator() const;
+  SMDS_ElemIteratorPtr edgesIterator() const;
+  SMDS_ElemIteratorPtr facesIterator() const;
+  virtual SMDS_ElemIteratorPtr elementsIterator(SMDSAbs_ElementType type) const;
 
-	virtual int NbNodes() const;
-	virtual int NbEdges() const;
-	virtual int NbFaces() const;
-	int GetID() const;
+  virtual int NbNodes() const;
+  virtual int NbEdges() const;
+  virtual int NbFaces() const;
+  int GetID() const;
 
-	///Return the type of the current element
-	virtual SMDSAbs_ElementType GetType() const = 0;
-	virtual bool IsPoly() const { return false; };
+  ///Return the type of the current element
+  virtual SMDSAbs_ElementType GetType() const = 0;
+  virtual bool IsPoly() const { return false; };
+  virtual bool IsQuadratic() const;
 
-	friend std::ostream & operator <<(std::ostream & OS, const SMDS_MeshElement *);
-	friend bool SMDS_MeshElementIDFactory::BindID(int ID,SMDS_MeshElement*elem);
+  virtual bool IsMediumNode(class SMDS_MeshNode* node) const;
 
-  protected:
-	SMDS_MeshElement(int ID=-1);
-	virtual void Print(std::ostream & OS) const;
-	
-  private:
-	int myID;
+  friend std::ostream & operator <<(std::ostream & OS, const SMDS_MeshElement *);
+  friend bool SMDS_MeshElementIDFactory::BindID(int ID,SMDS_MeshElement*elem);
+
+protected:
+  SMDS_MeshElement(int ID=-1);
+  virtual void Print(std::ostream & OS) const;
+
+private:
+  int myID;
 };
 
 #endif

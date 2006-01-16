@@ -192,3 +192,12 @@ bool operator<(const SMDS_MeshElement& e1, const SMDS_MeshElement& e2)
 	}
         return false;
 }
+
+bool SMDS_MeshElement::IsQuadratic() const
+{
+  return false;
+}
+bool SMDS_MeshElement::IsMediumNode(class SMDS_MeshNode* node) const
+{
+  return false;
+}

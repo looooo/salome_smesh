@@ -24,10 +24,13 @@
 //  File   : SMDS_QuadraticVolumeOfNodes.hxx
 //  Module : SMESH
 
-#ifndef _SMDS_QuadraticVolumeOfNodes_HeaderFile
-#define _SMDS_QuadraticVolumeOfNodes_HeaderFile
+#ifndef _SMDS_QuadraticFaceOfNodes_HeaderFile
+#define _SMDS_QuadraticFaceOfNodes_HeaderFile
 
 #include "SMDS_MeshFace.hxx"
+
+typedef SMDS_Iterator<const SMDS_MeshNode *> SMDS_NodeIterator;
+typedef boost::shared_ptr<SMDS_Iterator<const SMDS_MeshNode *> > SMDS_NodeIteratorPtr;
 
 class SMDS_WNT_EXPORT SMDS_QuadraticFaceOfNodes:public SMDS_MeshFace
 {
@@ -50,7 +53,7 @@ public:
 
   virtual bool IsQuadratic() const { return true; }
 
-  virtual bool IsMediumNode(class SMDS_MeshNode* node) const;
+  virtual bool IsMediumNode(const SMDS_MeshNode* node) const;
 
   bool ChangeNodes(const SMDS_MeshNode* nodes[],
                    const int            nbNodes);

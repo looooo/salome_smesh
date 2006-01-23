@@ -29,7 +29,7 @@
 
 #include "SMDS_MeshVolume.hxx"
 
-class SMDS_WNT_EXPORT SMDS_QuadraticVolumeOfNodes:public SMDS_MeshVolume
+class SMDS_WNT_EXPORT SMDS_QuadraticVolumeOfNodes: public SMDS_MeshVolume
 {
 public:
   // tetrahedron of 10 nodes
@@ -41,8 +41,9 @@ public:
                                const SMDS_MeshNode * n23,
                                const SMDS_MeshNode * n31,
                                const SMDS_MeshNode * n14, 
-                               const SMDS_MeshNode * n23,
+                               const SMDS_MeshNode * n24,
                                const SMDS_MeshNode * n34);
+
   // pyramid of 13 nodes
   SMDS_QuadraticVolumeOfNodes(const SMDS_MeshNode * n1,
                               const SMDS_MeshNode * n2,
@@ -87,7 +88,7 @@ public:
                               const SMDS_MeshNode * n12,
                               const SMDS_MeshNode * n23,
                               const SMDS_MeshNode * n34,
-                              const SMDS_MeshNode * n51, 
+                              const SMDS_MeshNode * n41, 
                               const SMDS_MeshNode * n56,
                               const SMDS_MeshNode * n67,
                               const SMDS_MeshNode * n78,
@@ -99,7 +100,7 @@ public:
 
   virtual bool IsQuadratic() const { return true; }
 
-  virtual bool IsMediumNode(class SMDS_MeshNode* node) const;
+  virtual bool IsMediumNode(const SMDS_MeshNode* node) const;
 
   bool ChangeNodes(const SMDS_MeshNode* nodes[],
                    const int            nbNodes);

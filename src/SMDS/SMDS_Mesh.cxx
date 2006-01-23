@@ -31,6 +31,9 @@
 #include "SMDS_FaceOfEdges.hxx"
 #include "SMDS_PolyhedralVolumeOfNodes.hxx"
 #include "SMDS_PolygonalFaceOfNodes.hxx"
+#include "SMDS_QuadraticEdge.hxx"
+#include "SMDS_QuadraticFaceOfNodes.hxx"
+#include "SMDS_QuadraticVolumeOfNodes.hxx"
 
 #include <algorithm>
 #include <map>
@@ -2201,3 +2204,595 @@ SMDSAbs_ElementType SMDS_Mesh::GetElementType( const int id, const bool iselem )
   else
     return elem->GetType();
 }
+
+
+
+//********************************************************************
+//********************************************************************
+//********                                                   *********
+//*****       Methods for addition of quadratic elements        ******
+//********                                                   *********
+//********************************************************************
+//********************************************************************
+
+//=======================================================================
+//function : AddEdgeWithID
+//purpose  : 
+//=======================================================================
+SMDS_MeshEdge* SMDS_Mesh::AddEdgeWithID(int n1, int n2, int n12, int ID) 
+{
+  SMDS_MeshNode* node1 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n1);
+  SMDS_MeshNode* node2 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n2);
+  SMDS_MeshNode* node12 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n12);
+  if(!node1 || !node2 || !node12) return NULL;
+  return SMDS_Mesh::AddEdgeWithID(node1, node2, node12, ID);
+}
+
+//=======================================================================
+//function : AddEdge
+//purpose  : 
+//=======================================================================
+SMDS_MeshEdge* SMDS_Mesh::AddEdge(const SMDS_MeshNode* n1,
+				  const SMDS_MeshNode* n2,
+                                  const SMDS_MeshNode* n12)
+{
+  return SMDS_Mesh::AddEdgeWithID(n1, n2, n12, myElementIDFactory->GetFreeID());
+}
+
+//=======================================================================
+//function : AddEdgeWithID
+//purpose  : 
+//=======================================================================
+SMDS_MeshEdge* SMDS_Mesh::AddEdgeWithID(const SMDS_MeshNode * n1,
+					const SMDS_MeshNode * n2, 
+					const SMDS_MeshNode * n12, 
+					int ID)
+{
+  cout<<"SMDS_Mesh::AddEdgeWithID"<<endl;
+  SMDS_QuadraticEdge* edge = new SMDS_QuadraticEdge(n1,n2,n12);
+  if(myElementIDFactory->BindID(ID, edge)) {
+    SMDS_MeshNode *node1,*node2, *node12;
+    node1 = const_cast<SMDS_MeshNode*>(n1);
+    node2 = const_cast<SMDS_MeshNode*>(n2);
+    node12 = const_cast<SMDS_MeshNode*>(n12);
+    node1->AddInverseElement(edge);
+    node2->AddInverseElement(edge);
+    node12->AddInverseElement(edge);
+    myEdges.Add(edge);
+    return edge;
+  } 
+  else {
+    delete edge;
+    return NULL;
+  }
+}
+
+
+//=======================================================================
+//function : AddFace
+//purpose  : 
+//=======================================================================
+SMDS_MeshFace* SMDS_Mesh::AddFace(const SMDS_MeshNode * n1,
+				  const SMDS_MeshNode * n2,
+				  const SMDS_MeshNode * n3,
+                                  const SMDS_MeshNode * n12,
+                                  const SMDS_MeshNode * n23,
+                                  const SMDS_MeshNode * n31)
+{
+  return SMDS_Mesh::AddFaceWithID(n1,n2,n3,n12,n23,n31,
+                                  myElementIDFactory->GetFreeID());
+}
+
+//=======================================================================
+//function : AddFaceWithID
+//purpose  : 
+//=======================================================================
+SMDS_MeshFace* SMDS_Mesh::AddFaceWithID(int n1, int n2, int n3,
+                                        int n12,int n23,int n31, int ID)
+{
+  SMDS_MeshNode * node1 = (SMDS_MeshNode *)myNodeIDFactory->MeshElement(n1);
+  SMDS_MeshNode * node2 = (SMDS_MeshNode *)myNodeIDFactory->MeshElement(n2);
+  SMDS_MeshNode * node3 = (SMDS_MeshNode *)myNodeIDFactory->MeshElement(n3);
+  SMDS_MeshNode * node12 = (SMDS_MeshNode *)myNodeIDFactory->MeshElement(n12);
+  SMDS_MeshNode * node23 = (SMDS_MeshNode *)myNodeIDFactory->MeshElement(n23);
+  SMDS_MeshNode * node31 = (SMDS_MeshNode *)myNodeIDFactory->MeshElement(n31);
+  if(!node1 || !node2 || !node3 || !node12 || !node23 || !node31) return NULL;
+  return SMDS_Mesh::AddFaceWithID(node1, node2, node3,
+                                  node12, node23, node31, ID);
+}
+
+//=======================================================================
+//function : AddFaceWithID
+//purpose  : 
+//=======================================================================
+SMDS_MeshFace* SMDS_Mesh::AddFaceWithID(const SMDS_MeshNode * n1,
+                                        const SMDS_MeshNode * n2,
+                                        const SMDS_MeshNode * n3,
+                                        const SMDS_MeshNode * n12,
+                                        const SMDS_MeshNode * n23,
+                                        const SMDS_MeshNode * n31, 
+                                        int ID)
+{
+  cout<<"SMDS_Mesh::AddFaceWithID"<<endl;
+  if(hasConstructionEdges()) {
+    // creation quadratic edges - not implemented
+  }
+  SMDS_QuadraticFaceOfNodes* face =
+    new SMDS_QuadraticFaceOfNodes(n1,n2,n3,n12,n23,n31);
+  myFaces.Add(face);
+
+  if (!registerElement(ID, face)) {
+    RemoveElement(face, false);
+    face = NULL;
+  }
+  return face;
+}
+
+
+//=======================================================================
+//function : AddFace
+//purpose  : 
+//=======================================================================
+SMDS_MeshFace* SMDS_Mesh::AddFace(const SMDS_MeshNode * n1,
+				  const SMDS_MeshNode * n2,
+				  const SMDS_MeshNode * n3,
+				  const SMDS_MeshNode * n4,
+                                  const SMDS_MeshNode * n12,
+                                  const SMDS_MeshNode * n23,
+                                  const SMDS_MeshNode * n34,
+                                  const SMDS_MeshNode * n41)
+{
+  return SMDS_Mesh::AddFaceWithID(n1,n2,n3,n4,n12,n23,n34,n41,
+                                  myElementIDFactory->GetFreeID());
+}
+
+//=======================================================================
+//function : AddFaceWithID
+//purpose  : 
+//=======================================================================
+SMDS_MeshFace* SMDS_Mesh::AddFaceWithID(int n1, int n2, int n3, int n4,
+                                        int n12,int n23,int n34,int n41, int ID)
+{
+  SMDS_MeshNode * node1 = (SMDS_MeshNode *)myNodeIDFactory->MeshElement(n1);
+  SMDS_MeshNode * node2 = (SMDS_MeshNode *)myNodeIDFactory->MeshElement(n2);
+  SMDS_MeshNode * node3 = (SMDS_MeshNode *)myNodeIDFactory->MeshElement(n3);
+  SMDS_MeshNode * node4 = (SMDS_MeshNode *)myNodeIDFactory->MeshElement(n4);
+  SMDS_MeshNode * node12 = (SMDS_MeshNode *)myNodeIDFactory->MeshElement(n12);
+  SMDS_MeshNode * node23 = (SMDS_MeshNode *)myNodeIDFactory->MeshElement(n23);
+  SMDS_MeshNode * node34 = (SMDS_MeshNode *)myNodeIDFactory->MeshElement(n34);
+  SMDS_MeshNode * node41 = (SMDS_MeshNode *)myNodeIDFactory->MeshElement(n41);
+  if(!node1 || !node2 || !node3 || !node4 ||
+     !node12 || !node23 || !node34 || !node41) return NULL;
+  return SMDS_Mesh::AddFaceWithID(node1, node2, node3, node4,
+                                  node12, node23, node34, node41, ID);
+}
+
+//=======================================================================
+//function : AddFaceWithID
+//purpose  : 
+//=======================================================================
+SMDS_MeshFace* SMDS_Mesh::AddFaceWithID(const SMDS_MeshNode * n1,
+                                        const SMDS_MeshNode * n2,
+                                        const SMDS_MeshNode * n3,
+                                        const SMDS_MeshNode * n4,
+                                        const SMDS_MeshNode * n12,
+                                        const SMDS_MeshNode * n23,
+                                        const SMDS_MeshNode * n34, 
+                                        const SMDS_MeshNode * n41, 
+                                        int ID)
+{
+  cout<<"SMDS_Mesh::AddFaceWithID"<<endl;
+  if(hasConstructionEdges()) {
+    // creation quadratic edges - not implemented
+  }
+  SMDS_QuadraticFaceOfNodes* face =
+    new SMDS_QuadraticFaceOfNodes(n1,n2,n3,n4,n12,n23,n34,n41);
+  myFaces.Add(face);
+
+  if (!registerElement(ID, face)) {
+    RemoveElement(face, false);
+    face = NULL;
+  }
+  return face;
+}
+
+
+//=======================================================================
+//function : AddVolume
+//purpose  : 
+//=======================================================================
+SMDS_MeshVolume* SMDS_Mesh::AddVolume(const SMDS_MeshNode * n1,
+				      const SMDS_MeshNode * n2, 
+				      const SMDS_MeshNode * n3,
+				      const SMDS_MeshNode * n4,
+                                      const SMDS_MeshNode * n12,
+                                      const SMDS_MeshNode * n23,
+                                      const SMDS_MeshNode * n31,
+                                      const SMDS_MeshNode * n14, 
+                                      const SMDS_MeshNode * n24,
+                                      const SMDS_MeshNode * n34)
+{
+  int ID = myElementIDFactory->GetFreeID();
+  SMDS_MeshVolume * v = SMDS_Mesh::AddVolumeWithID(n1, n2, n3, n4, n12, n23,
+                                                   n31, n14, n24, n34, ID);
+  if(v==NULL) myElementIDFactory->ReleaseID(ID);
+  return v;
+}
+
+//=======================================================================
+//function : AddVolumeWithID
+//purpose  : 
+//=======================================================================
+SMDS_MeshVolume* SMDS_Mesh::AddVolumeWithID(int n1, int n2, int n3, int n4,
+                                            int n12,int n23,int n31,
+                                            int n14,int n24,int n34, int ID)
+{
+  SMDS_MeshNode *node1, *node2, *node3, *node4, *node12, *node23;
+  SMDS_MeshNode *node31, *node14, *node24, *node34;
+  node1 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n1);
+  node2 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n2);
+  node3 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n3);
+  node4 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n4);
+  node12 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n12);
+  node23 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n23);
+  node31 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n31);
+  node14 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n14);
+  node24 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n24);
+  node34 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n34);
+  if( !node1 || !node2 || !node3 || !node4 || !node12 || !node23 ||
+     !node31 || !node14 || !node24 || !node34 ) return NULL;
+  return SMDS_Mesh::AddVolumeWithID(node1, node2, node3, node4, node12, node23,
+                                    node31, node14, node24, node34, ID);
+}
+	
+//=======================================================================
+//function : AddVolumeWithID
+//purpose  : 2d order tetrahedron of 10 nodes
+//=======================================================================
+SMDS_MeshVolume* SMDS_Mesh::AddVolumeWithID(const SMDS_MeshNode * n1,
+                                            const SMDS_MeshNode * n2,
+                                            const SMDS_MeshNode * n3,
+                                            const SMDS_MeshNode * n4,
+                                            const SMDS_MeshNode * n12,
+                                            const SMDS_MeshNode * n23,
+                                            const SMDS_MeshNode * n31,
+                                            const SMDS_MeshNode * n14, 
+                                            const SMDS_MeshNode * n24,
+                                            const SMDS_MeshNode * n34,
+                                            int ID)
+{
+  cout<<"SMDS_Mesh::AddVolumeWithID"<<endl;
+  if(hasConstructionFaces()) {
+    // creation quadratic faces - not implemented
+  }
+  SMDS_QuadraticVolumeOfNodes * volume =
+    new SMDS_QuadraticVolumeOfNodes(n1,n2,n3,n4,n12,n23,n31,n14,n24,n34);
+  myVolumes.Add(volume);
+
+  if (!registerElement(ID, volume)) {
+    RemoveElement(volume, false);
+    volume = NULL;
+  }
+  return volume;
+}
+
+
+//=======================================================================
+//function : AddVolume
+//purpose  : 
+//=======================================================================
+SMDS_MeshVolume* SMDS_Mesh::AddVolume(const SMDS_MeshNode * n1,
+				      const SMDS_MeshNode * n2, 
+				      const SMDS_MeshNode * n3,
+				      const SMDS_MeshNode * n4,
+                                      const SMDS_MeshNode * n5, 
+                                      const SMDS_MeshNode * n12,
+                                      const SMDS_MeshNode * n23,
+                                      const SMDS_MeshNode * n34,
+                                      const SMDS_MeshNode * n41,
+                                      const SMDS_MeshNode * n15, 
+                                      const SMDS_MeshNode * n25,
+                                      const SMDS_MeshNode * n35,
+                                      const SMDS_MeshNode * n45)
+{
+  int ID = myElementIDFactory->GetFreeID();
+  SMDS_MeshVolume * v =
+    SMDS_Mesh::AddVolumeWithID(n1, n2, n3, n4, n5, n12, n23, n34, n41,
+                               n15, n25, n35, n45, ID);
+  if(v==NULL) myElementIDFactory->ReleaseID(ID);
+  return v;
+}
+
+//=======================================================================
+//function : AddVolumeWithID
+//purpose  : 
+//=======================================================================
+SMDS_MeshVolume* SMDS_Mesh::AddVolumeWithID(int n1, int n2, int n3, int n4, int n5,
+                                            int n12,int n23,int n34,int n41,
+                                            int n15,int n25,int n35,int n45, int ID)
+{
+  SMDS_MeshNode *node1, *node2, *node3, *node4, *node5;
+  SMDS_MeshNode *node12, *node23, *node34, *node41;
+  SMDS_MeshNode *node15, *node25, *node35, *node45;
+  node1 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n1);
+  node2 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n2);
+  node3 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n3);
+  node4 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n4);
+  node5 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n5);
+  node12 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n12);
+  node23 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n23);
+  node34 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n34);
+  node41 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n41);
+  node15 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n15);
+  node25 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n25);
+  node35 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n35);
+  node45 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n45);
+  if( !node1 || !node2 || !node3 || !node4 || !node5 ||
+      !node12 || !node23 || !node34 || !node41 ||
+      !node15 || !node25 || !node35 || !node45 ) return NULL;
+  return SMDS_Mesh::AddVolumeWithID(node1, node2, node3, node4, node5,
+                                    node12, node23, node34, node41,
+                                    node15, node25, node35, node45, ID);
+}
+	
+//=======================================================================
+//function : AddVolumeWithID
+//purpose  : 2d order pyramid of 13 nodes
+//=======================================================================
+SMDS_MeshVolume* SMDS_Mesh::AddVolumeWithID(const SMDS_MeshNode * n1,
+                                            const SMDS_MeshNode * n2,
+                                            const SMDS_MeshNode * n3,
+                                            const SMDS_MeshNode * n4,
+                                            const SMDS_MeshNode * n5, 
+                                            const SMDS_MeshNode * n12,
+                                            const SMDS_MeshNode * n23,
+                                            const SMDS_MeshNode * n34,
+                                            const SMDS_MeshNode * n41,
+                                            const SMDS_MeshNode * n15, 
+                                            const SMDS_MeshNode * n25,
+                                            const SMDS_MeshNode * n35,
+                                            const SMDS_MeshNode * n45,
+                                            int ID)
+{
+  cout<<"SMDS_Mesh::AddVolumeWithID"<<endl;
+  if(hasConstructionFaces()) {
+    // creation quadratic faces - not implemented
+  }
+  SMDS_QuadraticVolumeOfNodes * volume =
+    new SMDS_QuadraticVolumeOfNodes(n1,n2,n3,n4,n5,n12,n23,
+                                    n34,n41,n15,n25,n35,n45);
+  myVolumes.Add(volume);
+
+  if (!registerElement(ID, volume)) {
+    RemoveElement(volume, false);
+    volume = NULL;
+  }
+  return volume;
+}
+
+
+//=======================================================================
+//function : AddVolume
+//purpose  : 
+//=======================================================================
+SMDS_MeshVolume* SMDS_Mesh::AddVolume(const SMDS_MeshNode * n1,
+				      const SMDS_MeshNode * n2, 
+				      const SMDS_MeshNode * n3,
+				      const SMDS_MeshNode * n4,
+                                      const SMDS_MeshNode * n5, 
+                                      const SMDS_MeshNode * n6, 
+                                      const SMDS_MeshNode * n12,
+                                      const SMDS_MeshNode * n23,
+                                      const SMDS_MeshNode * n31, 
+                                      const SMDS_MeshNode * n45,
+                                      const SMDS_MeshNode * n56,
+                                      const SMDS_MeshNode * n64, 
+                                      const SMDS_MeshNode * n14,
+                                      const SMDS_MeshNode * n25,
+                                      const SMDS_MeshNode * n36)
+{
+  int ID = myElementIDFactory->GetFreeID();
+  SMDS_MeshVolume * v =
+    SMDS_Mesh::AddVolumeWithID(n1, n2, n3, n4, n5, n6, n12, n23, n31,
+                               n45, n56, n64, n14, n25, n36, ID);
+  if(v==NULL) myElementIDFactory->ReleaseID(ID);
+  return v;
+}
+
+//=======================================================================
+//function : AddVolumeWithID
+//purpose  : 
+//=======================================================================
+SMDS_MeshVolume* SMDS_Mesh::AddVolumeWithID(int n1, int n2, int n3,
+                                            int n4, int n5, int n6,
+                                            int n12,int n23,int n31,
+                                            int n45,int n56,int n64,
+                                            int n14,int n25,int n36, int ID)
+{
+  SMDS_MeshNode *node1, *node2, *node3, *node4, *node5, *node6;
+  SMDS_MeshNode *node12, *node23, *node31;
+  SMDS_MeshNode *node45, *node56, *node64;
+  SMDS_MeshNode *node14, *node25, *node36;
+  node1 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n1);
+  node2 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n2);
+  node3 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n3);
+  node4 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n4);
+  node5 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n5);
+  node6 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n6);
+  node12 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n12);
+  node23 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n23);
+  node31 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n31);
+  node45 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n45);
+  node56 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n56);
+  node64 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n64);
+  node14 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n14);
+  node25 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n25);
+  node36 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n36);
+  if( !node1 || !node2 || !node3 || !node4 || !node5 || !node6 ||
+      !node12 || !node23 || !node31 || !node45 || !node56 ||
+      !node64 || !node14 || !node25 || !node36 ) return NULL;
+  return SMDS_Mesh::AddVolumeWithID(node1, node2, node3, node4, node5, node6,
+                                    node12, node23, node31, node45, node56,
+                                    node64, node14, node25, node36, ID);
+}
+	
+//=======================================================================
+//function : AddVolumeWithID
+//purpose  : 2d order Pentahedron with 15 nodes
+//=======================================================================
+SMDS_MeshVolume* SMDS_Mesh::AddVolumeWithID(const SMDS_MeshNode * n1,
+                                            const SMDS_MeshNode * n2,
+                                            const SMDS_MeshNode * n3,
+                                            const SMDS_MeshNode * n4,
+                                            const SMDS_MeshNode * n5, 
+                                            const SMDS_MeshNode * n6, 
+                                            const SMDS_MeshNode * n12,
+                                            const SMDS_MeshNode * n23,
+                                            const SMDS_MeshNode * n31, 
+                                            const SMDS_MeshNode * n45,
+                                            const SMDS_MeshNode * n56,
+                                            const SMDS_MeshNode * n64, 
+                                            const SMDS_MeshNode * n14,
+                                            const SMDS_MeshNode * n25,
+                                            const SMDS_MeshNode * n36,
+                                            int ID)
+{
+  cout<<"SMDS_Mesh::AddVolumeWithID"<<endl;
+  if(hasConstructionFaces()) {
+    // creation quadratic faces - not implemented
+  }
+  SMDS_QuadraticVolumeOfNodes * volume =
+    new SMDS_QuadraticVolumeOfNodes(n1,n2,n3,n4,n5,n6,n12,n23,n31,
+                                    n45,n56,n64,n14,n25,n36);
+  myVolumes.Add(volume);
+
+  if (!registerElement(ID, volume)) {
+    RemoveElement(volume, false);
+    volume = NULL;
+  }
+  return volume;
+}
+
+
+//=======================================================================
+//function : AddVolume
+//purpose  : 
+//=======================================================================
+SMDS_MeshVolume* SMDS_Mesh::AddVolume(const SMDS_MeshNode * n1,
+				      const SMDS_MeshNode * n2, 
+				      const SMDS_MeshNode * n3,
+				      const SMDS_MeshNode * n4,
+                                      const SMDS_MeshNode * n5, 
+                                      const SMDS_MeshNode * n6, 
+                                      const SMDS_MeshNode * n7,
+                                      const SMDS_MeshNode * n8, 
+                                      const SMDS_MeshNode * n12,
+                                      const SMDS_MeshNode * n23,
+                                      const SMDS_MeshNode * n34,
+                                      const SMDS_MeshNode * n41, 
+                                      const SMDS_MeshNode * n56,
+                                      const SMDS_MeshNode * n67,
+                                      const SMDS_MeshNode * n78,
+                                      const SMDS_MeshNode * n85, 
+                                      const SMDS_MeshNode * n15,
+                                      const SMDS_MeshNode * n26,
+                                      const SMDS_MeshNode * n37,
+                                      const SMDS_MeshNode * n48)
+{
+  int ID = myElementIDFactory->GetFreeID();
+  SMDS_MeshVolume * v =
+    SMDS_Mesh::AddVolumeWithID(n1, n2, n3, n4, n5, n6, n7, n8, n12, n23, n34, n41,
+                               n56, n67, n78, n85, n15, n26, n37, n48, ID);
+  if(v==NULL) myElementIDFactory->ReleaseID(ID);
+  return v;
+}
+
+//=======================================================================
+//function : AddVolumeWithID
+//purpose  : 
+//=======================================================================
+SMDS_MeshVolume* SMDS_Mesh::AddVolumeWithID(int n1, int n2, int n3, int n4,
+                                            int n5, int n6, int n7, int n8,
+                                            int n12,int n23,int n34,int n41,
+                                            int n56,int n67,int n78,int n85,
+                                            int n15,int n26,int n37,int n48, int ID)
+{
+  SMDS_MeshNode *node1, *node2, *node3, *node4;
+  SMDS_MeshNode *node5, *node6, *node7, *node8;
+  SMDS_MeshNode *node12, *node23, *node34, *node41;
+  SMDS_MeshNode *node56, *node67, *node78, *node85;
+  SMDS_MeshNode *node15, *node26, *node37, *node48;
+  node1 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n1);
+  node2 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n2);
+  node3 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n3);
+  node4 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n4);
+  node5 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n5);
+  node6 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n6);
+  node7 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n7);
+  node8 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n8);
+  node12 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n12);
+  node23 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n23);
+  node34 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n34);
+  node41 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n41);
+  node56 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n56);
+  node67 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n67);
+  node78 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n78);
+  node85 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n85);
+  node15 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n15);
+  node26 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n26);
+  node37 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n37);
+  node48 = (SMDS_MeshNode*) myNodeIDFactory->MeshElement(n48);
+  if( !node1 || !node2 || !node3 || !node4 ||
+      !node5 || !node6 || !node7 || !node8 ||
+      !node12 || !node23 || !node34 || !node41 ||
+      !node56 || !node67 || !node78 || !node85 ||
+      !node15 || !node26 || !node37 || !node48 ) return NULL;
+  return SMDS_Mesh::AddVolumeWithID(node1, node2, node3, node4,
+                                    node5, node6, node7, node8,
+                                    node12, node23, node34, node41,
+                                    node56, node67, node78, node85,
+                                    node15, node26, node37, node48, ID);
+}
+	
+//=======================================================================
+//function : AddVolumeWithID
+//purpose  : 2d order Hexahedrons with 20 nodes
+//=======================================================================
+SMDS_MeshVolume* SMDS_Mesh::AddVolumeWithID(const SMDS_MeshNode * n1,
+                                            const SMDS_MeshNode * n2,
+                                            const SMDS_MeshNode * n3,
+                                            const SMDS_MeshNode * n4,
+                                            const SMDS_MeshNode * n5, 
+                                            const SMDS_MeshNode * n6, 
+                                            const SMDS_MeshNode * n7,
+                                            const SMDS_MeshNode * n8, 
+                                            const SMDS_MeshNode * n12,
+                                            const SMDS_MeshNode * n23,
+                                            const SMDS_MeshNode * n34,
+                                            const SMDS_MeshNode * n41, 
+                                            const SMDS_MeshNode * n56,
+                                            const SMDS_MeshNode * n67,
+                                            const SMDS_MeshNode * n78,
+                                            const SMDS_MeshNode * n85, 
+                                            const SMDS_MeshNode * n15,
+                                            const SMDS_MeshNode * n26,
+                                            const SMDS_MeshNode * n37,
+                                            const SMDS_MeshNode * n48,
+                                            int ID)
+{
+  cout<<"SMDS_Mesh::AddVolumeWithID"<<endl;
+  if(hasConstructionFaces()) {
+    // creation quadratic faces - not implemented
+  }
+  SMDS_QuadraticVolumeOfNodes * volume =
+    new SMDS_QuadraticVolumeOfNodes(n1,n2,n3,n4,n5,n6,n7,n8,n12,n23,n34,n41,
+                                    n56,n67,n78,n85,n15,n26,n37,n48);
+  myVolumes.Add(volume);
+
+  if (!registerElement(ID, volume)) {
+    RemoveElement(volume, false);
+    volume = NULL;
+  }
+  return volume;
+}
+

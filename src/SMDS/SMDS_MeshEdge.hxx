@@ -48,8 +48,8 @@ class SMDS_MeshEdge:public SMDS_MeshElement
 	SMDS_ElemIteratorPtr
 		elementsIterator(SMDSAbs_ElementType type) const;
 
-  private:
-	const SMDS_MeshNode* myNodes[2];
+  protected:
+	const SMDS_MeshNode* myNodes[3];
 
 };
 #endif

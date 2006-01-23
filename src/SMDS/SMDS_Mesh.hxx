@@ -274,7 +274,7 @@ public:
 					   const SMDS_MeshNode * n23,
 					   const SMDS_MeshNode * n31,
 					   const SMDS_MeshNode * n14, 
-					   const SMDS_MeshNode * n23,
+					   const SMDS_MeshNode * n24,
 					   const SMDS_MeshNode * n34, 
 					   int ID);
   virtual SMDS_MeshVolume* AddVolume(const SMDS_MeshNode * n1,
@@ -285,7 +285,7 @@ public:
                                      const SMDS_MeshNode * n23,
                                      const SMDS_MeshNode * n31,
                                      const SMDS_MeshNode * n14, 
-                                     const SMDS_MeshNode * n23,
+                                     const SMDS_MeshNode * n24,
                                      const SMDS_MeshNode * n34);
 
   // 2d order pyramid of 13 nodes

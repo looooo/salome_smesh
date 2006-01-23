@@ -28,26 +28,31 @@
 #define _SMDS_QuadraticEdge_HeaderFile
 
 #include "SMDS_MeshEdge.hxx"
+#include <iostream>
 
 class SMDS_WNT_EXPORT SMDS_QuadraticEdge: public SMDS_MeshEdge
 {
 
-  public:
-	SMDS_QuadraticEdge(const SMDS_MeshNode * node1,
-                           const SMDS_MeshNode * node2,
-                           const SMDS_MeshNode * node12);
-        bool ChangeNodes(const SMDS_MeshNode * node1,
-                         const SMDS_MeshNode * node2,
-                         const SMDS_MeshNode * node12);
-	void Print(std::ostream & OS) const;
+public:
+    SMDS_QuadraticEdge(const SMDS_MeshNode * node1,
+                       const SMDS_MeshNode * node2,
+                       const SMDS_MeshNode * node12);
 
-	int NbNodes() const;
-  protected:
-	SMDS_ElemIteratorPtr
-		elementsIterator(SMDSAbs_ElementType type) const;
+    bool ChangeNodes(const SMDS_MeshNode * node1,
+                     const SMDS_MeshNode * node2,
+                     const SMDS_MeshNode * node12);
 
-  private:
-	const SMDS_MeshNode* myNodes[3];
+    void Print(std::ostream & OS) const;
+    
+    int NbNodes() const;
+
+    virtual bool IsQuadratic() const { return true; }
+    
+    virtual bool IsMediumNode(const SMDS_MeshNode* node) const;
+
+protected:
+  SMDS_ElemIteratorPtr
+    elementsIterator(SMDSAbs_ElementType type) const;
 
 };
 #endif

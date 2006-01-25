@@ -193,10 +193,31 @@ bool operator<(const SMDS_MeshElement& e1, const SMDS_MeshElement& e2)
         return false;
 }
 
+bool SMDS_MeshElement::IsValidIndex(const int ind) const
+{
+  return ( ind>-1 && ind<NbNodes() );
+}
+
+const SMDS_MeshNode* SMDS_MeshElement::GetNode(const int ind) const
+{
+  SMDS_MeshNode* N;
+  if(IsValidIndex(ind)) {
+    int nbe = 0;
+    SMDS_ElemIteratorPtr it=edgesIterator();
+    while(nbe<ind) {
+      it->next();
+      nbe++;
+    }
+    return static_cast<const SMDS_MeshNode*> (it->next());
+  }
+  return N;
+}
+
 bool SMDS_MeshElement::IsQuadratic() const
 {
   return false;
 }
+
 bool SMDS_MeshElement::IsMediumNode(class SMDS_MeshNode* node) const
 {
   return false;

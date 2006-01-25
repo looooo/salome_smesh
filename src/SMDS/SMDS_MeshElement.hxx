@@ -68,6 +68,15 @@ public:
   virtual int NbFaces() const;
   int GetID() const;
 
+  /**
+   * Return true if index of node is valid (0...NbNodes()-1)
+   */
+  virtual bool IsValidIndex(const int ind) const;
+  /**
+   * Return node by it index (if index is valid)
+   */
+  virtual const SMDS_MeshNode* GetNode(const int ind) const;
+
   ///Return the type of the current element
   virtual SMDSAbs_ElementType GetType() const = 0;
   virtual bool IsPoly() const { return false; };

@@ -558,8 +558,8 @@ Driver_Mesh::Status DriverMED_W_SMESHDS_Mesh::Perform()
 	PPolygoneInfo aCellInfo = myMed->CrPolygoneInfo(aMeshInfo,
                                                         SMDS_MED_ENTITY,
                                                         ePOLYGONE,
-                                                        aPolygoneConn,
                                                         aPolygoneInds,
+                                                        aPolygoneConn,
                                                         SMDS_MED_CONNECTIVITY,
                                                         aPolygoneFamilyNums,
                                                         aPolygoneElemNums);

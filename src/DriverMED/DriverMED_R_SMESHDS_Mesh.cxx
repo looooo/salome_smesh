@@ -154,7 +154,7 @@ DriverMED_R_SMESHDS_Mesh
 
 	// Reading pre information about all MED cells
 	//--------------------------------------------
-	typedef std::vector<int> TNodeIds;
+	typedef MED::TVector<int> TNodeIds;
         bool takeNumbers = true;  // initially we trust the numbers from file
 	MED::TEntityInfo aEntityInfo = aMed->GetEntityInfo(aMeshInfo);
 	MED::TEntityInfo::iterator anEntityIter = aEntityInfo.begin();
@@ -229,7 +229,7 @@ DriverMED_R_SMESHDS_Mesh
                     aFamily->SetType(anElement->GetType());
                   }
                 }
-              } // for (TInt iPG = 0; iPG < nbPolygons; iPG++)
+              }
               break;
 	    }
 	    case ePOLYEDRE: {
@@ -240,7 +240,7 @@ DriverMED_R_SMESHDS_Mesh
 	      for(TInt iElem = 0; iElem < aNbElem; iElem++){
 		MED::TCConnSliceArr aConnSliceArr = aPolyedreInfo->GetConnSliceArr(iElem);
 		TInt aNbFaces = aConnSliceArr.size();
-                typedef std::vector<int> TQuantities;
+                typedef MED::TVector<int> TQuantities;
 		TQuantities aQuantities(aNbFaces);
 		TInt aNbNodes = aPolyedreInfo->GetNbNodes(iElem);
 		TNodeIds aNodeIds(aNbNodes);
@@ -249,57 +249,57 @@ DriverMED_R_SMESHDS_Mesh
 		  TInt aNbConn = aConnSlice.size();
                   aQuantities[iFace] = aNbConn;
 #ifdef _EDF_NODE_IDS_
-		  if(anIsNodeNum)
-		    for(TInt iConn = 0; iConn < aNbConn; iConn++)
+		  if(anIsNodeNum){
+		    for(TInt iConn = 0; iConn < aNbConn; iConn++){
 		      aNodeIds[iNode++] = aNodeInfo->GetElemNum(aConnSlice[iConn] - 1);
+		    }
+		  }
 		  else
 		    for(TInt iConn = 0; iConn < aNbConn; iConn++)
 		      aNodeIds[iNode++] = aConnSlice[iConn];
 #else
 		  for(TInt iConn = 0; iConn < aNbConn; iConn++)
 		    aNodeIds[iNode++] = aConnSlice[iConn];
-#endif
+#endif		
+		}
+		bool isRenum = false;
+		SMDS_MeshElement* anElement = NULL;
+		TInt aFamNum = aPolyedreInfo->GetFamNum(iElem);
+		
+		try{
+		  if(anIsElemNum){
+		    TInt anElemId = aPolyedreInfo->GetElemNum(iElem);
+		    anElement = myMesh->AddPolyhedralVolumeWithID(aNodeIds,aQuantities,anElemId);
+		  }
+		  if(!anElement){
+		    std::vector<const SMDS_MeshNode*> aNodes(aNbNodes);
+		    for(TInt iConn = 0; iConn < aNbNodes; iConn++)
+		      aNodes[iConn] = FindNode(myMesh,aNodeIds[iConn]);
+		    anElement = myMesh->AddPolyhedralVolume(aNodes,aQuantities);
+		    isRenum = anIsElemNum;
+		  }
+		}catch(const std::exception& exc){
+		  aResult = DRS_FAIL;
+		}catch(...){
+		  aResult = DRS_FAIL;
 		}
 		
-                bool isRenum = false;
-                SMDS_MeshElement* anElement = NULL;
-                TInt aFamNum = aPolyedreInfo->GetFamNum(iElem);
-
-                try{
-                  if(anIsElemNum){
-		    TInt anElemId = aPolyedreInfo->GetElemNum(iElem);
-                    anElement = myMesh->AddPolyhedralVolumeWithID(aNodeIds,aQuantities,anElemId);
-                  }
-                  if(!anElement){
-                    std::vector<const SMDS_MeshNode*> aNodes(aNbNodes);
-		    for(TInt iConn = 0; iConn < aNbNodes; iConn++)
-                      aNodes[iConn] = FindNode(myMesh,aNodeIds[iConn]);
-                    anElement = myMesh->AddPolyhedralVolume(aNodes,aQuantities);
-                    isRenum = anIsElemNum;
-                  }
-                }catch(const std::exception& exc){
-                  aResult = DRS_FAIL;
-                }catch(...){
-                  aResult = DRS_FAIL;
-                }
-
-                if(!anElement){
-                  aResult = DRS_WARN_SKIP_ELEM;
-                }else{
-                  if(isRenum){
-                    anIsElemNum = eFAUX;
-                    takeNumbers = false;
-                    if (aResult < DRS_WARN_RENUMBER)
-                      aResult = DRS_WARN_RENUMBER;
-                  }
-                  if ( checkFamilyID ( aFamily, aFamNum ))
-                  {
-                    // Save reference to this element from its family
-                    aFamily->AddElement(anElement);
-                    aFamily->SetType(anElement->GetType());
-                  }
-                }
-              } // for (int iPE = 0; iPE < nbPolyedres; iPE++)
+		if(!anElement){
+		  aResult = DRS_WARN_SKIP_ELEM;
+		}else{
+		  if(isRenum){
+		    anIsElemNum = eFAUX;
+		    takeNumbers = false;
+		    if (aResult < DRS_WARN_RENUMBER)
+		      aResult = DRS_WARN_RENUMBER;
+		  }
+		  if ( checkFamilyID ( aFamily, aFamNum )) {
+		    // Save reference to this element from its family
+		    aFamily->AddElement(anElement);
+		    aFamily->SetType(anElement->GetType());
+		  }
+		}
+	      }
               break;
             }
 	    default: {

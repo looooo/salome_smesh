@@ -249,11 +249,9 @@ DriverMED_R_SMESHDS_Mesh
 		  TInt aNbConn = aConnSlice.size();
                   aQuantities[iFace] = aNbConn;
 #ifdef _EDF_NODE_IDS_
-		  if(anIsNodeNum){
-		    for(TInt iConn = 0; iConn < aNbConn; iConn++){
+		  if(anIsNodeNum)
+		    for(TInt iConn = 0; iConn < aNbConn; iConn++)
 		      aNodeIds[iNode++] = aNodeInfo->GetElemNum(aConnSlice[iConn] - 1);
-		    }
-		  }
 		  else
 		    for(TInt iConn = 0; iConn < aNbConn; iConn++)
 		      aNodeIds[iNode++] = aConnSlice[iConn];
@@ -262,6 +260,7 @@ DriverMED_R_SMESHDS_Mesh
 		    aNodeIds[iNode++] = aConnSlice[iConn];
 #endif		
 		}
+
 		bool isRenum = false;
 		SMDS_MeshElement* anElement = NULL;
 		TInt aFamNum = aPolyedreInfo->GetFamNum(iElem);

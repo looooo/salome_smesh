@@ -46,6 +46,7 @@
 #include "SMDS_MeshElement.hxx"
 #include "SMDS_MeshNode.hxx"
 #include "SMDS_VolumeTool.hxx"
+#include "SMDS_QuadraticFaceOfNodes.hxx"
 
 
 /*
@@ -162,14 +163,30 @@ bool NumericalFunctor::GetPoints(const SMDS_MeshElement* anElem,
     return false;
 
   // Get nodes of the element
-  SMDS_ElemIteratorPtr anIter = anElem->nodesIterator();
-  if ( anIter != 0 )
-  {
-    while( anIter->more() )
-    {
-      const SMDS_MeshNode* aNode = (SMDS_MeshNode*)anIter->next();
-      if ( aNode != 0 ){
-        theRes.push_back( gp_XYZ( aNode->X(), aNode->Y(), aNode->Z() ) );
+
+  const SMDS_QuadraticFaceOfNodes* F =
+    static_cast<const SMDS_QuadraticFaceOfNodes*>(anElem);
+  if(F) {
+    // use special nodes iterator
+    SMDS_NodeIteratorPtr anIter = F->interlacedNodesIterator();
+    if ( anIter != 0 ) {
+      while( anIter->more() ) {
+        const SMDS_MeshNode* aNode = anIter->next();
+        if ( aNode != 0 ) {
+          theRes.push_back( gp_XYZ( aNode->X(), aNode->Y(), aNode->Z() ) );
+        }
+      }
+    }
+  }
+
+  if(theRes.size()==0) {
+    SMDS_ElemIteratorPtr anIter = anElem->nodesIterator();
+    if ( anIter != 0 ) {
+      while( anIter->more() ) {
+        const SMDS_MeshNode* aNode = (SMDS_MeshNode*)anIter->next();
+        if ( aNode != 0 ) {
+          theRes.push_back( gp_XYZ( aNode->X(), aNode->Y(), aNode->Z() ) );
+        }
       }
     }
   }
@@ -189,10 +206,12 @@ void  NumericalFunctor::SetPrecision( const long thePrecision )
 
 double NumericalFunctor::GetValue( long theId )
 {
+cout<<"theId="<<theId<<endl;
   TSequenceOfXYZ P;
   if ( GetPoints( theId, P ))
   {
     double aVal = GetValue( P );
+cout<<"aVal="<<aVal<<endl;
     if ( myPrecision >= 0 )
     {
       double prec = pow( 10., (double)( myPrecision ) );
@@ -285,6 +304,7 @@ double AspectRatio::GetValue( const TSequenceOfXYZ& P )
   // According to "Mesh quality control" by Nadir Bouhamau referring to
   // Pascal Jean Frey and Paul-Louis George. Maillages, applications aux elements finis.
   // Hermes Science publications, Paris 1999 ISBN 2-7462-0024-4
+  // PAL10872
 
   int nbNodes = P.size();
 
@@ -840,17 +860,16 @@ SMDSAbs_ElementType Skew::GetType() const
 */
 double Area::GetValue( const TSequenceOfXYZ& P )
 {
-  double aArea = 0;
-  if ( P.size() == 3 )
-    return getArea( P( 1 ), P( 2 ), P( 3 ) );
-  else if (P.size() > 3)
-    aArea = getArea( P( 1 ), P( 2 ), P( 3 ) );
-  else
-    return 0;
-
-  for (int i=4; i<=P.size(); i++)
-    aArea += getArea(P(1),P(i-1),P(i));
-  return aArea;
+  gp_Vec aVec1( P(2) - P(1) );
+  gp_Vec aVec2( P(3) - P(1) );
+  gp_Vec SumVec = aVec1 ^ aVec2;
+  for (int i=4; i<=P.size(); i++) {
+    gp_Vec aVec1( P(i-1) - P(1) );
+    gp_Vec aVec2( P(i) - P(1) );
+    gp_Vec tmp = aVec1 ^ aVec2;
+    SumVec.Add(tmp);
+  }
+  return SumVec.Magnitude() * 0.5;
 }
 
 double Area::GetBadRate( double Value, int /*nbNodes*/ ) const
@@ -894,7 +913,10 @@ double Length2D::GetValue( long theElementId)
 {
   TSequenceOfXYZ P;
 
+  //cout<<"Length2D::GetValue"<<endl;
   if (GetPoints(theElementId,P)){
+    //for(int jj=1; jj<=P.size(); jj++)
+    //  cout<<"jj="<<jj<<" P("<<P(jj).X()<<","<<P(jj).Y()<<","<<P(jj).Z()<<")"<<endl;
 
     double  aVal;// = GetValue( P );
     const SMDS_MeshElement* aElem = myMesh->FindElement( theElementId );
@@ -908,7 +930,11 @@ double Length2D::GetValue( long theElementId)
     case SMDSAbs_Edge:
       if (len == 2){
 	aVal = getDistance( P( 1 ), P( 2 ) );
-	break;
+        break;
+      }
+      else if (len == 3){ // quadratic edge
+	aVal = getDistance(P( 1 ),P( 3 )) + getDistance(P( 3 ),P( 2 ));
+        break;
       }
     case SMDSAbs_Face:
       if (len == 3){ // triangles
@@ -923,6 +949,22 @@ double Length2D::GetValue( long theElementId)
 	double L2 = getDistance(P( 2 ),P( 3 ));
 	double L3 = getDistance(P( 3 ),P( 4 ));
 	double L4 = getDistance(P( 4 ),P( 1 ));
+	aVal = Max(Max(L1,L2),Max(L3,L4));
+	break;
+      }
+      if (len == 6){ // quadratic triangles
+	double L1 = getDistance(P( 1 ),P( 2 )) + getDistance(P( 2 ),P( 3 ));
+	double L2 = getDistance(P( 3 ),P( 4 )) + getDistance(P( 4 ),P( 5 ));
+	double L3 = getDistance(P( 5 ),P( 6 )) + getDistance(P( 6 ),P( 1 ));
+	aVal = Max(L1,Max(L2,L3));
+        //cout<<"L1="<<L1<<" L2="<<L2<<"L3="<<L3<<" aVal="<<aVal<<endl;
+	break;
+      }
+      else if (len == 8){ // quadratic quadrangles
+	double L1 = getDistance(P( 1 ),P( 2 )) + getDistance(P( 2 ),P( 3 ));
+	double L2 = getDistance(P( 3 ),P( 4 )) + getDistance(P( 4 ),P( 5 ));
+	double L3 = getDistance(P( 5 ),P( 6 )) + getDistance(P( 6 ),P( 7 ));
+	double L4 = getDistance(P( 7 ),P( 8 )) + getDistance(P( 8 ),P( 1 ));
 	aVal = Max(Max(L1,L2),Max(L3,L4));
 	break;
       }
@@ -987,6 +1029,63 @@ double Length2D::GetValue( long theElementId)
 
       }
 
+      if (len == 10){ // quadratic tetraidrs
+	double L1 = getDistance(P( 1 ),P( 5 )) + getDistance(P( 5 ),P( 2 ));
+	double L2 = getDistance(P( 2 ),P( 6 )) + getDistance(P( 6 ),P( 3 ));
+	double L3 = getDistance(P( 3 ),P( 7 )) + getDistance(P( 7 ),P( 1 ));
+	double L4 = getDistance(P( 1 ),P( 8 )) + getDistance(P( 8 ),P( 4 ));
+	double L5 = getDistance(P( 2 ),P( 9 )) + getDistance(P( 9 ),P( 4 ));
+	double L6 = getDistance(P( 3 ),P( 10 )) + getDistance(P( 10 ),P( 4 ));
+	aVal = Max(Max(Max(L1,L2),Max(L3,L4)),Max(L5,L6));
+	break;
+      }
+      else if (len == 13){ // quadratic piramids
+	double L1 = getDistance(P( 1 ),P( 6 )) + getDistance(P( 6 ),P( 2 ));
+	double L2 = getDistance(P( 2 ),P( 7 )) + getDistance(P( 7 ),P( 3 ));
+	double L3 = getDistance(P( 3 ),P( 8 )) + getDistance(P( 8 ),P( 1 ));
+	double L4 = getDistance(P( 4 ),P( 9 )) + getDistance(P( 9 ),P( 1 ));
+	double L5 = getDistance(P( 1 ),P( 10 )) + getDistance(P( 10 ),P( 5 ));
+	double L6 = getDistance(P( 2 ),P( 11 )) + getDistance(P( 11 ),P( 5 ));
+	double L7 = getDistance(P( 3 ),P( 12 )) + getDistance(P( 12 ),P( 5 ));
+	double L8 = getDistance(P( 4 ),P( 13 )) + getDistance(P( 13 ),P( 5 ));
+	aVal = Max(Max(Max(L1,L2),Max(L3,L4)),Max(L5,L6));
+	aVal = Max(aVal,Max(L7,L8));
+	break;
+      }
+      else if (len == 15){ // quadratic pentaidres
+	double L1 = getDistance(P( 1 ),P( 7 )) + getDistance(P( 7 ),P( 2 ));
+	double L2 = getDistance(P( 2 ),P( 8 )) + getDistance(P( 8 ),P( 3 ));
+	double L3 = getDistance(P( 3 ),P( 9 )) + getDistance(P( 9 ),P( 1 ));
+	double L4 = getDistance(P( 4 ),P( 10 )) + getDistance(P( 10 ),P( 5 ));
+	double L5 = getDistance(P( 5 ),P( 11 )) + getDistance(P( 11 ),P( 6 ));
+	double L6 = getDistance(P( 6 ),P( 12 )) + getDistance(P( 12 ),P( 4 ));
+	double L7 = getDistance(P( 1 ),P( 13 )) + getDistance(P( 13 ),P( 4 ));
+	double L8 = getDistance(P( 2 ),P( 14 )) + getDistance(P( 14 ),P( 5 ));
+	double L9 = getDistance(P( 3 ),P( 15 )) + getDistance(P( 15 ),P( 6 ));
+	aVal = Max(Max(Max(L1,L2),Max(L3,L4)),Max(L5,L6));
+	aVal = Max(aVal,Max(Max(L7,L8),L9));
+	break;
+      }
+      else if (len == 20){ // quadratic hexaider
+	double L1 = getDistance(P( 1 ),P( 9 )) + getDistance(P( 9 ),P( 2 ));
+	double L2 = getDistance(P( 2 ),P( 10 )) + getDistance(P( 10 ),P( 3 ));
+	double L3 = getDistance(P( 3 ),P( 11 )) + getDistance(P( 11 ),P( 4 ));
+	double L4 = getDistance(P( 4 ),P( 12 )) + getDistance(P( 12 ),P( 1 ));
+	double L5 = getDistance(P( 5 ),P( 13 )) + getDistance(P( 13 ),P( 6 ));
+	double L6 = getDistance(P( 6 ),P( 14 )) + getDistance(P( 14 ),P( 7 ));
+	double L7 = getDistance(P( 7 ),P( 15 )) + getDistance(P( 15 ),P( 8 ));
+	double L8 = getDistance(P( 8 ),P( 16 )) + getDistance(P( 16 ),P( 5 ));
+	double L9 = getDistance(P( 1 ),P( 17 )) + getDistance(P( 17 ),P( 5 ));
+	double L10= getDistance(P( 2 ),P( 18 )) + getDistance(P( 18 ),P( 6 ));
+	double L11= getDistance(P( 3 ),P( 19 )) + getDistance(P( 19 ),P( 7 ));
+	double L12= getDistance(P( 4 ),P( 20 )) + getDistance(P( 20 ),P( 8 ));
+	aVal = Max(Max(Max(L1,L2),Max(L3,L4)),Max(L5,L6));
+	aVal = Max(aVal,Max(Max(L7,L8),Max(L9,L10)));
+	aVal = Max(aVal,Max(L11,L12));
+	break;
+
+      }
+
     default: aVal=-1;
     }
 
@@ -1038,38 +1137,81 @@ void Length2D::GetValues(TValues& theValues){
   SMDS_FaceIteratorPtr anIter = myMesh->facesIterator();
   for(; anIter->more(); ){
     const SMDS_MeshFace* anElem = anIter->next();
-    SMDS_ElemIteratorPtr aNodesIter = anElem->nodesIterator();
-    long aNodeId[2];
-    gp_Pnt P[3];
 
-    double aLength;
-    const SMDS_MeshElement* aNode;
-    if(aNodesIter->more()){
-      aNode = aNodesIter->next();
-      const SMDS_MeshNode* aNodes = (SMDS_MeshNode*) aNode;
-      P[0] = P[1] = gp_Pnt(aNodes->X(),aNodes->Y(),aNodes->Z());
-      aNodeId[0] = aNodeId[1] = aNode->GetID();
-      aLength = 0;
+    if(anElem->IsQuadratic()) {
+      const SMDS_QuadraticFaceOfNodes* F =
+        static_cast<const SMDS_QuadraticFaceOfNodes*>(anElem);
+      // use special nodes iterator
+      SMDS_NodeIteratorPtr anIter = F->interlacedNodesIterator();
+      long aNodeId[4];
+      gp_Pnt P[4];
+
+      double aLength;
+      const SMDS_MeshElement* aNode;
+      if(anIter->more()){
+        aNode = anIter->next();
+        const SMDS_MeshNode* aNodes = (SMDS_MeshNode*) aNode;
+        P[0] = P[1] = gp_Pnt(aNodes->X(),aNodes->Y(),aNodes->Z());
+        aNodeId[0] = aNodeId[1] = aNode->GetID();
+        aLength = 0;
+      }
+      for(; anIter->more(); ){
+        const SMDS_MeshNode* N1 = static_cast<const SMDS_MeshNode*> (anIter->next());
+        P[2] = gp_Pnt(N1->X(),N1->Y(),N1->Z());
+        aNodeId[2] = N1->GetID();
+        aLength = P[1].Distance(P[2]);
+        if(!anIter->more()) break;
+        const SMDS_MeshNode* N2 = static_cast<const SMDS_MeshNode*> (anIter->next());
+        P[3] = gp_Pnt(N2->X(),N2->Y(),N2->Z());
+        aNodeId[3] = N2->GetID();
+        aLength += P[2].Distance(P[3]);
+        Value aValue1(aLength,aNodeId[1],aNodeId[2]);
+        Value aValue2(aLength,aNodeId[2],aNodeId[3]);
+        P[1] = P[3];
+        aNodeId[1] = aNodeId[3];
+        theValues.insert(aValue1);
+        theValues.insert(aValue2);
+      }
+      aLength += P[2].Distance(P[0]);
+      Value aValue1(aLength,aNodeId[1],aNodeId[2]);
+      Value aValue2(aLength,aNodeId[2],aNodeId[0]);
+      theValues.insert(aValue1);
+      theValues.insert(aValue2);
     }
-    for(; aNodesIter->more(); ){
-      aNode = aNodesIter->next();
-      const SMDS_MeshNode* aNodes = (SMDS_MeshNode*) aNode;
-      long anId = aNode->GetID();
+    else {
+      SMDS_ElemIteratorPtr aNodesIter = anElem->nodesIterator();
+      long aNodeId[2];
+      gp_Pnt P[3];
 
-      P[2] = gp_Pnt(aNodes->X(),aNodes->Y(),aNodes->Z());
+      double aLength;
+      const SMDS_MeshElement* aNode;
+      if(aNodesIter->more()){
+        aNode = aNodesIter->next();
+        const SMDS_MeshNode* aNodes = (SMDS_MeshNode*) aNode;
+        P[0] = P[1] = gp_Pnt(aNodes->X(),aNodes->Y(),aNodes->Z());
+        aNodeId[0] = aNodeId[1] = aNode->GetID();
+        aLength = 0;
+      }
+      for(; aNodesIter->more(); ){
+        aNode = aNodesIter->next();
+        const SMDS_MeshNode* aNodes = (SMDS_MeshNode*) aNode;
+        long anId = aNode->GetID();
+        
+        P[2] = gp_Pnt(aNodes->X(),aNodes->Y(),aNodes->Z());
+        
+        aLength = P[1].Distance(P[2]);
+        
+        Value aValue(aLength,aNodeId[1],anId);
+        aNodeId[1] = anId;
+        P[1] = P[2];
+        theValues.insert(aValue);
+      }
 
-      aLength = P[1].Distance(P[2]);
+      aLength = P[0].Distance(P[1]);
 
-      Value aValue(aLength,aNodeId[1],anId);
-      aNodeId[1] = anId;
-      P[1] = P[2];
+      Value aValue(aLength,aNodeId[0],aNodeId[1]);
       theValues.insert(aValue);
     }
-
-    aLength = P[0].Distance(P[1]);
-
-    Value aValue(aLength,aNodeId[0],aNodeId[1]);
-    theValues.insert(aValue);
   }
 }
 
@@ -1207,7 +1349,7 @@ void MultiConnection2D::GetValues(MValues& theValues){
       const SMDS_MeshNode* aNodes = (SMDS_MeshNode*) aNode1;
       aNodeId[0] = aNodeId[1] = aNodes->GetID();
     }
-    for(; aNodesIter->more(); ){
+    for(; aNodesIter->more(); ) {
       aNode2 = (SMDS_MeshNode*) aNodesIter->next();
       long anId = aNode2->GetID();
       aNodeId[2] = anId;
@@ -1217,7 +1359,8 @@ void MultiConnection2D::GetValues(MValues& theValues){
       if (aItr != theValues.end()){
 	aItr->second += 1;
 	//aNbConnects = nb;
-      } else {
+      }
+      else {
 	theValues[aValue] = 1;
 	//aNbConnects = 1;
       }
@@ -1227,10 +1370,11 @@ void MultiConnection2D::GetValues(MValues& theValues){
     }
     Value aValue(aNodeId[0],aNodeId[2]);
     MValues::iterator aItr = theValues.find(aValue);
-    if (aItr != theValues.end()){
+    if (aItr != theValues.end()) {
       aItr->second += 1;
       //aNbConnects = nb;
-    } else {
+    }
+    else {
       theValues[aValue] = 1;
       //aNbConnects = 1;
     }
@@ -2088,8 +2232,7 @@ static gp_XYZ getNormale( const SMDS_MeshFace* theFace )
   TColgp_Array1OfXYZ anArrOfXYZ(1,4);
   SMDS_ElemIteratorPtr aNodeItr = theFace->nodesIterator();
   int i = 1;
-  for ( ; aNodeItr->more() && i <= 4; i++ )
-  {
+  for ( ; aNodeItr->more() && i <= 4; i++ ) {
     SMDS_MeshNode* aNode = (SMDS_MeshNode*)aNodeItr->next();
     anArrOfXYZ.SetValue(i, gp_XYZ( aNode->X(), aNode->Y(), aNode->Z() ) );
   }
@@ -2097,8 +2240,7 @@ static gp_XYZ getNormale( const SMDS_MeshFace* theFace )
   gp_XYZ q1 = anArrOfXYZ.Value(2) - anArrOfXYZ.Value(1);
   gp_XYZ q2 = anArrOfXYZ.Value(3) - anArrOfXYZ.Value(1);
   n  = q1 ^ q2;
-  if ( aNbNode > 3 )
-  {
+  if ( aNbNode > 3 ) {
     gp_XYZ q3 = anArrOfXYZ.Value(4) - anArrOfXYZ.Value(1);
     n += q2 ^ q3;
   }

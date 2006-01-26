@@ -2248,7 +2248,6 @@ SMDS_MeshEdge* SMDS_Mesh::AddEdgeWithID(const SMDS_MeshNode * n1,
 					const SMDS_MeshNode * n12, 
 					int ID)
 {
-  cout<<"SMDS_Mesh::AddEdgeWithID"<<endl;
   SMDS_QuadraticEdge* edge = new SMDS_QuadraticEdge(n1,n2,n12);
   if(myElementIDFactory->BindID(ID, edge)) {
     SMDS_MeshNode *node1,*node2, *node12;
@@ -2313,7 +2312,6 @@ SMDS_MeshFace* SMDS_Mesh::AddFaceWithID(const SMDS_MeshNode * n1,
                                         const SMDS_MeshNode * n31, 
                                         int ID)
 {
-  cout<<"SMDS_Mesh::AddFaceWithID"<<endl;
   if(hasConstructionEdges()) {
     // creation quadratic edges - not implemented
   }
@@ -2381,7 +2379,6 @@ SMDS_MeshFace* SMDS_Mesh::AddFaceWithID(const SMDS_MeshNode * n1,
                                         const SMDS_MeshNode * n41, 
                                         int ID)
 {
-  cout<<"SMDS_Mesh::AddFaceWithID"<<endl;
   if(hasConstructionEdges()) {
     // creation quadratic edges - not implemented
   }
@@ -2461,7 +2458,6 @@ SMDS_MeshVolume* SMDS_Mesh::AddVolumeWithID(const SMDS_MeshNode * n1,
                                             const SMDS_MeshNode * n34,
                                             int ID)
 {
-  cout<<"SMDS_Mesh::AddVolumeWithID"<<endl;
   if(hasConstructionFaces()) {
     // creation quadratic faces - not implemented
   }
@@ -2554,7 +2550,6 @@ SMDS_MeshVolume* SMDS_Mesh::AddVolumeWithID(const SMDS_MeshNode * n1,
                                             const SMDS_MeshNode * n45,
                                             int ID)
 {
-  cout<<"SMDS_Mesh::AddVolumeWithID"<<endl;
   if(hasConstructionFaces()) {
     // creation quadratic faces - not implemented
   }
@@ -2657,7 +2652,6 @@ SMDS_MeshVolume* SMDS_Mesh::AddVolumeWithID(const SMDS_MeshNode * n1,
                                             const SMDS_MeshNode * n36,
                                             int ID)
 {
-  cout<<"SMDS_Mesh::AddVolumeWithID"<<endl;
   if(hasConstructionFaces()) {
     // creation quadratic faces - not implemented
   }
@@ -2780,7 +2774,6 @@ SMDS_MeshVolume* SMDS_Mesh::AddVolumeWithID(const SMDS_MeshNode * n1,
                                             const SMDS_MeshNode * n48,
                                             int ID)
 {
-  cout<<"SMDS_Mesh::AddVolumeWithID"<<endl;
   if(hasConstructionFaces()) {
     // creation quadratic faces - not implemented
   }

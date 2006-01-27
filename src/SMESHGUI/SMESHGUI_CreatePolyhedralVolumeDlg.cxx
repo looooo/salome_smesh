@@ -638,7 +638,8 @@ void SMESHGUI_CreatePolyhedralVolumeDlg::onTextChange(const QString& theNewText)
 	  buttonOk->setEnabled( false );
 	  buttonApply->setEnabled( false );
 	}
-	displaySimulation();
+	if(aListId.count()>1)
+	  displaySimulation();
       }
     }
   }
@@ -692,9 +693,10 @@ void SMESHGUI_CreatePolyhedralVolumeDlg::SelectionIntoArgument()
   
   // get selected nodes/faces
   QString aString = "";
+  int anbNodes=0,aNbFaces=0;
   switch(GetConstructorId()){
   case 0:{
-    int anbNodes = SMESH::GetNameOfSelectedNodes(mySelector, myActor->getIO(), aString);
+    anbNodes = SMESH::GetNameOfSelectedNodes(mySelector, myActor->getIO(), aString);
     if (anbNodes >= 3)
       AddButton->setEnabled(true);
     else if (anbNodes < 3){
@@ -707,7 +709,7 @@ void SMESHGUI_CreatePolyhedralVolumeDlg::SelectionIntoArgument()
   }
   case 1:{
     // get selected faces
-    int aNbFaces = SMESH::GetNameOfSelectedElements(mySelector, myActor->getIO(), aString);
+    aNbFaces = SMESH::GetNameOfSelectedElements(mySelector, myActor->getIO(), aString);
     if (aNbFaces<=1){
       buttonOk->setEnabled( false );
       buttonApply->setEnabled( false );
@@ -725,8 +727,8 @@ void SMESHGUI_CreatePolyhedralVolumeDlg::SelectionIntoArgument()
   }
   default: return;
   }
-  
-  displaySimulation();
+  if(anbNodes>2 || aNbFaces>1)
+    displaySimulation();
 }
 
 //=======================================================================

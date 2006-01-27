@@ -45,6 +45,7 @@
 #include "SVTK_ViewWindow.h"
 #include "SALOME_ListIO.hxx"
 
+#include "SalomeApp_Tools.h"
 #include "utilities.h"
 
 // OCCT Includes
@@ -257,7 +258,11 @@ void SMESHGUI_RemoveElementsDlg::ClickOnApply()
     try {
       SMESH::SMESH_MeshEditor_var aMeshEditor = myMesh->GetMeshEditor();
       aResult = aMeshEditor->RemoveElements(anArrayOfIdeces.inout());
-    } catch (...) {
+    } catch (const SALOME::SALOME_Exception& S_ex) {
+      SalomeApp_Tools::QtCatchCorbaException(S_ex);
+      myEditCurrentArgument->clear();
+    } catch (...){
+      myEditCurrentArgument->clear();
     }
 
     if (aResult) {

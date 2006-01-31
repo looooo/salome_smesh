@@ -109,6 +109,7 @@ class TPolySimulation{
       myPreviewActor->PickableOff();
       myPreviewActor->VisibilityOff();
       myPreviewActor->SetMapper( myMapper );
+      myPreviewActor->SetRepresentation( 3 );
 
       float anRGB[3];
       vtkProperty* aProp = vtkProperty::New();

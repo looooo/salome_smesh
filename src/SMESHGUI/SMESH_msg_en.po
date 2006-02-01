@@ -630,6 +630,10 @@ msgid "SMESH_UPDATEVIEW"
 msgstr "Update View"
 
 
+#Warning incorrect values
+msgid "SMESH_ERR_SCALARBAR_PARAMS"
+msgstr "Warning! The parameters is incorrect"
+
 # -------------- Connectivity --------------
 
 #Boundary Edges

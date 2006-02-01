@@ -221,18 +221,16 @@ void SMESHGUI_ShapeByMeshDlg::SetMesh (SMESH::SMESH_Mesh_ptr thePtr)
   myGeomObj = GEOM::GEOM_Object::_nil();
   myHasSolids = false;
 
-  bool isValidMesh = false;
   vector< bool > hasElement (myElemTypeGroup->count(), false);
   if (!myMesh->_is_nil() && myViewWindow )
   {
     _PTR(SObject) aSobj = SMESH::FindSObject(myMesh.in());
     SUIT_DataOwnerPtr anIObj (new LightApp_DataOwner(aSobj->GetID().c_str()));
-    isValidMesh = mySelectionMgr->isOk(anIObj);
 
-    int nb3dShapes = 0;
-    if (isValidMesh) // check that the mesh has a shape
+    vector< int > nbShapes( TopAbs_SHAPE, 0 );
+    int shapeDim = 0; // max dim with several shapes
+    if ( mySelectionMgr->isOk(anIObj) ) // check that the mesh has a valid shape
     {
-      isValidMesh = false;
       _PTR(SObject) aSO = SMESH::FindSObject(myMesh.in());
       GEOM::GEOM_Object_var mainShape = SMESH::GetGeom(aSO);
       if ( !mainShape->_is_nil() ) 
@@ -240,28 +238,37 @@ void SMESHGUI_ShapeByMeshDlg::SetMesh (SMESH::SMESH_Mesh_ptr thePtr)
         if ( GeometryGUI::GetGeomGen()->_is_nil() )// check that GEOM_Gen exists
           GeometryGUI::InitGeomGen();
         TopoDS_Shape aShape;
-        if ( GEOMBase::GetShape(mainShape, aShape)) {
-          isValidMesh = true;
-          TopExp_Explorer exp( aShape, TopAbs_SOLID );
-          myHasSolids = exp.More();
-          for ( ; exp.More(); exp.Next())
-            nb3dShapes++;
-          for ( exp.Init( aShape, TopAbs_SHELL, TopAbs_SOLID ); exp.More(); exp.Next())
-            nb3dShapes++;
+        if ( GEOMBase::GetShape(mainShape, aShape))
+        {
+          TopAbs_ShapeEnum types[4] = { TopAbs_EDGE, TopAbs_FACE, TopAbs_SHELL, TopAbs_SOLID };
+          for ( int dim = 4; dim > 0; --dim ) {
+            TopAbs_ShapeEnum type = types[ dim - 1 ];
+            TopAbs_ShapeEnum avoid = ( type == TopAbs_SHELL ) ? TopAbs_SOLID : TopAbs_SHAPE;
+            TopExp_Explorer exp( aShape, type, avoid );
+            for ( ; nbShapes[ type ] < 2 && exp.More(); exp.Next() )
+              ++nbShapes[ type ];
+            if ( nbShapes[ type ] > 1 ) {
+              shapeDim = dim;
+              break;
+            }
+          }
         }
       }
     }
-    if (isValidMesh)
+    if (shapeDim > 0)
     {
-      hasElement[ EDGE ]   = myMesh->NbEdges();
-      hasElement[ FACE ]   = myMesh->NbFaces();
-      hasElement[ VOLUME ] = myMesh->NbVolumes() && nb3dShapes > 1;
+      if ( nbShapes[ TopAbs_SHELL ] + nbShapes[ TopAbs_SOLID ] > 1 )
+        shapeDim = 3;
+      hasElement[ EDGE ]   = shapeDim > 0 && myMesh->NbEdges()  ;
+      hasElement[ FACE ]   = shapeDim > 1 && myMesh->NbFaces()  ;
+      hasElement[ VOLUME ] = shapeDim > 2 && myMesh->NbVolumes();
 
       if ( hasElement[ EDGE ] && myViewWindow->GetSelector() )
       {
         connect(mySelectionMgr, SIGNAL(currentSelectionChanged()), SLOT(onSelectionDone()));
       }
     }
+    myHasSolids = nbShapes[ TopAbs_SOLID ];
   }
 
   // disable inexistant elem types
@@ -269,6 +276,9 @@ void SMESHGUI_ShapeByMeshDlg::SetMesh (SMESH::SMESH_Mesh_ptr thePtr)
     if ( QButton* button = myElemTypeGroup->find( i ) )
       button->setEnabled( hasElement[ i ] );
   }
+  myElementId->setEnabled( hasElement[ EDGE ] );
+  myGeomName-> setEnabled( hasElement[ EDGE ] );
+
   setElementID("");
 }
 
@@ -437,21 +447,32 @@ void SMESHGUI_ShapeByMeshDlg::onTypeChanged (int theType)
 
 void SMESHGUI_ShapeByMeshDlg::onElemIdChanged(const QString& theNewText)
 {
+  myOkBtn->setEnabled( false );
+
   if ( myIsManualIdEnter && !myMesh->_is_nil() && myViewWindow )
     if ( SMESH_Actor* actor = SMESH::FindActorByObject(myMesh) )
       if ( SMDS_Mesh* aMesh = actor->GetObject()->GetMesh() )
       {
+        SMDSAbs_ElementType type = SMDSAbs_Edge;
+        switch ( myElemTypeGroup->id( myElemTypeGroup->selected() )) {
+        case EDGE  : type = SMDSAbs_Edge;   break;
+        case FACE  : type = SMDSAbs_Face;   break;
+        case VOLUME: type = SMDSAbs_Volume; break;
+        default: return;
+        }
         TColStd_MapOfInteger newIndices;
         QStringList aListId = QStringList::split( " ", theNewText, false);
         for ( int i = 0; i < aListId.count(); i++ ) {
-          if ( const SMDS_MeshNode * n = aMesh->FindNode( aListId[ i ].toInt() ))
-            newIndices.Add(n->GetID());
+          if ( const SMDS_MeshElement * e = aMesh->FindElement( aListId[ i ].toInt() ))
+            if ( e->GetType() == type )
+              newIndices.Add( e->GetID() );
         }
 
-        if ( !newIndices.IsEmpty() )
+        if ( !newIndices.IsEmpty() && newIndices.Extent() == 1 )
           if ( SVTK_Selector* s = myViewWindow->GetSelector() ) {
             s->AddOrRemoveIndex( actor->getIO(), newIndices, false );
             myViewWindow->highlight( actor->getIO(), true, true );
+            myOkBtn->setEnabled( true );
           }
       }
 }

@@ -297,8 +297,25 @@ bool SMESHGUI_MeshOp::isSubshapeOk() const
         TopoDS_Shape mainShape, subShape;
         if ( GEOMBase::GetShape( mainGeom, mainShape ) &&
              GEOMBase::GetShape( subGeom, subShape ) )
-          // 1 is index of mainShape itself
-          return GEOMBase::GetIndex( subShape, mainShape, 0 ) > 1;
+        {
+          int index = GEOMBase::GetIndex( subShape, mainShape, 0 );
+          if ( index > 0 ) {
+            // 1 is index of mainShape itself
+            return index > 1; // it is a subshape
+          }
+          // is it a group?
+          GEOM::GEOM_Gen_var geomGen = SMESH::GetGEOMGen();
+          _PTR(Study) aStudy = SMESH::GetActiveStudyDocument();
+          if ( !geomGen->_is_nil() && aStudy ) {
+            GEOM::GEOM_IGroupOperations_var op =
+              geomGen->GetIGroupOperations( aStudy->StudyId() );
+            if ( ! op->_is_nil() ) {
+              GEOM::GEOM_Object_var mainObj = op->GetMainShape( subGeom );
+              if ( !mainObj->_is_nil() )
+                return ( string( mainObj->GetEntry() ) == string( mainGeom->GetEntry() ));
+            }
+          }
+        }
       }
     }
   }
@@ -362,70 +379,17 @@ _PTR(SObject) SMESHGUI_MeshOp::getSubmeshByGeom() const
 //================================================================================
 void SMESHGUI_MeshOp::selectionDone()
 {
+  if ( myShapeByMeshDlg && myShapeByMeshDlg->isShown() )
+    return;
+
   SMESHGUI_SelectionOp::selectionDone();
 
   try
   {
-    if ( !myToCreate ) // edition
-    {
-      QString anObjEntry = myDlg->selectedObject( SMESHGUI_MeshDlg::Obj );
-      _PTR(SObject) pObj = studyDS()->FindObjectID( anObjEntry.latin1() );
-      if ( pObj != 0 )
-      {
-        SMESH::SMESH_subMesh_var aVar =
-          SMESH::SMESH_subMesh::_narrow( _CAST( SObject,pObj )->GetObject() );
-        myDlg->setObjectShown( SMESHGUI_MeshDlg::Mesh, !aVar->_is_nil() );
-        myDlg->objectWg( SMESHGUI_MeshDlg::Mesh, SMESHGUI_MeshDlg::Btn )->hide();
-        myDlg->updateGeometry();
-        myDlg->adjustSize();
-        readMesh();
-      }
-      else
-        myDlg->reset();
+    // Enable tabs according to shape dimension
 
-    }
-    else if ( !myIsMesh ) // submesh creation
-    {
-      // if a submesh on the selected shape already exist, pass to submesh edition mode
-      if ( _PTR(SObject) pSubmesh = getSubmeshByGeom() ) {
-        SMESH::SMESH_subMesh_var sm = 
-          SMESH::SObjectToInterface<SMESH::SMESH_subMesh>( pSubmesh );
-        bool editSubmesh = ( !sm->_is_nil() &&
-                             SUIT_MessageBox::question2( myDlg, tr( "SMESH_WARNING" ),
-                                                         tr( "EDIT_SUBMESH_QUESTION"),
-                                                         tr( "SMESH_BUT_YES" ),
-                                                         tr( "SMESH_BUT_NO" ), 1, 0, 0 ));
-        if ( editSubmesh )
-        {
-          selectionMgr()->clearFilters();
-          selectObject( pSubmesh );
-          SMESHGUI::GetSMESHGUI()->switchToOperation(704);
-        }
-        else
-        {
-          selectObject( _PTR(SObject)() );
-          myDlg->selectObject( "", SMESHGUI_MeshDlg::Geom, "" );
-        }
-      }
-      // enable/disable popup for choice of geom selection way
-      myDlg->setGeomPopupEnabled( !myDlg->selectedObject( SMESHGUI_MeshDlg::Mesh ).isEmpty() );
+    int shapeDim = 3;
 
-    }
-  }
-  catch ( const SALOME::SALOME_Exception& S_ex )
-  {
-    SalomeApp_Tools::QtCatchCorbaException( S_ex );
-  }
-  catch ( ... )
-  {
-  }
-
-
-  // Enable tabs according to shape dimension
-
-  int shapeDim = 3;
-  try
-  {
     GEOM::GEOM_Object_var aGeomVar;
     QString aGeomEntry = myDlg->selectedObject( SMESHGUI_MeshDlg::Geom );
     _PTR(SObject) pGeom = studyDS()->FindObjectID( aGeomEntry.latin1() );
@@ -461,6 +425,61 @@ void SMESHGUI_MeshOp::selectionDone()
         }
       }
     }
+    myDlg->setMaxHypoDim( shapeDim );
+
+    if ( !myToCreate ) // edition: read hypotheses
+    {
+      QString anObjEntry = myDlg->selectedObject( SMESHGUI_MeshDlg::Obj );
+      _PTR(SObject) pObj = studyDS()->FindObjectID( anObjEntry.latin1() );
+      if ( pObj != 0 )
+      {
+        SMESH::SMESH_subMesh_var aVar =
+          SMESH::SMESH_subMesh::_narrow( _CAST( SObject,pObj )->GetObject() );
+        myDlg->setObjectShown( SMESHGUI_MeshDlg::Mesh, !aVar->_is_nil() );
+        myDlg->objectWg( SMESHGUI_MeshDlg::Mesh, SMESHGUI_MeshDlg::Btn )->hide();
+        myDlg->updateGeometry();
+        myDlg->adjustSize();
+        readMesh();
+      }
+      else
+        myDlg->reset();
+
+    }
+    else if ( !myIsMesh ) // submesh creation
+    {
+      // if a submesh on the selected shape already exist, pass to submesh edition mode
+      if ( _PTR(SObject) pSubmesh = getSubmeshByGeom() ) {
+        SMESH::SMESH_subMesh_var sm = 
+          SMESH::SObjectToInterface<SMESH::SMESH_subMesh>( pSubmesh );
+        bool editSubmesh = ( !sm->_is_nil() &&
+                             SUIT_MessageBox::question2( myDlg, tr( "SMESH_WARNING" ),
+                                                         tr( "EDIT_SUBMESH_QUESTION"),
+                                                         tr( "SMESH_BUT_YES" ),
+                                                         tr( "SMESH_BUT_NO" ), 1, 0, 0 ));
+        if ( editSubmesh )
+        {
+          selectionMgr()->clearFilters();
+          selectObject( pSubmesh );
+          SMESHGUI::GetSMESHGUI()->switchToOperation(704);
+          return;
+        }
+        else
+        {
+          selectObject( _PTR(SObject)() );
+          myDlg->selectObject( "", SMESHGUI_MeshDlg::Geom, "" );
+        }
+      }
+
+      // enable/disable popup for choice of geom selection way
+      bool enable = false;
+      QString aMeshEntry = myDlg->selectedObject( SMESHGUI_MeshDlg::Mesh );
+      if ( _PTR(SObject) pMesh = studyDS()->FindObjectID( aMeshEntry.latin1() )) {
+        SMESH::SMESH_Mesh_var mesh = SMESH::SObjectToInterface<SMESH::SMESH_Mesh>( pMesh );
+        if ( !mesh->_is_nil() )
+          enable = ( shapeDim > 1 ) && ( mesh->NbEdges() > 0 );
+      }            
+      myDlg->setGeomPopupEnabled( enable );
+    }
   }
   catch ( const SALOME::SALOME_Exception& S_ex )
   {
@@ -469,7 +488,6 @@ void SMESHGUI_MeshOp::selectionDone()
   catch ( ... )
   {
   }
-  myDlg->setMaxHypoDim( shapeDim );
 }
 
 //================================================================================
@@ -1460,6 +1478,7 @@ void SMESHGUI_MeshOp::onGeomSelectionByMesh( bool theByMesh )
         SMESH::SMESH_Mesh::_narrow( _CAST( SObject,pMesh )->GetObject() );
       if ( !aMeshVar->_is_nil() ) {
         myDlg->hide();
+        myDlg->activateObject( SMESHGUI_MeshDlg::Mesh );
         myShapeByMeshDlg->Init();
         myShapeByMeshDlg->SetMesh( aMeshVar );
         myShapeByMeshDlg->show();
@@ -1476,8 +1495,6 @@ void SMESHGUI_MeshOp::onGeomSelectionByMesh( bool theByMesh )
 
 void SMESHGUI_MeshOp::onPublishShapeByMeshDlg()
 {
-  onCloseShapeByMeshDlg();
-
   if ( myShapeByMeshDlg ) {
     // Select a found geometry object
     GEOM::GEOM_Object_var aGeomVar = myShapeByMeshDlg->GetShape();
@@ -1485,16 +1502,28 @@ void SMESHGUI_MeshOp::onPublishShapeByMeshDlg()
     {
       QString ID = aGeomVar->GetStudyEntry();
       if ( _PTR(SObject) aGeomSO = studyDS()->FindObjectID( ID )) {
+        SMESH::SMESH_Mesh_ptr aMeshPtr = myShapeByMeshDlg->GetMesh();
+        if ( !CORBA::is_nil( aMeshPtr )) {
+          if (_PTR(SObject) aMeshSO = SMESH::FindSObject( aMeshPtr )) {
+            myDlg->activateObject( SMESHGUI_MeshDlg::Mesh );
+            myDlg->selectObject( aMeshSO->GetName(), SMESHGUI_MeshDlg::Mesh, aMeshSO->GetID() );
+          }
+        }
+        myDlg->activateObject( SMESHGUI_MeshDlg::Geom );
         selectObject( aGeomSO );
-        selectionDone();
+        //selectionDone();
       }
     }
+    else {
+      onCloseShapeByMeshDlg();
+    }
   }
+  myDlg->show();
 }
 
 //================================================================================
 /*!
- * \brief SLOT. Is called Close Ok is pressed in SMESHGUI_ShapeByMeshDlg
+ * \brief SLOT. Is called when Close is pressed in SMESHGUI_ShapeByMeshDlg
  */
 //================================================================================
 
@@ -1502,8 +1531,8 @@ void SMESHGUI_MeshOp::onCloseShapeByMeshDlg()
 {
   if ( myDlg ) {
     myDlg->show();
-    myDlg->selectObject( "", SMESHGUI_MeshDlg::Geom, "" );
     myDlg->activateObject( SMESHGUI_MeshDlg::Geom );
+    myDlg->selectObject( "", SMESHGUI_MeshDlg::Geom, "" );
   }
 }
 

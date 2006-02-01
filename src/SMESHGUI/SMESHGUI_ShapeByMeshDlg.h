@@ -59,6 +59,7 @@ public:
 
   void                     Init();
   void                     SetMesh (SMESH::SMESH_Mesh_ptr);
+  SMESH::SMESH_Mesh_ptr    GetMesh () { return myMesh; }
   GEOM::GEOM_Object_ptr    GetShape();
 
 signals:

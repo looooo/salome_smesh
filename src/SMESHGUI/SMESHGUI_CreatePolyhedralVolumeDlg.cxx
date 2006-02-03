@@ -62,6 +62,7 @@
 #include <vtkUnsignedCharArray.h>
 #include <vtkUnstructuredGrid.h>
 #include <vtkDataSetMapper.h>
+#include <vtkProperty.h>
 
 // QT Includes
 #include <qapplication.h>

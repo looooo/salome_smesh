@@ -1782,6 +1782,80 @@ msgstr "Polygon"
 msgid "SMESH_ADD_POLYGON"
 msgstr "Add polygon"
 
+msgid "SMESH_ADD_QUADRATIC_EDGE_TITLE"
+msgstr "Add Quadratic Edge"
+
+msgid "SMESH_ADD_QUADRATIC_TRIANGLE_TITLE"
+msgstr "Add Quadratic Triangle"
+
+msgid "SMESH_ADD_QUADRATIC_QUADRANGLE_TITLE"
+msgstr "Add Quadratic Quadrangle"
+
+msgid "SMESH_ADD_QUADRATIC_TETRAHEDRON_TITLE"
+msgstr "Add Quadratic Tetrahedron"
+
+msgid "SMESH_ADD_QUADRATIC_PYRAMID_TITLE"
+msgstr "Add Quadratic Pyramid"
+
+msgid "SMESH_ADD_QUADRATIC_PENTAHEDRON_TITLE"
+msgstr "Add Quadratic Pentahedron"
+
+msgid "SMESH_ADD_QUADRATIC_HEXAHEDRON_TITLE"
+msgstr "Add Quadratic Hexahedron"
+
+msgid "SMESH_QUADRATIC_EDGE"
+msgstr "Quadratic Edge"
+
+msgid "SMESH_QUADRATIC_TRIANGLE"
+msgstr "Quadratic Triangle"
+
+msgid "SMESH_QUADRATIC_QUADRANGLE"
+msgstr "Quadratic Quadrangle"
+
+msgid "SMESH_QUADRATIC_TETRAHEDRON"
+msgstr "Quadratic Tetrahedron"
+
+msgid "SMESH_QUADRATIC_PYRAMID"
+msgstr "Quadratic Pyramid"
+
+msgid "SMESH_QUADRATIC_PENTAHEDRON"
+msgstr "Quadratic Pentahedron"
+
+msgid "SMESH_QUADRATIC_HEXAHEDRON"
+msgstr "Quadratic Hexahedron"
+
+msgid "SMESHGUI_AddQuadraticElementDlg::SMESH_CORNER_NODES"
+msgstr "Corner Nodes:"
+
+msgid "SMESHGUI_AddQuadraticElementDlg::SMESH_ADD_QUADRATIC_EDGE"
+msgstr "Add Quadratic Edge"
+
+msgid "SMESHGUI_AddQuadraticElementDlg::SMESH_ADD_QUADRATIC_TRIANGLE"
+msgstr "Add Quadratic Triangle"
+
+msgid "SMESHGUI_AddQuadraticElementDlg::SMESH_ADD_QUADRATIC_QUADRANGLE"
+msgstr "Add Quadratic Quadrangle"
+
+msgid "SMESHGUI_AddQuadraticElementDlg::SMESH_ADD_QUADRATIC_TETRAHEDRON"
+msgstr "Add Quadratic Tetrahedron"
+
+msgid "SMESHGUI_AddQuadraticElementDlg::SMESH_ADD_QUADRATIC_PYRAMID"
+msgstr "Add Quadratic PYRAMID"
+
+msgid "SMESHGUI_AddQuadraticElementDlg::SMESH_ADD_QUADRATIC_PENTAHEDRON"
+msgstr "Add Quadratic Pentahedron"
+
+msgid "SMESHGUI_AddQuadraticElementDlg::SMESH_ADD_QUADRATIC_HEXAHEDRON"
+msgstr "Add Quadratic Hexahedron"
+
+msgid "SMESHGUI_AddQuadraticElementDlg::SMESH_FIRST"
+msgstr "First"
+
+msgid "SMESHGUI_AddQuadraticElementDlg::SMESH_MIDDLE"
+msgstr "Middle"
+
+msgid "SMESHGUI_AddQuadraticElementDlg::SMESH_LAST"
+msgstr "Last"
 #----------------------------------------------------
 
 msgid "SMESHGUI_CreatePatternDlg::CAPTION"
@@ -1995,6 +2069,27 @@ msgstr "Polygon"
 
 msgid "MEN_POLYHEDRON"
 msgstr "Polyhedron"
+
+msgid "MEN_QUADRATIC_EDGE"
+msgstr "Quadratic Edge"
+
+msgid "MEN_QUADRATIC_TRIANGLE"
+msgstr "Quadratic Triangle"
+
+msgid "MEN_QUADRATIC_QUADRANGLE"
+msgstr "Quadratic Quadrangle"
+
+msgid "MEN_QUADRATIC_TETRAHEDRON"
+msgstr "Quadratic Tetrahedron"
+
+msgid "MEN_QUADRATIC_PYRAMID"
+msgstr "Quadratic Pyramid"
+
+msgid "MEN_QUADRATIC_PENTAHEDRON"
+msgstr "Quadratic Pentahedron"
+
+msgid "MEN_QUADRATIC_HEXAHEDRON"
+msgstr "Quadratic Hexahedron"
 
 msgid "MEN_NODES"
 msgstr "Nodes"
@@ -2325,6 +2420,27 @@ msgstr "Polygon"
 msgid "TOP_POLYHEDRON"
 msgstr "Polyhedron"
 
+msgid "TOP_QUADRATIC_EDGE"
+msgstr "Quadratic Edge"
+
+msgid "TOP_QUADRATIC_TRIANGLE"
+msgstr "Quadratic Triangle"
+
+msgid "TOP_QUADRATIC_QUADRANGLE"
+msgstr "Quadratic Quadrangle"
+
+msgid "TOP_QUADRATIC_TETRAHEDRON"
+msgstr "Quadratic Tetrahedron"
+
+msgid "TOP_QUADRATIC_PYRAMID"
+msgstr "Quadratic Pyramid"
+
+msgid "TOP_QUADRATIC_PENTAHEDRON"
+msgstr "Quadratic Pentahedron"
+
+msgid "TOP_QUADRATIC_HEXAHEDRON"
+msgstr "Quadratic Hexahedron"
+
 msgid "TOP_NODES"
 msgstr "Nodes"
 
@@ -2604,6 +2720,27 @@ msgstr "Polygon"
 
 msgid "STB_POLYHEDRON"
 msgstr "Polyhedron"
+
+msgid "STB_QUADRATIC_EDGE"
+msgstr "Quadratic Edge"
+
+msgid "STB_QUADRATIC_TRIANGLE"
+msgstr "Quadratic Triangle"
+
+msgid "STB_QUADRATIC_QUADRANGLE"
+msgstr "Quadratic Quadrangle"
+
+msgid "STB_QUADRATIC_TETRAHEDRON"
+msgstr "Quadratic Tetrahedron"
+
+msgid "STB_QUADRATIC_PYRAMID"
+msgstr "Quadratic Pyramid"
+
+msgid "STB_QUADRATIC_PENTAHEDRON"
+msgstr "Quadratic Pentahedron"
+
+msgid "STB_QUADRATIC_HEXAHEDRON"
+msgstr "Quadratic Hexahedron"
 
 msgid "STB_NODES"
 msgstr "Nodes"

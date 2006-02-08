@@ -149,7 +149,7 @@ void SMESH_Mesh::ShapeToMesh(const TopoDS_Shape & aShape)
   // fill _mapAncestors
   _mapAncestors.Clear();
   int desType, ancType;
-  for ( desType = TopAbs_EDGE; desType > TopAbs_COMPOUND; desType-- )
+  for ( desType = TopAbs_VERTEX; desType > TopAbs_COMPOUND; desType-- )
     for ( ancType = desType - 1; ancType >= TopAbs_COMPOUND; ancType-- )
       TopExp::MapShapesAndAncestors ( aShape,
                                      (TopAbs_ShapeEnum) desType,
@@ -616,12 +616,12 @@ SMESH_Gen *SMESH_Mesh::GetGen()
 //=============================================================================
 
 SMESH_subMesh *SMESH_Mesh::GetSubMesh(const TopoDS_Shape & aSubShape)
-throw(SALOME_Exception)
+  throw(SALOME_Exception)
 {
   Unexpect aCatch(SalomeException);
   SMESH_subMesh *aSubMesh;
   int index = _myMeshDS->ShapeToIndex(aSubShape);
-  
+
   // for submeshes on GEOM Group
   if ( !index && aSubShape.ShapeType() == TopAbs_COMPOUND ) {
     TopoDS_Iterator it( aSubShape );
@@ -629,15 +629,16 @@ throw(SALOME_Exception)
       index = _myMeshDS->AddCompoundSubmesh( aSubShape, it.Value().ShapeType() );
   }
 
-  if (_mapSubMesh.find(index) != _mapSubMesh.end())
-    {
-      aSubMesh = _mapSubMesh[index];
-    }
+  map <int, SMESH_subMesh *>::iterator i_sm = _mapSubMesh.find(index);
+  if ( i_sm != _mapSubMesh.end())
+  {
+    aSubMesh = i_sm->second;
+  }
   else
-    {
-      aSubMesh = new SMESH_subMesh(index, this, _myMeshDS, aSubShape);
-      _mapSubMesh[index] = aSubMesh;
-    }
+  {
+    aSubMesh = new SMESH_subMesh(index, this, _myMeshDS, aSubShape);
+    _mapSubMesh[index] = aSubMesh;
+  }
   return aSubMesh;
 }
 
@@ -649,20 +650,17 @@ throw(SALOME_Exception)
 //=============================================================================
 
 SMESH_subMesh *SMESH_Mesh::GetSubMeshContaining(const TopoDS_Shape & aSubShape)
-throw(SALOME_Exception)
+  throw(SALOME_Exception)
 {
   Unexpect aCatch(SalomeException);
-  bool isFound = false;
   SMESH_subMesh *aSubMesh = NULL;
   
   int index = _myMeshDS->ShapeToIndex(aSubShape);
-  if (_mapSubMesh.find(index) != _mapSubMesh.end())
-    {
-      aSubMesh = _mapSubMesh[index];
-      isFound = true;
-    }
-  if (!isFound)
-    aSubMesh = NULL;
+
+  map <int, SMESH_subMesh *>::iterator i_sm = _mapSubMesh.find(index);
+  if ( i_sm != _mapSubMesh.end())
+    aSubMesh = i_sm->second;
+
   return aSubMesh;
 }
 
@@ -1152,7 +1150,7 @@ void SMESH_Mesh::CleanMeshOnPropagationChain (const TopoDS_Shape& theMainEdge)
     SMESH_subMesh *subMesh = GetSubMesh(anEdge);
     SMESHDS_SubMesh *subMeshDS = subMesh->GetSubMeshDS();
     if (subMeshDS && subMeshDS->NbElements() > 0) {
-      subMesh->ComputeStateEngine(SMESH_subMesh::CLEANDEP);
+      subMesh->ComputeStateEngine(SMESH_subMesh::CLEAN);
     }
   }
 }

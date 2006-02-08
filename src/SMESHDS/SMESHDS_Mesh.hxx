@@ -274,15 +274,6 @@ private:
 
 #endif
 
-  void addNodeToSubmesh( const SMDS_MeshNode* aNode, int Index )
-  {
-    //Update or build submesh
-    map<int,SMESHDS_SubMesh*>::iterator it = myShapeIndexToSubMesh.find( Index );
-    if ( it == myShapeIndexToSubMesh.end() )
-      it = myShapeIndexToSubMesh.insert( make_pair(Index, new SMESHDS_SubMesh() )).first;
-    it->second->AddNode( aNode ); // add aNode to submesh
-  }
-
   typedef std::list<const SMESHDS_Hypothesis*> THypList;
 
 #ifndef WNT
@@ -305,6 +296,15 @@ private:
   TGroups myGroups;
 
   SMESHDS_Script*            myScript;
+
+  // optimize addition of nodes/elements to submeshes by, SetNodeInVolume() etc:
+  // avoid search of submeshes in maps
+  bool add( const SMDS_MeshElement* elem, SMESHDS_SubMesh* subMesh );
+  SMESHDS_SubMesh* getSubmesh( const TopoDS_Shape & shape);
+  SMESHDS_SubMesh* getSubmesh( const int            Index );
+  int                        myCurSubID;
+  TopoDS_Shape               myCurSubShape;
+  SMESHDS_SubMesh*           myCurSubMesh;
 };
 
 

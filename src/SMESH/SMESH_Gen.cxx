@@ -702,37 +702,20 @@ void SMESH_Gen::Close(int studyId)
 
 int SMESH_Gen::GetShapeDim(const TopAbs_ShapeEnum & aShapeType)
 {
-	int shapeDim = -1;			// Shape dimension: 0D, 1D, 2D, 3D
-	int type = aShapeType;//.ShapeType();
-	switch (type)
-	{
-	case TopAbs_COMPOUND:
-	case TopAbs_COMPSOLID:
-	case TopAbs_SOLID:
-	case TopAbs_SHELL:
-	{
-		shapeDim = 3;
-		break;
-	}
-		//    case TopAbs_SHELL:
-	case TopAbs_FACE:
-	{
-		shapeDim = 2;
-		break;
-	}
-	case TopAbs_WIRE:
-	case TopAbs_EDGE:
-	{
-		shapeDim = 1;
-		break;
-	}
-	case TopAbs_VERTEX:
-	{
-		shapeDim = 0;
-		break;
-	}
-	}
-	return shapeDim;
+  static vector<int> dim;
+  if ( dim.empty() )
+  {
+    dim.resize( TopAbs_SHAPE, -1 );
+    dim[ TopAbs_COMPOUND ]  = 3;
+    dim[ TopAbs_COMPSOLID ] = 3;
+    dim[ TopAbs_SOLID ]     = 3;
+    dim[ TopAbs_SHELL ]     = 3;
+    dim[ TopAbs_FACE  ]     = 2;
+    dim[ TopAbs_WIRE ]      = 1;
+    dim[ TopAbs_EDGE ]      = 1;
+    dim[ TopAbs_VERTEX ]    = 0;
+  }
+  return dim[ aShapeType ];
 }
 
 //=============================================================================

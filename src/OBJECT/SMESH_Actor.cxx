@@ -263,8 +263,6 @@ SMESH_ActorDef::SMESH_ActorDef()
   myHighlitableActor->PickableOff();
   myHighlitableActor->SetRepresentation(SMESH_DeviceActor::eWireframe);
 
-  SetShrinkFactor( SMESH::GetFloat( "SMESH:shrink_coeff", 0.75 ) );
-
   myName = "";
   myIO = NULL;
 
@@ -754,6 +752,8 @@ bool SMESH_ActorDef::Init(TVisualObjPtr theVisualObj,
   SUIT_ResourceMgr* mgr = SUIT_Session::session()->resourceMgr();
   if( !mgr )
     return false;
+
+  SetShrinkFactor( SMESH::GetFloat( "SMESH:shrink_coeff", 0.75 ) );
 
   int aMode = mgr->integerValue( "SMESH", "display_mode" );
   SetRepresentation(-1);

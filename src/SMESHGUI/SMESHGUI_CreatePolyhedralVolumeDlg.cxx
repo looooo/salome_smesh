@@ -114,19 +114,17 @@ class TPolySimulation{
 
       float anRGB[3];
       vtkProperty* aProp = vtkProperty::New();
-      GetColor( "SMESH", "fill_color", anRGB[0], anRGB[1], anRGB[2], QColor( 0, 170, 255 ) );
+      GetColor( "SMESH", "selection_element_color", anRGB[0], anRGB[1], anRGB[2], QColor( 0, 170, 255 ) );
       aProp->SetColor(anRGB[0],anRGB[1],anRGB[2]);
       myPreviewActor->SetProperty( aProp );
+      float aFactor,aUnits;
+      myPreviewActor->SetResolveCoincidentTopology(true);
+      myPreviewActor->GetPolygonOffsetParameters(aFactor,aUnits);
+      myPreviewActor->SetPolygonOffsetParameters(aFactor,0.2*aUnits);
       aProp->Delete();
 
-      vtkProperty* aBackProp = vtkProperty::New();
-      GetColor( "SMESH", "backface_color", anRGB[0], anRGB[1], anRGB[2], QColor( 0, 0, 255 ) );
-      aBackProp->SetColor(anRGB[0],anRGB[1],anRGB[2]);
-      myPreviewActor->SetBackfaceProperty( aBackProp );
-      aBackProp->Delete();
-
       myViewWindow->AddActor( myPreviewActor );
-
+      
     }
 
 
@@ -139,7 +137,7 @@ class TPolySimulation{
       vtkUnstructuredGrid *aGrid = theActor->GetUnstructuredGrid();
       myGrid->SetPoints(aGrid->GetPoints());
 
-      if (theReset) ResetGrid(theReset);
+      ResetGrid(theReset);
       
       vtkIdList *anIds = vtkIdList::New();
 

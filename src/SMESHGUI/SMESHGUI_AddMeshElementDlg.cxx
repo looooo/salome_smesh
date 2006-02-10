@@ -410,11 +410,7 @@ void SMESHGUI_AddMeshElementDlg::Init()
 
   if (Reverse)
     connect(Reverse, SIGNAL(stateChanged(int)), SLOT(CheckBox(int)));
-
-  // Move widget on the botton right corner of main widget
-  int x, y;
-  mySMESHGUI->DefineDlgPosition(this, x, y);
-  this->move(x, y);
+  
   this->show(); // displays Dialog
 
   // set selection mode

@@ -342,11 +342,7 @@ void SMESHGUI_FilterLibraryDlg::Init (const QValueList<int>& theTypes,
     if (myListBox->count() > 0)
       myListBox->setCurrentItem(0);
   }
-
-  int x, y;
-  mySMESHGUI->DefineDlgPosition(this, x, y);
-  this->move(x, y);
-
+  
   this->show();
 
   updateMainButtons();

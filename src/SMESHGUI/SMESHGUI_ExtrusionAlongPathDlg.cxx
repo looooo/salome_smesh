@@ -370,10 +370,6 @@ SMESHGUI_ExtrusionAlongPathDlg::SMESHGUI_ExtrusionAlongPathDlg( SMESHGUI* theMod
   ZSpin->editor()->installEventFilter(this);
 
   /***************************************************************/
-  // set position and show dialog box
-  int x, y;
-  mySMESHGUI->DefineDlgPosition(this, x, y);
-  this->move(x, y);
   this->show(); // displays Dialog
 }
 

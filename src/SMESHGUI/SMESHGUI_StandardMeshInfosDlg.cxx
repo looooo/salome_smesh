@@ -162,11 +162,8 @@ SMESHGUI_StandardMeshInfosDlg::SMESHGUI_StandardMeshInfosDlg( SMESHGUI* theModul
   connect( mySMESHGUI,      SIGNAL(SignalDeactivateActiveDialog()), this, SLOT(DeactivateActiveDialog()));
   connect( mySelectionMgr,  SIGNAL(currentSelectionChanged()),      this, SLOT(onSelectionChanged()));
 
-  // resize and move dialog, then show
+  // show the dialog
   this->setMinimumSize(270, 428);
-  int x, y;
-  mySMESHGUI->DefineDlgPosition(this, x, y);
-  this->move(x, y);
   this->show();
 
   // init dialog with current selection

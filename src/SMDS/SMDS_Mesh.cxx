@@ -2075,6 +2075,57 @@ void SMDS_Mesh::RemoveElement(const SMDS_MeshElement *        elem,
   delete s1;
 }
 
+  
+///////////////////////////////////////////////////////////////////////////////
+///@param elem The element to delete
+///////////////////////////////////////////////////////////////////////////////
+void SMDS_Mesh::RemoveFreeElement(const SMDS_MeshElement * elem)
+{
+  SMDSAbs_ElementType aType = elem->GetType();
+  if (aType == SMDSAbs_Node) {
+    // only free node can be removed by this method
+    const SMDS_MeshNode* n = static_cast<const SMDS_MeshNode*>(elem);
+    SMDS_ElemIteratorPtr itFe = n->GetInverseElementIterator();
+    if (!itFe->more()) { // free node
+      myNodes.Remove(const_cast<SMDS_MeshNode*>(n));
+      myNodeIDFactory->ReleaseID(elem->GetID());
+      delete elem;
+    }
+  } else {
+    if (hasConstructionEdges() || hasConstructionFaces())
+      // this methods is only for meshes without descendants
+      return;
+
+    // Remove element from <InverseElements> of its nodes
+    SMDS_ElemIteratorPtr itn = elem->nodesIterator();
+    while (itn->more()) {
+      SMDS_MeshNode * n = static_cast<SMDS_MeshNode *>
+        (const_cast<SMDS_MeshElement *>(itn->next()));
+      n->RemoveInverseElement(elem);
+    }
+
+    // in meshes without descendants elements are always free
+    switch (aType) {
+    case SMDSAbs_Edge:
+      myEdges.Remove(static_cast<SMDS_MeshEdge*>
+                     (const_cast<SMDS_MeshElement*>(elem)));
+      break;
+    case SMDSAbs_Face:
+      myFaces.Remove(static_cast<SMDS_MeshFace*>
+                     (const_cast<SMDS_MeshElement*>(elem)));
+      break;
+    case SMDSAbs_Volume:
+      myVolumes.Remove(static_cast<SMDS_MeshVolume*>
+                       (const_cast<SMDS_MeshElement*>(elem)));
+      break;
+    default:
+      break;
+    }
+    myElementIDFactory->ReleaseID(elem->GetID());
+    delete elem;
+  }
+}
+
 /*!
  * Checks if the element is present in mesh.
  * Useful to determine dead pointers.

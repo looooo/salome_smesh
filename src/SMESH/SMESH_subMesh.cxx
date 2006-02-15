@@ -1028,17 +1028,17 @@ SMESH_Hypothesis::Hypothesis_Status
 void SMESH_subMesh::CleanDependsOn()
 {
   //MESSAGE("SMESH_subMesh::CleanDependsOn");
-	// **** parcourir les ancetres dans l'ordre de dépendance
+  // **** parcourir les ancetres dans l'ordre de dépendance
 
-	ComputeStateEngine(CLEAN);
+  ComputeStateEngine(CLEAN);
 
-	const map < int, SMESH_subMesh * >&dependson = DependsOn();
-	map < int, SMESH_subMesh * >::const_iterator its;
-	for (its = dependson.begin(); its != dependson.end(); its++)
-	{
-		SMESH_subMesh *sm = (*its).second;
-		sm->ComputeStateEngine(CLEAN);
-	}
+  const map < int, SMESH_subMesh * >&dependson = DependsOn();
+  map < int, SMESH_subMesh * >::const_iterator its;
+  for (its = dependson.begin(); its != dependson.end(); its++)
+  {
+    SMESH_subMesh *sm = (*its).second;
+    sm->ComputeStateEngine(CLEAN);
+  }
 }
 
 //=============================================================================
@@ -1102,26 +1102,26 @@ void SMESH_subMesh::DumpAlgoState(bool isMain)
 
 static void cleanSubMesh( SMESH_subMesh * subMesh )
 {
-  if ( subMesh )
-    if (SMESHDS_SubMesh * subMeshDS = subMesh->GetSubMeshDS())
-    {
+  if (subMesh) {
+    if (SMESHDS_SubMesh * subMeshDS = subMesh->GetSubMeshDS()) {
       SMESHDS_Mesh * meshDS = subMesh->GetFather()->GetMeshDS();
-      SMDS_ElemIteratorPtr ite=subMeshDS->GetElements();
-      while(ite->more())
-      {
+      SMDS_ElemIteratorPtr ite = subMeshDS->GetElements();
+      while (ite->more()) {
         const SMDS_MeshElement * elt = ite->next();
         //MESSAGE( " RM elt: "<<elt->GetID()<<" ( "<<elt->NbNodes()<<" )" );
-        meshDS->RemoveElement(elt);
+        //meshDS->RemoveElement(elt);
+        meshDS->RemoveFreeElement(elt, subMeshDS);
       }
 
-      SMDS_NodeIteratorPtr itn=subMeshDS->GetNodes();
-      while(itn->more())
-      {
+      SMDS_NodeIteratorPtr itn = subMeshDS->GetNodes();
+      while (itn->more()) {
         const SMDS_MeshNode * node = itn->next();
         //MESSAGE( " RM node: "<<node->GetID());
-        meshDS->RemoveNode(node);
+        //meshDS->RemoveNode(node);
+        meshDS->RemoveFreeNode(node, subMeshDS);
       }
     }
+  }
 }
 
 //=============================================================================
@@ -1167,13 +1167,11 @@ bool SMESH_subMesh::ComputeStateEngine(int event)
         _computeState = READY_TO_COMPUTE;
       }
       break;
-    case COMPUTE:			// nothing to do
+    case COMPUTE:		// nothing to do
       break;
     case CLEAN:
-      RemoveSubMeshElementsAndNodes();
-      //break; submeshes dependent on me should be cleaned as well
-    case CLEANDEP:
       CleanDependants();
+      RemoveSubMeshElementsAndNodes();
       break;
     case SUBMESH_COMPUTED:	// nothing to do
       break;
@@ -1270,6 +1268,7 @@ bool SMESH_subMesh::ComputeStateEngine(int event)
       }
       break;
     case CLEAN:
+      CleanDependants();
       RemoveSubMeshElementsAndNodes();
       _computeState = NOT_READY;
       algo = gen->GetAlgo((*_father), _subShape);
@@ -1279,9 +1278,6 @@ bool SMESH_subMesh::ComputeStateEngine(int event)
         if (ret)
           _computeState = READY_TO_COMPUTE;
       }
-      //break; submeshes dependent on me should be cleaned as well
-    case CLEANDEP:
-      CleanDependants();
       break;
     case SUBMESH_COMPUTED:      // nothing to do
       break;
@@ -1313,11 +1309,12 @@ bool SMESH_subMesh::ComputeStateEngine(int event)
       ComputeStateEngine( CLEAN );
       algo = gen->GetAlgo((*_father), _subShape);
       if (algo && !algo->NeedDescretBoundary())
-        CleanDependsOn(); // remove sub-mesh with event CLEANDEP
+        CleanDependsOn(); // clean sub-meshes with event CLEAN
       break;
-    case COMPUTE:                       // nothing to do
+    case COMPUTE:               // nothing to do
       break;
     case CLEAN:
+      CleanDependants();  // clean sub-meshes, dependant on this one, with event CLEAN
       RemoveSubMeshElementsAndNodes();
       _computeState = NOT_READY;
       algo = gen->GetAlgo((*_father), _subShape);
@@ -1327,9 +1324,6 @@ bool SMESH_subMesh::ComputeStateEngine(int event)
         if (ret)
           _computeState = READY_TO_COMPUTE;
       }
-      // break; submeshes dependent on me should be cleaned as well
-    case CLEANDEP:
-      CleanDependants();        // recursive recall with event CLEANDEP
       break;
     case SUBMESH_COMPUTED:      // nothing to do
       break;
@@ -1375,14 +1369,12 @@ bool SMESH_subMesh::ComputeStateEngine(int event)
     case COMPUTE:      // nothing to do
       break;
     case CLEAN:
+      CleanDependants(); // submeshes dependent on me should be cleaned as well
       RemoveSubMeshElementsAndNodes();
       if (_algoState == HYP_OK)
         _computeState = READY_TO_COMPUTE;
       else
         _computeState = NOT_READY;
-      // break; submeshes dependent on me should be cleaned as well
-    case CLEANDEP:
-      CleanDependants();
       break;
     case SUBMESH_COMPUTED:      // allow retry compute
       if (_algoState == HYP_OK)
@@ -1554,7 +1546,7 @@ void SMESH_subMesh::RemoveSubMeshElementsAndNodes()
 
   int dim = SMESH_Gen::GetShapeDim( _subShape );
   int type = _subShape.ShapeType() + 1;
-  for ( ; type <= TopAbs_EDGE; type++)
+  for ( ; type <= TopAbs_EDGE; type++) {
     if ( dim == SMESH_Gen::GetShapeDim( (TopAbs_ShapeEnum) type ))
     {
       TopExp_Explorer exp( _subShape, (TopAbs_ShapeEnum) type );
@@ -1563,6 +1555,7 @@ void SMESH_subMesh::RemoveSubMeshElementsAndNodes()
     }
     else
       break;
+  }
 }
 
 //=======================================================================

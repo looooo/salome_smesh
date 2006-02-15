@@ -245,6 +245,12 @@ public:
   virtual void RemoveEdge(const SMDS_MeshEdge * edge);
   virtual void RemoveFace(const SMDS_MeshFace * face);
   virtual void RemoveVolume(const SMDS_MeshVolume * volume);
+
+  /*! Remove only the given element and only if it is free.
+   *  Method does not work for meshes with descendants.
+   *  Implemented for fast cleaning of meshes.
+   */
+  virtual void RemoveFreeElement(const SMDS_MeshElement * elem);
   
   virtual bool RemoveFromParent();
   virtual bool RemoveSubMesh(const SMDS_Mesh * aMesh);

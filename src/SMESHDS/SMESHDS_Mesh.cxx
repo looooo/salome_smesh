@@ -607,10 +607,10 @@ SMDS_MeshVolume* SMESHDS_Mesh::AddPolyhedralVolume
 //purpose  : 
 //=======================================================================
 
-static void removeFromContainers (map<int,SMESHDS_SubMesh*> &      theSubMeshes,
-                                  set<SMESHDS_GroupBase*>&             theGroups,
-                                  list<const SMDS_MeshElement *> & theElems,
-                                  const bool                       isNode)
+static void removeFromContainers (map<int,SMESHDS_SubMesh*>&     theSubMeshes,
+                                  set<SMESHDS_GroupBase*>&       theGroups,
+                                  list<const SMDS_MeshElement*>& theElems,
+                                  const bool                     isNode)
 {
   if ( theElems.empty() )
     return;
@@ -683,6 +683,32 @@ void SMESHDS_Mesh::RemoveNode(const SMDS_MeshNode * n)
 }
 
 //=======================================================================
+//function : RemoveFreeNode
+//purpose  : 
+//=======================================================================
+void SMESHDS_Mesh::RemoveFreeNode(const SMDS_MeshNode * n, SMESHDS_SubMesh * subMesh)
+{
+  myScript->RemoveNode(n->GetID());
+
+  // Rm from group
+  // Node can belong to several groups
+  if (!myGroups.empty()) {
+    set<SMESHDS_GroupBase*>::iterator GrIt = myGroups.begin();
+    for (; GrIt != myGroups.end(); GrIt++) {
+      SMESHDS_Group* group = dynamic_cast<SMESHDS_Group*>(*GrIt);
+      if (!group || group->IsEmpty()) continue;
+      group->SMDSGroup().Remove(n);
+    }
+  }
+
+  // Rm from sub-mesh
+  // Node should belong to only one sub-mesh
+  subMesh->RemoveNode(n);
+
+  SMDS_Mesh::RemoveFreeElement(n);
+}
+
+//=======================================================================
 //function : RemoveElement
 //purpose  : 
 //========================================================================
@@ -702,6 +728,41 @@ void SMESHDS_Mesh::RemoveElement(const SMDS_MeshElement * elt)
   SMDS_Mesh::RemoveElement(elt, removedElems, removedNodes, false);
   
   removeFromContainers( myShapeIndexToSubMesh, myGroups, removedElems, false );
+}
+
+//=======================================================================
+//function : RemoveFreeElement
+//purpose  : 
+//========================================================================
+void SMESHDS_Mesh::RemoveFreeElement(const SMDS_MeshElement * elt, SMESHDS_SubMesh * subMesh)
+{
+  if (elt->GetType() == SMDSAbs_Node) {
+    RemoveFreeNode( static_cast<const SMDS_MeshNode*>(elt), subMesh);
+    return;
+  }
+
+  if (hasConstructionEdges() || hasConstructionFaces())
+    // this methods is only for meshes without descendants
+    return;
+
+  myScript->RemoveElement(elt->GetID());
+
+  // Rm from group
+  // Node can belong to several groups
+  if (!myGroups.empty()) {
+    set<SMESHDS_GroupBase*>::iterator GrIt = myGroups.begin();
+    for (; GrIt != myGroups.end(); GrIt++) {
+      SMESHDS_Group* group = dynamic_cast<SMESHDS_Group*>(*GrIt);
+      if (!group || group->IsEmpty()) continue;
+      group->SMDSGroup().Remove(elt);
+    }
+  }
+
+  // Rm from sub-mesh
+  // Element should belong to only one sub-mesh
+  subMesh->RemoveElement(elt);
+
+  SMDS_Mesh::RemoveFreeElement(elt);
 }
 
 //================================================================================

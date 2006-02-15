@@ -196,6 +196,14 @@ public:
   void MoveNode(const SMDS_MeshNode *, double x, double y, double z);
   virtual void RemoveNode(const SMDS_MeshNode *);
   void RemoveElement(const SMDS_MeshElement *);
+
+  /*! Remove only the given element/node and only if it is free.
+   *  Methods do not work for meshes with descendants.
+   *  Implemented for fast cleaning of meshes.
+   */
+  void RemoveFreeNode(const SMDS_MeshNode *, SMESHDS_SubMesh *);
+  void RemoveFreeElement(const SMDS_MeshElement *, SMESHDS_SubMesh *);
+
   bool ChangeElementNodes(const SMDS_MeshElement * elem,
                           const SMDS_MeshNode    * nodes[],
                           const int                nbnodes);

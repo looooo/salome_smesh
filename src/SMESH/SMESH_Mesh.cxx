@@ -267,6 +267,9 @@ SMESH_Hypothesis::Hypothesis_Status
   if(MYDEBUG) MESSAGE("SMESH_Mesh::AddHypothesis");
 
   SMESH_subMesh *subMesh = GetSubMesh(aSubShape);
+  if ( !subMesh || !subMesh->GetId())
+    return SMESH_Hypothesis::HYP_BAD_SUBSHAPE;
+
   SMESHDS_SubMesh *subMeshDS = subMesh->GetSubMeshDS();
   if ( subMeshDS && subMeshDS->IsComplexSubmesh() ) // group of sub-shapes and maybe of not sub-
   {
@@ -628,6 +631,8 @@ SMESH_subMesh *SMESH_Mesh::GetSubMesh(const TopoDS_Shape & aSubShape)
     if ( it.More() )
       index = _myMeshDS->AddCompoundSubmesh( aSubShape, it.Value().ShapeType() );
   }
+//   if ( !index )
+//     return NULL; // neither sub-shape nor a group
 
   map <int, SMESH_subMesh *>::iterator i_sm = _mapSubMesh.find(index);
   if ( i_sm != _mapSubMesh.end())

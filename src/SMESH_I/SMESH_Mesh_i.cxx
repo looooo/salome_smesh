@@ -316,6 +316,8 @@ static SMESH::Hypothesis_Status ConvertHypothesisStatus
     res = SMESH::HYP_ALREADY_EXIST; break;
   case SMESH_Hypothesis::HYP_BAD_DIM:
     res = SMESH::HYP_BAD_DIM; break;
+  case SMESH_Hypothesis::HYP_BAD_SUBSHAPE:
+    res = SMESH::HYP_BAD_SUBSHAPE; break;
   default:
     res = SMESH::HYP_UNKNOWN_FATAL;
   }

@@ -49,7 +49,8 @@ public:
     HYP_INCOMPATIBLE, // hypothesis does not fit algo
     HYP_NOTCONFORM,   // not conform mesh is produced appling a hypothesis
     HYP_ALREADY_EXIST,// such hypothesis already exist
-    HYP_BAD_DIM       // bad dimension
+    HYP_BAD_DIM,      // bad dimension
+    HYP_BAD_SUBSHAPE  // shape is neither the main one, nor its subshape, nor a group
   };
   static bool IsStatusFatal(Hypothesis_Status theStatus)
   { return theStatus >= HYP_UNKNOWN_FATAL; }

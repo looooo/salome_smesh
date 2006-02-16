@@ -1219,6 +1219,9 @@ msgstr "Such dimention hypothesis is already assigned to the shape"
 msgid "SMESH_HYP_8"
 msgstr "Hypothesis and submesh dimensions mismatch"
 
+msgid "SMESH_HYP_9"
+msgstr "Shape is neither the main one, nor its subshape, nor a valid group"
+
 msgid "MISSING_ALGO"
 msgstr "%3 %2D algorithm is missing"
 

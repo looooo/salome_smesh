@@ -2501,12 +2501,13 @@ void SMESHGUI::initialize( CAM_Application* app )
 	  group   = pat.arg( SMESHGUI_Selection::typeName( GROUP ) ),
 	  hypo    = pat.arg( SMESHGUI_Selection::typeName( HYPOTHESIS ) ),
 	  algo    = pat.arg( SMESHGUI_Selection::typeName( ALGORITHM ) ),
-	  elems   = QString( "'%1' '%2' '%3' '%4' '%5'" ).
+	  elems   = QString( "'%1' '%2' '%3' '%4' '%5' '%6'" ).
                        arg( SMESHGUI_Selection::typeName( SUBMESH_VERTEX ) ).
 		       arg( SMESHGUI_Selection::typeName( SUBMESH_EDGE ) ).
 		       arg( SMESHGUI_Selection::typeName( SUBMESH_FACE ) ).
 		       arg( SMESHGUI_Selection::typeName( SUBMESH_SOLID ) ).
-		       arg( SMESHGUI_Selection::typeName( SUBMESH_COMPOUND ) ),
+		       arg( SMESHGUI_Selection::typeName( SUBMESH_COMPOUND ) ).
+		       arg( SMESHGUI_Selection::typeName( SUBMESH ) ),
           subMesh = elems,
 	  mesh_group = mesh + " " + subMesh + " " + group,
 	  hyp_alg = hypo + " " + algo;

@@ -33,11 +33,19 @@
 using namespace std;
 
 //=======================================================================
-//function : 
+//function : Constructor
 //purpose  : 
 //=======================================================================
 SMESHDS_Command::SMESHDS_Command(const SMESHDS_CommandType aType):myType(aType),
 myNumber(0)
+{
+}
+
+//=======================================================================
+//function : Destructor
+//purpose  : 
+//=======================================================================
+SMESHDS_Command::~SMESHDS_Command()
 {
 }
 

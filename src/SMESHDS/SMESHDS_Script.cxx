@@ -31,6 +31,15 @@
 using namespace std;
 
 //=======================================================================
+//function : Destructor
+//purpose  : 
+//=======================================================================
+SMESHDS_Script::~SMESHDS_Script()
+{
+  Clear();
+}
+
+//=======================================================================
 //function : getCommand
 //purpose  : 
 //=======================================================================
@@ -222,7 +231,6 @@ void SMESHDS_Script::ChangePolyhedronNodes (const int        ElementID,
 //function : Renumber
 //purpose  : 
 //=======================================================================
-
 void SMESHDS_Script::Renumber (const bool isNodes, const int startID, const int deltaID)
 {
   getCommand(SMESHDS_Renumber)->Renumber( isNodes, startID, deltaID );
@@ -234,7 +242,11 @@ void SMESHDS_Script::Renumber (const bool isNodes, const int startID, const int 
 //=======================================================================
 void SMESHDS_Script::Clear()
 {
-	myCommands.clear();
+  list<SMESHDS_Command*>::iterator anIt = myCommands.begin();
+  for (; anIt != myCommands.end(); anIt++) {
+    delete (*anIt);
+  }
+  myCommands.clear();
 }
 
 //=======================================================================
@@ -243,5 +255,5 @@ void SMESHDS_Script::Clear()
 //=======================================================================
 const list<SMESHDS_Command*>& SMESHDS_Script::GetCommands()
 {
-	return myCommands;
+  return myCommands;
 }

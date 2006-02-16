@@ -1182,4 +1182,5 @@ void SMESHDS_Mesh::SetMeshElementOnShape(const SMDS_MeshElement* anElement,
 
 SMESHDS_Mesh::~SMESHDS_Mesh()
 {
+  delete myScript;
 }

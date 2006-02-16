@@ -36,6 +36,9 @@
 class SMESHDS_Script
 {
   public:
+	SMESHDS_Script() {};
+	~SMESHDS_Script();
+  
 	void AddNode(int NewNodeID, double x, double y, double z);
 	void AddEdge(int NewEdgeID, int idnode1, int idnode2);
 	void AddFace(int NewFaceID, int idnode1, int idnode2, int idnode3);
@@ -66,8 +69,7 @@ class SMESHDS_Script
 	void Renumber (const bool isNodes, const int startID, const int deltaID);
 	void Clear();
 	const std::list<SMESHDS_Command*> & GetCommands();
-	~SMESHDS_Script();
-  
+
   private:
 	SMESHDS_Command* getCommand(const SMESHDS_CommandType aType);
 

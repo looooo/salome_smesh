@@ -146,7 +146,9 @@ bool getSubMeshes(::SMESH_subMesh*  theSubMesh,
     }
     break;
   }
-  default: theSubMeshList.push_back( aSubMeshDS );
+  default:
+    if ( aSubMeshDS )
+      theSubMeshList.push_back( aSubMeshDS );
   }
   return size < theSubMeshList.size();
 }

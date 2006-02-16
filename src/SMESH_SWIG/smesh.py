@@ -112,6 +112,8 @@ class Mesh_Algorithm:
             reason = hypType + " mismatches shape"
         elif status == SMESH.HYP_CONCURENT :
             reason = "there are concurrent hypotheses on sub-shapes"
+        elif status == SMESH.HYP_BAD_SUBSHAPE :
+            reason = "shape is neither the main one, nor its subshape, nor a valid group"
         else:
             return
         hypName = '"' + hypName + '"'

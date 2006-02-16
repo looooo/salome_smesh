@@ -92,6 +92,36 @@ class Mesh_Algorithm:
         """
         return self.algo
 
+    def TreatHypoStatus(self, status, hypName, geomName, isAlgo):
+        """
+        Private method. Print error message if a hypothesis was not assigned
+        """
+        if isAlgo:
+            hypType = "algorithm"
+        else:
+            hypType = "hypothesis"
+        if status == SMESH.HYP_UNKNOWN_FATAL :
+            reason = "for unknown reason"
+        elif status == SMESH.HYP_INCOMPATIBLE :
+            reason = "this hypothesis mismatches algorithm"
+        elif status == SMESH.HYP_NOTCONFORM :
+            reason = "not conform mesh would be built"
+        elif status == SMESH.HYP_ALREADY_EXIST :
+            reason = hypType + " of the same dimension already assigned to this shape"
+        elif status == SMESH.HYP_BAD_DIM :
+            reason = hypType + " mismatches shape"
+        elif status == SMESH.HYP_CONCURENT :
+            reason = "there are concurrent hypotheses on sub-shapes"
+        else:
+            return
+        hypName = '"' + hypName + '"'
+        geomName= '"' + geomName+ '"'
+        if status < SMESH.HYP_UNKNOWN_FATAL:
+            print hypName, "was assigned to",    geomName,"but", reason
+        else:
+            print hypName, "was not assigned to",geomName,":", reason
+        pass
+
     def Create(self, mesh, geom, hypo, so="libStdMeshersEngine.so"):
         """
          Private method
@@ -111,7 +141,8 @@ class Mesh_Algorithm:
 
         self.algo = smesh.CreateHypothesis(hypo, so)
         SetName(self.algo, name + "/" + hypo)
-        mesh.mesh.AddHypothesis(self.geom, self.algo)
+        status = mesh.mesh.AddHypothesis(self.geom, self.algo)
+        self.TreatHypoStatus( status, hypo, name, 1 )
 
     def Hypothesis(self, hyp, args=[], so="libStdMeshersEngine.so"):
         """
@@ -126,8 +157,10 @@ class Mesh_Algorithm:
             a = a + s + str(args[i])
             s = ","
             i = i + 1
-        SetName(hypo, GetName(self.geom) + "/" + hyp + a)
-        self.mesh.mesh.AddHypothesis(self.geom, hypo)
+        name = GetName(self.geom)
+        SetName(hypo, name + "/" + hyp + a)
+        status = self.mesh.mesh.AddHypothesis(self.geom, hypo)
+        self.TreatHypoStatus( status, hyp, name, 0 )
         return hypo
 
 # Public class: Mesh_Segment
@@ -206,7 +239,7 @@ class Mesh_Segment(Mesh_Algorithm):
         """
         return self.Hypothesis("Propagation")
 
-    def AutomaticLength(self, fineness):
+    def AutomaticLength(self, fineness=0):
         """
          Define "AutomaticLength" hypothesis
          \param fineness for the fineness [0-1]
@@ -452,24 +485,54 @@ class Mesh:
 
     def Compute(self):
         """
-         Compute the mesh and return the status of the computation
+        Compute the mesh and return the status of the computation
         """
-        b = smesh.Compute(self.mesh, self.geom)
+        ok = smesh.Compute(self.mesh, self.geom)
+        if not ok:
+            errors = smesh.GetAlgoState( self.mesh, self.geom )
+            allReasons = ""
+            for err in errors:
+                if err.isGlobalAlgo:
+                    glob = " global "
+                else:
+                    glob = " local "
+                    pass
+                dim = str(err.algoDim)
+                if err.name == SMESH.MISSING_ALGO:
+                    reason = glob + dim + "D algorithm is missing"
+                elif err.name == SMESH.MISSING_HYPO:
+                    name = '"' + err.algoName + '"'
+                    reason = glob + dim + "D algorithm " + name + " misses " + dim + "D hypothesis"
+                else:
+                    reason = "Global \"Not Conform mesh allowed\" hypothesis is missing"
+                    pass
+                if allReasons != "":
+                    allReasons += "\n"
+                    pass
+                allReasons += reason
+                pass
+            if allReasons != "":
+                print '"' + GetName(self.mesh) + '"',"not computed:"
+                print allReasons
+                pass
+            pass
         if salome.sg.hasDesktop():
             smeshgui = salome.ImportComponentGUI("SMESH")
             smeshgui.Init(salome.myStudyId)
-            smeshgui.SetMeshIcon( salome.ObjectToID( self.mesh ), b )
+            smeshgui.SetMeshIcon( salome.ObjectToID( self.mesh ), ok )
             salome.sg.updateObjBrowser(1)
-        return b
+            pass
+        return ok
 
-    def AutomaticTetrahedralization(self):
+    def AutomaticTetrahedralization(self, fineness=0):
         """
         Compute tetrahedral mesh using AutomaticLength + MEFISTO + NETGEN
+        The parameter \a fineness [0.-1.] defines mesh fineness
         """
         dim = self.MeshDimension()
         # assign hypotheses
         self.RemoveGlobalHypotheses()
-        self.Segment().AutomaticLength()
+        self.Segment().AutomaticLength(fineness)
         if dim > 1 :
             self.Triangle().LengthFromEdges()
             pass
@@ -478,14 +541,15 @@ class Mesh:
             pass
         return self.Compute()
 
-    def AutomaticHexahedralization(self):
+    def AutomaticHexahedralization(self, fineness=0):
         """
         Compute hexahedral mesh using AutomaticLength + Quadrangle + Hexahedron
+        The parameter \a fineness [0.-1.] defines mesh fineness
         """
         dim = self.MeshDimension()
         # assign hypotheses
         self.RemoveGlobalHypotheses()
-        self.Segment().AutomaticLength()
+        self.Segment().AutomaticLength(fineness)
         if dim > 1 :
             self.Quadrangle()
             pass

@@ -27,6 +27,8 @@
 //  Module : SMESH
 //  $Header$
 
+using namespace std;
+
 #include "StdMeshers_Regular_1D.hxx"
 #include "StdMeshers_Distribution.hxx"
 #include "SMESH_Gen.hxx"
@@ -390,7 +392,6 @@ bool StdMeshers_Regular_1D::computeInternalParameters(const TopoDS_Edge& theEdge
         return false;
       }
     }
-
     GCPnts_UniformAbscissa Discret(C3d, eltSize, f, l);
     if ( !Discret.IsDone() )
       return false;
@@ -470,7 +471,7 @@ bool StdMeshers_Regular_1D::computeInternalParameters(const TopoDS_Edge& theEdge
 
   case DEFLECTION: {
 
-    GCPnts_UniformDeflection Discret(C3d, _value[ DEFLECTION_IND ], true);
+    GCPnts_UniformDeflection Discret(C3d, _value[ DEFLECTION_IND ], f, l, true);
     if ( !Discret.IsDone() )
       return false;
 
@@ -541,10 +542,13 @@ bool StdMeshers_Regular_1D::Compute(SMESH_Mesh & aMesh, const TopoDS_Shape & aSh
     if ( !_mainEdge.IsNull() )
       reversed = aMesh.IsReversedInChain( EE, _mainEdge );
     try {
-      if ( ! computeInternalParameters( E, params, reversed ))
+      if ( ! computeInternalParameters( E, params, reversed )) {
+        //cout << "computeInternalParameters() failed" <<endl;
         return false;
+      }
     }
     catch ( Standard_Failure ) {
+      //cout << "computeInternalParameters() failed, Standard_Failure" <<endl;
       return false;
     }
 

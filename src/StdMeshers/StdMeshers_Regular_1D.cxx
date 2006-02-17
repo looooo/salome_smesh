@@ -33,6 +33,8 @@ using namespace std;
 #include "StdMeshers_Distribution.hxx"
 #include "SMESH_Gen.hxx"
 #include "SMESH_Mesh.hxx"
+#include "SMESH_HypoFilter.hxx"
+#include "SMESH_subMesh.hxx"
 
 #include <OSD.hxx>
 
@@ -41,12 +43,11 @@ using namespace std;
 #include "StdMeshers_Arithmetic1D.hxx"
 #include "StdMeshers_StartEndLength.hxx"
 #include "StdMeshers_Deflection1D.hxx"
-#include <StdMeshers_AutomaticLength.hxx>
+#include "StdMeshers_AutomaticLength.hxx"
 
 #include "SMDS_MeshElement.hxx"
 #include "SMDS_MeshNode.hxx"
 #include "SMDS_EdgePosition.hxx"
-#include "SMESH_subMesh.hxx"
 
 #include "Utils_SALOME_Exception.hxx"
 #include "utilities.h"
@@ -506,6 +507,10 @@ bool StdMeshers_Regular_1D::Compute(SMESH_Mesh & aMesh, const TopoDS_Shape & aSh
 
   SMESHDS_Mesh * meshDS = aMesh.GetMeshDS();
   aMesh.GetSubMesh(aShape);
+
+  // quardatic mesh required?
+  SMESH_HypoFilter filter( SMESH_HypoFilter::HasName( "QuadraticMesh" ));
+  bool isQuadraticMesh = aMesh->GetHypothesis( aShape, filter, true );
 
   const TopoDS_Edge & EE = TopoDS::Edge(aShape);
   TopoDS_Edge E = TopoDS::Edge(EE.Oriented(TopAbs_FORWARD));

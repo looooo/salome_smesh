@@ -663,6 +663,11 @@ Handle(_pyHypothesis) _pyHypothesis::NewHypothesis( const Handle(_pyCommand)& th
     hyp->myCreationMethod = "Propagation";
     hyp->myType = "Regular_1D";
   }
+  else if ( hypType == "QuadraticMesh" ) {
+    hyp->myDim = 1;
+    hyp->myCreationMethod = "QuadraticMesh";
+    hyp->myType = "Regular_1D";
+  }
   else if ( hypType == "AutomaticLength" ) {
     hyp->myDim = 1;
     hyp->myCreationMethod = "AutomaticLength";

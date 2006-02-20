@@ -83,13 +83,14 @@
 #include "SalomeApp_Study.h"
 #include "SalomeApp_Application.h"
 #include "SalomeApp_CheckFileDlg.h"
+#include "SalomeApp_ImportOperation.h"
+
 #include "LightApp_DataOwner.h"
 #include "LightApp_Preferences.h"
 #include "LightApp_VTKSelector.h"
 #include "LightApp_Operation.h"
 #include "LightApp_UpdateFlags.h"
-
-#include "SalomeApp_ImportOperation.h"
+#include "LightApp_NameDlg.h"
 
 #include <SVTK_ViewWindow.h>
 #include <SVTK_ViewModel.h>
@@ -125,7 +126,6 @@
 #include <qstring.h>
 #include <qwidget.h>
 #include <qaction.h>
-#include <qinputdialog.h>
 
 // BOOST Includes
 #include <boost/shared_ptr.hpp>
@@ -1762,10 +1762,8 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
           {
             aName = anAttr;
             QString newName = QString(aName->Value().c_str());
-	    bool ok;
-	    newName = QInputDialog::getText( tr( "Rename" ), tr( "Enter new name:" ), QLineEdit::Normal,
-                                             newName, &ok, desktop() );
-            if ( ok && !newName.isEmpty() )
+            newName = LightApp_NameDlg::getName(desktop(), newName);
+            if ( !newName.isEmpty() )
             {
               //old source: aStudy->renameIObject( IObject, newName );
 	      aName->SetValue( newName.latin1() );

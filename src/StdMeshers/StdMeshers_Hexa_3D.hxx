@@ -35,6 +35,8 @@
 #include "StdMeshers_Quadrangle_2D.hxx"
 #include "Utils_SALOME_Exception.hxx"
 
+#include "StdMeshers_Helper.hxx"
+
 typedef struct point3Dstruct
 {
 	const SMDS_MeshNode * node;
@@ -135,6 +137,9 @@ protected:
   int _indY1;
   int _indZ0;
   int _indZ1;
+
+  bool myCreateQuadratic;
+  StdMeshers_Helper* myTool; // toll for working with quadratic elements
 };
 
 #endif

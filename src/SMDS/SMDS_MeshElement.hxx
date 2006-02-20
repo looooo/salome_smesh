@@ -82,7 +82,7 @@ public:
   virtual bool IsPoly() const { return false; };
   virtual bool IsQuadratic() const;
 
-  virtual bool IsMediumNode(class SMDS_MeshNode* node) const;
+  virtual bool IsMediumNode(const SMDS_MeshNode* node) const;
 
   friend std::ostream & operator <<(std::ostream & OS, const SMDS_MeshElement *);
   friend bool SMDS_MeshElementIDFactory::BindID(int ID,SMDS_MeshElement*elem);

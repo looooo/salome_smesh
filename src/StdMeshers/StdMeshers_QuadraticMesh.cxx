@@ -42,7 +42,10 @@ StdMeshers_QuadraticMesh::StdMeshers_QuadraticMesh(int         hypId,
      :SMESH_Hypothesis(hypId, studyId, gen)
 {
   _name = "QuadraticMesh";
-  _param_algo_dim = 1; // is used by StdMeshers_Regular_1D
+  // only one hypo of the same dim can be assigned to the shape so
+  // we use -3 in order to distingush from any usual 1D hypothsis and
+  // from "NotConformAllowed" (-1) and "Propagation" (-2)
+  _param_algo_dim = -3;
 }
 
 //=============================================================================

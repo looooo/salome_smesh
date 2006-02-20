@@ -616,15 +616,12 @@ static inline vtkIdType getCellType( const SMDSAbs_ElementType theType,
       else if ( theNbNodes == 6 )   return VTK_WEDGE;
       else if ( theNbNodes == 8 )   return VTK_HEXAHEDRON;
       else if ( theNbNodes == 10 )  {
-        cout<<"QUADRATIC_TETRA"<<endl;
         return VTK_QUADRATIC_TETRA;
       }
       else if ( theNbNodes == 20 )  {
-        cout<<"QUADRATIC_HEXAHEDRON"<<endl;
         return VTK_QUADRATIC_HEXAHEDRON;
       }
       else if ( theNbNodes==13 || theNbNodes==15 )  {
-        cout<<"QUADRATIC - CONVEX_POINT_SET"<<endl;
         return VTK_CONVEX_POINT_SET;
       }
       else return VTK_EMPTY_CELL;

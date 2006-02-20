@@ -378,7 +378,7 @@ public:
 					   const SMDS_MeshNode * n12,
 					   const SMDS_MeshNode * n23,
 					   const SMDS_MeshNode * n34,
-					   const SMDS_MeshNode * n51, 
+					   const SMDS_MeshNode * n41, 
 					   const SMDS_MeshNode * n56,
 					   const SMDS_MeshNode * n67,
 					   const SMDS_MeshNode * n78,
@@ -399,7 +399,7 @@ public:
                                      const SMDS_MeshNode * n12,
                                      const SMDS_MeshNode * n23,
                                      const SMDS_MeshNode * n34,
-                                     const SMDS_MeshNode * n51, 
+                                     const SMDS_MeshNode * n41, 
                                      const SMDS_MeshNode * n56,
                                      const SMDS_MeshNode * n67,
                                      const SMDS_MeshNode * n78,
@@ -456,11 +456,19 @@ public:
 
   const SMDS_MeshNode *FindNode(int idnode) const;
   const SMDS_MeshEdge *FindEdge(int idnode1, int idnode2) const;
+  const SMDS_MeshEdge *FindEdge(int idnode1, int idnode2, int idnode3) const;
   const SMDS_MeshFace *FindFace(int idnode1, int idnode2, int idnode3) const;
   const SMDS_MeshFace *FindFace(int idnode1, int idnode2, int idnode3, int idnode4) const;
+  const SMDS_MeshFace *FindFace(int idnode1, int idnode2, int idnode3,
+                                int idnode4, int idnode5, int idnode6) const;
+  const SMDS_MeshFace *FindFace(int idnode1, int idnode2, int idnode3, int idnode4,
+                                int idnode5, int idnode6, int idnode7, int idnode8) const;
   const SMDS_MeshElement *FindElement(int IDelem) const;
   static const SMDS_MeshEdge* FindEdge(const SMDS_MeshNode * n1,
                                        const SMDS_MeshNode * n2);
+  static const SMDS_MeshEdge* FindEdge(const SMDS_MeshNode * n1,
+                                       const SMDS_MeshNode * n2,
+                                       const SMDS_MeshNode * n3);
   static const SMDS_MeshFace* FindFace(const SMDS_MeshNode *n1,
                                        const SMDS_MeshNode *n2,
                                        const SMDS_MeshNode *n3);
@@ -468,6 +476,20 @@ public:
                                        const SMDS_MeshNode *n2,
                                        const SMDS_MeshNode *n3,
                                        const SMDS_MeshNode *n4);
+  static const SMDS_MeshFace* FindFace(const SMDS_MeshNode *n1,
+                                       const SMDS_MeshNode *n2,
+                                       const SMDS_MeshNode *n3,
+                                       const SMDS_MeshNode *n4,
+                                       const SMDS_MeshNode *n5,
+                                       const SMDS_MeshNode *n6);
+  static const SMDS_MeshFace* FindFace(const SMDS_MeshNode *n1,
+                                       const SMDS_MeshNode *n2,
+                                       const SMDS_MeshNode *n3,
+                                       const SMDS_MeshNode *n4,
+                                       const SMDS_MeshNode *n5,
+                                       const SMDS_MeshNode *n6,
+                                       const SMDS_MeshNode *n7,
+                                       const SMDS_MeshNode *n8);
 
   const SMDS_MeshFace *FindFace(std::vector<int> nodes_ids) const;
   static const SMDS_MeshFace* FindFace(std::vector<const SMDS_MeshNode *> nodes);

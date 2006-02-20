@@ -218,7 +218,7 @@ bool SMDS_MeshElement::IsQuadratic() const
   return false;
 }
 
-bool SMDS_MeshElement::IsMediumNode(class SMDS_MeshNode* node) const
+bool SMDS_MeshElement::IsMediumNode(const SMDS_MeshNode* node) const
 {
   return false;
 }

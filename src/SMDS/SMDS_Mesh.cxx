@@ -1087,19 +1087,32 @@ bool SMDS_Mesh::ChangeElementNodes(const SMDS_MeshElement * elem,
       if ( edge )
         Ok = const_cast<SMDS_MeshEdge*>( edge )->ChangeNodes( nodes[0], nodes[1] );
     }
+    else if ( nbnodes == 3 ) {
+      const SMDS_QuadraticEdge* edge = dynamic_cast<const SMDS_QuadraticEdge*>( elem );
+      if ( edge )
+        Ok = const_cast<SMDS_QuadraticEdge*>( edge )->ChangeNodes( nodes[0], nodes[1], nodes[2] );
+    }
     break;
   }
   case SMDSAbs_Face: {
     const SMDS_FaceOfNodes* face = dynamic_cast<const SMDS_FaceOfNodes*>( elem );
     if ( face ) {
       Ok = const_cast<SMDS_FaceOfNodes*>( face )->ChangeNodes( nodes, nbnodes );
-    } else {
-      /// ??? begin
-      const SMDS_PolygonalFaceOfNodes* face = dynamic_cast<const SMDS_PolygonalFaceOfNodes*>(elem);
-      if (face) {
-        Ok = const_cast<SMDS_PolygonalFaceOfNodes*>(face)->ChangeNodes(nodes, nbnodes);
+    }
+    else {
+      const SMDS_QuadraticFaceOfNodes* QF =
+        dynamic_cast<const SMDS_QuadraticFaceOfNodes*>( elem );
+      if ( QF ) {
+        Ok = const_cast<SMDS_QuadraticFaceOfNodes*>( QF )->ChangeNodes( nodes, nbnodes );
       }
-      /// ??? end
+      else {
+        /// ??? begin
+        const SMDS_PolygonalFaceOfNodes* face = dynamic_cast<const SMDS_PolygonalFaceOfNodes*>(elem);
+        if (face) {
+          Ok = const_cast<SMDS_PolygonalFaceOfNodes*>(face)->ChangeNodes(nodes, nbnodes);
+        }
+        /// ??? end
+      }
     }
     break;
   }
@@ -1112,8 +1125,15 @@ bool SMDS_Mesh::ChangeElementNodes(const SMDS_MeshElement * elem,
   //}
   case SMDSAbs_Volume: {
     const SMDS_VolumeOfNodes* vol = dynamic_cast<const SMDS_VolumeOfNodes*>( elem );
-    if ( vol )
+    if ( vol ) {
       Ok = const_cast<SMDS_VolumeOfNodes*>( vol )->ChangeNodes( nodes, nbnodes );
+    }
+    else {
+      const SMDS_QuadraticVolumeOfNodes* QV = dynamic_cast<const SMDS_QuadraticVolumeOfNodes*>( elem );
+      if ( QV ) {
+        Ok = const_cast<SMDS_QuadraticVolumeOfNodes*>( QV )->ChangeNodes( nodes, nbnodes );
+      }
+    }
     break;
   }
   default:
@@ -1203,6 +1223,7 @@ bool SMDS_Mesh::ChangePolyhedronNodes (const SMDS_MeshElement * elem,
   return Ok;
 }
 
+
 //=======================================================================
 //function : FindEdge
 //purpose  :
@@ -1210,53 +1231,94 @@ bool SMDS_Mesh::ChangePolyhedronNodes (const SMDS_MeshElement * elem,
 
 const SMDS_MeshEdge* SMDS_Mesh::FindEdge(int idnode1, int idnode2) const
 {
-	const SMDS_MeshNode * node1=FindNode(idnode1);
-	const SMDS_MeshNode * node2=FindNode(idnode2);
-	if((node1==NULL)||(node2==NULL)) return NULL;
-	return FindEdge(node1,node2);
+  const SMDS_MeshNode * node1=FindNode(idnode1);
+  const SMDS_MeshNode * node2=FindNode(idnode2);
+  if((node1==NULL)||(node2==NULL)) return NULL;
+  return FindEdge(node1,node2);
 }
 
 //#include "Profiler.h"
 const SMDS_MeshEdge* SMDS_Mesh::FindEdge(const SMDS_MeshNode * node1,
                                          const SMDS_MeshNode * node2)
 {
-	const SMDS_MeshEdge * toReturn=NULL;
-	//PROFILER_Init();
-	//PROFILER_Set();
-	SMDS_ElemIteratorPtr it1=node1->edgesIterator();
-	//PROFILER_Get(0);
-	//PROFILER_Set();
-	while(it1->more())
-	{
-		const SMDS_MeshEdge * e=static_cast<const SMDS_MeshEdge *>
-			(it1->next());
-		SMDS_ElemIteratorPtr it2=e->nodesIterator();
-		while(it2->more())
-		{
-			if(it2->next()->GetID()==node2->GetID())
-			{
-				toReturn=e;
-				break;
-			}
-		}
-	}
-	//PROFILER_Get(1);
-	return toReturn;
+  const SMDS_MeshEdge * toReturn=NULL;
+  //PROFILER_Init();
+  //PROFILER_Set();
+  SMDS_ElemIteratorPtr it1=node1->edgesIterator();
+  //PROFILER_Get(0);
+  //PROFILER_Set();
+  while(it1->more()) {
+    const SMDS_MeshEdge * e=static_cast<const SMDS_MeshEdge *> (it1->next());
+    SMDS_ElemIteratorPtr it2=e->nodesIterator();
+    while(it2->more()) {
+      if(it2->next()->GetID()==node2->GetID()) {
+        toReturn = e;
+        break;
+      }
+    }
+  }
+  //PROFILER_Get(1);
+  return toReturn;
 }
 
+
+//=======================================================================
+//function : FindEdgeOrCreate
+//purpose  :
+//=======================================================================
 
 SMDS_MeshEdge* SMDS_Mesh::FindEdgeOrCreate(const SMDS_MeshNode * node1,
-	const SMDS_MeshNode * node2) 
+                                           const SMDS_MeshNode * node2) 
 {
-	SMDS_MeshEdge * toReturn=NULL;
-	toReturn=const_cast<SMDS_MeshEdge*>(FindEdge(node1,node2));
-	if(toReturn==NULL)	
-	{
-          toReturn=new SMDS_MeshEdge(node1,node2);
-          myEdges.Add(toReturn);
-	} 
-	return toReturn;
+  SMDS_MeshEdge * toReturn=NULL;
+  toReturn=const_cast<SMDS_MeshEdge*>(FindEdge(node1,node2));
+  if(toReturn==NULL) {
+    toReturn=new SMDS_MeshEdge(node1,node2);
+    myEdges.Add(toReturn);
+  } 
+  return toReturn;
 }
+
+
+//=======================================================================
+//function : FindEdge
+//purpose  :
+//=======================================================================
+
+const SMDS_MeshEdge* SMDS_Mesh::FindEdge(int idnode1, int idnode2,
+                                         int idnode3) const
+{
+  const SMDS_MeshNode * node1=FindNode(idnode1);
+  const SMDS_MeshNode * node2=FindNode(idnode2);
+  const SMDS_MeshNode * node3=FindNode(idnode3);
+  if( (node1==NULL) || (node2==NULL)  || (node3==NULL) ) return NULL;
+  return FindEdge(node1,node2,node3);
+}
+
+const SMDS_MeshEdge* SMDS_Mesh::FindEdge(const SMDS_MeshNode * node1,
+                                         const SMDS_MeshNode * node2,
+                                         const SMDS_MeshNode * node3)
+{
+  const SMDS_MeshEdge * toReturn = NULL;
+  SMDS_ElemIteratorPtr it1 = node1->edgesIterator();
+  while(it1->more()) {
+    const SMDS_MeshEdge * e = static_cast<const SMDS_MeshEdge *> (it1->next());
+    SMDS_ElemIteratorPtr it2 = e->nodesIterator();
+    int tmp = 0;
+    while(it2->more()) {
+      int nID = it2->next()->GetID();
+      if( nID==node2->GetID() || nID==node3->GetID() ) {
+        tmp++;
+        if(tmp==2) {
+          toReturn = e;
+          break;
+        }
+      }
+    }
+  }
+  return toReturn;
+}
+
 
 //=======================================================================
 //function : FindFace
@@ -1266,117 +1328,218 @@ SMDS_MeshEdge* SMDS_Mesh::FindEdgeOrCreate(const SMDS_MeshNode * node1,
 const SMDS_MeshFace* SMDS_Mesh::FindFace(int idnode1, int idnode2,
 	int idnode3) const
 {
-	const SMDS_MeshNode * node1=FindNode(idnode1);
-	const SMDS_MeshNode * node2=FindNode(idnode2);
-	const SMDS_MeshNode * node3=FindNode(idnode3);
-	if((node1==NULL)||(node2==NULL)||(node3==NULL)) return NULL;
-	return FindFace(node1, node2, node3);
+  const SMDS_MeshNode * node1=FindNode(idnode1);
+  const SMDS_MeshNode * node2=FindNode(idnode2);
+  const SMDS_MeshNode * node3=FindNode(idnode3);
+  if( (node1==NULL) || (node2==NULL) || (node3==NULL) ) return NULL;
+  return FindFace(node1, node2, node3);
 }
 
-const SMDS_MeshFace* SMDS_Mesh::FindFace(
-		const SMDS_MeshNode *node1,
-		const SMDS_MeshNode *node2,
-		const SMDS_MeshNode *node3)
+const SMDS_MeshFace* SMDS_Mesh::FindFace(const SMDS_MeshNode *node1,
+                                         const SMDS_MeshNode *node2,
+                                         const SMDS_MeshNode *node3)
 {
-	const SMDS_MeshFace * face;
-	const SMDS_MeshElement * node;
-	bool node2found, node3found;
+  const SMDS_MeshFace * face;
+  const SMDS_MeshElement * node;
+  bool node2found, node3found;
 
-	SMDS_ElemIteratorPtr it1=node1->facesIterator();
-	while(it1->more())
-	{
-		face=static_cast<const SMDS_MeshFace*>(it1->next());
-		if(face->NbNodes()!=3) continue;
-		SMDS_ElemIteratorPtr it2=face->nodesIterator();
-		node2found=false;
-		node3found=false;
-		while(it2->more())
-		{
-			node=it2->next();
-			if(node->GetID()==node2->GetID()) node2found=true;
-			if(node->GetID()==node3->GetID()) node3found=true;
-		}
-		if(node2found&&node3found)
-			return face;
-	}
-	return NULL;
+  SMDS_ElemIteratorPtr it1 = node1->facesIterator();
+  while(it1->more()) {
+    face = static_cast<const SMDS_MeshFace*>(it1->next());
+    if(face->NbNodes()!=3) continue;
+    SMDS_ElemIteratorPtr it2 = face->nodesIterator();
+    node2found = false;
+    node3found = false;
+    while(it2->more()) {
+      node = it2->next();
+      if(node->GetID()==node2->GetID()) node2found = true;
+      if(node->GetID()==node3->GetID()) node3found = true;
+    }
+    if( node2found && node3found )
+      return face;
+  }
+  return NULL;
 }
 
-SMDS_MeshFace* SMDS_Mesh::FindFaceOrCreate(
-		const SMDS_MeshNode *node1,
-		const SMDS_MeshNode *node2,
-		const SMDS_MeshNode *node3)
+SMDS_MeshFace* SMDS_Mesh::FindFaceOrCreate(const SMDS_MeshNode *node1,
+                                           const SMDS_MeshNode *node2,
+                                           const SMDS_MeshNode *node3)
 {
-	SMDS_MeshFace * toReturn=NULL;
-	toReturn=const_cast<SMDS_MeshFace*>(FindFace(node1,node2,node3));
-	if(toReturn==NULL)
-	{
-	  toReturn=createTriangle(node1,node2,node3);
-	}
-	return toReturn;
+  SMDS_MeshFace * toReturn=NULL;
+  toReturn = const_cast<SMDS_MeshFace*>(FindFace(node1,node2,node3));
+  if(toReturn==NULL) {
+    toReturn = createTriangle(node1,node2,node3);
+  }
+  return toReturn;
 }
+
 
 //=======================================================================
 //function : FindFace
 //purpose  :
 //=======================================================================
 
-const SMDS_MeshFace* SMDS_Mesh::FindFace(int idnode1, int idnode2, int idnode3,
-	int idnode4) const
+const SMDS_MeshFace* SMDS_Mesh::FindFace(int idnode1, int idnode2,
+                                         int idnode3, int idnode4) const
 {
-	const SMDS_MeshNode * node1=FindNode(idnode1);
-	const SMDS_MeshNode * node2=FindNode(idnode2);
-	const SMDS_MeshNode * node3=FindNode(idnode3);
-	const SMDS_MeshNode * node4=FindNode(idnode4);
-	if((node1==NULL)||(node2==NULL)||(node3==NULL)||(node4==NULL)) return NULL;
-	return FindFace(node1, node2, node3, node4);
+  const SMDS_MeshNode * node1=FindNode(idnode1);
+  const SMDS_MeshNode * node2=FindNode(idnode2);
+  const SMDS_MeshNode * node3=FindNode(idnode3);
+  const SMDS_MeshNode * node4=FindNode(idnode4);
+  if( (node1==NULL) || (node2==NULL) || (node3==NULL) || (node4==NULL) )
+    return NULL;
+  return FindFace(node1, node2, node3, node4);
 }
 
-const SMDS_MeshFace* SMDS_Mesh::FindFace(
-		const SMDS_MeshNode *node1,
-		const SMDS_MeshNode *node2,
-		const SMDS_MeshNode *node3,
-		const SMDS_MeshNode *node4)
+const SMDS_MeshFace* SMDS_Mesh::FindFace(const SMDS_MeshNode *node1,
+                                         const SMDS_MeshNode *node2,
+                                         const SMDS_MeshNode *node3,
+                                         const SMDS_MeshNode *node4)
 {
-	const SMDS_MeshFace * face;
-	const SMDS_MeshElement * node;
-	bool node2found, node3found, node4found;
-	SMDS_ElemIteratorPtr it1=node1->facesIterator();
-	while(it1->more())
-	{
-		face=static_cast<const SMDS_MeshFace *>(it1->next());
-		if(face->NbNodes()!=4) continue;
-		SMDS_ElemIteratorPtr it2=face->nodesIterator();
-		node2found=false;
-		node3found=false;
-		node4found=false;
-		while(it2->more())
-		{
-			node=it2->next();
-			if(node->GetID()==node2->GetID()) node2found=true;
-			if(node->GetID()==node3->GetID()) node3found=true;
-			if(node->GetID()==node4->GetID()) node4found=true;
-		}
-		if(node2found&&node3found&&node4found)
-			return face;
-	}
-	return NULL;
+  const SMDS_MeshFace * face;
+  const SMDS_MeshElement * node;
+  bool node2found, node3found, node4found;
+  SMDS_ElemIteratorPtr it1 = node1->facesIterator();
+  while(it1->more()) {
+    face = static_cast<const SMDS_MeshFace *>(it1->next());
+    if(face->NbNodes()!=4) continue;
+    SMDS_ElemIteratorPtr it2 = face->nodesIterator();
+    node2found = false;
+    node3found = false;
+    node4found = false;
+    while(it2->more()) {
+      node=it2->next();
+      if(node->GetID()==node2->GetID()) node2found = true;
+      if(node->GetID()==node3->GetID()) node3found = true;
+      if(node->GetID()==node4->GetID()) node4found = true;
+    }
+    if( node2found && node3found && node4found )
+      return face;
+  }
+  return NULL;
 }
 
-SMDS_MeshFace* SMDS_Mesh::FindFaceOrCreate(
-		const SMDS_MeshNode *node1,
-		const SMDS_MeshNode *node2,
-		const SMDS_MeshNode *node3,
-		const SMDS_MeshNode *node4)
+SMDS_MeshFace* SMDS_Mesh::FindFaceOrCreate(const SMDS_MeshNode *node1,
+                                           const SMDS_MeshNode *node2,
+                                           const SMDS_MeshNode *node3,
+                                           const SMDS_MeshNode *node4)
 {
-	SMDS_MeshFace * toReturn=NULL;
-	toReturn=const_cast<SMDS_MeshFace*>(FindFace(node1,node2,node3,node4));
-	if(toReturn==NULL)
-	{
-	  toReturn=createQuadrangle(node1,node2,node3,node4);
-	}
-	return toReturn;
+  SMDS_MeshFace * toReturn=NULL;
+  toReturn=const_cast<SMDS_MeshFace*>(FindFace(node1,node2,node3,node4));
+  if(toReturn==NULL) {
+    toReturn=createQuadrangle(node1,node2,node3,node4);
+  }
+  return toReturn;
 }
+
+
+//=======================================================================
+//function : FindFace
+//purpose  :quadratic triangle
+//=======================================================================
+
+const SMDS_MeshFace* SMDS_Mesh::FindFace(int idnode1, int idnode2,
+                                         int idnode3, int idnode4,
+                                         int idnode5, int idnode6) const
+{
+  const SMDS_MeshNode * node1 = FindNode(idnode1);
+  const SMDS_MeshNode * node2 = FindNode(idnode2);
+  const SMDS_MeshNode * node3 = FindNode(idnode3);
+  const SMDS_MeshNode * node4 = FindNode(idnode4);
+  const SMDS_MeshNode * node5 = FindNode(idnode5);
+  const SMDS_MeshNode * node6 = FindNode(idnode6);
+  if( (node1==NULL) || (node2==NULL) || (node3==NULL) ||
+      (node4==NULL) || (node5==NULL) || (node6==NULL) ) return NULL;
+  return FindFace(node1, node2, node3, node4, node5, node6);
+}
+
+const SMDS_MeshFace* SMDS_Mesh::FindFace(const SMDS_MeshNode *node1,
+                                         const SMDS_MeshNode *node2,
+                                         const SMDS_MeshNode *node3,
+                                         const SMDS_MeshNode *node4,
+                                         const SMDS_MeshNode *node5,
+                                         const SMDS_MeshNode *node6)
+{
+  const SMDS_MeshFace * face;
+  const SMDS_MeshElement * node;
+  SMDS_ElemIteratorPtr it1 = node1->facesIterator();
+  while(it1->more()) {
+    face = static_cast<const SMDS_MeshFace*>(it1->next());
+    if(face->NbNodes()!=6) continue;
+    SMDS_ElemIteratorPtr it2 = face->nodesIterator();
+    int tmp = 0;
+    while(it2->more()) {
+      node = it2->next();
+      if(node->GetID()==node2->GetID()) tmp++;
+      if(node->GetID()==node3->GetID()) tmp++;
+      if(node->GetID()==node4->GetID()) tmp++;
+      if(node->GetID()==node5->GetID()) tmp++;
+      if(node->GetID()==node6->GetID()) tmp++;
+    }
+    if( tmp==5 )
+      return static_cast<const SMDS_MeshFace*>(face);
+  }
+  return NULL;
+}
+
+
+//=======================================================================
+//function : FindFace
+//purpose  : quadratic quadrangle
+//=======================================================================
+
+const SMDS_MeshFace* SMDS_Mesh::FindFace(int idnode1, int idnode2,
+                                         int idnode3, int idnode4,
+                                         int idnode5, int idnode6,
+                                         int idnode7, int idnode8) const
+{
+  const SMDS_MeshNode * node1 = FindNode(idnode1);
+  const SMDS_MeshNode * node2 = FindNode(idnode2);
+  const SMDS_MeshNode * node3 = FindNode(idnode3);
+  const SMDS_MeshNode * node4 = FindNode(idnode4);
+  const SMDS_MeshNode * node5 = FindNode(idnode5);
+  const SMDS_MeshNode * node6 = FindNode(idnode6);
+  const SMDS_MeshNode * node7 = FindNode(idnode7);
+  const SMDS_MeshNode * node8 = FindNode(idnode8);
+  if( (node1==NULL) || (node2==NULL) || (node3==NULL) || (node4==NULL) ||
+      (node5==NULL) || (node6==NULL) || (node7==NULL) || (node8==NULL) )
+    return NULL;
+  return FindFace(node1, node2, node3, node4, node5, node6, node7, node8);
+}
+
+const SMDS_MeshFace* SMDS_Mesh::FindFace(const SMDS_MeshNode *node1,
+                                         const SMDS_MeshNode *node2,
+                                         const SMDS_MeshNode *node3,
+                                         const SMDS_MeshNode *node4,
+                                         const SMDS_MeshNode *node5,
+                                         const SMDS_MeshNode *node6,
+                                         const SMDS_MeshNode *node7,
+                                         const SMDS_MeshNode *node8)
+{
+  const SMDS_MeshFace * face;
+  const SMDS_MeshElement * node;
+  SMDS_ElemIteratorPtr it1 = node1->facesIterator();
+  while(it1->more()) {
+    face = static_cast<const SMDS_MeshFace *>(it1->next());
+    if(face->NbNodes()!=8) continue;
+    SMDS_ElemIteratorPtr it2 = face->nodesIterator();
+    int tmp = 0;
+    while(it2->more()) {
+      node = it2->next();
+      if(node->GetID()==node2->GetID()) tmp++;
+      if(node->GetID()==node3->GetID()) tmp++;
+      if(node->GetID()==node4->GetID()) tmp++;
+      if(node->GetID()==node5->GetID()) tmp++;
+      if(node->GetID()==node6->GetID()) tmp++;
+      if(node->GetID()==node7->GetID()) tmp++;
+      if(node->GetID()==node8->GetID()) tmp++;
+    }
+    if( tmp==7 )
+      return face;
+  }
+  return NULL;
+}
+
 
 //=======================================================================
 //function : FindElement
@@ -1385,7 +1548,7 @@ SMDS_MeshFace* SMDS_Mesh::FindFaceOrCreate(
 
 const SMDS_MeshElement* SMDS_Mesh::FindElement(int IDelem) const
 {
-	return myElementIDFactory->MeshElement(IDelem);
+  return myElementIDFactory->MeshElement(IDelem);
 }
 
 //=======================================================================

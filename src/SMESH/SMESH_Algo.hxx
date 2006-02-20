@@ -33,15 +33,18 @@
 
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Edge.hxx>
+#include <gp_XY.hxx>
 
 #include <string>
 #include <vector>
 #include <list>
+#include <map>
 
 class SMESH_Gen;
 class SMESH_Mesh;
 class TopoDS_Face;
 class SMESHDS_Mesh;
+class SMDS_MeshNode;
 
 class SMESH_Algo:public SMESH_Hypothesis
 {
@@ -97,6 +100,7 @@ class SMESH_Algo:public SMESH_Hypothesis
         std::vector<std::string> _compatibleHypothesis;
         std::list<const SMESHDS_Hypothesis *> _appliedHypList;
         std::list<const SMESHDS_Hypothesis *> _usedHypList;
+
 };
 
 #endif

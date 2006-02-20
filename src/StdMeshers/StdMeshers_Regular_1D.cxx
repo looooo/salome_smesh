@@ -510,7 +510,7 @@ bool StdMeshers_Regular_1D::Compute(SMESH_Mesh & aMesh, const TopoDS_Shape & aSh
 
   // quardatic mesh required?
   SMESH_HypoFilter filter( SMESH_HypoFilter::HasName( "QuadraticMesh" ));
-  bool isQuadraticMesh = aMesh->GetHypothesis( aShape, filter, true );
+  bool QuadMode = aMesh.GetHypothesis( aShape, filter, true );
 
   const TopoDS_Edge & EE = TopoDS::Edge(aShape);
   TopoDS_Edge E = TopoDS::Edge(EE.Oriented(TopAbs_FORWARD));
@@ -533,15 +533,13 @@ bool StdMeshers_Regular_1D::Compute(SMESH_Mesh & aMesh, const TopoDS_Shape & aSh
 
   ASSERT(!VLast.IsNull());
   lid=aMesh.GetSubMesh(VLast)->GetSubMeshDS()->GetNodes();
-  if (!lid->more())
-  {
+  if (!lid->more()) {
     MESSAGE (" NO NODE BUILT ON VERTEX ");
     return false;
   }
   const SMDS_MeshNode * idLast = lid->next();
 
-  if (!Curve.IsNull())
-  {
+  if (!Curve.IsNull()) {
     list< double > params;
     bool reversed = false;
     if ( !_mainEdge.IsNull() )
@@ -558,9 +556,14 @@ bool StdMeshers_Regular_1D::Compute(SMESH_Mesh & aMesh, const TopoDS_Shape & aSh
     // only internal nodes receive an edge position with param on curve
 
     const SMDS_MeshNode * idPrev = idFirst;
+    double parPrev = f;
+    double parLast = l;
+    if(reversed) {
+      parPrev = l;
+      parLast = f;
+    }
     
-    for (list<double>::iterator itU = params.begin(); itU != params.end(); itU++)
-    {
+    for (list<double>::iterator itU = params.begin(); itU != params.end(); itU++) {
       double param = *itU;
       gp_Pnt P = Curve->Value(param);
 
@@ -568,15 +571,37 @@ bool StdMeshers_Regular_1D::Compute(SMESH_Mesh & aMesh, const TopoDS_Shape & aSh
       SMDS_MeshNode * node = meshDS->AddNode(P.X(), P.Y(), P.Z());
       meshDS->SetNodeOnEdge(node, shapeID, param);
 
-      SMDS_MeshEdge * edge = meshDS->AddEdge(idPrev, node);
-      meshDS->SetMeshElementOnShape(edge, shapeID);
+      if(QuadMode) {
+        // create medium node
+        double prm = ( parPrev + param )/2;
+        gp_Pnt PM = Curve->Value(prm);
+        SMDS_MeshNode * NM = meshDS->AddNode(PM.X(), PM.Y(), PM.Z());
+        meshDS->SetNodeOnEdge(NM, shapeID, prm);
+        SMDS_MeshEdge * edge = meshDS->AddEdge(idPrev, node, NM);
+        meshDS->SetMeshElementOnShape(edge, shapeID);
+      }
+      else {
+        SMDS_MeshEdge * edge = meshDS->AddEdge(idPrev, node);
+        meshDS->SetMeshElementOnShape(edge, shapeID);
+      }
+
       idPrev = node;
+      parPrev = param;
     }
-    SMDS_MeshEdge* edge = meshDS->AddEdge(idPrev, idLast);
-    meshDS->SetMeshElementOnShape(edge, shapeID);
+    if(QuadMode) {
+      double prm = ( parPrev + parLast )/2;
+      gp_Pnt PM = Curve->Value(prm);
+      SMDS_MeshNode * NM = meshDS->AddNode(PM.X(), PM.Y(), PM.Z());
+      meshDS->SetNodeOnEdge(NM, shapeID, prm);
+      SMDS_MeshEdge * edge = meshDS->AddEdge(idPrev, idLast, NM);
+      meshDS->SetMeshElementOnShape(edge, shapeID);
+    }
+    else {
+      SMDS_MeshEdge* edge = meshDS->AddEdge(idPrev, idLast);
+      meshDS->SetMeshElementOnShape(edge, shapeID);
+    }
   }
-  else
-  {
+  else {
     // Edge is a degenerated Edge : We put n = 5 points on the edge.
     int NbPoints = 5;
     BRep_Tool::Range(E, f, l);
@@ -588,18 +613,38 @@ bool StdMeshers_Regular_1D::Compute(SMESH_Mesh & aMesh, const TopoDS_Shape & aSh
     gp_Pnt P = BRep_Tool::Pnt(V1);
 
     const SMDS_MeshNode * idPrev = idFirst;
-    for (int i = 2; i < NbPoints; i++)
-    {
+    for (int i = 2; i < NbPoints; i++) {
       double param = f + (i - 1) * du;
       SMDS_MeshNode * node = meshDS->AddNode(P.X(), P.Y(), P.Z());
+      if(QuadMode) {
+        // create medium node
+        double prm = param - du/2.;
+        gp_Pnt PM = Curve->Value(prm);
+        SMDS_MeshNode * NM = meshDS->AddNode(PM.X(), PM.Y(), PM.Z());
+        meshDS->SetNodeOnEdge(NM, shapeID, prm);
+        SMDS_MeshEdge * edge = meshDS->AddEdge(idPrev, node, NM);
+        meshDS->SetMeshElementOnShape(edge, shapeID);
+      }
+      else {
+        SMDS_MeshEdge * edge = meshDS->AddEdge(idPrev, node);
+        meshDS->SetMeshElementOnShape(edge, shapeID);
+      }
       meshDS->SetNodeOnEdge(node, shapeID, param);
-
-      SMDS_MeshEdge * edge = meshDS->AddEdge(idPrev, node);
-      meshDS->SetMeshElementOnShape(edge, shapeID);
       idPrev = node;
     }
-    SMDS_MeshEdge * edge = meshDS->AddEdge(idPrev, idLast);
-    meshDS->SetMeshElementOnShape(edge, shapeID);
+    if(QuadMode) {
+      // create medium node
+      double prm = l - du/2.;
+      gp_Pnt PM = Curve->Value(prm);
+      SMDS_MeshNode * NM = meshDS->AddNode(PM.X(), PM.Y(), PM.Z());
+      meshDS->SetNodeOnEdge(NM, shapeID, prm);
+      SMDS_MeshEdge * edge = meshDS->AddEdge(idPrev, idLast, NM);
+      meshDS->SetMeshElementOnShape(edge, shapeID);
+    }
+    else {
+      SMDS_MeshEdge * edge = meshDS->AddEdge(idPrev, idLast);
+      meshDS->SetMeshElementOnShape(edge, shapeID);
+    }
   }
   return true;
 }

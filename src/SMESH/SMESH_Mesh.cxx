@@ -861,7 +861,8 @@ int SMESH_Mesh::NbTriangles() throw(SALOME_Exception)
   const SMDS_MeshFace * curFace;
   while (itFaces->more()) {
     curFace = itFaces->next();
-    if (!curFace->IsPoly() && curFace->NbNodes() == 3) Nb++;
+    if ( !curFace->IsPoly() && 
+	 ( curFace->NbNodes()==3 || curFace->NbNodes()==6 ) ) Nb++;
   }
   return Nb;
 }
@@ -879,7 +880,8 @@ int SMESH_Mesh::NbQuadrangles() throw(SALOME_Exception)
   const SMDS_MeshFace * curFace;
   while (itFaces->more()) {
     curFace = itFaces->next();
-    if (!curFace->IsPoly() && curFace->NbNodes() == 4) Nb++;
+    if ( !curFace->IsPoly() && 
+	 ( curFace->NbNodes() == 4 || curFace->NbNodes()==8 ) ) Nb++;
   }
   return Nb;
 }
@@ -917,7 +919,8 @@ int SMESH_Mesh::NbTetras() throw(SALOME_Exception)
   const SMDS_MeshVolume * curVolume;
   while (itVolumes->more()) {
     curVolume = itVolumes->next();
-    if (!curVolume->IsPoly() && curVolume->NbNodes() == 4) Nb++;
+    if ( !curVolume->IsPoly() && 
+	 ( curVolume->NbNodes() == 4 || curVolume->NbNodes()==10 ) ) Nb++;
   }
   return Nb;
 }
@@ -931,7 +934,8 @@ int SMESH_Mesh::NbHexas() throw(SALOME_Exception)
   const SMDS_MeshVolume * curVolume;
   while (itVolumes->more()) {
     curVolume = itVolumes->next();
-    if (!curVolume->IsPoly() && curVolume->NbNodes() == 8) Nb++;
+    if ( !curVolume->IsPoly() && 
+	 ( curVolume->NbNodes() == 8 || curVolume->NbNodes()==20 ) ) Nb++;
   }
   return Nb;
 }
@@ -945,7 +949,8 @@ int SMESH_Mesh::NbPyramids() throw(SALOME_Exception)
   const SMDS_MeshVolume * curVolume;
   while (itVolumes->more()) {
     curVolume = itVolumes->next();
-    if (!curVolume->IsPoly() && curVolume->NbNodes() == 5) Nb++;
+    if ( !curVolume->IsPoly() && 
+	 ( curVolume->NbNodes() == 5 || curVolume->NbNodes()==13 ) ) Nb++;
   }
   return Nb;
 }
@@ -959,7 +964,8 @@ int SMESH_Mesh::NbPrisms() throw(SALOME_Exception)
   const SMDS_MeshVolume * curVolume;
   while (itVolumes->more()) {
     curVolume = itVolumes->next();
-    if (!curVolume->IsPoly() && curVolume->NbNodes() == 6) Nb++;
+    if ( !curVolume->IsPoly() && 
+	 ( curVolume->NbNodes() == 6 || curVolume->NbNodes()==15 ) ) Nb++;
   }
   return Nb;
 }

@@ -970,7 +970,8 @@ bool SMDS_VolumeTool::GetFaceNormal (int faceIndex, double & X, double & Y, doub
   XYZ aVec13( p3 - p1 );
   XYZ cross = aVec12.Crossed( aVec13 );
 
-  if ( myFaceNbNodes == 4 ) {
+  //if ( myFaceNbNodes == 4 ) {
+  if ( myFaceNbNodes >3 ) {
     XYZ p4 ( myFaceNodes[3] );
     XYZ aVec14( p4 - p1 );
     XYZ cross2 = aVec13.Crossed( aVec14 );
@@ -1106,7 +1107,7 @@ bool SMDS_VolumeTool::IsLinked (const SMDS_MeshNode* theNode1,
 bool SMDS_VolumeTool::IsLinked (const int theNode1Index,
                                 const int theNode2Index) const
 {
-  if (myVolume->IsPoly()) {
+  if ( myVolume->IsPoly() ) {
     return IsLinked(myVolumeNodes[theNode1Index], myVolumeNodes[theNode2Index]);
   }
 
@@ -1144,6 +1145,57 @@ bool SMDS_VolumeTool::IsLinked (const int theNode1Index,
     default:;
     }
     break;
+  case 10:
+    {
+      switch ( minInd ) {
+      case 0: if( maxInd==4 ||  maxInd==6 ||  maxInd==7 ) return true;
+      case 1: if( maxInd==4 ||  maxInd==5 ||  maxInd==8 ) return true;
+      case 2: if( maxInd==5 ||  maxInd==6 ||  maxInd==9 ) return true;
+      case 3: if( maxInd==7 ||  maxInd==8 ||  maxInd==9 ) return true;
+      default:;
+      }
+      break;
+    }
+  case 13:
+    {
+      switch ( minInd ) {
+      case 0: if( maxInd==5 ||  maxInd==8 ||  maxInd==9 ) return true;
+      case 1: if( maxInd==5 ||  maxInd==6 ||  maxInd==10 ) return true;
+      case 2: if( maxInd==6 ||  maxInd==7 ||  maxInd==11 ) return true;
+      case 3: if( maxInd==7 ||  maxInd==8 ||  maxInd==12 ) return true;
+      case 4: if( maxInd==9 ||  maxInd==10 ||  maxInd==11 ||  maxInd==12 ) return true;
+      default:;
+      }
+      break;
+    }
+  case 15:
+    {
+      switch ( minInd ) {
+      case 0: if( maxInd==6 ||  maxInd==8 ||  maxInd==12 ) return true;
+      case 1: if( maxInd==6 ||  maxInd==7 ||  maxInd==13 ) return true;
+      case 2: if( maxInd==7 ||  maxInd==8 ||  maxInd==14 ) return true;
+      case 3: if( maxInd==9 ||  maxInd==11 ||  maxInd==12 ) return true;
+      case 4: if( maxInd==9 ||  maxInd==10 ||  maxInd==13 ) return true;
+      case 5: if( maxInd==10 ||  maxInd==11 ||  maxInd==14 ) return true;
+      default:;
+      }
+      break;
+    }
+  case 20:
+    {
+      switch ( minInd ) {
+      case 0: if( maxInd==8 ||  maxInd==11 ||  maxInd==16 ) return true;
+      case 1: if( maxInd==8 ||  maxInd==9 ||  maxInd==17 ) return true;
+      case 2: if( maxInd==9 ||  maxInd==10 ||  maxInd==18 ) return true;
+      case 3: if( maxInd==10 ||  maxInd==11 ||  maxInd==19 ) return true;
+      case 4: if( maxInd==12 ||  maxInd==15 ||  maxInd==16 ) return true;
+      case 5: if( maxInd==12 ||  maxInd==13 ||  maxInd==17 ) return true;
+      case 6: if( maxInd==13 ||  maxInd==14 ||  maxInd==18 ) return true;
+      case 7: if( maxInd==14 ||  maxInd==15 ||  maxInd==19 ) return true;
+      default:;
+      }
+      break;
+    }
   default:;
   }
   return false;
@@ -1185,8 +1237,7 @@ bool SMDS_VolumeTool::IsFreeFace( int faceIndex )
   typedef map< const SMDS_MeshElement*, int > TElemIntMap;
   TElemIntMap volNbShared;
   TElemIntMap::iterator vNbIt;
-  for ( int iNode = 0; iNode < nbFaceNodes; iNode++ )
-  {
+  for ( int iNode = 0; iNode < nbFaceNodes; iNode++ ) {
     const SMDS_MeshNode* n = nodes[ iNode ];
     SMDS_ElemIteratorPtr eIt = n->GetInverseElementIterator();
     while ( eIt->more() ) {
@@ -1194,10 +1245,12 @@ bool SMDS_VolumeTool::IsFreeFace( int faceIndex )
       if ( elem != myVolume && elem->GetType() == SMDSAbs_Volume ) {
         int nbShared = 1;
         vNbIt = volNbShared.find( elem );
-        if ( vNbIt == volNbShared.end() )
+        if ( vNbIt == volNbShared.end() ) {
           volNbShared.insert ( TElemIntMap::value_type( elem, nbShared ));
-        else
+        }
+        else {
           nbShared = ++(*vNbIt).second;
+        }
         if ( nbShared > maxNbShared )
           maxNbShared = nbShared;
       }
@@ -1213,8 +1266,7 @@ bool SMDS_VolumeTool::IsFreeFace( int faceIndex )
   if ( IsFaceExternal( faceIndex ))
     intNormal = XYZ( -intNormal.x, -intNormal.y, -intNormal.z );
   XYZ p0 ( nodes[0] ), baryCenter;
-  for ( vNbIt = volNbShared.begin(); vNbIt != volNbShared.end(); vNbIt++ )
-  {
+  for ( vNbIt = volNbShared.begin(); vNbIt != volNbShared.end(); vNbIt++ ) {
     int nbShared = (*vNbIt).second;
     if ( nbShared >= 3 ) {
       SMDS_VolumeTool volume( (*vNbIt).first );
@@ -1226,20 +1278,20 @@ bool SMDS_VolumeTool::IsFreeFace( int faceIndex )
     // remove a volume from volNbShared map
     volNbShared.erase( vNbIt );
   }
+
   // here volNbShared contains only volumes laying on the
   // opposite side of the face
-  if ( volNbShared.empty() )
+  if ( volNbShared.empty() ) {
     return free; // is free
+  }
 
   // check if the whole area of a face is shared
   bool isShared[] = { false, false, false, false }; // 4 triangle parts of a quadrangle
-  for ( vNbIt = volNbShared.begin(); vNbIt != volNbShared.end(); vNbIt++ )
-  {
+  for ( vNbIt = volNbShared.begin(); vNbIt != volNbShared.end(); vNbIt++ ) {
     SMDS_VolumeTool volume( (*vNbIt).first );
     bool prevLinkShared = false;
     int nbSharedLinks = 0;
-    for ( int iNode = 0; iNode < nbFaceNodes; iNode++ )
-    {
+    for ( int iNode = 0; iNode < nbFaceNodes; iNode++ ) {
       bool linkShared = volume.IsLinked( nodes[ iNode ], nodes[ iNode + 1] );
       if ( linkShared )
         nbSharedLinks++;

@@ -164,9 +164,9 @@ bool NumericalFunctor::GetPoints(const SMDS_MeshElement* anElem,
 
   // Get nodes of the element
 
-  const SMDS_QuadraticFaceOfNodes* F =
-    static_cast<const SMDS_QuadraticFaceOfNodes*>(anElem);
-  if(F) {
+  if(anElem->IsQuadratic()) {
+    const SMDS_QuadraticFaceOfNodes* F =
+      static_cast<const SMDS_QuadraticFaceOfNodes*>(anElem);
     // use special nodes iterator
     SMDS_NodeIteratorPtr anIter = F->interlacedNodesIterator();
     if ( anIter != 0 ) {

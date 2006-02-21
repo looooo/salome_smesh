@@ -1169,6 +1169,11 @@ SMESH::SMESH_MeshEditor_ptr SMESH_Mesh_i::GetMeshEditor()
  */
 //=============================================================================
 
+CORBA::Boolean SMESH_Mesh_i::HasDuplicatedGroupNamesMED()
+{
+  return _impl->HasDuplicatedGroupNamesMED();
+}
+
 static void PrepareForWriting (const char* file)
 {
   TCollection_AsciiString aFullName ((char*)file);

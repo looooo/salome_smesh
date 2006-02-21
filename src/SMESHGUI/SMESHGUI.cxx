@@ -146,7 +146,7 @@
 using namespace std;
 
 namespace{
-  // Decalarations
+  // Declarations
   //=============================================================
   void ImportMeshesFromFile(SMESH::SMESH_Gen_ptr theComponentMesh,
 			    int theCommandID);
@@ -260,30 +260,45 @@ namespace{
 	switch ( theCommandID ) {
 	case 125:
 	case 122:
-	  aFilterMap.insert( QObject::tr("MED 2.1 (*.med)"), SMESH::MED_V2_1 );
-	  aFilterMap.insert( QObject::tr("MED 2.2 (*.med)"), SMESH::MED_V2_2 );
+          {
+	    if (aMesh->HasDuplicatedGroupNamesMED()) {
+              int aRet = SUIT_MessageBox::warn2
+                (SMESHGUI::desktop(),
+                 QObject::tr("SMESH_WRN_WARNING"),
+                 QObject::tr("SMESH_EXPORT_MED_DUPLICATED_GRP").arg(anIObject->getName()),
+                 QObject::tr("SMESH_BUT_YES"),  QObject::tr("SMESH_BUT_NO"),
+                 0, 1, 0);
+              if (aRet)
+                return;
+            }
+
+            aFilterMap.insert( QObject::tr("MED 2.1 (*.med)"), SMESH::MED_V2_1 );
+            aFilterMap.insert( QObject::tr("MED 2.2 (*.med)"), SMESH::MED_V2_2 );
+          }
 	  break;
 	case 124:
 	case 121:
 	  aFilter = QObject::tr("DAT files (*.dat)");
 	  break;
 	case 126:
-	case 123: {
-	  if(aMesh->NbPyramids()){
-	    int aRet = SUIT_MessageBox::warn2(SMESHGUI::desktop(),
-					     QObject::tr("SMESH_WRN_WARNING"),
-					     QObject::tr("SMESH_EXPORT_UNV").arg(anIObject->getName()),
-					     QObject::tr("SMESH_BUT_YES"),
-					     QObject::tr("SMESH_BUT_NO"),
-					     0,1,0);
-	    if(aRet)
-	      return;
-	  }
-	  aFilter = QObject::tr("IDEAS files (*.unv)");
+	case 123:
+          {
+            if (aMesh->NbPyramids()) {
+              int aRet = SUIT_MessageBox::warn2
+                (SMESHGUI::desktop(),
+                 QObject::tr("SMESH_WRN_WARNING"),
+                 QObject::tr("SMESH_EXPORT_UNV").arg(anIObject->getName()),
+                 QObject::tr("SMESH_BUT_YES"),  QObject::tr("SMESH_BUT_NO"),
+                 0, 1, 0);
+              if (aRet)
+                return;
+            }
+            aFilter = QObject::tr("IDEAS files (*.unv)");
+          }
 	  break;
 	default:
 	  return;
-	}}
+	}
 
 	QString aFilename;
 	SMESH::MED_VERSION aFormat;
@@ -295,41 +310,42 @@ namespace{
 	
 	if ( theCommandID != 122 && theCommandID != 125 )
 	  aFilename = SUIT_FileDlg::getFileName(SMESHGUI::desktop(), "", aFilter, aTitle, false);
-	else
-	  {
-	    QStringList filters;
-	    for ( QMap<QString, SMESH::MED_VERSION>::const_iterator it = aFilterMap.begin(); it != aFilterMap.end(); ++it )
-	      filters.push_back( it.key() );
+	else {
+          QStringList filters;
+          QMap<QString, SMESH::MED_VERSION>::const_iterator it = aFilterMap.begin();
+          for ( ; it != aFilterMap.end(); ++it )
+            filters.push_back( it.key() );
 
-	    //SUIT_FileDlg* fd = new SUIT_FileDlg( SMESHGUI::desktop(), false, true, true );
-	    SalomeApp_CheckFileDlg* fd = new SalomeApp_CheckFileDlg( SMESHGUI::desktop(), false, QObject::tr("SMESH_AUTO_GROUPS") ,true, true );
-	    fd->setCaption( aTitle );
-	    fd->setFilters( filters );
-	    fd->setSelectedFilter( QObject::tr("MED 2.2 (*.med)") );
-	    fd->SetChecked(toCreateGroups);
-	    bool is_ok = false;
-	    while(!is_ok){
-	      fd->exec();
-	      aFilename = fd->selectedFile();
-	      aFormat = aFilterMap[fd->selectedFilter()];
-	      is_ok = true;
-	      if( !aFilename.isEmpty()
-		  && (aMesh->NbPolygons()>0 or aMesh->NbPolyhedrons()>0)
-		  && aFormat==SMESH::MED_V2_1){
-		int aRet = SUIT_MessageBox::warn2(SMESHGUI::desktop(),
-						  QObject::tr("SMESH_WRN_WARNING"),
-						  QObject::tr("SMESH_EXPORT_MED_V2_1").arg(anIObject->getName()),
-						  QObject::tr("SMESH_BUT_YES"),
-						  QObject::tr("SMESH_BUT_NO"),
-						  0,1,0);
-		if(aRet){
-		  is_ok = false;
-		}
-	      }
-	    }
-	    toCreateGroups = fd->IsChecked();
-	    delete fd;
-	  }
+          //SUIT_FileDlg* fd = new SUIT_FileDlg( SMESHGUI::desktop(), false, true, true );
+          SalomeApp_CheckFileDlg* fd = new SalomeApp_CheckFileDlg
+            ( SMESHGUI::desktop(), false, QObject::tr("SMESH_AUTO_GROUPS") ,true, true );
+          fd->setCaption( aTitle );
+          fd->setFilters( filters );
+          fd->setSelectedFilter( QObject::tr("MED 2.2 (*.med)") );
+          fd->SetChecked(toCreateGroups);
+          bool is_ok = false;
+          while (!is_ok) {
+            fd->exec();
+            aFilename = fd->selectedFile();
+            aFormat = aFilterMap[fd->selectedFilter()];
+            is_ok = true;
+            if ( !aFilename.isEmpty()
+                 && (aMesh->NbPolygons()>0 or aMesh->NbPolyhedrons()>0)
+                 && aFormat==SMESH::MED_V2_1) {
+              int aRet = SUIT_MessageBox::warn2(SMESHGUI::desktop(),
+                                                QObject::tr("SMESH_WRN_WARNING"),
+                                                QObject::tr("SMESH_EXPORT_MED_V2_1").arg(anIObject->getName()),
+                                                QObject::tr("SMESH_BUT_YES"),
+                                                QObject::tr("SMESH_BUT_NO"),
+                                                0,1,0);
+              if (aRet) {
+                is_ok = false;
+              }
+            }
+          }
+          toCreateGroups = fd->IsChecked();
+          delete fd;
+        }
 	if ( !aFilename.isEmpty() ) {
 	  // Check whether the file already exists and delete it if yes
 	  QFile aFile( aFilename );

@@ -132,12 +132,11 @@ public:
     throw (SALOME::SALOME_Exception);
 
   // --- C++ interface
-
   void SetImpl(::SMESH_Mesh* impl);
   ::SMESH_Mesh& GetImpl();         // :: force no namespace here
 
   SMESH_Gen_i* GetGen() { return _gen_i; }
-  
+
   int ImportUNVFile( const char* theFileName )
     throw (SALOME::SALOME_Exception);
 
@@ -149,6 +148,11 @@ public:
    */
   SMESH::DriverMED_ReadStatus ImportMEDFile( const char* theFileName, const char* theMeshName )
     throw (SALOME::SALOME_Exception);
+
+  /*! Check group names for duplications.
+   *  Consider maximum group name length stored in MED file.
+   */
+  CORBA::Boolean HasDuplicatedGroupNamesMED();
 
   void ExportToMED( const char* file, CORBA::Boolean auto_groups, SMESH::MED_VERSION theVersion )
     throw (SALOME::SALOME_Exception);

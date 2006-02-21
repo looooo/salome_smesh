@@ -336,6 +336,11 @@ module SMESH
     SMESH_MeshEditor GetMeshEditor()
       raises (SALOME::SALOME_Exception);
 
+    /*! Check group names for duplications.
+     *  Consider maximum group name length stored in MED file.
+     */
+    boolean HasDuplicatedGroupNamesMED();
+
     /*!
      * Export Mesh to different MED Formats
      * @params

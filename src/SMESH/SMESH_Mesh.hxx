@@ -150,7 +150,12 @@ public:
   const TopTools_ListOfShape& GetAncestors(const TopoDS_Shape& theSubShape) const;
   // return list of ancestors of theSubShape in the order
   // that lower dimention shapes come first.
-  
+
+  /*! Check group names for duplications.
+   *  Consider maximum group name length stored in MED file.
+   */
+  bool HasDuplicatedGroupNamesMED();
+
   void ExportMED(const char *file, 
 		 const char* theMeshName = NULL, 
 		 bool theAutoGroups = true, 

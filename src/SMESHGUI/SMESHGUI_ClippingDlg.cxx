@@ -362,10 +362,6 @@ SMESHGUI_ClippingDlg::SMESHGUI_ClippingDlg (SMESHGUI* theModule,
   /* to close dialog if study frame change */
   connect(mySMESHGUI, SIGNAL (SignalStudyFrameChanged()), this, SLOT(ClickOnCancel()));
 
-  /* Move widget on the botton right corner of main widget */
-  int x, y;
-  mySMESHGUI->DefineDlgPosition(this, x, y);
-  this->move(x, y);
   this->show();
 }
 

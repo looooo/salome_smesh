@@ -1406,9 +1406,6 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
       else
         aDlg = new SMESHGUI_CuttingOfQuadsDlg(this);
 
-      int x, y ;
-      DefineDlgPosition( aDlg, x, y );
-      aDlg->move( x, y );
       aDlg->show();
       break;
     }

@@ -363,10 +363,6 @@ void SMESHGUI_CreatePolyhedralVolumeDlg::Init()
   /* to close dialog if study change */
   connect( mySMESHGUI, SIGNAL ( SignalCloseAllDialogs() ), this, SLOT( ClickOnCancel() ) ) ;
   
-  /* Move widget on the botton right corner of main widget */
-  int x, y ;
-  mySMESHGUI->DefineDlgPosition( this, x, y ) ;
-  this->move( x, y ) ;
   this->show() ; /* displays Dialog */
 
   ConstructorsClicked(0);

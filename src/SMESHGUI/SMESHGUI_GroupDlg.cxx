@@ -103,12 +103,6 @@ SMESHGUI_GroupDlg::SMESHGUI_GroupDlg( SMESHGUI* theModule, const char* name,
     myGeomGroupBtn->setEnabled(false);
     myGeomGroupLine->setEnabled(false);
   }
-
-
-  /* Move widget on the botton right corner of main widget */
-  int x, y ;
-  mySMESHGUI->DefineDlgPosition(this, x, y);
-  this->move(x, y);
 }
 
 //=================================================================================
@@ -136,11 +130,6 @@ SMESHGUI_GroupDlg::SMESHGUI_GroupDlg( SMESHGUI* theModule, const char* name,
     myCurrentLineEdit = myMeshGroupLine;
     setSelectionMode(5);
   }
-  
-  /* Move widget on the botton right corner of main widget */
-  int x, y ;
-  mySMESHGUI->DefineDlgPosition(this, x, y);
-  this->move(x, y);
 }
 
 //=================================================================================

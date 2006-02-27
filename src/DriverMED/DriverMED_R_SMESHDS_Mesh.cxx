@@ -41,6 +41,7 @@
 
 #ifdef _DEBUG_
 static int MYDEBUG = 0;
+//#define _DEXCEPT_
 #else
 static int MYDEBUG = 0;
 #endif
@@ -69,10 +70,12 @@ DriverMED_R_SMESHDS_Mesh
 ::Perform()
 {
   Status aResult = DRS_FAIL;
+#ifndef _DEXCEPT_
   try{
+#endif
     myFamilies.clear();
     if(MYDEBUG) MESSAGE("Perform - myFile : "<<myFile);
-    PWrapper aMed = CrWrapper(myFile);
+    PWrapper aMed = CrWrapper(myFile,true);
 
     aResult = DRS_EMPTY;
     if(TInt aNbMeshes = aMed->GetNbMeshes()){
@@ -195,7 +198,9 @@ DriverMED_R_SMESHDS_Mesh
                 SMDS_MeshElement* anElement = NULL;
                 TInt aFamNum = aPolygoneInfo->GetFamNum(iElem);
 
+#ifndef _DEXCEPT_
                 try{
+#endif
                   if(anIsElemNum){
 		    TInt anElemId = aPolygoneInfo->GetElemNum(iElem);
                     anElement = myMesh->AddPolygonalFaceWithID(aNodeIds,anElemId);
@@ -207,12 +212,13 @@ DriverMED_R_SMESHDS_Mesh
                     anElement = myMesh->AddPolygonalFace(aNodes);
                     isRenum = anIsElemNum;
                   }
+#ifndef _DEXCEPT_
                 }catch(const std::exception& exc){
                   aResult = DRS_FAIL;
                 }catch (...){
                   aResult = DRS_FAIL;
                 }
-
+#endif
                 if(!anElement){
                   aResult = DRS_WARN_SKIP_ELEM;
                 }else{
@@ -265,7 +271,9 @@ DriverMED_R_SMESHDS_Mesh
 		SMDS_MeshElement* anElement = NULL;
 		TInt aFamNum = aPolyedreInfo->GetFamNum(iElem);
 		
+#ifndef _DEXCEPT_
 		try{
+#endif
 		  if(anIsElemNum){
 		    TInt anElemId = aPolyedreInfo->GetElemNum(iElem);
 		    anElement = myMesh->AddPolyhedralVolumeWithID(aNodeIds,aQuantities,anElemId);
@@ -277,12 +285,13 @@ DriverMED_R_SMESHDS_Mesh
 		    anElement = myMesh->AddPolyhedralVolume(aNodes,aQuantities);
 		    isRenum = anIsElemNum;
 		  }
+#ifndef _DEXCEPT_
 		}catch(const std::exception& exc){
 		  aResult = DRS_FAIL;
 		}catch(...){
 		  aResult = DRS_FAIL;
 		}
-		
+#endif		
 		if(!anElement){
 		  aResult = DRS_WARN_SKIP_ELEM;
 		}else{
@@ -344,7 +353,9 @@ DriverMED_R_SMESHDS_Mesh
 		TNodeIds aNodeIds(aNbNodes);
 		bool anIsValidConnect = false;
 		TCConnSlice aConnSlice = aCellInfo->GetConnSlice(iElem);
+#ifndef _DEXCEPT_
 		try{
+#endif
 #ifdef _EDF_NODE_IDS_
 		  if(anIsNodeNum)
 		    for(int iNode = 0; iNode < aNbNodes; iNode++)
@@ -357,6 +368,7 @@ DriverMED_R_SMESHDS_Mesh
 		    aNodeIds[iNode] = aConnSlice[iNode];
 #endif
 		  anIsValidConnect = true;
+#ifndef _DEXCEPT_
 		}catch(const std::exception& exc){
 		  //INFOS("Follow exception was cought:\n\t"<<exc.what());
 		  aResult = DRS_FAIL;
@@ -364,14 +376,16 @@ DriverMED_R_SMESHDS_Mesh
 		  //INFOS("Unknown exception was cought !!!");
 		  aResult = DRS_FAIL;
 		}
-		
+#endif		
 		if(!anIsValidConnect)
 		  continue;
 		
 		bool isRenum = false;
 		SMDS_MeshElement* anElement = NULL;
 		TInt aFamNum = aCellInfo->GetFamNum(iElem);
+#ifndef _DEXCEPT_
 		try{
+#endif
 		  //MESSAGE("Try to create element # " << iElem << " with id = "
 		  //        << aCellInfo->GetElemNum(iElem));
 		  switch(aGeom){
@@ -504,6 +518,7 @@ DriverMED_R_SMESHDS_Mesh
 		    }
 		    break;
 		  }
+#ifndef _DEXCEPT_
 		}catch(const std::exception& exc){
 		  //INFOS("Follow exception was cought:\n\t"<<exc.what());
 		  aResult = DRS_FAIL;
@@ -511,7 +526,7 @@ DriverMED_R_SMESHDS_Mesh
 		  //INFOS("Unknown exception was cought !!!");
 		  aResult = DRS_FAIL;
 		}
-		
+#endif		
 		if (!anElement) {
 		  aResult = DRS_WARN_SKIP_ELEM;
 		}
@@ -534,6 +549,7 @@ DriverMED_R_SMESHDS_Mesh
 	}
       }
     }
+#ifndef _DEXCEPT_
   }catch(const std::exception& exc){
     INFOS("Follow exception was cought:\n\t"<<exc.what());
     aResult = DRS_FAIL;
@@ -541,6 +557,7 @@ DriverMED_R_SMESHDS_Mesh
     INFOS("Unknown exception was cought !!!");
     aResult = DRS_FAIL;
   }
+#endif
   if(MYDEBUG) MESSAGE("Perform - aResult status = "<<aResult);
   return aResult;
 }

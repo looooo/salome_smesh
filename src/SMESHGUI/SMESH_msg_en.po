@@ -1799,6 +1799,9 @@ msgstr "Faces by nodes"
 msgid "SMESHGUI_CreatePolyhedralVolumeDlg::SMESH_POLYEDRE_PREVIEW"
 msgstr "Polyhedron preview"
 
+msgid "SMESHGUI_CreatePolyhedralVolumeDlg::SMESH_POLYEDRE_CREATE_ERROR"
+msgstr "Polyhedron creation error."
+
 msgid "SMESH_CREATE_POLYHEDRAL_VOLUME_TITLE"
 msgstr "Create polyhedral volume"
 

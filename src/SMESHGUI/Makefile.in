@@ -191,7 +191,7 @@ CXXFLAGS += -I${KERNEL_ROOT_DIR}/include/salome -I${GUI_ROOT_DIR}/include/salome
 
 LDFLAGS += -lSMESHObject -lSMESHFiltersSelection -lSMDS -lSMESHControls -lDlgRef \
 	$(OCC_KERNEL_LIBS) -lTKBO -lTKAdvTools -L${KERNEL_ROOT_DIR}/lib/salome -L${GUI_ROOT_DIR}/lib/salome \
-	-lVTKViewer -lSalomeApp -lSalomePrs -lSalomeNS -lSalomeLifeCycleCORBA -lOpUtil -lSalomeObject \
+	-lVTKViewer -lSalomeDSClient -lSalomeDS -lSalomeApp -lSalomePrs -lSalomeNS -lSalomeLifeCycleCORBA -lOpUtil -lSalomeObject \
 	-lEvent -lSALOMELocalTrace -lSVTK -lOCCViewer -L${GEOM_ROOT_DIR}/lib/salome -lGEOM -lGEOMClient  \
 	-lGEOMBase -lGEOMObject -lGEOMFiltersSelection
 

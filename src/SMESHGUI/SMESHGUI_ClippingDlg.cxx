@@ -387,6 +387,10 @@ void SMESHGUI_ClippingDlg::ClickOnApply()
 
   if (SVTK_ViewWindow* aViewWindow = SMESH::GetViewWindow(mySMESHGUI)) {
     SUIT_OverrideCursor wc;
+    
+    QWidget *aCurrWid = this->focusWidget();
+    aCurrWid->clearFocus();
+    aCurrWid->setFocus();
 
     myActor->RemoveAllClippingPlanes();
 

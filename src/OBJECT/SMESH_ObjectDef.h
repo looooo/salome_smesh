@@ -125,7 +125,7 @@ public:
   SMDS_Mesh*                GetMesh() const { return myMesh; }
 
 protected:
-
+  int                       myIsMeshFromServer;
   SMESH::SMESH_Mesh_var     myMeshServer;
   SMDS_Mesh*                myMesh;
 };

@@ -1570,3 +1570,14 @@ SMESH::ElementType SMESH_Mesh_i::GetElementType( const CORBA::Long id, const boo
 {
   return ( SMESH::ElementType )_impl->GetElementType( id, iselem );
 }
+
+//=============================================================================
+/*!
+ *
+ */
+//=============================================================================
+
+CORBA::Long SMESH_Mesh_i::GetMeshPtr()
+{
+  return (CORBA::Long)_impl;
+}

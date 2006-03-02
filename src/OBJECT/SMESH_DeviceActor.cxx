@@ -646,6 +646,8 @@ void SMESH_DeviceActor::SetShrinkFactor(float theValue){
 
 
 void SMESH_DeviceActor::SetHighlited(bool theIsHighlited){
+  if ( myIsHighlited == theIsHighlited )
+    return;
   myIsHighlited = theIsHighlited;
   Modified();
 }

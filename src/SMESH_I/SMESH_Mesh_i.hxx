@@ -254,6 +254,8 @@ public:
 
   virtual SMESH::long_array* GetIDs();
 
+  CORBA::Long GetMeshPtr();
+
   map<int, SMESH_subMesh_i*> _mapSubMesh_i; //NRI
   map<int, ::SMESH_subMesh*> _mapSubMesh;   //NRI
 

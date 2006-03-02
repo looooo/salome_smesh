@@ -746,12 +746,12 @@ bool SMESH_ActorDef::Init(TVisualObjPtr theVisualObj,
   my2DActor->GetPolygonOffsetParameters(aFactor,aUnits);
   my2DActor->SetPolygonOffsetParameters(aFactor,aUnits*0.75);
 
-  //SetIsShrunkable(theGrid->GetNumberOfCells() > 10);
-  SetIsShrunkable(true);
-
   SUIT_ResourceMgr* mgr = SUIT_Session::session()->resourceMgr();
   if( !mgr )
     return false;
+
+  //SetIsShrunkable(theGrid->GetNumberOfCells() > 10);
+  SetIsShrunkable(true);
 
   SetShrinkFactor( SMESH::GetFloat( "SMESH:shrink_coeff", 0.75 ) );
 
@@ -835,6 +835,8 @@ bool SMESH_ActorDef::IsInfinitive(){
 
 
 void SMESH_ActorDef::SetIsShrunkable(bool theShrunkable){
+  if ( myIsShrinkable == theShrunkable )
+    return;
   myIsShrinkable = theShrunkable;
   Modified();
 }
@@ -1135,6 +1137,8 @@ void SMESH_ActorDef::SetRepresentation(int theMode){
 
 
 void SMESH_ActorDef::SetPointRepresentation(bool theIsPointsVisible){
+  if ( myIsPointsVisible == theIsPointsVisible )
+    return;
   myIsPointsVisible = theIsPointsVisible;
   SetRepresentation(GetRepresentation());
 }
@@ -1175,12 +1179,16 @@ void SMESH_ActorDef::UpdateHighlight(){
 
 
 void SMESH_ActorDef::highlight(bool theHighlight){
+  if ( myIsHighlighted == theHighlight )
+    return;
   myIsHighlighted = theHighlight;
   UpdateHighlight();
 }
 
 
 void SMESH_ActorDef::SetPreSelected(bool thePreselect){ 
+  if ( myIsPreselected == thePreselect )
+    return;
   myIsPreselected = thePreselect; 
   UpdateHighlight();
 }

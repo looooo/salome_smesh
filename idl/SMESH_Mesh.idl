@@ -440,6 +440,12 @@ module SMESH
      * Get mesh description
      */
     string Dump();
+
+    /*!
+     * Get mesh pointer
+     */
+    long GetMeshPtr();
+
   };
 
   interface SMESH_subMesh : SALOME::GenericObj, SMESH_IDSource

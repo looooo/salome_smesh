@@ -193,7 +193,7 @@ LDFLAGS += -lSMESHObject -lSMESHFiltersSelection -lSMDS -lSMESHControls -lDlgRef
 	$(OCC_KERNEL_LIBS) -lTKBO -lTKAdvTools -L${KERNEL_ROOT_DIR}/lib/salome -L${GUI_ROOT_DIR}/lib/salome \
 	-lVTKViewer -lSalomeDSClient -lSalomeDS -lSalomeApp -lSalomePrs -lSalomeNS -lSalomeLifeCycleCORBA -lOpUtil -lSalomeObject \
 	-lEvent -lSALOMELocalTrace -lSVTK -lOCCViewer -L${GEOM_ROOT_DIR}/lib/salome -lGEOM -lGEOMClient  \
-	-lGEOMBase -lGEOMObject -lGEOMFiltersSelection
+	-lGEOMBase -lGEOMObject -lGEOMFiltersSelection -lSalomeSession
 
 LDFLAGSFORBIN += $(LDFLAGS)
 

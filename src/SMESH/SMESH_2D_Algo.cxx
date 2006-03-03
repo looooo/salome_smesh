@@ -45,7 +45,6 @@ SMESH_2D_Algo::SMESH_2D_Algo(int hypId, int studyId, SMESH_Gen* gen)
 //   _compatibleHypothesis.push_back("hypothese_2D_bidon");
   _type = ALGO_2D;
   gen->_map2D_Algo[hypId] = this;
-  myCreateQuadratic = false;
 }
 
 //=============================================================================
@@ -56,7 +55,6 @@ SMESH_2D_Algo::SMESH_2D_Algo(int hypId, int studyId, SMESH_Gen* gen)
 
 SMESH_2D_Algo::~SMESH_2D_Algo()
 {
-  myCreateQuadratic = false;
 }
 
 //=============================================================================
@@ -85,12 +83,10 @@ int SMESH_2D_Algo::NumberOfPoints(SMESH_Mesh& aMesh, const TopoDS_Wire& W)
   for (TopExp_Explorer exp(W,TopAbs_EDGE); exp.More(); exp.Next()) {
     const TopoDS_Edge& E = TopoDS::Edge(exp.Current());
     int nb = aMesh.GetSubMesh(E)->GetSubMeshDS()->NbNodes();
-    if(myCreateQuadratic)
+    if(_quadraticMesh)
       nb = nb/2;
-    //SCRUTE(nb);
-    nbPoints += nb +1; // internal points plus 1 vertex of 2 (last point ?)
+    nbPoints += nb + 1; // internal points plus 1 vertex of 2 (last point ?)
   }
-  //SCRUTE(nbPoints);
   return nbPoints;
 }
 

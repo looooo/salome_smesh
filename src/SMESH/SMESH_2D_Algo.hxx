@@ -43,8 +43,6 @@ public:
   int NumberOfWires(const TopoDS_Shape& S);
   int NumberOfPoints(SMESH_Mesh& aMesh,const TopoDS_Wire& W);
 
-protected:
-  bool myCreateQuadratic;
 };
 
 #endif

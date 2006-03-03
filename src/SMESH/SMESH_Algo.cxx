@@ -68,6 +68,7 @@ SMESH_Algo::SMESH_Algo(int hypId, int studyId,
 	gen->_mapAlgo[hypId] = this;
 
         _onlyUnaryInput = _requireDescretBoundary = true;
+        _quadraticMesh = false;
 }
 
 //=============================================================================
@@ -101,18 +102,17 @@ const vector < string > &SMESH_Algo::GetCompatibleHypothesis()
  */
 //=============================================================================
 
-const list <const SMESHDS_Hypothesis *> & SMESH_Algo::GetUsedHypothesis(
-	SMESH_Mesh & aMesh, const TopoDS_Shape & aShape)
+const list <const SMESHDS_Hypothesis *> &
+SMESH_Algo::GetUsedHypothesis(SMESH_Mesh &         aMesh,
+                              const TopoDS_Shape & aShape,
+                              const bool           ignoreAuxiliary)
 {
   _usedHypList.clear();
-  if ( !_compatibleHypothesis.empty() )
+  SMESH_HypoFilter filter;
+  if ( InitCompatibleHypoFilter( filter, ignoreAuxiliary ))
   {
-    SMESH_HypoFilter filter( SMESH_HypoFilter::HasName( _compatibleHypothesis[0] ));
-    for ( int i = 1; i < _compatibleHypothesis.size(); ++i )
-      filter.Or( filter.HasName( _compatibleHypothesis[ i ] ));
-
     aMesh.GetHypotheses( aShape, filter, _usedHypList, true );
-    if ( _usedHypList.size() > 1 )
+    if ( ignoreAuxiliary && _usedHypList.size() > 1 )
       _usedHypList.clear();	//only one compatible hypothesis allowed
   }
   return _usedHypList;
@@ -126,18 +126,16 @@ const list <const SMESHDS_Hypothesis *> & SMESH_Algo::GetUsedHypothesis(
  */
 //=============================================================================
 
-const list<const SMESHDS_Hypothesis *> & SMESH_Algo::GetAppliedHypothesis(
-	SMESH_Mesh & aMesh, const TopoDS_Shape & aShape)
+const list<const SMESHDS_Hypothesis *> &
+SMESH_Algo::GetAppliedHypothesis(SMESH_Mesh &         aMesh,
+                                 const TopoDS_Shape & aShape,
+                                 const bool           ignoreAuxiliary)
 {
   _appliedHypList.clear();
-  if ( !_compatibleHypothesis.empty() )
-  {
-    SMESH_HypoFilter filter( SMESH_HypoFilter::HasName( _compatibleHypothesis[0] ));
-    for ( int i = 1; i < _compatibleHypothesis.size(); ++i )
-      filter.Or( filter.HasName( _compatibleHypothesis[ i ] ));
-    
+  SMESH_HypoFilter filter;
+  if ( InitCompatibleHypoFilter( filter, ignoreAuxiliary ))
     aMesh.GetHypotheses( aShape, filter, _appliedHypList, false );
-  }
+
   return _appliedHypList;
 }
 
@@ -267,3 +265,26 @@ bool SMESH_Algo::IsReversedSubMesh (const TopoDS_Face&  theFace,
 
   return Ne * Nf < 0.;
 }
+
+/*!
+ * \brief Make filter recognize only compatible hypotheses
+ * \param theFilter - the filter to initialize
+ * \param ignoreAuxiliary - make filter ignore compatible auxiliary hypotheses
+ */
+bool SMESH_Algo::InitCompatibleHypoFilter( SMESH_HypoFilter & theFilter,
+                                           const bool         ignoreAuxiliary) const
+{
+  if ( !_compatibleHypothesis.empty() )
+  {
+    theFilter.Init( theFilter.HasName( _compatibleHypothesis[0] ));
+    for ( int i = 1; i < _compatibleHypothesis.size(); ++i )
+      theFilter.Or( theFilter.HasName( _compatibleHypothesis[ i ] ));
+
+    if ( ignoreAuxiliary )
+      theFilter.AndNot( theFilter.IsAuxiliary() );
+
+    return true;
+  }
+  return false;
+}
+

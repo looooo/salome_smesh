@@ -76,6 +76,17 @@ bool SMESH_HypoFilter::ApplicablePredicate::IsOk(const SMESH_Hypothesis* aHyp,
 };
 
 //=======================================================================
+//function : IsAuxiliaryPredicate::IsOk
+//purpose  : 
+//=======================================================================
+
+bool SMESH_HypoFilter::IsAuxiliaryPredicate::IsOk(const SMESH_Hypothesis* aHyp,
+                                                  const TopoDS_Shape&     /*aShape*/) const
+{
+  return aHyp->IsAuxiliary();
+};
+
+//=======================================================================
 //function : ApplicablePredicate::ApplicablePredicate
 //purpose  : 
 //=======================================================================
@@ -189,6 +200,17 @@ SMESH_HypoPredicate* SMESH_HypoFilter::IsAlgo()
 {
   return new TypePredicate( MORE, SMESHDS_Hypothesis::PARAM_ALGO );
 }
+
+//=======================================================================
+//function : IsAuxiliary
+//purpose  : 
+//=======================================================================
+
+SMESH_HypoPredicate* SMESH_HypoFilter::IsAuxiliary()
+{
+  return new IsAuxiliaryPredicate();
+}
+
 
 //=======================================================================
 //function : IsGlobal

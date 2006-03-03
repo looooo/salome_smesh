@@ -73,8 +73,19 @@ StdMeshers_Penta_3D::StdMeshers_Penta_3D()
   myTol3D=0.1;
   myWallNodesMaps.resize( SMESH_Block::NbFaces() );
   myShapeXYZ.resize( SMESH_Block::NbSubShapes() );
+  myTool = 0;
 }
 
+//=======================================================================
+//function : ~StdMeshers_Penta_3D
+//purpose  : 
+//=======================================================================
+
+StdMeshers_Penta_3D::~StdMeshers_Penta_3D()
+{
+  if ( myTool )
+    delete myTool;
+}
 
 //=======================================================================
 //function : Compute
@@ -97,24 +108,25 @@ bool StdMeshers_Penta_3D::Compute(SMESH_Mesh& aMesh,
     return bOK;
   }
 
-  bool QuadMode = true;
-
   myTool = new StdMeshers_Helper(aMesh);
-  myCreateQuadratic = myTool->IsQuadraticSubMesh(aShape,QuadMode);
+  myCreateQuadratic = myTool->IsQuadraticSubMesh(aShape);
 
   //
   MakeBlock();
   if (myErrorStatus){
+    delete myTool; myTool = 0;
     return bOK;
   }
   //
   ClearMeshOnFxy1();
   if (myErrorStatus) {
+    delete myTool; myTool = 0;
     return bOK;
   }
   //
   MakeNodes();
   if (myErrorStatus){
+    delete myTool; myTool = 0;
     return bOK;
   }
   //
@@ -122,11 +134,13 @@ bool StdMeshers_Penta_3D::Compute(SMESH_Mesh& aMesh,
   //
   MakeMeshOnFxy1();
   if (myErrorStatus) {
+    delete myTool; myTool = 0;
     return bOK;
   }
   //
   MakeVolumeMesh();
   //
+  delete myTool; myTool = 0;
   return !bOK;
 }
 

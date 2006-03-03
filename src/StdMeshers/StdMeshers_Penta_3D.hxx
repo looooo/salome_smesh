@@ -168,7 +168,7 @@ class StdMeshers_Penta_3D {
   public: // methods
     StdMeshers_Penta_3D();
     
-    //~StdMeshers_Penta_3D();
+    ~StdMeshers_Penta_3D();
     
     bool Compute(SMESH_Mesh& , const TopoDS_Shape& );
     

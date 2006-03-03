@@ -19,8 +19,14 @@ typedef pair<const SMDS_MeshNode*, const SMDS_MeshNode*> NLink;
 typedef map<NLink, const SMDS_MeshNode*> NLinkNodeMap;
 typedef map<NLink, const SMDS_MeshNode*>::iterator ItNLinkNode;
 
-///  Class StdMeshers_Helper
-//
+/*!
+ * \brief It helps meshers to add elements
+ *
+ * It allow meshers not to care about creation of medium nodes
+ * when filling a quadratic mesh. Helper does it itself.
+ * It defines degree of elements to create when IsQuadraticSubMesh()
+ * is called.
+ */
 
 class StdMeshers_Helper 
 {
@@ -42,17 +48,21 @@ class StdMeshers_Helper
 
   /**
    * Check submesh for given shape
-   * If QuadMode is true: check if all elements on this shape
+   * Check if all elements on this shape
    * are quadratic, if yes => set true to myCreateQuadratic 
    * (default value is false). Also fill myNLinkNodeMap
    * Returns myCreateQuadratic
    */
-  bool IsQuadraticSubMesh(const TopoDS_Shape& aSh, const bool QuadMode);
+  bool IsQuadraticSubMesh(const TopoDS_Shape& theShape);
 
-  /**
-   * Returns true if given node is medium
+  /*!
+   * \brief Returns true if given node is medium
+    * \param n - node to check
+    * \param typeToCheck - type of elements containing the node to ask about node status
+    * \retval bool - check result
    */
-  bool IsMedium(const SMDS_MeshNode* n);
+  static bool IsMedium(const SMDS_MeshNode*      node,
+                       const SMDSAbs_ElementType typeToCheck = SMDSAbs_All);
 
   /**
    * Auxilary function for filling myNLinkNodeMap

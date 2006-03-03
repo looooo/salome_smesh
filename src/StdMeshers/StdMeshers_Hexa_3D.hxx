@@ -129,6 +129,8 @@ protected:
 		Point3DStruct *np,
 		const SMESHDS_Mesh* meshDS);
 
+  bool ClearAndReturn(const bool res);
+
   CubeStruct _cube;
   FaceQuadStruct* _quads[6];
   int _indX0;

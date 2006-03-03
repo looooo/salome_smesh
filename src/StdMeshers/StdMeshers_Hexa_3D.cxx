@@ -71,15 +71,14 @@ static bool ComputePentahedralMesh(SMESH_Mesh & aMesh,	const TopoDS_Shape & aSha
 //=============================================================================
 
 StdMeshers_Hexa_3D::StdMeshers_Hexa_3D(int hypId, int studyId,
-	SMESH_Gen * gen):SMESH_3D_Algo(hypId, studyId, gen)
+                                       SMESH_Gen * gen):SMESH_3D_Algo(hypId, studyId, gen)
 {
-	MESSAGE("StdMeshers_Hexa_3D::StdMeshers_Hexa_3D");
-	_name = "Hexa_3D";
-//   _shapeType = TopAbs_SOLID;
-	_shapeType = (1 << TopAbs_SHELL) | (1 << TopAbs_SOLID);	// 1 bit /shape type
-//   MESSAGE("_shapeType octal " << oct << _shapeType);
-	for (int i = 0; i < 6; i++)
-		_quads[i] = 0;
+  MESSAGE("StdMeshers_Hexa_3D::StdMeshers_Hexa_3D");
+  _name = "Hexa_3D";
+  _shapeType = (1 << TopAbs_SHELL) | (1 << TopAbs_SOLID);	// 1 bit /shape type
+  for (int i = 0; i < 6; i++)
+    _quads[i] = 0;
+  myTool = 0;
 }
 
 //=============================================================================
@@ -90,10 +89,28 @@ StdMeshers_Hexa_3D::StdMeshers_Hexa_3D(int hypId, int studyId,
 
 StdMeshers_Hexa_3D::~StdMeshers_Hexa_3D()
 {
-	MESSAGE("StdMeshers_Hexa_3D::~StdMeshers_Hexa_3D");
-	for (int i = 0; i < 6; i++)
-		StdMeshers_Quadrangle_2D::QuadDelete(_quads[i]);
+  MESSAGE("StdMeshers_Hexa_3D::~StdMeshers_Hexa_3D");
+  ClearAndReturn(true);
 }
+
+//================================================================================
+/*!
+ * \brief Clear fields and return the argument
+  * \param res - the value to return
+  * \retval bool - the argument value
+ */
+//================================================================================
+
+bool StdMeshers_Hexa_3D::ClearAndReturn(const bool res)
+{
+  for (int i = 0; i < 6; i++)
+    StdMeshers_Quadrangle_2D::QuadDelete(_quads[i]);
+  if ( myTool )
+    delete myTool;
+  myTool = 0;
+  return res;
+}
+
 
 //=============================================================================
 /*!
@@ -166,19 +183,11 @@ bool StdMeshers_Hexa_3D::Compute(SMESH_Mesh & aMesh,
 {
   Unexpect aCatch(SalomeException);
   MESSAGE("StdMeshers_Hexa_3D::Compute");
-  //bool isOk = false;
   SMESHDS_Mesh * meshDS = aMesh.GetMeshDS();
-  //SMESH_subMesh *theSubMesh = aMesh.GetSubMesh(aShape);
-  //const SMESHDS_SubMesh *& subMeshDS = theSubMesh->GetSubMeshDS();
   
   // 0.  - shape and face mesh verification
   // 0.1 - shape must be a solid (or a shell) with 6 faces
   //MESSAGE("---");
-
-  bool QuadMode = true;
-
-  myTool = new StdMeshers_Helper(aMesh);
-  myCreateQuadratic = myTool->IsQuadraticSubMesh(aShape,QuadMode);
 
   vector < SMESH_subMesh * >meshFaces;
   for (TopExp_Explorer exp(aShape, TopAbs_FACE); exp.More(); exp.Next()) {
@@ -188,12 +197,14 @@ bool StdMeshers_Hexa_3D::Compute(SMESH_Mesh & aMesh,
   }
   if (meshFaces.size() != 6) {
     SCRUTE(meshFaces.size());
-//		ASSERT(0);
     return false;
   }
 
   // 0.2 - is each face meshed with Quadrangle_2D? (so, with a wire of 4 edges)
   //MESSAGE("---");
+
+  myTool = new StdMeshers_Helper(aMesh);
+  _quadraticMesh = myTool->IsQuadraticSubMesh(aShape);
 
   for (int i = 0; i < 6; i++) {
     TopoDS_Shape aFace = meshFaces[i]->GetSubShape();
@@ -207,39 +218,23 @@ bool StdMeshers_Hexa_3D::Compute(SMESH_Mesh & aMesh,
         SMDS_ElemIteratorPtr eIt = sm->GetElements();
         while ( isAllQuad && eIt->more() ) {
           const SMDS_MeshElement* elem =  eIt->next();
-          isAllQuad = ( elem->NbNodes()==4 ||(myCreateQuadratic && elem->NbNodes()==8) );
+          isAllQuad = ( elem->NbNodes()==4 ||(_quadraticMesh && elem->NbNodes()==8) );
         }
       }
     }
     if ( ! isAllQuad ) {
       //modified by NIZNHY-PKV Wed Nov 17 15:31:37 2004 f
-      bool bIsOk;
-      //
-      bIsOk = ComputePentahedralMesh(aMesh, aShape);
-      if (bIsOk) {
-        return true;
-      }
-      //modified by NIZNHY-PKV Wed Nov 17 15:31:42 2004 t
-      SCRUTE(algoName);
-      //			ASSERT(0);
-      return false;
+      bool bIsOk = ComputePentahedralMesh(aMesh, aShape);
+      return ClearAndReturn( bIsOk );
     }
     StdMeshers_Quadrangle_2D *quadAlgo =
       dynamic_cast < StdMeshers_Quadrangle_2D * >(algo);
     ASSERT(quadAlgo);
     try {
-      _quads[i] = quadAlgo->CheckAnd2Dcompute(aMesh, aFace, myCreateQuadratic);
-      // add links created in quadAlgo into myNLinkNodeMap
-//      NLinkNodeMap aMap = quadAlgo->GetNLinkNodeMap();
-//      myNLinkNodeMap.insert(aMap.begin(), aMap.end());
-      myTool->AddNLinkNodeMap(quadAlgo->GetNLinkNodeMap());
-      // *** to delete after usage
+      _quads[i] = quadAlgo->CheckAnd2Dcompute(aMesh, aFace, _quadraticMesh);
     }
     catch(SALOME_Exception & S_ex) {
-      // *** delete _quads
-      // *** throw exception
-      //			ASSERT(0);
-      return false;
+      return ClearAndReturn( false );
     }
 
     // 0.2.1 - number of points on the opposite edges must be the same
@@ -247,7 +242,7 @@ bool StdMeshers_Hexa_3D::Compute(SMESH_Mesh & aMesh,
         _quads[i]->nbPts[1] != _quads[i]->nbPts[3]) {
       MESSAGE("different number of points on the opposite edges of face " << i);
       //                  ASSERT(0);
-      return false;
+      return ClearAndReturn( false );
     }
   }
 
@@ -748,7 +743,7 @@ bool StdMeshers_Hexa_3D::Compute(SMESH_Mesh & aMesh,
   }
   if ( np ) delete [] np;
   //MESSAGE("End of StdMeshers_Hexa_3D::Compute()");
-  return true;
+  return ClearAndReturn( true );
 }
 
 //=============================================================================

@@ -72,19 +72,19 @@ using namespace std;
 //=============================================================================
 
 StdMeshers_MEFISTO_2D::StdMeshers_MEFISTO_2D(int hypId, int studyId,
-	SMESH_Gen * gen):SMESH_2D_Algo(hypId, studyId, gen)
+                                             SMESH_Gen * gen):SMESH_2D_Algo(hypId, studyId, gen)
 {
-	MESSAGE("StdMeshers_MEFISTO_2D::StdMeshers_MEFISTO_2D");
-	_name = "MEFISTO_2D";
-//   _shapeType = TopAbs_FACE;
-	_shapeType = (1 << TopAbs_FACE);
-	_compatibleHypothesis.push_back("MaxElementArea");
-	_compatibleHypothesis.push_back("LengthFromEdges");
+  MESSAGE("StdMeshers_MEFISTO_2D::StdMeshers_MEFISTO_2D");
+  _name = "MEFISTO_2D";
+  _shapeType = (1 << TopAbs_FACE);
+  _compatibleHypothesis.push_back("MaxElementArea");
+  _compatibleHypothesis.push_back("LengthFromEdges");
 
-	_edgeLength = 0;
-	_maxElementArea = 0;
-	_hypMaxElementArea = NULL;
-	_hypLengthFromEdges = NULL;
+  _edgeLength = 0;
+  _maxElementArea = 0;
+  _hypMaxElementArea = NULL;
+  _hypLengthFromEdges = NULL;
+  myTool = 0;
 }
 
 //=============================================================================
@@ -95,7 +95,7 @@ StdMeshers_MEFISTO_2D::StdMeshers_MEFISTO_2D(int hypId, int studyId,
 
 StdMeshers_MEFISTO_2D::~StdMeshers_MEFISTO_2D()
 {
-	MESSAGE("StdMeshers_MEFISTO_2D::~StdMeshers_MEFISTO_2D");
+  MESSAGE("StdMeshers_MEFISTO_2D::~StdMeshers_MEFISTO_2D");
 }
 
 //=============================================================================
@@ -220,15 +220,15 @@ bool StdMeshers_MEFISTO_2D::Compute(SMESH_Mesh & aMesh, const TopoDS_Shape & aSh
   int iw = 1;
   int nbpnt = 0;
 
-  bool QuadMode = true;
-
   myTool = new StdMeshers_Helper(aMesh);
-  myCreateQuadratic = myTool->IsQuadraticSubMesh(aShape,QuadMode);
+  _quadraticMesh = myTool->IsQuadraticSubMesh(aShape);
 
   myOuterWire = BRepTools::OuterWire(F);
   nbpnt += NumberOfPoints(aMesh, myOuterWire);
-  if ( nbpnt < 3 ) // ex: a circle with 2 segments
+  if ( nbpnt < 3 ) { // ex: a circle with 2 segments
+    delete myTool; myTool = 0;
     return false;
+  }
   nudslf[iw++] = nbpnt;
 
   for (TopExp_Explorer exp(F, TopAbs_WIRE); exp.More(); exp.Next()) {
@@ -252,47 +252,53 @@ bool StdMeshers_MEFISTO_2D::Compute(SMESH_Mesh & aMesh, const TopoDS_Shape & aSh
 
   map<int, const SMDS_MeshNode*> mefistoToDS;	// correspondence mefisto index--> points IDNodes
   if ( !LoadPoints(aMesh, F, myOuterWire, uvslf, m,
-                   mefistoToDS, scalex, scaley, VWMap) )
+                   mefistoToDS, scalex, scaley, VWMap) ) {
+    delete myTool; myTool = 0;
     return false;
+  }
 
-	for (TopExp_Explorer exp(F, TopAbs_WIRE); exp.More(); exp.Next())
-	{
-		const TopoDS_Wire & W = TopoDS::Wire(exp.Current());
-		if (!myOuterWire.IsSame(W))
-		{
-			if (! LoadPoints(aMesh, F, W, uvslf, m,
-                                         mefistoToDS, scalex, scaley, VWMap ))
-                          return false;
-		}
-	}
+  for (TopExp_Explorer exp(F, TopAbs_WIRE); exp.More(); exp.Next())
+  {
+    const TopoDS_Wire & W = TopoDS::Wire(exp.Current());
+    if (!myOuterWire.IsSame(W))
+    {
+      if (! LoadPoints(aMesh, F, W, uvslf, m,
+                       mefistoToDS, scalex, scaley, VWMap )) {
+        delete myTool; myTool = 0;
+        return false;
+      }
+    }
+  }
 
-	uvst = NULL;
-	nust = NULL;
-	aptrte(nutysu, aretmx,
-		nblf, nudslf, uvslf, nbpti, uvpti, nbst, uvst, nbt, nust, ierr);
+  uvst = NULL;
+  nust = NULL;
+  aptrte(nutysu, aretmx,
+         nblf, nudslf, uvslf, nbpti, uvpti, nbst, uvst, nbt, nust, ierr);
 
-	if (ierr == 0)
-	  {
-	    MESSAGE("... End Triangulation Generated Triangle Number " << nbt);
-	    MESSAGE("                                    Node Number " << nbst);
-	    StoreResult(aMesh, nbst, uvst, nbt, nust, F,
-			faceIsForward, mefistoToDS, scalex, scaley);
-	    isOk = true;
-	  }
-	else
-	{
-		MESSAGE("Error in Triangulation");
-		isOk = false;
-	}
-	if (nudslf != NULL)
-		delete[]nudslf;
-	if (uvslf != NULL)
-		delete[]uvslf;
-	if (uvst != NULL)
-		delete[]uvst;
-	if (nust != NULL)
-		delete[]nust;
-	return isOk;
+  if (ierr == 0)
+  {
+    MESSAGE("... End Triangulation Generated Triangle Number " << nbt);
+    MESSAGE("                                    Node Number " << nbst);
+    StoreResult(aMesh, nbst, uvst, nbt, nust, F,
+                faceIsForward, mefistoToDS, scalex, scaley);
+    isOk = true;
+  }
+  else
+  {
+    MESSAGE("Error in Triangulation");
+    isOk = false;
+  }
+  if (nudslf != NULL)
+    delete[]nudslf;
+  if (uvslf != NULL)
+    delete[]uvslf;
+  if (uvst != NULL)
+    delete[]uvst;
+  if (nust != NULL)
+    delete[]nust;
+  delete myTool; myTool = 0;
+
+  return isOk;
 }
 
 //=======================================================================
@@ -422,22 +428,9 @@ static bool fixCommonVertexUV (gp_Pnt2d &           theUV,
     else {
       while ( nIt->more() ) {
         const SMDS_MeshNode* node = nIt->next();
-        if(CreateQuadratic) {
-          // check if node is medium
-          bool IsMedium = false;
-          SMDS_ElemIteratorPtr itn = node->GetInverseElementIterator();
-          while (itn->more()) {
-            const SMDS_MeshElement* elem = itn->next();
-            if ( elem->GetType() != SMDSAbs_Edge )
-              continue;
-            if(elem->IsMediumNode(node)) {
-              IsMedium = true;
-              break;
-            }
-          }
-          if(IsMedium)
-            continue;
-        }
+        // check if node is medium
+        if ( CreateQuadratic && StdMeshers_Helper::IsMedium( node, SMDSAbs_Edge ))
+          continue;
         const SMDS_EdgePosition* epos =
           static_cast<const SMDS_EdgePosition*>(node->GetPosition().get());
         double u = epos->GetUParameter();
@@ -530,24 +523,9 @@ bool StdMeshers_MEFISTO_2D::LoadPoints(SMESH_Mesh &        aMesh,
     }
     const SMDS_MeshNode* idLast = lid->next();
 
-    // --- edge internal IDNodes (relies on good order storage, not checked)
-
-//    if(myCreateQuadratic) {
-      // fill myNLinkNodeMap
-//      SMDS_ElemIteratorPtr iter = aMesh.GetSubMesh(E)->GetSubMeshDS()->GetElements();
-//      while(iter->more()) {
-//        const SMDS_MeshElement* elem = iter->next();
-//        SMDS_ElemIteratorPtr nodeIt = elem->nodesIterator();
-//        const SMDS_MeshNode* n1 = static_cast<const SMDS_MeshNode*>( nodeIt->next() );
-//        const SMDS_MeshNode* n2 = static_cast<const SMDS_MeshNode*>( nodeIt->next() );
-//        const SMDS_MeshNode* n3 = static_cast<const SMDS_MeshNode*>( nodeIt->next() );
-//        NLink link(( n1 < n2 ? n1 : n2 ), ( n1 < n2 ? n2 : n1 ));
-//        myNLinkNodeMap.insert(NLinkNodeMap::value_type(link,n3));
-//        myNLinkNodeMap[link] = n3;
-//      }
-//    }
-
     int nbPoints = aMesh.GetSubMesh(E)->GetSubMeshDS()->NbNodes();
+    if ( _quadraticMesh )
+      nbPoints /= 2;
 
     double f, l;
     Handle(Geom2d_Curve) C2d = BRep_Tool::CurveOnSurface(E, F, f, l);
@@ -557,38 +535,14 @@ bool StdMeshers_MEFISTO_2D::LoadPoints(SMESH_Mesh &        aMesh,
     //bool isForward = (E.Orientation() == TopAbs_FORWARD);
     map<double, const SMDS_MeshNode*> params;
 
-    if(!myCreateQuadratic) {
-      while(ite->more()) {
-        const SMDS_MeshNode * node = ite->next();
-        const SMDS_EdgePosition* epos =
-          static_cast<const SMDS_EdgePosition*>(node->GetPosition().get());
-        double param = epos->GetUParameter();
-        params[param] = node;
-      }
-    }
-    else {
-      nbPoints = nbPoints/2;
-      while(ite->more()) {
-        const SMDS_MeshNode* node = ite->next();
-        // check if node is medium
-        bool IsMedium = false;
-        SMDS_ElemIteratorPtr itn = node->GetInverseElementIterator();
-        while (itn->more()) {
-          const SMDS_MeshElement* elem = itn->next();
-          if ( elem->GetType() != SMDSAbs_Edge )
-            continue;
-          if(elem->IsMediumNode(node)) {
-            IsMedium = true;
-            break;
-          }
-        }
-        if(IsMedium)
-          continue;
-        const SMDS_EdgePosition* epos =
-          static_cast<const SMDS_EdgePosition*>(node->GetPosition().get());
-        double param = epos->GetUParameter();
-        params[param] = node;
-      }
+    while(ite->more()) {
+      const SMDS_MeshNode * node = ite->next();
+      if ( _quadraticMesh && StdMeshers_Helper::IsMedium( node, SMDSAbs_Edge ))
+        continue;
+      const SMDS_EdgePosition* epos =
+        static_cast<const SMDS_EdgePosition*>(node->GetPosition().get());
+      double param = epos->GetUParameter();
+      params[param] = node;
     }
 
     if ( nbPoints != params.size()) {
@@ -602,13 +556,13 @@ bool StdMeshers_MEFISTO_2D::LoadPoints(SMESH_Mesh &        aMesh,
     //     add IDNodes in mefistoToDS map
     if (E.Orientation() == TopAbs_FORWARD) {
       gp_Pnt2d p = C2d->Value(f).XY().Multiplied( scale );       // first point = Vertex Forward
-      if ( fixCommonVertexUV( p, VFirst, W, myOuterWire, F, VWMap, aMesh, myCreateQuadratic ))
+      if ( fixCommonVertexUV( p, VFirst, W, myOuterWire, F, VWMap, aMesh, _quadraticMesh ))
         myNodesOnCommonV.push_back( idFirst );
       uvslf[m].x = p.X();
       uvslf[m].y = p.Y();
       mefistoToDS[m + 1] = idFirst;
-      //MESSAGE(" "<<m<<" "<<mefistoToDS[m+1]);
-      //MESSAGE("__ f "<<f<<" "<<uvslf[m].x <<" "<<uvslf[m].y);
+//       MESSAGE(" "<<m<<" "<<mefistoToDS[m+1]);
+//       MESSAGE("__ f "<<f<<" "<<uvslf[m].x <<" "<<uvslf[m].y);
       m++;
       map<double, const SMDS_MeshNode*>::iterator itp = params.begin();
       for (int i = 1; i <= nbPoints; i++) {  // nbPoints internal
@@ -617,21 +571,21 @@ bool StdMeshers_MEFISTO_2D::LoadPoints(SMESH_Mesh &        aMesh,
         uvslf[m].x = p.X();
         uvslf[m].y = p.Y();
         mefistoToDS[m + 1] = (*itp).second;
-        //MESSAGE(" "<<m<<" "<<mefistoToDS[m+1]);
-        //MESSAGE("__ "<<i<<" "<<param<<" "<<uvslf[m].x <<" "<<uvslf[m].y);
+//         MESSAGE(" "<<m<<" "<<mefistoToDS[m+1]);
+//         MESSAGE("__ "<<i<<" "<<param<<" "<<uvslf[m].x <<" "<<uvslf[m].y);
         m++;
         itp++;
       }
     }
     else {
       gp_Pnt2d p = C2d->Value(l).XY().Multiplied( scale );       // last point = Vertex Reversed
-      if ( fixCommonVertexUV( p, VLast, W, myOuterWire, F, VWMap, aMesh, myCreateQuadratic ))
+      if ( fixCommonVertexUV( p, VLast, W, myOuterWire, F, VWMap, aMesh, _quadraticMesh ))
         myNodesOnCommonV.push_back( idLast );
       uvslf[m].x = p.X();
       uvslf[m].y = p.Y();
       mefistoToDS[m + 1] = idLast;
-      //MESSAGE(" "<<m<<" "<<mefistoToDS[m+1]);
-      //MESSAGE("__ l "<<l<<" "<<uvslf[m].x <<" "<<uvslf[m].y);
+//       MESSAGE(" "<<m<<" "<<mefistoToDS[m+1]);
+//       MESSAGE("__ l "<<l<<" "<<uvslf[m].x <<" "<<uvslf[m].y);
       m++;
       map<double, const SMDS_MeshNode*>::reverse_iterator itp = params.rbegin();
       for (int i = nbPoints; i >= 1; i--)
@@ -641,23 +595,27 @@ bool StdMeshers_MEFISTO_2D::LoadPoints(SMESH_Mesh &        aMesh,
         uvslf[m].x = p.X();
         uvslf[m].y = p.Y();
         mefistoToDS[m + 1] = (*itp).second;
-        //MESSAGE(" "<<m<<" "<<mefistoToDS[m+1]);
-        //MESSAGE("__ "<<i<<" "<<param<<" "<<uvslf[m].x <<" "<<uvslf[m].y);
+//         MESSAGE(" "<<m<<" "<<mefistoToDS[m+1]);
+//         MESSAGE("__ "<<i<<" "<<param<<" "<<uvslf[m].x <<" "<<uvslf[m].y);
         m++;
         itp++;
       }
     }
+    /// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    /// !!!!!!!   HERE IS A BUG with fixOverlappedLinkUV  !!!!!!!!!!!
+    //  !!!!!!!   Correct version is in the CVS head       !!!!!!!!!!
+    /// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // prevent failure on overlapped adjacent links
-    if ( iEdge > 0 )
-      fixOverlappedLinkUV (uvslf[ mFirst - 1],
-                           uvslf[ mFirst ],
-                           uvslf[ mFirst + 1 ]);
+//     if ( iEdge > 0 )
+//       fixOverlappedLinkUV (uvslf[ mFirst - 1],
+//                            uvslf[ mFirst ],
+//                            uvslf[ mFirst + 1 ]);
     
   } // for  wexp
 
-  fixOverlappedLinkUV (uvslf[ m - 1],
-                       uvslf[ mInit ],
-                       uvslf[ mInit + 1 ]);
+//   fixOverlappedLinkUV (uvslf[ m - 1],
+//                        uvslf[ mInit ],
+//                        uvslf[ mInit + 1 ]);
 
   return true;
 }
@@ -859,17 +817,14 @@ double StdMeshers_MEFISTO_2D::ComputeEdgeElementLength(SMESH_Mesh & aMesh,
 	//MESSAGE("StdMeshers_MEFISTO_2D::ComputeEdgeElementLength");
 	// **** a mettre dans SMESH_2D_Algo ?
 
-	const TopoDS_Face & FF = TopoDS::Face(aShape);
+	//const TopoDS_Face & FF = TopoDS::Face(aShape);
 	//bool faceIsForward = (FF.Orientation() == TopAbs_FORWARD);
-	TopoDS_Face F = TopoDS::Face(FF.Oriented(TopAbs_FORWARD));
+	//TopoDS_Face F = TopoDS::Face(FF.Oriented(TopAbs_FORWARD));
 
 	double meanElementLength = 100;
 	double wireLength = 0;
 	int wireElementsNumber = 0;
-	for (TopExp_Explorer exp(F, TopAbs_WIRE); exp.More(); exp.Next())
-	{
-		const TopoDS_Wire & W = TopoDS::Wire(exp.Current());
-		for (TopExp_Explorer expe(W, TopAbs_EDGE); expe.More(); expe.Next())
+		for (TopExp_Explorer expe(aShape, TopAbs_EDGE); expe.More(); expe.Next())
 		{
 			const TopoDS_Edge & E = TopoDS::Edge(expe.Current());
 			int nb = aMesh.GetSubMesh(E)->GetSubMeshDS()->NbNodes();
@@ -877,7 +832,6 @@ double StdMeshers_MEFISTO_2D::ComputeEdgeElementLength(SMESH_Mesh & aMesh,
 			wireLength += length;
 			wireElementsNumber += nb;
 		}
-	}
 	if (wireElementsNumber)
 		meanElementLength = wireLength / wireElementsNumber;
 	//SCRUTE(meanElementLength);

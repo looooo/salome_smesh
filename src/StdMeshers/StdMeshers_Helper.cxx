@@ -24,78 +24,47 @@
 //purpose  : 
 //=======================================================================
 
-bool StdMeshers_Helper::IsQuadraticSubMesh(const TopoDS_Shape& aSh,
-                                           const bool QuadMode)
+bool StdMeshers_Helper::IsQuadraticSubMesh(const TopoDS_Shape& aSh)
 {
   SMESHDS_Mesh* meshDS = GetMesh()->GetMeshDS();
   myShapeID = meshDS->ShapeToIndex(aSh);
-  myCreateQuadratic = false;
-  if(QuadMode) {
-    // we can create quadratic elements only if each elements
-    // created on given shape is quadratic
-    // also we have to fill myNLinkNodeMap
-    myCreateQuadratic = true;
-    if(aSh.ShapeType()!=TopAbs_FACE) {
-      for (TopExp_Explorer exp(aSh, TopAbs_FACE); exp.More() && myCreateQuadratic; exp.Next()) {
-        const TopoDS_Face& F = TopoDS::Face(exp.Current());
-        SMDS_ElemIteratorPtr itf = GetMesh()->GetSubMesh(F)->GetSubMeshDS()->GetElements();
-        while(itf->more()) {
-          const SMDS_MeshElement* f = itf->next();
-          if( f->GetType()==SMDSAbs_Face && !f->IsQuadratic() ) {
-            myCreateQuadratic = false;
-            break;
-          }
-          SMDS_ElemIteratorPtr itn = f->nodesIterator();
-          if(f->NbNodes()==6) {
-            const SMDS_MeshNode* Ns[6];
-            int i = 0;
-            while(itn->more()) {
-              Ns[i++] = static_cast<const SMDS_MeshNode*>( itn->next() );
-            }
-            AddNLinkNode(Ns[0],Ns[1],Ns[3]);
-            AddNLinkNode(Ns[1],Ns[2],Ns[4]);
-            AddNLinkNode(Ns[2],Ns[0],Ns[5]);
-          }
-          else if(f->NbNodes()==8) {
-            const SMDS_MeshNode* Ns[8];
-            int i = 0;
-            while(itn->more()) {
-              Ns[i++] = static_cast<const SMDS_MeshNode*>( itn->next() );
-            }
-            AddNLinkNode(Ns[0],Ns[1],Ns[4]);
-            AddNLinkNode(Ns[1],Ns[2],Ns[5]);
-            AddNLinkNode(Ns[2],Ns[3],Ns[6]);
-            AddNLinkNode(Ns[3],Ns[0],Ns[7]);
-          }
-        }
-      }
-    }
-    else {
-      TopTools_MapOfShape aMap;
-      // check edges
-      const TopoDS_Face& F = TopoDS::Face(aSh);
-      const TopoDS_Wire& W = BRepTools::OuterWire(F);
-      BRepTools_WireExplorer wexp (W, F);
-      for (wexp.Init(W, F); wexp.More() && myCreateQuadratic; wexp.Next()) {
-        const TopoDS_Edge& E = wexp.Current();
-        if(aMap.Contains(E))
-          continue;
-        aMap.Add(E);
-        SMDS_ElemIteratorPtr it = GetMesh()->GetSubMesh(E)->GetSubMeshDS()->GetElements();
+  // we can create quadratic elements only if all elements
+  // created on given shape are quadratic
+  // also we have to fill myNLinkNodeMap
+  myCreateQuadratic = true;
+  TopAbs_ShapeEnum subType( aSh.ShapeType()==TopAbs_FACE ? TopAbs_EDGE : TopAbs_FACE );
+  SMDSAbs_ElementType elemType( subType==TopAbs_FACE ? SMDSAbs_Face : SMDSAbs_Edge );
+
+  TopExp_Explorer exp( aSh, subType );
+  for (; exp.More() && myCreateQuadratic; exp.Next()) {
+    if ( SMESHDS_SubMesh * subMesh = meshDS->MeshElements( exp.Current() )) {
+      if ( SMDS_ElemIteratorPtr it = subMesh->GetElements() ) {
         while(it->more()) {
           const SMDS_MeshElement* e = it->next();
-          if( e->GetType()==SMDSAbs_Edge && !e->IsQuadratic() ) {
+          if ( e->GetType() != elemType || !e->IsQuadratic() ) {
             myCreateQuadratic = false;
             break;
           }
-          // fill NLinkNodeMap
-          SMDS_ElemIteratorPtr nodeIt = e->nodesIterator();
-          const SMDS_MeshNode* n1 = static_cast<const SMDS_MeshNode*>( nodeIt->next() );
-          const SMDS_MeshNode* n2 = static_cast<const SMDS_MeshNode*>( nodeIt->next() );
-          const SMDS_MeshNode* n3 = static_cast<const SMDS_MeshNode*>( nodeIt->next() );
-          NLink link(( n1 < n2 ? n1 : n2 ), ( n1 < n2 ? n2 : n1 ));
-          myNLinkNodeMap.insert(NLinkNodeMap::value_type(link,n3));
-          myNLinkNodeMap[link] = n3;
+          else {
+            // fill NLinkNodeMap
+            switch ( e->NbNodes() ) {
+            case 3:
+              AddNLinkNode(e->GetNode(0),e->GetNode(1),e->GetNode(2)); break;
+            case 6:
+              AddNLinkNode(e->GetNode(0),e->GetNode(1),e->GetNode(3));
+              AddNLinkNode(e->GetNode(1),e->GetNode(2),e->GetNode(4));
+              AddNLinkNode(e->GetNode(2),e->GetNode(0),e->GetNode(5)); break;
+            case 8:
+              AddNLinkNode(e->GetNode(0),e->GetNode(1),e->GetNode(4));
+              AddNLinkNode(e->GetNode(1),e->GetNode(2),e->GetNode(5));
+              AddNLinkNode(e->GetNode(2),e->GetNode(3),e->GetNode(6));
+              AddNLinkNode(e->GetNode(3),e->GetNode(0),e->GetNode(7));
+              break;
+            default:
+              myCreateQuadratic = false;
+              break;
+            }
+          }
         }
       }
     }
@@ -114,14 +83,18 @@ bool StdMeshers_Helper::IsQuadraticSubMesh(const TopoDS_Shape& aSh,
 //purpose  : 
 //=======================================================================
 
-bool StdMeshers_Helper::IsMedium(const SMDS_MeshNode* n)
+bool StdMeshers_Helper::IsMedium(const SMDS_MeshNode*      node,
+                                 const SMDSAbs_ElementType typeToCheck)
 {
-  SMDS_ElemIteratorPtr it = n->GetInverseElementIterator();
+  bool isMedium = false;
+  SMDS_ElemIteratorPtr it = node->GetInverseElementIterator();
   while (it->more()) {
     const SMDS_MeshElement* elem = it->next();
-    return elem->IsMediumNode(n);
+    isMedium = elem->IsMediumNode(node);
+    if ( typeToCheck == SMDSAbs_All || elem->GetType() == typeToCheck )
+      break;
   }
-  return false;
+  return isMedium;
 }
 
 
@@ -136,12 +109,10 @@ void StdMeshers_Helper::AddNLinkNode(const SMDS_MeshNode* n1,
                                      const SMDS_MeshNode* n2,
                                      const SMDS_MeshNode* n12)
 {
-  NLink link(( n1 < n2 ? n1 : n2 ), ( n1 < n2 ? n2 : n1 ));
-  ItNLinkNode itLN = myNLinkNodeMap.find( link );
-  if ( itLN == myNLinkNodeMap.end() ) {
-    // add new record to map
-    myNLinkNodeMap.insert(NLinkNodeMap::value_type(link,n12));
-  }
+  NLink link( n1, n2 );
+  if ( n1 > n2 ) link = NLink( n2, n1 );
+  // add new record to map
+  myNLinkNodeMap.insert( make_pair(link,n12));
 }
 
 

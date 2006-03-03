@@ -81,6 +81,7 @@ StdMeshers_Quadrangle_2D::StdMeshers_Quadrangle_2D (int hypId, int studyId, SMES
   _name = "Quadrangle_2D";
   _shapeType = (1 << TopAbs_FACE);
   _compatibleHypothesis.push_back("QuadranglePreference");
+  myTool = 0;
 }
 
 //=============================================================================
@@ -92,6 +93,8 @@ StdMeshers_Quadrangle_2D::StdMeshers_Quadrangle_2D (int hypId, int studyId, SMES
 StdMeshers_Quadrangle_2D::~StdMeshers_Quadrangle_2D()
 {
   MESSAGE("StdMeshers_Quadrangle_2D::~StdMeshers_Quadrangle_2D");
+  if ( myTool )
+    delete myTool;
 }
 
 //=============================================================================
@@ -129,16 +132,17 @@ bool StdMeshers_Quadrangle_2D::Compute (SMESH_Mesh& aMesh,
   SMESHDS_Mesh * meshDS = aMesh.GetMeshDS();
   aMesh.GetSubMesh(aShape);
 
-  bool QuadMode = true;
-
-  myTool = new StdMeshers_Helper(aMesh);
-  myCreateQuadratic = myTool->IsQuadraticSubMesh(aShape,QuadMode);
+  if ( !myTool )
+    myTool = new StdMeshers_Helper(aMesh);
+  _quadraticMesh = myTool->IsQuadraticSubMesh(aShape);
 
   //FaceQuadStruct *quad = CheckAnd2Dcompute(aMesh, aShape);
   FaceQuadStruct* quad = CheckNbEdges(aMesh, aShape);
 
-  if (!quad)
+  if (!quad) {
+    delete myTool; myTool = 0;
     return false;
+  }
 
   if(myQuadranglePreference) {
     int n1 = quad->nbPts[0];
@@ -150,14 +154,18 @@ bool StdMeshers_Quadrangle_2D::Compute (SMESH_Mesh& aMesh,
     ntmp = ntmp*2;
     if( nfull==ntmp && ( (n1!=n3) || (n2!=n4) ) ) {
       // special path for using only quandrangle faces
-      return ComputeQuadPref(aMesh, aShape, quad);
+      bool ok = ComputeQuadPref(aMesh, aShape, quad);
+      delete myTool; myTool = 0;
+      return ok;
     }
   }
 
   // set normalized grid on unit square in parametric domain
   SetNormalizedGrid(aMesh, aShape, quad);
-  if (!quad)
+  if (!quad) {
+    delete myTool; myTool = 0;
     return false;
+  }
 
   // --- compute 3D values on points, store points & quadrangles
 
@@ -542,6 +550,8 @@ bool StdMeshers_Quadrangle_2D::Compute (SMESH_Mesh& aMesh,
   }
 
   QuadDelete(quad);
+  delete myTool; myTool = 0;
+
   bool isOk = true;
   return isOk;
 }
@@ -581,7 +591,7 @@ FaceQuadStruct* StdMeshers_Quadrangle_2D::CheckNbEdges(SMESH_Mesh & aMesh,
     int nb = aMesh.GetSubMesh(E)->GetSubMeshDS()->NbNodes();
     if (nbEdges < 4) {
       quad->edge[nbEdges] = E;
-      if(!myCreateQuadratic) {
+      if(!_quadraticMesh) {
         quad->nbPts[nbEdges] = nb + 2; // internal points + 2 extrema
       }
       else {
@@ -601,23 +611,6 @@ FaceQuadStruct* StdMeshers_Quadrangle_2D::CheckNbEdges(SMESH_Mesh & aMesh,
   return quad;
 }
 
-
-//=============================================================================
-/*!
- *  CheckAnd2Dcompute
- */
-//=============================================================================
-
-FaceQuadStruct *StdMeshers_Quadrangle_2D::CheckAnd2Dcompute
-  (SMESH_Mesh & aMesh, const TopoDS_Shape & aShape) throw(SALOME_Exception)
-{
-  bool QuadMode = true;
-  myTool = new StdMeshers_Helper(aMesh);
-  myCreateQuadratic = myTool->IsQuadraticSubMesh(aShape,QuadMode);
-  return CheckAnd2Dcompute(aMesh,aShape,myCreateQuadratic);
-}
-
-
 //=============================================================================
 /*!
  *  CheckAnd2Dcompute
@@ -631,7 +624,7 @@ FaceQuadStruct *StdMeshers_Quadrangle_2D::CheckAnd2Dcompute
 {
   Unexpect aCatch(SalomeException);
 
-  myCreateQuadratic = CreateQuadratic;
+  _quadraticMesh = CreateQuadratic;
 
   FaceQuadStruct *quad = CheckNbEdges(aMesh, aShape);
 
@@ -1437,7 +1430,7 @@ UVPtStruct* StdMeshers_Quadrangle_2D::LoadEdgePoints2 (SMESH_Mesh & aMesh,
 
   // --- edge internal IDNodes (relies on good order storage, not checked)
 
-//  if(myCreateQuadratic) {
+//  if(_quadraticMesh) {
     // fill myNLinkNodeMap
 //    SMDS_ElemIteratorPtr iter = aMesh.GetSubMesh(E)->GetSubMeshDS()->GetElements();
 //    while(iter->more()) {
@@ -1456,7 +1449,7 @@ UVPtStruct* StdMeshers_Quadrangle_2D::LoadEdgePoints2 (SMESH_Mesh & aMesh,
   SMDS_NodeIteratorPtr ite = aMesh.GetSubMesh(E)->GetSubMeshDS()->GetNodes();
   int nbPoints = aMesh.GetSubMesh(E)->GetSubMeshDS()->NbNodes();
 
-  if(!myCreateQuadratic) {
+  if(!_quadraticMesh) {
     while(ite->more()) {
       const SMDS_MeshNode* node = ite->next();
       const SMDS_EdgePosition* epos =
@@ -1619,7 +1612,7 @@ UVPtStruct* StdMeshers_Quadrangle_2D::LoadEdgePoints (SMESH_Mesh & aMesh,
 
   // --- edge internal IDNodes (relies on good order storage, not checked)
 
-//  if(myCreateQuadratic) {
+//  if(_quadraticMesh) {
     // fill myNLinkNodeMap
 //    SMDS_ElemIteratorPtr iter = aMesh.GetSubMesh(E)->GetSubMeshDS()->GetElements();
 //    while(iter->more()) {
@@ -1638,7 +1631,7 @@ UVPtStruct* StdMeshers_Quadrangle_2D::LoadEdgePoints (SMESH_Mesh & aMesh,
   SMDS_NodeIteratorPtr ite = aMesh.GetSubMesh(E)->GetSubMeshDS()->GetNodes();
   int nbPoints = aMesh.GetSubMesh(E)->GetSubMeshDS()->NbNodes();
 
-  if(!myCreateQuadratic) {
+  if(!_quadraticMesh) {
     while(ite->more()) {
       const SMDS_MeshNode* node = ite->next();
       const SMDS_EdgePosition* epos =

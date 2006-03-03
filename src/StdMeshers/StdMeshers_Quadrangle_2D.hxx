@@ -79,10 +79,6 @@ public:
     throw (SALOME_Exception);
 
   FaceQuadStruct* CheckAnd2Dcompute(SMESH_Mesh& aMesh,
-				    const TopoDS_Shape& aShape)
-    throw (SALOME_Exception);
-
-  FaceQuadStruct* CheckAnd2Dcompute(SMESH_Mesh& aMesh,
 				    const TopoDS_Shape& aShape,
                                     const bool CreateQuadratic)
     throw (SALOME_Exception);

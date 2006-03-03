@@ -1,12 +1,35 @@
+//  SMESH SMDS : implementaion of Salome mesh data structure
+//
+//  Copyright (C) 2003  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
+//  CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS 
+// 
+//  This library is free software; you can redistribute it and/or 
+//  modify it under the terms of the GNU Lesser General Public 
+//  License as published by the Free Software Foundation; either 
+//  version 2.1 of the License. 
+// 
+//  This library is distributed in the hope that it will be useful, 
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of 
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU 
+//  Lesser General Public License for more details. 
+// 
+//  You should have received a copy of the GNU Lesser General Public 
+//  License along with this library; if not, write to the Free Software 
+//  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA 
+// 
+//  See http://www.opencascade.org/SALOME/ or email : webmaster.salome@opencascade.org 
+//
+//
+//
 // File:      SMDS_QuadraticVolumeOfNodes.cxx
 // Created:   17.01.06 09:46:11
 // Author:    Sergey KUUL
-// Copyright: Open CASCADE 2006
 
 #include "SMDS_QuadraticVolumeOfNodes.hxx"
 
 #include "SMDS_IteratorOfElements.hxx"
 #include "SMDS_MeshNode.hxx"
+#include "SMDS_SetIterator.hxx"
 
 #include "utilities.h"
 
@@ -30,16 +53,17 @@ SMDS_QuadraticVolumeOfNodes::SMDS_QuadraticVolumeOfNodes
                                                 const SMDS_MeshNode * n24,
                                                 const SMDS_MeshNode * n34)
 {
-  myNodes.push_back(n1);
-  myNodes.push_back(n2);
-  myNodes.push_back(n3);
-  myNodes.push_back(n4);
-  myNodes.push_back(n12);
-  myNodes.push_back(n23);
-  myNodes.push_back(n31);
-  myNodes.push_back(n14);
-  myNodes.push_back(n24);
-  myNodes.push_back(n34);
+  myNodes.resize( 10 );
+  myNodes[ 0 ] = n1;
+  myNodes[ 1 ] = n2;
+  myNodes[ 2 ] = n3;
+  myNodes[ 3 ] = n4;
+  myNodes[ 4 ] = n12;
+  myNodes[ 5 ] = n23;
+  myNodes[ 6 ] = n31;
+  myNodes[ 7 ] = n14;
+  myNodes[ 8 ] = n24;
+  myNodes[ 9 ] = n34;
 }
 
 
@@ -63,19 +87,20 @@ SMDS_QuadraticVolumeOfNodes::SMDS_QuadraticVolumeOfNodes
                                                 const SMDS_MeshNode * n35,
                                                 const SMDS_MeshNode * n45)
 {
-  myNodes.push_back(n1);
-  myNodes.push_back(n2);
-  myNodes.push_back(n3);
-  myNodes.push_back(n4);
-  myNodes.push_back(n5);
-  myNodes.push_back(n12);
-  myNodes.push_back(n23);
-  myNodes.push_back(n34);
-  myNodes.push_back(n41);
-  myNodes.push_back(n15);
-  myNodes.push_back(n25);
-  myNodes.push_back(n35);
-  myNodes.push_back(n45);
+  myNodes.resize( 13 );
+  myNodes[ 0 ] = n1;
+  myNodes[ 1 ] = n2;
+  myNodes[ 2 ] = n3;
+  myNodes[ 3 ] = n4;
+  myNodes[ 4 ] = n5;
+  myNodes[ 5 ] = n12;
+  myNodes[ 6 ] = n23;
+  myNodes[ 7 ] = n34;
+  myNodes[ 8 ] = n41;
+  myNodes[ 9 ] = n15;
+  myNodes[ 10 ] = n25;
+  myNodes[ 11 ] = n35;
+  myNodes[ 12 ] = n45;
 }
 
 
@@ -101,21 +126,22 @@ SMDS_QuadraticVolumeOfNodes::SMDS_QuadraticVolumeOfNodes
                                                 const SMDS_MeshNode * n25,
                                                 const SMDS_MeshNode * n36)
 {
-  myNodes.push_back(n1);
-  myNodes.push_back(n2);
-  myNodes.push_back(n3);
-  myNodes.push_back(n4);
-  myNodes.push_back(n5);
-  myNodes.push_back(n6);
-  myNodes.push_back(n12);
-  myNodes.push_back(n23);
-  myNodes.push_back(n31);
-  myNodes.push_back(n45);
-  myNodes.push_back(n56);
-  myNodes.push_back(n64);
-  myNodes.push_back(n14);
-  myNodes.push_back(n25);
-  myNodes.push_back(n36);
+  myNodes.resize( 15 );
+  myNodes[ 0 ] = n1;
+  myNodes[ 1 ] = n2;
+  myNodes[ 2 ] = n3;
+  myNodes[ 3 ] = n4;
+  myNodes[ 4 ] = n5;
+  myNodes[ 5 ] = n6;
+  myNodes[ 6 ] = n12;
+  myNodes[ 7 ] = n23;
+  myNodes[ 8 ] = n31;
+  myNodes[ 9 ] = n45;
+  myNodes[ 10 ] = n56;
+  myNodes[ 11 ] = n64;
+  myNodes[ 12 ] = n14;
+  myNodes[ 13 ] = n25;
+  myNodes[ 14 ] = n36;
 }
 
 
@@ -146,26 +172,27 @@ SMDS_QuadraticVolumeOfNodes::SMDS_QuadraticVolumeOfNodes
                                                 const SMDS_MeshNode * n37,
                                                 const SMDS_MeshNode * n48)
 {
-  myNodes.push_back(n1);
-  myNodes.push_back(n2);
-  myNodes.push_back(n3);
-  myNodes.push_back(n4);
-  myNodes.push_back(n5);
-  myNodes.push_back(n6);
-  myNodes.push_back(n7);
-  myNodes.push_back(n8);
-  myNodes.push_back(n12);
-  myNodes.push_back(n23);
-  myNodes.push_back(n34);
-  myNodes.push_back(n41);
-  myNodes.push_back(n56);
-  myNodes.push_back(n67);
-  myNodes.push_back(n78);
-  myNodes.push_back(n85);
-  myNodes.push_back(n15);
-  myNodes.push_back(n26);
-  myNodes.push_back(n37);
-  myNodes.push_back(n48);
+  myNodes.resize( 20 );
+  myNodes[ 0 ] = n1;
+  myNodes[ 1 ] = n2;
+  myNodes[ 2 ] = n3;
+  myNodes[ 3 ] = n4;
+  myNodes[ 4 ] = n5;
+  myNodes[ 5 ] = n6;
+  myNodes[ 6 ] = n7;
+  myNodes[ 7 ] = n8;
+  myNodes[ 8 ] = n12;
+  myNodes[ 9 ] = n23;
+  myNodes[ 10 ] = n34;
+  myNodes[ 11 ] = n41;
+  myNodes[ 12 ] = n56;
+  myNodes[ 13 ] = n67;
+  myNodes[ 14 ] = n78;
+  myNodes[ 15 ] = n85;
+  myNodes[ 16 ] = n15;
+  myNodes[ 17 ] = n26;
+  myNodes[ 18 ] = n37;
+  myNodes[ 19 ] = n48;
 }
 
 
@@ -176,29 +203,15 @@ SMDS_QuadraticVolumeOfNodes::SMDS_QuadraticVolumeOfNodes
 
 bool SMDS_QuadraticVolumeOfNodes::IsMediumNode(const SMDS_MeshNode* node) const
 {
-  if(NbNodes()==10) {
-    int i=4;
-    for(; i<10; i++) {
-      if(myNodes[i]==node) return true;
-    }
+  int nbCorners = 0;
+  switch (myNodes.size()) {
+  case 10: nbCorners = 4; break;
+  case 13: nbCorners = 5; break;
+  case 15: nbCorners = 6; break;
+  default: nbCorners = 8;
   }
-  else if(NbNodes()==13) {
-    int i=5;
-    for(; i<13; i++) {
-      if(myNodes[i]==node) return true;
-    }
-  }
-  else if(NbNodes()==15) {
-    int i=6;
-    for(; i<15; i++) {
-      if(myNodes[i]==node) return true;
-    }
-  }
-  else {
-    int i=8;
-    for(; i<20; i++) {
-      if(myNodes[i]==node) return true;
-    }
+  for ( int i = nbCorners; i<myNodes.size(); i++) {
+    if(myNodes[i]==node) return true;
   }
   return false;
 }
@@ -240,11 +253,11 @@ int SMDS_QuadraticVolumeOfNodes::NbNodes() const
 //=======================================================================
 int SMDS_QuadraticVolumeOfNodes::NbEdges() const
 {
-  if(NbNodes()==10)
+  if(myNodes.size()==10)
     return 6;
-  else if(NbNodes()==13)
+  else if(myNodes.size()==13)
     return 8;
-  else if(NbNodes()==15)
+  else if(myNodes.size()==15)
     return 9;
   else
     return 12;
@@ -257,9 +270,9 @@ int SMDS_QuadraticVolumeOfNodes::NbEdges() const
 //=======================================================================
 int SMDS_QuadraticVolumeOfNodes::NbFaces() const
 {
-  if(NbNodes()==10)
+  if(myNodes.size()==10)
     return 4;
-  else if(NbNodes()==20)
+  else if(myNodes.size()==20)
     return 6;
   else
     return 5;
@@ -280,28 +293,21 @@ void SMDS_QuadraticVolumeOfNodes::Print(ostream & OS) const
 
 
 //=======================================================================
+//private class : SMDS_QuadraticVolumeOfNodes_MyIterator
+//purpose  : 
+//=======================================================================
+
+class SMDS_QuadraticVolumeOfNodes_MyIterator : public SMDS_NodeVectorElemIterator
+{
+public:
+  SMDS_QuadraticVolumeOfNodes_MyIterator(const vector<const SMDS_MeshNode *>& s):
+    SMDS_NodeVectorElemIterator( s.begin(), s.end() ) {}
+};
+
+//=======================================================================
 //function : elementsIterator
 //purpose  : 
 //=======================================================================
-class SMDS_QuadraticVolumeOfNodes_MyIterator:public SMDS_ElemIterator
-{
-  const std::vector<const SMDS_MeshNode *> mySet;
-  int index;
- public:
-  SMDS_QuadraticVolumeOfNodes_MyIterator(const std::vector<const SMDS_MeshNode *> s):
-    mySet(s),index(0) {}
-
-  bool more()
-  {
-    return index < mySet.size();
-  }
-
-  const SMDS_MeshElement* next()
-  {
-    index++;
-    return mySet[index-1];
-  }
-};
 
 SMDS_ElemIteratorPtr SMDS_QuadraticVolumeOfNodes::elementsIterator
                                          (SMDSAbs_ElementType type) const
@@ -325,5 +331,17 @@ SMDS_ElemIteratorPtr SMDS_QuadraticVolumeOfNodes::elementsIterator
         (new SMDS_QuadraticVolumeOfNodes_MyIterator(myNodes))));
   }
   return SMDS_ElemIteratorPtr();
+}
+
+/*!
+ * \brief Return node by its index
+ * \param ind - node index
+ * \retval const SMDS_MeshNode* - the node
+ * 
+ * Index is wrapped if it is out of a valid range
+ */
+const SMDS_MeshNode* SMDS_QuadraticVolumeOfNodes::GetNode(const int ind) const
+{
+  return myNodes[ WrappedIndex( ind )];
 }
 

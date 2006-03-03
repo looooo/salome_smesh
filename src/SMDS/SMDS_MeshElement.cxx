@@ -200,17 +200,11 @@ bool SMDS_MeshElement::IsValidIndex(const int ind) const
 
 const SMDS_MeshNode* SMDS_MeshElement::GetNode(const int ind) const
 {
-  SMDS_MeshNode* N;
-  if(IsValidIndex(ind)) {
-    int nbe = 0;
-    SMDS_ElemIteratorPtr it=edgesIterator();
-    while(nbe<ind) {
-      it->next();
-      nbe++;
-    }
-    return static_cast<const SMDS_MeshNode*> (it->next());
-  }
-  return N;
+  SMDS_ElemIteratorPtr it = nodesIterator();
+  int i = 0, index = WrappedIndex( ind );
+  while ( index != i++ )
+    it->next();
+  return static_cast<const SMDS_MeshNode*> (it->next());
 }
 
 bool SMDS_MeshElement::IsQuadratic() const

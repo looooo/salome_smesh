@@ -34,25 +34,29 @@ class SMDS_WNT_EXPORT SMDS_QuadraticEdge: public SMDS_MeshEdge
 {
 
 public:
-    SMDS_QuadraticEdge(const SMDS_MeshNode * node1,
-                       const SMDS_MeshNode * node2,
-                       const SMDS_MeshNode * node12);
-
-    bool ChangeNodes(const SMDS_MeshNode * node1,
+  SMDS_QuadraticEdge(const SMDS_MeshNode * node1,
                      const SMDS_MeshNode * node2,
                      const SMDS_MeshNode * node12);
 
-    void Print(std::ostream & OS) const;
-    
-    int NbNodes() const;
+  bool ChangeNodes(const SMDS_MeshNode * node1,
+                   const SMDS_MeshNode * node2,
+                   const SMDS_MeshNode * node12);
 
-    virtual bool IsQuadratic() const { return true; }
-    
-    virtual bool IsMediumNode(const SMDS_MeshNode* node) const;
+  void Print(std::ostream & OS) const;
+
+  int NbNodes() const;
+
+  virtual bool IsQuadratic() const { return true; }
+
+  virtual bool IsMediumNode(const SMDS_MeshNode* node) const;
+
+  SMDS_NodeIteratorPtr interlacedNodesIterator() const;
+
+  SMDS_ElemIteratorPtr interlacedNodesElemIterator() const;
 
 protected:
   SMDS_ElemIteratorPtr
-    elementsIterator(SMDSAbs_ElementType type) const;
+  elementsIterator(SMDSAbs_ElementType type) const;
 
 };
 #endif

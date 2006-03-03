@@ -50,15 +50,6 @@
 #include <set>
 #include <list>
 
-typedef SMDS_Iterator<const SMDS_MeshNode *> SMDS_NodeIterator;
-typedef boost::shared_ptr<SMDS_Iterator<const SMDS_MeshNode *> > SMDS_NodeIteratorPtr;
-typedef SMDS_Iterator<const SMDS_MeshEdge *> SMDS_EdgeIterator;
-typedef boost::shared_ptr<SMDS_Iterator<const SMDS_MeshEdge *> > SMDS_EdgeIteratorPtr;
-typedef SMDS_Iterator<const SMDS_MeshFace *> SMDS_FaceIterator;
-typedef boost::shared_ptr<SMDS_Iterator<const SMDS_MeshFace *> > SMDS_FaceIteratorPtr;
-typedef SMDS_Iterator<const SMDS_MeshVolume *> SMDS_VolumeIterator;
-typedef boost::shared_ptr<SMDS_Iterator<const SMDS_MeshVolume *> > SMDS_VolumeIteratorPtr;
-
 class SMDS_WNT_EXPORT SMDS_Mesh:public SMDS_MeshObject{
 public:
   

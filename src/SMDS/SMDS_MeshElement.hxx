@@ -68,15 +68,6 @@ public:
   virtual int NbFaces() const;
   int GetID() const;
 
-  /**
-   * Return true if index of node is valid (0...NbNodes()-1)
-   */
-  virtual bool IsValidIndex(const int ind) const;
-  /**
-   * Return node by it index (if index is valid)
-   */
-  virtual const SMDS_MeshNode* GetNode(const int ind) const;
-
   ///Return the type of the current element
   virtual SMDSAbs_ElementType GetType() const = 0;
   virtual bool IsPoly() const { return false; };
@@ -86,6 +77,36 @@ public:
 
   friend std::ostream & operator <<(std::ostream & OS, const SMDS_MeshElement *);
   friend bool SMDS_MeshElementIDFactory::BindID(int ID,SMDS_MeshElement*elem);
+
+  // ===========================
+  //  Access to nodes by index
+  // ===========================
+  /*!
+   * \brief Return node by its index
+    * \param ind - node index
+    * \retval const SMDS_MeshNode* - the node
+   * 
+   * Index is wrapped if it is out of a valid range
+   */
+  virtual const SMDS_MeshNode* GetNode(const int ind) const;
+
+  /*!
+   * \brief Return true if index of node is valid (0 <= ind < NbNodes())
+    * \param ind - node index
+    * \retval bool - index check result
+   */
+  virtual bool IsValidIndex(const int ind) const;
+
+  /*!
+   * \brief Make index valid
+    * \param ind - node index
+    * \retval int - valid node index
+   */
+  int WrappedIndex(const int ind) const {
+    if ( ind < 0 ) return -( ind % NbNodes());
+    if ( ind >= NbNodes() ) return ind % NbNodes();
+    return ind;
+  }
 
 protected:
   SMDS_MeshElement(int ID=-1);

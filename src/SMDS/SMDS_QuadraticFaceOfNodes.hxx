@@ -29,9 +29,6 @@
 
 #include "SMDS_MeshFace.hxx"
 
-typedef SMDS_Iterator<const SMDS_MeshNode *> SMDS_NodeIterator;
-typedef boost::shared_ptr<SMDS_Iterator<const SMDS_MeshNode *> > SMDS_NodeIteratorPtr;
-
 class SMDS_WNT_EXPORT SMDS_QuadraticFaceOfNodes:public SMDS_MeshFace
 {
 public:
@@ -65,6 +62,17 @@ public:
   virtual void Print (std::ostream & OS) const;
 
   SMDS_NodeIteratorPtr interlacedNodesIterator() const;
+
+  SMDS_ElemIteratorPtr interlacedNodesElemIterator() const;
+
+  /*!
+   * \brief Return node by its index
+    * \param ind - node index
+    * \retval const SMDS_MeshNode* - the node
+   * 
+   * Index is wrapped if it is out of a valid range
+   */
+  virtual const SMDS_MeshNode* GetNode(const int ind) const;
 
 protected:
   virtual SMDS_ElemIteratorPtr elementsIterator (SMDSAbs_ElementType type) const;

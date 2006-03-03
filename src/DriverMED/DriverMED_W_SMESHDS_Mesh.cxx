@@ -393,28 +393,30 @@ Driver_Mesh::Status DriverMED_W_SMESHDS_Mesh::Perform()
 #ifdef _ELEMENTS_BY_DIM_
       SMDS_MED_ENTITY = eARETE;
 #endif
+      // count edges of diff types
+      int aNbSeg3 = 0, aNbSeg2 = 0;
       SMDS_EdgeIteratorPtr anIter = myMesh->edgesIterator();
-
-//      TInt aNbConnectivity = MED::GetNbNodes(eSEG2);
-//      MED::TIntVector anElemNums(aNbElems);
-//      MED::TIntVector aFamilyNums(aNbElems);
-//      MED::TIntVector aConnectivity(aNbElems*aNbConnectivity);
+      while ( anIter->more() )
+        if ( anIter->next()->NbNodes() == 3 )
+          ++aNbSeg3;
+      aNbSeg2 = aNbElems - aNbSeg3;
 
       TInt aNbSeg2Conn = MED::GetNbNodes(eSEG2);
-      MED::TIntVector aSeg2ElemNums(aNbElems);
-      MED::TIntVector aSeg2FamilyNums(aNbElems);
-      MED::TIntVector aSeg2Conn(aNbElems*aNbSeg2Conn);
+      MED::TIntVector aSeg2ElemNums, aSeg2FamilyNums, aSeg2Conn;
+      aSeg2ElemNums  .reserve( aNbSeg2 );
+      aSeg2FamilyNums.reserve( aNbSeg2 );
+      aSeg2Conn      .reserve( aNbSeg2*aNbSeg2Conn );
 
       TInt aNbSeg3Conn = MED::GetNbNodes(eSEG3);
-      MED::TIntVector aSeg3ElemNums(aNbElems);
-      MED::TIntVector aSeg3FamilyNums(aNbElems);
-      MED::TIntVector aSeg3Conn(aNbElems*aNbSeg3Conn);
+      MED::TIntVector aSeg3ElemNums, aSeg3FamilyNums, aSeg3Conn;
+      aSeg3ElemNums  .reserve( aNbSeg3 );
+      aSeg3FamilyNums.reserve( aNbSeg3 );
+      aSeg3Conn      .reserve( aNbSeg3*aNbSeg3Conn );
 
-      //for(TInt iElem = 0, Conn = 0; anIter->more(); iElem++, iConn+=aNbConnectivity){
-      for(TInt iElem = 0; anIter->more(); iElem++) {
+      anIter = myMesh->edgesIterator();
+      while ( anIter->more() ) {
 	const SMDS_MeshEdge* anElem = anIter->next();
 	TInt aNbNodes = anElem->NbNodes();
-	SMDS_ElemIteratorPtr aNodesIter = anElem->nodesIterator();
 
 	TInt aNbConnectivity;
 	MED::TIntVector* anElemNums;
@@ -423,46 +425,39 @@ Driver_Mesh::Status DriverMED_W_SMESHDS_Mesh::Perform()
         switch(aNbNodes){
         case 2:
           aNbConnectivity = aNbSeg2Conn;
-          anElemNums = &aSeg2ElemNums;
-          aFamilyNums = &aSeg2FamilyNums;
-          aConnectivity = &aSeg2Conn;
+          anElemNums      = &aSeg2ElemNums;
+          aFamilyNums     = &aSeg2FamilyNums;
+          aConnectivity   = &aSeg2Conn;
           break;
         case 3:
           aNbConnectivity = aNbSeg3Conn;
-          anElemNums = &aSeg3ElemNums;
-          aFamilyNums = &aSeg3FamilyNums;
-          aConnectivity = &aSeg3Conn;
+          anElemNums      = &aSeg3ElemNums;
+          aFamilyNums     = &aSeg3FamilyNums;
+          aConnectivity   = &aSeg3Conn;
           break;
         default:
           break;
         }
 
-	MED::TIntVector aVector(aNbNodes);
-	for(TInt iNode = 0; aNodesIter->more(); iNode++){
-	  const SMDS_MeshElement* aNode = aNodesIter->next();
+        for(TInt iNode = 0; iNode < aNbNodes; iNode++) {
+	  const SMDS_MeshElement* aNode = anElem->GetNode( iNode );
 #ifdef _EDF_NODE_IDS_
-	  aVector[iNode] = aNodeIdMap[aNode->GetID()];
+	  aConnectivity->push_back( aNodeIdMap[aNode->GetID()] );
 #else
-	  aVector[iNode] = aNode->GetID();
+	  aConnectivity->push_back( aNode->GetID() );
 #endif
-	}
-
-	TInt aSize = aConnectivity->size();
-	aConnectivity->resize(aSize+aNbConnectivity);
-	// There is some differences between SMDS and MED in cells mapping
-        for(TInt iNode = 0; iNode < aNbNodes; iNode++) 
-          (*aConnectivity)[aSize+iNode] = aVector[iNode];
+        }
 
 	anElemNums->push_back(anElem->GetID());
 
-        if (anElemFamMap.find(anElem) != anElemFamMap.end())
-          aFamilyNums->push_back(anElemFamMap[anElem]);
+        map<const SMDS_MeshElement*,int>::iterator edge_fam = anElemFamMap.find( anElem );
+        if ( edge_fam != anElemFamMap.end() )
+          aFamilyNums->push_back( edge_fam->second );
         else
-          aFamilyNums->push_back(myFacesDefaultFamilyId);
-
+          aFamilyNums->push_back( myFacesDefaultFamilyId );
       }
       
-      if(TInt aNbElems = aSeg2ElemNums.size()){
+      if ( aNbSeg2 ) {
         PCellInfo aCellInfo = myMed->CrCellInfo(aMeshInfo,
                                                 SMDS_MED_ENTITY,
                                                 eSEG2,
@@ -472,7 +467,7 @@ Driver_Mesh::Status DriverMED_W_SMESHDS_Mesh::Perform()
                                                 aSeg2ElemNums);
         myMed->SetCellInfo(aCellInfo);
       }
-      if(TInt aNbElems = aSeg3ElemNums.size()){
+      if ( aNbSeg3 ) {
         PCellInfo aCellInfo = myMed->CrCellInfo(aMeshInfo,
                                                 SMDS_MED_ENTITY,
                                                 eSEG3,

@@ -47,6 +47,7 @@
 #include "SMDS_MeshNode.hxx"
 #include "SMDS_VolumeTool.hxx"
 #include "SMDS_QuadraticFaceOfNodes.hxx"
+#include "SMDS_QuadraticEdge.hxx"
 
 
 /*
@@ -88,32 +89,69 @@ namespace{
       return 0;
 
     const SMDS_MeshElement* anEdge = theMesh->FindElement( theId );
-    if ( anEdge == 0 || anEdge->GetType() != SMDSAbs_Edge || anEdge->NbNodes() != 2 )
+    if ( anEdge == 0 || anEdge->GetType() != SMDSAbs_Edge/* || anEdge->NbNodes() != 2 */)
       return 0;
 
-    TColStd_MapOfInteger aMap;
+    // for each pair of nodes in anEdge (there are 2 pairs in a quadratic edge)
+    // count elements containing both nodes of the pair.
+    // Note that there may be such cases for a quadratic edge (a horizontal line):
+    //
+    //  Case 1          Case 2
+    //  |     |      |        |      |
+    //  |     |      |        |      |
+    //  +-----+------+  +-----+------+ 
+    //  |            |  |            |
+    //  |            |  |            |
+    // result sould be 2 in both cases
+    //
+    int aResult0 = 0, aResult1 = 0;
+     // last node, it is a medium one in a quadratic edge
+    const SMDS_MeshNode* aLastNode = anEdge->GetNode( anEdge->NbNodes() - 1 );
+    const SMDS_MeshNode* aNode0 = anEdge->GetNode( 0 );
+    const SMDS_MeshNode* aNode1 = anEdge->GetNode( 1 );
+    if ( aNode1 == aLastNode ) aNode1 = 0;
 
-    int aResult = 0;
-    SMDS_ElemIteratorPtr anIter = anEdge->nodesIterator();
-    if ( anIter != 0 ) {
-      while( anIter->more() ) {
-	const SMDS_MeshNode* aNode = (SMDS_MeshNode*)anIter->next();
-	if ( aNode == 0 )
-	  return 0;
-	SMDS_ElemIteratorPtr anElemIter = aNode->GetInverseElementIterator();
-	while( anElemIter->more() ) {
-	  const SMDS_MeshElement* anElem = anElemIter->next();
-	  if ( anElem != 0 && anElem->GetType() != SMDSAbs_Edge ) {
-	    int anId = anElem->GetID();
-
-	    if ( anIter->more() )              // i.e. first node
-	      aMap.Add( anId );
-	    else if ( aMap.Contains( anId ) )
-	      aResult++;
-	  }
-	}
+    SMDS_ElemIteratorPtr anElemIter = aLastNode->GetInverseElementIterator();
+    while( anElemIter->more() ) {
+      const SMDS_MeshElement* anElem = anElemIter->next();
+      if ( anElem != 0 && anElem->GetType() != SMDSAbs_Edge ) {
+        SMDS_ElemIteratorPtr anIter = anElem->nodesIterator();
+        while ( anIter->more() ) {
+          if ( const SMDS_MeshElement* anElemNode = anIter->next() ) {
+            if ( anElemNode == aNode0 ) {
+              aResult0++;
+              if ( !aNode1 ) break; // not a quadratic edge
+            }
+            else if ( anElemNode == aNode1 )
+              aResult1++;
+          }
+        }
       }
     }
+    int aResult = max ( aResult0, aResult1 );
+
+//     TColStd_MapOfInteger aMap;
+
+//     SMDS_ElemIteratorPtr anIter = anEdge->nodesIterator();
+//     if ( anIter != 0 ) {
+//       while( anIter->more() ) {
+// 	const SMDS_MeshNode* aNode = (SMDS_MeshNode*)anIter->next();
+// 	if ( aNode == 0 )
+// 	  return 0;
+// 	SMDS_ElemIteratorPtr anElemIter = aNode->GetInverseElementIterator();
+// 	while( anElemIter->more() ) {
+// 	  const SMDS_MeshElement* anElem = anElemIter->next();
+// 	  if ( anElem != 0 && anElem->GetType() != SMDSAbs_Edge ) {
+// 	    int anId = anElem->GetID();
+
+// 	    if ( anIter->more() )              // i.e. first node
+// 	      aMap.Add( anId );
+// 	    else if ( aMap.Contains( anId ) )
+// 	      aResult++;
+// 	  }
+// 	}
+//       }
+//     }
 
     return aResult;
   }
@@ -155,39 +193,41 @@ bool NumericalFunctor::GetPoints(const int theId,
 }
 
 bool NumericalFunctor::GetPoints(const SMDS_MeshElement* anElem,
-                                 TSequenceOfXYZ& theRes )
+                                 TSequenceOfXYZ&         theRes )
 {
   theRes.clear();
 
   if ( anElem == 0)
     return false;
 
-  // Get nodes of the element
+  theRes.reserve( anElem->NbNodes() );
 
-  if(anElem->IsQuadratic()) {
-    const SMDS_QuadraticFaceOfNodes* F =
-      static_cast<const SMDS_QuadraticFaceOfNodes*>(anElem);
-    // use special nodes iterator
-    SMDS_NodeIteratorPtr anIter = F->interlacedNodesIterator();
-    if ( anIter != 0 ) {
-      while( anIter->more() ) {
-        const SMDS_MeshNode* aNode = anIter->next();
-        if ( aNode != 0 ) {
-          theRes.push_back( gp_XYZ( aNode->X(), aNode->Y(), aNode->Z() ) );
-        }
-      }
+  // Get nodes of the element
+  SMDS_ElemIteratorPtr anIter;
+
+  if ( anElem->IsQuadratic() ) {
+    switch ( anElem->GetType() ) {
+    case SMDSAbs_Edge:
+      anIter = static_cast<const SMDS_QuadraticEdge*>
+        (anElem)->interlacedNodesElemIterator();
+      break;
+    case SMDSAbs_Face:
+      anIter = static_cast<const SMDS_QuadraticFaceOfNodes*>
+        (anElem)->interlacedNodesElemIterator();
+      break;
+    default:
+      anIter = anElem->nodesIterator();
+      //return false;
     }
   }
+  else {
+    anIter = anElem->nodesIterator();
+  }
 
-  if(theRes.size()==0) {
-    SMDS_ElemIteratorPtr anIter = anElem->nodesIterator();
-    if ( anIter != 0 ) {
-      while( anIter->more() ) {
-        const SMDS_MeshNode* aNode = (SMDS_MeshNode*)anIter->next();
-        if ( aNode != 0 ) {
-          theRes.push_back( gp_XYZ( aNode->X(), aNode->Y(), aNode->Z() ) );
-        }
-      }
+  if ( anIter ) {
+    while( anIter->more() ) {
+      if ( const SMDS_MeshNode* aNode = static_cast<const SMDS_MeshNode*>( anIter->next() ))
+        theRes.push_back( gp_XYZ( aNode->X(), aNode->Y(), aNode->Z() ) );
     }
   }
 
@@ -206,12 +246,10 @@ void  NumericalFunctor::SetPrecision( const long thePrecision )
 
 double NumericalFunctor::GetValue( long theId )
 {
-cout<<"theId="<<theId<<endl;
   TSequenceOfXYZ P;
   if ( GetPoints( theId, P ))
   {
     double aVal = GetValue( P );
-cout<<"aVal="<<aVal<<endl;
     if ( myPrecision >= 0 )
     {
       double prec = pow( 10., (double)( myPrecision ) );
@@ -874,7 +912,7 @@ double Area::GetValue( const TSequenceOfXYZ& P )
 
 double Area::GetBadRate( double Value, int /*nbNodes*/ ) const
 {
-  // meaningless as it is not quality control functor
+  // meaningless as it is not a quality control functor
   return Value;
 }
 
@@ -890,7 +928,11 @@ SMDSAbs_ElementType Area::GetType() const
 */
 double Length::GetValue( const TSequenceOfXYZ& P )
 {
-  return ( P.size() == 2 ? getDistance( P( 1 ), P( 2 ) ) : 0 );
+  switch ( P.size() ) {
+  case 2:  return getDistance( P( 1 ), P( 2 ) );
+  case 3:  return getDistance( P( 1 ), P( 2 ) ) + getDistance( P( 2 ), P( 3 ) );
+  default: return 0.;
+  }
 }
 
 double Length::GetBadRate( double Value, int /*nbNodes*/ ) const
@@ -1490,41 +1532,33 @@ bool FreeEdges::IsSatisfy( long theId )
   if ( aFace == 0 || aFace->GetType() != SMDSAbs_Face || aFace->NbNodes() < 3 )
     return false;
 
-  int nbNodes = aFace->NbNodes();
-  //const SMDS_MeshNode* aNodes[ nbNodes ];
-#ifndef WNT
-  const SMDS_MeshNode* aNodes [nbNodes];
-#else
-  const SMDS_MeshNode** aNodes = (const SMDS_MeshNode **)new SMDS_MeshNode*[nbNodes];
-#endif
-  int i = 0;
-  SMDS_ElemIteratorPtr anIter = aFace->nodesIterator();
-  if ( anIter != 0 )
-  {
-    while( anIter->more() )
-    {
-      const SMDS_MeshNode* aNode = (SMDS_MeshNode*)anIter->next();
-      if ( aNode == 0 )
-        return false;
-      aNodes[ i++ ] = aNode;
-    }
+  SMDS_ElemIteratorPtr anIter;
+  if ( aFace->IsQuadratic() ) {
+    anIter = static_cast<const SMDS_QuadraticFaceOfNodes*>
+      (aFace)->interlacedNodesElemIterator();
   }
+  else {
+    anIter = aFace->nodesIterator();
+  }
+  if ( anIter != 0 )
+    return false;
 
-  for ( int i = 0; i < nbNodes - 1; i++ )
-	  if ( IsFreeEdge( &aNodes[ i ], theId ) ) {
-#ifdef WNT
-		delete [] aNodes;
-#endif
+  int i = 0, nbNodes = aFace->NbNodes();
+  vector <const SMDS_MeshNode*> aNodes( nbNodes+1 );
+  while( anIter->more() )
+  {
+    const SMDS_MeshNode* aNode = (SMDS_MeshNode*)anIter->next();
+    if ( aNode == 0 )
+      return false;
+    aNodes[ i++ ] = aNode;
+  }
+  aNodes[ nbNodes ] = aNodes[ 0 ];
+
+  for ( i = 0; i < nbNodes; i++ )
+    if ( IsFreeEdge( &aNodes[ i ], theId ) )
       return true;
-	  }
 
-  aNodes[ 1 ] = aNodes[ nbNodes - 1 ];
-  const Standard_Boolean isFree = IsFreeEdge( &aNodes[ 0 ], theId );
-#ifdef WNT
-		delete [] aNodes;
-#endif
-//  return 
- return isFree;
+  return false;
 }
 
 SMDSAbs_ElementType FreeEdges::GetType() const

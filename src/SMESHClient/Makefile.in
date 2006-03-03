@@ -66,8 +66,26 @@ BIN_SERVER_IDL =
 # additionnal information to compil and link file
 CPPFLAGS += $(OCC_INCLUDES) -I${KERNEL_ROOT_DIR}/include/salome
 CXXFLAGS += $(OCC_CXXFLAGS) -I${KERNEL_ROOT_DIR}/include/salome
-LDFLAGS  += $(OCC_KERNEL_LIBS) -L${KERNEL_ROOT_DIR}/lib/salome -lSMDS -lSMESHimpl -lSMESHDS -lSMESHControls
+LDFLAGS  += $(OCC_KERNEL_LIBS) \
+	    -L${KERNEL_ROOT_DIR}/lib/salome \
+	    -L${GEOM_ROOT_DIR}/lib/salome \
+	    -L${MED_ROOT_DIR}/lib/salome \
+            -lSMDS \
+            -lSMESHimpl \
+            -lSMESHDS \
+            -lSMESHControls \
+            -lNMTTools \
+            -lNMTDS \
+	    -lmed_V2_1 \
+            -lMEDWrapper \
+            -lMEDWrapperBase \
+            -lMEDWrapper_V2_1 \
+            -lMEDWrapper_V2_2 \
+            -lSALOMELocalTrace \
+            -lSALOMEBasics \
+            -lOpUtil
 
 LDFLAGSFORBIN += $(LDFLAGS)
+
 @CONCLUDE@
 

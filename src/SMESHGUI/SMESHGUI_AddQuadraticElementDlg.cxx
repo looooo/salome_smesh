@@ -62,6 +62,46 @@ using namespace std;
 
 namespace SMESH {
 
+  void ReverseConnectivity( vector<int> & ids, int type )
+  {
+    // for reverse connectivity of other types keeping the first id, see
+    // void SMESH_VisualObjDef::buildElemPrs() in SMESH_Object.cxx:900
+    const int* conn = 0;
+   
+    switch ( type ) {
+    case QUAD_TETRAHEDRON: {
+      static int aConn[] = {0,2,1,3,6,5,4,7,9,8};
+      conn = aConn;
+      break;
+    }
+    case QUAD_PYRAMID: {
+      static int aConn[] = {0,3,2,1,4,8,7,6,5,9,12,11,10};
+      conn = aConn;
+      break;
+    }
+    case QUAD_PENTAHEDRON: {
+      static int aConn[] = {0,2,1,3,5,4,8,7,6,11,10,9,12,14,13};
+      conn = aConn;
+      break;
+    }
+    case QUAD_HEXAHEDRON: {
+      static int aConn[] = {0,3,2,1,4,7,6,5,11,10,9,8,15,14,13,12,16,19,18,17};
+      conn = aConn;
+      break;
+    }
+    default:;
+    }
+    if ( !conn ) {
+      reverse( ids.begin(), ids.end() );
+    }
+    else {
+      vector<int> aRevIds( ids.size() );
+      for ( int i = 0; i < ids.size(); i++)
+        aRevIds[ i ] = ids[ conn[ i ]];
+      ids = aRevIds;
+    }
+  }
+
   class TElementSimulation {
     SalomeApp_Application* myApplication;
     SUIT_ViewWindow* myViewWindow;
@@ -70,6 +110,9 @@ namespace SMESH {
     SALOME_Actor* myPreviewActor;
     vtkDataSetMapper* myMapper;
     vtkUnstructuredGrid* myGrid;
+    //vtkProperty* myBackProp, *myProp;
+
+    float anRGB[3], aBackRGB[3];
 
   public:
     TElementSimulation (SalomeApp_Application* theApplication)
@@ -91,82 +134,83 @@ namespace SMESH {
       myPreviewActor->VisibilityOff();
       myPreviewActor->SetMapper(myMapper);
 
-      float anRGB[3];
-      vtkProperty* aProp = vtkProperty::New();
+      vtkProperty* myProp = vtkProperty::New();
       GetColor( "SMESH", "fill_color", anRGB[0], anRGB[1], anRGB[2], QColor( 0, 170, 255 ) );
-      aProp->SetColor( anRGB[0], anRGB[1], anRGB[2] );
-      myPreviewActor->SetProperty( aProp );
-      aProp->Delete();
+      myProp->SetColor( anRGB[0], anRGB[1], anRGB[2] );
+      myPreviewActor->SetProperty( myProp );
+      myProp->Delete();
 
-      vtkProperty* aBackProp = vtkProperty::New();
-      GetColor( "SMESH", "backface_color", anRGB[0], anRGB[1], anRGB[2], QColor( 0, 0, 255 ) );
-      aBackProp->SetColor( anRGB[0], anRGB[1], anRGB[2] );
-      myPreviewActor->SetBackfaceProperty( aBackProp );
-      aBackProp->Delete();
+      vtkProperty* myBackProp = vtkProperty::New();
+      GetColor( "SMESH", "backface_color", aBackRGB[0], aBackRGB[1], aBackRGB[2], QColor( 0, 0, 255 ) );
+      myBackProp->SetColor( aBackRGB[0], aBackRGB[1], aBackRGB[2] );
+      myPreviewActor->SetBackfaceProperty( myBackProp );
+      myBackProp->Delete();
 
       myVTKViewWindow->AddActor(myPreviewActor);
     }
 
     typedef std::vector<vtkIdType> TVTKIds;
     void SetPosition (SMESH_Actor* theActor,
-                      vtkIdType theType,
-                      const TVTKIds& theIds,
-		      int theMode)
+                      const int    theType,
+                      TVTKIds&     theIds,
+		      const int    theMode,
+                      const bool   theReverse)
     {
       vtkUnstructuredGrid *aGrid = theActor->GetUnstructuredGrid();
       myGrid->SetPoints(aGrid->GetPoints());
 
       //add points
-          
-      const int* aConn = NULL;
-      
-      /*
-      switch (theType) {
-      case VTK_QUADRATIC_TRIANGLE:
-	{
-          static int anIds[] = {0,2,1,5,4,3};
-          aConn = anIds;
-          break;
-	}
 
-      case VTK_QUADRATIC_QUAD:
-	{
-          static int anIds[] = {0,3,2,1,7,6,5,4};
-          aConn = anIds;
-          break;
-	}
-      case VTK_QUADRATIC_TETRA:
-	{
-          static int anIds[] = {0,2,1,3,6,5,4,7,9,8};
-          aConn = anIds;
-          break;
-	}
-      case VTK_QUADRATIC_PYRAMID:
-	{
-          static int anIds[] = {0,3,2,1,4,9,12,11,10};
-          aConn = anIds;
-          break;
-	}
-      case VTK_QUADRATIC_HEXAHEDRON:
-	{
-          static int anIds[] = {0,3,2,1,4,7,6,5,11,10,9,8,15,14,13,12,16,19,18,17};
-          aConn = anIds;
-          break;
-	}
+      vtkIdType aType = 0;
+
+      switch (theType) {
+      case QUAD_EDGE:
+        aType = VTK_QUADRATIC_EDGE;
+        break;
+      case QUAD_TRIANGLE:
+        aType = VTK_QUADRATIC_TRIANGLE; 
+        break;
+      case QUAD_QUADRANGLE:
+        aType = VTK_QUADRATIC_QUAD; 
+        break;
+      case QUAD_TETRAHEDRON:
+        aType = VTK_QUADRATIC_TETRA; 
+        break;
+      case QUAD_PYRAMID:
+        //aType = VTK_QUADRATIC_PYRAMID; // NOT SUPPORTED IN VTK4.2
+        aType = VTK_CONVEX_POINT_SET;
+        break;
+      case QUAD_PENTAHEDRON:
+        //aType = VTK_QUADRATIC_WEDGE; // NOT SUPPORTED IN VTK4.2
+        aType = VTK_CONVEX_POINT_SET;
+        break; 
+      case QUAD_HEXAHEDRON:
+        aType = VTK_QUADRATIC_HEXAHEDRON;
+        break;
       }
-      */
+
+      // take care of orientation
+      if ( aType == VTK_CONVEX_POINT_SET ) {
+        if ( theReverse && theMode == VTK_SURFACE ) {
+          //myPreviewActor->GetProperty()->SetColor( aBackRGB[0], aBackRGB[1], aBackRGB[2] );
+        }
+      }
+      else {
+        // VTK cell connectivity opposites the MED one
+        if ( !theReverse ) {
+          ReverseConnectivity( theIds, theType );
+        }
+      }
             
       myGrid->Reset();
       vtkIdList *anIds = vtkIdList::New();
       
-      if(aConn)
-	for (int i = 0, iEnd = theIds.size(); i < iEnd; i++)
-	  anIds->InsertId(i,theIds[aConn[i]]);
-      else
-	for (int i = 0, iEnd = theIds.size(); i < iEnd; i++)
-	  anIds->InsertId(i,theIds[i]);
+      for (int i = 0, iEnd = theIds.size(); i < iEnd; i++) {
+        anIds->InsertId(i,theIds[i]);
+        //std::cout << i<< ": " << theIds[i] << std::endl;
+      }
       
-      myGrid->InsertNextCell(theType,anIds);
+      myGrid->InsertNextCell(aType,anIds);
       anIds->Delete();
       
       myGrid->Modified();
@@ -174,6 +218,13 @@ namespace SMESH {
       myPreviewActor->GetMapper()->Update();
       myPreviewActor->SetRepresentation( theMode );
       SetVisibility(true);
+
+      // restore normal orientation
+      if ( aType == VTK_CONVEX_POINT_SET ) {
+        if ( theReverse  && theMode == VTK_SURFACE ) {
+          //myPreviewActor->GetProperty()->SetColor( anRGB[0], anRGB[1], anRGB[2] );
+        }
+      }
     }
 
 
@@ -195,6 +246,9 @@ namespace SMESH {
       myMapper->Delete();
 
       myGrid->Delete();
+
+//       myProp->Delete();
+//       myBackProp->Delete();
     }
   };
 }
@@ -210,11 +264,11 @@ static int LastTriangleIds[] =  {1,2,0};
 static int FirstQuadrangleIds[] = {0,1,2,3};
 static int LastQuadrangleIds[] =  {1,2,3,0};
 
-static int FirstTetrahedronIds[] = {0,1,2,3,1,2};
-static int LastTetrahedronIds[] =  {1,2,0,0,3,3};
+static int FirstTetrahedronIds[] = {0,1,2,3,3,3};
+static int LastTetrahedronIds[] =  {1,2,0,0,1,2};
 
-static int FirstPyramidIds[] = {0,1,2,3,4,1,2,3};
-static int LastPyramidIds[] =  {1,2,3,0,0,4,4,4};
+static int FirstPyramidIds[] = {0,1,2,3,4,4,4,4};
+static int LastPyramidIds[] =  {1,2,3,0,0,1,2,3};
 
 static int FirstPentahedronIds[] = {0,1,2,3,4,5,0,1,2};
 static int LastPentahedronIds[] =  {1,2,0,4,5,3,3,4,5};
@@ -419,7 +473,7 @@ void SMESHGUI_AddQuadraticElementDlg::Init()
     myNbCorners = 5;
     break;
   case QUAD_PENTAHEDRON:
-    aNumRows = 8;
+    aNumRows = 9;
     myNbCorners = 6;
     break; 
   case QUAD_HEXAHEDRON:
@@ -496,13 +550,13 @@ void SMESHGUI_AddQuadraticElementDlg::ClickOnApply()
   if (IsValid() && !mySMESHGUI->isActiveStudyLocked()) {
     myBusy = true;
     
-    QStringList aListId;
+    vector<int> anIds;
 
     switch (myType) {
     case QUAD_EDGE:
-      aListId.append(myTable->text(0, 0));
-      aListId.append(myTable->text(0, 1));
-      aListId.append(myTable->text(0, 2));
+      anIds.push_back(myTable->text(0, 0).toInt());
+      anIds.push_back(myTable->text(0, 2).toInt());
+      anIds.push_back(myTable->text(0, 1).toInt());
       break;
     case QUAD_TRIANGLE:
     case QUAD_QUADRANGLE:
@@ -511,23 +565,20 @@ void SMESHGUI_AddQuadraticElementDlg::ClickOnApply()
     case QUAD_PENTAHEDRON:
     case QUAD_HEXAHEDRON:
       for ( int row = 0; row < myNbCorners; row++ )
-	aListId.append(myTable->text(row, 0));
+	anIds.push_back(myTable->text(row, 0).toInt());
       for ( int row = 0; row < myTable->numRows(); row++ )
-	aListId.append(myTable->text(row, 1));
+	anIds.push_back(myTable->text(row, 1).toInt());
       break;
     }
-
-    int aNumberOfIds =  aListId.count();
+    if ( myReverseCB->isChecked())
+      SMESH::ReverseConnectivity( anIds, myType );
+    
+    int aNumberOfIds =  anIds.size();
     SMESH::long_array_var anArrayOfIdeces = new SMESH::long_array;
     anArrayOfIdeces->length( aNumberOfIds );
     
-    bool reverse = (myReverseCB->isChecked());
-    
     for (int i = 0; i < aNumberOfIds; i++)
-      if (reverse)
-        anArrayOfIdeces[i] = aListId[ aNumberOfIds - i - 1 ].toInt();
-      else
-        anArrayOfIdeces[i] = aListId[ i ].toInt();
+      anArrayOfIdeces[i] = anIds[ i ];
 
     SMESH::SMESH_MeshEditor_var aMeshEditor = myMesh->GetMeshEditor();
     switch (myType) {
@@ -735,10 +786,10 @@ void SMESHGUI_AddQuadraticElementDlg::displaySimulation()
     if ( myType == QUAD_EDGE )
       {
 	anIds.push_back( myActor->GetObject()->GetNodeVTKId( myTable->text(0, 0).toInt() ) );
+	anIds.push_back( myActor->GetObject()->GetNodeVTKId( myTable->text(0, 2).toInt() ) );
 	anID = (myTable->text(0, 1)).toInt(&ok);
 	if (!ok) anID = (myTable->text(0, 0)).toInt();
 	anIds.push_back( myActor->GetObject()->GetNodeVTKId(anID) );
-	anIds.push_back( myActor->GetObject()->GetNodeVTKId( myTable->text(0, 2).toInt() ) );
 	aDisplayMode = VTK_WIREFRAME;
       }
     else
@@ -757,38 +808,7 @@ void SMESHGUI_AddQuadraticElementDlg::displaySimulation()
 	  }
       }
     
-    if (myReverseCB->isChecked())
-      reverse(anIds.begin(),anIds.end());
-    
-    vtkIdType aType = 0;
-    
-    switch (myType) {
-    case QUAD_EDGE:
-      aType = VTK_QUADRATIC_EDGE;
-      break;
-    case QUAD_TRIANGLE:
-      aType = VTK_QUADRATIC_TRIANGLE; 
-      break;
-    case QUAD_QUADRANGLE:
-      aType = VTK_QUADRATIC_QUAD; 
-      break;
-    case QUAD_TETRAHEDRON:
-      aType = VTK_QUADRATIC_TETRA; 
-      break;
-      /*
-    case QUAD_PYRAMID:
-      aType = VTK_QUADRATIC_PYRAMID; // NOT SUPPORTED IN VTK4.2
-      break;
-    case QUAD_PENTAHEDRON:
-      aType = VTK_QUADRATIC_WEDGE; // NOT SUPPORTED IN VTK4.2
-      break; 
-      */
-    case QUAD_HEXAHEDRON:
-      aType = VTK_QUADRATIC_HEXAHEDRON;
-      break;
-    }
-    
-    mySimulation->SetPosition(myActor,aType,anIds,aDisplayMode);
+    mySimulation->SetPosition(myActor,myType,anIds,aDisplayMode,myReverseCB->isChecked());
     SMESH::UpdateView();
   }
 }

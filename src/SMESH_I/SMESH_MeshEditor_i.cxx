@@ -243,21 +243,26 @@ CORBA::Boolean SMESH_MeshEditor_i::AddVolume(const SMESH::long_array & IDsOfNode
   for(int i=0;i<NbNodes;i++)
     n[i]=GetMeshDS()->FindNode(IDsOfNodes[i]);
 
+  SMDS_MeshElement* elem = 0;
   switch(NbNodes)
   {
-  case 4:GetMeshDS()->AddVolume(n[0],n[1],n[2],n[3]); break;
-  case 5:GetMeshDS()->AddVolume(n[0],n[1],n[2],n[3],n[4]); break;
-  case 6:GetMeshDS()->AddVolume(n[0],n[1],n[2],n[3],n[4],n[5]); break;
-  case 8:GetMeshDS()->AddVolume(n[0],n[1],n[2],n[3],n[4],n[5],n[6],n[7]); break;
-  case 10:GetMeshDS()->AddVolume(n[0],n[1],n[2],n[3],n[4],n[5],
-                                 n[6],n[7],n[8],n[9]); break;
-  case 13:GetMeshDS()->AddVolume(n[0],n[1],n[2],n[3],n[4],n[5],n[6],
-                                 n[7],n[8],n[9],n[10],n[11],n[12]); break;
-  case 15:GetMeshDS()->AddVolume(n[0],n[1],n[2],n[3],n[4],n[5],n[6],n[7],n[8],
-                                 n[9],n[10],n[11],n[12],n[13],n[14]); break;
-  case 20:GetMeshDS()->AddVolume(n[0],n[1],n[2],n[3],n[4],n[5],n[6],n[7],
-                                 n[8],n[9],n[10],n[11],n[12],n[13],n[14],
-                                 n[15],n[16],n[17],n[18],n[19]); break;
+  case 4 :elem = GetMeshDS()->AddVolume(n[0],n[1],n[2],n[3]); break;
+  case 5 :elem = GetMeshDS()->AddVolume(n[0],n[1],n[2],n[3],n[4]); break;
+  case 6 :elem = GetMeshDS()->AddVolume(n[0],n[1],n[2],n[3],n[4],n[5]); break;
+  case 8 :elem = GetMeshDS()->AddVolume(n[0],n[1],n[2],n[3],n[4],n[5],n[6],n[7]); break;
+  case 10:elem = GetMeshDS()->AddVolume(n[0],n[1],n[2],n[3],n[4],n[5],
+                                        n[6],n[7],n[8],n[9]);
+    break;
+  case 13:elem = GetMeshDS()->AddVolume(n[0],n[1],n[2],n[3],n[4],n[5],n[6],
+                                        n[7],n[8],n[9],n[10],n[11],n[12]);
+    break;
+  case 15:elem = GetMeshDS()->AddVolume(n[0],n[1],n[2],n[3],n[4],n[5],n[6],n[7],n[8],
+                                        n[9],n[10],n[11],n[12],n[13],n[14]);
+    break;
+  case 20:elem = GetMeshDS()->AddVolume(n[0],n[1],n[2],n[3],n[4],n[5],n[6],n[7],
+                                        n[8],n[9],n[10],n[11],n[12],n[13],n[14],
+                                        n[15],n[16],n[17],n[18],n[19]);
+    break;
   }
   // Update Python script
   TPythonDump() << "isDone = " << this << ".AddVolume( " << IDsOfNodes << " )";
@@ -265,7 +270,7 @@ CORBA::Boolean SMESH_MeshEditor_i::AddVolume(const SMESH::long_array & IDsOfNode
   TPythonDump() << "print 'AddVolume: ', isDone";
 #endif
 
-  return true;
+  return elem;
 };
 
 //=============================================================================

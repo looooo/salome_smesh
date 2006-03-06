@@ -452,6 +452,7 @@ void SMESHGUI_CreatePolyhedralVolumeDlg::ClickOnApply()
 {
   if ( myNbOkElements>0 && !mySMESHGUI->isActiveStudyLocked())
     {
+      if(checkEditLine(false) == -1) {return;}
       busy = true;
       if (GetConstructorId() == 0)
 	{
@@ -535,6 +536,7 @@ void SMESHGUI_CreatePolyhedralVolumeDlg::ClickOnApply()
 //=================================================================================
 void SMESHGUI_CreatePolyhedralVolumeDlg::ClickOnOk()
 {
+  if(checkEditLine(false) == -1) {return;}
   ClickOnApply() ;
   ClickOnCancel() ;
 }

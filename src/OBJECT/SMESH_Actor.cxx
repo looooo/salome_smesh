@@ -150,6 +150,8 @@ SMESH_ActorDef::SMESH_ActorDef()
   aFilter->RegisterCellsWithType(VTK_TRIANGLE);
   aFilter->RegisterCellsWithType(VTK_POLYGON);
   aFilter->RegisterCellsWithType(VTK_QUAD);
+  aFilter->RegisterCellsWithType(VTK_QUADRATIC_TRIANGLE);
+  aFilter->RegisterCellsWithType(VTK_QUADRATIC_QUAD);
 
   my3DActor = SMESH_DeviceActor::New();
   my3DActor->SetUserMatrix(aMatrix);
@@ -164,6 +166,8 @@ SMESH_ActorDef::SMESH_ActorDef()
   aFilter->RegisterCellsWithType(VTK_HEXAHEDRON);
   aFilter->RegisterCellsWithType(VTK_WEDGE);
   aFilter->RegisterCellsWithType(VTK_PYRAMID);
+  aFilter->RegisterCellsWithType(VTK_QUADRATIC_TETRA);
+  aFilter->RegisterCellsWithType(VTK_QUADRATIC_HEXAHEDRON);
   aFilter->RegisterCellsWithType(VTK_CONVEX_POINT_SET);
 
   //Definition 1D divice of the actor
@@ -185,6 +189,7 @@ SMESH_ActorDef::SMESH_ActorDef()
   aFilter = my1DActor->GetExtractUnstructuredGrid();
   aFilter->SetModeOfChanging(VTKViewer_ExtractUnstructuredGrid::eAdding);
   aFilter->RegisterCellsWithType(VTK_LINE);
+  aFilter->RegisterCellsWithType(VTK_QUADRATIC_EDGE);
 
   my1DProp = vtkProperty::New();
   my1DProp->DeepCopy(myEdgeProp);
@@ -210,6 +215,7 @@ SMESH_ActorDef::SMESH_ActorDef()
   aFilter = my1DExtActor->GetExtractUnstructuredGrid();
   aFilter->SetModeOfChanging(VTKViewer_ExtractUnstructuredGrid::eAdding);
   aFilter->RegisterCellsWithType(VTK_LINE);
+  aFilter->RegisterCellsWithType(VTK_QUADRATIC_EDGE);
 
 
   //Definition 0D divice of the actor
@@ -1017,6 +1023,7 @@ void SMESH_ActorDef::SetEntityMode(unsigned int theMode){
   if(myEntityMode & eEdges){
     if (MYDEBUG) MESSAGE("EDGES");
     aFilter->RegisterCellsWithType(VTK_LINE);
+    aFilter->RegisterCellsWithType(VTK_QUADRATIC_EDGE);
   }
 
   if(myEntityMode & eFaces){
@@ -1024,6 +1031,8 @@ void SMESH_ActorDef::SetEntityMode(unsigned int theMode){
     aFilter->RegisterCellsWithType(VTK_TRIANGLE);
     aFilter->RegisterCellsWithType(VTK_POLYGON);
     aFilter->RegisterCellsWithType(VTK_QUAD);
+    aFilter->RegisterCellsWithType(VTK_QUADRATIC_TRIANGLE);
+    aFilter->RegisterCellsWithType(VTK_QUADRATIC_QUAD);
   }
 
   if(myEntityMode & eVolumes){
@@ -1033,6 +1042,8 @@ void SMESH_ActorDef::SetEntityMode(unsigned int theMode){
     aFilter->RegisterCellsWithType(VTK_HEXAHEDRON);
     aFilter->RegisterCellsWithType(VTK_WEDGE);
     aFilter->RegisterCellsWithType(VTK_PYRAMID);
+    aFilter->RegisterCellsWithType(VTK_QUADRATIC_TETRA);
+    aFilter->RegisterCellsWithType(VTK_QUADRATIC_HEXAHEDRON);
     aFilter->RegisterCellsWithType(VTK_CONVEX_POINT_SET);
   }
   aFilter->Update();

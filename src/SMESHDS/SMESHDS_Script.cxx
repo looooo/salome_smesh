@@ -257,3 +257,98 @@ const list<SMESHDS_Command*>& SMESHDS_Script::GetCommands()
 {
   return myCommands;
 }
+
+
+//********************************************************************
+//*****             Methods for quadratic elements              ******
+//********************************************************************
+
+//=======================================================================
+//function : AddEdge
+//purpose  : 
+//=======================================================================
+void SMESHDS_Script::AddEdge(int NewEdgeID, int n1, int n2, int n12)
+{
+  getCommand(SMESHDS_AddQuadEdge)->AddEdge(NewEdgeID, n1, n2, n12);
+}
+
+//=======================================================================
+//function : AddFace
+//purpose  : 
+//=======================================================================
+void SMESHDS_Script::AddFace(int NewFaceID, int n1, int n2, int n3,
+                             int n12, int n23, int n31)
+{
+  getCommand(SMESHDS_AddQuadTriangle)->AddFace(NewFaceID, n1, n2, n3,
+                                               n12, n23, n31);
+}
+
+//=======================================================================
+//function : AddFace
+//purpose  : 
+//=======================================================================
+void SMESHDS_Script::AddFace(int NewFaceID, int n1, int n2, int n3, int n4,
+                             int n12, int n23, int n34, int n41)
+{
+  getCommand(SMESHDS_AddQuadQuadrangle)->AddFace(NewFaceID, n1, n2, n3, n4,
+                                                 n12, n23, n34, n41);
+}
+
+//=======================================================================
+//function : AddVolume
+//purpose  : 
+//=======================================================================
+void SMESHDS_Script::AddVolume(int NewVolID, int n1, int n2, int n3, int n4,
+                               int n12, int n23, int n31,
+                               int n14, int n24, int n34)
+{
+  getCommand(SMESHDS_AddQuadTetrahedron)->AddVolume(NewVolID, n1, n2, n3, n4,
+                                                    n12, n23, n31,
+                                                    n14, n24, n34);
+}
+
+//=======================================================================
+//function : AddVolume
+//purpose  : 
+//=======================================================================
+void SMESHDS_Script::AddVolume(int NewVolID, int n1, int n2, int n3, int n4,
+                               int n5, int n12, int n23, int n34, int n41,
+                               int n15, int n25, int n35, int n45)
+{
+  getCommand(SMESHDS_AddQuadPyramid)->AddVolume(NewVolID, n1, n2, n3, n4, n5,
+                                                n12, n23, n34, n41,
+                                                n15, n25, n35, n45);
+}
+
+//=======================================================================
+//function : AddVolume
+//purpose  : 
+//=======================================================================
+void SMESHDS_Script::AddVolume(int NewVolID, int n1, int n2, int n3, int n4,
+                                int n5,int n6, int n12, int n23, int n31,
+                                int n45, int n56, int n64,
+                                int n14, int n25, int n36)
+{
+  getCommand(SMESHDS_AddQuadPentahedron)->AddVolume(NewVolID, n1,n2,n3,n4,n5,n6,
+                                                    n12, n23, n31,
+                                                    n45, n56, n64,
+                                                    n14, n25, n36);
+}
+
+//=======================================================================
+//function : AddVolume
+//purpose  : 
+//=======================================================================
+void SMESHDS_Script::AddVolume(int NewVolID, int n1, int n2, int n3,
+                               int n4, int n5, int n6, int n7, int n8,
+                               int n12, int n23, int n34, int n41,
+                               int n56, int n67, int n78, int n85,
+                               int n15, int n26, int n37, int n48)
+{
+  getCommand(SMESHDS_AddQuadHexahedron)->AddVolume(NewVolID, n1, n2, n3, n4,
+                                                   n5, n6, n7, n8,
+                                                   n12, n23, n34, n41,
+                                                   n56, n67, n78, n85,
+                                                   n15, n26, n37, n48);
+}
+

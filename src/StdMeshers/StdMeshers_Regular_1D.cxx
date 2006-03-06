@@ -33,6 +33,8 @@ using namespace std;
 #include "StdMeshers_Distribution.hxx"
 #include "SMESH_Gen.hxx"
 #include "SMESH_Mesh.hxx"
+#include "SMESH_HypoFilter.hxx"
+#include "SMESH_subMesh.hxx"
 
 #include "StdMeshers_LocalLength.hxx"
 #include "StdMeshers_NumberOfSegments.hxx"
@@ -44,7 +46,6 @@ using namespace std;
 #include "SMDS_MeshElement.hxx"
 #include "SMDS_MeshNode.hxx"
 #include "SMDS_EdgePosition.hxx"
-#include "SMESH_subMesh.hxx"
 
 #include "Utils_SALOME_Exception.hxx"
 #include "utilities.h"
@@ -90,6 +91,8 @@ StdMeshers_Regular_1D::StdMeshers_Regular_1D(int hypId, int studyId,
 	_compatibleHypothesis.push_back("Deflection1D");
 	_compatibleHypothesis.push_back("Arithmetic1D");
 	_compatibleHypothesis.push_back("AutomaticLength");
+
+	_compatibleHypothesis.push_back("QuadraticMesh"); // auxiliary !!!
 }
 
 //=============================================================================
@@ -109,21 +112,36 @@ StdMeshers_Regular_1D::~StdMeshers_Regular_1D()
 //=============================================================================
 
 bool StdMeshers_Regular_1D::CheckHypothesis
-                         (SMESH_Mesh& aMesh,
-                          const TopoDS_Shape& aShape,
+                         (SMESH_Mesh&                          aMesh,
+                          const TopoDS_Shape&                  aShape,
                           SMESH_Hypothesis::Hypothesis_Status& aStatus)
 {
   _hypType = NONE;
+  _quadraticMesh = false;
 
-  const list <const SMESHDS_Hypothesis * >&hyps = GetUsedHypothesis(aMesh, aShape);
-  if (hyps.size() == 0)
+  const bool ignoreAuxiliaryHyps = false;
+  const list <const SMESHDS_Hypothesis * > & hyps =
+    GetUsedHypothesis(aMesh, aShape, ignoreAuxiliaryHyps);
+
+  // find non-auxiliary hypothesis
+  const SMESHDS_Hypothesis *theHyp = 0;
+  list <const SMESHDS_Hypothesis * >::const_iterator h = hyps.begin();
+  for ( ; h != hyps.end(); ++h ) {
+    if ( static_cast<const SMESH_Hypothesis*>(*h)->IsAuxiliary() ) {
+      if ( strcmp( "QuadraticMesh", (*h)->GetName() ) == 0 )
+        _quadraticMesh = true;
+    }
+    else {
+      if ( !theHyp )
+        theHyp = *h; // use only the first non-auxiliary hypothesis
+    }
+  }
+
+  if ( !theHyp )
   {
     aStatus = SMESH_Hypothesis::HYP_MISSING;
     return false;  // can't work without a hypothesis
   }
-
-  // use only the first hypothesis
-  const SMESHDS_Hypothesis *theHyp = hyps.front();
 
   string hypName = theHyp->GetName();
 
@@ -538,15 +556,13 @@ bool StdMeshers_Regular_1D::Compute(SMESH_Mesh & aMesh, const TopoDS_Shape & aSh
 
   ASSERT(!VLast.IsNull());
   lid=aMesh.GetSubMesh(VLast)->GetSubMeshDS()->GetNodes();
-  if (!lid->more())
-  {
+  if (!lid->more()) {
     MESSAGE (" NO NODE BUILT ON VERTEX ");
     return false;
   }
   const SMDS_MeshNode * idLast = lid->next();
 
-  if (!Curve.IsNull())
-  {
+  if (!Curve.IsNull()) {
     list< double > params;
     bool reversed = false;
     if ( !_mainEdge.IsNull() )
@@ -566,9 +582,14 @@ bool StdMeshers_Regular_1D::Compute(SMESH_Mesh & aMesh, const TopoDS_Shape & aSh
     // only internal nodes receive an edge position with param on curve
 
     const SMDS_MeshNode * idPrev = idFirst;
+    double parPrev = f;
+    double parLast = l;
+//     if(reversed) {
+//       parPrev = l;
+//       parLast = f;
+//     }
     
-    for (list<double>::iterator itU = params.begin(); itU != params.end(); itU++)
-    {
+    for (list<double>::iterator itU = params.begin(); itU != params.end(); itU++) {
       double param = *itU;
       gp_Pnt P = Curve->Value(param);
 
@@ -576,17 +597,39 @@ bool StdMeshers_Regular_1D::Compute(SMESH_Mesh & aMesh, const TopoDS_Shape & aSh
       SMDS_MeshNode * node = meshDS->AddNode(P.X(), P.Y(), P.Z());
       meshDS->SetNodeOnEdge(node, shapeID, param);
 
-      SMDS_MeshEdge * edge = meshDS->AddEdge(idPrev, node);
-      meshDS->SetMeshElementOnShape(edge, shapeID);
+      if(_quadraticMesh) {
+        // create medium node
+        double prm = ( parPrev + param )/2;
+        gp_Pnt PM = Curve->Value(prm);
+        SMDS_MeshNode * NM = meshDS->AddNode(PM.X(), PM.Y(), PM.Z());
+        meshDS->SetNodeOnEdge(NM, shapeID, prm);
+        SMDS_MeshEdge * edge = meshDS->AddEdge(idPrev, node, NM);
+        meshDS->SetMeshElementOnShape(edge, shapeID);
+      }
+      else {
+        SMDS_MeshEdge * edge = meshDS->AddEdge(idPrev, node);
+        meshDS->SetMeshElementOnShape(edge, shapeID);
+      }
+
       idPrev = node;
+      parPrev = param;
     }
-    SMDS_MeshEdge* edge = meshDS->AddEdge(idPrev, idLast);
-    meshDS->SetMeshElementOnShape(edge, shapeID);
+    if(_quadraticMesh) {
+      double prm = ( parPrev + parLast )/2;
+      gp_Pnt PM = Curve->Value(prm);
+      SMDS_MeshNode * NM = meshDS->AddNode(PM.X(), PM.Y(), PM.Z());
+      meshDS->SetNodeOnEdge(NM, shapeID, prm);
+      SMDS_MeshEdge * edge = meshDS->AddEdge(idPrev, idLast, NM);
+      meshDS->SetMeshElementOnShape(edge, shapeID);
+    }
+    else {
+      SMDS_MeshEdge* edge = meshDS->AddEdge(idPrev, idLast);
+      meshDS->SetMeshElementOnShape(edge, shapeID);
+    }
   }
-  else
-  {
+  else {
     // Edge is a degenerated Edge : We put n = 5 points on the edge.
-    int NbPoints = 5;
+    const int NbPoints = 5;
     BRep_Tool::Range(E, f, l);
     double du = (l - f) / (NbPoints - 1);
     //MESSAGE("************* Degenerated edge! *****************");
@@ -596,18 +639,38 @@ bool StdMeshers_Regular_1D::Compute(SMESH_Mesh & aMesh, const TopoDS_Shape & aSh
     gp_Pnt P = BRep_Tool::Pnt(V1);
 
     const SMDS_MeshNode * idPrev = idFirst;
-    for (int i = 2; i < NbPoints; i++)
-    {
+    for (int i = 2; i < NbPoints; i++) {
       double param = f + (i - 1) * du;
       SMDS_MeshNode * node = meshDS->AddNode(P.X(), P.Y(), P.Z());
+      if(_quadraticMesh) {
+        // create medium node
+        double prm = param - du/2.;
+        gp_Pnt PM = Curve->Value(prm);
+        SMDS_MeshNode * NM = meshDS->AddNode(PM.X(), PM.Y(), PM.Z());
+        meshDS->SetNodeOnEdge(NM, shapeID, prm);
+        SMDS_MeshEdge * edge = meshDS->AddEdge(idPrev, node, NM);
+        meshDS->SetMeshElementOnShape(edge, shapeID);
+      }
+      else {
+        SMDS_MeshEdge * edge = meshDS->AddEdge(idPrev, node);
+        meshDS->SetMeshElementOnShape(edge, shapeID);
+      }
       meshDS->SetNodeOnEdge(node, shapeID, param);
-
-      SMDS_MeshEdge * edge = meshDS->AddEdge(idPrev, node);
-      meshDS->SetMeshElementOnShape(edge, shapeID);
       idPrev = node;
     }
-    SMDS_MeshEdge * edge = meshDS->AddEdge(idPrev, idLast);
-    meshDS->SetMeshElementOnShape(edge, shapeID);
+    if(_quadraticMesh) {
+      // create medium node
+      double prm = l - du/2.;
+      gp_Pnt PM = Curve->Value(prm);
+      SMDS_MeshNode * NM = meshDS->AddNode(PM.X(), PM.Y(), PM.Z());
+      meshDS->SetNodeOnEdge(NM, shapeID, prm);
+      SMDS_MeshEdge * edge = meshDS->AddEdge(idPrev, idLast, NM);
+      meshDS->SetMeshElementOnShape(edge, shapeID);
+    }
+    else {
+      SMDS_MeshEdge * edge = meshDS->AddEdge(idPrev, idLast);
+      meshDS->SetMeshElementOnShape(edge, shapeID);
+    }
   }
   return true;
 }
@@ -618,40 +681,47 @@ bool StdMeshers_Regular_1D::Compute(SMESH_Mesh & aMesh, const TopoDS_Shape & aSh
  */
 //=============================================================================
 
-const list <const SMESHDS_Hypothesis *> & StdMeshers_Regular_1D::GetUsedHypothesis(
-	SMESH_Mesh & aMesh, const TopoDS_Shape & aShape)
+const list <const SMESHDS_Hypothesis *> &
+StdMeshers_Regular_1D::GetUsedHypothesis(SMESH_Mesh &         aMesh,
+                                         const TopoDS_Shape & aShape,
+                                         const bool           ignoreAuxiliary)
 {
   _usedHypList.clear();
-  _usedHypList = GetAppliedHypothesis(aMesh, aShape);	// copy
-  int nbHyp = _usedHypList.size();
   _mainEdge.Nullify();
+
+  SMESH_HypoFilter auxiliaryFilter, compatibleFilter;
+  auxiliaryFilter.Init( SMESH_HypoFilter::IsAuxiliary() );
+  const bool ignoreAux = true;
+  InitCompatibleHypoFilter( compatibleFilter, ignoreAux );
+
+  // get non-auxiliary assigned to aShape
+  int nbHyp = aMesh.GetHypotheses( aShape, compatibleFilter, _usedHypList, false );
+
   if (nbHyp == 0)
   {
     // Check, if propagated from some other edge
     if (aShape.ShapeType() == TopAbs_EDGE &&
         aMesh.IsPropagatedHypothesis(aShape, _mainEdge))
     {
-      // Propagation of 1D hypothesis from <aMainEdge> on this edge
-      //_usedHypList = GetAppliedHypothesis(aMesh, _mainEdge);	// copy
-      // use a general method in order not to nullify _mainEdge
-      _usedHypList = SMESH_Algo::GetUsedHypothesis(aMesh, _mainEdge);	// copy
-      nbHyp = _usedHypList.size();
+      // Propagation of 1D hypothesis from <aMainEdge> on this edge;
+      // get non-auxiliary assigned to _mainEdge
+      nbHyp = aMesh.GetHypotheses( _mainEdge, compatibleFilter, _usedHypList, false );
     }
   }
-  if (nbHyp == 0)
+
+  if (nbHyp == 0) // nothing propagated nor assigned to aShape
   {
-    TopTools_ListIteratorOfListOfShape ancIt( aMesh.GetAncestors( aShape ));
-    for (; ancIt.More(); ancIt.Next())
-    {
-      const TopoDS_Shape& ancestor = ancIt.Value();
-      _usedHypList = GetAppliedHypothesis(aMesh, ancestor);	// copy
-      nbHyp = _usedHypList.size();
-      if (nbHyp == 1)
-        break;
-    }
+    SMESH_Algo::GetUsedHypothesis( aMesh, aShape, ignoreAuxiliary );
+    nbHyp = _usedHypList.size();
   }
-  if (nbHyp > 1)
-    _usedHypList.clear();	//only one compatible hypothesis allowed
+  else
+  {
+    // get auxiliary hyps from aShape
+    aMesh.GetHypotheses( aShape, auxiliaryFilter, _usedHypList, true );
+  }
+  if ( nbHyp > 1 && ignoreAuxiliary )
+    _usedHypList.clear(); //only one compatible non-auxiliary hypothesis allowed
+
   return _usedHypList;
 }
 

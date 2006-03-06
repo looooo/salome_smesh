@@ -110,10 +110,10 @@ public:
                                          const SMESH_HypoFilter& aFilter,
                                          const bool              andAncestors) const;
   
-  bool GetHypotheses(const TopoDS_Shape &                aSubShape,
-                     const SMESH_HypoFilter&             aFilter,
-                     list <const SMESHDS_Hypothesis * >& aHypList,
-                     const bool                          andAncestors) const;
+  int GetHypotheses(const TopoDS_Shape &                aSubShape,
+                    const SMESH_HypoFilter&             aFilter,
+                    list <const SMESHDS_Hypothesis * >& aHypList,
+                    const bool                          andAncestors) const;
 
   const list<SMESHDS_Command*> & GetLog() throw(SALOME_Exception);
   
@@ -134,12 +134,15 @@ public:
   SMESH_subMesh *GetSubMeshContaining(const int aShapeID)
     throw(SALOME_Exception);
   
+  void NotifySubMeshesHypothesisModification(const SMESH_Hypothesis* theChangedHyp);
+  // Say all submeshes that theChangedHyp has been modified
+
   const list < SMESH_subMesh * >&
   GetSubMeshUsingHypothesis(SMESHDS_Hypothesis * anHyp)
     throw(SALOME_Exception);
   
-  bool IsUsedHypothesis(SMESHDS_Hypothesis * anHyp,
-			const TopoDS_Shape & aSubShape);
+  bool IsUsedHypothesis(SMESHDS_Hypothesis *  anHyp,
+			const SMESH_subMesh * aSubMesh);
   // Return True if anHyp is used to mesh aSubShape
   
   bool IsNotConformAllowed() const;

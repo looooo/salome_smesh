@@ -37,6 +37,7 @@
 #include <vtkUnsignedCharArray.h>
 #include <vtkUnstructuredGrid.h>
 #include <vtkDataSetMapper.h>
+#include <vtkProperty.h>
 
 #include <vtkQuadraticEdge.h>
 #include <vtkQuadraticTriangle.h>

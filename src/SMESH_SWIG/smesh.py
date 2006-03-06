@@ -250,6 +250,18 @@ class Mesh_Segment(Mesh_Algorithm):
         hyp.SetFineness( fineness )
         return hyp
 
+    def QuadraticMesh(self):
+        """
+         Define "QuadraticMesh" hypothesis, forcing construction of quadratic edges.
+         If the 2D mesher sees that all boundary edges are quadratic ones,
+         it generates quadratic faces, else it generates linear faces using
+         medium nodes as if they were vertex ones.
+         The 3D mesher generates quadratic volumes only if all boundary faces
+         are quadratic ones, else it fails.
+        """
+        hyp = self.Hypothesis("QuadraticMesh")
+        return hyp
+
 # Public class: Mesh_Segment_Python
 # ---------------------------------
 

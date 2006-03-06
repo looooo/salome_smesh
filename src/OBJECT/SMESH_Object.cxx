@@ -90,12 +90,16 @@ static inline vtkIdType getCellType( const SMDSAbs_ElementType theType,
   switch( theType )
   {
     case SMDSAbs_Edge: 
-      return theNbNodes == 2 ? VTK_LINE : VTK_EMPTY_CELL;
+      if( theNbNodes == 2 )         return VTK_LINE;
+      else if ( theNbNodes == 3 )   return VTK_QUADRATIC_EDGE;
+      else return VTK_EMPTY_CELL;
 
     case SMDSAbs_Face  :
       if (thePoly && theNbNodes>2 ) return VTK_POLYGON;
       else if ( theNbNodes == 3 )   return VTK_TRIANGLE;
       else if ( theNbNodes == 4 )   return VTK_QUAD;
+      else if ( theNbNodes == 6 )   return VTK_QUADRATIC_TRIANGLE;
+      else if ( theNbNodes == 8 )   return VTK_QUADRATIC_QUAD;
       else return VTK_EMPTY_CELL;
       
     case SMDSAbs_Volume:
@@ -104,6 +108,15 @@ static inline vtkIdType getCellType( const SMDSAbs_ElementType theType,
       else if ( theNbNodes == 5 )   return VTK_PYRAMID;
       else if ( theNbNodes == 6 )   return VTK_WEDGE;
       else if ( theNbNodes == 8 )   return VTK_HEXAHEDRON;
+      else if ( theNbNodes == 10 )  {
+        return VTK_QUADRATIC_TETRA;
+      }
+      else if ( theNbNodes == 20 )  {
+        return VTK_QUADRATIC_HEXAHEDRON;
+      }
+      else if ( theNbNodes==13 || theNbNodes==15 )  {
+        return VTK_CONVEX_POINT_SET;
+      }
       else return VTK_EMPTY_CELL;
 
     default: return VTK_EMPTY_CELL;
@@ -391,11 +404,34 @@ void SMESH_VisualObjDef::buildElemPrs()
 	    static int anIds[] = {0,1,2,3,4,5};
 	    for (int k = 0; k < aNbNodes; k++) aConnectivities.push_back(anIds[k]);
 
-	  } else if (aNbNodes == 8) {
+	  }
+          else if (aNbNodes == 8) {
 	    static int anIds[] = {0,3,2,1,4,7,6,5};
 	    for (int k = 0; k < aNbNodes; k++) aConnectivities.push_back(anIds[k]);
 
-	  } else {
+	  }
+          else if (aNbNodes == 10) {
+	    static int anIds[] = {0,2,1,3,6,5,4,7,9,8};
+	    for (int k = 0; k < aNbNodes; k++) aConnectivities.push_back(anIds[k]);
+	  }
+          else if (aNbNodes == 13) {
+	    static int anIds[] = {0,3,2,1,4,8,7,6,5,9,12,11,10};
+	    for (int k = 0; k < aNbNodes; k++) aConnectivities.push_back(anIds[k]);
+	  }
+          else if (aNbNodes == 15) {
+	    static int anIds[] = {0,2,1,3,5,4,8,7,6,11,10,9,12,14,13};
+	    for (int k = 0; k < aNbNodes; k++) aConnectivities.push_back(anIds[k]);
+	    //for (int k = 0; k < aNbNodes; k++) {
+            //  int nn = aConnectivities[k];
+            //  const SMDS_MeshNode* N = static_cast<const SMDS_MeshNode*> (aConnect[nn]);
+            //  cout<<"k="<<k<<"  N("<<N->X()<<","<<N->Y()<<","<<N->Z()<<")"<<endl;
+            //}
+	  }
+          else if (aNbNodes == 20) {
+	    static int anIds[] = {0,3,2,1,4,7,6,5,11,10,9,8,15,14,13,12,16,19,18,17};
+	    for (int k = 0; k < aNbNodes; k++) aConnectivities.push_back(anIds[k]);
+	  }
+          else {
           }
 
 	  if (aConnectivities.size() > 0) {

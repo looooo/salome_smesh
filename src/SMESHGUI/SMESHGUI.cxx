@@ -40,6 +40,7 @@
 #include "SMESHGUI_Hypotheses.h"
 #include "SMESHGUI_MoveNodesDlg.h"
 #include "SMESHGUI_AddMeshElementDlg.h"
+#include "SMESHGUI_AddQuadraticElementDlg.h"
 #include "SMESHGUI_EditHypothesesDlg.h"
 #include "SMESHGUI_CreateHypothesesDlg.h"
 #include "SMESHGUI_FilterDlg.h"
@@ -1866,6 +1867,46 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
       }
       break;
     }
+  case 4034:     // QUADRATIC EDGE
+  case 4035:     // QUADRATIC TRIANGLE
+  case 4036:     // QUADRATIC QUADRANGLE
+  case 4037:     // QUADRATIC TETRAHEDRON
+  case 4038:     // QUADRATIC PYRAMID
+  case 4039:     // QUADRATIC PENTAHEDRON
+  case 4040:     // QUADRATIC HEXAHEDRON
+    {
+      if(checkLock(aStudy)) break;
+      if ( vtkwnd ) {
+	EmitSignalDeactivateDialog();
+	int type;
+
+	switch (theCommandID) {
+	case 4034:                                      
+	  type = QUAD_EDGE; break;
+	case 4035:                                      
+	  type = QUAD_TRIANGLE; break;
+	case 4036:                                     
+	  type = QUAD_QUADRANGLE; break;
+	case 4037:                                     
+	  type = QUAD_TETRAHEDRON; break;
+	case 4038:                                     
+	  type = QUAD_PYRAMID; break; 
+	case 4039:                                     
+	  type = QUAD_PENTAHEDRON; break; 
+	case 4040:
+	  type = QUAD_HEXAHEDRON;
+	  break;
+	default:;
+	}
+	 new SMESHGUI_AddQuadraticElementDlg( this, type );
+      }
+      else {
+	SUIT_MessageBox::warn1(SMESHGUI::desktop(),
+			       tr("SMESH_WRN_WARNING"), tr("SMESH_WRN_VIEWER_VTK"),
+			       tr("SMESH_BUT_OK"));
+      }
+      break;
+    }
   case 4041:					// REMOVES NODES
     {
       if(checkLock(aStudy)) break;
@@ -2320,6 +2361,13 @@ void SMESHGUI::initialize( CAM_Application* app )
   createSMESHAction( 301, "DISPLAY" );
   createSMESHAction( 302, "DISPLAY_ONLY" );
   createSMESHAction( 4033, "POLYHEDRON", "ICON_DLG_POLYHEDRON" );
+  createSMESHAction( 4034, "QUADRATIC_EDGE", "ICON_DLG_QUADRATIC_EDGE" );
+  createSMESHAction( 4035, "QUADRATIC_TRIANGLE", "ICON_DLG_QUADRATIC_TRIANGLE" );
+  createSMESHAction( 4036, "QUADRATIC_QUADRANGLE", "ICON_DLG_QUADRATIC_QUADRANGLE" );
+  createSMESHAction( 4037, "QUADRATIC_TETRAHEDRON", "ICON_DLG_QUADRATIC_TETRAHEDRON" );
+  createSMESHAction( 4038, "QUADRATIC_PYRAMID", "ICON_DLG_QUADRATIC_PYRAMID" );
+  createSMESHAction( 4039, "QUADRATIC_PENTAHEDRON", "ICON_DLG_QUADRATIC_PENTAHEDRON" );
+  createSMESHAction( 4040, "QUADRATIC_HEXAHEDRON", "ICON_DLG_QUADRATIC_HEXAHEDRON" );
 
   // ----- create menu --------------
   int fileId   = createMenu( tr( "MEN_FILE" ),   -1,  1 ),
@@ -2399,6 +2447,14 @@ void SMESHGUI::initialize( CAM_Application* app )
   createMenu( 4031, addId, -1 );
   createMenu( 4032, addId, -1 );
   createMenu( 4033, addId, -1 );
+  createMenu( separator(), addId, -1 );
+  createMenu( 4034, addId, -1 );
+  createMenu( 4035, addId, -1 );
+  createMenu( 4036, addId, -1 );
+  createMenu( 4037, addId, -1 );
+  createMenu( 4038, addId, -1 );
+  createMenu( 4039, addId, -1 );
+  createMenu( 4040, addId, -1 );
 
   createMenu( 4041, removeId, -1 );
   createMenu( 4042, removeId, -1 );
@@ -2474,6 +2530,14 @@ void SMESHGUI::initialize( CAM_Application* app )
   createTool( 4031, addRemTb );
   createTool( 4032, addRemTb );
   createTool( 4033, addRemTb );
+  createTool( separator(), addRemTb );
+  createTool( 4034, addRemTb );
+  createTool( 4035, addRemTb );
+  createTool( 4036, addRemTb );
+  createTool( 4037, addRemTb );
+  createTool( 4038, addRemTb );
+  createTool( 4039, addRemTb );
+  createTool( 4040, addRemTb );
   createTool( separator(), addRemTb );
   createTool( 4041, addRemTb );
   createTool( 4042, addRemTb );

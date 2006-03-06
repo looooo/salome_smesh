@@ -98,3 +98,14 @@ istream & operator >>(istream & load, StdMeshers_QuadraticMesh & hyp)
 {
   return hyp.LoadFrom( load );
 }
+//================================================================================
+/*!
+ * \brief Initialize my parameter values by the mesh built on the geometry
+  * \retval bool - false as this hypothesis does not have parameters values
+ */
+//================================================================================
+
+bool StdMeshers_QuadraticMesh::SetParametersByMesh(const SMESH_Mesh*, const TopoDS_Shape&)
+{
+  return false;
+}

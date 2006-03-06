@@ -45,6 +45,7 @@ using namespace std;
 #include <TopTools_ListOfShape.hxx>
 #include <TopTools_ListIteratorOfListOfShape.hxx>
 #include <TColStd_ListIteratorOfListOfInteger.hxx>
+#include <TColStd_MapOfInteger.hxx>
 
 #include <BRep_Tool.hxx>
 #include <Geom_Surface.hxx>
@@ -70,15 +71,14 @@ static bool ComputePentahedralMesh(SMESH_Mesh & aMesh,	const TopoDS_Shape & aSha
 //=============================================================================
 
 StdMeshers_Hexa_3D::StdMeshers_Hexa_3D(int hypId, int studyId,
-	SMESH_Gen * gen):SMESH_3D_Algo(hypId, studyId, gen)
+                                       SMESH_Gen * gen):SMESH_3D_Algo(hypId, studyId, gen)
 {
-	MESSAGE("StdMeshers_Hexa_3D::StdMeshers_Hexa_3D");
-	_name = "Hexa_3D";
-//   _shapeType = TopAbs_SOLID;
-	_shapeType = (1 << TopAbs_SHELL) | (1 << TopAbs_SOLID);	// 1 bit /shape type
-//   MESSAGE("_shapeType octal " << oct << _shapeType);
-	for (int i = 0; i < 6; i++)
-		_quads[i] = 0;
+  MESSAGE("StdMeshers_Hexa_3D::StdMeshers_Hexa_3D");
+  _name = "Hexa_3D";
+  _shapeType = (1 << TopAbs_SHELL) | (1 << TopAbs_SOLID);	// 1 bit /shape type
+  for (int i = 0; i < 6; i++)
+    _quads[i] = 0;
+  myTool = 0;
 }
 
 //=============================================================================
@@ -89,10 +89,28 @@ StdMeshers_Hexa_3D::StdMeshers_Hexa_3D(int hypId, int studyId,
 
 StdMeshers_Hexa_3D::~StdMeshers_Hexa_3D()
 {
-	MESSAGE("StdMeshers_Hexa_3D::~StdMeshers_Hexa_3D");
-	for (int i = 0; i < 6; i++)
-		StdMeshers_Quadrangle_2D::QuadDelete(_quads[i]);
+  MESSAGE("StdMeshers_Hexa_3D::~StdMeshers_Hexa_3D");
+  ClearAndReturn(true);
 }
+
+//================================================================================
+/*!
+ * \brief Clear fields and return the argument
+  * \param res - the value to return
+  * \retval bool - the argument value
+ */
+//================================================================================
+
+bool StdMeshers_Hexa_3D::ClearAndReturn(const bool res)
+{
+  for (int i = 0; i < 6; i++)
+    StdMeshers_Quadrangle_2D::QuadDelete(_quads[i]);
+  if ( myTool )
+    delete myTool;
+  myTool = 0;
+  return res;
+}
+
 
 //=============================================================================
 /*!
@@ -146,6 +164,7 @@ static bool findIJ (const SMDS_MeshNode* node, const FaceQuadStruct * quad, int&
   return true;
 }
 
+
 //=============================================================================
 /*!
  * Hexahedron mesh on hexaedron like form
@@ -163,534 +182,507 @@ bool StdMeshers_Hexa_3D::Compute(SMESH_Mesh & aMesh,
 	const TopoDS_Shape & aShape)throw(SALOME_Exception)
 {
   Unexpect aCatch(SalomeException);
-	MESSAGE("StdMeshers_Hexa_3D::Compute");
-	//bool isOk = false;
-	SMESHDS_Mesh * meshDS = aMesh.GetMeshDS();
-	//SMESH_subMesh *theSubMesh = aMesh.GetSubMesh(aShape);
-	//const SMESHDS_SubMesh *& subMeshDS = theSubMesh->GetSubMeshDS();
+  MESSAGE("StdMeshers_Hexa_3D::Compute");
+  SMESHDS_Mesh * meshDS = aMesh.GetMeshDS();
+  
+  // 0.  - shape and face mesh verification
+  // 0.1 - shape must be a solid (or a shell) with 6 faces
+  //MESSAGE("---");
 
-	// 0.  - shape and face mesh verification
-	// 0.1 - shape must be a solid (or a shell) with 6 faces
-	//MESSAGE("---");
+  vector < SMESH_subMesh * >meshFaces;
+  for (TopExp_Explorer exp(aShape, TopAbs_FACE); exp.More(); exp.Next()) {
+    SMESH_subMesh *aSubMesh = aMesh.GetSubMeshContaining(exp.Current());
+    ASSERT(aSubMesh);
+    meshFaces.push_back(aSubMesh);
+  }
+  if (meshFaces.size() != 6) {
+    SCRUTE(meshFaces.size());
+    return false;
+  }
 
-	vector < SMESH_subMesh * >meshFaces;
-	for (TopExp_Explorer exp(aShape, TopAbs_FACE); exp.More(); exp.Next())
-	{
-		SMESH_subMesh *aSubMesh = aMesh.GetSubMeshContaining(exp.Current());
-		ASSERT(aSubMesh);
-		meshFaces.push_back(aSubMesh);
-	}
-	if (meshFaces.size() != 6)
-	{
-		SCRUTE(meshFaces.size());
-//		ASSERT(0);
-		return false;
-	}
+  // 0.2 - is each face meshed with Quadrangle_2D? (so, with a wire of 4 edges)
+  //MESSAGE("---");
 
-	// 0.2 - is each face meshed with Quadrangle_2D? (so, with a wire of 4 edges)
-	//MESSAGE("---");
+  myTool = new StdMeshers_Helper(aMesh);
+  _quadraticMesh = myTool->IsQuadraticSubMesh(aShape);
 
-	for (int i = 0; i < 6; i++)
-	{
-	  TopoDS_Shape aFace = meshFaces[i]->GetSubShape();
-	  SMESH_Algo *algo = _gen->GetAlgo(aMesh, aFace);
-	  string algoName = algo->GetName();
-          bool isAllQuad = false;
-	  if (algoName == "Quadrangle_2D") {
-            SMESHDS_SubMesh * sm = meshDS->MeshElements( aFace );
-            if ( sm ) {
-              isAllQuad = true;
-              SMDS_ElemIteratorPtr eIt = sm->GetElements();
-              while ( isAllQuad && eIt->more() )
-                isAllQuad = ( eIt->next()->NbNodes() == 4 );
-            }
-          }
-          if ( ! isAllQuad ) {
-	    //modified by NIZNHY-PKV Wed Nov 17 15:31:37 2004 f
-            bool bIsOk;
-            //
-            bIsOk=ComputePentahedralMesh(aMesh, aShape);
-            if (bIsOk) {
-              return true;
-            }
-	    //modified by NIZNHY-PKV Wed Nov 17 15:31:42 2004 t
-	    SCRUTE(algoName);
-	    //			ASSERT(0);
-	    return false;
-	  }
-	  StdMeshers_Quadrangle_2D *quadAlgo =
-	    dynamic_cast < StdMeshers_Quadrangle_2D * >(algo);
-	  ASSERT(quadAlgo);
-	  try
-	    {
-	      _quads[i] = quadAlgo->CheckAnd2Dcompute(aMesh, aFace);
-	      // *** to delete after usage
-	    }
-	  catch(SALOME_Exception & S_ex)
-	    {
-	      // *** delete _quads
-	      // *** throw exception
-	      //			ASSERT(0);
-	      return false;
-	    }
+  for (int i = 0; i < 6; i++) {
+    TopoDS_Shape aFace = meshFaces[i]->GetSubShape();
+    SMESH_Algo *algo = _gen->GetAlgo(aMesh, aFace);
+    string algoName = algo->GetName();
+    bool isAllQuad = false;
+    if (algoName == "Quadrangle_2D") {
+      SMESHDS_SubMesh * sm = meshDS->MeshElements( aFace );
+      if ( sm ) {
+        isAllQuad = true;
+        SMDS_ElemIteratorPtr eIt = sm->GetElements();
+        while ( isAllQuad && eIt->more() ) {
+          const SMDS_MeshElement* elem =  eIt->next();
+          isAllQuad = ( elem->NbNodes()==4 ||(_quadraticMesh && elem->NbNodes()==8) );
+        }
+      }
+    }
+    if ( ! isAllQuad ) {
+      //modified by NIZNHY-PKV Wed Nov 17 15:31:37 2004 f
+      bool bIsOk = ComputePentahedralMesh(aMesh, aShape);
+      return ClearAndReturn( bIsOk );
+    }
+    StdMeshers_Quadrangle_2D *quadAlgo =
+      dynamic_cast < StdMeshers_Quadrangle_2D * >(algo);
+    ASSERT(quadAlgo);
+    try {
+      _quads[i] = quadAlgo->CheckAnd2Dcompute(aMesh, aFace, _quadraticMesh);
+    }
+    catch(SALOME_Exception & S_ex) {
+      return ClearAndReturn( false );
+    }
 
-	  // 0.2.1 - number of points on the opposite edges must be the same
-	  if (_quads[i]->nbPts[0] != _quads[i]->nbPts[2] ||
-	      _quads[i]->nbPts[1] != _quads[i]->nbPts[3])
-	    {
-	      MESSAGE("different number of points on the opposite edges of face " << i);
-	      //                  ASSERT(0);
-	      return false;
-	    }
-	}
+    // 0.2.1 - number of points on the opposite edges must be the same
+    if (_quads[i]->nbPts[0] != _quads[i]->nbPts[2] ||
+        _quads[i]->nbPts[1] != _quads[i]->nbPts[3]) {
+      MESSAGE("different number of points on the opposite edges of face " << i);
+      //                  ASSERT(0);
+      return ClearAndReturn( false );
+    }
+  }
 
-	// 1.  - identify faces and vertices of the "cube"
-	// 1.1 - ancestor maps vertex->edges in the cube
-	//MESSAGE("---");
+  // 1.  - identify faces and vertices of the "cube"
+  // 1.1 - ancestor maps vertex->edges in the cube
+  //MESSAGE("---");
 
-	TopTools_IndexedDataMapOfShapeListOfShape MS;
-	TopExp::MapShapesAndAncestors(aShape, TopAbs_VERTEX, TopAbs_EDGE, MS);
+  TopTools_IndexedDataMapOfShapeListOfShape MS;
+  TopExp::MapShapesAndAncestors(aShape, TopAbs_VERTEX, TopAbs_EDGE, MS);
 
-	// 1.2 - first face is choosen as face Y=0 of the unit cube
-	//MESSAGE("---");
+  // 1.2 - first face is choosen as face Y=0 of the unit cube
+  //MESSAGE("---");
 
-	const TopoDS_Shape & aFace = meshFaces[0]->GetSubShape();
-	const TopoDS_Face & F = TopoDS::Face(aFace);
+  const TopoDS_Shape & aFace = meshFaces[0]->GetSubShape();
+  const TopoDS_Face & F = TopoDS::Face(aFace);
 
-	// 1.3 - identify the 4 vertices of the face Y=0: V000, V100, V101, V001
-	//MESSAGE("---");
+  // 1.3 - identify the 4 vertices of the face Y=0: V000, V100, V101, V001
+  //MESSAGE("---");
 
-	int i = 0;
-	TopoDS_Edge E = _quads[0]->edge[i];	//edge will be Y=0,Z=0 on unit cube
-	double f, l;
-	Handle(Geom2d_Curve) C2d = BRep_Tool::CurveOnSurface(E, F, f, l);
-	TopoDS_Vertex VFirst, VLast;
-	TopExp::Vertices(E, VFirst, VLast);	// corresponds to f and l
-	bool isForward =
-		(((l - f) * (_quads[0]->last[i] - _quads[0]->first[i])) > 0);
+  int i = 0;
+  TopoDS_Edge E = _quads[0]->edge[i];	//edge will be Y=0,Z=0 on unit cube
+  double f, l;
+  Handle(Geom2d_Curve) C2d = BRep_Tool::CurveOnSurface(E, F, f, l);
+  TopoDS_Vertex VFirst, VLast;
+  TopExp::Vertices(E, VFirst, VLast);	// corresponds to f and l
+  bool isForward = (((l - f) * (_quads[0]->last[i] - _quads[0]->first[i])) > 0);
 
-	if (isForward)
-	{
-		_cube.V000 = VFirst;	// will be (0,0,0) on the unit cube
-		_cube.V100 = VLast;		// will be (1,0,0) on the unit cube
-	}
-	else
-	{
-		_cube.V000 = VLast;
-		_cube.V100 = VFirst;
-	}
+  if (isForward) {
+    _cube.V000 = VFirst;	// will be (0,0,0) on the unit cube
+    _cube.V100 = VLast;		// will be (1,0,0) on the unit cube
+  }
+  else {
+    _cube.V000 = VLast;
+    _cube.V100 = VFirst;
+  }
 
-	i = 1;
-	E = _quads[0]->edge[i];
-	C2d = BRep_Tool::CurveOnSurface(E, F, f, l);
-	TopExp::Vertices(E, VFirst, VLast);
-	isForward = (((l - f) * (_quads[0]->last[i] - _quads[0]->first[i])) > 0);
-	if (isForward)
-		_cube.V101 = VLast;		// will be (1,0,1) on the unit cube
-	else
-		_cube.V101 = VFirst;
+  i = 1;
+  E = _quads[0]->edge[i];
+  C2d = BRep_Tool::CurveOnSurface(E, F, f, l);
+  TopExp::Vertices(E, VFirst, VLast);
+  isForward = (((l - f) * (_quads[0]->last[i] - _quads[0]->first[i])) > 0);
+  if (isForward)
+    _cube.V101 = VLast;		// will be (1,0,1) on the unit cube
+  else
+    _cube.V101 = VFirst;
 
-	i = 2;
-	E = _quads[0]->edge[i];
-	C2d = BRep_Tool::CurveOnSurface(E, F, f, l);
-	TopExp::Vertices(E, VFirst, VLast);
-	isForward = (((l - f) * (_quads[0]->last[i] - _quads[0]->first[i])) > 0);
-	if (isForward)
-		_cube.V001 = VLast;		// will be (0,0,1) on the unit cube
-	else
-		_cube.V001 = VFirst;
+  i = 2;
+  E = _quads[0]->edge[i];
+  C2d = BRep_Tool::CurveOnSurface(E, F, f, l);
+  TopExp::Vertices(E, VFirst, VLast);
+  isForward = (((l - f) * (_quads[0]->last[i] - _quads[0]->first[i])) > 0);
+  if (isForward)
+    _cube.V001 = VLast;		// will be (0,0,1) on the unit cube
+  else
+    _cube.V001 = VFirst;
 
-	// 1.4 - find edge X=0, Z=0 (ancestor of V000 not in face Y=0)
-	//     - find edge X=1, Z=0 (ancestor of V100 not in face Y=0)
-	//     - find edge X=1, Z=1 (ancestor of V101 not in face Y=0) 
-	//     - find edge X=0, Z=1 (ancestor of V001 not in face Y=0)
-	//MESSAGE("---");
+  // 1.4 - find edge X=0, Z=0 (ancestor of V000 not in face Y=0)
+  //     - find edge X=1, Z=0 (ancestor of V100 not in face Y=0)
+  //     - find edge X=1, Z=1 (ancestor of V101 not in face Y=0) 
+  //     - find edge X=0, Z=1 (ancestor of V001 not in face Y=0)
+  //MESSAGE("---");
 
-	TopoDS_Edge E_0Y0 = EdgeNotInFace(aMesh, aShape, F, _cube.V000, MS);
-	ASSERT(!E_0Y0.IsNull());
+  TopoDS_Edge E_0Y0 = EdgeNotInFace(aMesh, aShape, F, _cube.V000, MS);
+  ASSERT(!E_0Y0.IsNull());
 
-	TopoDS_Edge E_1Y0 = EdgeNotInFace(aMesh, aShape, F, _cube.V100, MS);
-	ASSERT(!E_1Y0.IsNull());
+  TopoDS_Edge E_1Y0 = EdgeNotInFace(aMesh, aShape, F, _cube.V100, MS);
+  ASSERT(!E_1Y0.IsNull());
 
-	TopoDS_Edge E_1Y1 = EdgeNotInFace(aMesh, aShape, F, _cube.V101, MS);
-	ASSERT(!E_1Y1.IsNull());
+  TopoDS_Edge E_1Y1 = EdgeNotInFace(aMesh, aShape, F, _cube.V101, MS);
+  ASSERT(!E_1Y1.IsNull());
 
-	TopoDS_Edge E_0Y1 = EdgeNotInFace(aMesh, aShape, F, _cube.V001, MS);
-	ASSERT(!E_0Y1.IsNull());
+  TopoDS_Edge E_0Y1 = EdgeNotInFace(aMesh, aShape, F, _cube.V001, MS);
+  ASSERT(!E_0Y1.IsNull());
 
-	// 1.5 - identify the 4 vertices in face Y=1: V010, V110, V111, V011
-	//MESSAGE("---");
+  // 1.5 - identify the 4 vertices in face Y=1: V010, V110, V111, V011
+  //MESSAGE("---");
 
-	TopExp::Vertices(E_0Y0, VFirst, VLast);
-	if (VFirst.IsSame(_cube.V000))
-		_cube.V010 = VLast;
-	else
-		_cube.V010 = VFirst;
+  TopExp::Vertices(E_0Y0, VFirst, VLast);
+  if (VFirst.IsSame(_cube.V000))
+    _cube.V010 = VLast;
+  else
+    _cube.V010 = VFirst;
 
-	TopExp::Vertices(E_1Y0, VFirst, VLast);
-	if (VFirst.IsSame(_cube.V100))
-		_cube.V110 = VLast;
-	else
-		_cube.V110 = VFirst;
+  TopExp::Vertices(E_1Y0, VFirst, VLast);
+  if (VFirst.IsSame(_cube.V100))
+    _cube.V110 = VLast;
+  else
+    _cube.V110 = VFirst;
 
-	TopExp::Vertices(E_1Y1, VFirst, VLast);
-	if (VFirst.IsSame(_cube.V101))
-		_cube.V111 = VLast;
-	else
-		_cube.V111 = VFirst;
+  TopExp::Vertices(E_1Y1, VFirst, VLast);
+  if (VFirst.IsSame(_cube.V101))
+    _cube.V111 = VLast;
+  else
+    _cube.V111 = VFirst;
 
-	TopExp::Vertices(E_0Y1, VFirst, VLast);
-	if (VFirst.IsSame(_cube.V001))
-		_cube.V011 = VLast;
-	else
-		_cube.V011 = VFirst;
+  TopExp::Vertices(E_0Y1, VFirst, VLast);
+  if (VFirst.IsSame(_cube.V001))
+    _cube.V011 = VLast;
+  else
+    _cube.V011 = VFirst;
 
-	// 1.6 - find remaining faces given 4 vertices
-	//MESSAGE("---");
+  // 1.6 - find remaining faces given 4 vertices
+  //MESSAGE("---");
 
-	_indY0 = 0;
-	_cube.quad_Y0 = _quads[_indY0];
+  _indY0 = 0;
+  _cube.quad_Y0 = _quads[_indY0];
 
-	_indY1 = GetFaceIndex(aMesh, aShape, meshFaces,
-		_cube.V010, _cube.V011, _cube.V110, _cube.V111);
-	_cube.quad_Y1 = _quads[_indY1];
+  _indY1 = GetFaceIndex(aMesh, aShape, meshFaces,
+                        _cube.V010, _cube.V011, _cube.V110, _cube.V111);
+  _cube.quad_Y1 = _quads[_indY1];
 
-	_indZ0 = GetFaceIndex(aMesh, aShape, meshFaces,
-		_cube.V000, _cube.V010, _cube.V100, _cube.V110);
-	_cube.quad_Z0 = _quads[_indZ0];
+  _indZ0 = GetFaceIndex(aMesh, aShape, meshFaces,
+                        _cube.V000, _cube.V010, _cube.V100, _cube.V110);
+  _cube.quad_Z0 = _quads[_indZ0];
 
-	_indZ1 = GetFaceIndex(aMesh, aShape, meshFaces,
-		_cube.V001, _cube.V011, _cube.V101, _cube.V111);
-	_cube.quad_Z1 = _quads[_indZ1];
+  _indZ1 = GetFaceIndex(aMesh, aShape, meshFaces,
+                        _cube.V001, _cube.V011, _cube.V101, _cube.V111);
+  _cube.quad_Z1 = _quads[_indZ1];
 
-	_indX0 = GetFaceIndex(aMesh, aShape, meshFaces,
-		_cube.V000, _cube.V001, _cube.V010, _cube.V011);
-	_cube.quad_X0 = _quads[_indX0];
+  _indX0 = GetFaceIndex(aMesh, aShape, meshFaces,
+                        _cube.V000, _cube.V001, _cube.V010, _cube.V011);
+  _cube.quad_X0 = _quads[_indX0];
 
-	_indX1 = GetFaceIndex(aMesh, aShape, meshFaces,
-		_cube.V100, _cube.V101, _cube.V110, _cube.V111);
-	_cube.quad_X1 = _quads[_indX1];
+  _indX1 = GetFaceIndex(aMesh, aShape, meshFaces,
+                        _cube.V100, _cube.V101, _cube.V110, _cube.V111);
+  _cube.quad_X1 = _quads[_indX1];
 
-	//MESSAGE("---");
+  //MESSAGE("---");
 
-	// 1.7 - get convertion coefs from face 2D normalized to 3D normalized
+  // 1.7 - get convertion coefs from face 2D normalized to 3D normalized
 
-	Conv2DStruct cx0;			// for face X=0
-	Conv2DStruct cx1;			// for face X=1
-	Conv2DStruct cy0;
-	Conv2DStruct cy1;
-	Conv2DStruct cz0;
-	Conv2DStruct cz1;
+  Conv2DStruct cx0;			// for face X=0
+  Conv2DStruct cx1;			// for face X=1
+  Conv2DStruct cy0;
+  Conv2DStruct cy1;
+  Conv2DStruct cz0;
+  Conv2DStruct cz1;
 
-	GetConv2DCoefs(*_cube.quad_X0, meshFaces[_indX0]->GetSubShape(),
-		_cube.V000, _cube.V010, _cube.V011, _cube.V001, cx0);
-	GetConv2DCoefs(*_cube.quad_X1, meshFaces[_indX1]->GetSubShape(),
-		_cube.V100, _cube.V110, _cube.V111, _cube.V101, cx1);
-	GetConv2DCoefs(*_cube.quad_Y0, meshFaces[_indY0]->GetSubShape(),
-		_cube.V000, _cube.V100, _cube.V101, _cube.V001, cy0);
-	GetConv2DCoefs(*_cube.quad_Y1, meshFaces[_indY1]->GetSubShape(),
-		_cube.V010, _cube.V110, _cube.V111, _cube.V011, cy1);
-	GetConv2DCoefs(*_cube.quad_Z0, meshFaces[_indZ0]->GetSubShape(),
-		_cube.V000, _cube.V100, _cube.V110, _cube.V010, cz0);
-	GetConv2DCoefs(*_cube.quad_Z1, meshFaces[_indZ1]->GetSubShape(),
-		_cube.V001, _cube.V101, _cube.V111, _cube.V011, cz1);
+  GetConv2DCoefs(*_cube.quad_X0, meshFaces[_indX0]->GetSubShape(),
+                 _cube.V000, _cube.V010, _cube.V011, _cube.V001, cx0);
+  GetConv2DCoefs(*_cube.quad_X1, meshFaces[_indX1]->GetSubShape(),
+                 _cube.V100, _cube.V110, _cube.V111, _cube.V101, cx1);
+  GetConv2DCoefs(*_cube.quad_Y0, meshFaces[_indY0]->GetSubShape(),
+                 _cube.V000, _cube.V100, _cube.V101, _cube.V001, cy0);
+  GetConv2DCoefs(*_cube.quad_Y1, meshFaces[_indY1]->GetSubShape(),
+                 _cube.V010, _cube.V110, _cube.V111, _cube.V011, cy1);
+  GetConv2DCoefs(*_cube.quad_Z0, meshFaces[_indZ0]->GetSubShape(),
+                 _cube.V000, _cube.V100, _cube.V110, _cube.V010, cz0);
+  GetConv2DCoefs(*_cube.quad_Z1, meshFaces[_indZ1]->GetSubShape(),
+                 _cube.V001, _cube.V101, _cube.V111, _cube.V011, cz1);
 
-	// 1.8 - create a 3D structure for normalized values
-
-	//MESSAGE("---");
-        int nbx = _cube.quad_Z0->nbPts[0];
-        if (cz0.a1 == 0.) nbx = _cube.quad_Z0->nbPts[1];
+  // 1.8 - create a 3D structure for normalized values
+  
+  //MESSAGE("---");
+  int nbx = _cube.quad_Z0->nbPts[0];
+  if (cz0.a1 == 0.) nbx = _cube.quad_Z0->nbPts[1];
  
-        int nby = _cube.quad_X0->nbPts[0];
-        if (cx0.a1 == 0.) nby = _cube.quad_X0->nbPts[1];
+  int nby = _cube.quad_X0->nbPts[0];
+  if (cx0.a1 == 0.) nby = _cube.quad_X0->nbPts[1];
  
-        int nbz = _cube.quad_Y0->nbPts[0];
-        if (cy0.a1 != 0.) nbz = _cube.quad_Y0->nbPts[1];
+  int nbz = _cube.quad_Y0->nbPts[0];
+  if (cy0.a1 != 0.) nbz = _cube.quad_Y0->nbPts[1];
 
-	int i1, j1, nbxyz = nbx * nby * nbz;
-	Point3DStruct *np = new Point3DStruct[nbxyz];
+  int i1, j1, nbxyz = nbx * nby * nbz;
+  Point3DStruct *np = new Point3DStruct[nbxyz];
 
-	// 1.9 - store node indexes of faces
+  // 1.9 - store node indexes of faces
 
-	{
-		const TopoDS_Face & F = TopoDS::Face(meshFaces[_indX0]->GetSubShape());
+  {
+    const TopoDS_Face & F = TopoDS::Face(meshFaces[_indX0]->GetSubShape());
 
-		faceQuadStruct *quad = _cube.quad_X0;
-		int i = 0;				// j = x/face , k = y/face
-		int nbdown = quad->nbPts[0];
-		int nbright = quad->nbPts[1];
+    faceQuadStruct *quad = _cube.quad_X0;
+    int i = 0;				// j = x/face , k = y/face
+    int nbdown = quad->nbPts[0];
+    int nbright = quad->nbPts[1];
 
-
-		SMDS_NodeIteratorPtr itf= aMesh.GetSubMesh(F)->GetSubMeshDS()->GetNodes();
+    SMDS_NodeIteratorPtr itf= aMesh.GetSubMesh(F)->GetSubMeshDS()->GetNodes();
 			
-		while(itf->more())
-		{
-			const SMDS_MeshNode * node = itf->next();
-                        findIJ( node, quad, i1, j1 );
-			int ij1 = j1 * nbdown + i1;
-			quad->uv_grid[ij1].node = node;
-		}
+    while(itf->more()) {
+      const SMDS_MeshNode * node = itf->next();
+      if(myTool->IsMedium(node))
+        continue;
+      findIJ( node, quad, i1, j1 );
+      int ij1 = j1 * nbdown + i1;
+      quad->uv_grid[ij1].node = node;
+    }
 
-		for (int i1 = 0; i1 < nbdown; i1++)
-			for (int j1 = 0; j1 < nbright; j1++)
-			{
-				int ij1 = j1 * nbdown + i1;
-				int j = cx0.ia * i1 + cx0.ib * j1 + cx0.ic;	// j = x/face
-				int k = cx0.ja * i1 + cx0.jb * j1 + cx0.jc;	// k = y/face
-				int ijk = k * nbx * nby + j * nbx + i;
-				//MESSAGE(" "<<ij1<<" "<<i<<" "<<j<<" "<<ijk);
-				np[ijk].node = quad->uv_grid[ij1].node;
-				//SCRUTE(np[ijk].nodeId);
-			}
-	}
+    for (int i1 = 0; i1 < nbdown; i1++)
+      for (int j1 = 0; j1 < nbright; j1++) {
+        int ij1 = j1 * nbdown + i1;
+        int j = cx0.ia * i1 + cx0.ib * j1 + cx0.ic;	// j = x/face
+        int k = cx0.ja * i1 + cx0.jb * j1 + cx0.jc;	// k = y/face
+        int ijk = k * nbx * nby + j * nbx + i;
+        //MESSAGE(" "<<ij1<<" "<<i<<" "<<j<<" "<<ijk);
+        np[ijk].node = quad->uv_grid[ij1].node;
+        //SCRUTE(np[ijk].nodeId);
+      }
+  }
 
-	{
-		const TopoDS_Face & F = TopoDS::Face(meshFaces[_indX1]->GetSubShape());
+  {
+    const TopoDS_Face & F = TopoDS::Face(meshFaces[_indX1]->GetSubShape());
 
-		SMDS_NodeIteratorPtr itf= aMesh.GetSubMesh(F)->GetSubMeshDS()->GetNodes();
+    SMDS_NodeIteratorPtr itf= aMesh.GetSubMesh(F)->GetSubMeshDS()->GetNodes();
 
-		faceQuadStruct *quad = _cube.quad_X1;
-		int i = nbx - 1;		// j = x/face , k = y/face
-		int nbdown = quad->nbPts[0];
-		int nbright = quad->nbPts[1];
+    faceQuadStruct *quad = _cube.quad_X1;
+    int i = nbx - 1;		// j = x/face , k = y/face
+    int nbdown = quad->nbPts[0];
+    int nbright = quad->nbPts[1];
 
-		while(itf->more())
-		{
-			const SMDS_MeshNode * node = itf->next();
-                        findIJ( node, quad, i1, j1 );
-			int ij1 = j1 * nbdown + i1;
-			quad->uv_grid[ij1].node = node;
-		}
+    while(itf->more()) {
+      const SMDS_MeshNode * node = itf->next();
+      if(myTool->IsMedium(node))
+        continue;
+      findIJ( node, quad, i1, j1 );
+      int ij1 = j1 * nbdown + i1;
+      quad->uv_grid[ij1].node = node;
+    }
 
-		for (int i1 = 0; i1 < nbdown; i1++)
-			for (int j1 = 0; j1 < nbright; j1++)
-			{
-				int ij1 = j1 * nbdown + i1;
-				int j = cx1.ia * i1 + cx1.ib * j1 + cx1.ic;	// j = x/face
-				int k = cx1.ja * i1 + cx1.jb * j1 + cx1.jc;	// k = y/face
-				int ijk = k * nbx * nby + j * nbx + i;
-				//MESSAGE(" "<<ij1<<" "<<i<<" "<<j<<" "<<ijk);
-				np[ijk].node = quad->uv_grid[ij1].node;
-				//SCRUTE(np[ijk].nodeId);
-			}
-	}
+    for (int i1 = 0; i1 < nbdown; i1++)
+      for (int j1 = 0; j1 < nbright; j1++) {
+        int ij1 = j1 * nbdown + i1;
+        int j = cx1.ia * i1 + cx1.ib * j1 + cx1.ic;	// j = x/face
+        int k = cx1.ja * i1 + cx1.jb * j1 + cx1.jc;	// k = y/face
+        int ijk = k * nbx * nby + j * nbx + i;
+        //MESSAGE(" "<<ij1<<" "<<i<<" "<<j<<" "<<ijk);
+        np[ijk].node = quad->uv_grid[ij1].node;
+        //SCRUTE(np[ijk].nodeId);
+      }
+  }
 
-	{
-		const TopoDS_Face & F = TopoDS::Face(meshFaces[_indY0]->GetSubShape());
+  {
+    const TopoDS_Face & F = TopoDS::Face(meshFaces[_indY0]->GetSubShape());
 
-		SMDS_NodeIteratorPtr itf= aMesh.GetSubMesh(F)->GetSubMeshDS()->GetNodes();
+    SMDS_NodeIteratorPtr itf= aMesh.GetSubMesh(F)->GetSubMeshDS()->GetNodes();
 
-		faceQuadStruct *quad = _cube.quad_Y0;
-		int j = 0;				// i = x/face , k = y/face
-		int nbdown = quad->nbPts[0];
-		int nbright = quad->nbPts[1];
+    faceQuadStruct *quad = _cube.quad_Y0;
+    int j = 0;				// i = x/face , k = y/face
+    int nbdown = quad->nbPts[0];
+    int nbright = quad->nbPts[1];
 
-		while(itf->more())
-		{
-			const SMDS_MeshNode * node = itf->next();
-                        findIJ( node, quad, i1, j1 );
-			int ij1 = j1 * nbdown + i1;
-			quad->uv_grid[ij1].node = node;
-		}
+    while(itf->more()) {
+      const SMDS_MeshNode * node = itf->next();
+      if(myTool->IsMedium(node))
+        continue;
+      findIJ( node, quad, i1, j1 );
+      int ij1 = j1 * nbdown + i1;
+      quad->uv_grid[ij1].node = node;
+    }
 
-		for (int i1 = 0; i1 < nbdown; i1++)
-			for (int j1 = 0; j1 < nbright; j1++)
-			{
-				int ij1 = j1 * nbdown + i1;
-				int i = cy0.ia * i1 + cy0.ib * j1 + cy0.ic;	// i = x/face
-				int k = cy0.ja * i1 + cy0.jb * j1 + cy0.jc;	// k = y/face
-				int ijk = k * nbx * nby + j * nbx + i;
-				//MESSAGE(" "<<ij1<<" "<<i<<" "<<j<<" "<<ijk);
-				np[ijk].node = quad->uv_grid[ij1].node;
-				//SCRUTE(np[ijk].nodeId);
-			}
-	}
+    for (int i1 = 0; i1 < nbdown; i1++)
+      for (int j1 = 0; j1 < nbright; j1++) {
+        int ij1 = j1 * nbdown + i1;
+        int i = cy0.ia * i1 + cy0.ib * j1 + cy0.ic;	// i = x/face
+        int k = cy0.ja * i1 + cy0.jb * j1 + cy0.jc;	// k = y/face
+        int ijk = k * nbx * nby + j * nbx + i;
+        //MESSAGE(" "<<ij1<<" "<<i<<" "<<j<<" "<<ijk);
+        np[ijk].node = quad->uv_grid[ij1].node;
+        //SCRUTE(np[ijk].nodeId);
+      }
+  }
 
-	{
-		const TopoDS_Face & F = TopoDS::Face(meshFaces[_indY1]->GetSubShape());
+  {
+    const TopoDS_Face & F = TopoDS::Face(meshFaces[_indY1]->GetSubShape());
 
-		SMDS_NodeIteratorPtr itf= aMesh.GetSubMesh(F)->GetSubMeshDS()->GetNodes();
+    SMDS_NodeIteratorPtr itf= aMesh.GetSubMesh(F)->GetSubMeshDS()->GetNodes();
 
-		faceQuadStruct *quad = _cube.quad_Y1;
-		int j = nby - 1;		// i = x/face , k = y/face
-		int nbdown = quad->nbPts[0];
-		int nbright = quad->nbPts[1];
+    faceQuadStruct *quad = _cube.quad_Y1;
+    int j = nby - 1;		// i = x/face , k = y/face
+    int nbdown = quad->nbPts[0];
+    int nbright = quad->nbPts[1];
 
-		while(itf->more())
-		{
-			const SMDS_MeshNode * node = itf->next();
-                        findIJ( node, quad, i1, j1 );
-			int ij1 = j1 * nbdown + i1;
-			quad->uv_grid[ij1].node = node;
-		}
+    while(itf->more()) {
+      const SMDS_MeshNode * node = itf->next();
+      if(myTool->IsMedium(node))
+        continue;
+      findIJ( node, quad, i1, j1 );
+      int ij1 = j1 * nbdown + i1;
+      quad->uv_grid[ij1].node = node;
+    }
 
-		for (int i1 = 0; i1 < nbdown; i1++)
-			for (int j1 = 0; j1 < nbright; j1++)
-			{
-				int ij1 = j1 * nbdown + i1;
-				int i = cy1.ia * i1 + cy1.ib * j1 + cy1.ic;	// i = x/face
-				int k = cy1.ja * i1 + cy1.jb * j1 + cy1.jc;	// k = y/face
-				int ijk = k * nbx * nby + j * nbx + i;
-				//MESSAGE(" "<<ij1<<" "<<i<<" "<<j<<" "<<ijk);
-				np[ijk].node = quad->uv_grid[ij1].node;
-				//SCRUTE(np[ijk].nodeId);
-			}
-	}
+    for (int i1 = 0; i1 < nbdown; i1++)
+      for (int j1 = 0; j1 < nbright; j1++) {
+        int ij1 = j1 * nbdown + i1;
+        int i = cy1.ia * i1 + cy1.ib * j1 + cy1.ic;	// i = x/face
+        int k = cy1.ja * i1 + cy1.jb * j1 + cy1.jc;	// k = y/face
+        int ijk = k * nbx * nby + j * nbx + i;
+        //MESSAGE(" "<<ij1<<" "<<i<<" "<<j<<" "<<ijk);
+        np[ijk].node = quad->uv_grid[ij1].node;
+        //SCRUTE(np[ijk].nodeId);
+      }
+  }
 
-	{
-		const TopoDS_Face & F = TopoDS::Face(meshFaces[_indZ0]->GetSubShape());
+  {
+    const TopoDS_Face & F = TopoDS::Face(meshFaces[_indZ0]->GetSubShape());
 
-		SMDS_NodeIteratorPtr itf= aMesh.GetSubMesh(F)->GetSubMeshDS()->GetNodes();
+    SMDS_NodeIteratorPtr itf= aMesh.GetSubMesh(F)->GetSubMeshDS()->GetNodes();
 
-		faceQuadStruct *quad = _cube.quad_Z0;
-		int k = 0;				// i = x/face , j = y/face
-		int nbdown = quad->nbPts[0];
-		int nbright = quad->nbPts[1];
+    faceQuadStruct *quad = _cube.quad_Z0;
+    int k = 0;				// i = x/face , j = y/face
+    int nbdown = quad->nbPts[0];
+    int nbright = quad->nbPts[1];
 
-		while(itf->more())
-		{
-			const SMDS_MeshNode * node = itf->next();
-                        findIJ( node, quad, i1, j1 );
-			int ij1 = j1 * nbdown + i1;
-			quad->uv_grid[ij1].node = node;
-		}
+    while(itf->more()) {
+      const SMDS_MeshNode * node = itf->next();
+      if(myTool->IsMedium(node))
+        continue;
+      findIJ( node, quad, i1, j1 );
+      int ij1 = j1 * nbdown + i1;
+      quad->uv_grid[ij1].node = node;
+    }
 
-		for (int i1 = 0; i1 < nbdown; i1++)
-			for (int j1 = 0; j1 < nbright; j1++)
-			{
-				int ij1 = j1 * nbdown + i1;
-				int i = cz0.ia * i1 + cz0.ib * j1 + cz0.ic;	// i = x/face
-				int j = cz0.ja * i1 + cz0.jb * j1 + cz0.jc;	// j = y/face
-				int ijk = k * nbx * nby + j * nbx + i;
-				//MESSAGE(" "<<ij1<<" "<<i<<" "<<j<<" "<<ijk);
-				np[ijk].node = quad->uv_grid[ij1].node;
-				//SCRUTE(np[ijk].nodeId);
-			}
-	}
+    for (int i1 = 0; i1 < nbdown; i1++)
+      for (int j1 = 0; j1 < nbright; j1++) {
+        int ij1 = j1 * nbdown + i1;
+        int i = cz0.ia * i1 + cz0.ib * j1 + cz0.ic;	// i = x/face
+        int j = cz0.ja * i1 + cz0.jb * j1 + cz0.jc;	// j = y/face
+        int ijk = k * nbx * nby + j * nbx + i;
+        //MESSAGE(" "<<ij1<<" "<<i<<" "<<j<<" "<<ijk);
+        np[ijk].node = quad->uv_grid[ij1].node;
+        //SCRUTE(np[ijk].nodeId);
+      }
+  }
 
-	{
-		const TopoDS_Face & F = TopoDS::Face(meshFaces[_indZ1]->GetSubShape());
+  {
+    const TopoDS_Face & F = TopoDS::Face(meshFaces[_indZ1]->GetSubShape());
 
-		SMDS_NodeIteratorPtr itf= aMesh.GetSubMesh(F)->GetSubMeshDS()->GetNodes();
+    SMDS_NodeIteratorPtr itf= aMesh.GetSubMesh(F)->GetSubMeshDS()->GetNodes();
 
-		faceQuadStruct *quad = _cube.quad_Z1;
-		int k = nbz - 1;		// i = x/face , j = y/face
-		int nbdown = quad->nbPts[0];
-		int nbright = quad->nbPts[1];
+    faceQuadStruct *quad = _cube.quad_Z1;
+    int k = nbz - 1;		// i = x/face , j = y/face
+    int nbdown = quad->nbPts[0];
+    int nbright = quad->nbPts[1];
+    
+    while(itf->more()) {
+      const SMDS_MeshNode * node = itf->next();
+      if(myTool->IsMedium(node))
+        continue;
+      findIJ( node, quad, i1, j1 );
+      int ij1 = j1 * nbdown + i1;
+      quad->uv_grid[ij1].node = node;
+    }
 
-		while(itf->more())
-		{
-			const SMDS_MeshNode * node = itf->next();
-                        findIJ( node, quad, i1, j1 );
-			int ij1 = j1 * nbdown + i1;
-			quad->uv_grid[ij1].node = node;
-		}
+    for (int i1 = 0; i1 < nbdown; i1++)
+      for (int j1 = 0; j1 < nbright; j1++) {
+        int ij1 = j1 * nbdown + i1;
+        int i = cz1.ia * i1 + cz1.ib * j1 + cz1.ic;	// i = x/face
+        int j = cz1.ja * i1 + cz1.jb * j1 + cz1.jc;	// j = y/face
+        int ijk = k * nbx * nby + j * nbx + i;
+        //MESSAGE(" "<<ij1<<" "<<i<<" "<<j<<" "<<ijk);
+        np[ijk].node = quad->uv_grid[ij1].node;
+        //SCRUTE(np[ijk].nodeId);
+      }
+  }
 
-		for (int i1 = 0; i1 < nbdown; i1++)
-			for (int j1 = 0; j1 < nbright; j1++)
-			{
-				int ij1 = j1 * nbdown + i1;
-				int i = cz1.ia * i1 + cz1.ib * j1 + cz1.ic;	// i = x/face
-				int j = cz1.ja * i1 + cz1.jb * j1 + cz1.jc;	// j = y/face
-				int ijk = k * nbx * nby + j * nbx + i;
-				//MESSAGE(" "<<ij1<<" "<<i<<" "<<j<<" "<<ijk);
-				np[ijk].node = quad->uv_grid[ij1].node;
-				//SCRUTE(np[ijk].nodeId);
-			}
-	}
+  // 2.0 - for each node of the cube:
+  //       - get the 8 points 3D = 8 vertices of the cube
+  //       - get the 12 points 3D on the 12 edges of the cube
+  //       - get the 6 points 3D on the 6 faces with their ID
+  //       - compute the point 3D
+  //       - store the point 3D in SMESHDS, store its ID in 3D structure
 
-	// 2.0 - for each node of the cube:
-	//       - get the 8 points 3D = 8 vertices of the cube
-	//       - get the 12 points 3D on the 12 edges of the cube
-	//       - get the 6 points 3D on the 6 faces with their ID
-	//       - compute the point 3D
-	//       - store the point 3D in SMESHDS, store its ID in 3D structure
+  int shapeID = meshDS->ShapeToIndex( aShape );
 
-        int shapeID = meshDS->ShapeToIndex( aShape );
+  Pt3 p000, p001, p010, p011, p100, p101, p110, p111;
+  Pt3 px00, px01, px10, px11;
+  Pt3 p0y0, p0y1, p1y0, p1y1;
+  Pt3 p00z, p01z, p10z, p11z;
+  Pt3 pxy0, pxy1, px0z, px1z, p0yz, p1yz;
 
-	Pt3 p000, p001, p010, p011, p100, p101, p110, p111;
-	Pt3 px00, px01, px10, px11;
-	Pt3 p0y0, p0y1, p1y0, p1y1;
-	Pt3 p00z, p01z, p10z, p11z;
-	Pt3 pxy0, pxy1, px0z, px1z, p0yz, p1yz;
+  GetPoint(p000, 0, 0, 0, nbx, nby, nbz, np, meshDS);
+  GetPoint(p001, 0, 0, nbz - 1, nbx, nby, nbz, np, meshDS);
+  GetPoint(p010, 0, nby - 1, 0, nbx, nby, nbz, np, meshDS);
+  GetPoint(p011, 0, nby - 1, nbz - 1, nbx, nby, nbz, np, meshDS);
+  GetPoint(p100, nbx - 1, 0, 0, nbx, nby, nbz, np, meshDS);
+  GetPoint(p101, nbx - 1, 0, nbz - 1, nbx, nby, nbz, np, meshDS);
+  GetPoint(p110, nbx - 1, nby - 1, 0, nbx, nby, nbz, np, meshDS);
+  GetPoint(p111, nbx - 1, nby - 1, nbz - 1, nbx, nby, nbz, np, meshDS);
 
-	GetPoint(p000, 0, 0, 0, nbx, nby, nbz, np, meshDS);
-	GetPoint(p001, 0, 0, nbz - 1, nbx, nby, nbz, np, meshDS);
-	GetPoint(p010, 0, nby - 1, 0, nbx, nby, nbz, np, meshDS);
-	GetPoint(p011, 0, nby - 1, nbz - 1, nbx, nby, nbz, np, meshDS);
-	GetPoint(p100, nbx - 1, 0, 0, nbx, nby, nbz, np, meshDS);
-	GetPoint(p101, nbx - 1, 0, nbz - 1, nbx, nby, nbz, np, meshDS);
-	GetPoint(p110, nbx - 1, nby - 1, 0, nbx, nby, nbz, np, meshDS);
-	GetPoint(p111, nbx - 1, nby - 1, nbz - 1, nbx, nby, nbz, np, meshDS);
+  for (int i = 1; i < nbx - 1; i++) {
+    for (int j = 1; j < nby - 1; j++) {
+      for (int k = 1; k < nbz - 1; k++) {
+        // *** seulement maillage regulier
+        // 12 points on edges
+        GetPoint(px00, i, 0, 0, nbx, nby, nbz, np, meshDS);
+        GetPoint(px01, i, 0, nbz - 1, nbx, nby, nbz, np, meshDS);
+        GetPoint(px10, i, nby - 1, 0, nbx, nby, nbz, np, meshDS);
+        GetPoint(px11, i, nby - 1, nbz - 1, nbx, nby, nbz, np, meshDS);
 
-	for (int i = 1; i < nbx - 1; i++)
-	{
-		for (int j = 1; j < nby - 1; j++)
-		{
-			for (int k = 1; k < nbz - 1; k++)
-			{
-				// *** seulement maillage regulier
-				// 12 points on edges
-				GetPoint(px00, i, 0, 0, nbx, nby, nbz, np, meshDS);
-				GetPoint(px01, i, 0, nbz - 1, nbx, nby, nbz, np, meshDS);
-				GetPoint(px10, i, nby - 1, 0, nbx, nby, nbz, np, meshDS);
-				GetPoint(px11, i, nby - 1, nbz - 1, nbx, nby, nbz, np, meshDS);
+        GetPoint(p0y0, 0, j, 0, nbx, nby, nbz, np, meshDS);
+        GetPoint(p0y1, 0, j, nbz - 1, nbx, nby, nbz, np, meshDS);
+        GetPoint(p1y0, nbx - 1, j, 0, nbx, nby, nbz, np, meshDS);
+        GetPoint(p1y1, nbx - 1, j, nbz - 1, nbx, nby, nbz, np, meshDS);
 
-				GetPoint(p0y0, 0, j, 0, nbx, nby, nbz, np, meshDS);
-				GetPoint(p0y1, 0, j, nbz - 1, nbx, nby, nbz, np, meshDS);
-				GetPoint(p1y0, nbx - 1, j, 0, nbx, nby, nbz, np, meshDS);
-				GetPoint(p1y1, nbx - 1, j, nbz - 1, nbx, nby, nbz, np, meshDS);
+        GetPoint(p00z, 0, 0, k, nbx, nby, nbz, np, meshDS);
+        GetPoint(p01z, 0, nby - 1, k, nbx, nby, nbz, np, meshDS);
+        GetPoint(p10z, nbx - 1, 0, k, nbx, nby, nbz, np, meshDS);
+        GetPoint(p11z, nbx - 1, nby - 1, k, nbx, nby, nbz, np, meshDS);
 
-				GetPoint(p00z, 0, 0, k, nbx, nby, nbz, np, meshDS);
-				GetPoint(p01z, 0, nby - 1, k, nbx, nby, nbz, np, meshDS);
-				GetPoint(p10z, nbx - 1, 0, k, nbx, nby, nbz, np, meshDS);
-				GetPoint(p11z, nbx - 1, nby - 1, k, nbx, nby, nbz, np, meshDS);
+        // 12 points on faces
+        GetPoint(pxy0, i, j, 0, nbx, nby, nbz, np, meshDS);
+        GetPoint(pxy1, i, j, nbz - 1, nbx, nby, nbz, np, meshDS);
+        GetPoint(px0z, i, 0, k, nbx, nby, nbz, np, meshDS);
+        GetPoint(px1z, i, nby - 1, k, nbx, nby, nbz, np, meshDS);
+        GetPoint(p0yz, 0, j, k, nbx, nby, nbz, np, meshDS);
+        GetPoint(p1yz, nbx - 1, j, k, nbx, nby, nbz, np, meshDS);
 
-				// 12 points on faces
-				GetPoint(pxy0, i, j, 0, nbx, nby, nbz, np, meshDS);
-				GetPoint(pxy1, i, j, nbz - 1, nbx, nby, nbz, np, meshDS);
-				GetPoint(px0z, i, 0, k, nbx, nby, nbz, np, meshDS);
-				GetPoint(px1z, i, nby - 1, k, nbx, nby, nbz, np, meshDS);
-				GetPoint(p0yz, 0, j, k, nbx, nby, nbz, np, meshDS);
-				GetPoint(p1yz, nbx - 1, j, k, nbx, nby, nbz, np, meshDS);
+        int ijk = k * nbx * nby + j * nbx + i;
+        double x = double (i) / double (nbx - 1);	// *** seulement
+        double y = double (j) / double (nby - 1);	// *** maillage
+        double z = double (k) / double (nbz - 1);	// *** regulier
 
-				int ijk = k * nbx * nby + j * nbx + i;
-				double x = double (i) / double (nbx - 1);	// *** seulement
-				double y = double (j) / double (nby - 1);	// *** maillage
-				double z = double (k) / double (nbz - 1);	// *** regulier
+        Pt3 X;
+        for (int i = 0; i < 3; i++) {
+          X[i] = (1 - x) * p0yz[i] + x * p1yz[i]
+                 + (1 - y) * px0z[i] + y * px1z[i]
+                 + (1 - z) * pxy0[i] + z * pxy1[i]
+                 - (1 - x) * ((1 - y) * p00z[i] + y * p01z[i])
+                 - x * ((1 - y) * p10z[i] + y * p11z[i])
+                 - (1 - y) * ((1 - z) * px00[i] + z * px01[i])
+                 - y * ((1 - z) * px10[i] + z * px11[i])
+                 - (1 - z) * ((1 - x) * p0y0[i] + x * p1y0[i])
+                 - z * ((1 - x) * p0y1[i] + x * p1y1[i])
+                 + (1 - x) * ((1 - y) * ((1 - z) * p000[i] + z * p001[i])
+                 + y * ((1 - z) * p010[i] + z * p011[i]))
+                 + x * ((1 - y) * ((1 - z) * p100[i] + z * p101[i])
+                 + y * ((1 - z) * p110[i] + z * p111[i]));
+        }
 
-				Pt3 X;
-				for (int i = 0; i < 3; i++)
-				{
-					X[i] =
-						(1 - x) * p0yz[i] + x * p1yz[i]
-						+ (1 - y) * px0z[i] + y * px1z[i]
-						+ (1 - z) * pxy0[i] + z * pxy1[i]
-						- (1 - x) * ((1 - y) * p00z[i] + y * p01z[i])
-						- x * ((1 - y) * p10z[i] + y * p11z[i])
-						- (1 - y) * ((1 - z) * px00[i] + z * px01[i])
-						- y * ((1 - z) * px10[i] + z * px11[i])
-						- (1 - z) * ((1 - x) * p0y0[i] + x * p1y0[i])
-						- z * ((1 - x) * p0y1[i] + x * p1y1[i])
-						+ (1 - x) * ((1 - y) * ((1 - z) * p000[i] + z * p001[i])
-						+ y * ((1 - z) * p010[i] + z * p011[i]))
-						+ x * ((1 - y) * ((1 - z) * p100[i] + z * p101[i])
-						+ y * ((1 - z) * p110[i] + z * p111[i]));
-				}
-
-				SMDS_MeshNode * node = meshDS->AddNode(X[0], X[1], X[2]);
-				np[ijk].node = node;
-                                meshDS->SetNodeInVolume(node, shapeID);
-			}
-		}
-	}
+        SMDS_MeshNode * node = meshDS->AddNode(X[0], X[1], X[2]);
+        np[ijk].node = node;
+        meshDS->SetNodeInVolume(node, shapeID);
+      }
+    }
+  }
 
   // find orientation of furute volumes according to MED convention
   vector< bool > forward( nbx * nby );
   SMDS_VolumeTool vTool;
-  for (int i = 0; i < nbx - 1; i++)
-    for (int j = 0; j < nby - 1; j++)
-    {
+  for (int i = 0; i < nbx - 1; i++) {
+    for (int j = 0; j < nby - 1; j++) {
       int n1 = j * nbx + i;
       int n2 = j * nbx + i + 1;
       int n3 = (j + 1) * nbx + i + 1;
@@ -705,51 +697,53 @@ bool StdMeshers_Hexa_3D::Compute(SMESH_Mesh & aMesh,
       vTool.Set( &tmpVol );
       forward[ n1 ] = vTool.IsForward();
     }
+  }
 
-	//2.1 - for each node of the cube (less 3 *1 Faces):
-	//      - store hexahedron in SMESHDS
-	MESSAGE("Storing hexahedron into the DS");
-	for (int i = 0; i < nbx - 1; i++)
-		for (int j = 0; j < nby - 1; j++)
-                {
-                        bool isForw = forward.at( j * nbx + i );
-			for (int k = 0; k < nbz - 1; k++)
-			{
-				int n1 = k * nbx * nby + j * nbx + i;
-				int n2 = k * nbx * nby + j * nbx + i + 1;
-				int n3 = k * nbx * nby + (j + 1) * nbx + i + 1;
-				int n4 = k * nbx * nby + (j + 1) * nbx + i;
-				int n5 = (k + 1) * nbx * nby + j * nbx + i;
-				int n6 = (k + 1) * nbx * nby + j * nbx + i + 1;
-				int n7 = (k + 1) * nbx * nby + (j + 1) * nbx + i + 1;
-				int n8 = (k + 1) * nbx * nby + (j + 1) * nbx + i;
+  //2.1 - for each node of the cube (less 3 *1 Faces):
+  //      - store hexahedron in SMESHDS
+  MESSAGE("Storing hexahedron into the DS");
+  for (int i = 0; i < nbx - 1; i++) {
+    for (int j = 0; j < nby - 1; j++) {
+      bool isForw = forward.at( j * nbx + i );
+      for (int k = 0; k < nbz - 1; k++) {
+        int n1 = k * nbx * nby + j * nbx + i;
+        int n2 = k * nbx * nby + j * nbx + i + 1;
+        int n3 = k * nbx * nby + (j + 1) * nbx + i + 1;
+        int n4 = k * nbx * nby + (j + 1) * nbx + i;
+        int n5 = (k + 1) * nbx * nby + j * nbx + i;
+        int n6 = (k + 1) * nbx * nby + j * nbx + i + 1;
+        int n7 = (k + 1) * nbx * nby + (j + 1) * nbx + i + 1;
+        int n8 = (k + 1) * nbx * nby + (j + 1) * nbx + i;
 
-				SMDS_MeshVolume * elt;
-                                if ( isForw )
-                                  elt = meshDS->AddVolume(np[n1].node,
-                                                          np[n2].node,
-                                                          np[n3].node,
-                                                          np[n4].node,
-                                                          np[n5].node,
-                                                          np[n6].node,
-                                                          np[n7].node,
-                                                          np[n8].node);
-                                else
-                                  elt = meshDS->AddVolume(np[n1].node,
-                                                          np[n4].node,
-                                                          np[n3].node,
-                                                          np[n2].node,
-                                                          np[n5].node,
-                                                          np[n8].node,
-                                                          np[n7].node,
-                                                          np[n6].node);
-
-                                meshDS->SetMeshElementOnShape(elt, shapeID);
-                              }
-                      }
+        SMDS_MeshVolume * elt;
+        if ( isForw ) {
+          //elt = meshDS->AddVolume(np[n1].node, np[n2].node,
+          //                        np[n3].node, np[n4].node,
+          //                        np[n5].node, np[n6].node,
+          //                        np[n7].node, np[n8].node);
+          elt = myTool->AddVolume(np[n1].node, np[n2].node,
+                                  np[n3].node, np[n4].node,
+                                  np[n5].node, np[n6].node,
+                                  np[n7].node, np[n8].node);
+        }
+        else {
+          //elt = meshDS->AddVolume(np[n1].node, np[n4].node,
+          //                        np[n3].node, np[n2].node,
+          //                        np[n5].node, np[n8].node,
+          //                        np[n7].node, np[n6].node);
+          elt = myTool->AddVolume(np[n1].node, np[n4].node,
+                                  np[n3].node, np[n2].node,
+                                  np[n5].node, np[n8].node,
+                                  np[n7].node, np[n6].node);
+        }
+        
+        meshDS->SetMeshElementOnShape(elt, shapeID);
+      }
+    }
+  }
   if ( np ) delete [] np;
-	//MESSAGE("End of StdMeshers_Hexa_3D::Compute()");
-	return true;
+  //MESSAGE("End of StdMeshers_Hexa_3D::Compute()");
+  return ClearAndReturn( true );
 }
 
 //=============================================================================
@@ -1065,4 +1059,5 @@ bool ComputePentahedralMesh(SMESH_Mesh & aMesh,	const TopoDS_Shape & aShape)
   */
   return bOK;
 }
+
 

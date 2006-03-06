@@ -433,7 +433,7 @@ void SMESH_subMesh::InsertDependence(const TopoDS_Shape aSubShape)
  */
 //=============================================================================
 
-const TopoDS_Shape & SMESH_subMesh::GetSubShape()
+const TopoDS_Shape & SMESH_subMesh::GetSubShape() const
 {
 	//MESSAGE("SMESH_subMesh::GetSubShape");
 	return _subShape;
@@ -540,7 +540,7 @@ SMESH_Hypothesis::Hypothesis_Status
     if ( ! CanAddHypothesis( anHyp ))
       return SMESH_Hypothesis::HYP_BAD_DIM;
 
-    if ( GetSimilarAttached( _subShape, anHyp ) )
+    if ( /*!anHyp->IsAuxiliary() &&*/ GetSimilarAttached( _subShape, anHyp ) )
       return SMESH_Hypothesis::HYP_ALREADY_EXIST;
 
     if ( !_meshDS->AddHypothesis(_subShape, anHyp))
@@ -549,9 +549,9 @@ SMESH_Hypothesis::Hypothesis_Status
     // Serve Propagation of 1D hypothesis
     if (event == ADD_HYP) {
       bool isPropagationOk = true;
-      string hypName = anHyp->GetName();
+      bool isPropagationHyp = ( strcmp( "Propagation", anHyp->GetName() ) == 0 );
 
-      if (hypName == "Propagation") {
+      if ( isPropagationHyp ) {
         TopExp_Explorer exp (_subShape, TopAbs_EDGE);
         TopTools_MapOfShape aMap;
         for (; exp.More(); exp.Next()) {
@@ -579,7 +579,11 @@ SMESH_Hypothesis::Hypothesis_Status
       } else {
       }
 
-      if (!isPropagationOk && ret < SMESH_Hypothesis::HYP_CONCURENT) {
+      if ( isPropagationOk ) {
+        if ( isPropagationHyp )
+          return ret; // nothing more to do for "Propagation" hypothesis
+      }
+      else if ( ret < SMESH_Hypothesis::HYP_CONCURENT) {
         ret = SMESH_Hypothesis::HYP_CONCURENT;
       }
     } // Serve Propagation of 1D hypothesis
@@ -598,7 +602,9 @@ SMESH_Hypothesis::Hypothesis_Status
     {
       bool isPropagationOk = true;
       SMESH_HypoFilter propagFilter( SMESH_HypoFilter::HasName( "Propagation" ));
-      if ( propagFilter.IsOk( anHyp, _subShape ))
+      bool isPropagationHyp = propagFilter.IsOk( anHyp, _subShape );
+
+      if ( isPropagationHyp )
       {
         TopExp_Explorer exp (_subShape, TopAbs_EDGE);
         TopTools_MapOfShape aMap;
@@ -620,7 +626,11 @@ SMESH_Hypothesis::Hypothesis_Status
         isPropagationOk = _father->RebuildPropagationChains();
       }
 
-      if (!isPropagationOk && ret < SMESH_Hypothesis::HYP_CONCURENT) {
+      if ( isPropagationOk ) {
+        if ( isPropagationHyp )
+          return ret; // nothing more to do for "Propagation" hypothesis
+      }
+      else if ( ret < SMESH_Hypothesis::HYP_CONCURENT) {
         ret = SMESH_Hypothesis::HYP_CONCURENT;
       }
     } // Serve Propagation of 1D hypothesis
@@ -698,7 +708,7 @@ SMESH_Hypothesis::Hypothesis_Status
         SetAlgoState(HYP_OK);
       if (SMESH_Hypothesis::IsStatusFatal( ret ))
         _meshDS->RemoveHypothesis(_subShape, anHyp);
-      else if (!_father->IsUsedHypothesis(  anHyp, _subShape ))
+      else if (!_father->IsUsedHypothesis( anHyp, this ))
       {
         _meshDS->RemoveHypothesis(_subShape, anHyp);
         ret = SMESH_Hypothesis::HYP_INCOMPATIBLE;
@@ -788,7 +798,7 @@ SMESH_Hypothesis::Hypothesis_Status
           // ret should be fatal: anHyp was not added
           ret = SMESH_Hypothesis::HYP_INCOMPATIBLE;
       }
-      else if (!_father->IsUsedHypothesis(  anHyp, _subShape ))
+      else if (!_father->IsUsedHypothesis(  anHyp, this ))
         ret = SMESH_Hypothesis::HYP_INCOMPATIBLE;
 
       if (SMESH_Hypothesis::IsStatusFatal( ret ))
@@ -852,7 +862,7 @@ SMESH_Hypothesis::Hypothesis_Status
       ASSERT(algo);
       if ( algo->CheckHypothesis((*_father),_subShape, aux_ret ))
       {
-        if (_father->IsUsedHypothesis( anHyp, _subShape )) // new Hyp
+        if (_father->IsUsedHypothesis( anHyp, this )) // new Hyp
           modifiedHyp = true;
       }
       else
@@ -1607,8 +1617,9 @@ TopoDS_Shape SMESH_subMesh::GetCollection(SMESH_Gen * theGen, SMESH_Algo* theAlg
   if ( mainShape.IsSame( _subShape ))
     return _subShape;
 
+  const bool ignoreAuxiliaryHyps = false;
   list<const SMESHDS_Hypothesis*> aUsedHyp =
-    theAlgo->GetUsedHypothesis( *_father, _subShape ); // copy
+    theAlgo->GetUsedHypothesis( *_father, _subShape, ignoreAuxiliaryHyps ); // copy
 
   // put in a compound all shapes with the same hypothesis assigned
   // and a good ComputState
@@ -1626,7 +1637,7 @@ TopoDS_Shape SMESH_subMesh::GetCollection(SMESH_Gen * theGen, SMESH_Algo* theAlg
 
     if (subMesh->GetComputeState() == READY_TO_COMPUTE &&
         anAlgo == theAlgo &&
-        anAlgo->GetUsedHypothesis( *_father, S ) == aUsedHyp)
+        anAlgo->GetUsedHypothesis( *_father, S, ignoreAuxiliaryHyps ) == aUsedHyp)
     {
       aBuilder.Add( aCompound, S );
     }
@@ -1637,26 +1648,31 @@ TopoDS_Shape SMESH_subMesh::GetCollection(SMESH_Gen * theGen, SMESH_Algo* theAlg
 
 //=======================================================================
 //function : GetSimilarAttached
-//purpose  : return nb of hypotheses attached to theShape.
+//purpose  : return a hypothesis attached to theShape.
 //           If theHyp is provided, similar but not same hypotheses
-//           are countered; else only applicable ones having theHypType
-//           are countered
+//           is returned; else only applicable ones having theHypType
+//           is returned
 //=======================================================================
 
 const SMESH_Hypothesis* SMESH_subMesh::GetSimilarAttached(const TopoDS_Shape&      theShape,
                                                           const SMESH_Hypothesis * theHyp,
                                                           const int                theHypType)
 {
-  SMESH_HypoFilter filter;
-  filter.Init( SMESH_HypoFilter::HasType( theHyp ? theHyp->GetType() : theHypType ));
+  SMESH_HypoFilter hypoKind;
+  hypoKind.Init( hypoKind.HasType( theHyp ? theHyp->GetType() : theHypType ));
   if ( theHyp ) {
-    filter.And( SMESH_HypoFilter::HasDim( theHyp->GetDim() ));
-    filter.AndNot( SMESH_HypoFilter::Is( theHyp ));
+    hypoKind.And   ( hypoKind.HasDim( theHyp->GetDim() ));
+    hypoKind.AndNot( hypoKind.Is( theHyp ));
+    if ( theHyp->IsAuxiliary() )
+      hypoKind.And( hypoKind.HasName( theHyp->GetName() ));
+    else
+      hypoKind.AndNot( hypoKind.IsAuxiliary());
   }
-  else
-    filter.And( SMESH_HypoFilter::IsApplicableTo( theShape ));
+  else {
+    hypoKind.And( hypoKind.IsApplicableTo( theShape ));
+  }
 
-  return _father->GetHypothesis( theShape, filter, false );
+  return _father->GetHypothesis( theShape, hypoKind, false );
 }
 
 //=======================================================================

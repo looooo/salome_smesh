@@ -57,11 +57,11 @@ public:
 
   SMESH_Hypothesis(int hypId, int studyId, SMESH_Gen* gen);
   virtual ~SMESH_Hypothesis();
-  int GetDim() const;
+  virtual int GetDim() const;
   int GetStudyId() const;
-  void NotifySubMeshesHypothesisModification();
-  int GetShapeType() const;
-  const char* GetLibName() const;
+  virtual void NotifySubMeshesHypothesisModification();
+  virtual int GetShapeType() const;
+  virtual const char* GetLibName() const;
   void  SetLibName(const char* theLibName);
 
   /*!
@@ -71,6 +71,17 @@ public:
     * \retval bool - true if parameter values have been successfully defined
    */
   virtual bool SetParametersByMesh(const SMESH_Mesh* theMesh, const TopoDS_Shape& theShape)=0;
+
+  /*!
+   * \brief Return true if me is an auxiliary hypothesis
+    * \retval bool - auxiliary or not
+   * 
+   * An auxiliary hypothesis is optional, i.e. an algorithm
+   * can work without it and another hypothesis of the same
+   * dimention can be assigned to the shape
+   */
+  virtual bool IsAuxiliary() const
+  { return GetType() == PARAM_ALGO && _param_algo_dim <= 0; }
 
 protected:
   SMESH_Gen* _gen;

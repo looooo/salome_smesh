@@ -354,17 +354,27 @@ bool StdMeshers_Regular_1D::computeInternalParameters(const TopoDS_Edge& theEdge
       {
       case StdMeshers_NumberOfSegments::DT_Scale:
         {
+          int NbSegm   = _ivalue[ NB_SEGMENTS_IND ];
           double scale = _value[ SCALE_FACTOR_IND ];
-          if ( theReverse )
-            scale = 1. / scale;
-          double alpha = pow( scale , 1.0 / (_ivalue[ NB_SEGMENTS_IND ] - 1));
-          double factor = (l - f) / (1 - pow( alpha,_ivalue[ NB_SEGMENTS_IND ]));
 
-          int i, NbPoints = 1 + _ivalue[ NB_SEGMENTS_IND ];
-          for ( i = 2; i < NbPoints; i++ )
-          {
-            double param = f + factor * (1 - pow(alpha, i - 1));
-            theParams.push_back( param );
+          if (fabs(scale - 1.0) < Precision::Confusion()) {
+            // special case to avoid division on zero
+            for (int i = 1; i < NbSegm; i++) {
+              double param = f + (l - f) * i / NbSegm;
+              theParams.push_back( param );
+            }
+          } else {
+            // general case of scale distribution
+            if ( theReverse )
+              scale = 1.0 / scale;
+
+            double alpha = pow(scale, 1.0 / (NbSegm - 1));
+            double factor = (l - f) / (1.0 - pow(alpha, NbSegm));
+
+            for (int i = 1; i < NbSegm; i++) {
+              double param = f + factor * (1.0 - pow(alpha, i));
+              theParams.push_back( param );
+            }
           }
           return true;
         }

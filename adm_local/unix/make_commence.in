@@ -250,7 +250,7 @@ ac_cc_warnings.m4                 check_boost.m4     check_swig.m4
 
 ACLOCAL_GUI = \
 check_vtk.m4	                  check_opengl.m4    check_qt.m4        \
-check_GUI.m4                      check_full_GUI.m4  
+check_GUI.m4	                  check_corba_in_GUI.m4  
 
 ACLOCAL_MED =                 check_Med.m4
 ACLOCAL_GEOM =                check_GEOM.m4                      

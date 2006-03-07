@@ -309,6 +309,7 @@ SMESH_HypoFilter & SMESH_HypoFilter::Init  ( SMESH_HypoPredicate* aPredicate, bo
   list<SMESH_HypoPredicate*>::const_iterator pred = myPredicates.begin();
   for ( ; pred != myPredicates.end(); ++pred )
     delete *pred;
+  myPredicates.clear();
 
   add( notNagate ? AND : AND_NOT, aPredicate );
   return *this;

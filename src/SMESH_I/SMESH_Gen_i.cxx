@@ -46,6 +46,7 @@
 #include <gp_Pnt.hxx>
 #include <BRep_Tool.hxx>
 #include <TCollection_AsciiString.hxx>
+#include <OSD.hxx>
 
 #include "Utils_CorbaException.hxx"
 
@@ -92,7 +93,6 @@
 #include "Utils_ExceptHandlers.hxx"
 
 #include <map>
-#include <boost/filesystem/path.hpp>
 
 using namespace std;
 using SMESH::TPythonDump;
@@ -247,6 +247,8 @@ SMESH_Gen_i::SMESH_Gen_i( CORBA::ORB_ptr            orb,
   myIsEmbeddedMode = false;
   myShapeReader = NULL;  // shape reader
   mySMESHGen = this;
+
+  OSD::SetSignal( true );
 }
 
 //=============================================================================
@@ -650,7 +652,7 @@ SMESH::SMESH_Mesh_ptr SMESH_Gen_i::CreateMeshesFromUNV( const char* theFileName 
   if(MYDEBUG) MESSAGE( "SMESH_Gen_i::CreateMeshesFromUNV" );
 
   SMESH::SMESH_Mesh_var aMesh = createMesh();
-  string aFileName; // = boost::filesystem::path(theFileName).leaf();
+  string aFileName;
   // publish mesh in the study
   if ( CanPublishInStudy( aMesh ) ) {
     SALOMEDS::StudyBuilder_var aStudyBuilder = myCurrentStudy->NewBuilder();
@@ -761,7 +763,7 @@ SMESH::SMESH_Mesh_ptr SMESH_Gen_i::CreateMeshesFromSTL( const char* theFileName 
   if(MYDEBUG) MESSAGE( "SMESH_Gen_i::CreateMeshesFromSTL" );
 
   SMESH::SMESH_Mesh_var aMesh = createMesh();
-  string aFileName; // = boost::filesystem::path(theFileName).leaf();
+  string aFileName;
   // publish mesh in the study
   if ( CanPublishInStudy( aMesh ) ) {
     SALOMEDS::StudyBuilder_var aStudyBuilder = myCurrentStudy->NewBuilder();

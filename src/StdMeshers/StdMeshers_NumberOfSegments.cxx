@@ -33,7 +33,7 @@
 #include "SMESHDS_SubMesh.hxx"
 #include "SMESH_Mesh.hxx"
 
-#include "CASCatch_CatchSignals.hxx"
+#include "CASCatch.hxx"
 
 #include <ExprIntrp_GenExp.hxx>
 #include <Expr_Array1OfNamedUnknown.hxx>
@@ -212,7 +212,6 @@ void StdMeshers_NumberOfSegments::SetTableFunction(const std::vector<double>& ta
   double prev = -PRECISION;
   bool isSame = table.size() == _table.size();
 
-  CASCatch_CatchSignals aCatchSignals;
   bool pos = false;
   for (i=0; i < table.size()/2; i++) {
     double par = table[i*2];
@@ -311,8 +310,6 @@ bool process( const TCollection_AsciiString& str, int convMode,
 	      bool& non_neg, bool& non_zero,
  	      bool& singulars, double& sing_point )
 {
-  CASCatch_CatchSignals aCatchSignals;
-
   bool parsed_ok = true;
   Handle( ExprIntrp_GenExp ) myExpr;
   CASCatch_TRY

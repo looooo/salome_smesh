@@ -27,7 +27,7 @@
 //  $Header$
 
 #include "StdMeshers_Distribution.hxx"
-#include "CASCatch_CatchSignals.hxx"
+#include "CASCatch.hxx"
 
 #include <math_GaussSingleIntegration.hxx>
 #include <utilities.h>
@@ -43,8 +43,6 @@ Function::~Function()
 
 bool Function::value( const double, double& f ) const
 {
-  CASCatch_CatchSignals aCatchSignals;
-
   bool ok = true;
   if( myConv==0 )
   {
@@ -170,8 +168,6 @@ FunctionExpr::FunctionExpr( const char* str, const int conv )
   myVars( 1, 1 ),
   myValues( 1, 1 )
 {
-  CASCatch_CatchSignals aCatchSignals;
-
   bool ok = true;
   CASCatch_TRY
   {
@@ -206,8 +202,6 @@ bool FunctionExpr::value( const double t, double& f ) const
 {
   if( myExpr.IsNull() )
     return false;
-
-  CASCatch_CatchSignals aCatchSignals;
 
   ( ( TColStd_Array1OfReal& )myValues ).ChangeValue( 1 ) = t;
   bool ok = true;

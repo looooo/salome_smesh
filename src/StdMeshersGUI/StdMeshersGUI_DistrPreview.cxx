@@ -1,6 +1,6 @@
 
 #include "StdMeshersGUI_DistrPreview.h"
-#include "CASCatch_CatchSignals.hxx"
+#include "CASCatch.hxx"
 
 #include <Expr_NamedUnknown.hxx>
 #include <Expr_GeneralExpression.hxx>
@@ -221,8 +221,6 @@ void StdMeshersGUI_DistrPreview::update()
   delete[] y;
   x = y = 0;
 
-  CASCatch_CatchSignals aCatchSignals;
-
   CASCatch_TRY
   {   
     replot();
@@ -267,8 +265,6 @@ bool isCorrectArg( const Handle( Expr_GeneralExpression )& expr )
 
 bool StdMeshersGUI_DistrPreview::init( const QString& str )
 {
-  CASCatch_CatchSignals aCatchSignals;
-
   bool parsed_ok = true;
   CASCatch_TRY
   {
@@ -311,8 +307,6 @@ double StdMeshersGUI_DistrPreview::calc( bool& ok )
 {
   double res = 0.0;
 
-  CASCatch_CatchSignals aCatchSignals;
-
   ok = true;
   CASCatch_TRY {   
     res = myExpr->Expression()->Evaluate( myVars, myValues );
@@ -333,8 +327,6 @@ bool StdMeshersGUI_DistrPreview::isDone() const
 
 bool StdMeshersGUI_DistrPreview::convert( double& v ) const
 {
-  CASCatch_CatchSignals aCatchSignals;
-
   bool ok = true;
   switch( myConv )
   {

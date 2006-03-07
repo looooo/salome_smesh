@@ -78,8 +78,7 @@ LDFLAGS+= \
         -lSMESHClient \
         -lSalomeApp \
         -lSalomeObject \
-        -lSMESHControls \
-        -lCASCatch
+        -lSMESHControls
 
 LDFLAGSFORBIN += \
 	-L${GEOM_ROOT_DIR}/lib/salome \

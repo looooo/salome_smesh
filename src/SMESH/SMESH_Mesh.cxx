@@ -585,7 +585,7 @@ int SMESH_Mesh::GetHypotheses(const TopoDS_Shape &                aSubShape,
         }
     }
   }
-  return !aHypList.empty();
+  return nbHyps;
 }
 
 //=============================================================================

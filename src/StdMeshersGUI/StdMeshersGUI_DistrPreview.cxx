@@ -334,6 +334,10 @@ bool StdMeshersGUI_DistrPreview::convert( double& v ) const
     {
       CASCatch_TRY
       { 
+	// in StdMeshers_NumberOfSegments.cc
+	// const double PRECISION = 1e-7;
+	//
+	if(v < -7) v = -7.0;
 	v = pow( 10.0, v );
       }
       CASCatch_CATCH(Standard_Failure)

@@ -157,6 +157,7 @@ LIB_MOC = \
 		SMESHGUI_Dialog.h \
 		SMESHGUI_MeshDlg.h \
 		SMESHGUI_MeshOp.h \
+		SMESHGUI_Hypotheses.h \
 		SMESHGUI_ShapeByMeshDlg.h \
 		SMESHGUI_AddQuadraticElementDlg.h
 

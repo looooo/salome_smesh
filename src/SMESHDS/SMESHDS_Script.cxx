@@ -31,12 +31,32 @@
 using namespace std;
 
 //=======================================================================
+//function : Constructor
+//purpose  : 
+//=======================================================================
+SMESHDS_Script::SMESHDS_Script(bool theIsEmbeddedMode):
+  myIsEmbeddedMode(theIsEmbeddedMode)
+{}
+
+//=======================================================================
 //function : Destructor
 //purpose  : 
 //=======================================================================
 SMESHDS_Script::~SMESHDS_Script()
 {
   Clear();
+}
+
+//=======================================================================
+void SMESHDS_Script::SetModified(bool theModified)
+{
+  myIsModified = theModified;
+}
+
+//=======================================================================
+bool SMESHDS_Script::IsModified()
+{
+  return myIsModified;
 }
 
 //=======================================================================
@@ -78,6 +98,10 @@ void SMESHDS_Script::AddNode(int NewNodeID, double x, double y, double z)
 //=======================================================================
 void SMESHDS_Script::AddEdge(int NewEdgeID, int idnode1, int idnode2)
 {
+  if(myIsEmbeddedMode){
+    myIsModified = true;
+    return;
+  }
   getCommand(SMESHDS_AddEdge)->AddEdge(NewEdgeID, idnode1, idnode2);
 }
 
@@ -88,6 +112,10 @@ void SMESHDS_Script::AddEdge(int NewEdgeID, int idnode1, int idnode2)
 void SMESHDS_Script::AddFace(int NewFaceID,
                              int idnode1, int idnode2, int idnode3)
 {
+  if(myIsEmbeddedMode){
+    myIsModified = true;
+    return;
+  }
   getCommand(SMESHDS_AddTriangle)->AddFace(NewFaceID,
                                            idnode1, idnode2, idnode3);
 }
@@ -100,6 +128,10 @@ void SMESHDS_Script::AddFace(int NewFaceID,
                              int idnode1, int idnode2,
                              int idnode3, int idnode4)
 {
+  if(myIsEmbeddedMode){
+    myIsModified = true;
+    return;
+  }
   getCommand(SMESHDS_AddQuadrangle)->AddFace(NewFaceID,
                                              idnode1, idnode2,
                                              idnode3, idnode4);
@@ -113,6 +145,10 @@ void SMESHDS_Script::AddVolume(int NewID,
                                int idnode1, int idnode2,
                                int idnode3, int idnode4)
 {
+  if(myIsEmbeddedMode){
+    myIsModified = true;
+    return;
+  }
   getCommand(SMESHDS_AddTetrahedron)->AddVolume(NewID,
                                                 idnode1, idnode2,
                                                 idnode3, idnode4);
@@ -126,6 +162,10 @@ void SMESHDS_Script::AddVolume(int NewID,
                                int idnode1, int idnode2,
                                int idnode3, int idnode4, int idnode5)
 {
+  if(myIsEmbeddedMode){
+    myIsModified = true;
+    return;
+  }
   getCommand(SMESHDS_AddPyramid)->AddVolume(NewID,
                                             idnode1, idnode2,
                                             idnode3, idnode4, idnode5);
@@ -139,6 +179,10 @@ void SMESHDS_Script::AddVolume(int NewID,
                                int idnode1, int idnode2, int idnode3,
                                int idnode4, int idnode5, int idnode6)
 {
+  if(myIsEmbeddedMode){
+    myIsModified = true;
+    return;
+  }
   getCommand(SMESHDS_AddPrism)->AddVolume(NewID,
                                           idnode1, idnode2, idnode3,
                                           idnode4, idnode5, idnode6);
@@ -152,6 +196,10 @@ void SMESHDS_Script::AddVolume(int NewID,
                                int idnode1, int idnode2, int idnode3, int idnode4,
                                int idnode5, int idnode6, int idnode7, int idnode8)
 {
+  if(myIsEmbeddedMode){
+    myIsModified = true;
+    return;
+  }
   getCommand(SMESHDS_AddHexahedron)->AddVolume(NewID,
                                                idnode1, idnode2, idnode3, idnode4,
                                                idnode5, idnode6, idnode7, idnode8);
@@ -163,6 +211,10 @@ void SMESHDS_Script::AddVolume(int NewID,
 //=======================================================================
 void SMESHDS_Script::AddPolygonalFace (int NewFaceID, std::vector<int> nodes_ids)
 {
+  if(myIsEmbeddedMode){
+    myIsModified = true;
+    return;
+  }
   getCommand(SMESHDS_AddPolygon)->AddPolygonalFace(NewFaceID, nodes_ids);
 }
 
@@ -174,6 +226,10 @@ void SMESHDS_Script::AddPolyhedralVolume (int NewID,
                                           std::vector<int> nodes_ids,
                                           std::vector<int> quantities)
 {
+  if(myIsEmbeddedMode){
+    myIsModified = true;
+    return;
+  }
   getCommand(SMESHDS_AddPolyhedron)->AddPolyhedralVolume
     (NewID, nodes_ids, quantities);
 }
@@ -184,6 +240,10 @@ void SMESHDS_Script::AddPolyhedralVolume (int NewID,
 //=======================================================================
 void SMESHDS_Script::MoveNode(int NewNodeID, double x, double y, double z)
 {
+  if(myIsEmbeddedMode){
+    myIsModified = true;
+    return;
+  }
   getCommand(SMESHDS_MoveNode)->MoveNode(NewNodeID, x, y, z);
 }
 
@@ -193,6 +253,10 @@ void SMESHDS_Script::MoveNode(int NewNodeID, double x, double y, double z)
 //=======================================================================
 void SMESHDS_Script::RemoveNode(int ID)
 {
+  if(myIsEmbeddedMode){
+    myIsModified = true;
+    return;
+  }
   getCommand(SMESHDS_RemoveNode)->RemoveNode(ID);
 }
 
@@ -202,6 +266,10 @@ void SMESHDS_Script::RemoveNode(int ID)
 //=======================================================================
 void SMESHDS_Script::RemoveElement(int ElementID)
 {
+  if(myIsEmbeddedMode){
+    myIsModified = true;
+    return;
+  }
   getCommand(SMESHDS_RemoveElement)->RemoveElement(ElementID);
 }
 
@@ -212,6 +280,10 @@ void SMESHDS_Script::RemoveElement(int ElementID)
 
 void SMESHDS_Script::ChangeElementNodes(int ElementID, int nodes[], int nbnodes)
 {
+  if(myIsEmbeddedMode){
+    myIsModified = true;
+    return;
+  }
   getCommand(SMESHDS_ChangeElementNodes)->ChangeElementNodes( ElementID, nodes, nbnodes );
 }
 
@@ -223,6 +295,10 @@ void SMESHDS_Script::ChangePolyhedronNodes (const int        ElementID,
                                             std::vector<int> nodes_ids,
                                             std::vector<int> quantities)
 {
+  if(myIsEmbeddedMode){
+    myIsModified = true;
+    return;
+  }
   getCommand(SMESHDS_ChangePolyhedronNodes)->ChangePolyhedronNodes
     (ElementID, nodes_ids, quantities);
 }
@@ -233,6 +309,10 @@ void SMESHDS_Script::ChangePolyhedronNodes (const int        ElementID,
 //=======================================================================
 void SMESHDS_Script::Renumber (const bool isNodes, const int startID, const int deltaID)
 {
+  if(myIsEmbeddedMode){
+    myIsModified = true;
+    return;
+  }
   getCommand(SMESHDS_Renumber)->Renumber( isNodes, startID, deltaID );
 }
 
@@ -269,6 +349,10 @@ const list<SMESHDS_Command*>& SMESHDS_Script::GetCommands()
 //=======================================================================
 void SMESHDS_Script::AddEdge(int NewEdgeID, int n1, int n2, int n12)
 {
+  if(myIsEmbeddedMode){
+    myIsModified = true;
+    return;
+  }
   getCommand(SMESHDS_AddQuadEdge)->AddEdge(NewEdgeID, n1, n2, n12);
 }
 
@@ -279,6 +363,10 @@ void SMESHDS_Script::AddEdge(int NewEdgeID, int n1, int n2, int n12)
 void SMESHDS_Script::AddFace(int NewFaceID, int n1, int n2, int n3,
                              int n12, int n23, int n31)
 {
+  if(myIsEmbeddedMode){
+    myIsModified = true;
+    return;
+  }
   getCommand(SMESHDS_AddQuadTriangle)->AddFace(NewFaceID, n1, n2, n3,
                                                n12, n23, n31);
 }
@@ -290,6 +378,10 @@ void SMESHDS_Script::AddFace(int NewFaceID, int n1, int n2, int n3,
 void SMESHDS_Script::AddFace(int NewFaceID, int n1, int n2, int n3, int n4,
                              int n12, int n23, int n34, int n41)
 {
+  if(myIsEmbeddedMode){
+    myIsModified = true;
+    return;
+  }
   getCommand(SMESHDS_AddQuadQuadrangle)->AddFace(NewFaceID, n1, n2, n3, n4,
                                                  n12, n23, n34, n41);
 }
@@ -302,6 +394,10 @@ void SMESHDS_Script::AddVolume(int NewVolID, int n1, int n2, int n3, int n4,
                                int n12, int n23, int n31,
                                int n14, int n24, int n34)
 {
+  if(myIsEmbeddedMode){
+    myIsModified = true;
+    return;
+  }
   getCommand(SMESHDS_AddQuadTetrahedron)->AddVolume(NewVolID, n1, n2, n3, n4,
                                                     n12, n23, n31,
                                                     n14, n24, n34);
@@ -315,6 +411,10 @@ void SMESHDS_Script::AddVolume(int NewVolID, int n1, int n2, int n3, int n4,
                                int n5, int n12, int n23, int n34, int n41,
                                int n15, int n25, int n35, int n45)
 {
+  if(myIsEmbeddedMode){
+    myIsModified = true;
+    return;
+  }
   getCommand(SMESHDS_AddQuadPyramid)->AddVolume(NewVolID, n1, n2, n3, n4, n5,
                                                 n12, n23, n34, n41,
                                                 n15, n25, n35, n45);
@@ -329,6 +429,10 @@ void SMESHDS_Script::AddVolume(int NewVolID, int n1, int n2, int n3, int n4,
                                 int n45, int n56, int n64,
                                 int n14, int n25, int n36)
 {
+  if(myIsEmbeddedMode){
+    myIsModified = true;
+    return;
+  }
   getCommand(SMESHDS_AddQuadPentahedron)->AddVolume(NewVolID, n1,n2,n3,n4,n5,n6,
                                                     n12, n23, n31,
                                                     n45, n56, n64,
@@ -345,6 +449,10 @@ void SMESHDS_Script::AddVolume(int NewVolID, int n1, int n2, int n3,
                                int n56, int n67, int n78, int n85,
                                int n15, int n26, int n37, int n48)
 {
+  if(myIsEmbeddedMode){
+    myIsModified = true;
+    return;
+  }
   getCommand(SMESHDS_AddQuadHexahedron)->AddVolume(NewVolID, n1, n2, n3, n4,
                                                    n5, n6, n7, n8,
                                                    n12, n23, n34, n41,

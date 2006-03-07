@@ -79,17 +79,21 @@ static int MYDEBUG = 0;
  */
 //=============================================================================
 
-SMESH_Mesh::SMESH_Mesh(int localId, int studyId, SMESH_Gen * gen, SMESHDS_Document * myDocument)
-: _groupId( 0 )
+SMESH_Mesh::SMESH_Mesh(int theLocalId, 
+		       int theStudyId, 
+		       SMESH_Gen* theGen,
+		       bool theIsEmbeddedMode,
+		       SMESHDS_Document* theDocument):
+  _groupId( 0 )
 {
   INFOS("SMESH_Mesh::SMESH_Mesh(int localId)");
-	_id = localId;
-	_studyId = studyId;
-	_gen = gen;
-	_myDocument = myDocument;
-	_idDoc = _myDocument->NewMesh();
-	_myMeshDS = _myDocument->GetMesh(_idDoc);
-	_isShapeToMesh = false;
+  _id = theLocalId;
+  _studyId = theStudyId;
+  _gen = theGen;
+  _myDocument = theDocument;
+  _idDoc = theDocument->NewMesh(theIsEmbeddedMode);
+  _myMeshDS = theDocument->GetMesh(_idDoc);
+  _isShapeToMesh = false;
 }
 
 //=============================================================================

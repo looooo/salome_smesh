@@ -36,9 +36,12 @@
 class SMESHDS_Script
 {
   public:
-	SMESHDS_Script() {};
+	SMESHDS_Script(bool theIsEmbeddedMode);
 	~SMESHDS_Script();
   
+        void SetModified(bool theModified);
+        bool IsModified();
+
 	void AddNode(int NewNodeID, double x, double y, double z);
 	void AddEdge(int NewEdgeID, int idnode1, int idnode2);
 	void AddFace(int NewFaceID, int idnode1, int idnode2, int idnode3);
@@ -95,6 +98,9 @@ class SMESHDS_Script
 	SMESHDS_Command* getCommand(const SMESHDS_CommandType aType);
 
 	std::list<SMESHDS_Command*> myCommands;
+
+        bool myIsEmbeddedMode;
+        bool myIsModified;
 };
 
 #endif

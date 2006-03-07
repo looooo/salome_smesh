@@ -31,14 +31,11 @@
 #include "SMDS_Mesh.hxx"
 #include "SMESH_Actor.h"
 #include "SMESH_ControlsDef.hxx"
-#include "SMESH_Client.hxx"
+#include "SalomeApp_Application.h"
 #include "VTKViewer_ExtractUnstructuredGrid.h"
 
 #include CORBA_SERVER_HEADER(SMESH_Gen)
 #include CORBA_SERVER_HEADER(SALOME_Exception)
-
-#include "SALOME_LifeCycleCORBA.hxx"
-#include "SalomeApp_Application.h"
 
 #include <vtkCell.h>
 #include <vtkIdList.h>
@@ -238,42 +235,6 @@ void SMESH_VisualObjDef::buildNodePrs()
   aPoints->Delete();
 
   myGrid->SetCells( 0, 0, 0 );
-
-  // Create cells
-  /*
-  int nbPoints = aPoints->GetNumberOfPoints();
-  vtkIdList *anIdList = vtkIdList::New();
-  anIdList->SetNumberOfIds( 1 );
-
-  vtkCellArray *aCells = vtkCellArray::New();
-  aCells->Allocate( 2 * nbPoints, 0 );
-
-  vtkUnsignedCharArray* aCellTypesArray = vtkUnsignedCharArray::New();
-  aCellTypesArray->SetNumberOfComponents( 1 );
-  aCellTypesArray->Allocate( nbPoints );
-
-  for( vtkIdType aCellId = 0; aCellId < nbPoints; aCellId++ )
-  {
-    anIdList->SetId( 0, aCellId );
-    aCells->InsertNextCell( anIdList );
-    aCellTypesArray->InsertNextValue( VTK_VERTEX );
-  }
-
-  vtkIntArray* aCellLocationsArray = vtkIntArray::New();
-  aCellLocationsArray->SetNumberOfComponents( 1 );
-  aCellLocationsArray->SetNumberOfTuples( nbPoints );
-
-  aCells->InitTraversal();
-  for( vtkIdType i = 0, *pts, npts; aCells->GetNextCell( npts, pts ); i++ )
-    aCellLocationsArray->SetValue( i, aCells->GetTraversalLocation( npts ) );
-
-  myGrid->SetCells( aCellTypesArray, aCellLocationsArray, aCells );
-
-  aCellLocationsArray->Delete();
-  aCellTypesArray->Delete();
-  aCells->Delete();
-  anIdList->Delete(); 
-  */
 }
 
 //=================================================================================
@@ -524,15 +485,11 @@ bool SMESH_VisualObjDef::GetEdgeNodes( const int theElemId,
 // function : SMESH_MeshObj
 // purpose  : Constructor
 //=================================================================================
-SMESH_MeshObj::SMESH_MeshObj(SMESH::SMESH_Mesh_ptr theMesh)
+SMESH_MeshObj::SMESH_MeshObj(SMESH::SMESH_Mesh_ptr theMesh):
+  myClient(SalomeApp_Application::orb(),theMesh)
 {
   if ( MYDEBUG ) 
-    MESSAGE("SMESH_MeshObj - theMesh->_is_nil() = "<<theMesh->_is_nil());
-    
-  myMeshServer = SMESH::SMESH_Mesh::_duplicate( theMesh );
-  myMeshServer->Register();
-  myMesh = new SMDS_Mesh();
-  myIsMeshFromServer = 0;
+    MESSAGE("SMESH_MeshObj - this = "<<this<<"; theMesh->_is_nil() = "<<theMesh->_is_nil());
 }
 
 //=================================================================================
@@ -541,9 +498,8 @@ SMESH_MeshObj::SMESH_MeshObj(SMESH::SMESH_Mesh_ptr theMesh)
 //=================================================================================
 SMESH_MeshObj::~SMESH_MeshObj()
 {
-  myMeshServer->Destroy();
-  if ( !myIsMeshFromServer )
-    delete myMesh;
+  if ( MYDEBUG ) 
+    MESSAGE("SMESH_MeshObj - this = "<<this<<"\n");
 }
 
 //=================================================================================
@@ -553,23 +509,8 @@ SMESH_MeshObj::~SMESH_MeshObj()
 void SMESH_MeshObj::Update( int theIsClear )
 {
   // Update SMDS_Mesh on client part
-  SALOME_LifeCycleCORBA* ls = new SALOME_LifeCycleCORBA( SalomeApp_Application::namingService() );
-  Engines::Component_var comp = ls->FindOrLoad_Component( "FactoryServer", "SMESH" );
-  SMESH::SMESH_Gen_ptr smesh = SMESH::SMESH_Gen::_narrow( comp );
-  int isUpdated = 0;
-  SMESH_Client client;
-  SMDS_Mesh* meshPtr = client.Update( smesh, myMeshServer, myMesh, theIsClear, isUpdated );
-  if ( meshPtr && myMesh != meshPtr )
-  {
-    delete myMesh;
-    myMesh = meshPtr;
-    myIsMeshFromServer = 1;
-  }
-  // Fill unstructured grid
-  if ( isUpdated )
-  {
-    buildPrs();
-  }
+  if ( myClient.Update(theIsClear) )
+    buildPrs();  // Fill unstructured grid
 }
 
 //=================================================================================
@@ -578,7 +519,7 @@ void SMESH_MeshObj::Update( int theIsClear )
 //=================================================================================
 int SMESH_MeshObj::GetElemDimension( const int theObjId )
 {
-  const SMDS_MeshElement* anElem = myMesh->FindElement( theObjId );
+  const SMDS_MeshElement* anElem = myClient->FindElement( theObjId );
   if ( anElem == 0 )
     return 0;
 
@@ -602,22 +543,22 @@ int SMESH_MeshObj::GetNbEntities( const SMDSAbs_ElementType theType) const
   {
     case SMDSAbs_Node:
     {
-      return myMesh->NbNodes();
+      return myClient->NbNodes();
     }
     break;
     case SMDSAbs_Edge:
     {
-      return myMesh->NbEdges();
+      return myClient->NbEdges();
     }
     break;
     case SMDSAbs_Face:
     {
-      return myMesh->NbFaces();
+      return myClient->NbFaces();
     }
     break;
     case SMDSAbs_Volume:
     {
-      return myMesh->NbVolumes();
+      return myClient->NbVolumes();
     }
     break;
     default:
@@ -634,25 +575,25 @@ int SMESH_MeshObj::GetEntities( const SMDSAbs_ElementType theType, TEntityList& 
   {
     case SMDSAbs_Node:
     {
-      SMDS_NodeIteratorPtr anIter = myMesh->nodesIterator();
+      SMDS_NodeIteratorPtr anIter = myClient->nodesIterator();
       while ( anIter->more() ) theObjs.push_back( anIter->next() );
     }
     break;
     case SMDSAbs_Edge:
     {
-      SMDS_EdgeIteratorPtr anIter = myMesh->edgesIterator();
+      SMDS_EdgeIteratorPtr anIter = myClient->edgesIterator();
       while ( anIter->more() ) theObjs.push_back( anIter->next() );
     }
     break;
     case SMDSAbs_Face:
     {
-      SMDS_FaceIteratorPtr anIter = myMesh->facesIterator();
+      SMDS_FaceIteratorPtr anIter = myClient->facesIterator();
       while ( anIter->more() ) theObjs.push_back( anIter->next() );
     }
     break;
     case SMDSAbs_Volume:
     {
-      SMDS_VolumeIteratorPtr anIter = myMesh->volumesIterator();
+      SMDS_VolumeIteratorPtr anIter = myClient->volumesIterator();
       while ( anIter->more() ) theObjs.push_back( anIter->next() );
     }
     break;
@@ -678,7 +619,7 @@ void SMESH_MeshObj::UpdateFunctor( const SMESH::Controls::FunctorPtr& theFunctor
 //=================================================================================
 bool SMESH_MeshObj::IsNodePrs() const
 {
-  return myMesh->NbEdges() == 0 &&myMesh->NbFaces() == 0 &&myMesh->NbVolumes() == 0 ;
+  return myClient->NbEdges() == 0 &&myClient->NbFaces() == 0 && myClient->NbVolumes() == 0 ;
 }
 
 

@@ -45,9 +45,10 @@ using namespace std;
 //function : Create
 //purpose  : 
 //=======================================================================
-SMESHDS_Mesh::SMESHDS_Mesh(int MeshID):myMeshID(MeshID)
+SMESHDS_Mesh::SMESHDS_Mesh(int theMeshID, bool theIsEmbeddedMode):
+  myMeshID(theMeshID)
 {
-	myScript = new SMESHDS_Script();
+  myScript = new SMESHDS_Script(theIsEmbeddedMode);
 }
 
 //=======================================================================

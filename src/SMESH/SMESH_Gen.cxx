@@ -102,33 +102,24 @@ SMESH_Gen::~SMESH_Gen()
  */
 //=============================================================================
 
-SMESH_Mesh* SMESH_Gen::CreateMesh(int studyId)
-throw(SALOME_Exception)
+SMESH_Mesh* SMESH_Gen::CreateMesh(int theStudyId, bool theIsEmbeddedMode)
+  throw(SALOME_Exception)
 {
-        Unexpect aCatch(SalomeException);
-	MESSAGE("SMESH_Gen::CreateMesh");
-//   if (aShape.ShapeType() == TopAbs_COMPOUND)
-//     {
-//       INFOS("Mesh Compound not yet implemented!");
-//       throw(SALOME_Exception(LOCALIZED("Mesh Compound not yet implemented!")));
-//     }
+  Unexpect aCatch(SalomeException);
+  MESSAGE("SMESH_Gen::CreateMesh");
 
-	// Get studyContext, create it if it does'nt exist, with a SMESHDS_Document
+  // Get studyContext, create it if it does'nt exist, with a SMESHDS_Document
+  StudyContextStruct *aStudyContext = GetStudyContext(theStudyId);
 
-	StudyContextStruct *myStudyContext = GetStudyContext(studyId);
+  // create a new SMESH_mesh object
+  SMESH_Mesh *aMesh = new SMESH_Mesh(_localId++,
+				     theStudyId,
+				     this,
+				     theIsEmbeddedMode,
+				     aStudyContext->myDocument);
+  aStudyContext->mapMesh[_localId] = aMesh;
 
-	// create a new SMESH_mesh object
-
-	SMESH_Mesh *mesh = new SMESH_Mesh(_localId++,
-		studyId,
-		this,
-		myStudyContext->myDocument);
-	myStudyContext->mapMesh[_localId] = mesh;
-
-	// associate a TopoDS_Shape to the mesh
-
-//mesh->ShapeToMesh(aShape);
-	return mesh;
+  return aMesh;
 }
 
 //=============================================================================

@@ -81,6 +81,12 @@ LDFLAGS  += $(OCC_KERNEL_LIBS) \
             -lMEDWrapperBase \
             -lMEDWrapper_V2_1 \
             -lMEDWrapper_V2_2 \
+            -lSalomeResourcesManager \
+            -lSalomeLifeCycleCORBA \
+            -lSalomeNotification \
+            -lSalomeContainer \
+            -lRegistry \
+            -lSalomeNS \
             -lSALOMELocalTrace \
             -lSALOMEBasics \
             -lOpUtil

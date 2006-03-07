@@ -79,8 +79,11 @@ class SMESH_Mesh
   SMESH_Mesh();
   SMESH_Mesh(const SMESH_Mesh&);
 public:
-  SMESH_Mesh(int localId, int studyId, SMESH_Gen * gen,
-	     SMESHDS_Document * myDocument);
+  SMESH_Mesh(int theLocalId, 
+	     int theStudyId, 
+	     SMESH_Gen* theGen,
+	     bool theIsEmbeddedMode,
+	     SMESHDS_Document* theDocument);
   
   virtual ~SMESH_Mesh();
   

@@ -26,14 +26,17 @@
 //  Module : SMESH
 
 #include "SMESH_Client.hxx"
+#include "SMESH_Mesh.hxx"
+
+#include "SALOME_NamingService.hxx"
+#include "SALOME_LifeCycleCORBA.hxx"
 
 #include <SALOMEconfig.h>
+#include CORBA_SERVER_HEADER(SALOME_Component)
+#include CORBA_SERVER_HEADER(SALOME_Exception)
+
 #include "OpUtil.hxx"
 #include "utilities.h"
-
-#include <SMESH_Mesh.hxx>
-
-#include CORBA_SERVER_HEADER(SALOME_Exception)
 
 #ifdef WNT
 #include <process.h>
@@ -57,30 +60,8 @@ static int MYDEBUG = 0;
 static int MYDEBUG = 0;
 #endif
 
-//=======================================================================
-// function : Create()
-// purpose  : Create in client not in a container
-//=======================================================================
-SMESH_Client::SMESH_Client()
+namespace
 {
-  pid_client = 
-#ifdef WNT
-    (long)_getpid();
-#else
-    (long)getpid();
-#endif
-}
-
-//=======================================================================
-// function : Create()
-// purpose  : 
-//=======================================================================
-SMESH_Client::SMESH_Client(Engines::Container_ptr client)
-{
-  pid_client = client->getPID();
-}
-
-namespace{
 
   inline const SMDS_MeshNode* FindNode(const SMDS_Mesh* theMesh, int theId){
     if(const SMDS_MeshNode* anElem = theMesh->FindNode(theId)) return anElem;
@@ -344,42 +325,121 @@ namespace{
   }
 }
 
-//=================================================================================
-// function : Update
-// purpose  : Update mesh
-//=================================================================================
-SMDS_Mesh* SMESH_Client::Update( SMESH::SMESH_Gen_ptr smesh,
-                                 SMESH::SMESH_Mesh_ptr theMeshServer, 
-                                 SMDS_Mesh* theMesh,
-                                 int theIsClear,
-				 int& theIsUpdated )
+//=======================================================================
+SMESH::SMESH_Gen_var 
+SMESH_Client::GetSMESHGen(CORBA::ORB_ptr theORB,
+			  CORBA::Boolean& theIsEmbeddedMode)
 {
-  SMDS_Mesh* meshPtr = theMesh;
-  theIsUpdated = 0;
- 
-  SMESH::log_array_var aSeq = theMeshServer->GetLog( theIsClear );
-  CORBA::Long aLength = aSeq->length();
-  
-  if( MYDEBUG )
-    MESSAGE( "Update: length of the script is "<<aLength );
-  
-  if( !aLength )
-    return meshPtr;  // nothing to update
+  static SMESH::SMESH_Gen_var aMeshGen;
 
-  string hst_client = GetHostname();
-  Engines::Container_var ctn_server = smesh->GetContainerRef();
-  long pid_server = ctn_server->getPID();
-  if ( (pid_client==pid_server) && (strcmp(hst_client.c_str(), ctn_server->getHostName())==0) )
-  {
+  if(CORBA::is_nil(aMeshGen.in())){    
+#ifdef WNT
+    long aClientPID = (long)_getpid();
+#else
+    long aClientPID =  (long)getpid();
+#endif
+
+    SALOME_NamingService aNamingService(theORB);
+    SALOME_LifeCycleCORBA aLifeCycleCORBA(&aNamingService);
+    Engines::Component_var aComponent = aLifeCycleCORBA.FindOrLoad_Component("FactoryServer","SMESH");
+    aMeshGen = SMESH::SMESH_Gen::_narrow(aComponent);
+    
+    std::string aClientHostName = GetHostname();
+    Engines::Container_var aServerContainer = aMeshGen->GetContainerRef();
+    CORBA::String_var aServerHostName = aServerContainer->getHostName();
+    CORBA::Long aServerPID = aServerContainer->getPID();
+    aMeshGen->SetEmbeddedMode((aClientPID == aServerPID) && (aClientHostName == aServerHostName.in()));
+  }
+  theIsEmbeddedMode = aMeshGen->IsEmbeddedMode();
+
+  return aMeshGen;
+}
+
+
+//=======================================================================
+// function : Create()
+// purpose  : 
+//=======================================================================
+SMESH_Client::SMESH_Client(CORBA::ORB_ptr theORB,
+			   SMESH::SMESH_Mesh_ptr theMesh):
+  myMeshServer(SMESH::SMESH_Mesh::_duplicate(theMesh)),
+  mySMESHDSMesh(NULL),
+  mySMDSMesh(NULL)
+{
+  myMeshServer->Register();
+
+  CORBA::Boolean anIsEmbeddedMode;
+  GetSMESHGen(theORB,anIsEmbeddedMode);
+  if(anIsEmbeddedMode){
     if ( MYDEBUG )
       MESSAGE("Info: The same process, update mesh by pointer ");
     // just set client mesh pointer to server mesh pointer
-    meshPtr = ((SMESH_Mesh*)theMeshServer->GetMeshPtr())->GetMeshDS();
-    if ( meshPtr )
-      theIsUpdated = 1;
-  }
-  else
-  {
+    SMESH_Mesh* aMesh = reinterpret_cast<SMESH_Mesh*>(theMesh->GetMeshPtr());
+    mySMESHDSMesh = aMesh->GetMeshDS();
+    mySMDSMesh = mySMESHDSMesh;
+  }else
+    mySMDSMesh = new SMDS_Mesh();
+}
+
+
+//=================================================================================
+// function : ~SMESH_Client
+// purpose  : Destructor
+//=================================================================================
+SMESH_Client::~SMESH_Client()
+{
+  myMeshServer->Destroy();
+  if(!mySMESHDSMesh)
+    delete mySMDSMesh;
+}
+
+
+//=================================================================================
+SMDS_Mesh* 
+SMESH_Client::GetMesh() const 
+{
+  return mySMDSMesh; 
+}
+
+
+//=================================================================================
+SMDS_Mesh*
+SMESH_Client::operator->() const
+{
+  return GetMesh();
+}
+
+
+//=================================================================================
+SMESH::SMESH_Mesh_ptr
+SMESH_Client::GetMeshServer()
+{
+  return myMeshServer.in(); 
+}
+
+
+//=================================================================================
+// function : SMESH_Client
+// purpose  : Update mesh
+//=================================================================================
+bool
+SMESH_Client::Update(bool theIsClear)
+{
+  bool anIsModified = true;
+  if(mySMESHDSMesh){
+    SMESHDS_Script* aScript = mySMESHDSMesh->GetScript();
+    anIsModified = aScript->IsModified();
+    aScript->SetModified(false);
+  }else{
+    SMESH::log_array_var aSeq = myMeshServer->GetLog( theIsClear );
+    CORBA::Long aLength = aSeq->length();
+    anIsModified = aLength > 0;
+    if( MYDEBUG )
+      MESSAGE( "Update: length of the script is "<<aLength );
+  
+    if(!anIsModified)
+      return false;
+
     // update client mesh structure by logged changes commands
     try
     {
@@ -392,32 +452,32 @@ SMDS_Mesh* SMESH_Client::Update( SMESH::SMESH_Gen_ptr smesh,
 
 	switch(aCommand)
         {
-	case SMESH::ADD_NODE       : AddNodesWithID      ( meshPtr, aSeq, anId ); break;
-        case SMESH::ADD_EDGE       : AddEdgesWithID      ( meshPtr, aSeq, anId ); break;
-        case SMESH::ADD_TRIANGLE   : AddTriasWithID      ( meshPtr, aSeq, anId ); break;
-        case SMESH::ADD_QUADRANGLE : AddQuadsWithID      ( meshPtr, aSeq, anId ); break;
-        case SMESH::ADD_POLYGON    : AddPolygonsWithID   ( meshPtr, aSeq, anId ); break;
-        case SMESH::ADD_TETRAHEDRON: AddTetrasWithID     ( meshPtr, aSeq, anId ); break;
-        case SMESH::ADD_PYRAMID    : AddPiramidsWithID   ( meshPtr, aSeq, anId ); break;
-        case SMESH::ADD_PRISM      : AddPrismsWithID     ( meshPtr, aSeq, anId ); break;
-        case SMESH::ADD_HEXAHEDRON : AddHexasWithID      ( meshPtr, aSeq, anId ); break;
-        case SMESH::ADD_POLYHEDRON : AddPolyhedronsWithID( meshPtr, aSeq, anId ); break;
+	case SMESH::ADD_NODE       : AddNodesWithID      ( mySMDSMesh, aSeq, anId ); break;
+        case SMESH::ADD_EDGE       : AddEdgesWithID      ( mySMDSMesh, aSeq, anId ); break;
+        case SMESH::ADD_TRIANGLE   : AddTriasWithID      ( mySMDSMesh, aSeq, anId ); break;
+        case SMESH::ADD_QUADRANGLE : AddQuadsWithID      ( mySMDSMesh, aSeq, anId ); break;
+        case SMESH::ADD_POLYGON    : AddPolygonsWithID   ( mySMDSMesh, aSeq, anId ); break;
+        case SMESH::ADD_TETRAHEDRON: AddTetrasWithID     ( mySMDSMesh, aSeq, anId ); break;
+        case SMESH::ADD_PYRAMID    : AddPiramidsWithID   ( mySMDSMesh, aSeq, anId ); break;
+        case SMESH::ADD_PRISM      : AddPrismsWithID     ( mySMDSMesh, aSeq, anId ); break;
+        case SMESH::ADD_HEXAHEDRON : AddHexasWithID      ( mySMDSMesh, aSeq, anId ); break;
+        case SMESH::ADD_POLYHEDRON : AddPolyhedronsWithID( mySMDSMesh, aSeq, anId ); break;
 
         case SMESH::REMOVE_NODE:
           for( ; anElemId < aNbElems; anElemId++ )
-            meshPtr->RemoveNode( FindNode( meshPtr, anIndexes[anElemId] ) );
+            mySMDSMesh->RemoveNode( FindNode( mySMDSMesh, anIndexes[anElemId] ) );
         break;
         
         case SMESH::REMOVE_ELEMENT:
           for( ; anElemId < aNbElems; anElemId++ )
-            meshPtr->RemoveElement( FindElement( meshPtr, anIndexes[anElemId] ) );
+            mySMDSMesh->RemoveElement( FindElement( mySMDSMesh, anIndexes[anElemId] ) );
         break;
 
         case SMESH::MOVE_NODE:
           for(CORBA::Long aCoordId=0; anElemId < aNbElems; anElemId++, aCoordId+=3)
           {
             SMDS_MeshNode* node =
-              const_cast<SMDS_MeshNode*>( FindNode( meshPtr, anIndexes[anElemId] ));
+              const_cast<SMDS_MeshNode*>( FindNode( mySMDSMesh, anIndexes[anElemId] ));
             node->setXYZ( aCoords[aCoordId], aCoords[aCoordId+1], aCoords[aCoordId+2] );
           }
         break;
@@ -426,33 +486,32 @@ SMDS_Mesh* SMESH_Client::Update( SMESH::SMESH_Gen_ptr smesh,
           for ( CORBA::Long i = 0; anElemId < aNbElems; anElemId++ )
           {
             // find element
-            const SMDS_MeshElement* elem = FindElement( meshPtr, anIndexes[i++] );
+            const SMDS_MeshElement* elem = FindElement( mySMDSMesh, anIndexes[i++] );
             // nb nodes
             int nbNodes = anIndexes[i++];
             // nodes
             //ASSERT( nbNodes < 9 );
             const SMDS_MeshNode* aNodes[ nbNodes ];
             for ( int iNode = 0; iNode < nbNodes; iNode++ )
-              aNodes[ iNode ] = FindNode( meshPtr, anIndexes[i++] );
+              aNodes[ iNode ] = FindNode( mySMDSMesh, anIndexes[i++] );
             // change
-            meshPtr->ChangeElementNodes( elem, aNodes, nbNodes );
+            mySMDSMesh->ChangeElementNodes( elem, aNodes, nbNodes );
           }
           break;
 
         case SMESH::CHANGE_POLYHEDRON_NODES:
-          ChangePolyhedronNodes(meshPtr, aSeq, anId);
+          ChangePolyhedronNodes(mySMDSMesh, aSeq, anId);
           break;
         case SMESH::RENUMBER:
           for(CORBA::Long i=0; anElemId < aNbElems; anElemId++, i+=3)
           {
-            meshPtr->Renumber( anIndexes[i], anIndexes[i+1], anIndexes[i+2] );
+            mySMDSMesh->Renumber( anIndexes[i], anIndexes[i+1], anIndexes[i+2] );
           }
           break;
           
         default:;
 	}
       }
-      theIsUpdated = 1;
     }
     catch ( SALOME::SALOME_Exception& exc )
     {
@@ -466,15 +525,15 @@ SMDS_Mesh* SMESH_Client::Update( SMESH::SMESH_Gen_ptr smesh,
     {
       INFOS("Unknown exception was cought !!!");
     }
-  } // end of else (update mesh by log script
-  
-  if ( MYDEBUG && meshPtr )
-  {
-    MESSAGE("Update - meshPtr->NbNodes() = "<<meshPtr->NbNodes());
-    MESSAGE("Update - meshPtr->NbEdges() = "<<meshPtr->NbEdges());
-    MESSAGE("Update - meshPtr->NbFaces() = "<<meshPtr->NbFaces());
-    MESSAGE("Update - meshPtr->NbVolumes() = "<<meshPtr->NbVolumes());
-  }
 
-  return meshPtr;
+    if ( MYDEBUG && mySMDSMesh )
+    {
+      MESSAGE("Update - mySMDSMesh->NbNodes() = "<<mySMDSMesh->NbNodes());
+      MESSAGE("Update - mySMDSMesh->NbEdges() = "<<mySMDSMesh->NbEdges());
+      MESSAGE("Update - mySMDSMesh->NbFaces() = "<<mySMDSMesh->NbFaces());
+      MESSAGE("Update - mySMDSMesh->NbVolumes() = "<<mySMDSMesh->NbVolumes());
+    }
+  } // end of update mesh by log script
+  
+  return anIsModified;
 }

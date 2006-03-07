@@ -31,11 +31,6 @@
 #include <SALOMEconfig.h>
 #include CORBA_SERVER_HEADER(SMESH_Gen)
 #include CORBA_SERVER_HEADER(SMESH_Mesh)
-//#include CORBA_SERVER_HEADER(SALOME_Container)
-
-#ifndef _Standard_HeaderFile
-#include <Standard.hxx>
-#endif
 
 #if defined WNT && defined WIN32 && defined SALOME_WNT_EXPORTS
 #define SMESHCLIENT_WNT_EXPORT __declspec( dllexport )
@@ -43,41 +38,41 @@
 #define SMESHCLIENT_WNT_EXPORT
 #endif
 
+class SMESHDS_Mesh;
 class SMDS_Mesh;
+
 
 //=====================================================================
 // SMESH_Client : class definition
 //=====================================================================
-class SMESHCLIENT_WNT_EXPORT SMESH_Client  {
-
+class SMESHCLIENT_WNT_EXPORT SMESH_Client  
+{
 public:
-  
-  inline void* operator new(size_t,void* anAddress) 
-  {
-    return anAddress;
-  }
-  inline void* operator new(size_t size) 
-  { 
-    return Standard::Allocate(size); 
-  }
-  inline void  operator delete(void *anAddress) 
-  { 
-    if (anAddress) Standard::Free((Standard_Address&)anAddress); 
-  }
-  // Methods PUBLIC
-  // 
-  SMESH_Client();
-  SMESH_Client(Engines::Container_ptr client);
-  SMDS_Mesh* Update( SMESH::SMESH_Gen_ptr smesh,
-                     SMESH::SMESH_Mesh_ptr theMeshServer, 
-                     SMDS_Mesh* theMesh, 
-                     int theIsClear,
-		     int& theIsUpdated );
+  static 
+  SMESH::SMESH_Gen_var
+  GetSMESHGen(CORBA::ORB_ptr theORB,
+	      CORBA::Boolean& theIsEmbeddedMode);
 
-private: 
-  // Fields PRIVATE
-  //
-  long  pid_client;
+  SMESH_Client(CORBA::ORB_ptr theORB,
+	       SMESH::SMESH_Mesh_ptr theMesh);
+  ~SMESH_Client();
+
+  bool 
+  Update(bool theIsClear);
+
+  SMDS_Mesh* 
+  GetMesh() const;
+
+  SMDS_Mesh*
+  operator->() const;
+
+  SMESH::SMESH_Mesh_ptr
+  GetMeshServer();
+
+protected: 
+  SMESH::SMESH_Mesh_var myMeshServer;
+  SMESHDS_Mesh* mySMESHDSMesh;
+  SMDS_Mesh* mySMDSMesh;
 };
 
 

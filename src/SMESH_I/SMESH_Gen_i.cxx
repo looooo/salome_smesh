@@ -244,6 +244,7 @@ SMESH_Gen_i::SMESH_Gen_i( CORBA::ORB_ptr            orb,
   _thisObj = this ;
   _id = myPoa->activate_object( _thisObj );
   
+  myIsEmbeddedMode = false;
   myShapeReader = NULL;  // shape reader
   mySMESHGen = this;
 }
@@ -377,7 +378,7 @@ SMESH::SMESH_Mesh_ptr SMESH_Gen_i::createMesh()
     // create a new mesh object servant, store it in a map in study context
     SMESH_Mesh_i* meshServant = new SMESH_Mesh_i( GetPOA(), this, GetCurrentStudyID() );
     // create a new mesh object
-    meshServant->SetImpl( myGen.CreateMesh( GetCurrentStudyID() ));
+    meshServant->SetImpl( myGen.CreateMesh( GetCurrentStudyID(), myIsEmbeddedMode ));
 
     // activate the CORBA servant of Mesh
     SMESH::SMESH_Mesh_var mesh = SMESH::SMESH_Mesh::_narrow( meshServant->_this() );
@@ -405,6 +406,32 @@ GEOM_Client* SMESH_Gen_i::GetShapeReader()
     myShapeReader = new GEOM_Client(GetContainerRef());
   ASSERT( myShapeReader );
   return myShapeReader;
+}
+
+//=============================================================================
+/*!
+ *  SMESH_Gen_i::SetEmbeddedMode
+ *
+ *  Set current mode
+ */
+//=============================================================================
+
+void SMESH_Gen_i::SetEmbeddedMode( CORBA::Boolean theMode )
+{
+  myIsEmbeddedMode = theMode;
+}
+
+//=============================================================================
+/*!
+ *  SMESH_Gen_i::IsEmbeddedMode
+ *
+ *  Get current mode
+ */
+//=============================================================================
+
+CORBA::Boolean SMESH_Gen_i::IsEmbeddedMode()
+{
+  return myIsEmbeddedMode;
 }
 
 //=============================================================================

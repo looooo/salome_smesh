@@ -26,6 +26,7 @@
 
 #include "SMESHGUI.h"
 
+#include "SMESH_Client.hxx"
 #include "SMESHGUI_NodesDlg.h"
 #include "SMESHGUI_TransparencyDlg.h"
 #include "SMESHGUI_ClippingDlg.h"
@@ -825,12 +826,11 @@ SMESH::SMESH_Gen_var SMESHGUI::myComponentSMESH = SMESH::SMESH_Gen::_nil();
 //=============================================================================
 SMESHGUI::SMESHGUI() :
 SalomeApp_Module( "SMESH" )
-{
+{  
   if ( CORBA::is_nil( myComponentSMESH ) )
   {
-    SALOME_LifeCycleCORBA* ls = new SALOME_LifeCycleCORBA( getApp()->namingService() );
-    Engines::Component_var comp = ls->FindOrLoad_Component( "FactoryServer", "SMESH" );
-    myComponentSMESH = SMESH::SMESH_Gen::_narrow( comp );
+    CORBA::Boolean anIsEmbeddedMode;
+    myComponentSMESH = SMESH_Client::GetSMESHGen(getApp()->orb(),anIsEmbeddedMode);
   }
 
   myActiveDialogBox = 0;

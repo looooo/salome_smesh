@@ -78,7 +78,7 @@ class SMESHDS_GroupBase;
 
 class SMESHDS_WNT_EXPORT SMESHDS_Mesh:public SMDS_Mesh{
 public:
-  SMESHDS_Mesh(int MeshID);
+  SMESHDS_Mesh(int theMeshID, bool theIsEmbeddedMode);
   void ShapeToMesh(const TopoDS_Shape & S);
   bool AddHypothesis(const TopoDS_Shape & SS, const SMESHDS_Hypothesis * H);
   bool RemoveHypothesis(const TopoDS_Shape & S, const SMESHDS_Hypothesis * H);

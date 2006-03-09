@@ -1601,7 +1601,12 @@ void FreeEdges::GetBoreders(TBorders& theBorders)
   for(; anIter->more(); ){
     const SMDS_MeshFace* anElem = anIter->next();
     long anElemId = anElem->GetID();
-    SMDS_ElemIteratorPtr aNodesIter = anElem->nodesIterator();
+    SMDS_ElemIteratorPtr aNodesIter;
+    if ( anElem->IsQuadratic() )
+      aNodesIter = static_cast<const SMDS_QuadraticFaceOfNodes*>(anElem)->
+        interlacedNodesElemIterator();
+    else
+      aNodesIter = anElem->nodesIterator();
     long aNodeId[2];
     const SMDS_MeshElement* aNode;
     if(aNodesIter->more()){

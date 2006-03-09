@@ -428,6 +428,9 @@ bool SMESHGUI_MeshPatternDlg::onApply()
       SMESH::UpdateView();
 
       mySMESHGUI->updateObjBrowser(true);
+
+      mySelEdit[ Ids ]->setText("");
+
       return true;
     } else {
       QMessageBox::information(SMESHGUI::desktop(), tr("SMESH_ERROR"),

@@ -530,13 +530,11 @@ bool StdMeshers_MEFISTO_2D::LoadPoints(SMESH_Mesh &        aMesh,
         static_cast<const SMDS_EdgePosition*>(node->GetPosition().get());
       double param = epos->GetUParameter();
       if ( !isForward ) param = -param;
-      params.insert( make_pair( param, node ));
-    }
-    int nbPoints = aMesh.GetSubMesh(E)->GetSubMeshDS()->NbNodes();
-    if ( nbPoints != params.size())
-    {
-      MESSAGE( "BAD NODE ON EDGE POSITIONS" );
-      return false;
+      if ( !params.insert( make_pair( param, node )).second )
+      {
+        MESSAGE( "BAD NODE ON EDGE POSITIONS" );
+        return false;
+      }
     }
 
     // --- load 2D values into MEFISTO structure,

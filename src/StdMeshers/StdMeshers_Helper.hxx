@@ -11,7 +11,7 @@
 #include <TopoDS_Shape.hxx>
 #include <SMDS_MeshNode.hxx>
 #include <TopoDS_Face.hxx>
-#include <gp_XY.hxx>
+#include <gp_Pnt2d.hxx>
 
 #include <map>
 
@@ -82,11 +82,18 @@ class StdMeshers_Helper
    */
   const NLinkNodeMap& GetNLinkNodeMap() { return myNLinkNodeMap; }
 
-  /**
-   * Auxilary function for GetMediumNode()
+  /*!
+   * \brief Return node UV on face
+    * \param F - the face
+    * \param n - the node
+    * \param n2 - a medium node will be placed between n and n2
+    * \retval gp_XY - resulting UV
+   * 
+   * Auxilary function called form GetMediumNode()
    */
-  gp_XY GetNodeUV(const TopoDS_Face& F,
-                  const SMDS_MeshNode* n);
+  gp_XY GetNodeUV(const TopoDS_Face&   F,
+                  const SMDS_MeshNode* n,
+                  const SMDS_MeshNode* n2=0);
 
   /**
    * Special function for search or creation medium node
@@ -140,6 +147,15 @@ class StdMeshers_Helper
                              const SMDS_MeshNode* n8);
 
 
+ protected:
+
+  /*!
+   * \brief Select UV on either of 2 pcurves of a seam edge, closest to the given UV
+    * \param uv1 - UV on the seam
+    * \param uv2 - UV within a face
+    * \retval gp_Pnt2d - selected UV
+   */
+  gp_Pnt2d GetUVOnSeam( const gp_Pnt2d& uv1, const gp_Pnt2d& uv2 ) const;
 
  private:
 
@@ -152,6 +168,10 @@ class StdMeshers_Helper
 
   // special map for using during creation quadratic faces
   NLinkNodeMap myNLinkNodeMap;
+
+  std::set< int > mySeamShapeIds;
+  double          myPar1, myPar2; // bounds of a closed periodic surface
+  int             myParIndex;     // bounds' index (1-U, 2-V)
 
 };
 

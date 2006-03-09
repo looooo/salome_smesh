@@ -208,6 +208,25 @@ int SMESH_MeshEditor::FindShape (const SMDS_MeshElement * theElem)
 }
 
 //=======================================================================
+//function : IsMedium
+//purpose  : 
+//=======================================================================
+
+bool SMESH_MeshEditor::IsMedium(const SMDS_MeshNode*      node,
+                                const SMDSAbs_ElementType typeToCheck)
+{
+  bool isMedium = false;
+  SMDS_ElemIteratorPtr it = node->GetInverseElementIterator();
+  while (it->more()) {
+    const SMDS_MeshElement* elem = it->next();
+    isMedium = elem->IsMediumNode(node);
+    if ( typeToCheck == SMDSAbs_All || elem->GetType() == typeToCheck )
+      break;
+  }
+  return isMedium;
+}
+
+//=======================================================================
 //function : ShiftNodesQuadTria
 //purpose  : auxilary
 //           Shift nodes in the array corresponded to quadratic triangle
@@ -1739,34 +1758,23 @@ void laplacianSmooth(const SMDS_MeshNode*                 theNode,
     if ( elem->GetType() != SMDSAbs_Face )
       continue;
 
-    // put all nodes in array
-    int nbNodes = 0, iNode = 0;
-    vector< const SMDS_MeshNode*> aNodes( elem->NbNodes() );
-    if(!elem->IsQuadratic()) {
-      SMDS_ElemIteratorPtr itN = elem->nodesIterator();
-      while ( itN->more() ) {
-        aNodes[ nbNodes ] = static_cast<const SMDS_MeshNode*>( itN->next() );
-        if ( aNodes[ nbNodes ] == theNode )
-          iNode = nbNodes; // index of theNode within aNodes
-        nbNodes++;
+    for ( int i = 0; i < elem->NbNodes(); ++i ) {
+      if ( elem->GetNode( i ) == theNode ) {
+        // add linked nodes
+        int iBefore = i - 1;
+        int iAfter = i + 1;
+        if ( elem->IsQuadratic() ) {
+          int nbCorners = elem->NbNodes() / 2;
+          if ( iAfter >= nbCorners )
+            iAfter = 0; // elem->GetNode() wraps index
+          if ( iBefore == -1 )
+            iBefore = nbCorners - 1;
+        }
+        nodeSet.insert( elem->GetNode( iAfter ));
+        nodeSet.insert( elem->GetNode( iBefore ));
+        break;
       }
     }
-    else {
-      int nbn = elem->NbNodes()/2;
-      aNodes.resize(nbn);
-      SMDS_ElemIteratorPtr itN = elem->nodesIterator();
-      while ( nbNodes<nbn ) {
-        aNodes[ nbNodes ] = static_cast<const SMDS_MeshNode*>( itN->next() );
-        if ( aNodes[ nbNodes ] == theNode )
-          iNode = nbNodes; // index of theNode within aNodes
-        nbNodes++;
-      }
-    }
-    // add linked nodes
-    int iAfter = ( iNode + 1 == nbNodes ) ? 0 : iNode + 1;
-    nodeSet.insert( aNodes[ iAfter ]);
-    int iBefore = ( iNode == 0 ) ? nbNodes - 1 : iNode - 1;
-    nodeSet.insert( aNodes[ iBefore ]);
   }
 
   // compute new coodrs
@@ -1855,12 +1863,11 @@ void centroidalSmooth(const SMDS_MeshNode*                 theNode,
     }
     double elemArea = anAreaFunc.GetValue( aNodePoints );
     totalArea += elemArea;
-    elemCenter /= elem->NbNodes();
+    elemCenter /= nn;
     aNewXYZ += elemCenter * elemArea;
   }
   aNewXYZ /= totalArea;
   if ( !theSurface.IsNull() ) {
-    ASSERT( theUVMap.find( theNode ) != theUVMap.end() );
     theUVMap[ theNode ]->SetCoord( aNewXYZ.X(), aNewXYZ.Y() );
     aNewXYZ = theSurface->Value( aNewXYZ.X(), aNewXYZ.Y() ).XYZ();
   }
@@ -1915,7 +1922,7 @@ void SMESH_MeshEditor::Smooth (set<const SMDS_MeshElement*> & theElems,
   if ( theTgtAspectRatio < 1.0 )
     theTgtAspectRatio = 1.0;
 
-  double disttol = 1.e-16;
+  const double disttol = 1.e-16;
 
   SMESH::Controls::AspectRatio aQualityFunc;
 
@@ -1948,8 +1955,6 @@ void SMESH_MeshEditor::Smooth (set<const SMDS_MeshElement*> & theElems,
   // smooth elements on each TopoDS_Face separately
   // ===============================================
 
-  set<const SMDS_MeshElement*> QuadElems;
-
   set< int >::reverse_iterator fId = faceIdSet.rbegin(); // treate 0 fId at the end
   for ( ; fId != faceIdSet.rend(); ++fId ) {
     // get face surface and submesh
@@ -1978,6 +1983,7 @@ void SMESH_MeshEditor::Smooth (set<const SMDS_MeshElement*> & theElems,
     // compute UV for them
     // ---------------------------------------------------------
     bool checkBoundaryNodes = false;
+    bool isQuadratic = false;
     set<const SMDS_MeshNode*> setMovableNodes;
     map< const SMDS_MeshNode*, gp_XY* > uvMap, uvMap2;
     list< gp_XY > listUV; // uvs the 2 uvMaps refer to
@@ -2003,23 +2009,20 @@ void SMESH_MeshEditor::Smooth (set<const SMDS_MeshElement*> & theElems,
         continue;
       }
       elemsOnFace.push_back( elem );
-      if(elem->IsQuadratic()) {
-        QuadElems.insert(elem);
-      }
       theElems.erase( itElem++ );
       nbElemOnFace++;
+
+      if ( !isQuadratic )
+        isQuadratic = elem->IsQuadratic();
 
       // get movable nodes of elem
       const SMDS_MeshNode* node;
       SMDS_TypeOfPosition posType;
       SMDS_ElemIteratorPtr itN = elem->nodesIterator();
-      int nbn =  elem->NbNodes();
+      int nn = 0, nbn =  elem->NbNodes();
       if(elem->IsQuadratic())
         nbn = nbn/2;
-      int nn = 0;
-      //while ( itN->more() ) {
-      while ( nn<nbn ) {
-        nn++;
+      while ( nn++ < nbn ) {
         node = static_cast<const SMDS_MeshNode*>( itN->next() );
         const SMDS_PositionPtr& pos = node->GetPosition();
         posType = pos.get() ? pos->GetTypeOfPosition() : SMDS_TOP_3DSPACE;
@@ -2053,7 +2056,10 @@ void SMESH_MeshEditor::Smooth (set<const SMDS_MeshElement*> & theElems,
       // get nodes to check UV
       list< const SMDS_MeshNode* > uvCheckNodes;
       itN = elem->nodesIterator();
-      while ( itN->more() ) {
+      nn = 0; nbn =  elem->NbNodes();
+      if(elem->IsQuadratic())
+        nbn = nbn/2;
+      while ( nn++ < nbn ) {
         node = static_cast<const SMDS_MeshNode*>( itN->next() );
         if ( uvMap.find( node ) == uvMap.end() )
           uvCheckNodes.push_back( node );
@@ -2149,31 +2155,17 @@ void SMESH_MeshEditor::Smooth (set<const SMDS_MeshElement*> & theElems,
       list< const SMDS_MeshElement* >::iterator elemIt = elemsOnFace.begin();
       for ( ; elemIt != elemsOnFace.end(); ++elemIt ) {
         const SMDS_MeshElement* elem = (*elemIt);
-        // put elem nodes in array
-        vector< const SMDS_MeshNode* > nodes;
-        if(!elem->IsQuadratic()) {
-          nodes.reserve( elem->NbNodes() + 1 );
-          SMDS_ElemIteratorPtr itN = elem->nodesIterator();
-          while ( itN->more() )
-            nodes.push_back( static_cast<const SMDS_MeshNode*>( itN->next() ));
-        }
-        else {
-          nodes.reserve( elem->NbNodes()/2 + 1 );
-          SMDS_ElemIteratorPtr itN = elem->nodesIterator();
-          int nbn = 0;
-          while ( nbn<elem->NbNodes()/2 ) {
-            nbn++;
-            nodes.push_back( static_cast<const SMDS_MeshNode*>( itN->next() ));
-          }
-        }
-        nodes.push_back( nodes.front() );
+        int nbn =  elem->NbNodes();
+        if(elem->IsQuadratic())
+          nbn = nbn/2;
         // loop on elem links: insert them in linkNbMap
-        for ( int iN = 1; iN < nodes.size(); ++iN ) {
+        const SMDS_MeshNode* curNode, *prevNode = elem->GetNode( nbn );
+        for ( int iN = 0; iN < nbn; ++iN ) {
+          curNode = elem->GetNode( iN );
           TLink link;
-          if ( nodes[ iN-1 ]->GetID() < nodes[ iN ]->GetID() )
-            link = make_pair( nodes[ iN-1 ], nodes[ iN ] );
-          else
-            link = make_pair( nodes[ iN ], nodes[ iN-1 ] );
+          if ( curNode < prevNode ) link = make_pair( curNode , prevNode );
+          else                      link = make_pair( prevNode , curNode );
+          prevNode = curNode;
           link_nb = linkNbMap.find( link );
           if ( link_nb == linkNbMap.end() )
             linkNbMap.insert( make_pair ( link, 1 ));
@@ -2223,8 +2215,11 @@ void SMESH_MeshEditor::Smooth (set<const SMDS_MeshElement*> & theElems,
         // get nodes on seam and its vertices
         list< const SMDS_MeshNode* > seamNodes;
         SMDS_NodeIteratorPtr nSeamIt = sm->GetNodes();
-        while ( nSeamIt->more() )
-          seamNodes.push_back( nSeamIt->next() );
+        while ( nSeamIt->more() ) {
+          const SMDS_MeshNode* node = nSeamIt->next();
+          if ( !isQuadratic || !IsMedium( node ))
+            seamNodes.push_back( node );
+        }
         TopExp_Explorer vExp( edge, TopAbs_VERTEX );
         for ( ; vExp.More(); vExp.Next() ) {
           sm = aMesh->MeshElements( vExp.Current() );
@@ -2258,7 +2253,9 @@ void SMESH_MeshEditor::Smooth (set<const SMDS_MeshElement*> & theElems,
               continue;
             int nbUseMap1 = 0, nbUseMap2 = 0;
             SMDS_ElemIteratorPtr nIt = e->nodesIterator();
-            while ( nIt->more() )
+            int nn = 0, nbn =  e->NbNodes();
+            if(e->IsQuadratic()) nbn = nbn/2;
+            while ( nn++ < nbn )
             {
               const SMDS_MeshNode* n =
                 static_cast<const SMDS_MeshNode*>( nIt->next() );
@@ -2282,7 +2279,8 @@ void SMESH_MeshEditor::Smooth (set<const SMDS_MeshElement*> & theElems,
             // be on one side of a seam
             if ( theSmoothMethod == CENTROIDAL && nbUseMap1 && nbUseMap2 ) {
               SMDS_ElemIteratorPtr nIt = e->nodesIterator();
-              while ( nIt->more() ) {
+              nn = 0;
+              while ( nn++ < nbn ) {
                 const SMDS_MeshNode* n =
                   static_cast<const SMDS_MeshNode*>( nIt->next() );
                 setMovableNodes.erase( n );
@@ -2376,38 +2374,36 @@ void SMESH_MeshEditor::Smooth (set<const SMDS_MeshElement*> & theElems,
       }
     }
 
-  } // loop on face ids
-
-  set< const SMDS_MeshElement* >::iterator itq;
-  for ( itq = QuadElems.begin(); itq != QuadElems.end(); itq++ ) {
-    const SMDS_QuadraticFaceOfNodes* QF =
-      dynamic_cast<const SMDS_QuadraticFaceOfNodes*> (*itq);
-    if(QF) {
-      vector<const SMDS_MeshNode*> Ns(QF->NbNodes()+1);
-      SMDS_NodeIteratorPtr anIter = QF->interlacedNodesIterator();
-      int nn = 0;
-      while( anIter->more() ) {
-        Ns[nn++] = anIter->next();
-        //Ns.push_back(anIter->next());
-      }
-      Ns[nn] = Ns[0];
-      //Ns.push_back(Ns[0]);
-      int i=0;
-      for(; i<QF->NbNodes(); i=i+2) {
-        double x = (Ns[i]->X() + Ns[i+2]->X())/2;
-        double y = (Ns[i]->Y() + Ns[i+2]->Y())/2;
-        double z = (Ns[i]->Z() + Ns[i+2]->Z())/2;
-        if( fabs( Ns[i+1]->X() - x ) > disttol ||
-           fabs( Ns[i+1]->Y() - y ) > disttol ||
-           fabs( Ns[i+1]->Z() - z ) > disttol ) {
-          // we have to move i+1 node
-          const_cast<SMDS_MeshNode*>(Ns[i+1])->setXYZ(x,y,z);
-          aMesh->MoveNode( Ns[i+1], x, y, z );
+    // move medium nodes of quadratic elements
+    if ( isQuadratic )
+    {
+      list< const SMDS_MeshElement* >::iterator elemIt = elemsOnFace.begin();
+      for ( ; elemIt != elemsOnFace.end(); ++elemIt ) {
+        const SMDS_QuadraticFaceOfNodes* QF =
+          dynamic_cast<const SMDS_QuadraticFaceOfNodes*> (*elemIt);
+        if(QF) {
+          vector<const SMDS_MeshNode*> Ns;
+          Ns.reserve(QF->NbNodes()+1);
+          SMDS_NodeIteratorPtr anIter = QF->interlacedNodesIterator();
+          while ( anIter->more() )
+            Ns.push_back( anIter->next() );
+          Ns.push_back( Ns[0] );
+          for(int i=0; i<QF->NbNodes(); i=i+2) {
+            double x = (Ns[i]->X() + Ns[i+2]->X())/2;
+            double y = (Ns[i]->Y() + Ns[i+2]->Y())/2;
+            double z = (Ns[i]->Z() + Ns[i+2]->Z())/2;
+            if( fabs( Ns[i+1]->X() - x ) > disttol ||
+                fabs( Ns[i+1]->Y() - y ) > disttol ||
+                fabs( Ns[i+1]->Z() - z ) > disttol ) {
+              // we have to move i+1 node
+              aMesh->MoveNode( Ns[i+1], x, y, z );
+            }
+          }
         }
       }
     }
-  }
-  QuadElems.clear();
+    
+  } // loop on face ids
 
 }
 

@@ -1108,7 +1108,7 @@ int SMESHDS_Mesh::AddCompoundSubmesh(const TopoDS_Shape& S,
 //function : IndexToShape
 //purpose  : 
 //=======================================================================
-TopoDS_Shape SMESHDS_Mesh::IndexToShape(int ShapeIndex)
+const TopoDS_Shape& SMESHDS_Mesh::IndexToShape(int ShapeIndex) const
 {
 	return myIndexToShape.FindKey(ShapeIndex);
 }

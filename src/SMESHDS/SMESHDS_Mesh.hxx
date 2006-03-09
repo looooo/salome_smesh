@@ -432,7 +432,7 @@ public:
   SMESHDS_Script * GetScript();
   void ClearScript();
   int ShapeToIndex(const TopoDS_Shape & aShape) const;
-  TopoDS_Shape IndexToShape(int ShapeIndex);
+  const TopoDS_Shape& IndexToShape(int ShapeIndex) const;
 
   SMESHDS_SubMesh * NewSubMesh(int Index);
   int AddCompoundSubmesh(const TopoDS_Shape& S, TopAbs_ShapeEnum type = TopAbs_SHAPE);

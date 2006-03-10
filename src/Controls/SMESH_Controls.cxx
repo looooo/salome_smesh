@@ -1378,7 +1378,12 @@ void MultiConnection2D::GetValues(MValues& theValues){
   SMDS_FaceIteratorPtr anIter = myMesh->facesIterator();
   for(; anIter->more(); ){
     const SMDS_MeshFace* anElem = anIter->next();
-    SMDS_ElemIteratorPtr aNodesIter = anElem->nodesIterator();
+    SMDS_ElemIteratorPtr aNodesIter;
+    if ( anElem->IsQuadratic() )
+      aNodesIter = static_cast<const SMDS_QuadraticFaceOfNodes*>
+        (anElem)->interlacedNodesElemIterator();
+    else
+      aNodesIter = anElem->nodesIterator();
     long aNodeId[3];
 
     //int aNbConnects=0;

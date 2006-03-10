@@ -26,6 +26,31 @@ fi
 #    echo "failed : KERNEL_SRC variable is not correct !"
 #    exit
 #fi
+
+########################################################################
+# Test if the GUI_ROOT_DIR is set correctly
+
+if test ! -d "${GUI_ROOT_DIR}"; then
+    echo "failed : GUI_ROOT_DIR variable is not correct !"
+    exit
+fi
+
+########################################################################
+# Test if the MED_ROOT_DIR is set correctly
+
+if test ! -d "${MED_ROOT_DIR}"; then
+    echo "failed : MED_ROOT_DIR variable is not correct !"
+    exit
+fi
+
+########################################################################
+# Test if the GEOM_ROOT_DIR is set correctly
+
+if test ! -d "${GEOM_ROOT_DIR}"; then
+    echo "failed : GEOM_ROOT_DIR variable is not correct !"
+    exit
+fi
+
 ########################################################################
 # find_in - utility function
 #

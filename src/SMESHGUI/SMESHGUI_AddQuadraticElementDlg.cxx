@@ -525,10 +525,6 @@ void SMESHGUI_AddQuadraticElementDlg::Init()
   connect(mySMESHGUI, SIGNAL (SignalDeactivateActiveDialog()), SLOT(DeactivateActiveDialog()));
   connect(mySMESHGUI, SIGNAL (SignalStudyFrameChanged()), SLOT(ClickOnCancel()));
 
-  // Move widget on the botton right corner of main widget
-  int x, y;
-  mySMESHGUI->DefineDlgPosition(this, x, y);
-  this->move(x, y);
   this->show(); // displays Dialog
 
   // set selection mode

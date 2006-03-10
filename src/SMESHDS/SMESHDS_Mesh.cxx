@@ -46,9 +46,16 @@ using namespace std;
 //purpose  : 
 //=======================================================================
 SMESHDS_Mesh::SMESHDS_Mesh(int theMeshID, bool theIsEmbeddedMode):
+  myIsEmbeddedMode(theIsEmbeddedMode),
   myMeshID(theMeshID)
 {
   myScript = new SMESHDS_Script(theIsEmbeddedMode);
+}
+
+//=======================================================================
+bool SMESHDS_Mesh::IsEmbeddedMode()
+{
+  return myIsEmbeddedMode;
 }
 
 //=======================================================================

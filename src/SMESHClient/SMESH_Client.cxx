@@ -375,9 +375,12 @@ SMESH_Client::SMESH_Client(CORBA::ORB_ptr theORB,
       MESSAGE("Info: The same process, update mesh by pointer ");
     // just set client mesh pointer to server mesh pointer
     SMESH_Mesh* aMesh = reinterpret_cast<SMESH_Mesh*>(theMesh->GetMeshPtr());
-    mySMESHDSMesh = aMesh->GetMeshDS();
-    mySMDSMesh = mySMESHDSMesh;
-  }else
+    if(aMesh->GetMeshDS()->IsEmbeddedMode()){
+      mySMESHDSMesh = aMesh->GetMeshDS();
+      mySMDSMesh = mySMESHDSMesh;
+    }
+  }
+  if(!mySMDSMesh)
     mySMDSMesh = new SMDS_Mesh();
 }
 

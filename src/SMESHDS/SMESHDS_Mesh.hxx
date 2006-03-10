@@ -79,6 +79,8 @@ class SMESHDS_GroupBase;
 class SMESHDS_WNT_EXPORT SMESHDS_Mesh:public SMDS_Mesh{
 public:
   SMESHDS_Mesh(int theMeshID, bool theIsEmbeddedMode);
+  bool IsEmbeddedMode();
+
   void ShapeToMesh(const TopoDS_Shape & S);
   bool AddHypothesis(const TopoDS_Shape & SS, const SMESHDS_Hypothesis * H);
   bool RemoveHypothesis(const TopoDS_Shape & S, const SMESHDS_Hypothesis * H);
@@ -499,6 +501,7 @@ private:
   TGroups myGroups;
 
   SMESHDS_Script*            myScript;
+  bool                       myIsEmbeddedMode;
 
   // optimize addition of nodes/elements to submeshes by, SetNodeInVolume() etc:
   // avoid search of submeshes in maps

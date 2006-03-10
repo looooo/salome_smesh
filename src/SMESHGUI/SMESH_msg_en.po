@@ -144,6 +144,10 @@ msgstr "Activate Link Selection Mode"
 msgid "SMESH_WRN_EMPTY_NAME" 
 msgstr "Empty name is not valid"
 
+#Smesh polyedre cretion error
+msgid "SMESH_POLYEDRE_CREATE_ERROR"
+msgstr "Polyedron creation error"
+
 #-------------------------------------------------------------------------
 # MEN
 #-------------------------------------------------------------------------

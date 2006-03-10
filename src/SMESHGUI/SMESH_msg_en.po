@@ -918,6 +918,14 @@ msgstr "Group on geometry"
 msgid "SMESH_GEOM_GROUP"
 msgstr "Geometry group"
 
+#Color group
+msgid "SMESH_SET_COLOR"
+msgstr "Color group"
+
+#Check color group
+msgid "SMESH_CHECK_COLOR"
+msgstr "Color number"
+
 #%1 SubMeshes
 msgid "SMESH_SUBMESH_SELECTED"
 msgstr "%1 SubMeshes"

@@ -95,6 +95,7 @@ private slots:
     void onSelectSubMesh(bool on);
     void onSelectGroup(bool on);
     void onSelectGeomGroup(bool on);
+    void onSelectColorGroup(bool on);
     void setCurrentSelection();
 
     void setFilters();
@@ -140,6 +141,9 @@ private:
     QCheckBox*                    mySelectGroup;
     QPushButton*                  myGroupBtn;
     QLineEdit*                    myGroupLine;
+
+    QCheckBox*                    mySelectColorGroup;
+    QLineEdit*                    myColorGroupLine;
 
     QCheckBox*                    mySelectGeomGroup;
     QPushButton*                  myGeomGroupBtn;

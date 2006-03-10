@@ -259,7 +259,7 @@ void SMESHGUI_GroupDlg::initDialog(bool create)
   myGroupLine = new QLineEdit(aSelectBox, "group line");
   myGroupLine->setReadOnly(true);
   onSelectGroup(false);
-
+  
   /***************************************************************/
   QGridLayout* wg1Layout = new QGridLayout( wg1, 3, 1, 0, 6 );
   wg1Layout->addWidget(aContentBox, 0, 0);
@@ -291,6 +291,26 @@ void SMESHGUI_GroupDlg::initDialog(bool create)
   myWGStack->addWidget( wg2, myGrpTypeGroup->id(rb2) );
 
   /***************************************************************/
+  QGroupBox* aColorBox = new QGroupBox(this, "color box");
+  aColorBox->setTitle(tr("SMESH_SET_COLOR"));
+
+  mySelectColorGroup = new QCheckBox(aColorBox, "color checkbox");
+  mySelectColorGroup->setText(tr("SMESH_CHECK_COLOR"));
+  mySelectColorGroup->setMinimumSize(50, 0);
+  
+  myColorGroupLine = new QLineEdit(aColorBox, "color line");
+  myColorGroupLine->setReadOnly(false);
+  onSelectColorGroup(false);
+  
+  /***************************************************************/
+  QHBoxLayout* aColorLayout = new QHBoxLayout(aColorBox, 15, 20);
+  aColorLayout->setAutoAdd(false);
+  
+  aColorLayout->addWidget(mySelectColorGroup);
+  aColorLayout->addWidget(myColorGroupLine);
+  
+  /***************************************************************/
+  
   QFrame* aButtons = new QFrame(this, "button box");
   aButtons->setFrameStyle(QFrame::Box | QFrame::Sunken);
   QHBoxLayout* aBtnLayout = new QHBoxLayout(aButtons, 11, 6);
@@ -322,7 +342,8 @@ void SMESHGUI_GroupDlg::initDialog(bool create)
   aMainLayout->addMultiCellWidget(myGrpTypeGroup, 3, 3, 0, 2);
   aMainLayout->addMultiCellWidget(myWGStack,      4, 4, 0, 2);
   aMainLayout->setRowStretch( 5, 5 );
-  aMainLayout->addMultiCellWidget(aButtons,       6, 6, 0, 2);
+  aMainLayout->addMultiCellWidget(aColorBox,   6, 6, 0, 2);
+  aMainLayout->addMultiCellWidget(aButtons,       7, 7, 0, 2);
 
   /* signals and slots connections */
   connect(myMeshGroupBtn, SIGNAL(clicked()), this, SLOT(setCurrentSelection()));
@@ -344,6 +365,8 @@ void SMESHGUI_GroupDlg::initDialog(bool create)
   connect(mySubMeshBtn, SIGNAL(clicked()), this, SLOT(setCurrentSelection()));
   connect(myGroupBtn, SIGNAL(clicked()), this, SLOT(setCurrentSelection()));
   connect(myGeomGroupBtn, SIGNAL(clicked()), this, SLOT(setCurrentSelection()));
+  connect(mySelectColorGroup, SIGNAL(toggled(bool)), this, SLOT(onSelectColorGroup(bool)));
+
 
   connect(aOKBtn, SIGNAL(clicked()), this, SLOT(onOK()));
   connect(aApplyBtn, SIGNAL(clicked()), this, SLOT(onApply()));
@@ -439,6 +462,10 @@ void SMESHGUI_GroupDlg::init (SMESH::SMESH_Group_ptr theGroup)
 
   myName->setText(myGroup->GetName());
   myName->home(false);
+
+  myColorGroupLine->setText(QString::number(myGroup->GetColorNumber()));
+  myColorGroupLine->home(false);
+  
   myMeshGroupLine->setText(myGroup->GetName());
 
   myCurrentLineEdit = 0;
@@ -595,6 +622,20 @@ bool SMESHGUI_GroupDlg::onApply()
 
       myGroup = SMESH::AddGroup(myMesh, aType, myName->text());
       myGroup->Add(anIdList.inout());
+      
+      int aColorNumber = myColorGroupLine->text().toInt();
+      myGroup->SetColorNumber(aColorNumber);
+      
+      _PTR(SObject) aMeshGroupSO = SMESH::FindSObject(myGroup);
+
+      SMESH::setFileName (aMeshGroupSO, myColorGroupLine->text());
+      
+      SMESH::setFileType (aMeshGroupSO,"COULEURGROUP");
+      
+      /* init for next operation */
+      myName->setText("");
+
+      myColorGroupLine->setText("");
 
       /* init for next operation */
       myName->setText("");
@@ -603,6 +644,9 @@ bool SMESHGUI_GroupDlg::onApply()
 
     } else {
       myGroup->SetName(myName->text());
+        
+      int aColorNumber = myColorGroupLine->text().toInt();
+      myGroup->SetColorNumber(aColorNumber);
 
       QValueList<int> aAddList;
       QValueList<int>::iterator anIt;
@@ -660,10 +704,20 @@ bool SMESHGUI_GroupDlg::onApply()
     SMESH::SMESH_GroupOnGeom_var aGroupOnGeom =
       myMesh->CreateGroupFromGEOM(aType, myName->text(),myGeomGroup);
 
+    int aColorNumber = myColorGroupLine->text().toInt();
+    aGroupOnGeom->SetColorNumber(aColorNumber);
+    
+    _PTR(SObject) aMeshGroupSO = SMESH::FindSObject(aGroupOnGeom);
+    
+    SMESH::setFileName (aMeshGroupSO, myColorGroupLine->text());
+    
+    SMESH::setFileType (aMeshGroupSO,"COULEURGROUP");
+    
     mySMESHGUI->updateObjBrowser(true);
     mySelectionMgr->clearSelected();
     /* init for next operation */
     myName->setText("");
+    myColorGroupLine->setText("");
     return true;
   }
 
@@ -986,6 +1040,23 @@ void SMESHGUI_GroupDlg::onSelectGeomGroup(bool on)
   }
 }
 
+//=================================================================================
+// function : (onSelectColorGroup)
+// purpose  : Called when setting a color on group
+//=================================================================================
+void SMESHGUI_GroupDlg::onSelectColorGroup(bool on)
+{
+  if (on) {
+    setSelectionMode(7);
+  }
+  else {
+    myColorGroupLine->setText("");
+    myCurrentLineEdit = 0;
+    if (myTypeId != -1)
+      setSelectionMode(myTypeId);
+  }
+  myColorGroupLine->setEnabled(on);
+}
 
 //=================================================================================
 // function : setCurrentSelection()

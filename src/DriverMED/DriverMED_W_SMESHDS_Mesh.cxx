@@ -817,6 +817,7 @@ Driver_Mesh::Status DriverMED_W_SMESHDS_Mesh::Perform()
             anElemNums = &aHexaElemNums;
             aFamilyNums = &aHexaFamilyNums;
             aConnectivity = &aHexaConn;
+	    break;
           case 10:
             aNbConnectivity = aNbTetra10Conn;
             anElemNums = &anTetra10ElemNums;

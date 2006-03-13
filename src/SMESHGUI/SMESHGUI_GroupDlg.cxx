@@ -110,7 +110,7 @@ SMESHGUI_GroupDlg::SMESHGUI_GroupDlg( SMESHGUI* theModule, const char* name,
 // purpose  :
 //=================================================================================
 SMESHGUI_GroupDlg::SMESHGUI_GroupDlg( SMESHGUI* theModule, const char* name,
-				      SMESH::SMESH_Group_ptr theGroup, bool modal, WFlags fl)
+				      SMESH::SMESH_GroupBase_ptr theGroup, bool modal, WFlags fl)
      : QDialog( SMESH::GetDesktop( theModule ), name, modal, WStyle_Customize | WStyle_NormalBorder |
                 WStyle_Title | WStyle_SysMenu | WDestructiveClose),
      mySMESHGUI( theModule ),
@@ -276,6 +276,12 @@ void SMESHGUI_GroupDlg::initDialog(bool create)
   myGeomGroupLine->setReadOnly(true); //VSR ???
   onSelectGeomGroup(false);
 
+  if (!create)
+    {
+      myGeomGroupBtn->setEnabled(false);
+      myGeomGroupLine->setEnabled(false);
+    }
+
   /***************************************************************/
   QGridLayout* wg2Layout = new QGridLayout( wg2, 2, 3, 0, 6 );
   wg2Layout->addWidget(geomObject,     0, 0);
@@ -366,8 +372,8 @@ void SMESHGUI_GroupDlg::initDialog(bool create)
   connect(myGroupBtn, SIGNAL(clicked()), this, SLOT(setCurrentSelection()));
   connect(myGeomGroupBtn, SIGNAL(clicked()), this, SLOT(setCurrentSelection()));
   connect(mySelectColorGroup, SIGNAL(toggled(bool)), this, SLOT(onSelectColorGroup(bool)));
-
-
+  connect(myColorGroupLine, SIGNAL(textChanged(const QString&)), this, SLOT(onNbColorsChanged(const QString&)));
+  
   connect(aOKBtn, SIGNAL(clicked()), this, SLOT(onOK()));
   connect(aApplyBtn, SIGNAL(clicked()), this, SLOT(onApply()));
   connect(aCloseBtn, SIGNAL(clicked()), this, SLOT(onClose()));
@@ -419,6 +425,7 @@ void SMESHGUI_GroupDlg::init (SMESH::SMESH_Mesh_ptr theMesh)
   /* init data from current selection */
   myMesh = SMESH::SMESH_Mesh::_duplicate(theMesh);
   myGroup = SMESH::SMESH_Group::_nil();
+  myGroupOnGeom = SMESH::SMESH_GroupOnGeom::_nil();
 
   myActor = SMESH::FindActorByObject(myMesh);
   SMESH::SetPickable(myActor);
@@ -442,15 +449,17 @@ void SMESHGUI_GroupDlg::init (SMESH::SMESH_Mesh_ptr theMesh)
 // function : Init()
 // purpose  :
 //=================================================================================
-void SMESHGUI_GroupDlg::init (SMESH::SMESH_Group_ptr theGroup)
+void SMESHGUI_GroupDlg::init (SMESH::SMESH_GroupBase_ptr theGroup)
 {
   myMesh = theGroup->GetMesh();
-  myGroup = SMESH::SMESH_Group::_duplicate(theGroup);
 
-  myActor = SMESH::FindActorByObject(myMesh);
-  if ( !myActor )
-    myActor = SMESH::FindActorByObject(myGroup);
-  SMESH::SetPickable(myActor);
+  myName->setText(theGroup->GetName());
+  myName->home(false);
+
+  myColorGroupLine->setText(QString::number(theGroup->GetColorNumber()));
+  myColorGroupLine->home(false);
+
+  myMeshGroupLine->setText(theGroup->GetName());
 
   int aType = 0;
   switch(theGroup->GetType()) {
@@ -459,31 +468,61 @@ void SMESHGUI_GroupDlg::init (SMESH::SMESH_Group_ptr theGroup)
   case SMESH::FACE: aType = 2; break;
   case SMESH::VOLUME: aType = 3; break;
   }
-
-  myName->setText(myGroup->GetName());
-  myName->home(false);
-
-  myColorGroupLine->setText(QString::number(myGroup->GetColorNumber()));
-  myColorGroupLine->home(false);
-  
-  myMeshGroupLine->setText(myGroup->GetName());
-
-  myCurrentLineEdit = 0;
   myTypeGroup->setButton(aType);
-  myElements->clear();
-  setSelectionMode(aType);
-  myTypeId = aType;
+  
+  myGroup = SMESH::SMESH_Group::_narrow( theGroup );
 
-  myIdList.clear();
-  if (!theGroup->IsEmpty()) {
-    SMESH::long_array_var anElements = myGroup->GetListOfID();
-    int k = anElements->length();
-    for (int i = 0; i < k; i++) {
-      myIdList.append(anElements[i]);
-      myElements->insertItem(QString::number(anElements[i]));
+  if ( !myGroup->_is_nil() )
+    {
+      myGrpTypeGroup->setButton(0);
+      onGrpTypeChanged(0);
+
+      myActor = SMESH::FindActorByObject(myMesh);
+      if ( !myActor )
+	myActor = SMESH::FindActorByObject(myGroup);
+      SMESH::SetPickable(myActor);
+      
+      myCurrentLineEdit = 0;
+      myElements->clear();
+      setSelectionMode(aType);
+      myTypeId = aType;
+      
+      myIdList.clear();
+      if (!myGroup->IsEmpty()) {
+	SMESH::long_array_var anElements = myGroup->GetListOfID();
+	int k = anElements->length();
+	for (int i = 0; i < k; i++) {
+	  myIdList.append(anElements[i]);
+	  myElements->insertItem(QString::number(anElements[i]));
+	}
+	myElements->selectAll(true);
+      }
     }
-    myElements->selectAll(true);
-  }
+  else
+    {
+      myGroupOnGeom = SMESH::SMESH_GroupOnGeom::_narrow( theGroup );
+      
+      if ( !myGroupOnGeom->_is_nil() )
+	{
+	  myGrpTypeGroup->setButton(1);
+	  onGrpTypeChanged(1);
+
+	  myActor = SMESH::FindActorByObject(myMesh);
+	  if ( !myActor )
+	    myActor = SMESH::FindActorByObject(myGroup);
+	  SMESH::SetPickable(myActor);
+	  
+	  QString aShapeName("");
+	  _PTR(Study) aStudy = SMESH::GetActiveStudyDocument();
+	  GEOM::GEOM_Object_var aGroupShape = myGroupOnGeom->GetShape();
+	  if (!aGroupShape->_is_nil())
+	    {
+	      _PTR(SObject) aGroupShapeSO = aStudy->FindObjectID(aGroupShape->GetStudyEntry());
+	      aShapeName = aGroupShapeSO->GetName().c_str();
+	    }
+	  myGeomGroupLine->setText( aShapeName );
+	}
+    }
 }
 
 //=================================================================================
@@ -497,7 +536,10 @@ void SMESHGUI_GroupDlg::updateButtons()
   if (myGrpTypeId == 0)
     enable = !myName->text().stripWhiteSpace().isEmpty() && myElements->count() > 0;
   else if (myGrpTypeId == 1)
-    enable = !myName->text().stripWhiteSpace().isEmpty() && !CORBA::is_nil( myGeomGroup );
+    {
+      bool isEditMode = !CORBA::is_nil( myGroupOnGeom );
+      enable = !myName->text().stripWhiteSpace().isEmpty() && (!CORBA::is_nil( myGeomGroup ) || isEditMode);
+    }
   QPushButton* aBtn;
   aBtn = (QPushButton*) child("ok", "QPushButton");
   if (aBtn) aBtn->setEnabled(enable);
@@ -510,6 +552,15 @@ void SMESHGUI_GroupDlg::updateButtons()
 // purpose  :
 //=================================================================================
 void SMESHGUI_GroupDlg::onNameChanged (const QString& text)
+{
+  updateButtons();
+}
+
+//=================================================================================
+// function : onNbColorsChanged()
+// purpose  :
+//=================================================================================
+void SMESHGUI_GroupDlg::onNbColorsChanged (const QString& text)
 {
   updateButtons();
 }
@@ -634,11 +685,7 @@ bool SMESHGUI_GroupDlg::onApply()
       
       /* init for next operation */
       myName->setText("");
-
       myColorGroupLine->setText("");
-
-      /* init for next operation */
-      myName->setText("");
       myElements->clear();
       myGroup = SMESH::SMESH_Group::_nil();
 
@@ -687,40 +734,50 @@ bool SMESHGUI_GroupDlg::onApply()
     return true;
   } else if (myGrpTypeId == 1 &&
              !myName->text().stripWhiteSpace().isEmpty() &&
-             !CORBA::is_nil(myGeomGroup))
+             (!CORBA::is_nil(myGeomGroup) || !CORBA::is_nil(myGroupOnGeom)))
   {
-    SMESH::ElementType aType = SMESH::ALL;
-    switch (myTypeId) {
-    case 0: aType = SMESH::NODE; break;
-    case 1: aType = SMESH::EDGE; break;
-    case 2: aType = SMESH::FACE; break;
-    case 3: aType = SMESH::VOLUME; break;
+    if (myGroupOnGeom->_is_nil()) {
+      SMESH::ElementType aType = SMESH::ALL;
+      switch (myTypeId) {
+      case 0: aType = SMESH::NODE; break;
+      case 1: aType = SMESH::EDGE; break;
+      case 2: aType = SMESH::FACE; break;
+      case 3: aType = SMESH::VOLUME; break;
+      }
+      
+      _PTR(Study) aStudy = SMESH::GetActiveStudyDocument();
+      GEOM::GEOM_IGroupOperations_var aGroupOp =
+	SMESH::GetGEOMGen()->GetIGroupOperations(aStudy->StudyId());
+      
+      myGroupOnGeom = myMesh->CreateGroupFromGEOM(aType, myName->text(),myGeomGroup);
+      
+      int aColorNumber = myColorGroupLine->text().toInt();
+      myGroupOnGeom->SetColorNumber(aColorNumber);
+      
+      _PTR(SObject) aMeshGroupSO = SMESH::FindSObject(myGroupOnGeom);
+      
+      SMESH::setFileName (aMeshGroupSO, myColorGroupLine->text());
+      
+      SMESH::setFileType (aMeshGroupSO,"COULEURGROUP");
+      
+      /* init for next operation */
+      myName->setText("");
+      myColorGroupLine->setText("");
+      myGroupOnGeom = SMESH::SMESH_GroupOnGeom::_nil();
     }
-
-    _PTR(Study) aStudy = SMESH::GetActiveStudyDocument();
-    GEOM::GEOM_IGroupOperations_var aGroupOp =
-      SMESH::GetGEOMGen()->GetIGroupOperations(aStudy->StudyId());
-
-    SMESH::SMESH_GroupOnGeom_var aGroupOnGeom =
-      myMesh->CreateGroupFromGEOM(aType, myName->text(),myGeomGroup);
-
-    int aColorNumber = myColorGroupLine->text().toInt();
-    aGroupOnGeom->SetColorNumber(aColorNumber);
-    
-    _PTR(SObject) aMeshGroupSO = SMESH::FindSObject(aGroupOnGeom);
-    
-    SMESH::setFileName (aMeshGroupSO, myColorGroupLine->text());
-    
-    SMESH::setFileType (aMeshGroupSO,"COULEURGROUP");
+    else
+      {
+	myGroupOnGeom->SetName(myName->text());
+        
+	int aColorNumber = myColorGroupLine->text().toInt();
+	myGroupOnGeom->SetColorNumber(aColorNumber);
+      }
     
     mySMESHGUI->updateObjBrowser(true);
     mySelectionMgr->clearSelected();
-    /* init for next operation */
-    myName->setText("");
-    myColorGroupLine->setText("");
     return true;
   }
-
+  
   return false;
 }
 
@@ -825,7 +882,7 @@ void SMESHGUI_GroupDlg::onObjectSelectionChanged()
         myGeomGroupLine->setEnabled(true);
         updateButtons();
       } else {
-        SMESH::SMESH_Group_var aGroup = SMESH::IObjectToInterface<SMESH::SMESH_Group>(IO);
+        SMESH::SMESH_GroupBase_var aGroup = SMESH::IObjectToInterface<SMESH::SMESH_GroupBase>(IO);
         if (aGroup->_is_nil())
 	{
 	  myIsBusy = false;
@@ -958,6 +1015,8 @@ void SMESHGUI_GroupDlg::onObjectSelectionChanged()
   if (!myActor) {
     if (!myGroup->_is_nil())
       myActor = SMESH::FindActorByObject(myGroup);
+    else if(!myGroupOnGeom->_is_nil())
+      myActor = SMESH::FindActorByObject(myGroupOnGeom);
     else
       myActor = SMESH::FindActorByObject(myMesh);
   }

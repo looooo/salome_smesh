@@ -1592,8 +1592,8 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
       int nbSelectedGroups = 0;
       for ( ; It.More(); It.Next() )
       {
-        SMESH::SMESH_Group_var aGroup =
-          SMESH::IObjectToInterface<SMESH::SMESH_Group>(It.Value());
+        SMESH::SMESH_GroupBase_var aGroup =
+          SMESH::IObjectToInterface<SMESH::SMESH_GroupBase>(It.Value());
         if (!aGroup->_is_nil()) {
 	  nbSelectedGroups++;
           SMESHGUI_GroupDlg *aDlg = new SMESHGUI_GroupDlg( this, "", aGroup);
@@ -1602,7 +1602,7 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
       }
       if (nbSelectedGroups == 0)
 	{
-	  SMESHGUI_GroupDlg *aDlg = new SMESHGUI_GroupDlg( this, "", SMESH::SMESH_Group::_nil());
+	  SMESHGUI_GroupDlg *aDlg = new SMESHGUI_GroupDlg( this, "", SMESH::SMESH_GroupBase::_nil());
 	  aDlg->show();
 	}
       break;

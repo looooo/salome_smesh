@@ -69,7 +69,7 @@ public:
 		       bool modal = FALSE, WFlags fl = 0 );
     SMESHGUI_GroupDlg( SMESHGUI*,
 		       const char* name, 
-		       SMESH::SMESH_Group_ptr theGroup,
+		       SMESH::SMESH_GroupBase_ptr theGroup,
 		       bool modal = FALSE, WFlags fl = 0 );
     ~SMESHGUI_GroupDlg();
 
@@ -102,12 +102,13 @@ private slots:
     void onSort();
 
     void onNameChanged(const QString& text);
+    void onNbColorsChanged(const QString& text);
     void onFilterAccepted();
 
 private:
     void initDialog(bool create);
     void init(SMESH::SMESH_Mesh_ptr theMesh);
-    void init(SMESH::SMESH_Group_ptr theGroup);
+    void init(SMESH::SMESH_GroupBase_ptr theGroup);
     void closeEvent(QCloseEvent* e);
     void enterEvent (QEvent*);
     void hideEvent (QHideEvent*);                          /* ESC key */
@@ -151,6 +152,7 @@ private:
 
     SMESH::SMESH_Mesh_var         myMesh;
     SMESH::SMESH_Group_var        myGroup;
+    SMESH::SMESH_GroupOnGeom_var  myGroupOnGeom;
     QValueList<int>               myIdList;
     GEOM::GEOM_Object_var         myGeomGroup;
 

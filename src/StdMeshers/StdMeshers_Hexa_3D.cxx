@@ -76,9 +76,6 @@ StdMeshers_Hexa_3D::StdMeshers_Hexa_3D(int hypId, int studyId,
   MESSAGE("StdMeshers_Hexa_3D::StdMeshers_Hexa_3D");
   _name = "Hexa_3D";
   _shapeType = (1 << TopAbs_SHELL) | (1 << TopAbs_SOLID);	// 1 bit /shape type
-  for (int i = 0; i < 6; i++)
-    _quads[i] = 0;
-  myTool = 0;
 }
 
 //=============================================================================
@@ -90,7 +87,6 @@ StdMeshers_Hexa_3D::StdMeshers_Hexa_3D(int hypId, int studyId,
 StdMeshers_Hexa_3D::~StdMeshers_Hexa_3D()
 {
   MESSAGE("StdMeshers_Hexa_3D::~StdMeshers_Hexa_3D");
-  ClearAndReturn(true);
 }
 
 //================================================================================
@@ -101,13 +97,12 @@ StdMeshers_Hexa_3D::~StdMeshers_Hexa_3D()
  */
 //================================================================================
 
-bool StdMeshers_Hexa_3D::ClearAndReturn(const bool res)
+bool StdMeshers_Hexa_3D::ClearAndReturn(FaceQuadStruct* theQuads[6], const bool res)
 {
-  for (int i = 0; i < 6; i++)
-    StdMeshers_Quadrangle_2D::QuadDelete(_quads[i]);
-  if ( myTool )
-    delete myTool;
-  myTool = 0;
+  for (int i = 0; i < 6; i++) {
+    StdMeshers_Quadrangle_2D::QuadDelete(theQuads[i]);
+    theQuads[i] = NULL;
+  }
   return res;
 }
 
@@ -203,8 +198,36 @@ bool StdMeshers_Hexa_3D::Compute(SMESH_Mesh & aMesh,
   // 0.2 - is each face meshed with Quadrangle_2D? (so, with a wire of 4 edges)
   //MESSAGE("---");
 
-  myTool = new StdMeshers_Helper(aMesh);
-  _quadraticMesh = myTool->IsQuadraticSubMesh(aShape);
+  // tool for working with quadratic elements
+  StdMeshers_Helper aTool (aMesh);
+  _quadraticMesh = aTool.IsQuadraticSubMesh(aShape);
+
+  // cube structure
+  typedef struct cubeStruct
+  {
+    TopoDS_Vertex V000;
+    TopoDS_Vertex V001;
+    TopoDS_Vertex V010;
+    TopoDS_Vertex V011;
+    TopoDS_Vertex V100;
+    TopoDS_Vertex V101;
+    TopoDS_Vertex V110;
+    TopoDS_Vertex V111;
+    faceQuadStruct* quad_X0;
+    faceQuadStruct* quad_X1;
+    faceQuadStruct* quad_Y0;
+    faceQuadStruct* quad_Y1;
+    faceQuadStruct* quad_Z0;
+    faceQuadStruct* quad_Z1;
+    Point3DStruct* np; // normalised 3D coordinates
+  } CubeStruct;
+
+  CubeStruct aCube;
+
+  // bounding faces
+  FaceQuadStruct* aQuads[6];
+  for (int i = 0; i < 6; i++)
+    aQuads[i] = 0;
 
   for (int i = 0; i < 6; i++) {
     TopoDS_Shape aFace = meshFaces[i]->GetSubShape();
@@ -225,24 +248,24 @@ bool StdMeshers_Hexa_3D::Compute(SMESH_Mesh & aMesh,
     if ( ! isAllQuad ) {
       //modified by NIZNHY-PKV Wed Nov 17 15:31:37 2004 f
       bool bIsOk = ComputePentahedralMesh(aMesh, aShape);
-      return ClearAndReturn( bIsOk );
+      return ClearAndReturn( aQuads, bIsOk );
     }
     StdMeshers_Quadrangle_2D *quadAlgo =
       dynamic_cast < StdMeshers_Quadrangle_2D * >(algo);
     ASSERT(quadAlgo);
     try {
-      _quads[i] = quadAlgo->CheckAnd2Dcompute(aMesh, aFace, _quadraticMesh);
+      aQuads[i] = quadAlgo->CheckAnd2Dcompute(aMesh, aFace, _quadraticMesh);
     }
     catch(SALOME_Exception & S_ex) {
-      return ClearAndReturn( false );
+      return ClearAndReturn( aQuads, false );
     }
 
     // 0.2.1 - number of points on the opposite edges must be the same
-    if (_quads[i]->nbPts[0] != _quads[i]->nbPts[2] ||
-        _quads[i]->nbPts[1] != _quads[i]->nbPts[3]) {
+    if (aQuads[i]->nbPts[0] != aQuads[i]->nbPts[2] ||
+        aQuads[i]->nbPts[1] != aQuads[i]->nbPts[3]) {
       MESSAGE("different number of points on the opposite edges of face " << i);
       //                  ASSERT(0);
-      return ClearAndReturn( false );
+      return ClearAndReturn( aQuads, false );
     }
   }
 
@@ -263,41 +286,41 @@ bool StdMeshers_Hexa_3D::Compute(SMESH_Mesh & aMesh,
   //MESSAGE("---");
 
   int i = 0;
-  TopoDS_Edge E = _quads[0]->edge[i];	//edge will be Y=0,Z=0 on unit cube
+  TopoDS_Edge E = aQuads[0]->edge[i];	//edge will be Y=0,Z=0 on unit cube
   double f, l;
   Handle(Geom2d_Curve) C2d = BRep_Tool::CurveOnSurface(E, F, f, l);
   TopoDS_Vertex VFirst, VLast;
   TopExp::Vertices(E, VFirst, VLast);	// corresponds to f and l
-  bool isForward = (((l - f) * (_quads[0]->last[i] - _quads[0]->first[i])) > 0);
+  bool isForward = (((l - f) * (aQuads[0]->last[i] - aQuads[0]->first[i])) > 0);
 
   if (isForward) {
-    _cube.V000 = VFirst;	// will be (0,0,0) on the unit cube
-    _cube.V100 = VLast;		// will be (1,0,0) on the unit cube
+    aCube.V000 = VFirst;	// will be (0,0,0) on the unit cube
+    aCube.V100 = VLast;		// will be (1,0,0) on the unit cube
   }
   else {
-    _cube.V000 = VLast;
-    _cube.V100 = VFirst;
+    aCube.V000 = VLast;
+    aCube.V100 = VFirst;
   }
 
   i = 1;
-  E = _quads[0]->edge[i];
+  E = aQuads[0]->edge[i];
   C2d = BRep_Tool::CurveOnSurface(E, F, f, l);
   TopExp::Vertices(E, VFirst, VLast);
-  isForward = (((l - f) * (_quads[0]->last[i] - _quads[0]->first[i])) > 0);
+  isForward = (((l - f) * (aQuads[0]->last[i] - aQuads[0]->first[i])) > 0);
   if (isForward)
-    _cube.V101 = VLast;		// will be (1,0,1) on the unit cube
+    aCube.V101 = VLast;		// will be (1,0,1) on the unit cube
   else
-    _cube.V101 = VFirst;
+    aCube.V101 = VFirst;
 
   i = 2;
-  E = _quads[0]->edge[i];
+  E = aQuads[0]->edge[i];
   C2d = BRep_Tool::CurveOnSurface(E, F, f, l);
   TopExp::Vertices(E, VFirst, VLast);
-  isForward = (((l - f) * (_quads[0]->last[i] - _quads[0]->first[i])) > 0);
+  isForward = (((l - f) * (aQuads[0]->last[i] - aQuads[0]->first[i])) > 0);
   if (isForward)
-    _cube.V001 = VLast;		// will be (0,0,1) on the unit cube
+    aCube.V001 = VLast;		// will be (0,0,1) on the unit cube
   else
-    _cube.V001 = VFirst;
+    aCube.V001 = VFirst;
 
   // 1.4 - find edge X=0, Z=0 (ancestor of V000 not in face Y=0)
   //     - find edge X=1, Z=0 (ancestor of V100 not in face Y=0)
@@ -305,70 +328,70 @@ bool StdMeshers_Hexa_3D::Compute(SMESH_Mesh & aMesh,
   //     - find edge X=0, Z=1 (ancestor of V001 not in face Y=0)
   //MESSAGE("---");
 
-  TopoDS_Edge E_0Y0 = EdgeNotInFace(aMesh, aShape, F, _cube.V000, MS);
+  TopoDS_Edge E_0Y0 = EdgeNotInFace(aMesh, aShape, F, aCube.V000, MS);
   ASSERT(!E_0Y0.IsNull());
 
-  TopoDS_Edge E_1Y0 = EdgeNotInFace(aMesh, aShape, F, _cube.V100, MS);
+  TopoDS_Edge E_1Y0 = EdgeNotInFace(aMesh, aShape, F, aCube.V100, MS);
   ASSERT(!E_1Y0.IsNull());
 
-  TopoDS_Edge E_1Y1 = EdgeNotInFace(aMesh, aShape, F, _cube.V101, MS);
+  TopoDS_Edge E_1Y1 = EdgeNotInFace(aMesh, aShape, F, aCube.V101, MS);
   ASSERT(!E_1Y1.IsNull());
 
-  TopoDS_Edge E_0Y1 = EdgeNotInFace(aMesh, aShape, F, _cube.V001, MS);
+  TopoDS_Edge E_0Y1 = EdgeNotInFace(aMesh, aShape, F, aCube.V001, MS);
   ASSERT(!E_0Y1.IsNull());
 
   // 1.5 - identify the 4 vertices in face Y=1: V010, V110, V111, V011
   //MESSAGE("---");
 
   TopExp::Vertices(E_0Y0, VFirst, VLast);
-  if (VFirst.IsSame(_cube.V000))
-    _cube.V010 = VLast;
+  if (VFirst.IsSame(aCube.V000))
+    aCube.V010 = VLast;
   else
-    _cube.V010 = VFirst;
+    aCube.V010 = VFirst;
 
   TopExp::Vertices(E_1Y0, VFirst, VLast);
-  if (VFirst.IsSame(_cube.V100))
-    _cube.V110 = VLast;
+  if (VFirst.IsSame(aCube.V100))
+    aCube.V110 = VLast;
   else
-    _cube.V110 = VFirst;
+    aCube.V110 = VFirst;
 
   TopExp::Vertices(E_1Y1, VFirst, VLast);
-  if (VFirst.IsSame(_cube.V101))
-    _cube.V111 = VLast;
+  if (VFirst.IsSame(aCube.V101))
+    aCube.V111 = VLast;
   else
-    _cube.V111 = VFirst;
+    aCube.V111 = VFirst;
 
   TopExp::Vertices(E_0Y1, VFirst, VLast);
-  if (VFirst.IsSame(_cube.V001))
-    _cube.V011 = VLast;
+  if (VFirst.IsSame(aCube.V001))
+    aCube.V011 = VLast;
   else
-    _cube.V011 = VFirst;
+    aCube.V011 = VFirst;
 
   // 1.6 - find remaining faces given 4 vertices
   //MESSAGE("---");
 
-  _indY0 = 0;
-  _cube.quad_Y0 = _quads[_indY0];
+  int _indY0 = 0;
+  aCube.quad_Y0 = aQuads[_indY0];
 
-  _indY1 = GetFaceIndex(aMesh, aShape, meshFaces,
-                        _cube.V010, _cube.V011, _cube.V110, _cube.V111);
-  _cube.quad_Y1 = _quads[_indY1];
+  int _indY1 = GetFaceIndex(aMesh, aShape, meshFaces,
+                            aCube.V010, aCube.V011, aCube.V110, aCube.V111);
+  aCube.quad_Y1 = aQuads[_indY1];
 
-  _indZ0 = GetFaceIndex(aMesh, aShape, meshFaces,
-                        _cube.V000, _cube.V010, _cube.V100, _cube.V110);
-  _cube.quad_Z0 = _quads[_indZ0];
+  int _indZ0 = GetFaceIndex(aMesh, aShape, meshFaces,
+                            aCube.V000, aCube.V010, aCube.V100, aCube.V110);
+  aCube.quad_Z0 = aQuads[_indZ0];
 
-  _indZ1 = GetFaceIndex(aMesh, aShape, meshFaces,
-                        _cube.V001, _cube.V011, _cube.V101, _cube.V111);
-  _cube.quad_Z1 = _quads[_indZ1];
+  int _indZ1 = GetFaceIndex(aMesh, aShape, meshFaces,
+                            aCube.V001, aCube.V011, aCube.V101, aCube.V111);
+  aCube.quad_Z1 = aQuads[_indZ1];
 
-  _indX0 = GetFaceIndex(aMesh, aShape, meshFaces,
-                        _cube.V000, _cube.V001, _cube.V010, _cube.V011);
-  _cube.quad_X0 = _quads[_indX0];
+  int _indX0 = GetFaceIndex(aMesh, aShape, meshFaces,
+                            aCube.V000, aCube.V001, aCube.V010, aCube.V011);
+  aCube.quad_X0 = aQuads[_indX0];
 
-  _indX1 = GetFaceIndex(aMesh, aShape, meshFaces,
-                        _cube.V100, _cube.V101, _cube.V110, _cube.V111);
-  _cube.quad_X1 = _quads[_indX1];
+  int _indX1 = GetFaceIndex(aMesh, aShape, meshFaces,
+                            aCube.V100, aCube.V101, aCube.V110, aCube.V111);
+  aCube.quad_X1 = aQuads[_indX1];
 
   //MESSAGE("---");
 
@@ -381,30 +404,30 @@ bool StdMeshers_Hexa_3D::Compute(SMESH_Mesh & aMesh,
   Conv2DStruct cz0;
   Conv2DStruct cz1;
 
-  GetConv2DCoefs(*_cube.quad_X0, meshFaces[_indX0]->GetSubShape(),
-                 _cube.V000, _cube.V010, _cube.V011, _cube.V001, cx0);
-  GetConv2DCoefs(*_cube.quad_X1, meshFaces[_indX1]->GetSubShape(),
-                 _cube.V100, _cube.V110, _cube.V111, _cube.V101, cx1);
-  GetConv2DCoefs(*_cube.quad_Y0, meshFaces[_indY0]->GetSubShape(),
-                 _cube.V000, _cube.V100, _cube.V101, _cube.V001, cy0);
-  GetConv2DCoefs(*_cube.quad_Y1, meshFaces[_indY1]->GetSubShape(),
-                 _cube.V010, _cube.V110, _cube.V111, _cube.V011, cy1);
-  GetConv2DCoefs(*_cube.quad_Z0, meshFaces[_indZ0]->GetSubShape(),
-                 _cube.V000, _cube.V100, _cube.V110, _cube.V010, cz0);
-  GetConv2DCoefs(*_cube.quad_Z1, meshFaces[_indZ1]->GetSubShape(),
-                 _cube.V001, _cube.V101, _cube.V111, _cube.V011, cz1);
+  GetConv2DCoefs(*aCube.quad_X0, meshFaces[_indX0]->GetSubShape(),
+                 aCube.V000, aCube.V010, aCube.V011, aCube.V001, cx0);
+  GetConv2DCoefs(*aCube.quad_X1, meshFaces[_indX1]->GetSubShape(),
+                 aCube.V100, aCube.V110, aCube.V111, aCube.V101, cx1);
+  GetConv2DCoefs(*aCube.quad_Y0, meshFaces[_indY0]->GetSubShape(),
+                 aCube.V000, aCube.V100, aCube.V101, aCube.V001, cy0);
+  GetConv2DCoefs(*aCube.quad_Y1, meshFaces[_indY1]->GetSubShape(),
+                 aCube.V010, aCube.V110, aCube.V111, aCube.V011, cy1);
+  GetConv2DCoefs(*aCube.quad_Z0, meshFaces[_indZ0]->GetSubShape(),
+                 aCube.V000, aCube.V100, aCube.V110, aCube.V010, cz0);
+  GetConv2DCoefs(*aCube.quad_Z1, meshFaces[_indZ1]->GetSubShape(),
+                 aCube.V001, aCube.V101, aCube.V111, aCube.V011, cz1);
 
   // 1.8 - create a 3D structure for normalized values
   
   //MESSAGE("---");
-  int nbx = _cube.quad_Z0->nbPts[0];
-  if (cz0.a1 == 0.) nbx = _cube.quad_Z0->nbPts[1];
+  int nbx = aCube.quad_Z0->nbPts[0];
+  if (cz0.a1 == 0.) nbx = aCube.quad_Z0->nbPts[1];
  
-  int nby = _cube.quad_X0->nbPts[0];
-  if (cx0.a1 == 0.) nby = _cube.quad_X0->nbPts[1];
+  int nby = aCube.quad_X0->nbPts[0];
+  if (cx0.a1 == 0.) nby = aCube.quad_X0->nbPts[1];
  
-  int nbz = _cube.quad_Y0->nbPts[0];
-  if (cy0.a1 != 0.) nbz = _cube.quad_Y0->nbPts[1];
+  int nbz = aCube.quad_Y0->nbPts[0];
+  if (cy0.a1 != 0.) nbz = aCube.quad_Y0->nbPts[1];
 
   int i1, j1, nbxyz = nbx * nby * nbz;
   Point3DStruct *np = new Point3DStruct[nbxyz];
@@ -414,7 +437,7 @@ bool StdMeshers_Hexa_3D::Compute(SMESH_Mesh & aMesh,
   {
     const TopoDS_Face & F = TopoDS::Face(meshFaces[_indX0]->GetSubShape());
 
-    faceQuadStruct *quad = _cube.quad_X0;
+    faceQuadStruct *quad = aCube.quad_X0;
     int i = 0;				// j = x/face , k = y/face
     int nbdown = quad->nbPts[0];
     int nbright = quad->nbPts[1];
@@ -423,7 +446,7 @@ bool StdMeshers_Hexa_3D::Compute(SMESH_Mesh & aMesh,
 			
     while(itf->more()) {
       const SMDS_MeshNode * node = itf->next();
-      if(myTool->IsMedium(node))
+      if(aTool.IsMedium(node))
         continue;
       findIJ( node, quad, i1, j1 );
       int ij1 = j1 * nbdown + i1;
@@ -447,14 +470,14 @@ bool StdMeshers_Hexa_3D::Compute(SMESH_Mesh & aMesh,
 
     SMDS_NodeIteratorPtr itf= aMesh.GetSubMesh(F)->GetSubMeshDS()->GetNodes();
 
-    faceQuadStruct *quad = _cube.quad_X1;
+    faceQuadStruct *quad = aCube.quad_X1;
     int i = nbx - 1;		// j = x/face , k = y/face
     int nbdown = quad->nbPts[0];
     int nbright = quad->nbPts[1];
 
     while(itf->more()) {
       const SMDS_MeshNode * node = itf->next();
-      if(myTool->IsMedium(node))
+      if(aTool.IsMedium(node))
         continue;
       findIJ( node, quad, i1, j1 );
       int ij1 = j1 * nbdown + i1;
@@ -478,14 +501,14 @@ bool StdMeshers_Hexa_3D::Compute(SMESH_Mesh & aMesh,
 
     SMDS_NodeIteratorPtr itf= aMesh.GetSubMesh(F)->GetSubMeshDS()->GetNodes();
 
-    faceQuadStruct *quad = _cube.quad_Y0;
+    faceQuadStruct *quad = aCube.quad_Y0;
     int j = 0;				// i = x/face , k = y/face
     int nbdown = quad->nbPts[0];
     int nbright = quad->nbPts[1];
 
     while(itf->more()) {
       const SMDS_MeshNode * node = itf->next();
-      if(myTool->IsMedium(node))
+      if(aTool.IsMedium(node))
         continue;
       findIJ( node, quad, i1, j1 );
       int ij1 = j1 * nbdown + i1;
@@ -509,14 +532,14 @@ bool StdMeshers_Hexa_3D::Compute(SMESH_Mesh & aMesh,
 
     SMDS_NodeIteratorPtr itf= aMesh.GetSubMesh(F)->GetSubMeshDS()->GetNodes();
 
-    faceQuadStruct *quad = _cube.quad_Y1;
+    faceQuadStruct *quad = aCube.quad_Y1;
     int j = nby - 1;		// i = x/face , k = y/face
     int nbdown = quad->nbPts[0];
     int nbright = quad->nbPts[1];
 
     while(itf->more()) {
       const SMDS_MeshNode * node = itf->next();
-      if(myTool->IsMedium(node))
+      if(aTool.IsMedium(node))
         continue;
       findIJ( node, quad, i1, j1 );
       int ij1 = j1 * nbdown + i1;
@@ -540,14 +563,14 @@ bool StdMeshers_Hexa_3D::Compute(SMESH_Mesh & aMesh,
 
     SMDS_NodeIteratorPtr itf= aMesh.GetSubMesh(F)->GetSubMeshDS()->GetNodes();
 
-    faceQuadStruct *quad = _cube.quad_Z0;
+    faceQuadStruct *quad = aCube.quad_Z0;
     int k = 0;				// i = x/face , j = y/face
     int nbdown = quad->nbPts[0];
     int nbright = quad->nbPts[1];
 
     while(itf->more()) {
       const SMDS_MeshNode * node = itf->next();
-      if(myTool->IsMedium(node))
+      if(aTool.IsMedium(node))
         continue;
       findIJ( node, quad, i1, j1 );
       int ij1 = j1 * nbdown + i1;
@@ -571,14 +594,14 @@ bool StdMeshers_Hexa_3D::Compute(SMESH_Mesh & aMesh,
 
     SMDS_NodeIteratorPtr itf= aMesh.GetSubMesh(F)->GetSubMeshDS()->GetNodes();
 
-    faceQuadStruct *quad = _cube.quad_Z1;
+    faceQuadStruct *quad = aCube.quad_Z1;
     int k = nbz - 1;		// i = x/face , j = y/face
     int nbdown = quad->nbPts[0];
     int nbright = quad->nbPts[1];
     
     while(itf->more()) {
       const SMDS_MeshNode * node = itf->next();
-      if(myTool->IsMedium(node))
+      if(aTool.IsMedium(node))
         continue;
       findIJ( node, quad, i1, j1 );
       int ij1 = j1 * nbdown + i1;
@@ -721,20 +744,20 @@ bool StdMeshers_Hexa_3D::Compute(SMESH_Mesh & aMesh,
           //                        np[n3].node, np[n4].node,
           //                        np[n5].node, np[n6].node,
           //                        np[n7].node, np[n8].node);
-          elt = myTool->AddVolume(np[n1].node, np[n2].node,
-                                  np[n3].node, np[n4].node,
-                                  np[n5].node, np[n6].node,
-                                  np[n7].node, np[n8].node);
+          elt = aTool.AddVolume(np[n1].node, np[n2].node,
+                                np[n3].node, np[n4].node,
+                                np[n5].node, np[n6].node,
+                                np[n7].node, np[n8].node);
         }
         else {
           //elt = meshDS->AddVolume(np[n1].node, np[n4].node,
           //                        np[n3].node, np[n2].node,
           //                        np[n5].node, np[n8].node,
           //                        np[n7].node, np[n6].node);
-          elt = myTool->AddVolume(np[n1].node, np[n4].node,
-                                  np[n3].node, np[n2].node,
-                                  np[n5].node, np[n8].node,
-                                  np[n7].node, np[n6].node);
+          elt = aTool.AddVolume(np[n1].node, np[n4].node,
+                                np[n3].node, np[n2].node,
+                                np[n5].node, np[n8].node,
+                                np[n7].node, np[n6].node);
         }
         
         meshDS->SetMeshElementOnShape(elt, shapeID);
@@ -743,7 +766,7 @@ bool StdMeshers_Hexa_3D::Compute(SMESH_Mesh & aMesh,
   }
   if ( np ) delete [] np;
   //MESSAGE("End of StdMeshers_Hexa_3D::Compute()");
-  return ClearAndReturn( true );
+  return ClearAndReturn( aQuads, true );
 }
 
 //=============================================================================

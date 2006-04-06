@@ -20,6 +20,8 @@
 #ifndef SMESH_ACTORUTILS_H
 #define SMESH_ACTORUTILS_H
 
+#include "VTKViewer.h"
+
 #include <qcolor.h>
 #include <qstring.h>
 
@@ -27,12 +29,12 @@ class vtkUnstructuredGrid;
 
 namespace SMESH{
   
-  float GetFloat( const QString& theValue, float theDefault = 0 );
-  float GetFloat( const QString& theName, const QString& theSection, float theDefault = 0 );
+  vtkFloatingPointType GetFloat( const QString& theValue, vtkFloatingPointType theDefault = 0 );
+  vtkFloatingPointType GetFloat( const QString& theName, const QString& theSection, vtkFloatingPointType theDefault = 0 );
 
   QColor GetColor( const QString& theSect, const QString& theName, const QColor&t = QColor() );
   void   GetColor( const QString& theSect, const QString& theName, int&, int&, int&, const QColor&t = QColor() );
-  void   GetColor( const QString& theSect, const QString& theName, float&, float&, float&, const QColor&t = QColor() );
+  void   GetColor( const QString& theSect, const QString& theName, vtkFloatingPointType&, vtkFloatingPointType&, vtkFloatingPointType&, const QColor&t = QColor() );
 
   void WriteUnstructuredGrid(vtkUnstructuredGrid* theGrid, const char* theFileName);
 

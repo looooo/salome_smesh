@@ -63,7 +63,7 @@
 // VTK Includes
 #include <vtkCell.h>
 #include <vtkIdList.h>
-#include <vtkIntArray.h>
+#include <vtkIdTypeArray.h>
 #include <vtkCellArray.h>
 #include <vtkUnsignedCharArray.h>
 #include <vtkUnstructuredGrid.h>
@@ -148,7 +148,7 @@ namespace SMESH {
       aCells->InsertNextCell(anIdList);
       aCellTypesArray->InsertNextValue(VTK_VERTEX);
 
-      vtkIntArray* aCellLocationsArray = vtkIntArray::New();
+      vtkIdTypeArray* aCellLocationsArray = vtkIdTypeArray::New();
       aCellLocationsArray->SetNumberOfComponents(1);
       aCellLocationsArray->SetNumberOfTuples(1);
 
@@ -179,11 +179,11 @@ namespace SMESH {
       vtkProperty* aProp = vtkProperty::New();
       aProp->SetRepresentationToPoints();
 
-      float anRGB[3];
+      vtkFloatingPointType anRGB[3];
       GetColor( "SMESH", "node_color", anRGB[0], anRGB[1], anRGB[2], QColor( 0, 255, 0 ) );
       aProp->SetColor( anRGB[0], anRGB[1], anRGB[2] );
 
-      float aPointSize = GetFloat( "SMESH:node_size", 3 );
+      vtkFloatingPointType aPointSize = GetFloat( "SMESH:node_size", 3 );
       aProp->SetPointSize( aPointSize );
 
       myPreviewActor->SetProperty( aProp );

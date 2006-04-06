@@ -37,10 +37,10 @@ static int MYDEBUG = 0;
 
 namespace SMESH{
 
-  float GetFloat( const QString& theValue, float theDefault )
+  vtkFloatingPointType GetFloat( const QString& theValue, vtkFloatingPointType theDefault )
   {
     int pos = theValue.find( ":" );
-    float val = theDefault;
+    vtkFloatingPointType val = theDefault;
     if( pos>=0 ) 
     {
       QString name = theValue.right( theValue.length()-pos-1 ),
@@ -51,12 +51,12 @@ namespace SMESH{
     return val;
   }
 
-  float GetFloat( const QString& theValue, const QString& theSection, float theDefault )
+  vtkFloatingPointType GetFloat( const QString& theValue, const QString& theSection, vtkFloatingPointType theDefault )
   {
-    float val = theDefault;
+    vtkFloatingPointType val = theDefault;
     SUIT_ResourceMgr* mgr = SUIT_Session::session()->resourceMgr();
     if( mgr )
-      val = (float) mgr->doubleValue( theValue, theSection, theDefault );
+      val = (vtkFloatingPointType) mgr->doubleValue( theValue, theSection, theDefault );
 
     return val;
   }
@@ -90,7 +90,7 @@ namespace SMESH{
     SUIT_Tools::rgbSet( SUIT_Tools::rgbSet( c ), r, g, b );
   }
 
-  void GetColor( const QString& theSect, const QString& theName, float& r, float& g, float& b, const QColor& def )
+  void GetColor( const QString& theSect, const QString& theName, vtkFloatingPointType& r, vtkFloatingPointType& g, vtkFloatingPointType& b, const QColor& def )
   {
     int ir( 0 ), ig( 0 ), ib( 0 );
     GetColor( theSect, theName, ir, ig, ib, def );

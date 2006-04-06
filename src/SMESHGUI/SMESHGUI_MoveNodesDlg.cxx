@@ -61,7 +61,7 @@
 // VTK includes
 #include <vtkCell.h>
 #include <vtkIdList.h>
-#include <vtkIntArray.h>
+#include <vtkIdTypeArray.h>
 #include <vtkCellArray.h>
 #include <vtkUnsignedCharArray.h>
 #include <vtkUnstructuredGrid.h>
@@ -547,7 +547,7 @@ void SMESHGUI_MoveNodesDlg::redisplayPreview()
   aCellTypesArray->InsertNextValue(VTK_VERTEX);
   anIdList->Delete();
 
-  vtkIntArray* aCellLocationsArray = vtkIntArray::New();
+  vtkIdTypeArray* aCellLocationsArray = vtkIdTypeArray::New();
   aCellLocationsArray->SetNumberOfComponents(1);
   aCellLocationsArray->SetNumberOfTuples(1);
 

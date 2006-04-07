@@ -68,7 +68,7 @@
 #include <vtkPolygon.h>
 #include <vtkConvexPointSet.h>
 #include <vtkIdList.h>
-#include <vtkIntArray.h>
+#include <vtkIdTypeArray.h>
 #include <vtkCellArray.h>
 #include <vtkUnsignedCharArray.h>
 #include <vtkUnstructuredGrid.h>
@@ -1320,7 +1320,7 @@ void SMESHGUI_CuttingOfQuadsDlg::displayPreview()
     }
   }
 
-  vtkIntArray* aCellLocationsArray = vtkIntArray::New();
+  vtkIdTypeArray* aCellLocationsArray = vtkIdTypeArray::New();
   aCellLocationsArray->SetNumberOfComponents(1);
   aCellLocationsArray->SetNumberOfTuples(aNbCells);
 

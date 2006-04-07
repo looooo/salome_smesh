@@ -39,7 +39,7 @@
 
 #include <vtkCell.h>
 #include <vtkIdList.h>
-#include <vtkIntArray.h>
+#include <vtkIdTypeArray.h>
 #include <vtkCellArray.h>
 #include <vtkUnsignedCharArray.h>
 
@@ -418,7 +418,7 @@ void SMESH_VisualObjDef::buildElemPrs()
 
   // Insert cells in grid
   
-  vtkIntArray* aCellLocationsArray = vtkIntArray::New();
+  vtkIdTypeArray* aCellLocationsArray = vtkIdTypeArray::New();
   aCellLocationsArray->SetNumberOfComponents( 1 );
   aCellLocationsArray->SetNumberOfTuples( aNbCells );
   

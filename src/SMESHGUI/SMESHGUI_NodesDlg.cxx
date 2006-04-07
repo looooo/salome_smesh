@@ -54,6 +54,7 @@
 
 #include "SVTK_Selector.h"
 #include "SVTK_ViewWindow.h"
+#include "VTKViewer_CellLocationsArray.h"
 
 #include "SALOME_Actor.h"
 #include "SALOME_ListIO.hxx"
@@ -63,7 +64,6 @@
 // VTK Includes
 #include <vtkCell.h>
 #include <vtkIdList.h>
-#include <vtkIdTypeArray.h>
 #include <vtkCellArray.h>
 #include <vtkUnsignedCharArray.h>
 #include <vtkUnstructuredGrid.h>
@@ -148,7 +148,7 @@ namespace SMESH {
       aCells->InsertNextCell(anIdList);
       aCellTypesArray->InsertNextValue(VTK_VERTEX);
 
-      vtkIdTypeArray* aCellLocationsArray = vtkIdTypeArray::New();
+      VTKViewer_CellLocationsArray* aCellLocationsArray = VTKViewer_CellLocationsArray::New();
       aCellLocationsArray->SetNumberOfComponents(1);
       aCellLocationsArray->SetNumberOfTuples(1);
 

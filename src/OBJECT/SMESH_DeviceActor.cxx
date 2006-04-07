@@ -31,6 +31,7 @@
 #include "SMESH_ExtractGeometry.h"
 #include "SMESH_ControlsDef.hxx"
 #include "SMESH_ActorUtils.h"
+#include "VTKViewer_CellLocationsArray.h"
 
 #include <VTKViewer_Transform.h>
 #include <VTKViewer_TransformFilter.h>
@@ -55,7 +56,6 @@
 
 #include <vtkCell.h>
 #include <vtkIdList.h>
-#include <vtkIdTypeArray.h>
 #include <vtkCellArray.h>
 #include <vtkUnsignedCharArray.h>
 
@@ -366,7 +366,7 @@ SMESH_DeviceActor
 	}
       }
       
-      vtkIdTypeArray* aCellLocationsArray = vtkIdTypeArray::New();
+      VTKViewer_CellLocationsArray* aCellLocationsArray = VTKViewer_CellLocationsArray::New();
       aCellLocationsArray->SetNumberOfComponents( 1 );
       aCellLocationsArray->SetNumberOfTuples( aNbCells );
       
@@ -426,7 +426,7 @@ SMESH_DeviceActor
 	}
       }
       
-      vtkIdTypeArray* aCellLocationsArray = vtkIdTypeArray::New();
+      VTKViewer_CellLocationsArray* aCellLocationsArray = VTKViewer_CellLocationsArray::New();
       aCellLocationsArray->SetNumberOfComponents( 1 );
       aCellLocationsArray->SetNumberOfTuples( aNbCells );
       
@@ -508,7 +508,7 @@ SMESH_DeviceActor
       }
     }
     
-    vtkIdTypeArray* aCellLocationsArray = vtkIdTypeArray::New();
+    VTKViewer_CellLocationsArray* aCellLocationsArray = VTKViewer_CellLocationsArray::New();
     aCellLocationsArray->SetNumberOfComponents( 1 );
     aCellLocationsArray->SetNumberOfTuples( aNbCells );
     

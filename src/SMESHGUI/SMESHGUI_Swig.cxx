@@ -331,9 +331,6 @@ SMESH_Swig::Init(int theStudyID)
     void
     Execute()
     {
-      if(SUIT_ResourceMgr* aResMgr = SMESHGUI::resourceMgr())
-	aResMgr->loadLanguage( QString::null, "en" );
-
       SUIT_Session* aSession = SUIT_Session::session();
       SUIT_Application* anApplication = aSession->activeApplication();
       SalomeApp_Application* anApp = dynamic_cast<SalomeApp_Application*>(anApplication);

@@ -680,6 +680,8 @@ module SMESH
                                    in double          MaxAspectRatio,
                                    in Smooth_Method   Method);
 
+    void ConvertToQuadratic(in boolean theForce3d);
+
     void RenumberNodes();
 
     void RenumberElements();

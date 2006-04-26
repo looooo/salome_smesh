@@ -35,6 +35,7 @@
 #include "SMESH_SequenceOfNode.hxx"
 #include "gp_Dir.hxx"
 #include "TColStd_HSequenceOfReal.hxx"
+#include "SMESH_MesherHelper.hxx"
 
 #include <list>
 #include <map>
@@ -339,6 +340,10 @@ class SMESH_MeshEditor {
   // insert theNodesToInsert into all volumes, containing link
   // theBetweenNode1 - theBetweenNode2, between theBetweenNode1 and theBetweenNode2.
 
+  void ConvertToQuadratic(const bool theForce3d);
+  //converts all mesh to quadratic one, deletes old elements, replacing 
+  //them with quadratic ones with the same id.
+
 //  static int SortQuadNodes (const SMDS_Mesh * theMesh,
 //                            int               theNodeIds[] );
 //  // Set 4 nodes of a quadrangle face in a good order.
@@ -354,6 +359,10 @@ class SMESH_MeshEditor {
                                const SMDS_MeshElement* elemInGroups,
                                SMESHDS_Mesh *          aMesh);
   // Add elemToAdd to the groups the elemInGroups belongs to
+
+  static void RemoveElemFromGroups (const SMDS_MeshElement* removeelem,
+                                    SMESHDS_Mesh *          aMesh);
+  // remove elemToAdd from the groups 
 
   static const SMDS_MeshElement*
     FindFaceInSet(const SMDS_MeshNode*                     n1,
@@ -377,10 +386,16 @@ class SMESH_MeshEditor {
   // Return an index of the shape theElem is on
   // or zero if a shape not found
 
-
   SMESH_Mesh * GetMesh() { return myMesh; }
 
   SMESHDS_Mesh * GetMeshDS() { return myMesh->GetMeshDS(); }
+private:
+
+  void ConvertElemToQuadratic(SMESHDS_SubMesh *theSm,
+                              SMESH_MesherHelper* theHelper,
+			      const bool theForce3d);
+  //Auxiliary function for "ConvertToQuadratic" is intended to convert
+  //elements contained in submesh to quadratic
 
  private:
 

@@ -954,6 +954,7 @@ int SMESH_MeshEditor::BestSplit (const SMDS_MeshElement*              theQuad,
   return -1;
 }
 
+
 //=======================================================================
 //function : AddToSameGroups
 //purpose  : add elemToAdd to the groups the elemInGroups belongs to
@@ -972,6 +973,25 @@ void SMESH_MeshEditor::AddToSameGroups (const SMDS_MeshElement* elemToAdd,
   }
 }
 
+//=======================================================================
+//function : RemoveElemFromGroups
+//purpose  : Remove removeelem to the groups the elemInGroups belongs to
+//=======================================================================
+void SMESH_MeshEditor::RemoveElemFromGroups (const SMDS_MeshElement* removeelem,
+                                             SMESHDS_Mesh *          aMesh)
+{
+  const set<SMESHDS_GroupBase*>& groups = aMesh->GetGroups();
+  if (!groups.empty()) 
+  {
+    set<SMESHDS_GroupBase*>::const_iterator GrIt = groups.begin();
+    for (; GrIt != groups.end(); GrIt++) 
+    {
+      SMESHDS_Group* grp = dynamic_cast<SMESHDS_Group*>(*GrIt);
+      if (!grp || grp->IsEmpty()) continue;
+      grp->SMDSGroup().Remove(removeelem);
+    }
+  }
+}
 //=======================================================================
 //function : QuadToTri
 //purpose  : Cut quadrangles into triangles.
@@ -5796,6 +5816,211 @@ void SMESH_MeshEditor::UpdateVolumes (const SMDS_MeshNode*        theBetweenNode
       aMesh->RemoveElement(elem);
     }
   }
+}
+
+//=======================================================================
+//function : ConvertElemToQuadratic
+//purpose  :
+//=======================================================================
+void SMESH_MeshEditor::ConvertElemToQuadratic(SMESHDS_SubMesh *theSm,
+                                              SMESH_MesherHelper* theHelper,
+					      const bool theForce3d)
+{
+  if( !theSm ) return;
+  SMESHDS_Mesh* meshDS = GetMeshDS();
+  SMDS_ElemIteratorPtr ElemItr = theSm->GetElements();
+  while(ElemItr->more())
+  {
+    const SMDS_MeshElement* elem = ElemItr->next();
+    if( !elem ) continue;
+
+    int id = elem->GetID();
+    int nbNodes = elem->NbNodes();
+    vector<const SMDS_MeshNode *> aNds (nbNodes);
+    
+    for(int i = 0; i < nbNodes; i++)
+    {
+      aNds[i] = elem->GetNode(i);
+    }
+
+    SMDSAbs_ElementType aType = elem->GetType();
+
+    switch( aType )
+    {
+    case SMDSAbs_Edge :
+    {
+      meshDS->RemoveFreeElement(elem, theSm);	
+      const SMDS_QuadraticEdge* NewEdge = theHelper->AddQuadraticEdge(aNds[0], aNds[1], id, theForce3d);
+      AddToSameGroups(NewEdge, elem, meshDS);
+      break;
+    }
+    case SMDSAbs_Face :
+    {
+      if(elem->IsQuadratic()) continue;
+
+      meshDS->RemoveFreeElement(elem, theSm);
+      SMDS_MeshFace * NewFace = 0;
+      switch(nbNodes)
+      {
+      case 3:
+	NewFace = theHelper->AddFace(aNds[0], aNds[1], aNds[2], id, theForce3d);
+	break;
+      case 4:
+	NewFace = theHelper->AddFace(aNds[0], aNds[1], aNds[2], aNds[3], id, theForce3d);
+	break;
+      default:
+	continue;
+      }
+      AddToSameGroups(NewFace, elem, meshDS);
+      break;  
+    }
+    case SMDSAbs_Volume :
+    {
+      if( elem->IsQuadratic() ) continue;
+
+      meshDS->RemoveFreeElement(elem, theSm);
+      SMDS_MeshVolume * NewVolume = 0;
+      switch(nbNodes)
+      {
+      case 4:
+	NewVolume = theHelper->AddVolume(aNds[0], aNds[1], aNds[2], aNds[3], id, true);
+	break;
+      case 6:
+	NewVolume = theHelper->AddVolume(aNds[0], aNds[1], aNds[2], aNds[3], aNds[4], aNds[5], id, true);
+	break;
+      case 8:
+	NewVolume = theHelper->AddVolume(aNds[0], aNds[1], aNds[2], aNds[3],
+					 aNds[4], aNds[5], aNds[6], aNds[7], id, true);
+	break;
+      default:
+	continue;
+      }
+      AddToSameGroups(NewVolume, elem, meshDS);
+      break;  
+    }
+    default :
+      continue;
+    }
+  }
+}
+
+//=======================================================================
+//function : ConvertToQuadratic
+//purpose  :
+//=======================================================================
+void SMESH_MeshEditor::ConvertToQuadratic(const bool theForce3d)
+{
+  SMESHDS_Mesh* meshDS = GetMeshDS();
+
+  SMESH_MesherHelper* aHelper = new SMESH_MesherHelper(*myMesh);
+  const TopoDS_Shape& aShape = meshDS->ShapeToMesh();
+
+  if ( !aShape.IsNull() && GetMesh()->GetSubMeshContaining(aShape) )
+  {
+    SMESH_subMesh *aSubMesh = GetMesh()->GetSubMeshContaining(aShape);
+    
+    const map < int, SMESH_subMesh * >& aMapSM = aSubMesh->DependsOn();
+    map < int, SMESH_subMesh * >::const_iterator itsub;
+    for (itsub = aMapSM.begin(); itsub != aMapSM.end(); itsub++)
+    {
+      SMESHDS_SubMesh *sm = ((*itsub).second)->GetSubMeshDS();
+      aHelper->SetSubShape( (*itsub).second->GetSubShape() );
+      ConvertElemToQuadratic(sm, aHelper, theForce3d);
+    }
+    aHelper->SetSubShape( aSubMesh->GetSubShape() );
+    ConvertElemToQuadratic(aSubMesh->GetSubMeshDS(), aHelper, theForce3d);
+  }
+  else
+  {
+    SMDS_EdgeIteratorPtr aEdgeItr = meshDS->edgesIterator();
+    while(aEdgeItr->more())
+    {
+      const SMDS_MeshEdge* edge = aEdgeItr->next();
+      if(edge)
+      {
+	int id = edge->GetID();
+	const SMDS_MeshNode* n1 = edge->GetNode(0);
+	const SMDS_MeshNode* n2 = edge->GetNode(1);
+
+	RemoveElemFromGroups (edge, meshDS);
+	meshDS->SMDS_Mesh::RemoveFreeElement(edge);
+
+        const SMDS_QuadraticEdge* NewEdge = aHelper->AddQuadraticEdge(n1, n2, id, theForce3d);
+        AddToSameGroups(NewEdge, edge, meshDS);
+      }
+    }
+    SMDS_FaceIteratorPtr aFaceItr = meshDS->facesIterator();
+    while(aFaceItr->more())
+    {
+      const SMDS_MeshFace* face = aFaceItr->next();
+      if(!face || face->IsQuadratic() ) continue;
+      
+      int id = face->GetID();
+      int nbNodes = face->NbNodes();
+      vector<const SMDS_MeshNode *> aNds (nbNodes);
+
+      for(int i = 0; i < nbNodes; i++)
+      {
+	aNds[i] = face->GetNode(i);
+      }
+
+      RemoveElemFromGroups (face, meshDS); 
+      meshDS->SMDS_Mesh::RemoveFreeElement(face);
+
+      SMDS_MeshFace * NewFace = 0;
+      switch(nbNodes)
+      {
+      case 3:
+	NewFace = aHelper->AddFace(aNds[0], aNds[1], aNds[2], id, theForce3d);
+	break;
+      case 4:
+	NewFace = aHelper->AddFace(aNds[0], aNds[1], aNds[2], aNds[3], id, theForce3d);
+	break;
+      default:
+	continue;
+      }
+      AddToSameGroups(NewFace, face, meshDS);
+    }
+    SMDS_VolumeIteratorPtr aVolumeItr = meshDS->volumesIterator();
+    while(aVolumeItr->more())
+    {
+      const SMDS_MeshVolume* volume = aVolumeItr->next();
+      if(!volume || volume->IsQuadratic() ) continue;
+      
+      int id = volume->GetID();
+      int nbNodes = volume->NbNodes();
+      vector<const SMDS_MeshNode *> aNds (nbNodes);
+
+      for(int i = 0; i < nbNodes; i++)
+      {
+	aNds[i] = volume->GetNode(i);
+      }
+
+      RemoveElemFromGroups (volume, meshDS);
+      meshDS->SMDS_Mesh::RemoveFreeElement(volume);
+
+      SMDS_MeshVolume * NewVolume = 0;
+      switch(nbNodes)
+      {
+      case 4:
+	NewVolume = aHelper->AddVolume(aNds[0], aNds[1], aNds[2],
+                                       aNds[3], id, true );
+	break;
+      case 6:
+	NewVolume = aHelper->AddVolume(aNds[0], aNds[1], aNds[2],
+                                       aNds[3], aNds[4], aNds[5], id, true);
+	break;
+      case 8:
+	NewVolume = aHelper->AddVolume(aNds[0], aNds[1], aNds[2], aNds[3],
+				       aNds[4], aNds[5], aNds[6], aNds[7], id, true);
+	break;
+      default:
+	continue;
+      }
+      AddToSameGroups(NewVolume, volume, meshDS);
+    }
+  }
+  delete aHelper;
 }
 
 //=======================================================================

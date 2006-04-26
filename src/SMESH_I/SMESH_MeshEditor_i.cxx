@@ -1731,3 +1731,17 @@ SMESH_MeshEditor_i::SewSideElements(const SMESH::long_array& IDsOfSide1Elements,
                                               aSecondNode1ToMerge,
                                               aSecondNode2ToMerge));
 }
+
+//=======================================================================
+//function : ConvertToQuadratic
+//purpose  :
+//=======================================================================
+
+void SMESH_MeshEditor_i::ConvertToQuadratic(CORBA::Boolean theForce3d)
+{
+  ::SMESH_MeshEditor anEditor( _myMesh );
+  anEditor.ConvertToQuadratic(theForce3d);
+ // Update Python script
+  TPythonDump() << this << ".ConvertToQuadratic( "
+                << theForce3d << ") ";
+}

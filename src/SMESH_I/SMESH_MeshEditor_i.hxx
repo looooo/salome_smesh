@@ -116,6 +116,9 @@ class SMESH_MeshEditor_i: public POA_SMESH::SMESH_MeshEditor
 			      SMESH::SMESH_MeshEditor::Smooth_Method Method,
                               bool                                   IsParametric);
 
+
+  void ConvertToQuadratic(CORBA::Boolean Force3d);
+
   void RenumberNodes();
   void RenumberElements();
 

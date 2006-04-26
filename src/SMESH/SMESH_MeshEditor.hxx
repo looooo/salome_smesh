@@ -344,6 +344,11 @@ class SMESH_MeshEditor {
   //converts all mesh to quadratic one, deletes old elements, replacing 
   //them with quadratic ones with the same id.
 
+  bool ConvertFromQuadratic();
+  //converts all mesh from quadratic to ordinary ones, deletes old quadratic elements, replacing 
+  //them with ordinary mesh elements with the same id.
+
+
 //  static int SortQuadNodes (const SMDS_Mesh * theMesh,
 //                            int               theNodeIds[] );
 //  // Set 4 nodes of a quadrangle face in a good order.

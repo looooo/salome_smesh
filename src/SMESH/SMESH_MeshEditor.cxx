@@ -6029,54 +6029,6 @@ void SMESH_MeshEditor::ConvertToQuadratic(const bool theForce3d)
 //=======================================================================
 bool  SMESH_MeshEditor::ConvertFromQuadratic()
 {
-  SMESHDS_Mesh* meshDS = GetMeshDS();
-  SMDS_ElemIteratorPtr aElemItr = meshDS->elementsIterator();
-  while(aElemItr->more())
-  {
-    const SMDS_MeshElement* elem = aElemItr->next();
-    if(elem)
-    {
-      if(!elem->IsQuadratic())
-        continue;
-      
-      int id = elem->GetID();
-
-      int nbNodes = elem->NbNodes();
-      vector<const SMDS_MeshNode *> aNds (nbNodes);
-
-      for(int i = 0; i < nbNodes; i++)
-      {
-	const SMDS_MeshNode* n = elem->GetNode(i);
-	if( elem->IsMediumNode( n ) )
-	  meshDS->SMDS_Mesh::RemoveFreeElement( n );	
-	else 
-	  aNds[i] = n;
-      }
-
-      SMDSAbs_ElementType aType = elem->GetType();      
-      RemoveElemFromGroups (elem, meshDS);
-      meshDS->SMDS_Mesh::RemoveFreeElement(elem);
-
-      SMDS_MeshElement * NewElem = 0;
-      switch(aType)
-      {
-        case SMDSAbs_Edge:
-	  NewElem = meshDS->AddEdgeWithID( ,id );
-	  break;
-	case SMDSAbs_Face:
-	  if( nbNds==3 )NewElem = meshDS->AddFaceWithID( ,id );
-	  if( nbNds==4 )NewElem = meshDS->AddFaceWithID( ,id );
-	  break;
-	case SMDSAbs_Volume:
-	  break;
-	default:
-	  break;
-      }
-
-      AddToSameGroups(NewElem, elem, meshDS);
-    }
-  }
-  return true;
 }
 
 //=======================================================================

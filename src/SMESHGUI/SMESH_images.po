@@ -368,3 +368,6 @@ msgstr "mesh_pattern.png"
 
 msgid "ICON_FILE_OPEN"
 msgstr "open.png"
+
+msgid "ICON_CONV_TO_QUAD"
+msgstr "mesh_conv_to_quad.png"

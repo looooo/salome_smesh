@@ -62,6 +62,7 @@
 #include "SMESHGUI_MeshPatternDlg.h"
 #include "SMESHGUI_Selection.h"
 #include "SMESHGUI_CreatePolyhedralVolumeDlg.h"
+#include "SMESHGUI_ConvToQuadOp.h"
 #include "SMESHGUI_MeshOp.h"
 #include "SMESHGUI_Displayer.h"
 
@@ -1497,6 +1498,20 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
       }
       break;
     }
+  case 417: // Convert mesh to quadratic
+    {
+    startOperation( 417 );
+      /*      if (checkLock(aStudy)) break;
+      if (vtkwnd) {
+	EmitSignalDeactivateDialog();
+	new SMESHGUI_ConvToQuadDlg();
+      } else {
+	SUIT_MessageBox::warn1(desktop(),
+                               tr("SMESH_WRN_WARNING"), tr("SMESH_WRN_VIEWER_VTK"),
+                               tr("SMESH_BUT_OK"));
+			       }*/
+      break;
+    }
   case 801:                                     // CREATE GROUP
     {
       if ( !vtkwnd )
@@ -2355,6 +2370,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   createSMESHAction(  414, "REVOLUTION",      "ICON_REVOLUTION" );
   createSMESHAction(  415, "MAP",             "ICON_MAP" );
   createSMESHAction(  416, "EXTRUSION_ALONG", "ICON_EXTRUSION_ALONG" );
+  createSMESHAction(  417, "CONV_TO_QUAD",    "ICON_CONV_TO_QUAD" );
   createSMESHAction(  200, "RESET" );
   createSMESHAction(  201, "SCALAR_BAR_PROP" );
   createSMESHAction(  211, "WIRE",           "ICON_WIRE", 0, true );
@@ -2501,6 +2517,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   createMenu( 416, modifyId, -1 );
   createMenu( 414, modifyId, -1 );
   createMenu( 415, modifyId, -1 );
+  createMenu( 417, modifyId, -1 );
 
   createMenu( 214, viewId, -1 );
 
@@ -2585,6 +2602,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   createTool( 416, modifyTb );
   createTool( 414, modifyTb );
   createTool( 415, modifyTb );
+  createTool( 417, modifyTb );
 
   createTool( 214, dispModeTb );
 
@@ -3230,6 +3248,9 @@ LightApp_Operation* SMESHGUI::createOperation( const int id ) const
     break;
     case 704: // Edit mesh/sub-mesh
       op = new SMESHGUI_MeshOp( false );
+    break;
+    case 417: //convert to quadratic
+      op = new SMESHGUI_ConvToQuadOp();
     break;
     default:
     break;

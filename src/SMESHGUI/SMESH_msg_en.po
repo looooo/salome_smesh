@@ -2215,6 +2215,9 @@ msgstr "Revolution"
 msgid "MEN_MAP"
 msgstr "Pattern mapping"
 
+msgid "MEN_CONV_TO_QUAD"
+msgstr "Convert to quadratic"
+
 msgid "MEN_EXTRUSION_ALONG"
 msgstr "Extrusion along a path"
 
@@ -2565,6 +2568,9 @@ msgstr "Revolution"
 msgid "TOP_MAP"
 msgstr "Pattern mapping"
 
+msgid "TOP_CONV_TO_QUAD"
+msgstr "Convert to quadratic"
+
 msgid "TOP_EXTRUSION_ALONG"
 msgstr "Extrusion along a path"
 
@@ -2866,6 +2872,9 @@ msgstr "Revolution"
 msgid "STB_MAP"
 msgstr "Pattern mapping"
 
+msgid "STB_CONV_TO_QUAD"
+msgstr "Convert to quadratic"
+
 msgid "STB_EXTRUSION_ALONG"
 msgstr "Extrusion along a path"
 
@@ -3163,3 +3172,21 @@ msgstr "Geometry object is not a subshape of the shape to mesh"
 
 msgid "SMESHGUI_MeshOp::MESH_IS_NOT_DEFINED"
 msgstr "Mesh is not defined\nPlease specify it and try again"
+
+
+#-----------------------------------------------------------
+
+msgid "SMESHGUI_ConvToQuadDlg::CAPTION"
+msgstr "Convert to quadratic"
+
+msgid "SMESHGUI_ConvToQuadDlg::MESH"
+msgstr "Mesh"
+
+msgid "SMESHGUI_ConvToQuadDlg::MEDIUMNDS"
+msgstr "Medium nodes on geometry"
+
+msgid "SMESHGUI_ConvToQuadOp::MESH_IS_NOT_SELECTED"
+msgstr "Mesh is not selected\nPlease specify it and try again"
+
+msgid "SMESHGUI_ConvToQuadOp::REF_IS_NULL"
+msgstr "No valid mesh object selected"

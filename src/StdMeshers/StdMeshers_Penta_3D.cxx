@@ -108,7 +108,7 @@ bool StdMeshers_Penta_3D::Compute(SMESH_Mesh& aMesh,
     return bOK;
   }
 
-  myTool = new StdMeshers_Helper(aMesh);
+  myTool = new SMESH_MesherHelper(aMesh);
   myCreateQuadratic = myTool->IsQuadraticSubMesh(aShape);
 
   //

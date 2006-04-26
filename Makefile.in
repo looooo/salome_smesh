@@ -139,7 +139,8 @@ mesh_quad_quadrangle.png \
 mesh_quad_tetrahedron.png \
 mesh_quad_pyramid.png \
 mesh_quad_pentahedron.png \
-mesh_quad_hexahedron.png
+mesh_quad_hexahedron.png \
+mesh_conv_to_quad.png
 
 BIN_SCRIPT= \
 VERSION

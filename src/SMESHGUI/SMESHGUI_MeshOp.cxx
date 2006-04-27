@@ -231,6 +231,8 @@ void SMESHGUI_MeshOp::startOperation()
     aTab->setAvailableHyps( AddHyp, hypList );
     aTab->setExistingHyps( MainHyp, hypList );
     aTab->setExistingHyps( AddHyp, hypList );
+    myExistingHyps[ i ][ MainHyp ].clear();
+    myExistingHyps[ i ][ AddHyp ].clear();
     // set algos
     availableHyps( i, Algo, hypList, myAvailableHypData[i][Algo] );
     aTab->setAvailableHyps( Algo, hypList );
@@ -357,6 +359,7 @@ _PTR(SObject) SMESHGUI_MeshOp::getSubmeshByGeom() const
       case GEOM::COMPOUND: tag = SUBMESH_ON_COMPOUND_TAG; break;
       default:;
       }
+      _PTR(GenericAttribute) anAttr;
       _PTR(SObject) aSubmeshRoot;
       _PTR(Study) aStudy = SMESH::GetActiveStudyDocument();
       if ( pMesh->FindSubObject( tag, aSubmeshRoot ) )
@@ -365,6 +368,8 @@ _PTR(SObject) SMESHGUI_MeshOp::getSubmeshByGeom() const
         for (; smIter->More(); smIter->Next() )
         {
           _PTR(SObject) aSmObj = smIter->Value();
+          if ( ! aSmObj->FindAttribute( anAttr, "AttributeIOR" ))
+            continue;
           _PTR(ChildIterator) anIter1 = aStudy->NewChildIterator(aSmObj);
           for (; anIter1->More(); anIter1->Next()) {
             _PTR(SObject) pGeom2 = anIter1->Value();
@@ -435,6 +440,7 @@ void SMESHGUI_MeshOp::selectionDone()
       }
     }
     myDlg->setMaxHypoDim( shapeDim );
+
 
     if ( !myToCreate ) // edition: read hypotheses
     {
@@ -1026,10 +1032,7 @@ void SMESHGUI_MeshOp::onAlgoSelected( const int theIndex,
 
   // set hypotheses corresponding to the found algoritms
 
-  //QString anObjEntry = myDlg->selectedObject( SMESHGUI_MeshDlg::Obj );
-  _PTR(SObject) pObj;// = studyDS()->FindObjectID( anObjEntry.latin1() );
-  if ( !pObj )
-    pObj = SMESH::GetActiveStudyDocument()->FindComponent("SMESH");
+  _PTR(SObject) pObj = SMESH::GetActiveStudyDocument()->FindComponent("SMESH");
 
   for ( int dim = SMESH::DIM_1D; dim <= SMESH::DIM_3D; dim++ )
   {
@@ -1039,17 +1042,38 @@ void SMESHGUI_MeshOp::onAlgoSelected( const int theIndex,
     {
       myAvailableHypData[ dim ][ type ].clear();
       QStringList anAvailable, anExisting;
-      SMESH::SMESH_Hypothesis_var curHyp;
 
+      HypothesisData* curAlgo = algoByDim[ dim ];
+      int hypIndex = currentHyp( dim, type );
+
+      SMESH::SMESH_Hypothesis_var curHyp;
+      if ( hypIndex >= 0 && hypIndex < myExistingHyps[ dim ][ type ].count() )
+        curHyp = myExistingHyps[ dim ][ type ][ hypIndex ];
+
+      if ( !myToCreate && !curAlgo && !curHyp->_is_nil() ) { // edition, algo not selected
+        // try to find algo by selected hypothesis in order to keep it selected
+        bool algoDeselectedByUser = ( theDim < 0 && aDim == dim );
+        QString curHypType = curHyp->GetName();
+        if ( !algoDeselectedByUser &&
+             myObjHyps[ dim ][ type ].count() > 0 &&
+             curHypType == myObjHyps[ dim ][ type ][ 0 ]->GetName())
+        {
+          HypothesisData* hypData = SMESH::GetHypothesisData( curHyp->GetName() );
+          for ( int i = 0 ; i < myAvailableHypData[ dim ][ Algo ].count(); ++i ) {
+            curAlgo = myAvailableHypData[ dim ][ Algo ][ i ];
+            if ( curAlgo && hypData && isCompatible( curAlgo, hypData, type ))
+              break;
+            else
+              curAlgo = 0;
+          }
+        }
+      }
       // get hyps compatible with curAlgo
-      if ( HypothesisData* curAlgo = algoByDim[ dim ] )
+      if ( curAlgo )
       {
-        // get current existing hypothesis
-        int hypIndex = currentHyp( dim, type );
-        if ( hypIndex >= 0 && hypIndex < myExistingHyps[ dim ][ type ].count() ) {
-          curHyp = myExistingHyps[ dim ][ type ][ hypIndex ];
-          QString hypTypeName = curHyp->GetName();
-          HypothesisData* hypData = SMESH::GetHypothesisData( hypTypeName );
+        // check if a selected hyp is compatible with the curAlgo
+        if ( !curHyp->_is_nil() ) {
+          HypothesisData* hypData = SMESH::GetHypothesisData( curHyp->GetName() );
           if ( !isCompatible( curAlgo, hypData, type ))
             curHyp = SMESH::SMESH_Hypothesis::_nil();
         }
@@ -1061,9 +1085,10 @@ void SMESHGUI_MeshOp::onAlgoSelected( const int theIndex,
       myDlg->tab( dim )->setExistingHyps( type, anExisting );
 
       // set current existing hypothesis
-      int hypIndex = -1;
       if ( !curHyp->_is_nil() && !anExisting.isEmpty() )
         hypIndex = this->find( curHyp, myExistingHyps[ dim ][ type ]);
+      else
+        hypIndex = -1;
       if ( !isSubmesh && hypIndex < 0 && anExisting.count() == 1 ) {
         // none is yet selected => select the sole existing if it is not optional
         QString hypTypeName = myExistingHyps[ dim ][ type ][ 0 ]->GetName();
@@ -1434,15 +1459,15 @@ void SMESHGUI_MeshOp::readMesh()
   }
 
   // Get hypotheses and algorithms assigned to the mesh/sub-mesh
+  QStringList anExisting;
   for ( int dim = SMESH::DIM_1D; dim <= SMESH::DIM_3D; dim++ )
   {
     // get algorithm
-    QStringList anExisting;
-    int aHypIndex = -1;
     existingHyps( dim, Algo, pObj, anExisting, myObjHyps[ dim ][ Algo ] );
+    // find algo index among available ones
+    int aHypIndex = -1;
     if ( myObjHyps[ dim ][ Algo ].count() > 0 )
     {
-      // find algo index among available ones
       SMESH::SMESH_Hypothesis_var aVar = myObjHyps[ dim ][ Algo ].first();
       QString aHypTypeName = aVar->GetName();
       HypothesisData* algoData = SMESH::GetHypothesisData( aHypTypeName );
@@ -1456,8 +1481,12 @@ void SMESHGUI_MeshOp::readMesh()
     setCurrentHyp( dim, Algo, aHypIndex );
     // set existing and available hypothesis according to the selected algo
     onAlgoSelected( aHypIndex, dim );
+  }
 
-    // get hypotheses
+  // get hypotheses
+  bool hypWithoutAlgo = false;
+  for ( int dim = SMESH::DIM_1D; dim <= SMESH::DIM_3D; dim++ )
+  {
     for ( int hypType = MainHyp; hypType <= AddHyp; hypType++ )
     {
       // get hypotheses
@@ -1467,15 +1496,23 @@ void SMESHGUI_MeshOp::readMesh()
       if ( myObjHyps[ dim ][ hypType ].count() > 0 ) {
         aHypIndex = find( myObjHyps[ dim ][ hypType ].first(),
                           myExistingHyps[ dim ][ hypType ] );
-//         if ( aHypIndex < 0 ) {
-//           // assigned hypothesis is incompatible with the algorithm
-//           myExistingHyps[ dim ][ hypType ].push_back( myObjHyps[ dim ][ hypType ].first() );
-//           aHypIndex = myExistingHyps[ dim ][ hypType ].count() - 1;
-//         }
+        if ( aHypIndex < 0 ) {
+          // assigned hypothesis is incompatible with the algorithm
+          if ( currentHyp( dim, Algo ) < 0 )
+          { // none algo selected; it is edition for sure, of submesh maybe
+            hypWithoutAlgo = true;
+            myExistingHyps[ dim ][ hypType ].push_back( myObjHyps[ dim ][ hypType ].first() );
+            aHypIndex = myExistingHyps[ dim ][ hypType ].count() - 1;
+            myDlg->tab( dim )->setExistingHyps( hypType, anExisting );
+          }
+        }
       }
       setCurrentHyp( dim, hypType, aHypIndex );
     }
   }
+  // make available other hyps of same type as one without algo
+  if ( hypWithoutAlgo )
+    onAlgoSelected( currentHyp( 0, Algo ), 0 );
 }
 
 //================================================================================

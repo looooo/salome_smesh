@@ -756,6 +756,10 @@ TCollection_AsciiString SMESH_Gen_i::DumpPython_impl
   for (int ir = 1; ir <= seqRemoved.Length(); ir++) {
     anUpdatedScript += "\n\tSO = theStudy.FindObjectIOR(theStudy.ConvertObjectToIOR(";
     anUpdatedScript += seqRemoved.Value(ir);
+    // for object wrapped by class of smesh.py
+    anEntry = theObjectNames( seqRemoved.Value(ir) );
+    if ( anEntry2AccessorMethod.IsBound( anEntry ) )
+      anUpdatedScript += helper + "." + anEntry2AccessorMethod( anEntry );
     anUpdatedScript += "))\n\tif SO is not None: aStudyBuilder.RemoveObjectWithChildren(SO)";
   }
 

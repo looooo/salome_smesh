@@ -1898,7 +1898,7 @@ msgid "SMESHGUI_AddQuadraticElementDlg::SMESH_ADD_QUADRATIC_TETRAHEDRON"
 msgstr "Add Quadratic Tetrahedron"
 
 msgid "SMESHGUI_AddQuadraticElementDlg::SMESH_ADD_QUADRATIC_PYRAMID"
-msgstr "Add Quadratic PYRAMID"
+msgstr "Add Quadratic Pyramid"
 
 msgid "SMESHGUI_AddQuadraticElementDlg::SMESH_ADD_QUADRATIC_PENTAHEDRON"
 msgstr "Add Quadratic Pentahedron"

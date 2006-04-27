@@ -383,6 +383,37 @@ class Mesh_Hexahedron(Mesh_Algorithm):
         """
         self.Create(mesh, geom, "Hexa_3D")
 
+# Public class: Mesh_Netgen
+# ------------------------------
+
+class Mesh_Netgen(Mesh_Algorithm):
+    """
+    Class to define a NETGEN-based 2D or 3D algorithm
+    that need no discrete boundary (i.e. independent)
+    """
+
+    is3D = 0
+
+    def __init__(self, mesh, is3D, geom=0):
+        """
+         Private constructor
+        """
+        self.is3D = is3D
+        if is3D:
+            self.Create(mesh, geom, "NETGEN_2D3D", "libNETGENEngine.so")
+        else:
+            self.Create(mesh, geom, "NETGEN_2D", "libNETGENEngine.so")
+
+    def Parameters(self):
+        """
+         Define hypothesis containing parameters of the algorithm
+        """
+        if self.is3D:
+            hyp = self.Hypothesis("NETGEN_Parameters", [], "libNETGENEngine.so")
+        else:
+            hyp = self.Hypothesis("NETGEN_Parameters_2D", [], "libNETGENEngine.so")
+        return hyp
+
 # Public class: Mesh
 # ==================
 
@@ -498,6 +529,17 @@ class Mesh:
          \param geom If defined, subshape to be meshed
         """
         return Mesh_Hexahedron(self, geom)
+
+    def Netgen(self, is3D, geom=0):
+        """
+         Creates a NETGEN-based 2D or 3D independent algorithm (i.e. needs no
+         discrete boundary).
+         If the optional \a geom parameter is not sets, this algorithm is global.
+         Otherwise, this algorithm defines a submesh based on \a geom subshape.
+         \param is3D If 0 then algorithm is 2D, otherwise 3D
+         \param geom If defined, subshape to be meshed
+        """
+        return Mesh_Netgen(self, is3D, geom)
 
     def Compute(self):
         """

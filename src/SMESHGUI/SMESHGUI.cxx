@@ -2098,7 +2098,7 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
     if (!myFilterLibraryDlg)
       myFilterLibraryDlg = new SMESHGUI_FilterLibraryDlg( this, SMESH::GetDesktop( this ), aTypes, SMESHGUI_FilterLibraryDlg::EDIT );
     else if (myFilterLibraryDlg->isHidden())
-      myFilterLibraryDlg->show();
+      myFilterLibraryDlg->Init( aTypes, SMESHGUI_FilterLibraryDlg::EDIT );
     myFilterLibraryDlg->raise();
   }
   break;

@@ -46,8 +46,9 @@ using namespace std;
 //purpose  : 
 //=======================================================================
 SMESHDS_Mesh::SMESHDS_Mesh(int theMeshID, bool theIsEmbeddedMode):
+  myMeshID(theMeshID),
   myIsEmbeddedMode(theIsEmbeddedMode),
-  myMeshID(theMeshID)
+  myCurSubID(-1)
 {
   myScript = new SMESHDS_Script(theIsEmbeddedMode);
 }

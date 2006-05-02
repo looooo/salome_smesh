@@ -182,8 +182,7 @@ class SMESH_MesherHelper
   void SetKeyIsQuadratic(const bool theKey)
     {myCreateQuadratic = theKey;};
 
-  void SetSubShape(const TopoDS_Shape& subShape)
-    {myShape = subShape;};
+  void SetSubShape(const TopoDS_Shape& subShape);
 
  protected:
 

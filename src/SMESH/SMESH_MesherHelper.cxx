@@ -7,7 +7,7 @@
 #include "SMESH_MesherHelper.hxx"
 
 #include "SMDS_FacePosition.hxx" 
-#include "SMDS_EdgePosition.hxx".cxx
+#include "SMDS_EdgePosition.hxx"
 #include "SMESH_MeshEditor.hxx"
 
 #include <BRepAdaptor_Surface.hxx>
@@ -77,41 +77,58 @@ bool SMESH_MesherHelper::IsQuadraticSubMesh(const TopoDS_Shape& aSh)
     myNLinkNodeMap.clear();
   }
   else {
-    // treatment of periodic faces
-    if ( aSh.ShapeType() == TopAbs_FACE ) {
-      const TopoDS_Face& face = TopoDS::Face( aSh );
-      BRepAdaptor_Surface surface( face );
-      if ( surface.IsUPeriodic() || surface.IsVPeriodic() ) {
-        // look for a seam edge
-        for ( exp.Init( face, TopAbs_EDGE ); exp.More(); exp.Next()) {
-          const TopoDS_Edge& edge = TopoDS::Edge( exp.Current() );
-          if ( BRep_Tool::IsClosed( edge, face )) {
-            // initialize myPar1, myPar2 and myParIndex
-            if ( mySeamShapeIds.empty() ) {
-              gp_Pnt2d uv1, uv2;
-              BRep_Tool::UVPoints( edge, face, uv1, uv2 );
-              if ( Abs( uv1.Coord(1) - uv2.Coord(1) ) < Abs( uv1.Coord(2) - uv2.Coord(2) ))
-              {
-                myParIndex = 1; // U periodic
-                myPar1 = surface.FirstUParameter();
-                myPar2 = surface.LastUParameter();
-              }
-              else {
-                myParIndex = 2;  // V periodic
-                myPar1 = surface.FirstVParameter();
-                myPar2 = surface.LastVParameter();
-              }
+    SetSubShape( aSh );
+  }
+  return myCreateQuadratic;
+}
+
+//================================================================================
+/*!
+ * \brief Set geomerty to make elements on
+  * \param aSh - geomertic shape
+ */
+//================================================================================
+
+void SMESH_MesherHelper::SetSubShape(const TopoDS_Shape& aSh)
+{
+  myShape = aSh;
+
+  // treatment of periodic faces
+  if ( aSh.ShapeType() == TopAbs_FACE )
+  {
+    const TopoDS_Face& face = TopoDS::Face( aSh );
+    BRepAdaptor_Surface surface( face );
+    if ( surface.IsUPeriodic() || surface.IsVPeriodic() )
+    {
+      SMESHDS_Mesh* meshDS = GetMesh()->GetMeshDS();
+      // look for a seam edge
+      for ( TopExp_Explorer exp( face, TopAbs_EDGE ); exp.More(); exp.Next()) {
+        const TopoDS_Edge& edge = TopoDS::Edge( exp.Current() );
+        if ( BRep_Tool::IsClosed( edge, face )) {
+          // initialize myPar1, myPar2 and myParIndex
+          if ( mySeamShapeIds.empty() ) {
+            gp_Pnt2d uv1, uv2;
+            BRep_Tool::UVPoints( edge, face, uv1, uv2 );
+            if ( Abs( uv1.Coord(1) - uv2.Coord(1) ) < Abs( uv1.Coord(2) - uv2.Coord(2) ))
+            {
+              myParIndex = 1; // U periodic
+              myPar1 = surface.FirstUParameter();
+              myPar2 = surface.LastUParameter();
             }
-            // store shapes indices
-            mySeamShapeIds.insert( meshDS->ShapeToIndex( exp.Current() ));
-            for ( TopExp_Explorer v( exp.Current(), TopAbs_VERTEX ); v.More(); v.Next() )
-              mySeamShapeIds.insert( meshDS->ShapeToIndex( v.Current() ));
+            else {
+              myParIndex = 2;  // V periodic
+              myPar1 = surface.FirstVParameter();
+              myPar2 = surface.LastVParameter();
+            }
           }
+          // store shapes indices
+          mySeamShapeIds.insert( meshDS->ShapeToIndex( exp.Current() ));
+          for ( TopExp_Explorer v( exp.Current(), TopAbs_VERTEX ); v.More(); v.Next() )
+            mySeamShapeIds.insert( meshDS->ShapeToIndex( v.Current() ));
         }
       }
     }
   }
-  return myCreateQuadratic;
 }
 
 
@@ -257,8 +274,8 @@ const SMDS_MeshNode* SMESH_MesherHelper::GetMediumNode(const SMDS_MeshNode* n1,
                                                        const SMDS_MeshNode* n2,
                                                        bool force3d)
 {
-//cout<<"n1: "<<n1;
-//cout<<"n2: "<<n2;
+  TopAbs_ShapeEnum shapeType = myShape.IsNull() ? TopAbs_SHAPE : myShape.ShapeType();
+
   NLink link(( n1 < n2 ? n1 : n2 ), ( n1 < n2 ? n2 : n1 ));
   ItNLinkNode itLN = myNLinkNodeMap.find( link );
   if ( itLN != myNLinkNodeMap.end() ) {
@@ -292,7 +309,7 @@ const SMDS_MeshNode* SMESH_MesherHelper::GetMediumNode(const SMDS_MeshNode* n1,
     if(!force3d) {
       // we try to create medium node using UV parameters of
       // nodes, else - medium between corresponding 3d points
-      if(faceID>-1 || myShape.ShapeType() == TopAbs_FACE) {
+      if(faceID>-1 || shapeType == TopAbs_FACE) {
 	// obtaining a face and 2d points for nodes
 	TopoDS_Face F;
 	if( myShape.IsNull() )
@@ -335,7 +352,7 @@ const SMDS_MeshNode* SMESH_MesherHelper::GetMediumNode(const SMDS_MeshNode* n1,
         myNLinkNodeMap.insert(NLinkNodeMap::value_type(link,n12));
         return n12;
       }
-      if (edgeID>-1 || myShape.ShapeType() == TopAbs_EDGE) {
+      if (edgeID>-1 || shapeType == TopAbs_EDGE) {
 
 	TopoDS_Edge E;
 	if( myShape.IsNull() )

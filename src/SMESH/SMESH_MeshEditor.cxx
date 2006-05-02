@@ -2398,6 +2398,9 @@ void SMESH_MeshEditor::Smooth (set<const SMDS_MeshElement*> & theElems,
     // move medium nodes of quadratic elements
     if ( isQuadratic )
     {
+      SMESH_MesherHelper helper( *GetMesh() );
+      if ( !face.IsNull() )
+        helper.SetSubShape( face );
       list< const SMDS_MeshElement* >::iterator elemIt = elemsOnFace.begin();
       for ( ; elemIt != elemsOnFace.end(); ++elemIt ) {
         const SMDS_QuadraticFaceOfNodes* QF =
@@ -2409,10 +2412,20 @@ void SMESH_MeshEditor::Smooth (set<const SMDS_MeshElement*> & theElems,
           while ( anIter->more() )
             Ns.push_back( anIter->next() );
           Ns.push_back( Ns[0] );
-          for(int i=0; i<QF->NbNodes(); i=i+2) {
-            double x = (Ns[i]->X() + Ns[i+2]->X())/2;
-            double y = (Ns[i]->Y() + Ns[i+2]->Y())/2;
-            double z = (Ns[i]->Z() + Ns[i+2]->Z())/2;
+          double x, y, z;
+          for ( int i=0; i<QF->NbNodes(); i=i+2 ) {
+            if ( !surface.IsNull() ) {
+              gp_XY uv1 = helper.GetNodeUV( face, Ns[i], Ns[i+2] );
+              gp_XY uv2 = helper.GetNodeUV( face, Ns[i+2], Ns[i] );
+              gp_XY uv = ( uv1 + uv2 ) / 2.;
+              gp_Pnt xyz = surface->Value( uv.X(), uv.Y() );
+              x = xyz.X(); y = xyz.Y(); z = xyz.Z(); 
+            }
+            else {
+              x = (Ns[i]->X() + Ns[i+2]->X())/2;
+              y = (Ns[i]->Y() + Ns[i+2]->Y())/2;
+              z = (Ns[i]->Z() + Ns[i+2]->Z())/2;
+            }
             if( fabs( Ns[i+1]->X() - x ) > disttol ||
                 fabs( Ns[i+1]->Y() - y ) > disttol ||
                 fabs( Ns[i+1]->Z() - z ) > disttol ) {

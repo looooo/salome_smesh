@@ -1284,6 +1284,7 @@ bool SMESH_subMesh::ComputeStateEngine(int event)
 
 #ifdef _DEBUG_
           // Show vertices location of a failed shape
+          cout << algo->GetName() << " failed on shape with the following vertices:" << endl;
           TopTools_IndexedMapOfShape vMap;
           TopExp::MapShapes( _subShape, TopAbs_VERTEX, vMap );
           for ( int iv = 1; iv <= vMap.Extent(); ++iv ) {

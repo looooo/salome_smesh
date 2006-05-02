@@ -29,7 +29,6 @@
 bool SMESH_MesherHelper::IsQuadraticSubMesh(const TopoDS_Shape& aSh)
 {
   SMESHDS_Mesh* meshDS = GetMesh()->GetMeshDS();
-  myShapeID = meshDS->ShapeToIndex(aSh);
   // we can create quadratic elements only if all elements
   // created on subshapes of given shape are quadratic
   // also we have to fill myNLinkNodeMap
@@ -91,7 +90,10 @@ bool SMESH_MesherHelper::IsQuadraticSubMesh(const TopoDS_Shape& aSh)
 
 void SMESH_MesherHelper::SetSubShape(const TopoDS_Shape& aSh)
 {
+  SMESHDS_Mesh* meshDS = GetMesh()->GetMeshDS();
+
   myShape = aSh;
+  myShapeID = meshDS->ShapeToIndex(aSh);
 
   // treatment of periodic faces
   if ( aSh.ShapeType() == TopAbs_FACE )
@@ -100,7 +102,6 @@ void SMESH_MesherHelper::SetSubShape(const TopoDS_Shape& aSh)
     BRepAdaptor_Surface surface( face );
     if ( surface.IsUPeriodic() || surface.IsVPeriodic() )
     {
-      SMESHDS_Mesh* meshDS = GetMesh()->GetMeshDS();
       // look for a seam edge
       for ( TopExp_Explorer exp( face, TopAbs_EDGE ); exp.More(); exp.Next()) {
         const TopoDS_Edge& edge = TopoDS::Edge( exp.Current() );
@@ -314,8 +315,10 @@ const SMDS_MeshNode* SMESH_MesherHelper::GetMediumNode(const SMDS_MeshNode* n1,
 	TopoDS_Face F;
 	if( myShape.IsNull() )
           F = TopoDS::Face(meshDS->IndexToShape(faceID));
-	else
+	else {
           F = TopoDS::Face(myShape);
+          faceID = myShapeID;
+        }
 
 	gp_XY p1 = GetNodeUV(F,n1,n2);
         gp_XY p2 = GetNodeUV(F,n2,n1);
@@ -357,8 +360,10 @@ const SMDS_MeshNode* SMESH_MesherHelper::GetMediumNode(const SMDS_MeshNode* n1,
 	TopoDS_Edge E;
 	if( myShape.IsNull() )
           E = TopoDS::Edge(meshDS->IndexToShape(edgeID));
-	else
+	else {
           E = TopoDS::Edge(myShape);
+          edgeID = myShapeID;
+        }
 
 	double p1 = GetNodeU(E,n1);
 	double p2 = GetNodeU(E,n2);

@@ -51,6 +51,7 @@ SMESHDS_Mesh::SMESHDS_Mesh(int theMeshID, bool theIsEmbeddedMode):
   myCurSubID(-1)
 {
   myScript = new SMESHDS_Script(theIsEmbeddedMode);
+  myCurSubMesh = 0;
 }
 
 //=======================================================================
@@ -847,7 +848,8 @@ bool SMESHDS_Mesh::add(const SMDS_MeshElement* elem, SMESHDS_SubMesh* subMesh )
 void SMESHDS_Mesh::SetNodeInVolume(SMDS_MeshNode *      aNode,
                                    const TopoDS_Shell & S)
 {
-  add( aNode, getSubmesh(S) );
+  if ( add( aNode, getSubmesh(S) ))
+    const_cast<SMDS_Position*>( aNode->GetPosition().get() )->SetShapeId( myCurSubID );
 }
 //=======================================================================
 //function : SetNodeOnVolume
@@ -856,7 +858,8 @@ void SMESHDS_Mesh::SetNodeInVolume(SMDS_MeshNode *      aNode,
 void SMESHDS_Mesh::SetNodeInVolume(SMDS_MeshNode *      aNode,
                                    const TopoDS_Solid & S)
 {
-  add( aNode, getSubmesh(S) );
+  if ( add( aNode, getSubmesh(S) ))
+    const_cast<SMDS_Position*>( aNode->GetPosition().get() )->SetShapeId( myCurSubID );
 }
 
 //=======================================================================
@@ -1141,7 +1144,8 @@ int SMESHDS_Mesh::ShapeToIndex(const TopoDS_Shape & S) const
 //=======================================================================
 void SMESHDS_Mesh::SetNodeInVolume(const SMDS_MeshNode* aNode, int Index)
 {
-  add( aNode, getSubmesh( Index ));
+  if ( add( aNode, getSubmesh( Index )))
+    const_cast<SMDS_Position*>( aNode->GetPosition().get() )->SetShapeId( Index );
 }
 
 //=======================================================================

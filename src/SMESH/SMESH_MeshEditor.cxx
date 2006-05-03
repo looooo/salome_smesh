@@ -4784,6 +4784,7 @@ const SMDS_MeshElement*
         const SMDS_QuadraticFaceOfNodes* F =
           static_cast<const SMDS_QuadraticFaceOfNodes*>(elem);
         // use special nodes iterator
+        iNode = 0;
         SMDS_NodeIteratorPtr anIter = F->interlacedNodesIterator();
         while ( anIter->more() ) {
           faceNodes[iNode] = static_cast<const SMDS_MeshNode*>(anIter->next());
@@ -6094,11 +6095,26 @@ SMESH_MeshEditor::Sew_Error
     set<const SMDS_MeshElement*>::iterator vIt, eIt;
     set<const SMDS_MeshNode*>::iterator    nIt;
 
-  // -----------------------------------------------------------
-  // 1a. Collect nodes of existing faces
-  //     and build set of face nodes in order to detect missing
-  //     faces corresponing to sides of volumes
-  // -----------------------------------------------------------
+    // check that given nodes belong to given elements
+    const SMDS_MeshNode* n1 = ( iSide == 0 ) ? theFirstNode1 : theFirstNode2;
+    const SMDS_MeshNode* n2 = ( iSide == 0 ) ? theSecondNode1 : theSecondNode2;
+    int firstIndex = -1, secondIndex = -1;
+    for (eIt = elemSet->begin(); eIt != elemSet->end(); eIt++ ) {
+      const SMDS_MeshElement* elem = *eIt;
+      if ( firstIndex  < 0 ) firstIndex  = elem->GetNodeIndex( n1 );
+      if ( secondIndex < 0 ) secondIndex = elem->GetNodeIndex( n2 );
+      if ( firstIndex > -1 && secondIndex > -1 ) break;
+    }
+    if ( firstIndex < 0 || secondIndex < 0 ) {
+      // we can simply return until temporary faces created
+      return (iSide == 0 ) ? SEW_BAD_SIDE1_NODES : SEW_BAD_SIDE2_NODES;
+    }
+
+    // -----------------------------------------------------------
+    // 1a. Collect nodes of existing faces
+    //     and build set of face nodes in order to detect missing
+    //     faces corresponing to sides of volumes
+    // -----------------------------------------------------------
 
     set< set <const SMDS_MeshNode*> > setOfFaceNodeSet;
 
@@ -6108,24 +6124,11 @@ SMESH_MeshEditor::Sew_Error
       if ( elem->GetType() == SMDSAbs_Face ) {
         faceSet->insert( elem );
         set <const SMDS_MeshNode*> faceNodeSet;
-        if(elem->IsQuadratic()) {
-          const SMDS_QuadraticFaceOfNodes* F =
-            static_cast<const SMDS_QuadraticFaceOfNodes*>(elem);
-          // use special nodes iterator
-          SMDS_NodeIteratorPtr anIter = F->interlacedNodesIterator();
-          while( anIter->more() ) {
-            const SMDS_MeshNode* n = anIter->next();
-            nodeSet->insert( n );
-            faceNodeSet.insert( n );
-          }
-        }
-        else {
-          SMDS_ElemIteratorPtr nodeIt = elem->nodesIterator();
-          while ( nodeIt->more() ) {
-            const SMDS_MeshNode* n = static_cast<const SMDS_MeshNode*>( nodeIt->next() );
-            nodeSet->insert( n );
-            faceNodeSet.insert( n );
-          }
+        SMDS_ElemIteratorPtr nodeIt = elem->nodesIterator();
+        while ( nodeIt->more() ) {
+          const SMDS_MeshNode* n = static_cast<const SMDS_MeshNode*>( nodeIt->next() );
+          nodeSet->insert( n );
+          faceNodeSet.insert( n );
         }
         setOfFaceNodeSet.insert( faceNodeSet );
       }
@@ -6194,10 +6197,7 @@ SMESH_MeshEditor::Sew_Error
               aFreeFace = aMesh->FindFace( fNodes[0],fNodes[1],fNodes[2],fNodes[3] );
             }
             else {
-              vector<const SMDS_MeshNode *> poly_nodes (nbNodes);
-              for (int inode = 0; inode < nbNodes; inode++) {
-                poly_nodes[inode] = fNodes[inode];
-              }
+              vector<const SMDS_MeshNode *> poly_nodes ( fNodes, & fNodes[nbNodes]);
               aFreeFace = aMesh->FindFace(poly_nodes);
             }
           }
@@ -6210,10 +6210,7 @@ SMESH_MeshEditor::Sew_Error
               aFreeFace = aTmpFacesMesh.AddFace( fNodes[0],fNodes[1],fNodes[2],fNodes[3] );
             }
             else {
-              vector<const SMDS_MeshNode *> poly_nodes (nbNodes);
-              for (int inode = 0; inode < nbNodes; inode++) {
-                poly_nodes[inode] = fNodes[inode];
-              }
+              vector<const SMDS_MeshNode *> poly_nodes ( fNodes, & fNodes[nbNodes]);
               aFreeFace = aTmpFacesMesh.AddPolygonalFace(poly_nodes);
             }
           }
@@ -6609,7 +6606,7 @@ SMESH_MeshEditor::Sew_Error
         const SMDS_MeshElement* e = invElemIt->next();
         // get a new suite of nodes: make replacement
         int nbReplaced = 0, i = 0, nbNodes = e->NbNodes();
-        const SMDS_MeshNode* nodes[ 8 ];
+        vector< const SMDS_MeshNode*> nodes( nbNodes );
         SMDS_ElemIteratorPtr nIt = e->nodesIterator();
         while ( nIt->more() ) {
           const SMDS_MeshNode* n =
@@ -6625,7 +6622,7 @@ SMESH_MeshEditor::Sew_Error
         //         elemIDsToRemove.push_back( e->GetID() );
         //       else
         if ( nbReplaced )
-          aMesh->ChangeElementNodes( e, nodes, nbNodes );
+          aMesh->ChangeElementNodes( e, & nodes[0], nbNodes );
       }
     }
 

@@ -1114,12 +1114,15 @@ void SMESHGUI_MeshOp::onHypoSet( const QString& theSetName )
   HypothesesSet* aHypoSet = SMESH::GetHypothesesSet(theSetName);
   if (!aHypoSet) return;
 
+  // clear all hyps
+  for (int dim = SMESH::DIM_1D; dim <= SMESH::DIM_3D; dim++) {
+    setCurrentHyp(dim, Algo, -1);
+    setCurrentHyp(dim, AddHyp, -1);
+    setCurrentHyp(dim, MainHyp, -1);
+  }
+
   for (int aHypType = Algo; aHypType < AddHyp; aHypType++) {
     bool isAlgo = (aHypType == Algo);
-
-    // clear all hyps
-    for (int dim = SMESH::DIM_1D; dim <= SMESH::DIM_3D; dim++)
-      setCurrentHyp(dim, aHypType, -1);
 
     // set hyps from the set
     QStringList* aHypoList = isAlgo ? &aHypoSet->AlgoList : &aHypoSet->HypoList;
@@ -1132,9 +1135,13 @@ void SMESHGUI_MeshOp::onHypoSet( const QString& theSetName )
       int aDim = aHypData->Dim[0];
       // create or/and set
       if (isAlgo) {
-        QStringList tmp;
-        availableHyps( aDim, Algo, tmp, myAvailableHypData[aDim][Algo] );
         int index = myAvailableHypData[aDim][Algo].findIndex( aHypData );
+        if ( index < 0 ) {
+          QStringList anAvailable;
+          availableHyps( aDim, Algo, anAvailable, myAvailableHypData[aDim][Algo] );
+          myDlg->tab( aDim )->setAvailableHyps( Algo, anAvailable );
+          index = myAvailableHypData[aDim][Algo].findIndex( aHypData );
+        }
         setCurrentHyp( aDim, Algo, index );
         onAlgoSelected( index, aDim );
       }

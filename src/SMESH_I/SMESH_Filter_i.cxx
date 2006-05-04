@@ -2256,7 +2256,7 @@ Predicate_ptr Filter_i::GetPredicate()
 // name    : toString
 // Purpose : Convert bool to LDOMString
 //=======================================================================
-static inline LDOMString toString( const bool val )
+static inline LDOMString toString( CORBA::Boolean val )
 {
   return val ? "logical not" : "";
 }
@@ -2274,7 +2274,7 @@ static inline bool toBool( const LDOMString& theStr )
 // name    : toString
 // Purpose : Convert double to LDOMString
 //=======================================================================
-static inline LDOMString toString( const double val )
+static inline LDOMString toString( CORBA::Double val )
 {
   char a[ 255 ];
   sprintf( a, "%e", val );
@@ -2294,7 +2294,7 @@ static inline double toDouble( const LDOMString& theStr )
 // name    : toString
 // Purpose : Convert functor type to LDOMString
 //=======================================================================
-static inline LDOMString toString( const long theType )
+static inline LDOMString toString( CORBA::Long theType )
 {
   switch ( theType )
   {
@@ -2510,13 +2510,12 @@ static LDOM_Element createFilterItem( const char*       theName,
   for ( CORBA::ULong i = 0, n = aCriteria->length(); i < n; i++ )
   {
     LDOM_Element aCriterionItem = theDoc.createElement( "criterion" );
-
-    typedef long int TLongParam;
-    aCriterionItem.setAttribute( ATTR_TYPE         , toString( TLongParam( aCriteria[ i ].Type) ) );
-    aCriterionItem.setAttribute( ATTR_COMPARE      , toString( TLongParam( aCriteria[ i ].Compare ) ) );
-    aCriterionItem.setAttribute( ATTR_THRESHOLD    , toString( TLongParam( aCriteria[ i ].Threshold ) ) );
-    aCriterionItem.setAttribute( ATTR_UNARY        , toString( TLongParam( aCriteria[ i ].UnaryOp ) ) );
-    aCriterionItem.setAttribute( ATTR_BINARY       , toString( TLongParam( aCriteria[ i ].BinaryOp ) ) );
+    
+    aCriterionItem.setAttribute( ATTR_TYPE         , toString(  aCriteria[ i ].Type) );
+    aCriterionItem.setAttribute( ATTR_COMPARE      , toString(  aCriteria[ i ].Compare ) );
+    aCriterionItem.setAttribute( ATTR_THRESHOLD    , toString(  aCriteria[ i ].Threshold ) );
+    aCriterionItem.setAttribute( ATTR_UNARY        , toString(  aCriteria[ i ].UnaryOp ) );
+    aCriterionItem.setAttribute( ATTR_BINARY       , toString(  aCriteria[ i ].BinaryOp ) );
 
     aCriterionItem.setAttribute( ATTR_THRESHOLD_STR, (const char*)aCriteria[ i ].ThresholdStr );
     aCriterionItem.setAttribute( ATTR_TOLERANCE    , toString( aCriteria[ i ].Tolerance ) );

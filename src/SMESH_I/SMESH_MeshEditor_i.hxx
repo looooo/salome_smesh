@@ -118,6 +118,7 @@ class SMESH_MeshEditor_i: public POA_SMESH::SMESH_MeshEditor
 
 
   void ConvertToQuadratic(CORBA::Boolean Force3d);
+  CORBA::Boolean ConvertFromQuadratic();
 
   void RenumberNodes();
   void RenumberElements();

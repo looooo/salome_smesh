@@ -394,6 +394,7 @@ class SMESH_MeshEditor {
   SMESH_Mesh * GetMesh() { return myMesh; }
 
   SMESHDS_Mesh * GetMeshDS() { return myMesh->GetMeshDS(); }
+
 private:
 
   void ConvertElemToQuadratic(SMESHDS_SubMesh *theSm,
@@ -402,7 +403,12 @@ private:
   //Auxiliary function for "ConvertToQuadratic" is intended to convert
   //elements contained in submesh to quadratic
 
- private:
+  void RemoveQuadElem( SMESHDS_SubMesh *theSm,
+		       SMDS_ElemIteratorPtr theItr);
+  //Auxiliary function for "ConvertFromQuadratic" is intended to convert quadratic
+  //element to ordinary and for removing quadratic nodes
+
+private:
 
   SMESH_Mesh * myMesh;
 

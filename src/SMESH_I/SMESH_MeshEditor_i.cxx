@@ -1743,5 +1743,19 @@ void SMESH_MeshEditor_i::ConvertToQuadratic(CORBA::Boolean theForce3d)
   anEditor.ConvertToQuadratic(theForce3d);
  // Update Python script
   TPythonDump() << this << ".ConvertToQuadratic( "
-                << theForce3d << ") ";
+                << theForce3d << " )";
+}
+
+//=======================================================================
+//function : ConvertFromQuadratic
+//purpose  :
+//=======================================================================
+
+CORBA::Boolean SMESH_MeshEditor_i::ConvertFromQuadratic()
+{
+  ::SMESH_MeshEditor anEditor( _myMesh );
+  CORBA::Boolean isDone = anEditor.ConvertFromQuadratic();
+  // Update Python script
+  TPythonDump() << this << ".ConvertFromQuadratic( )";
+  return isDone;
 }

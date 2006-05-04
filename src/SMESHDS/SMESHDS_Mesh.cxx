@@ -713,7 +713,8 @@ void SMESHDS_Mesh::RemoveFreeNode(const SMDS_MeshNode * n, SMESHDS_SubMesh * sub
 
   // Rm from sub-mesh
   // Node should belong to only one sub-mesh
-  subMesh->RemoveNode(n);
+  if( subMesh )
+    subMesh->RemoveNode(n);
 
   SMDS_Mesh::RemoveFreeElement(n);
 }
@@ -770,7 +771,8 @@ void SMESHDS_Mesh::RemoveFreeElement(const SMDS_MeshElement * elt, SMESHDS_SubMe
 
   // Rm from sub-mesh
   // Element should belong to only one sub-mesh
-  subMesh->RemoveElement(elt);
+  if( subMesh )
+    subMesh->RemoveElement(elt);
 
   SMDS_Mesh::RemoveFreeElement(elt);
 }

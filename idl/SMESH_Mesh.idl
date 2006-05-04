@@ -35,6 +35,8 @@ module SMESH
 {
   interface SMESH_Hypothesis;
   typedef sequence<SMESH_Hypothesis> ListOfHypothesis;
+  interface SMESH_GroupBase;
+  typedef sequence<SMESH_GroupBase> ListOfGroups;
 
   typedef sequence<double> double_array ;
   typedef sequence<long> long_array ;
@@ -169,7 +171,6 @@ module SMESH
     long_array GetIDs();
   };
 
-  interface SMESH_GroupBase;
   interface SMESH_Group;
   interface SMESH_GroupOnGeom;
   interface SMESH_subMesh;
@@ -234,6 +235,12 @@ module SMESH
      *  Remove group with its contents
      */
     void RemoveGroupWithContents( in SMESH_GroupBase aGroup )
+      raises (SALOME::SALOME_Exception);
+
+    /*!
+     *  Get the list of groups existing in the mesh
+     */
+    ListOfGroups GetGroups()
       raises (SALOME::SALOME_Exception);
 
     /*!

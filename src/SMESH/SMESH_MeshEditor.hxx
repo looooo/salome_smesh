@@ -33,6 +33,7 @@
 #include "SMESH_Mesh.hxx"
 #include "SMESH_Controls.hxx"
 #include "SMESH_SequenceOfNode.hxx"
+#include "SMESH_SequenceOfElemPtr.hxx"
 #include "gp_Dir.hxx"
 #include "TColStd_HSequenceOfReal.hxx"
 #include "SMESH_MesherHelper.hxx"
@@ -89,7 +90,7 @@ class SMESH_MeshEditor {
    *                       is still performed; theMaxAngle is mesured in radians.
    * \retval bool - Success or not.
    */
-  bool TriToQuad (std::set<const SMDS_MeshElement*> &  theElems,
+  bool TriToQuad (std::map<int,const SMDS_MeshElement*> & theElems,
                   SMESH::Controls::NumericalFunctorPtr theCriterion,
                   const double                         theMaxAngle);
 
@@ -99,7 +100,7 @@ class SMESH_MeshEditor {
    * \param theCriterion - Is used to choose a diagonal for splitting.
    * \retval bool - Success or not.
    */
-  bool QuadToTri (std::set<const SMDS_MeshElement*> &  theElems,
+  bool QuadToTri (std::map<int,const SMDS_MeshElement*> &  theElems,
                   SMESH::Controls::NumericalFunctorPtr theCriterion);
 
   /*!
@@ -108,7 +109,7 @@ class SMESH_MeshEditor {
    * \param the13Diag - Is used to choose a diagonal for splitting.
    * \retval bool - Success or not.
    */
-  bool QuadToTri (std::set<const SMDS_MeshElement*> & theElems,
+  bool QuadToTri (std::map<int,const SMDS_MeshElement*> & theElems,
                   const bool                          the13Diag);
 
   /*!
@@ -123,7 +124,7 @@ class SMESH_MeshEditor {
 
   enum SmoothMethod { LAPLACIAN = 0, CENTROIDAL };
 
-  void Smooth (std::set<const SMDS_MeshElement*> & theElements,
+  void Smooth (std::map<int,const SMDS_MeshElement*> & theElements,
                std::set<const SMDS_MeshNode*> &    theFixedNodes,
                const SmoothMethod                  theSmoothMethod,
                const int                           theNbIterations,
@@ -139,7 +140,7 @@ class SMESH_MeshEditor {
   // on geometrical faces
 
 
-  void RotationSweep (std::set<const SMDS_MeshElement*> & theElements,
+  void RotationSweep (std::map<int,const SMDS_MeshElement*> & theElements,
                       const gp_Ax1&                       theAxis,
                       const double                        theAngle,
                       const int                           theNbSteps,
@@ -189,7 +190,7 @@ class SMESH_MeshEditor {
    *   EXTRUSION_FLAG_SEW is set
    */
   void ExtrusionSweep
-           (set<const SMDS_MeshElement*> & theElems,
+           (map<int,const SMDS_MeshElement*> & theElems,
             const gp_Vec&                  theStep,
             const int                      theNbSteps,
             TElemOfElemListMap&            newElemsMap,
@@ -206,7 +207,7 @@ class SMESH_MeshEditor {
    *   EXTRUSION_FLAG_SEW is set
    * param theParams - special structure for manage of extrusion
    */
-  void ExtrusionSweep (set<const SMDS_MeshElement*> & theElems,
+  void ExtrusionSweep (map<int,const SMDS_MeshElement*> & theElems,
                        ExtrusParam&                   theParams,
                        TElemOfElemListMap&            newElemsMap,
                        const int                      theFlags,
@@ -226,7 +227,7 @@ class SMESH_MeshEditor {
     EXTR_CANT_GET_TANGENT
     };
   
-  Extrusion_Error ExtrusionAlongTrack (std::set<const SMDS_MeshElement*> & theElements,
+  Extrusion_Error ExtrusionAlongTrack (std::map<int,const SMDS_MeshElement*> & theElements,
                                        SMESH_subMesh*                      theTrackPattern,
                                        const SMDS_MeshNode*                theNodeStart,
                                        const bool                          theHasAngles,
@@ -236,7 +237,7 @@ class SMESH_MeshEditor {
   // Generate new elements by extrusion of theElements along path given by theTrackPattern,
   // theHasAngles are the rotation angles, base point can be given by theRefPoint
 
-  void Transform (std::set<const SMDS_MeshElement*> & theElements,
+  void Transform (std::map<int,const SMDS_MeshElement*> & theElements,
                   const gp_Trsf&                      theTrsf,
                   const bool                          theCopy);
   // Move or copy theElements applying theTrsf to their nodes
@@ -313,8 +314,8 @@ class SMESH_MeshEditor {
   // nodes are inserted.
   // Return false, if sewing failed.
 
-  Sew_Error SewSideElements (std::set<const SMDS_MeshElement*>& theSide1,
-                             std::set<const SMDS_MeshElement*>& theSide2,
+  Sew_Error SewSideElements (std::map<int,const SMDS_MeshElement*>& theSide1,
+                             std::map<int,const SMDS_MeshElement*>& theSide2,
                              const SMDS_MeshNode*               theFirstNode1ToMerge,
                              const SMDS_MeshNode*               theFirstNode2ToMerge,
                              const SMDS_MeshNode*               theSecondNode1ToMerge,
@@ -372,8 +373,8 @@ class SMESH_MeshEditor {
   static const SMDS_MeshElement*
     FindFaceInSet(const SMDS_MeshNode*                     n1,
                   const SMDS_MeshNode*                     n2,
-                  const std::set<const SMDS_MeshElement*>& elemSet,
-                  const std::set<const SMDS_MeshElement*>& avoidSet);
+                  const std::map<int,const SMDS_MeshElement*>& elemSet,
+                  const std::map<int,const SMDS_MeshElement*>& avoidSet);
   // Return a face having linked nodes n1 and n2 and which is
   // - not in avoidSet,
   // - in elemSet provided that !elemSet.empty()
@@ -395,6 +396,10 @@ class SMESH_MeshEditor {
 
   SMESHDS_Mesh * GetMeshDS() { return myMesh->GetMeshDS(); }
 
+  SMESH_SequenceOfElemPtr GetLastCreatedNodes() { return myLastCreatedNodes; }
+
+  SMESH_SequenceOfElemPtr GetLastCreatedElems() { return myLastCreatedElems; }
+
 private:
 
   void ConvertElemToQuadratic(SMESHDS_SubMesh *theSm,
@@ -411,6 +416,16 @@ private:
 private:
 
   SMESH_Mesh * myMesh;
+
+  /*!
+   * Sequence for keeping nodes created during last operation
+   */
+  SMESH_SequenceOfElemPtr myLastCreatedNodes;
+
+  /*!
+   * Sequence for keeping elements created during last operation
+   */
+  SMESH_SequenceOfElemPtr myLastCreatedElems;
 
 };
 

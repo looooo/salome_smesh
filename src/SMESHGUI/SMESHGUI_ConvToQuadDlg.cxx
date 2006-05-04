@@ -34,6 +34,8 @@
 #include <qgroupbox.h>
 #include <qlayout.h>
 #include <qcheckbox.h>
+#include <qradiobutton.h>
+#include <qbuttongroup.h>
 
 SMESHGUI_ConvToQuadDlg::SMESHGUI_ConvToQuadDlg()
 : SMESHGUI_Dialog( 0, false, true )
@@ -50,12 +52,26 @@ SMESHGUI_ConvToQuadDlg::SMESHGUI_ConvToQuadDlg()
   createObject( tr( "MESH" ), aGrp, 0 );
 
   //Create check box
-  myMedNdsOnGeom = new QCheckBox( tr( "MEDIUMNDS" ), mainFrame() );
+   myMedNdsOnGeom = new QCheckBox( tr( "MEDIUMNDS" ), mainFrame() );
+
+  //Create RadioButtons
+  myBG = new QButtonGroup( 2, Qt::Vertical, "", mainFrame() );
+  myBG->setExclusive( true );
   
+  myRB1 = new QRadioButton( myBG );  
+  myRB1->setText( tr( "RADIOBTN_1" ) );
+  myRB1->setChecked( true );
+
+  myRB2 = new QRadioButton( myBG );  
+  myRB2->setText( tr( "RADIOBTN_2" ) );
+
   // Fill layout
   QVBoxLayout* aLay = new QVBoxLayout( mainFrame(), 5, 5 );
   aLay->addWidget( aGrp );
   aLay->addWidget( myMedNdsOnGeom );
+  aLay->addWidget( myBG );
+  
+  connect(myBG, SIGNAL( clicked( int ) ), this, SIGNAL( onClicked( int ) ) );
 }
 
 SMESHGUI_ConvToQuadDlg::~SMESHGUI_ConvToQuadDlg()
@@ -77,7 +93,38 @@ bool SMESHGUI_ConvToQuadDlg::IsEnabledCheck() const
   return myMedNdsOnGeom->isEnabled();
 }
 
-void SMESHGUI_ConvToQuadDlg::SetEnabledCheck(const bool theCheck)
+void SMESHGUI_ConvToQuadDlg::SetEnabledCheck( const bool theCheck )
 {
-  myMedNdsOnGeom->setEnabled(theCheck);
+  myMedNdsOnGeom->setEnabled( theCheck );
 }
+
+int SMESHGUI_ConvToQuadDlg::CurrentRB( )
+{
+  return myBG->selectedId();
+}
+
+void SMESHGUI_ConvToQuadDlg::SetEnabledControls( const bool theCheck )
+{
+  myBG->setEnabled( theCheck );
+  myMedNdsOnGeom->setEnabled( theCheck );
+  setButtonEnabled( theCheck, QtxDialog::OK | QtxDialog::Apply );
+}
+
+void SMESHGUI_ConvToQuadDlg::SetEnabledRB( const int idx, const bool theCheck ) 
+{
+  if(idx)
+  {
+    myRB2->setEnabled( theCheck );
+    myRB1->setEnabled( !theCheck );
+    myRB1->setChecked( true );
+  }
+  else
+  {
+    myRB1->setEnabled( theCheck );
+    myRB2->setEnabled( !theCheck );
+    myRB2->setChecked( true );
+  }
+  emit onClicked( myBG->selectedId() );
+}
+
+

@@ -91,6 +91,8 @@ void SMESHGUI_ConvToQuadOp::startOperation()
   {
     myDlg = new SMESHGUI_ConvToQuadDlg( );
   }
+  connect( myDlg, SIGNAL( onClicked( int ) ), SLOT( ConnectRadioButtons( int ) ) );
+
   SMESHGUI_SelectionOp::startOperation();
 
   myDlg->SetMediumNdsOnGeom( false );
@@ -122,23 +124,21 @@ void SMESHGUI_ConvToQuadOp::selectionDone()
     SMESH::SMESH_Mesh_var mesh =
     SMESH::SObjectToInterface<SMESH::SMESH_Mesh>( pMesh );  
 
-    GEOM::GEOM_Object_var mainGeom;
-    mainGeom = mesh->GetShapeToMesh();
-
-    if( mesh->_is_nil() || 
-	( !mesh->NbEdgesOfOrder(SMESH::ORDER_LINEAR) && 
-	  !mesh->NbFacesOfOrder(SMESH::ORDER_LINEAR) &&
-	  !mesh->NbVolumesOfOrder(SMESH::ORDER_LINEAR) ) )
+    if( mesh->_is_nil() )
     {
-      myDlg->setButtonEnabled( false, QtxDialog::OK | QtxDialog::Apply );
-      myDlg->SetEnabledCheck( false );
+      myDlg->SetEnabledControls( false );
     }
-    else if( mainGeom->_is_nil() && myDlg->IsEnabledCheck() )
-      myDlg->SetEnabledCheck( false );
+    else if( ConsistMesh( mesh ) == SMESHGUI_ConvToQuadOp::Quadratic )
+    {
+      myDlg->SetEnabledRB( 0, false );
+    }
+    else if( ConsistMesh( mesh ) == SMESHGUI_ConvToQuadOp::Linear )
+    {
+      myDlg->SetEnabledRB( 1, false );
+    }
     else 
     {
-      myDlg->setButtonEnabled( true, QtxDialog::OK | QtxDialog::Apply );
-      myDlg->SetEnabledCheck( true );
+      myDlg->SetEnabledControls( true );
     }
   }
   catch ( const SALOME::SALOME_Exception& S_ex )
@@ -205,13 +205,20 @@ bool SMESHGUI_ConvToQuadOp::onApply()
 
   try
   {
-    bool aParam = true;
-    if( myDlg->IsEnabledCheck() )
-      aParam = myDlg->IsMediumNdsOnGeom();
-
     SMESH::SMESH_MeshEditor_var aEditor = mesh->GetMeshEditor();
-    aEditor->ConvertToQuadratic( aParam );
-    aResult = true; 
+    if( !myDlg->CurrentRB() )
+    {
+      bool aParam = true;
+      if( myDlg->IsEnabledCheck() )
+	aParam = myDlg->IsMediumNdsOnGeom();
+
+      aEditor->ConvertToQuadratic( aParam );
+      aResult = true; 
+    }
+    else
+    {
+      aResult = aEditor->ConvertFromQuadratic();
+    }
   }
   catch ( const SALOME::SALOME_Exception& S_ex )
   {
@@ -222,11 +229,58 @@ bool SMESHGUI_ConvToQuadOp::onApply()
   {
     aResult = false;
   }
-  if(aResult)
+  if( aResult )
   {
-    update( UF_ObjBrowser | UF_Model );
-    myDlg->setButtonEnabled( false, QtxDialog::Apply );
+    update( UF_ObjBrowser | UF_Model | UF_Viewer );
+    selectionDone();
   }
   return aResult;
 }
+
+//================================================================================
+/*! ConsistMesh
+ *  Determines, what elements this mesh contains. 
+ */
+//================================================================================
+SMESHGUI_ConvToQuadOp::MeshType SMESHGUI_ConvToQuadOp::ConsistMesh( const SMESH::SMESH_Mesh_var& mesh) const
+{
+  int nbAllElem = 0, nbQEdges =0, nbQFaces =0, nbQVolum = 0;
+  int nbEdges = 0, nbFaces = 0, nbVolum = 0;
+
+  nbAllElem = (int)mesh->NbElements();
+  nbQEdges = (int)mesh->NbEdgesOfOrder(SMESH::ORDER_QUADRATIC);
+  nbQFaces = (int)mesh->NbFacesOfOrder(SMESH::ORDER_QUADRATIC);
+  nbQVolum = (int)mesh->NbVolumesOfOrder(SMESH::ORDER_QUADRATIC);
+
+  nbEdges = (int)mesh->NbEdgesOfOrder(SMESH::ORDER_LINEAR);
+  nbFaces = (int)mesh->NbFacesOfOrder(SMESH::ORDER_LINEAR);
+  nbVolum = (int)mesh->NbVolumesOfOrder(SMESH::ORDER_LINEAR);
+
+  if( nbAllElem == (nbQEdges+nbQFaces+nbQVolum) )
+    return SMESHGUI_ConvToQuadOp::Quadratic;
+  else if ( nbAllElem == (nbEdges+nbFaces+nbVolum) )
+    return SMESHGUI_ConvToQuadOp::Linear;
+  else 
+    return SMESHGUI_ConvToQuadOp::Comp;
+}
+
+
+void SMESHGUI_ConvToQuadOp::ConnectRadioButtons( int id )
+{
+  QString anMeshEntry = myDlg->selectedObject( 0 );
+  _PTR(SObject) pMesh = studyDS()->FindObjectID( anMeshEntry.latin1() );
+  if ( !pMesh ) return;
+
+  SMESH::SMESH_Mesh_var mesh =
+    SMESH::SObjectToInterface<SMESH::SMESH_Mesh>( pMesh );  
+
+  GEOM::GEOM_Object_var mainGeom;
+  mainGeom = mesh->GetShapeToMesh();
+
+  if( id || mainGeom->_is_nil() )
+    myDlg->SetEnabledCheck( false );
+  else
+    myDlg->SetEnabledCheck( true );
+}
+
 

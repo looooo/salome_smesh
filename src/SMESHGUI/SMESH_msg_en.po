@@ -2216,7 +2216,7 @@ msgid "MEN_MAP"
 msgstr "Pattern mapping"
 
 msgid "MEN_CONV_TO_QUAD"
-msgstr "Convert to quadratic"
+msgstr "Convert to/from quadratic"
 
 msgid "MEN_EXTRUSION_ALONG"
 msgstr "Extrusion along a path"
@@ -2569,7 +2569,7 @@ msgid "TOP_MAP"
 msgstr "Pattern mapping"
 
 msgid "TOP_CONV_TO_QUAD"
-msgstr "Convert to quadratic"
+msgstr "Convert to/from quadratic"
 
 msgid "TOP_EXTRUSION_ALONG"
 msgstr "Extrusion along a path"
@@ -2873,7 +2873,7 @@ msgid "STB_MAP"
 msgstr "Pattern mapping"
 
 msgid "STB_CONV_TO_QUAD"
-msgstr "Convert to quadratic"
+msgstr "Convert to/from quadratic"
 
 msgid "STB_EXTRUSION_ALONG"
 msgstr "Extrusion along a path"
@@ -3177,13 +3177,19 @@ msgstr "Mesh is not defined\nPlease specify it and try again"
 #-----------------------------------------------------------
 
 msgid "SMESHGUI_ConvToQuadDlg::CAPTION"
-msgstr "Convert to quadratic"
+msgstr "Convert to/from quadratic"
 
 msgid "SMESHGUI_ConvToQuadDlg::MESH"
 msgstr "Mesh"
 
 msgid "SMESHGUI_ConvToQuadDlg::MEDIUMNDS"
 msgstr "Medium nodes on geometry"
+
+msgid "SMESHGUI_ConvToQuadDlg::RADIOBTN_1"
+msgstr "Convert to quadratic"
+
+msgid "SMESHGUI_ConvToQuadDlg::RADIOBTN_2"
+msgstr "Convert from quadratic"
 
 msgid "SMESHGUI_ConvToQuadOp::MESH_IS_NOT_SELECTED"
 msgstr "Mesh is not selected\nPlease specify it and try again"

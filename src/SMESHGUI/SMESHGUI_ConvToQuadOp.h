@@ -42,8 +42,9 @@ class SMESHGUI_ConvToQuadDlg;
 class SMESHGUI_ConvToQuadOp : public SMESHGUI_SelectionOp
 { 
   Q_OBJECT
-      
-  //  enum HypType{ Algo = 0, MainHyp, AddHyp };
+
+public:      
+enum MeshType{ Comp = 0, Linear, Quadratic };
 
 public:
   SMESHGUI_ConvToQuadOp();
@@ -55,12 +56,14 @@ protected:
   virtual void                   startOperation();
   virtual void                   selectionDone();
   virtual SUIT_SelectionFilter*  createFilter( const int ) const;
+  MeshType                       ConsistMesh( const SMESH::SMESH_Mesh_var& ) const;
 
 protected slots:
   virtual bool                   onApply();
+  void                           ConnectRadioButtons( int);
 
 private:
-  SMESHGUI_ConvToQuadDlg*              myDlg;
+  SMESHGUI_ConvToQuadDlg*        myDlg;
 };
 
 #endif

@@ -42,6 +42,8 @@
 #include CORBA_SERVER_HEADER(SMESH_Mesh)
 
 class QCheckBox;
+class QRadioButton;
+class QButtonGroup;
 
 class SMESHGUI_ConvToQuadDlg : public SMESHGUI_Dialog
 { 
@@ -54,11 +56,22 @@ public:
   bool     IsMediumNdsOnGeom() const;
   void     SetMediumNdsOnGeom(const bool theCheck);
   bool     IsEnabledCheck() const;
-  void     SetEnabledCheck(const bool theCheck);
-  
+  void     SetEnabledCheck( const bool theCheck );
+  void     SetEnabledGroup( const bool theCheck );
+  void     SetEnabledControls( const bool theCheck );
+  void     SetEnabledRB( const int idx, const bool theCheck );
+  int      CurrentRB();//returns the ID of the selected toggle button
+
+signals:
+  void     onClicked( int );
+
 private:
 
   QCheckBox* myMedNdsOnGeom;
+  QButtonGroup* myBG;
+  QRadioButton* myRB1;
+  QRadioButton* myRB2;
+
 };
 
 #endif

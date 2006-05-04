@@ -682,6 +682,8 @@ module SMESH
 
     void ConvertToQuadratic(in boolean theForce3d);
 
+    boolean ConvertFromQuadratic();
+
     void RenumberNodes();
 
     void RenumberElements();

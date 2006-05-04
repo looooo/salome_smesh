@@ -639,6 +639,37 @@ SMESH::SMESH_Mesh_ptr SMESH_Gen_i::CreateMesh( GEOM::GEOM_Object_ptr theShapeObj
 
 //=============================================================================
 /*!
+ *  SMESH_Gen_i::CreateEmptyMesh
+ *
+ *  Create empty mesh
+ */
+//=============================================================================
+
+SMESH::SMESH_Mesh_ptr SMESH_Gen_i::CreateEmptyMesh()
+     throw ( SALOME::SALOME_Exception )
+{
+  Unexpect aCatch(SALOME_SalomeException);
+  if(MYDEBUG) MESSAGE( "SMESH_Gen_i::CreateMesh" );
+  // create mesh
+  SMESH::SMESH_Mesh_var mesh = this->createMesh();
+
+  // publish mesh in the study
+  if ( CanPublishInStudy( mesh ) ) {
+    SALOMEDS::StudyBuilder_var aStudyBuilder = myCurrentStudy->NewBuilder();
+    aStudyBuilder->NewCommand();  // There is a transaction
+    SALOMEDS::SObject_var aSO = PublishMesh( myCurrentStudy, mesh.in() );
+    aStudyBuilder->CommitCommand();
+    if ( !aSO->_is_nil() ) {
+      // Update Python script
+      TPythonDump() << aSO << " = " << this << ".CreateEmptyMesh()";
+    }
+  }
+
+  return mesh._retn();
+}
+
+//=============================================================================
+/*!
  *  SMESH_Gen_i::CreateMeshFromUNV
  *
  *  Create mesh and import data from UNV file

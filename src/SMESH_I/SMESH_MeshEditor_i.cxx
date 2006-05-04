@@ -1939,7 +1939,7 @@ CORBA::Boolean SMESH_MeshEditor_i::ChangeElemNodes(CORBA::Long ide,
   }
   // Update Python script
   TPythonDump() << "isDone = " << this << ".ChangeElemNodes( "
-                << ide << ", " << IDsOfElements << " )";
+                << ide << ", " << newIDs << " )";
 #ifdef _DEBUG_
   TPythonDump() << "print 'ChangeElemNodes: ', isDone";
 #endif

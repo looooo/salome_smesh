@@ -728,6 +728,47 @@ void SMESH_Mesh_i::RemoveGroupWithContents( SMESH::SMESH_GroupBase_ptr theGroup 
   _gen_i->RemoveLastFromPythonScript(_gen_i->GetCurrentStudy()->StudyId());
 }
 
+
+//================================================================================
+/*!
+ * \brief Get the list of groups existing in the mesh
+  * \retval SMESH::ListOfGroups * - list of groups
+ */
+//================================================================================
+
+SMESH::ListOfGroups * SMESH_Mesh_i::GetGroups() throw(SALOME::SALOME_Exception)
+{
+  Unexpect aCatch(SALOME_SalomeException);
+  if (MYDEBUG) MESSAGE("GetGroups");
+
+  SMESH::ListOfGroups_var aList = new SMESH::ListOfGroups();
+  // Python Dump
+  TPythonDump aPythonDump;
+  aPythonDump << "[ ";
+
+  try {
+    aList->length( _mapGroups.size() );
+    int i = 0;
+    map<int, SMESH::SMESH_GroupBase_ptr>::iterator it = _mapGroups.begin();
+    for ( ; it != _mapGroups.end(); it++ ) {
+      if ( CORBA::is_nil( it->second )) continue;
+      aList[i++] = SMESH::SMESH_GroupBase::_duplicate( it->second );
+      // Python Dump
+      if (i > 1) aPythonDump << ", ";
+      aPythonDump << it->second;
+    }
+    aList->length( i );
+  }
+  catch(SALOME_Exception & S_ex) {
+    THROW_SALOME_CORBA_EXCEPTION(S_ex.what(), SALOME::BAD_PARAM);
+  }
+
+  // Update Python script
+  aPythonDump << " ] = " << _this() << ".GetGroups()";
+
+  return aList._retn();
+}
+
 //=============================================================================
 /*! UnionGroups
  *  New group is created. All mesh elements that are

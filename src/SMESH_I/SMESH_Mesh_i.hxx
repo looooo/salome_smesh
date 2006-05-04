@@ -99,6 +99,9 @@ public:
   void RemoveGroupWithContents( SMESH::SMESH_GroupBase_ptr theGroup )
     throw (SALOME::SALOME_Exception);
   
+  SMESH::ListOfGroups* GetGroups()
+    throw (SALOME::SALOME_Exception);
+
   SMESH::SMESH_Group_ptr UnionGroups( SMESH::SMESH_GroupBase_ptr theGroup1, 
                                       SMESH::SMESH_GroupBase_ptr theGroup2, 
                                       const char* theName )

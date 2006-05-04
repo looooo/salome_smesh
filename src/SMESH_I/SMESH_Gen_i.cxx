@@ -699,6 +699,10 @@ SMESH::SMESH_Mesh_ptr SMESH_Gen_i::CreateMeshesFromUNV( const char* theFileName 
   SMESH_Mesh_i* aServant = dynamic_cast<SMESH_Mesh_i*>( GetServant( aMesh ).in() );
   ASSERT( aServant );
   aServant->ImportUNVFile( theFileName );
+
+  // Dump creation of groups
+  aServant->GetGroups();
+
   return aMesh._retn();
 }
 
@@ -717,11 +721,6 @@ SMESH::mesh_array* SMESH_Gen_i::CreateMeshesFromMED( const char* theFileName,
   Unexpect aCatch(SALOME_SalomeException);
   if(MYDEBUG) MESSAGE( "SMESH_Gen_i::CreateMeshFromMED" );
 
-  // Python Dump
-  TPythonDump aPythonDump;
-  aPythonDump << "([";
-  //TCollection_AsciiString aStr ("([");
-
   // Retrieve mesh names from the file
   DriverMED_R_SMESHDS_Mesh myReader;
   myReader.SetFile( theFileName );
@@ -730,6 +729,14 @@ SMESH::mesh_array* SMESH_Gen_i::CreateMeshesFromMED( const char* theFileName,
   list<string> aNames = myReader.GetMeshNames(aStatus);
   SMESH::mesh_array_var aResult = new SMESH::mesh_array();
   theStatus = (SMESH::DriverMED_ReadStatus)aStatus;
+
+  { // open a new scope to make aPythonDump die before PythonDump in SMESH_Mesh::GetGroups()
+
+  // Python Dump
+  TPythonDump aPythonDump;
+  aPythonDump << "([";
+  //TCollection_AsciiString aStr ("([");
+
   if (theStatus == SMESH::DRS_OK) {
     SALOMEDS::StudyBuilder_var aStudyBuilder = myCurrentStudy->NewBuilder();
     aStudyBuilder->NewCommand();  // There is a transaction
@@ -775,6 +782,10 @@ SMESH::mesh_array* SMESH_Gen_i::CreateMeshesFromMED( const char* theFileName,
 
   // Update Python script
   aPythonDump << "], status) = " << this << ".CreateMeshesFromMED('" << theFileName << "')";
+  }
+  // Dump creation of groups
+  for ( int i = 0; i < aResult->length(); ++i )
+    aResult[ i ]->GetGroups();
 
   return aResult._retn();
 }

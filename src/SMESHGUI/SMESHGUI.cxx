@@ -730,91 +730,81 @@ namespace{
     SALOME_ListIteratorOfListIO It(selected);
 
     aStudyBuilder->NewCommand();  // There is a transaction
-    for(; It.More(); It.Next()){
+    for(; It.More(); It.Next()){ // loop on selected IO's
       Handle(SALOME_InteractiveObject) IObject = It.Value();
-      if(IObject->hasEntry()){
-	_PTR(SObject) SO = aStudy->FindObjectID(IObject->getEntry());
+      if(IObject->hasEntry()) {
+	_PTR(SObject) aSO = aStudy->FindObjectID(IObject->getEntry());
 
 	// disable removal of "SMESH" component object
-	if(SO->FindAttribute(anAttr, "AttributeIOR")){
+	if(aSO->FindAttribute(anAttr, "AttributeIOR")){
 	  anIOR = anAttr;
 	  if ( !strcmp( (char*)anIOR->Value().c_str(), engineIOR().latin1() ) )
 	    continue;
 	}
 
-	/* Erase child graphical objects */
-	_PTR(ChildIterator) it = aStudy->NewChildIterator(SO);
-	for(it->InitEx(true); it->More(); it->Next()){
-	  _PTR(SObject) CSO = it->Value();
-	  if(CSO->FindAttribute(anAttr, "AttributeIOR")){
-	    anIOR = anAttr;
+        // put the whole hierarchy of sub-objects of the selected SO into a list and
+        // then treat them all starting from the deepest objects (at list back)
 
+        list< _PTR(SObject) > listSO;
+        listSO.push_back( aSO );
+        list< _PTR(SObject) >::iterator itSO = listSO.begin();
+        for ( ; itSO != listSO.end(); ++itSO ) {
+          _PTR(ChildIterator) it = aStudy->NewChildIterator( *itSO );
+          for (it->InitEx(false); it->More(); it->Next())
+            listSO.push_back( it->Value() );
+        }
+
+        // treat SO's in the list starting from the back
+
+        list< _PTR(SObject) >::reverse_iterator ritSO = listSO.rbegin();
+        for ( ; ritSO != listSO.rend(); ++ritSO ) {
+          _PTR(SObject) SO = *ritSO;
+          if ( !SO ) continue;
+          string anEntry = SO->GetID();
+
+          /** Erase graphical object **/
+	  if(SO->FindAttribute(anAttr, "AttributeIOR")){
 	    QPtrVector<SUIT_ViewWindow> aViews = vm->getViews();
 	    for(int i = 0; i < nbSf; i++){
 	      SUIT_ViewWindow *sf = aViews[i];
-	      CORBA::String_var anEntry = CSO->GetID().c_str();
-	      if(SMESH_Actor* anActor = SMESH::FindActorByEntry(sf,anEntry.in())){
+	      if(SMESH_Actor* anActor = SMESH::FindActorByEntry(sf,anEntry.c_str())){
 		SMESH::RemoveActor(sf,anActor);
 	      }
 	    }
 	  }
-	}
 
-	/* Erase main graphical object */
-	QPtrVector<SUIT_ViewWindow> aViews = vm->getViews();
-	for(int i = 0; i < nbSf; i++){
-	  SUIT_ViewWindow *sf = aViews[i];
-	  if(SMESH_Actor* anActor = SMESH::FindActorByEntry(sf,IObject->getEntry())){
-	    SMESH::RemoveActor(sf,anActor);
-	  }
-	}
+          /** Remove an object from data structures **/
+          SMESH::SMESH_GroupBase_var aGroup = SMESH::SMESH_GroupBase::_narrow( SMESH::SObjectToObject( SO ));
+          SMESH::SMESH_subMesh_var   aSubMesh = SMESH::SMESH_subMesh::_narrow( SMESH::SObjectToObject( SO ));
+          if ( !aGroup->_is_nil() ) {                          // DELETE GROUP
+            SMESH::SMESH_Mesh_var aMesh = aGroup->GetMesh();
+            aMesh->RemoveGroup( aGroup );
+          }
+          else if ( !aSubMesh->_is_nil() ) {                   // DELETE SUBMESH
+            SMESH::SMESH_Mesh_var aMesh = aSubMesh->GetFather();
+            aMesh->RemoveSubMesh( aSubMesh );
 
-	// Remove object(s) from data structures
-	_PTR(SObject) obj = aStudy->FindObjectID(IObject->getEntry());
-	if(obj){
-	  SMESH::SMESH_GroupBase_var aGroup = SMESH::SMESH_GroupBase::_narrow( SMESH::SObjectToObject( obj ) );
-	  SMESH::SMESH_subMesh_var   aSubMesh = SMESH::SMESH_subMesh::_narrow( SMESH::SObjectToObject( obj ) );
-          QString objType = CheckTypeObject(IObject);
-	  if ( !aGroup->_is_nil() ) {                          // DELETE GROUP
-	    SMESH::SMESH_Mesh_var aMesh = aGroup->GetMesh();
-	    aMesh->RemoveGroup( aGroup );
-	  }
-	  else if ( !aSubMesh->_is_nil() ) {                   // DELETE SUBMESH
-	    SMESH::SMESH_Mesh_var aMesh = aSubMesh->GetFather();
-	    aMesh->RemoveSubMesh( aSubMesh );
-	    
-	    _PTR(SObject) aMeshSO = SMESH::FindSObject(aMesh);
-	    if (aMeshSO)
+            _PTR(SObject) aMeshSO = SMESH::FindSObject(aMesh);
+            if (aMeshSO)
               SMESH::ModifiedMesh(aMeshSO, false);
-	  }
-	  else if ( objType == "Hypothesis" || objType == "Algorithm" ) {// DELETE HYPOTHESIS
-            SMESH::RemoveHypothesisOrAlgorithmOnMesh(IObject);
-	    aStudyBuilder->RemoveObjectWithChildren( obj );
-	  }
-	  else {// default action: remove SObject from the study
-	    // san - it's no use opening a transaction here until UNDO/REDO is provided in SMESH
-	    //SUIT_Operation *op = new SALOMEGUI_ImportOperation(myActiveStudy);
-	    //op->start();
-	    SMESH::SMESH_subMesh_var aSubMesh = SMESH::SMESH_subMesh::_nil();
-
-	    _PTR(ChildIterator) it = aStudy->NewChildIterator(obj);
-	    for ( ; it->More(); it->Next() ){
-	      _PTR(SObject) CSO = it->Value();
-	      aSubMesh = SMESH::SMESH_subMesh::_narrow( SMESH::SObjectToObject( CSO ) );
-	      if ( !aSubMesh->_is_nil() )
-		{
-		  SMESH::SMESH_Mesh_var aMesh = aSubMesh->GetFather();
-		  _PTR(SObject) aMeshSO = SMESH::FindSObject(aMesh);
-		  if (aMeshSO)
-		    SMESH::ModifiedMesh(aMeshSO, false);
-		  break;
-		}
-	    }
-	    aStudyBuilder->RemoveObjectWithChildren( obj );
-	    //op->finish();
-	  }
-	}
-
+          }
+          else {
+            IObject = new SALOME_InteractiveObject
+              ( anEntry.c_str(), engineIOR().latin1(), SO->GetName().c_str() );
+            QString objType = CheckTypeObject(IObject);
+            if ( objType == "Hypothesis" || objType == "Algorithm" ) {// DELETE HYPOTHESIS
+              SMESH::RemoveHypothesisOrAlgorithmOnMesh(IObject);
+              aStudyBuilder->RemoveObjectWithChildren( SO );
+            }
+            else {// default action: remove SObject from the study
+              // san - it's no use opening a transaction here until UNDO/REDO is provided in SMESH
+              //SUIT_Operation *op = new SALOMEGUI_ImportOperation(myActiveStudy);
+              //op->start();
+              aStudyBuilder->RemoveObjectWithChildren( SO );
+              //op->finish();
+            }
+          }
+	} /* listSO back loop */
       } /* IObject->hasEntry() */
     } /* more/next */
     aStudyBuilder->CommitCommand();

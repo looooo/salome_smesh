@@ -2481,9 +2481,6 @@ void SMESH_MeshEditor::Smooth (map<int,const SMDS_MeshElement*> & theElems,
     // move medium nodes of quadratic elements
     if ( isQuadratic )
     {
-      SMESH_MesherHelper helper( *GetMesh() );
-      if ( !face.IsNull() )
-        helper.SetSubShape( face );
       list< const SMDS_MeshElement* >::iterator elemIt = elemsOnFace.begin();
       for ( ; elemIt != elemsOnFace.end(); ++elemIt ) {
         const SMDS_QuadraticFaceOfNodes* QF =
@@ -6234,7 +6231,8 @@ void SMESH_MeshEditor::ConvertToQuadratic(const bool theForce3d)
 //purpose  :
 //=======================================================================
 void SMESH_MeshEditor::RemoveQuadElem(SMESHDS_SubMesh *theSm, 
-				      SMDS_ElemIteratorPtr theItr)
+				      SMDS_ElemIteratorPtr theItr,
+				      RemoveQuadNodeMap& theRemoveNodeMap)
 {
   SMESHDS_Mesh* meshDS = GetMeshDS();
   while( theItr->more() )
@@ -6249,22 +6247,18 @@ void SMESH_MeshEditor::RemoveQuadElem(SMESHDS_SubMesh *theSm,
 
       int nbNodes = elem->NbNodes(), idx = 0;
       vector<const SMDS_MeshNode *> aNds; 
-      vector<const SMDS_MeshNode *> aQuadNds; 
 
-      //remove all quadratic nodes 
       for(int i = 0; i < nbNodes; i++)
       {
 	const SMDS_MeshNode* n = elem->GetNode(i);
 
 	if( elem->IsMediumNode( n ) )
 	{
-	  aQuadNds.push_back( n );
-	  /*  ItRemoveQuadNodeMap itRNM = myRemoveNodeMap.find( n );
-	    if( itRNM == myRemoveNodeMap.end() )
-	    {
-	      aQuadNds.push_back( n );
-	      myRemoveNodeMap.insert(RemoveQuadNodeMap::value_type( n,theSm ));
-	      }*/
+	  ItRemoveQuadNodeMap itRNM = theRemoveNodeMap.find( n );
+	  if( itRNM == theRemoveNodeMap.end() )
+	  {
+	    theRemoveNodeMap.insert(RemoveQuadNodeMap::value_type( n,theSm ));
+	  }
 	}
 	else 
 	  aNds.push_back( n );
@@ -6277,10 +6271,6 @@ void SMESH_MeshEditor::RemoveQuadElem(SMESHDS_SubMesh *theSm,
       //remove old quadratic elements
       meshDS->RemoveFreeElement( elem, theSm );
 
-      for( int j = 0; j < aQuadNds.size(); j++ )
-      {
-	meshDS->RemoveFreeNode( aQuadNds[j], theSm );	
-      }
       SMDS_MeshElement * NewElem = 0;
       switch(aType)
       {
@@ -6321,7 +6311,7 @@ void SMESH_MeshEditor::RemoveQuadElem(SMESHDS_SubMesh *theSm,
 bool  SMESH_MeshEditor::ConvertFromQuadratic()
 {
   SMESHDS_Mesh* meshDS = GetMeshDS();
-  //  myRemoveNodeMap.clear();
+  RemoveQuadNodeMap aRemoveNodeMap;
 
   const TopoDS_Shape& aShape = meshDS->ShapeToMesh();
 
@@ -6335,23 +6325,24 @@ bool  SMESH_MeshEditor::ConvertFromQuadratic()
     {
       SMESHDS_SubMesh *sm = ((*itsub).second)->GetSubMeshDS();
       if( sm )
-	RemoveQuadElem( sm, sm->GetElements() );
+	RemoveQuadElem( sm, sm->GetElements(), aRemoveNodeMap );
     }
     SMESHDS_SubMesh *Sm = aSubMesh->GetSubMeshDS();
     if( Sm )
-      RemoveQuadElem( Sm, Sm->GetElements() );
+      RemoveQuadElem( Sm, Sm->GetElements(), aRemoveNodeMap );
   }
   else
   {
     SMESHDS_SubMesh *aSM = 0;
-    RemoveQuadElem( aSM, meshDS->elementsIterator() );
+    RemoveQuadElem( aSM, meshDS->elementsIterator(), aRemoveNodeMap );
   }
 
-  /*  ItRemoveQuadNodeMap itRNM = myRemoveNodeMap.begin();
-  for ( ; itRNM != myRemoveNodeMap.end(); itRNM++ ) {
+  //remove all quadratic nodes 
+  ItRemoveQuadNodeMap itRNM = aRemoveNodeMap.begin();
+  for ( ; itRNM != aRemoveNodeMap.end(); itRNM++ ) 
   {
-    meshDS->RemoveFreeNode( (*itRNM), (*itRNM).second  );	
-    }*/
+    meshDS->RemoveFreeNode( (*itRNM).first, (*itRNM).second  );	
+  }
 
   return true;
 }

@@ -44,6 +44,9 @@
 typedef map<const SMDS_MeshElement*,
             list<const SMDS_MeshElement*> > TElemOfElemListMap;
 
+typedef map<const SMDS_MeshNode*, SMESHDS_SubMesh*> RemoveQuadNodeMap;
+typedef map<const SMDS_MeshNode*, SMESHDS_SubMesh*>::iterator ItRemoveQuadNodeMap;
+
 class SMDS_MeshElement;
 class SMDS_MeshFace;
 class SMDS_MeshNode;
@@ -396,6 +399,8 @@ class SMESH_MeshEditor {
 
   SMESHDS_Mesh * GetMeshDS() { return myMesh->GetMeshDS(); }
 
+  SMESHDS_Mesh * GetMeshDS() { return myMesh->GetMeshDS(); }
+
   SMESH_SequenceOfElemPtr GetLastCreatedNodes() { return myLastCreatedNodes; }
 
   SMESH_SequenceOfElemPtr GetLastCreatedElems() { return myLastCreatedElems; }
@@ -409,7 +414,8 @@ private:
   //elements contained in submesh to quadratic
 
   void RemoveQuadElem( SMESHDS_SubMesh *theSm,
-		       SMDS_ElemIteratorPtr theItr);
+		       SMDS_ElemIteratorPtr theItr,
+		       RemoveQuadNodeMap& theRemoveNodeMap);
   //Auxiliary function for "ConvertFromQuadratic" is intended to convert quadratic
   //element to ordinary and for removing quadratic nodes
 

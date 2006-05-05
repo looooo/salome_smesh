@@ -192,6 +192,7 @@ void StdMeshersGUI_NbSegmentsCreator::retrieveParams() const
   myDistr->setCurrentItem( data.myDistrType );
   myScale->setValue( data.myScale );
   myConv->setButton( data.myConv );
+  myTable->table()->funcValidator()->setBottom(myConv->id( myConv->selected() )==0 ? -1E20 : 0);
   myTable->table()->setData( data.myTable );
   myExpr->setText( data.myExpr );
 }

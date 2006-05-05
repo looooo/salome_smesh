@@ -2481,6 +2481,9 @@ void SMESH_MeshEditor::Smooth (map<int,const SMDS_MeshElement*> & theElems,
     // move medium nodes of quadratic elements
     if ( isQuadratic )
     {
+      SMESH_MesherHelper helper( *GetMesh() );
+      if ( !face.IsNull() )
+        helper.SetSubShape( face );
       list< const SMDS_MeshElement* >::iterator elemIt = elemsOnFace.begin();
       for ( ; elemIt != elemsOnFace.end(); ++elemIt ) {
         const SMDS_QuadraticFaceOfNodes* QF =

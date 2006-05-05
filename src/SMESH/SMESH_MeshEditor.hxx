@@ -399,8 +399,6 @@ class SMESH_MeshEditor {
 
   SMESHDS_Mesh * GetMeshDS() { return myMesh->GetMeshDS(); }
 
-  SMESHDS_Mesh * GetMeshDS() { return myMesh->GetMeshDS(); }
-
   SMESH_SequenceOfElemPtr GetLastCreatedNodes() { return myLastCreatedNodes; }
 
   SMESH_SequenceOfElemPtr GetLastCreatedElems() { return myLastCreatedElems; }

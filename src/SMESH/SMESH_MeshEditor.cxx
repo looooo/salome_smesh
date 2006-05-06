@@ -41,6 +41,7 @@
 
 #include "SMESH_subMesh.hxx"
 #include "SMESH_ControlsDef.hxx"
+#include "SMESH_MesherHelper.hxx"
 
 #include "utilities.h"
 
@@ -65,6 +66,7 @@
 #include <GeomAdaptor_Surface.hxx>
 #include <ElCLib.hxx>
 #include <TColStd_ListOfInteger.hxx>
+#include <TopoDS_Face.hxx>
 
 #include <map>
 
@@ -811,7 +813,7 @@ static double getBadRate (const SMDS_MeshElement*               theElem,
 //           theCrit is used to select a diagonal to cut
 //=======================================================================
 
-bool SMESH_MeshEditor::QuadToTri (map<int,const SMDS_MeshElement*> &       theElems,
+bool SMESH_MeshEditor::QuadToTri (map<int,const SMDS_MeshElement*> &   theElems,
                                   SMESH::Controls::NumericalFunctorPtr theCrit)
 {
   myLastCreatedElems.Clear();
@@ -824,122 +826,133 @@ bool SMESH_MeshEditor::QuadToTri (map<int,const SMDS_MeshElement*> &       theEl
 
   SMESHDS_Mesh * aMesh = GetMeshDS();
 
+  Handle(Geom_Surface) surface;
+  SMESH_MesherHelper   helper( *GetMesh() );
+
   map<int, const SMDS_MeshElement * >::iterator itElem;
   for ( itElem = theElems.begin(); itElem != theElems.end(); itElem++ ) {
     const SMDS_MeshElement* elem = (*itElem).second;
     if ( !elem || elem->GetType() != SMDSAbs_Face )
       continue;
+    if ( elem->NbNodes() != ( elem->IsQuadratic() ? 8 : 4 ))
+      continue;
 
-    if(elem->NbNodes()==4) {
+    // retrieve element nodes
+    const SMDS_MeshNode* aNodes [8];
+    SMDS_ElemIteratorPtr itN = elem->nodesIterator();
+    int i = 0;
+    while ( itN->more() )
+      aNodes[ i++ ] = static_cast<const SMDS_MeshNode*>( itN->next() );
 
-      // retrieve element nodes
-      const SMDS_MeshNode* aNodes [4];
-      SMDS_ElemIteratorPtr itN = elem->nodesIterator();
-      int i = 0;
-      while ( itN->more() )
-        aNodes[ i++ ] = static_cast<const SMDS_MeshNode*>( itN->next() );
+    // compare two sets of possible triangles
+    double aBadRate1, aBadRate2; // to what extent a set is bad
+    SMDS_FaceOfNodes tr1 ( aNodes[0], aNodes[1], aNodes[2] );
+    SMDS_FaceOfNodes tr2 ( aNodes[2], aNodes[3], aNodes[0] );
+    aBadRate1 = getBadRate( &tr1, theCrit ) + getBadRate( &tr2, theCrit );
 
-      // compare two sets of possible triangles
-      double aBadRate1, aBadRate2; // to what extent a set is bad
-      SMDS_FaceOfNodes tr1 ( aNodes[0], aNodes[1], aNodes[2] );
-      SMDS_FaceOfNodes tr2 ( aNodes[2], aNodes[3], aNodes[0] );
-      aBadRate1 = getBadRate( &tr1, theCrit ) + getBadRate( &tr2, theCrit );
-      
-      SMDS_FaceOfNodes tr3 ( aNodes[1], aNodes[2], aNodes[3] );
-      SMDS_FaceOfNodes tr4 ( aNodes[3], aNodes[0], aNodes[1] );
-      aBadRate2 = getBadRate( &tr3, theCrit ) + getBadRate( &tr4, theCrit );
+    SMDS_FaceOfNodes tr3 ( aNodes[1], aNodes[2], aNodes[3] );
+    SMDS_FaceOfNodes tr4 ( aNodes[3], aNodes[0], aNodes[1] );
+    aBadRate2 = getBadRate( &tr3, theCrit ) + getBadRate( &tr4, theCrit );
 
-      int aShapeId = FindShape( elem );
-      //MESSAGE( "aBadRate1 = " << aBadRate1 << "; aBadRate2 = " << aBadRate2
-      //      << " ShapeID = " << aShapeId << endl << elem );
+    int aShapeId = FindShape( elem );
+    const SMDS_MeshElement* newElem = 0;
+
+    if( !elem->IsQuadratic() ) {
+
+      // split liner quadrangle
 
       if ( aBadRate1 <= aBadRate2 ) {
         // tr1 + tr2 is better
         aMesh->ChangeElementNodes( elem, aNodes, 3 );
-        //MESSAGE( endl << elem );
-
-        elem = aMesh->AddFace( aNodes[2], aNodes[3], aNodes[0] );
+        newElem = aMesh->AddFace( aNodes[2], aNodes[3], aNodes[0] );
       }
       else {
         // tr3 + tr4 is better
         aMesh->ChangeElementNodes( elem, &aNodes[1], 3 );
-        //MESSAGE( endl << elem );
-        
-        elem = aMesh->AddFace( aNodes[3], aNodes[0], aNodes[1] );
+        newElem = aMesh->AddFace( aNodes[3], aNodes[0], aNodes[1] );
       }
-      //MESSAGE( endl << elem );
-      myLastCreatedElems.Append(elem);
-
-      // put a new triangle on the same shape
-      if ( aShapeId )
-        aMesh->SetMeshElementOnShape( elem, aShapeId );
     }
+    else {
 
-    if( elem->NbNodes()==8 && elem->IsQuadratic() ) {
+      // split qudratic quadrangle
+
+      // get surface elem is on
+      if ( aShapeId != helper.GetSubShapeID() ) {
+        surface.Nullify();
+        TopoDS_Shape shape = aMesh->IndexToShape( aShapeId );
+        if ( !shape.IsNull() && shape.ShapeType() == TopAbs_FACE ) {
+          TopoDS_Face face = TopoDS::Face( shape );
+          surface = BRep_Tool::Surface( face );
+          if ( !surface.IsNull() )
+            helper.SetSubShape( shape );
+        }
+      }
+      // get elem nodes
       const SMDS_MeshNode* aNodes [8];
+      const SMDS_MeshNode* inFaceNode = 0;
       SMDS_ElemIteratorPtr itN = elem->nodesIterator();
       int i = 0;
       while ( itN->more() ) {
         aNodes[ i++ ] = static_cast<const SMDS_MeshNode*>( itN->next() );
+        if ( !inFaceNode && helper.GetNodeUVneedInFaceNode() &&
+             aNodes[ i-1 ]->GetPosition()->GetTypeOfPosition() == SMDS_TOP_FACE )
+        {
+          inFaceNode = aNodes[ i-1 ];
+        } 
       }
-
-      // compare two sets of possible triangles
-      // use for comparing simple triangles (not quadratic)
-      double aBadRate1, aBadRate2; // to what extent a set is bad
-      SMDS_FaceOfNodes tr1 ( aNodes[0], aNodes[1], aNodes[2] );
-      SMDS_FaceOfNodes tr2 ( aNodes[2], aNodes[3], aNodes[0] );
-      aBadRate1 = getBadRate( &tr1, theCrit ) + getBadRate( &tr2, theCrit );
-
-      SMDS_FaceOfNodes tr3 ( aNodes[1], aNodes[2], aNodes[3] );
-      SMDS_FaceOfNodes tr4 ( aNodes[3], aNodes[0], aNodes[1] );
-      aBadRate2 = getBadRate( &tr3, theCrit ) + getBadRate( &tr4, theCrit );
-
-      int aShapeId = FindShape( elem );
-      
       // find middle point for (0,1,2,3)
-      // and create node in this point;
-      double x=0., y=0., z=0.;
-      for(i=0; i<4; i++) {
-        x += aNodes[i]->X();
-        y += aNodes[i]->Y();
-        z += aNodes[i]->Z();
+      // and create a node in this point;
+      gp_XYZ p( 0,0,0 );
+      if ( surface.IsNull() ) {
+        for(i=0; i<4; i++)
+          p += gp_XYZ(aNodes[i]->X(), aNodes[i]->Y(), aNodes[i]->Z() );
+        p /= 4;
       }
-      const SMDS_MeshNode* newN = aMesh->AddNode(x/4, y/4, z/4);
+      else {
+        TopoDS_Face face = TopoDS::Face( helper.GetSubShape() );
+        gp_XY uv( 0,0 );
+        for(i=0; i<4; i++)
+          uv += helper.GetNodeUV( face, aNodes[i], inFaceNode );
+        uv /= 4.;
+        p = surface->Value( uv.X(), uv.Y() ).XYZ();
+      }
+      const SMDS_MeshNode* newN = aMesh->AddNode( p.X(), p.Y(), p.Z() );
       myLastCreatedNodes.Append(newN);
 
+      // create a new element
+      const SMDS_MeshNode* N[6];
       if ( aBadRate1 <= aBadRate2 ) {
-        // tr1 + tr2 is better
-        const SMDS_MeshNode* N[6];
         N[0] = aNodes[0];
         N[1] = aNodes[1];
         N[2] = aNodes[2];
         N[3] = aNodes[4];
         N[4] = aNodes[5];
         N[5] = newN;
-        aMesh->ChangeElementNodes( elem, N, 6 );
-        elem = aMesh->AddFace(aNodes[2], aNodes[3], aNodes[0],
-                              aNodes[6], aNodes[7], newN );
+        newElem = aMesh->AddFace(aNodes[2], aNodes[3], aNodes[0],
+                                 aNodes[6], aNodes[7], newN );
       }
       else {
-        // tr3 + tr4 is better
-        const SMDS_MeshNode* N[6];
         N[0] = aNodes[1];
         N[1] = aNodes[2];
         N[2] = aNodes[3];
         N[3] = aNodes[5];
         N[4] = aNodes[6];
         N[5] = newN;
-        aMesh->ChangeElementNodes( elem, N, 6 );
-        elem = aMesh->AddFace(aNodes[3], aNodes[0], aNodes[1],
-                              aNodes[7], aNodes[4], newN );
+        newElem = aMesh->AddFace(aNodes[3], aNodes[0], aNodes[1],
+                                 aNodes[7], aNodes[4], newN );
       }
-      myLastCreatedElems.Append(elem);
-      // put a new triangle on the same shape
-      if ( aShapeId ) {
-        aMesh->SetMeshElementOnShape( elem, aShapeId );
-      }
-    }
+      aMesh->ChangeElementNodes( elem, N, 6 );
 
+    } // qudratic case
+
+    // care of a new element
+
+    myLastCreatedElems.Append(newElem);
+    AddToSameGroups( newElem, elem, aMesh );
+
+    // put a new triangle on the same shape
+    if ( aShapeId )
+      aMesh->SetMeshElementOnShape( newElem, aShapeId );
   }
   return true;
 }
@@ -1036,7 +1049,7 @@ void SMESH_MeshEditor::RemoveElemFromGroups (const SMDS_MeshElement* removeelem,
 //=======================================================================
 
 bool SMESH_MeshEditor::QuadToTri (std::map<int,const SMDS_MeshElement*> & theElems,
-                                  const bool                          the13Diag)
+                                  const bool                              the13Diag)
 {
   myLastCreatedElems.Clear();
   myLastCreatedNodes.Clear();
@@ -1044,6 +1057,9 @@ bool SMESH_MeshEditor::QuadToTri (std::map<int,const SMDS_MeshElement*> & theEle
   MESSAGE( "::QuadToTri()" );
 
   SMESHDS_Mesh * aMesh = GetMeshDS();
+
+  Handle(Geom_Surface) surface;
+  SMESH_MesherHelper   helper( *GetMesh() );
 
   map<int, const SMDS_MeshElement * >::iterator itElem;
   for ( itElem = theElems.begin(); itElem != theElems.end(); itElem++ ) {
@@ -1078,52 +1094,80 @@ bool SMESH_MeshEditor::QuadToTri (std::map<int,const SMDS_MeshElement*> & theEle
       AddToSameGroups( newElem, elem, aMesh );
     }
 
+    // Quadratic quadrangle
+
     if( elem->NbNodes()==8 && elem->IsQuadratic() ) {
+
+      // get surface elem is on
+      int aShapeId = FindShape( elem );
+      if ( aShapeId != helper.GetSubShapeID() ) {
+        surface.Nullify();
+        TopoDS_Shape shape = aMesh->IndexToShape( aShapeId );
+        if ( !shape.IsNull() && shape.ShapeType() == TopAbs_FACE ) {
+          TopoDS_Face face = TopoDS::Face( shape );
+          surface = BRep_Tool::Surface( face );
+          if ( !surface.IsNull() )
+            helper.SetSubShape( shape );
+        }
+      }
+
       const SMDS_MeshNode* aNodes [8];
+      const SMDS_MeshNode* inFaceNode = 0;
       SMDS_ElemIteratorPtr itN = elem->nodesIterator();
       int i = 0;
       while ( itN->more() ) {
         aNodes[ i++ ] = static_cast<const SMDS_MeshNode*>( itN->next() );
+        if ( !inFaceNode && helper.GetNodeUVneedInFaceNode() &&
+             aNodes[ i-1 ]->GetPosition()->GetTypeOfPosition() == SMDS_TOP_FACE )
+        {
+          inFaceNode = aNodes[ i-1 ];
+        } 
       }
 
       // find middle point for (0,1,2,3)
-      // and create node in this point;
-      double x=0., y=0., z=0.;
-      for(i=0; i<4; i++) {
-        x += aNodes[i]->X();
-        y += aNodes[i]->Y();
-        z += aNodes[i]->Z();
+      // and create a node in this point;
+      gp_XYZ p( 0,0,0 );
+      if ( surface.IsNull() ) {
+        for(i=0; i<4; i++)
+          p += gp_XYZ(aNodes[i]->X(), aNodes[i]->Y(), aNodes[i]->Z() );
+        p /= 4;
       }
-      const SMDS_MeshNode* newN = aMesh->AddNode(x/4, y/4, z/4);
+      else {
+        TopoDS_Face geomFace = TopoDS::Face( helper.GetSubShape() );
+        gp_XY uv( 0,0 );
+        for(i=0; i<4; i++)
+          uv += helper.GetNodeUV( geomFace, aNodes[i], inFaceNode );
+        uv /= 4.;
+        p = surface->Value( uv.X(), uv.Y() ).XYZ();
+      }
+      const SMDS_MeshNode* newN = aMesh->AddNode( p.X(), p.Y(), p.Z() );
       myLastCreatedNodes.Append(newN);
 
-      int aShapeId = FindShape( elem );
+      // create a new element
       const SMDS_MeshElement* newElem = 0;
+      const SMDS_MeshNode* N[6];
       if ( the13Diag ) {
-        const SMDS_MeshNode* N[6];
         N[0] = aNodes[0];
         N[1] = aNodes[1];
         N[2] = aNodes[2];
         N[3] = aNodes[4];
         N[4] = aNodes[5];
         N[5] = newN;
-        aMesh->ChangeElementNodes( elem, N, 6 );
-        elem = aMesh->AddFace(aNodes[2], aNodes[3], aNodes[0],
-                              aNodes[6], aNodes[7], newN );
+        newElem = aMesh->AddFace(aNodes[2], aNodes[3], aNodes[0],
+                                 aNodes[6], aNodes[7], newN );
       }
       else {
-        const SMDS_MeshNode* N[6];
         N[0] = aNodes[1];
         N[1] = aNodes[2];
         N[2] = aNodes[3];
         N[3] = aNodes[5];
         N[4] = aNodes[6];
         N[5] = newN;
-        aMesh->ChangeElementNodes( elem, N, 6 );
-        elem = aMesh->AddFace(aNodes[3], aNodes[0], aNodes[1],
-                              aNodes[7], aNodes[4], newN );
+        newElem = aMesh->AddFace(aNodes[3], aNodes[0], aNodes[1],
+                                 aNodes[7], aNodes[4], newN );
       }
-      myLastCreatedElems.Append(elem);
+      myLastCreatedElems.Append(newElem);
+      aMesh->ChangeElementNodes( elem, N, 6 );
       // put a new triangle on the same shape and add to the same groups
       if ( aShapeId )
         aMesh->SetMeshElementOnShape( newElem, aShapeId );

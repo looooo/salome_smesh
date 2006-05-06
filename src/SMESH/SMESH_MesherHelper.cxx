@@ -107,11 +107,36 @@ bool SMESH_MesherHelper::IsQuadraticSubMesh(const TopoDS_Shape& aSh)
  */
 //================================================================================
 
+void SMESH_MesherHelper::SetSubShape(const int aShID)
+{
+  if ( aShID == myShapeID )
+    return;
+  if ( aShID > 1 )
+    SetSubShape( GetMesh()->GetMeshDS()->IndexToShape( aShID ));
+  else
+    SetSubShape( TopoDS_Shape() );
+}
+
+//================================================================================
+/*!
+ * \brief Set geomerty to make elements on
+  * \param aSh - geomertic shape
+ */
+//================================================================================
+
 void SMESH_MesherHelper::SetSubShape(const TopoDS_Shape& aSh)
 {
-  SMESHDS_Mesh* meshDS = GetMesh()->GetMeshDS();
+  if ( !myShape.IsNull() && !aSh.IsNull() && myShape.IsSame( aSh ))
+    return;
 
   myShape = aSh;
+  mySeamShapeIds.clear();
+
+  if ( myShape.IsNull() ) {
+    myShapeID  = -1;
+    return;
+  }
+  SMESHDS_Mesh* meshDS = GetMesh()->GetMeshDS();
   myShapeID = meshDS->ShapeToIndex(aSh);
 
   // treatment of periodic faces
@@ -151,6 +176,27 @@ void SMESH_MesherHelper::SetSubShape(const TopoDS_Shape& aSh)
   }
 }
 
+//================================================================================
+  /*!
+   * \brief Check if inFaceNode argument is necessary for call GetNodeUV(F,..)
+    * \param F - the face
+    * \retval bool - return true if the face is periodic
+   */
+//================================================================================
+
+bool SMESH_MesherHelper::GetNodeUVneedInFaceNode(const TopoDS_Face& F) const
+{
+  if ( F.IsNull() ) return !mySeamShapeIds.empty();
+
+  if ( !F.IsNull() && !myShape.IsNull() && myShape.IsSame( F ))
+    return !mySeamShapeIds.empty();
+
+  Handle(Geom_Surface) aSurface = BRep_Tool::Surface( F );
+  if ( !aSurface.IsNull() )
+    return ( aSurface->IsUPeriodic() || aSurface->IsVPeriodic() );
+
+  return false;
+}
 
 //=======================================================================
 //function : IsMedium
@@ -206,7 +252,7 @@ gp_Pnt2d SMESH_MesherHelper::GetUVOnSeam( const gp_Pnt2d& uv1, const gp_Pnt2d& u
  * \brief Return node UV on face
  * \param F - the face
  * \param n - the node
- * \param n2 - a medium node will be placed between n and n2
+ * \param n2 - a node of element being created located inside a face
  * \retval gp_XY - resulting UV
  * 
  * Auxilary function called form GetMediumNode()

@@ -55,7 +55,7 @@ class SMESH_MesherHelper
 
   /// Empty constructor
   SMESH_MesherHelper(SMESH_Mesh& theMesh)
-    { myMesh=(void *)&theMesh; myCreateQuadratic = false; }
+    { myMesh=(void *)&theMesh; myCreateQuadratic = false; myShapeID=-1;}
 
   SMESH_Mesh* GetMesh() const
     { return (SMESH_Mesh*)myMesh; }
@@ -106,14 +106,24 @@ class SMESH_MesherHelper
    * \brief Return node UV on face
     * \param F - the face
     * \param n - the node
-    * \param n2 - a medium node will be placed between n and n2
+    * \param inFaceNode - a node of element being created located inside a face
     * \retval gp_XY - resulting UV
    * 
    * Auxilary function called form GetMediumNode()
    */
   gp_XY GetNodeUV(const TopoDS_Face&   F,
                   const SMDS_MeshNode* n,
-                  const SMDS_MeshNode* n2=0);
+                  const SMDS_MeshNode* inFaceNode=0);
+
+  /*!
+   * \brief Check if inFaceNode argument is necessary for call GetNodeUV(F,..)
+    * \param F - the face
+    * \retval bool - return true if the face is periodic
+    *
+    * if F is Null, answer about subshape set through IsQuadraticSubMesh() or
+    * SetSubShape()
+   */
+  bool GetNodeUVneedInFaceNode(const TopoDS_Face& F = TopoDS_Face()) const;
 
   /*!
    * \brief Return  U on edge
@@ -198,10 +208,29 @@ class SMESH_MesherHelper
 			     bool force3d = true);
 
   
-  void SetKeyIsQuadratic(const bool theKey)
-    {myCreateQuadratic = theKey;};
+  /*!
+   * \brief Set order of elements to create
+    * \param theBuildQuadratic - to build quadratic or not
+   * 
+   * To be used for quadratic elements creation without preceding
+   * IsQuadraticSubMesh() or AddQuadraticEdge() call
+   */
+  void SetKeyIsQuadratic(const bool theBuildQuadratic)
+  { myCreateQuadratic = theBuildQuadratic; }
 
+  /*!
+   * \brief Set shape to make elements on
+    * \param subShape, subShapeID - shape or its ID (==SMESHDS_Mesh::ShapeToIndex(shape))
+   */
+  void SetSubShape(const int           subShapeID);
   void SetSubShape(const TopoDS_Shape& subShape);
+
+  /*!
+   * \brief Return shape or its ID, on which created elements are added
+    * \retval TopoDS_Shape, int - shape or its ID
+   */
+  int          GetSubShapeID() { return myShapeID; }
+  TopoDS_Shape GetSubShape()   { return myShape; }
 
  protected:
 

@@ -1250,7 +1250,7 @@ SMESH::SMESH_MeshEditor::Extrusion_Error
   TopoDS_Shape aShape = SMESH_Gen_i::GetSMESHGen()->GeomObjectToShape( thePathShape );
   SMESH_subMesh* aSubMesh = aMeshImp->GetImpl().GetSubMesh( aShape );
 
-  if ( !aSubMesh )
+  if ( !aSubMesh || !aSubMesh->GetSubMeshDS())
     return SMESH::SMESH_MeshEditor::EXTR_BAD_PATH_SHAPE;
 
   SMDS_MeshNode* nodeStart = (SMDS_MeshNode*)aMeshImp->GetImpl().GetMeshDS()->FindNode(theNodeStart);

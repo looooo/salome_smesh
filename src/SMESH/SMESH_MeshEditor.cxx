@@ -6163,6 +6163,7 @@ void SMESH_MeshEditor::ConvertToQuadratic(const bool theForce3d)
   SMESHDS_Mesh* meshDS = GetMeshDS();
 
   SMESH_MesherHelper* aHelper = new SMESH_MesherHelper(*myMesh);
+  aHelper->SetKeyIsQuadratic( true );
   const TopoDS_Shape& aShape = meshDS->ShapeToMesh();
 
   if ( !aShape.IsNull() && GetMesh()->GetSubMeshContaining(aShape) )

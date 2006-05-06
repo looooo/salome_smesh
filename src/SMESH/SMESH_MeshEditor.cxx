@@ -879,7 +879,9 @@ bool SMESH_MeshEditor::QuadToTri (map<int,const SMDS_MeshElement*> &   theElems,
       // get surface elem is on
       if ( aShapeId != helper.GetSubShapeID() ) {
         surface.Nullify();
-        TopoDS_Shape shape = aMesh->IndexToShape( aShapeId );
+        TopoDS_Shape shape;
+        if ( aShapeId > 0 )
+          shape = aMesh->IndexToShape( aShapeId );
         if ( !shape.IsNull() && shape.ShapeType() == TopAbs_FACE ) {
           TopoDS_Face face = TopoDS::Face( shape );
           surface = BRep_Tool::Surface( face );
@@ -1102,7 +1104,9 @@ bool SMESH_MeshEditor::QuadToTri (std::map<int,const SMDS_MeshElement*> & theEle
       int aShapeId = FindShape( elem );
       if ( aShapeId != helper.GetSubShapeID() ) {
         surface.Nullify();
-        TopoDS_Shape shape = aMesh->IndexToShape( aShapeId );
+        TopoDS_Shape shape;
+        if ( aShapeId > 0 )
+          shape = aMesh->IndexToShape( aShapeId );
         if ( !shape.IsNull() && shape.ShapeType() == TopAbs_FACE ) {
           TopoDS_Face face = TopoDS::Face( shape );
           surface = BRep_Tool::Surface( face );

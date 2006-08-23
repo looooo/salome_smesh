@@ -17,7 +17,7 @@
 //  License along with this library; if not, write to the Free Software
 //  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 //
-// See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
+//  See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 //
 //
 //
@@ -37,13 +37,15 @@
 #include "SMESH_Gen_i.hxx"
 #include "SMESH_Filter_i.hxx"
 #include "SMESH_PythonDump.hxx"
-#include "CASCatch.hxx"
 
 #include "utilities.h"
 
 #include <gp_Ax1.hxx>
 #include <gp_Ax2.hxx>
 #include <gp_Vec.hxx>
+
+#include <Standard_Failure.hxx>
+#include <Standard_ErrorHandler.hxx>
 
 #include <sstream>
 
@@ -1052,7 +1054,8 @@ void SMESH_MeshEditor_i::ExtrusionSweep(const SMESH::long_array & theIDsOfElemen
   myLastCreatedElems = new SMESH::long_array();
   myLastCreatedNodes = new SMESH::long_array();
 
-  CASCatch_TRY {   
+  try {   
+    OCC_CATCH_SIGNALS;
     SMESHDS_Mesh* aMesh = GetMeshDS();
     
     map<int,const SMDS_MeshElement*> elements;
@@ -1073,7 +1076,7 @@ void SMESH_MeshEditor_i::ExtrusionSweep(const SMESH::long_array & theIDsOfElemen
 		  << theIDsOfElements << ", stepVector, " << theNbOfSteps << " )";
 
   }
-  CASCatch_CATCH(Standard_Failure) {
+  catch(Standard_Failure) {
     Handle(Standard_Failure) aFail = Standard_Failure::Caught();          
     INFOS( "SMESH_MeshEditor_i::ExtrusionSweep fails - "<< aFail->GetMessageString() );
   }

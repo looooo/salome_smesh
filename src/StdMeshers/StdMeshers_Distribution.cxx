@@ -27,10 +27,12 @@
 //  $Header$
 
 #include "StdMeshers_Distribution.hxx"
-#include "CASCatch.hxx"
 
 #include <math_GaussSingleIntegration.hxx>
 #include <utilities.h>
+
+#include <Standard_Failure.hxx>
+#include <Standard_ErrorHandler.hxx>
 
 Function::Function( const int conv )
 : myConv( conv )
@@ -46,11 +48,11 @@ bool Function::value( const double, double& f ) const
   bool ok = true;
   if( myConv==0 )
   {
-    CASCatch_TRY
-    {
+    try {
+      OCC_CATCH_SIGNALS;
       f = pow( 10, f );
     }
-    CASCatch_CATCH(Standard_Failure)
+    catch(Standard_Failure)
     {
       Handle(Standard_Failure) aFail = Standard_Failure::Caught();
       f = 0.0;
@@ -170,12 +172,12 @@ FunctionExpr::FunctionExpr( const char* str, const int conv )
   myValues( 1, 1 )
 {
   bool ok = true;
-  CASCatch_TRY
-  {
+  try {
+    OCC_CATCH_SIGNALS;
     myExpr = ExprIntrp_GenExp::Create();
     myExpr->Process( ( Standard_CString )str );
   }
-  CASCatch_CATCH(Standard_Failure)
+  catch(Standard_Failure)
   {
     Handle(Standard_Failure) aFail = Standard_Failure::Caught();
     ok = false;
@@ -206,10 +208,11 @@ bool FunctionExpr::value( const double t, double& f ) const
 
   ( ( TColStd_Array1OfReal& )myValues ).ChangeValue( 1 ) = t;
   bool ok = true;
-  CASCatch_TRY {
+  try {
+    OCC_CATCH_SIGNALS;
     f = myExpr->Expression()->Evaluate( myVars, myValues );
   }
-  CASCatch_CATCH(Standard_Failure) {
+  catch(Standard_Failure) {
     Handle(Standard_Failure) aFail = Standard_Failure::Caught();
     f = 0.0;
     ok = false;
@@ -222,13 +225,13 @@ bool FunctionExpr::value( const double t, double& f ) const
 double FunctionExpr::integral( const double a, const double b ) const
 {
   double res = 0.0;
-  CASCatch_TRY
-  {
+  try {
+    OCC_CATCH_SIGNALS;
     math_GaussSingleIntegration _int( ( math_Function& )*this, a, b, 20 );
     if( _int.IsDone() )
       res = _int.Value();
   }
-  CASCatch_CATCH(Standard_Failure)
+  catch(Standard_Failure)
   {
     res = 0.0;
     MESSAGE( "Exception in integral calculating" );

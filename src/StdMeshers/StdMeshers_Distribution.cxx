@@ -49,7 +49,9 @@ bool Function::value( const double, double& f ) const
   if( myConv==0 )
   {
     try {
+#if (OCC_VERSION_MAJOR << 16 | OCC_VERSION_MINOR << 8 | OCC_VERSION_MAINTENANCE) > 0x060100
       OCC_CATCH_SIGNALS;
+#endif
       f = pow( 10, f );
     }
     catch(Standard_Failure)
@@ -173,7 +175,9 @@ FunctionExpr::FunctionExpr( const char* str, const int conv )
 {
   bool ok = true;
   try {
+#if (OCC_VERSION_MAJOR << 16 | OCC_VERSION_MINOR << 8 | OCC_VERSION_MAINTENANCE) > 0x060100
     OCC_CATCH_SIGNALS;
+#endif
     myExpr = ExprIntrp_GenExp::Create();
     myExpr->Process( ( Standard_CString )str );
   }
@@ -209,7 +213,9 @@ bool FunctionExpr::value( const double t, double& f ) const
   ( ( TColStd_Array1OfReal& )myValues ).ChangeValue( 1 ) = t;
   bool ok = true;
   try {
+#if (OCC_VERSION_MAJOR << 16 | OCC_VERSION_MINOR << 8 | OCC_VERSION_MAINTENANCE) > 0x060100
     OCC_CATCH_SIGNALS;
+#endif
     f = myExpr->Expression()->Evaluate( myVars, myValues );
   }
   catch(Standard_Failure) {
@@ -226,7 +232,9 @@ double FunctionExpr::integral( const double a, const double b ) const
 {
   double res = 0.0;
   try {
+#if (OCC_VERSION_MAJOR << 16 | OCC_VERSION_MINOR << 8 | OCC_VERSION_MAINTENANCE) > 0x060100
     OCC_CATCH_SIGNALS;
+#endif
     math_GaussSingleIntegration _int( ( math_Function& )*this, a, b, 20 );
     if( _int.IsDone() )
       res = _int.Value();

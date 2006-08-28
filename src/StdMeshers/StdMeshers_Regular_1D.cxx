@@ -575,7 +575,9 @@ bool StdMeshers_Regular_1D::Compute(SMESH_Mesh & aMesh, const TopoDS_Shape & aSh
     if ( !_mainEdge.IsNull() )
       reversed = aMesh.IsReversedInChain( EE, _mainEdge );
     try {
+#if (OCC_VERSION_MAJOR << 16 | OCC_VERSION_MINOR << 8 | OCC_VERSION_MAINTENANCE) > 0x060100
       OCC_CATCH_SIGNALS;
+#endif
       if ( ! computeInternalParameters( E, params, reversed )) {
         //cout << "computeInternalParameters() failed" <<endl;
         return false;

@@ -220,7 +220,9 @@ void StdMeshers_NumberOfSegments::SetTableFunction(const std::vector<double>& ta
     if( _convMode==0 )
     {
       try {
+#if (OCC_VERSION_MAJOR << 16 | OCC_VERSION_MINOR << 8 | OCC_VERSION_MAINTENANCE) > 0x060100
         OCC_CATCH_SIGNALS;
+#endif
 	val = pow( 10.0, val );
       }
       catch(Standard_Failure)
@@ -314,7 +316,9 @@ bool process( const TCollection_AsciiString& str, int convMode,
   bool parsed_ok = true;
   Handle( ExprIntrp_GenExp ) myExpr;
   try {
+#if (OCC_VERSION_MAJOR << 16 | OCC_VERSION_MINOR << 8 | OCC_VERSION_MAINTENANCE) > 0x060100
     OCC_CATCH_SIGNALS;
+#endif
     myExpr = ExprIntrp_GenExp::Create();
     myExpr->Process( str.ToCString() );
   }

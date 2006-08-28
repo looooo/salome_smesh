@@ -243,7 +243,9 @@ void StdMeshersGUI_DistrPreview::update()
   x = y = 0;
 
   try {   
+#if (OCC_VERSION_MAJOR << 16 | OCC_VERSION_MINOR << 8 | OCC_VERSION_MAINTENANCE) > 0x060100
     OCC_CATCH_SIGNALS;
+#endif
     replot();
   }
   catch(Standard_Failure)
@@ -288,7 +290,9 @@ bool StdMeshersGUI_DistrPreview::init( const QString& str )
 {
   bool parsed_ok = true;
   try {
+#if (OCC_VERSION_MAJOR << 16 | OCC_VERSION_MINOR << 8 | OCC_VERSION_MAINTENANCE) > 0x060100
     OCC_CATCH_SIGNALS;
+#endif
     myExpr = ExprIntrp_GenExp::Create();
     myExpr->Process( ( Standard_CString ) str.latin1() );
   }
@@ -330,7 +334,9 @@ double StdMeshersGUI_DistrPreview::calc( bool& ok )
 
   ok = true;
   try {   
+#if (OCC_VERSION_MAJOR << 16 | OCC_VERSION_MINOR << 8 | OCC_VERSION_MAINTENANCE) > 0x060100
     OCC_CATCH_SIGNALS;
+#endif
     res = myExpr->Expression()->Evaluate( myVars, myValues );
   }
   catch(Standard_Failure) {
@@ -355,7 +361,9 @@ bool StdMeshersGUI_DistrPreview::convert( double& v ) const
   case EXPONENT:
     {
       try { 
+#if (OCC_VERSION_MAJOR << 16 | OCC_VERSION_MINOR << 8 | OCC_VERSION_MAINTENANCE) > 0x060100
         OCC_CATCH_SIGNALS;
+#endif
 	// in StdMeshers_NumberOfSegments.cc
 	// const double PRECISION = 1e-7;
 	//

@@ -1265,7 +1265,9 @@ bool SMESH_subMesh::ComputeStateEngine(int event)
         RemoveSubMeshElementsAndNodes();
 	{
 	  try {
+#if (OCC_VERSION_MAJOR << 16 | OCC_VERSION_MINOR << 8 | OCC_VERSION_MAINTENANCE) > 0x060100
             OCC_CATCH_SIGNALS;
+#endif
 	    if (!algo->NeedDescretBoundary() && !algo->OnlyUnaryInput())
 	      ret = ApplyToCollection( algo, GetCollection( gen, algo ) );
 	    else

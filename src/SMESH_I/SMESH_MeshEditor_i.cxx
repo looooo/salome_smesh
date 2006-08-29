@@ -44,8 +44,17 @@
 #include <gp_Ax2.hxx>
 #include <gp_Vec.hxx>
 
+#if (OCC_VERSION_MAJOR << 16 | OCC_VERSION_MINOR << 8 | OCC_VERSION_MAINTENANCE) > 0x060100
+#define NO_CAS_CATCH
+#endif
+
 #include <Standard_Failure.hxx>
+
+#ifdef NO_CAS_CATCH
 #include <Standard_ErrorHandler.hxx>
+#else
+#include "CASCatch.hxx"
+#endif
 
 #include <sstream>
 
@@ -1054,18 +1063,20 @@ void SMESH_MeshEditor_i::ExtrusionSweep(const SMESH::long_array & theIDsOfElemen
   myLastCreatedElems = new SMESH::long_array();
   myLastCreatedNodes = new SMESH::long_array();
 
+#ifdef NO_CAS_CATCH
   try {   
-#if (OCC_VERSION_MAJOR << 16 | OCC_VERSION_MINOR << 8 | OCC_VERSION_MAINTENANCE) > 0x060100
     OCC_CATCH_SIGNALS;
+#else
+  CASCatch_TRY {
 #endif
     SMESHDS_Mesh* aMesh = GetMeshDS();
-    
+
     map<int,const SMDS_MeshElement*> elements;
     ToMap(theIDsOfElements, aMesh, elements);
 
     const SMESH::PointStruct * P = &theStepVector.PS;
     gp_Vec stepVec( P->x, P->y, P->z );
-    
+
     TElemOfElemListMap aHystory;
     ::SMESH_MeshEditor anEditor( _myMesh );
     anEditor.ExtrusionSweep (elements, stepVec, theNbOfSteps, aHystory);
@@ -1075,10 +1086,13 @@ void SMESH_MeshEditor_i::ExtrusionSweep(const SMESH::long_array & theIDsOfElemen
     // Update Python script
     TPythonDump() << "stepVector = " << theStepVector;
     TPythonDump() << this << ".ExtrusionSweep( "
-		  << theIDsOfElements << ", stepVector, " << theNbOfSteps << " )";
+                  << theIDsOfElements << ", stepVector, " << theNbOfSteps << " )";
 
-  }
-  catch(Standard_Failure) {
+#ifdef NO_CAS_CATCH
+  } catch(Standard_Failure) {
+#else
+  } CASCatch_CATCH(Standard_Failure) {
+#endif
     Handle(Standard_Failure) aFail = Standard_Failure::Caught();          
     INFOS( "SMESH_MeshEditor_i::ExtrusionSweep fails - "<< aFail->GetMessageString() );
   }

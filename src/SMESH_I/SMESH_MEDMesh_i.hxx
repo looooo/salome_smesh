@@ -230,6 +230,21 @@ class SMESH_MEDMesh_i:
 
         CORBA::Boolean areEquals(SALOME_MED::MESH_ptr other) 
 	  throw(SALOME::SALOME_Exception);;
+
+        SALOME::SenderInt_ptr getSenderForPolygonsConnectivity
+        (SALOME_MED::medConnectivity mode, SALOME_MED::medEntityMesh entity)
+          throw (SALOME::SALOME_Exception) {SALOME::SenderInt_ptr ret; return ret;};
+        SALOME::SenderInt_ptr getSenderForPolygonsConnectivityIndex
+        (SALOME_MED::medConnectivity mode, SALOME_MED::medEntityMesh entity)
+          throw (SALOME::SALOME_Exception){SALOME::SenderInt_ptr ret; return ret;};
+        SALOME::SenderInt_ptr getSenderForPolyhedronConnectivity
+        (SALOME_MED::medConnectivity mode)
+          throw (SALOME::SALOME_Exception){SALOME::SenderInt_ptr ret; return ret;};
+        SALOME::SenderInt_ptr getSenderForPolyhedronIndex
+        (SALOME_MED::medConnectivity mode)
+          throw (SALOME::SALOME_Exception){SALOME::SenderInt_ptr ret; return ret;};
+        SALOME::SenderInt_ptr getSenderForPolyhedronFacesIndex()
+          throw (SALOME::SALOME_Exception){SALOME::SenderInt_ptr ret; return ret;};
 };
 
 #endif /* _MED_MESH_I_HXX_ */

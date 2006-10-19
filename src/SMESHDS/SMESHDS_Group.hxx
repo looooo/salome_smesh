@@ -53,9 +53,9 @@ class SMESHDS_EXPORT SMESHDS_Group : public SMESHDS_GroupBase
 
   virtual SMDS_ElemIteratorPtr GetElements();
 
-  bool SMESHDS_Group::Add (const int theID);
+  bool Add (const int theID);
 
-  bool SMESHDS_Group::Remove (const int theID);
+  bool Remove (const int theID);
 
   void Clear();
 

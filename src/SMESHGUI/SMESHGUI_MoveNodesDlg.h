@@ -81,6 +81,7 @@ private:
   void                          closeEvent( QCloseEvent* e ) ;
   void                          enterEvent ( QEvent * ) ;
   void                          hideEvent ( QHideEvent * );
+  void                          keyPressEvent( QKeyEvent* );
   void                          erasePreview();
   QFrame*                       createButtonFrame( QWidget* );
   QFrame*                       createMainFrame  ( QWidget* );

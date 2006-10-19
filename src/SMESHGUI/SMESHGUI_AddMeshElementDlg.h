@@ -84,6 +84,7 @@ private:
     void closeEvent (QCloseEvent*);
     void hideEvent (QHideEvent*);                 /* ESC key */
     void enterEvent (QEvent*);                    /* mouse enter the QWidget */
+    void keyPressEvent(QKeyEvent*);
     void displaySimulation();
 
     SMESHGUI*                   mySMESHGUI;              /* Current SMESHGUI object */

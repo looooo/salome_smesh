@@ -286,20 +286,20 @@ SMESHGUI_RevolutionDlg::SMESHGUI_RevolutionDlg( SMESHGUI* theModule, const char*
   SMESHGUI_RevolutionDlgLayout->addWidget(GroupArguments, 1, 0);
 
   /* Initialisations */
-  SpinBox_X->RangeStepAndValidator(-999999.999, +999999.999, 10.0, 3);
-  SpinBox_Y->RangeStepAndValidator(-999999.999, +999999.999, 10.0, 3);
-  SpinBox_Z->RangeStepAndValidator(-999999.999, +999999.999, 10.0, 3);
-  SpinBox_DX->RangeStepAndValidator(-999999.999, +999999.999, 10.0, 3);
-  SpinBox_DY->RangeStepAndValidator(-999999.999, +999999.999, 10.0, 3);
-  SpinBox_DZ->RangeStepAndValidator(-999999.999, +999999.999, 10.0, 3);
+  SpinBox_X->RangeStepAndValidator(COORD_MIN, COORD_MAX, 10.0, 3);
+  SpinBox_Y->RangeStepAndValidator(COORD_MIN, COORD_MAX, 10.0, 3);
+  SpinBox_Z->RangeStepAndValidator(COORD_MIN, COORD_MAX, 10.0, 3);
+  SpinBox_DX->RangeStepAndValidator(COORD_MIN, COORD_MAX, 10.0, 3);
+  SpinBox_DY->RangeStepAndValidator(COORD_MIN, COORD_MAX, 10.0, 3);
+  SpinBox_DZ->RangeStepAndValidator(COORD_MIN, COORD_MAX, 10.0, 3);
 
-  SpinBox_Angle->RangeStepAndValidator(-999999.999, +999999.999, 5.0, 3);
+  SpinBox_Angle->RangeStepAndValidator(COORD_MIN, COORD_MAX, 5.0, 3);
 
   QIntValidator* anIntValidator = new QIntValidator(SpinBox_NbSteps);
   SpinBox_NbSteps->setValidator(anIntValidator);
   SpinBox_NbSteps->setRange(1, 999999);
 
-  SpinBox_Tolerance->RangeStepAndValidator(0.0, +999999.999, 0.1, 6);
+  SpinBox_Tolerance->RangeStepAndValidator(0.0, COORD_MAX, 0.1, 6);
 
   GroupArguments->show();
   RadioButton1->setChecked(TRUE);
@@ -938,4 +938,21 @@ void SMESHGUI_RevolutionDlg::onVectorChanged()
     buttonOk->setEnabled(false);
     buttonApply->setEnabled(false);
   }
+}
+
+//=================================================================================
+// function : keyPressEvent()
+// purpose  :
+//=================================================================================
+void SMESHGUI_RevolutionDlg::keyPressEvent( QKeyEvent* e )
+{
+  QDialog::keyPressEvent( e );
+  if ( e->isAccepted() )
+    return;
+
+  if ( e->key() == Key_F1 )
+    {
+      e->accept();
+      ClickOnHelp();
+    }
 }

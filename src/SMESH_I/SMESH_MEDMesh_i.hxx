@@ -47,7 +47,8 @@
 class SMESH_Mesh_i;
 
 class SMESH_I_EXPORT SMESH_MEDMesh_i:
-	public virtual POA_SALOME_MED::MESH, public virtual SALOME::GenericObj_i
+  public virtual POA_SALOME_MED::MESH, 
+  public virtual SALOME::GenericObj_i
 {
 protected:
   // C++ object containing values

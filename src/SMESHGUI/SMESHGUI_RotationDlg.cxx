@@ -87,7 +87,7 @@ SMESHGUI_RotationDlg::SMESHGUI_RotationDlg( SMESHGUI* theModule, const char* nam
      mySMESHGUI( theModule ),
      mySelectionMgr( SMESH::GetSelectionMgr( theModule ) )
 {
-  QPixmap image0 (SMESH::GetResourceMgr( mySMESHGUI )->loadPixmap("SMESH", tr("ICON_DLG_ROTATION")));
+  QPixmap image0 (SMESH::GetResourceMgr( mySMESHGUI )->loadPixmap("SMESH", tr("ICON_DLG_MESH_ROTATION")));
   QPixmap image1 (SMESH::GetResourceMgr( mySMESHGUI )->loadPixmap("SMESH", tr("ICON_SELECT")));
 
   if (!name)
@@ -279,14 +279,14 @@ SMESHGUI_RotationDlg::SMESHGUI_RotationDlg( SMESHGUI* theModule, const char* nam
   SMESHGUI_RotationDlgLayout->addWidget(GroupArguments, 1, 0);
 
   /* Initialisations */
-  SpinBox_X->RangeStepAndValidator(-999999.999, +999999.999, 10.0, 3);
-  SpinBox_Y->RangeStepAndValidator(-999999.999, +999999.999, 10.0, 3);
-  SpinBox_Z->RangeStepAndValidator(-999999.999, +999999.999, 10.0, 3);
-  SpinBox_DX->RangeStepAndValidator(-999999.999, +999999.999, 10.0, 3);
-  SpinBox_DY->RangeStepAndValidator(-999999.999, +999999.999, 10.0, 3);
-  SpinBox_DZ->RangeStepAndValidator(-999999.999, +999999.999, 10.0, 3);
+  SpinBox_X->RangeStepAndValidator(COORD_MIN, COORD_MAX, 10.0, 3);
+  SpinBox_Y->RangeStepAndValidator(COORD_MIN, COORD_MAX, 10.0, 3);
+  SpinBox_Z->RangeStepAndValidator(COORD_MIN, COORD_MAX, 10.0, 3);
+  SpinBox_DX->RangeStepAndValidator(COORD_MIN, COORD_MAX, 10.0, 3);
+  SpinBox_DY->RangeStepAndValidator(COORD_MIN, COORD_MAX, 10.0, 3);
+  SpinBox_DZ->RangeStepAndValidator(COORD_MIN, COORD_MAX, 10.0, 3);
 
-  SpinBox_Angle->RangeStepAndValidator(-999999.999, +999999.999, 5.0, 3);
+  SpinBox_Angle->RangeStepAndValidator(-360.0, +360.0, 5.0, 3);
 
   GroupArguments->show();
   myConstructorId = 0;
@@ -845,4 +845,21 @@ void SMESHGUI_RotationDlg::onVectorChanged()
     buttonOk->setEnabled(false);
     buttonApply->setEnabled(false);
   }
+}
+
+//=================================================================================
+// function : keyPressEvent()
+// purpose  :
+//=================================================================================
+void SMESHGUI_RotationDlg::keyPressEvent( QKeyEvent* e )
+{
+  QDialog::keyPressEvent( e );
+  if ( e->isAccepted() )
+    return;
+
+  if ( e->key() == Key_F1 )
+    {
+      e->accept();
+      ClickOnHelp();
+    }
 }

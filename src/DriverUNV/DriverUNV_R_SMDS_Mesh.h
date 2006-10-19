@@ -34,6 +34,9 @@ class SMDS_MeshGroup;
 typedef std::map<SMDS_MeshGroup*, std::string> TGroupNamesMap;
 typedef std::map<SMDS_MeshGroup*, int> TGroupIdMap;
 
+typedef std::map<SMDS_MeshGroup*, std::string> TGroupNamesMap;
+typedef std::map<SMDS_MeshGroup*, int> TGroupIdMap;
+
 class MESHDRIVERUNV_EXPORT DriverUNV_R_SMDS_Mesh: public Driver_SMDS_Mesh
 {
  public:

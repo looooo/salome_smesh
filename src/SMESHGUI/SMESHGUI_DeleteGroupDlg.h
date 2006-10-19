@@ -63,6 +63,7 @@ private:
 
   void                    closeEvent (QCloseEvent*);
   void                    enterEvent (QEvent*);
+  void                    keyPressEvent(QKeyEvent*);
 
 private slots:
 

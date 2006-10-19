@@ -109,8 +109,7 @@ CORBA::Boolean SMESH_Pattern_i::LoadFromFile(const char* theFileContents)
   // remove some gabage from the end
   TCollection_AsciiString patternDescription = (char*) theFileContents;
   int pos = patternDescription.Length();
-  char test = patternDescription.Value( pos );
-  while (! isdigit( (unsigned char)patternDescription.Value( pos )))
+  while (! isdigit( patternDescription.Value( pos )))
     pos--;
   if ( pos != patternDescription.Length() ) {
     patternDescription.Trunc( pos );

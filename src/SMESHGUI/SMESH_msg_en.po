@@ -22,6 +22,19 @@
 # would be translated to "Pub", not "Foo::Pub".
 msgid ""
 msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"PO-Revision-Date: 2006-01-13 13:50+0300\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+# This is a Qt message file in .po format.  Each msgid starts with
+# a scope.  This scope should *NOT* be translated - eg. "Foo::Bar"
+# would be translated to "Pub", not "Foo::Pub".
+msgid ""
+msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "POT-Creation-Date: 2002-05-28 10:57:43 AM CEST\n"
 "PO-Revision-Date: 2005-06-07 10:51+0400\n"
@@ -151,6 +164,10 @@ msgstr "Activate Link Selection Mode"
 #Empty name
 msgid "SMESH_WRN_EMPTY_NAME" 
 msgstr "Empty name is not valid"
+
+#Not available data
+msgid "SMESH_WRN_NO_AVAILABLE_DATA" 
+msgstr "No available data in selection"
 
 #Smesh polyedre cretion error
 msgid "SMESH_POLYEDRE_CREATE_ERROR"
@@ -1661,10 +1678,10 @@ msgid "SMESHGUI_ExtrusionAlongPathDlg::SMESH_PATH_MESH"
 msgstr "Mesh"
 
 msgid "SMESHGUI_ExtrusionAlongPathDlg::SMESH_PATH_SHAPE"
-msgstr "Shape (edge or wire)"
+msgstr "Shape (edge)"
 
 msgid "SMESHGUI_ExtrusionAlongPathDlg::SMESH_PATH_START"
-msgstr "Start point"
+msgstr "Start node"
 
 msgid "SMESHGUI_ExtrusionAlongPathDlg::SMESH_USE_ANGLES"
 msgstr "Use Angles"
@@ -3021,6 +3038,12 @@ msgstr "Elements"
 
 msgid "SMESHGUI::PREF_COLOR"
 msgstr "Color"
+
+msgid "SMESHGUI::PREF_TITLE_COLOR"
+msgstr "Title color"
+
+msgid "SMESHGUI::PREF_LABELS_COLOR"
+msgstr "Labels color"
 
 msgid "SMESHGUI::PREF_SIZE"
 msgstr "Size"

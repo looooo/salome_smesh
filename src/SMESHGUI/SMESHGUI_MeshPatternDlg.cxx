@@ -383,6 +383,13 @@ bool SMESHGUI_MeshPatternDlg::isValid (const bool theMess)
     return false;
   }
 
+  if ( myName->text()=="" ) {
+    if (theMess)
+      QMessageBox::information(SMESHGUI::desktop(), tr("SMESH_INSUFFICIENT_DATA"),
+                               tr("SMESHGUI_INVALID_PARAMETERS"), QMessageBox::Ok);
+    return false;
+  }
+
   return true;
 }
 
@@ -1366,4 +1373,21 @@ bool SMESHGUI_MeshPatternDlg::getIds (QValueList<int>& ids) const
 int SMESHGUI_MeshPatternDlg::getNode (bool second) const
 {
   return second ? myNode2->value() - 1 : myNode1->value() - 1;
+}
+
+//=================================================================================
+// function : keyPressEvent()
+// purpose  :
+//=================================================================================
+void SMESHGUI_MeshPatternDlg::keyPressEvent( QKeyEvent* e )
+{
+  QDialog::keyPressEvent( e );
+  if ( e->isAccepted() )
+    return;
+
+  if ( e->key() == Key_F1 )
+    {
+      e->accept();
+      onHelp();
+    }
 }

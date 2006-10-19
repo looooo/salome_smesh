@@ -17,7 +17,7 @@
 //  License along with this library; if not, write to the Free Software 
 //  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA 
 // 
-// See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
+//  See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 //
 //
 //
@@ -29,10 +29,6 @@
 
 #include "StdMeshers_Regular_1D.hxx"
 #include "StdMeshers_Distribution.hxx"
-#include "SMESH_Gen.hxx"
-#include "SMESH_Mesh.hxx"
-#include "SMESH_HypoFilter.hxx"
-#include "SMESH_subMesh.hxx"
 
 #include "StdMeshers_LocalLength.hxx"
 #include "StdMeshers_NumberOfSegments.hxx"
@@ -40,6 +36,11 @@
 #include "StdMeshers_StartEndLength.hxx"
 #include "StdMeshers_Deflection1D.hxx"
 #include "StdMeshers_AutomaticLength.hxx"
+
+#include "SMESH_Gen.hxx"
+#include "SMESH_Mesh.hxx"
+#include "SMESH_HypoFilter.hxx"
+#include "SMESH_subMesh.hxx"
 
 #include "SMDS_MeshElement.hxx"
 #include "SMDS_MeshNode.hxx"
@@ -56,14 +57,16 @@
 #include <GCPnts_AbscissaPoint.hxx>
 #include <GCPnts_UniformAbscissa.hxx>
 #include <GCPnts_UniformDeflection.hxx>
-#include <Standard_ErrorHandler.hxx>
 #include <Precision.hxx>
 #include <Expr_GeneralExpression.hxx>
 #include <Expr_NamedUnknown.hxx>
 #include <Expr_Array1OfNamedUnknown.hxx>
-#include <TColStd_Array1OfReal.hxx>
 #include <ExprIntrp_GenExp.hxx>
+#include <TColStd_Array1OfReal.hxx>
 #include <OSD.hxx>
+
+#include <Standard_ErrorHandler.hxx>
+#include <Standard_Failure.hxx>
 
 #include <string>
 #include <math.h>
@@ -570,6 +573,9 @@ bool StdMeshers_Regular_1D::Compute(SMESH_Mesh & aMesh, const TopoDS_Shape & aSh
     if ( !_mainEdge.IsNull() )
       reversed = aMesh.IsReversedInChain( EE, _mainEdge );
     try {
+#if (OCC_VERSION_MAJOR << 16 | OCC_VERSION_MINOR << 8 | OCC_VERSION_MAINTENANCE) > 0x060100
+      OCC_CATCH_SIGNALS;
+#endif
       if ( ! computeInternalParameters( E, params, reversed )) {
         //cout << "computeInternalParameters() failed" <<endl;
         return false;

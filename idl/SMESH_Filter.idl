@@ -30,9 +30,6 @@
 #include "GEOM_Gen.idl"
 #include "SMESH_Mesh.idl"
 
-#include "GEOM_Gen.idl"
-
-
 module SMESH
 {
 

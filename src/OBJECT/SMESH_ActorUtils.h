@@ -70,6 +70,7 @@ SMESHOBJECT_EXPORT
   void 
   WriteUnstructuredGrid(vtkUnstructuredGrid* theGrid, 
 			const char* theFileName);
+
 }
 
 #endif

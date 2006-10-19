@@ -90,6 +90,7 @@ private:
 
   void                        closeEvent( QCloseEvent* e ) ;
   void                        enterEvent ( QEvent * ) ;            
+  void                        keyPressEvent( QKeyEvent* e );
   
 private slots:
 

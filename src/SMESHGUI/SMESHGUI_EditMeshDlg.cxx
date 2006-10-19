@@ -369,3 +369,21 @@ void SMESHGUI_EditMeshDlg::hideEvent (QHideEvent * e)
   if (!isMinimized())
     ClickOnCancel();
 }
+
+
+//=================================================================================
+// function : keyPressEvent()
+// purpose  :
+//=================================================================================
+void SMESHGUI_EditMeshDlg::keyPressEvent( QKeyEvent* e )
+{
+  QDialog::keyPressEvent( e );
+  if ( e->isAccepted() )
+    return;
+
+  if ( e->key() == Key_F1 )
+    {
+      e->accept();
+      ClickOnHelp();
+    }
+}

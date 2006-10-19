@@ -317,10 +317,10 @@ SMESHGUI_ExtrusionAlongPathDlg::SMESHGUI_ExtrusionAlongPathDlg( SMESHGUI* theMod
 
   /***************************************************************/
   // Initialisations
-  XSpin->RangeStepAndValidator(-999999.999, +999999.999, 10.0, 3);
-  YSpin->RangeStepAndValidator(-999999.999, +999999.999, 10.0, 3);
-  ZSpin->RangeStepAndValidator(-999999.999, +999999.999, 10.0, 3);
-  AngleSpin->RangeStepAndValidator(-999999.999, +999999.999, 5.0, 3);
+  XSpin->RangeStepAndValidator(COORD_MIN, COORD_MAX, 10.0, 3);
+  YSpin->RangeStepAndValidator(COORD_MIN, COORD_MAX, 10.0, 3);
+  ZSpin->RangeStepAndValidator(COORD_MIN, COORD_MAX, 10.0, 3);
+  AngleSpin->RangeStepAndValidator(-180.0, 180.0, 5.0, 3);
 
   mySelector = (SMESH::GetViewWindow( mySMESHGUI ))->GetSelector();
 
@@ -684,7 +684,7 @@ void SMESHGUI_ExtrusionAlongPathDlg::ClickOnHelp()
 			   QObject::tr("EXTERNAL_BROWSER_CANNOT_SHOW_PAGE").
 			   arg(app->resourceMgr()->stringValue("ExternalBrowser", platform)).arg(myHelpFileName),
 			   QObject::tr("BUT_OK"));
-	}
+  }
 }
 
 //=================================================================================
@@ -1201,4 +1201,21 @@ bool SMESHGUI_ExtrusionAlongPathDlg::eventFilter (QObject* object, QEvent* event
     }
   }
   return QDialog::eventFilter(object, event);
+}
+
+//=================================================================================
+// function : keyPressEvent()
+// purpose  :
+//=================================================================================
+void SMESHGUI_ExtrusionAlongPathDlg::keyPressEvent( QKeyEvent* e )
+{
+  QDialog::keyPressEvent( e );
+  if ( e->isAccepted() )
+    return;
+
+  if ( e->key() == Key_F1 )
+    {
+      e->accept();
+      ClickOnHelp();
+    }
 }

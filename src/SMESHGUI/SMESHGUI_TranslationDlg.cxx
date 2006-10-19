@@ -257,12 +257,12 @@ SMESHGUI_TranslationDlg::SMESHGUI_TranslationDlg( SMESHGUI* theModule, const cha
   SMESHGUI_TranslationDlgLayout->addWidget(GroupArguments, 1, 0);
 
   /* Initialisations */
-  SpinBox1_1->RangeStepAndValidator(-999999.999, +999999.999, 10.0, 3);
-  SpinBox1_2->RangeStepAndValidator(-999999.999, +999999.999, 10.0, 3);
-  SpinBox1_3->RangeStepAndValidator(-999999.999, +999999.999, 10.0, 3);
-  SpinBox2_1->RangeStepAndValidator(-999999.999, +999999.999, 10.0, 3);
-  SpinBox2_2->RangeStepAndValidator(-999999.999, +999999.999, 10.0, 3);
-  SpinBox2_3->RangeStepAndValidator(-999999.999, +999999.999, 10.0, 3);
+  SpinBox1_1->RangeStepAndValidator(COORD_MIN, COORD_MAX, 10.0, 3);
+  SpinBox1_2->RangeStepAndValidator(COORD_MIN, COORD_MAX, 10.0, 3);
+  SpinBox1_3->RangeStepAndValidator(COORD_MIN, COORD_MAX, 10.0, 3);
+  SpinBox2_1->RangeStepAndValidator(COORD_MIN, COORD_MAX, 10.0, 3);
+  SpinBox2_2->RangeStepAndValidator(COORD_MIN, COORD_MAX, 10.0, 3);
+  SpinBox2_3->RangeStepAndValidator(COORD_MIN, COORD_MAX, 10.0, 3);
 
   GroupArguments->show();
   RadioButton1->setChecked(TRUE);
@@ -854,4 +854,21 @@ int SMESHGUI_TranslationDlg::GetConstructorId()
   if (GroupConstructors != NULL && GroupConstructors->selected() != NULL)
     return GroupConstructors->id(GroupConstructors->selected());
   return -1;
+}
+
+//=================================================================================
+// function : keyPressEvent()
+// purpose  :
+//=================================================================================
+void SMESHGUI_TranslationDlg::keyPressEvent( QKeyEvent* e )
+{
+  QDialog::keyPressEvent( e );
+  if ( e->isAccepted() )
+    return;
+
+  if ( e->key() == Key_F1 )
+    {
+      e->accept();
+      ClickOnHelp();
+    }
 }

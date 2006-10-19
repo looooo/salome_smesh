@@ -833,10 +833,13 @@ void SMESHGUI_FilterTable::SetCriterion (const int                       theRow,
     aTable->SetEditable(false, theRow, 4);
 
   if (theCriterion.Type != FT_RangeOfIds &&
-       theCriterion.Type != FT_BelongToGeom &&
-       theCriterion.Type != FT_BelongToPlane &&
-       theCriterion.Type != FT_BelongToCylinder &&
-       theCriterion.Type != FT_LyingOnGeom)
+      theCriterion.Type != FT_BelongToGeom &&
+      theCriterion.Type != FT_BelongToPlane &&
+      theCriterion.Type != FT_BelongToCylinder &&
+      theCriterion.Type != FT_LyingOnGeom &&
+      theCriterion.Type != FT_FreeBorders &&
+      theCriterion.Type != FT_FreeEdges &&
+      theCriterion.Type != FT_BadOrientedVolume)
     aTable->setText(theRow, 2, QString("%1").arg(theCriterion.Threshold, 0, 'g', 15));
   else
     {
@@ -2292,9 +2295,11 @@ void SMESHGUI_FilterDlg::insertFilterInViewer()
          myFilter[ myTable->GetType() ]->GetPredicate()->_is_nil() ||
          !mySetInViewer->isChecked()) {
       SMESH::RemoveFilter(getFilterId(anEntType), aSelector);
-    } else {
+    }
+    else {
       Handle(SMESHGUI_PredicateFilter) aFilter = new SMESHGUI_PredicateFilter();
       aFilter->SetPredicate(myFilter[ myTable->GetType() ]->GetPredicate());
+      SMESH::RemoveFilter(getFilterId(anEntType), aSelector); //skl for IPAL12631
       SMESH::SetFilter(aFilter, aSelector);
     }
   }
@@ -2591,3 +2596,21 @@ void SMESHGUI_FilterDlg::updateSelection()
     }
   }
 }
+
+//=================================================================================
+// function : keyPressEvent()
+// purpose  :
+//=================================================================================
+void SMESHGUI_FilterDlg::keyPressEvent( QKeyEvent* e )
+{
+  QDialog::keyPressEvent( e );
+  if ( e->isAccepted() )
+    return;
+
+  if ( e->key() == Key_F1 )
+    {
+      e->accept();
+      onHelp();
+    }
+}
+

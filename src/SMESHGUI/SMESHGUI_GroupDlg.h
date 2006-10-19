@@ -116,6 +116,7 @@ private:
     void closeEvent(QCloseEvent* e);
     void enterEvent (QEvent*);
     void hideEvent (QHideEvent*);                          /* ESC key */
+    void keyPressEvent(QKeyEvent*);
     void setSelectionMode(int theMode);
     void updateButtons();
 

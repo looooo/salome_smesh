@@ -91,6 +91,8 @@
 
 #include "SMDS_EdgePosition.hxx"
 #include "SMDS_FacePosition.hxx"
+#include "SMDS_VertexPosition.hxx"
+#include "SMDS_SpacePosition.hxx"
 
 #include CORBA_SERVER_HEADER(SMESH_Group)
 #include CORBA_SERVER_HEADER(SMESH_Filter)
@@ -315,18 +317,38 @@ SMESH::SMESH_Hypothesis_ptr SMESH_Gen_i::createHypothesis(const char* theHypName
   char* aPlatformLibName = 0;
   if ( theLibName && theLibName[0] != '\0'  )
   {
+    int libNameLen = strlen(theLibName);
+    //check for old format "libXXXXXXX.so"
+    if( !strncmp( theLibName, "lib", 3 ) && !strcmp( theLibName+libNameLen-4, ".so" ) && libNameLen > 7 )
+      {
+	//the old format
 #ifdef WNT
-    aPlatformLibName = new char[ strlen(theLibName) + 5 ];
-    aPlatformLibName[0] = '\0';
-    aPlatformLibName = strcat( aPlatformLibName, theLibName );
-    aPlatformLibName = strcat( aPlatformLibName, ".dll" );
+	aPlatformLibName = new char[libNameLen - 2];
+	aPlatformLibName[0] = '\0';
+	aPlatformLibName = strncat( aPlatformLibName, theLibName+3, libNameLen-6  );
+	aPlatformLibName = strcat( aPlatformLibName, ".dll" );
 #else
-    aPlatformLibName = new char[ strlen(theLibName) + 7 ];
-    aPlatformLibName[0] = '\0';
-    aPlatformLibName = strcat( aPlatformLibName, "lib" );
-    aPlatformLibName = strcat( aPlatformLibName, theLibName );
-    aPlatformLibName = strcat( aPlatformLibName, ".so" );
+	aPlatformLibName = new char[ libNameLen ];
+	aPlatformLibName[0] = '\0';
+	aPlatformLibName = strcat( aPlatformLibName, theLibName );
 #endif
+      }
+    else
+      {
+	//try to use new format 
+#ifdef WNT
+	aPlatformLibName = new char[ libNameLen + 5 ];
+	aPlatformLibName[0] = '\0';
+	aPlatformLibName = strcat( aPlatformLibName, theLibName );
+	aPlatformLibName = strcat( aPlatformLibName, ".dll" );
+#else
+	aPlatformLibName = new char[ libNameLen + 7 ];
+	aPlatformLibName[0] = '\0';
+	aPlatformLibName = strcat( aPlatformLibName, "lib" );
+	aPlatformLibName = strcat( aPlatformLibName, theLibName );
+	aPlatformLibName = strcat( aPlatformLibName, ".so" );
+#endif
+      }
   }
   
 
@@ -466,18 +488,23 @@ void SMESH_Gen_i::SetEmbeddedMode( CORBA::Boolean theMode )
   myIsEmbeddedMode = theMode;
 
   if ( !myIsEmbeddedMode ) {
-    bool raiseFPE;
+    //PAL10867: disable signals catching with "noexcepthandler" option
+    char* envNoCatchSignals = getenv("NOT_INTERCEPT_SIGNALS");
+    if (!envNoCatchSignals || !atoi(envNoCatchSignals))
+    {
+      bool raiseFPE;
 #ifdef _DEBUG_
-    raiseFPE = true;
-    char* envDisableFPE = getenv("DISABLE_FPE");
-    if (envDisableFPE && atoi(envDisableFPE))
-      raiseFPE = false;
+      raiseFPE = true;
+      char* envDisableFPE = getenv("DISABLE_FPE");
+      if (envDisableFPE && atoi(envDisableFPE))
+        raiseFPE = false;
 #else
-    raiseFPE = false;
+      raiseFPE = false;
 #endif
-    OSD::SetSignal( raiseFPE );
+      OSD::SetSignal( raiseFPE );
+    }
+    // else OSD::SetSignal() is called in GUI
   }
-  // else OSD::SetSignal() is called in GUI
 }
 
 //=============================================================================
@@ -1135,6 +1162,10 @@ CORBA::Boolean SMESH_Gen_i::Compute( SMESH::SMESH_Mesh_ptr theMesh,
       return myGen.Compute( myLocMesh, myLocShape);
     }
   }
+  catch ( std::bad_alloc& exc ) {
+    THROW_SALOME_CORBA_EXCEPTION( "Memory allocation problem",
+                                  SALOME::INTERNAL_ERROR );
+  }
   catch ( SALOME_Exception& S_ex ) {
     INFOS( "Compute(): catch exception "<< S_ex.what() );
   }
@@ -1729,8 +1760,9 @@ SALOMEDS::TMPFile* SMESH_Gen_i::Save( SALOMEDS::SComponent_ptr theComponent,
               }
             }
             // All sub-meshes will be stored in MED file
-            if ( shapeRefFound )
-              myWriter.AddAllSubMeshes();
+            // .. will NOT (PAL 12992)
+            //if ( shapeRefFound )
+            //myWriter.AddAllSubMeshes();
 
             // groups root sub-branch
             SALOMEDS::SObject_var myGroupsBranch;
@@ -1833,10 +1865,79 @@ SALOMEDS::TMPFile* SMESH_Gen_i::Save( SALOMEDS::SComponent_ptr theComponent,
                 myLocMesh.ShapeToMesh( nullShape ); // remove shape referring data
               }
 
-              // Store node positions on sub-shapes (SMDS_Position):
-
               if ( !mySMESHDSMesh->SubMeshes().empty() )
               {
+                // Store submeshes
+                // ----------------
+                aGroup = new HDFgroup( "Submeshes", aTopGroup );
+                aGroup->CreateOnDisk();
+
+                // each element belongs to one or none submesh,
+                // so for each node/element, we store a submesh ID
+
+                // Make maps of submesh IDs of elements sorted by element IDs
+                typedef int TElemID;
+                typedef int TSubMID;
+                map< TElemID, TSubMID > eId2smId, nId2smId;
+                map< TElemID, TSubMID >::iterator hint; // insertion to map is done before hint
+                const map<int,SMESHDS_SubMesh*>& aSubMeshes = mySMESHDSMesh->SubMeshes();
+                map<int,SMESHDS_SubMesh*>::const_iterator itSubM ( aSubMeshes.begin() );
+                SMDS_NodeIteratorPtr itNode;
+                SMDS_ElemIteratorPtr itElem;
+                for ( itSubM = aSubMeshes.begin(); itSubM != aSubMeshes.end() ; itSubM++ )
+                {
+                  TSubMID          aSubMeID = itSubM->first;
+                  SMESHDS_SubMesh* aSubMesh = itSubM->second;
+                  if ( aSubMesh->IsComplexSubmesh() )
+                    continue; // submesh containing other submeshs
+                  // nodes
+                  hint = nId2smId.begin(); // optimize insertion basing on increasing order of elem Ids in submesh
+                  for ( itNode = aSubMesh->GetNodes(); itNode->more(); ++hint)
+                    hint = nId2smId.insert( hint, make_pair( itNode->next()->GetID(), aSubMeID ));
+                  // elements
+                  hint = eId2smId.begin();
+                  for ( itElem = aSubMesh->GetElements(); itElem->more(); ++hint)
+                    hint = eId2smId.insert( hint, make_pair( itElem->next()->GetID(), aSubMeID ));
+                }
+
+                // Care of elements that are not on submeshes
+                if ( mySMESHDSMesh->NbNodes() != nId2smId.size() ) {
+                  for ( itNode = mySMESHDSMesh->nodesIterator(); itNode->more(); )
+                    /*  --- stl_map.h says : */
+                    /*  A %map relies on unique keys and thus a %pair is only inserted if its */
+                    /*  first element (the key) is not already present in the %map.           */
+                    nId2smId.insert( make_pair( itNode->next()->GetID(), 0 ));
+                }
+                int nbElems = mySMESHDSMesh->NbEdges() + mySMESHDSMesh->NbFaces() + mySMESHDSMesh->NbVolumes();
+                if ( nbElems != eId2smId.size() ) {
+                  for ( itElem = mySMESHDSMesh->elementsIterator(); itElem->more(); )
+                    eId2smId.insert( make_pair( itElem->next()->GetID(), 0 ));
+                }
+
+                // Store submesh IDs
+                for ( int isNode = 0; isNode < 2; ++isNode )
+                {
+                  map< TElemID, TSubMID >& id2smId = isNode ? nId2smId : eId2smId;
+                  if ( id2smId.empty() ) continue;
+                  map< TElemID, TSubMID >::const_iterator id_smId = id2smId.begin();
+                  // make and fill array of submesh IDs
+                  int* smIDs = new int [ id2smId.size() ];
+                  for ( int i = 0; id_smId != id2smId.end(); ++id_smId, ++i )
+                    smIDs[ i ] = id_smId->second;
+                  // write HDF group
+                  aSize[ 0 ] = id2smId.size();
+                  string aDSName( isNode ? "Node Submeshes" : "Element Submeshes");
+                  aDataset = new HDFdataset( (char*)aDSName.c_str(), aGroup, HDF_INT32, aSize, 1 );
+                  aDataset->CreateOnDisk();
+                  aDataset->WriteOnDisk( smIDs );
+                  aDataset->CloseOnDisk();
+                  //
+                  delete smIDs;
+                }
+                
+                // Store node positions on sub-shapes (SMDS_Position):
+                // ----------------------------------------------------
+
                 aGroup = new HDFgroup( "Node Positions", aTopGroup );
                 aGroup->CreateOnDisk();
 
@@ -1852,9 +1953,7 @@ SALOMEDS::TMPFile* SMESH_Gen_i::Save( SALOMEDS::SComponent_ptr theComponent,
                 int nbEdgeNodes = 0, nbFaceNodes = 0;
                 list<SMESHDS_SubMesh*> aEdgeSM, aFaceSM;
                 // loop on SMESHDS_SubMesh'es
-                const map<int,SMESHDS_SubMesh*>& aSubMeshes = mySMESHDSMesh->SubMeshes();
-                map<int,SMESHDS_SubMesh*>::const_iterator itSubM ( aSubMeshes.begin() );
-                for ( ; itSubM != aSubMeshes.end() ; itSubM++ )
+                for ( itSubM = aSubMeshes.begin(); itSubM != aSubMeshes.end() ; itSubM++ )
                 {
                   SMESHDS_SubMesh* aSubMesh = (*itSubM).second;
                   if ( aSubMesh->IsComplexSubmesh() )
@@ -1895,8 +1994,6 @@ SALOMEDS::TMPFile* SMESH_Gen_i::Save( SALOMEDS::SComponent_ptr theComponent,
                   for ( ; itSM != pListSM->end(); itSM++ )
                   {
                     SMESHDS_SubMesh* aSubMesh = (*itSM);
-                    if ( aSubMesh->IsComplexSubmesh() )
-                      continue; // submesh containing other submeshs
 
                     SMDS_NodeIteratorPtr itNode = aSubMesh->GetNodes();
                     // loop on nodes in aSubMesh
@@ -2040,6 +2137,31 @@ void SMESH_Gen_i::loadGeomData( SALOMEDS::SComponent_ptr theCompRoot )
   SALOMEDS::StudyBuilder_var aStudyBuilder = aStudy->NewBuilder(); 
   aStudyBuilder->LoadWith( theCompRoot, GetGeomEngine() );
 }
+//=============================================================================
+/*!
+ * \brief Creates SMDS_Position according to shape type
+ */
+//=============================================================================
+
+class PositionCreator {
+public:
+  SMDS_PositionPtr MakePosition(const TopAbs_ShapeEnum type) {
+    return (this->*myFuncTable[ type ])();
+  }
+  PositionCreator() {
+    myFuncTable.resize( (size_t) TopAbs_SHAPE, & PositionCreator::defaultPosition );
+    myFuncTable[ TopAbs_FACE ] = & PositionCreator::facePosition;
+    myFuncTable[ TopAbs_EDGE ] = & PositionCreator::edgePosition;
+    myFuncTable[ TopAbs_VERTEX ] = & PositionCreator::vertexPosition;
+  }
+private:
+  SMDS_PositionPtr edgePosition()    const { return SMDS_PositionPtr( new SMDS_EdgePosition  ); }
+  SMDS_PositionPtr facePosition()    const { return SMDS_PositionPtr( new SMDS_FacePosition  ); }
+  SMDS_PositionPtr vertexPosition()  const { return SMDS_PositionPtr( new SMDS_VertexPosition); }
+  SMDS_PositionPtr defaultPosition() const { return SMDS_SpacePosition::originSpacePosition();  }
+  typedef SMDS_PositionPtr (PositionCreator:: * FmakePos)() const;
+  vector<FmakePos> myFuncTable;
+};
 
 //=============================================================================
 /*!
@@ -2627,10 +2749,80 @@ bool SMESH_Gen_i::Load( SALOMEDS::SComponent_ptr theComponent,
 	  }
 
 	  if(hasData) {
+            
 	    // Read sub-meshes from MED
+            // -------------------------
 	    if(MYDEBUG) MESSAGE("Create all sub-meshes");
-	    myReader.CreateAllSubMeshes();
+            bool submeshesInFamilies = ( ! aTopGroup->ExistInternalObject( "Submeshes" ));
+            if ( submeshesInFamilies )
+            {
+              // old way working before fix of PAL 12992
+              myReader.CreateAllSubMeshes();
+            }
+            else
+            {
+              // open a group
+              aGroup = new HDFgroup( "Submeshes", aTopGroup ); 
+              aGroup->OpenOnDisk();
 
+              int maxID = mySMESHDSMesh->MaxShapeIndex();
+              vector< SMESHDS_SubMesh * > subMeshes( maxID + 1, (SMESHDS_SubMesh*) 0 );
+              vector< TopAbs_ShapeEnum  > smType   ( maxID + 1, TopAbs_SHAPE ); 
+              
+              PositionCreator aPositionCreator;
+
+              SMDS_NodeIteratorPtr nIt = mySMESHDSMesh->nodesIterator();
+              SMDS_ElemIteratorPtr eIt = mySMESHDSMesh->elementsIterator();
+              for ( int isNode = 0; isNode < 2; ++isNode )
+              {
+                string aDSName( isNode ? "Node Submeshes" : "Element Submeshes");
+                if ( aGroup->ExistInternalObject( (char*) aDSName.c_str() ))
+                {
+                  aDataset = new HDFdataset( (char*) aDSName.c_str(), aGroup );
+                  aDataset->OpenOnDisk();
+                  // read submesh IDs for all elements sorted by ID
+                  int nbElems = aDataset->GetSize();
+                  int* smIDs = new int [ nbElems ];
+                  aDataset->ReadFromDisk( smIDs );
+		  aDataset->CloseOnDisk();
+
+                  // get elements sorted by ID
+                  ::SMESH_MeshEditor::TIDSortedElemSet elemSet;
+                  if ( isNode )
+                    while ( nIt->more() ) elemSet.insert( nIt->next() );
+                  else
+                    while ( eIt->more() ) elemSet.insert( eIt->next() );
+                  ASSERT( elemSet.size() == nbElems );
+
+                  // add elements to submeshes
+                  ::SMESH_MeshEditor::TIDSortedElemSet::iterator iE = elemSet.begin();
+                  for ( int i = 0; i < nbElems; ++i, ++iE )
+                  {
+                    int smID = smIDs[ i ];
+                    if ( smID == 0 ) continue;
+                    ASSERT( smID <= maxID );
+                    const SMDS_MeshElement* elem = *iE;
+                    // get or create submesh
+                    SMESHDS_SubMesh* & sm = subMeshes[ smID ];
+                    if ( ! sm ) {
+                      sm = mySMESHDSMesh->NewSubMesh( smID );
+                      smType[ smID ] = mySMESHDSMesh->IndexToShape( smID ).ShapeType();
+                    }
+                    // add
+                    if ( isNode ) {
+                      SMDS_PositionPtr pos = aPositionCreator.MakePosition( smType[ smID ]);
+                      pos->SetShapeId( smID );
+                      SMDS_MeshNode* node = const_cast<SMDS_MeshNode*>( static_cast<const SMDS_MeshNode*>( elem ));
+                      node->SetPosition( pos );
+                      sm->AddNode( node );
+                    } else {
+                      sm->AddElement( elem );
+                    }
+                  }
+                  delete smIDs;
+                }
+              }
+            } // end reading submeshes
 
             // Read node positions on sub-shapes (SMDS_Position)
 
@@ -2699,6 +2891,7 @@ bool SMESH_Gen_i::Load( SALOMEDS::SComponent_ptr theComponent,
                     nbFids = aSize;
                   }
                 }
+                aDataset->CloseOnDisk();
               } // loop on 5 datasets
 
               // Set node positions on edges or faces

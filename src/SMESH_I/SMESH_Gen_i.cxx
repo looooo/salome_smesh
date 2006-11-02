@@ -319,19 +319,22 @@ SMESH::SMESH_Hypothesis_ptr SMESH_Gen_i::createHypothesis(const char* theHypName
   {
     int libNameLen = strlen(theLibName);
     //check for old format "libXXXXXXX.so"
-    if( !strncmp( theLibName, "lib", 3 ) && !strcmp( theLibName+libNameLen-4, ".so" ) && libNameLen > 7 )
+    if( libNameLen > 7 && !strncmp( theLibName, "lib", 3 ) && !strcmp( theLibName+libNameLen-3, ".so" ) )
       {
 	//the old format
 #ifdef WNT
-	aPlatformLibName = new char[libNameLen - 2];
+	aPlatformLibName = new char[libNameLen - 1];
 	aPlatformLibName[0] = '\0';
 	aPlatformLibName = strncat( aPlatformLibName, theLibName+3, libNameLen-6  );
 	aPlatformLibName = strcat( aPlatformLibName, ".dll" );
+  aPlatformLibName[libNameLen - 2] = '\0';
 #else
-	aPlatformLibName = new char[ libNameLen ];
+	aPlatformLibName = new char[ libNameLen + 1];
 	aPlatformLibName[0] = '\0';
 	aPlatformLibName = strcat( aPlatformLibName, theLibName );
+  aPlatformLibName[libNameLen] = '\0';
 #endif
+
       }
     else
       {

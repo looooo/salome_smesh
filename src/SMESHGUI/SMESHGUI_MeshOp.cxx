@@ -854,9 +854,6 @@ void SMESHGUI_MeshOp::createHypothesis (const int theDim,
 {
   // During a hypothesis creation we might need to select some objects.
   // Main dialog must not update it's own selected objects in this case.
-
-  // but the state of the ToggleButtons should be saved to restore it later
-  LightApp_SimpleGuiStateMap dlgState = dlg()->getActiveState();
   dlg()->deactivateAll();
 
   HypothesisData* aData = SMESH::GetHypothesisData(theTypeName.latin1());
@@ -885,8 +882,6 @@ void SMESHGUI_MeshOp::createHypothesis (const int theDim,
       SMESH::CreateHypothesis(theTypeName, aData->Label, false);
     }
   }
-  // restore the state of toggle buttons:
-  dlg()->restoreState(dlgState);
 
   _PTR(SComponent) aFather = SMESH::GetActiveStudyDocument()->FindComponent("SMESH");
 

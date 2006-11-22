@@ -1266,7 +1266,7 @@ bool SMDS_VolumeTool::IsFreeFace( int faceIndex )
   if ( IsFaceExternal( faceIndex ))
     intNormal = XYZ( -intNormal.x, -intNormal.y, -intNormal.z );
   XYZ p0 ( nodes[0] ), baryCenter;
-  for ( vNbIt = volNbShared.begin(); vNbIt != volNbShared.end(); vNbIt++ ) {
+  for ( vNbIt = volNbShared.begin(); vNbIt != volNbShared.end(); ) {
     int nbShared = (*vNbIt).second;
     if ( nbShared >= 3 ) {
       SMDS_VolumeTool volume( (*vNbIt).first );

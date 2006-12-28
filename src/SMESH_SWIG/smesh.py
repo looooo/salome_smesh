@@ -241,6 +241,12 @@ def GetCriterion(elementType,
         
     if Compare in [FT_LessThan, FT_MoreThan, FT_EqualTo]:
         aCriterion.Compare = EnumToLong(Compare)
+    elif Compare == "=" or Compare == "==":
+        aCriterion.Compare = EnumToLong(FT_EqualTo)
+    elif Compare == "<":
+        aCriterion.Compare = EnumToLong(FT_LessThan)
+    elif Compare == ">":
+        aCriterion.Compare = EnumToLong(FT_MoreThan)
     else:
         aCriterion.Compare = EnumToLong(FT_EqualTo)
         aTreshold = Compare

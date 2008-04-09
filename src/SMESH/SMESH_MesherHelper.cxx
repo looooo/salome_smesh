@@ -50,6 +50,8 @@
 
 #define RETURN_BAD_RESULT(msg) { MESSAGE(msg); return false; }
 
+using namespace std;
+
 //================================================================================
 /*!
  * \brief Constructor

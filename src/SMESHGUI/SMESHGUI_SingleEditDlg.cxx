@@ -63,6 +63,7 @@
 #include <qmessagebox.h>
 #include <qvalidator.h>
 
+using namespace std;
 
 #define SPACING 5
 #define MARGIN  10

@@ -78,7 +78,7 @@ class SMESHGUI_EXPORT SMESHGUI_EditMeshDlg : public QDialog
   void onEditGroup();
 
   void FindGravityCenter(TColStd_MapOfInteger & ElemsIdMap, 
-			 list< gp_XYZ > & GrCentersXYZ);
+    std::list< gp_XYZ > & GrCentersXYZ);
   // add the centers of gravity of ElemsIdMap elements to the GrCentersXYZ list
 
  private:

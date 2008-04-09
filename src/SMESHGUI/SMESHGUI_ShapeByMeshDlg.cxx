@@ -67,6 +67,8 @@
 #include <qapplication.h>
 #include <qstringlist.h>
 
+using namespace std;
+
 #define SPACING 5
 #define MARGIN  10
 

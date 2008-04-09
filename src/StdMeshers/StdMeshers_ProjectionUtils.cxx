@@ -65,6 +65,8 @@
 #include <TopTools_DataMapIteratorOfDataMapOfShapeShape.hxx>
 #include <TopTools_DataMapIteratorOfDataMapOfShapeListOfShape.hxx>
 
+using namespace std;
+
 
 #define RETURN_BAD_RESULT(msg) { MESSAGE(")-: Error: " << msg); return false; }
 #define SHOW_VERTEX(v,msg) // { \

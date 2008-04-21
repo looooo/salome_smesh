@@ -198,13 +198,14 @@ namespace SMESH {
       }
     }
     TVisualObjCont::iterator anIter = VISUAL_OBJ_CONT.begin();
-    for ( ; anIter != VISUAL_OBJ_CONT.end(); ++anIter ) {
+    for ( ; anIter != VISUAL_OBJ_CONT.end(); anIter++ ) {
       int curId = anIter->first.first;
       if ( curId == studyID ) {
         // for unknown reason, object destructor is not called, so clear object manually
         anIter->second->GetUnstructuredGrid()->SetCells(0,0,0);
         anIter->second->GetUnstructuredGrid()->SetPoints(0);
-        VISUAL_OBJ_CONT.erase( anIter-- );  // dercement occures before erase()
+        VISUAL_OBJ_CONT.erase( anIter );  // dercement occures before erase()
+        anIter = VISUAL_OBJ_CONT.begin(); //reinitialize iterator after erase operation
       }
     }
   }

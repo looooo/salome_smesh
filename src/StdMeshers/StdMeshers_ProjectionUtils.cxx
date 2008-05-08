@@ -25,8 +25,6 @@
 // Created   : Fri Oct 27 10:24:28 2006
 // Author    : Edward AGAPOV (eap)
 
-using namespace std;
-
 #include "StdMeshers_ProjectionUtils.hxx"
 
 #include "StdMeshers_ProjectionSource1D.hxx"

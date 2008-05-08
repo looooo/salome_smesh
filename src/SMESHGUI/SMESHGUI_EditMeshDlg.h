@@ -18,8 +18,6 @@
 // See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 //
 
-using namespace std;
-
 #ifndef SMESHGUI_EditMeshDlg_H
 #define SMESHGUI_EditMeshDlg_H
 

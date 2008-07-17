@@ -60,7 +60,7 @@ namespace SMESH
 
 DEFINE_STANDARD_HANDLE(SMESHGUI_Filter, VTKViewer_Filter)
 
-class SMESHGUI_EXPORT SMESHGUI_Filter : public VTKViewer_Filter
+class SMESHGUI_Filter : public VTKViewer_Filter
 {
 public:
   virtual bool                IsObjValid( const int ) const = 0;
@@ -77,7 +77,7 @@ public:
 
 DEFINE_STANDARD_HANDLE(SMESHGUI_PredicateFilter, SMESHGUI_Filter)
 
-class SMESHGUI_EXPORT SMESHGUI_PredicateFilter : public SMESHGUI_Filter
+class SMESHGUI_PredicateFilter : public SMESHGUI_Filter
 {
 public:
   SMESHGUI_PredicateFilter();
@@ -105,7 +105,7 @@ public:
 
 DEFINE_STANDARD_HANDLE(SMESHGUI_QuadrangleFilter, SMESHGUI_Filter)
 
-class SMESHGUI_EXPORT SMESHGUI_QuadrangleFilter : public SMESHGUI_Filter
+class SMESHGUI_QuadrangleFilter : public SMESHGUI_Filter
 {
 public:
   SMESHGUI_QuadrangleFilter();
@@ -127,7 +127,7 @@ public:
 
 DEFINE_STANDARD_HANDLE(SMESHGUI_TriangleFilter, SMESHGUI_Filter)
 
-class SMESHGUI_EXPORT SMESHGUI_TriangleFilter : public SMESHGUI_Filter
+class SMESHGUI_TriangleFilter : public SMESHGUI_Filter
 {
 public:
   SMESHGUI_TriangleFilter();
@@ -149,7 +149,7 @@ public:
 
 DEFINE_STANDARD_HANDLE(SMESHGUI_FacesFilter, SMESHGUI_Filter)
 
-class SMESHGUI_EXPORT SMESHGUI_FacesFilter : public SMESHGUI_Filter
+class SMESHGUI_FacesFilter : public SMESHGUI_Filter
 {
 public:
   SMESHGUI_FacesFilter();
@@ -171,7 +171,7 @@ public:
 
 DEFINE_STANDARD_HANDLE(SMESHGUI_VolumesFilter, SMESHGUI_Filter)
 
-class SMESHGUI_EXPORT SMESHGUI_VolumesFilter : public SMESHGUI_Filter
+class SMESHGUI_VolumesFilter : public SMESHGUI_Filter
 {
 public:
   SMESHGUI_VolumesFilter();

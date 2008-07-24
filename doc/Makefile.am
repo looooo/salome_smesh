@@ -28,3 +28,15 @@
 # source path
 
 SUBDIRS= salome
+
+usr_docs:
+	@@SETX@; for d in $(SUBDIRS); do        \
+           (cd $$d && $(MAKE) $@) || exit 1;    \
+        done;
+
+docs: usr_docs
+
+dev_docs:
+	@@SETX@; for d in $(SUBDIRS); do        \
+           (cd $$d && $(MAKE) $@) || exit 1;    \
+        done;

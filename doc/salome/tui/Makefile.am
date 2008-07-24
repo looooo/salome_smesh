@@ -51,6 +51,20 @@ dev_docs:
 	cp -fr $(srcdir)/SMESH/sources/ SMESH ; \
 	rm -fr INPUT
 
+docs: dev_docs
+
+clean-local:
+	rm -rf `ls | grep -v "Makefile"`
+	rm -rf SMESH
+
+install-data-local: dev_docs
+	mkdir -p $(docdir)/tui
+	cp -rf SMESH $(docdir)/tui
+	-find $(PWD) -name CVS -prune -exec rm -rf {} \;
+
+uninstall-local:
+	rm -rf $(docdir)/tui/SMESH
+
 doctuidir=$(docdir)/tui/SMESH
 
 nodist_doctui_DATA= SMESH/doxyfile

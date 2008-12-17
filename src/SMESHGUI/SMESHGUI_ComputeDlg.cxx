@@ -949,18 +949,8 @@ SMESHGUI_BaseComputeOp::SMESHGUI_BaseComputeOp()
 
 void SMESHGUI_BaseComputeOp::startOperation()
 {
-  if ( !myCompDlg )
-  {
-    myCompDlg = new SMESHGUI_ComputeDlg( desktop() );
-    // connect signals and slots
-    connect(myCompDlg->myShowBtn,    SIGNAL (clicked()), SLOT(onPreviewShape()));
-    connect(myCompDlg->myPublishBtn, SIGNAL (clicked()), SLOT(onPublishShape()));
-    connect(myCompDlg->myBadMeshBtn, SIGNAL (clicked()), SLOT(onShowBadMesh()));
-
-    QTableWidget* aTable = table();
-    connect(aTable, SIGNAL(itemSelectionChanged()), SLOT(currentCellChanged()));
-    connect(aTable, SIGNAL(currentCellChanged(int,int,int,int)), SLOT(currentCellChanged()));
-  }
+  // create compute dialog if not created before
+  computeDlg();
 
   myMesh      = SMESH::SMESH_Mesh::_nil();
   myMainShape = GEOM::GEOM_Object::_nil();
@@ -1225,7 +1215,8 @@ void SMESHGUI_BaseComputeOp::showComputeResult( const bool theMemoryLack,
       currentCellChanged(); // to update buttons
     }
   }
-  aCompDlg->show();
+  // show dialog and wait, becase Compute can be invoked from Preview operation
+  aCompDlg->exec();
 }
 
 //================================================================================
@@ -1424,6 +1415,19 @@ SMESHGUI_BaseComputeOp::~SMESHGUI_BaseComputeOp()
 
 SMESHGUI_ComputeDlg* SMESHGUI_BaseComputeOp::computeDlg() const
 {
+  if ( !myCompDlg )
+  {
+    SMESHGUI_BaseComputeOp* me = (SMESHGUI_BaseComputeOp*)this;
+    me->myCompDlg = new SMESHGUI_ComputeDlg( desktop() );
+    // connect signals and slots
+    connect(myCompDlg->myShowBtn,    SIGNAL (clicked()), SLOT(onPreviewShape()));
+    connect(myCompDlg->myPublishBtn, SIGNAL (clicked()), SLOT(onPublishShape()));
+    connect(myCompDlg->myBadMeshBtn, SIGNAL (clicked()), SLOT(onShowBadMesh()));
+
+    QTableWidget* aTable = me->table();
+    connect(aTable, SIGNAL(itemSelectionChanged()), SLOT(currentCellChanged()));
+    connect(aTable, SIGNAL(currentCellChanged(int,int,int,int)), SLOT(currentCellChanged()));
+  }
   return myCompDlg;
 }
 
@@ -1822,6 +1826,7 @@ void SMESHGUI_PrecomputeOp::onPreview()
     break;
   }
 
+  aWaitCursor.suspend();
   // SHOW ERRORS
   if ( isShowError )
   {

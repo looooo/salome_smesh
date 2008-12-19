@@ -1776,10 +1776,11 @@ void SMESHGUI_PrecomputeOp::onPreview()
       
     SMESH::MeshPreviewStruct_var previewData =
       gen->Precompute(myMesh, myMainShape, (SMESH::Dimension)dim, aShapesId);
-    if ( previewData.operator->() )
+    SMESH::MeshPreviewStruct* previewRes = previewData._retn();
+    if ( previewRes && previewRes->nodesXYZ.length() > 0 )
     {
       computeFailed = false;
-      myPreviewDisplayer->SetData( previewData._retn() );
+      myPreviewDisplayer->SetData( previewRes );
       // append shape indeces with computed mesh entities
       for ( int i = 0, n = aShapesId->length(); i < n; i++ )
 	myMapShapeId[ aShapesId[ i ] ] = 0;

@@ -1389,7 +1389,7 @@ SMESH::MeshPreviewStruct* SMESH_Gen_i::Precompute( SMESH::SMESH_Mesh_ptr theMesh
     THROW_SALOME_CORBA_EXCEPTION( "bad Mesh reference",
                                   SALOME::BAD_PARAM );
 
-  SMESH::MeshPreviewStruct_var result = 0;
+  SMESH::MeshPreviewStruct_var result = new SMESH::MeshPreviewStruct;
   try {
     // get mesh servant
     SMESH_Mesh_i* meshServant = dynamic_cast<SMESH_Mesh_i*>( GetServant( theMesh ).in() );
@@ -1413,7 +1413,6 @@ SMESH::MeshPreviewStruct* SMESH_Gen_i::Precompute( SMESH::SMESH_Mesh_ptr theMesh
 	int nbShapeId = shapeIds.size();
 	theShapesId.length( nbShapeId );
 	// iterates on shapes and collect mesh entities into mesh preview
-	result = new SMESH::MeshPreviewStruct;
 	TSetOfInt::const_iterator idIt = shapeIds.begin();
 	TSetOfInt::const_iterator idEnd = shapeIds.end();
 	std::map< int, int > mapOfShIdNb;

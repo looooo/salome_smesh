@@ -13,7 +13,12 @@ the meshing elements and these calculated values is shown with the
 help of a scalar bar, which is displayed near the presentation of your
 mesh.
 
-There are 1D, 2D and 3D quality controls.
+There are 0D, 1D, 2D and 3D quality controls.
+
+0D mesh quality controls:
+<ul>
+<li>\ref free_nodes_page "Free nodes"</li>
+</ul>
 
 1D mesh quality controls:
 <ul>

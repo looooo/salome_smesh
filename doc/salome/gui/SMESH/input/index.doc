@@ -51,6 +51,7 @@
 <li>\ref free_borders_page</li>
 <li>\ref borders_at_multi_connection_page</li>
 <li>\ref length_page</li>
+<li>\ref free_nodes_page</li>
 <li>\ref free_edges_page</li>
 <li>\ref length_2d_page</li>
 <li>\ref borders_at_multi_connection_2d_page</li>

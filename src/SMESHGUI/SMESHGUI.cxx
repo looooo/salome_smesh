@@ -771,6 +771,10 @@
 	    aTitle = QObject::tr( "MULTI_BORDERS" );
 	    aControl = SMESH_Actor::eMultiConnection;
 	    break;
+	  case 6005:
+	    aTitle = QObject::tr( "FREE_NODES" );
+	    aControl = SMESH_Actor::eFreeNodes;
+	    break;
 	  case 6019:
 	    aTitle = QObject::tr( "MULTI2D_BORDERS" );
 	    aControl = SMESH_Actor::eMultiConnection2D;
@@ -2425,6 +2429,7 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
   case 6002:
   case 6003:
   case 6004:
+  case 6005:
   case 6009:
     if ( vtkwnd ) {
 
@@ -2651,6 +2656,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   createSMESHAction( 6002, "FREE_EDGE",       "ICON_FREE_EDGE",     0, true );
   createSMESHAction( 6003, "FREE_BORDER",     "ICON_FREE_EDGE_2D",  0, true );
   createSMESHAction( 6004, "CONNECTION",      "ICON_CONNECTION",    0, true );
+  createSMESHAction( 6005, "FREE_NODE",       "ICON_FREE_NODE",     0, true );
   createSMESHAction( 6011, "AREA",            "ICON_AREA",          0, true );
   createSMESHAction( 6012, "TAPER",           "ICON_TAPER",         0, true );
   createSMESHAction( 6013, "ASPECT",          "ICON_ASPECT",        0, true );
@@ -2794,6 +2800,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   createMenu( 6001, ctrlId, -1 );
   createMenu( 6004, ctrlId, -1 );
   createMenu( separator(), ctrlId, -1 );
+  createMenu( 6005, ctrlId, -1 );
   createMenu( 6002, ctrlId, -1 );
   createMenu( 6018, ctrlId, -1 );
   createMenu( 6019, ctrlId, -1 );
@@ -2885,6 +2892,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   createTool( 6003, ctrlTb );
   createTool( 6004, ctrlTb );
   createTool( separator(), ctrlTb );
+  createTool( 6005, ctrlTb );
   createTool( 6002, ctrlTb );
   createTool( 6018, ctrlTb );
   createTool( 6019, ctrlTb );
@@ -3139,6 +3147,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   // Controls
   //-------------------------------------------------
   QString
+    aMeshInVtkHasNodes = aMeshInVTK + "&&" + hasNodes,
     aMeshInVtkHasEdges = aMeshInVTK + "&&" + hasEdges,
     aMeshInVtkHasFaces = aMeshInVTK + "&&" + hasFaces,
     aMeshInVtkHasVolumes = aMeshInVTK + "&&" + hasVolumes;
@@ -3164,8 +3173,12 @@ void SMESHGUI::initialize( CAM_Application* app )
 
   popupMgr()->insert( separator(), anId, -1 );
 
+  popupMgr()->insert( action( 6005 ), anId, -1 ); // FREE_NODE
+  popupMgr()->setRule( action( 6005 ), aMeshInVtkHasNodes, QtxPopupMgr::VisibleRule );
+  popupMgr()->setRule( action( 6005 ), "controlMode = 'eFreeNodes'", QtxPopupMgr::ToggleRule );
+
   popupMgr()->insert( action( 6002 ), anId, -1 ); // FREE_EDGE
-  popupMgr()->setRule( action( 6002 ), aMeshInVtkHasFaces, QtxPopupMgr::VisibleRule );
+  popupMgr()->setRule( action( 6002 ), aMeshInVtkHasEdges, QtxPopupMgr::VisibleRule );
   popupMgr()->setRule( action( 6002 ), "controlMode = 'eFreeEdges'", QtxPopupMgr::ToggleRule );
 
   popupMgr()->insert( action( 6018 ), anId, -1 ); // LENGTH_2D

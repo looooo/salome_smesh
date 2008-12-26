@@ -197,7 +197,7 @@ SMESH_ActorDef::SMESH_ActorDef()
   my1DProp->DeepCopy(myEdgeProp);
   my1DProp->SetLineWidth(aLineWidth + aLineWidthInc);
   my1DProp->SetPointSize(aPointSize);
-
+  
   my1DExtProp = vtkProperty::New();
   my1DExtProp->DeepCopy(myEdgeProp);
   anRGB[0] = 1 - anRGB[0];
@@ -236,7 +236,26 @@ SMESH_ActorDef::SMESH_ActorDef()
   myNodeActor->SetRepresentation(SMESH_DeviceActor::ePoint);
   aFilter = myNodeActor->GetExtractUnstructuredGrid();
   aFilter->SetModeOfExtraction(VTKViewer_ExtractUnstructuredGrid::ePoints);
+  
+  myNodeExtProp = vtkProperty::New();
+  myNodeExtProp->DeepCopy(myNodeProp);
+  anRGB[0] = 1 - anRGB[0];
+  anRGB[1] = 1 - anRGB[1];
+  anRGB[2] = 1 - anRGB[2];
+  myNodeExtProp->SetColor(anRGB[0],anRGB[1],anRGB[2]);
+  myNodeExtProp->SetPointSize(aPointSize);
 
+  myNodeExtActor = SMESH_DeviceActor::New();
+  myNodeExtActor->SetUserMatrix(aMatrix);
+  myNodeExtActor->SetStoreClippingMapping(true);
+  myNodeExtActor->PickableOff();
+  myNodeExtActor->SetHighlited(true);
+  myNodeExtActor->SetVisibility(false);
+  myNodeExtActor->SetProperty(myNodeExtProp);
+  myNodeExtActor->SetRepresentation(SMESH_DeviceActor::ePoint);
+  aFilter = myNodeExtActor->GetExtractUnstructuredGrid();
+  aFilter->SetModeOfExtraction(VTKViewer_ExtractUnstructuredGrid::ePoints);
+  aFilter->RegisterCellsWithType(VTK_VERTEX);
 
   //Definition of Pickable and Highlitable engines
   //----------------------------------------------
@@ -394,7 +413,8 @@ SMESH_ActorDef::~SMESH_ActorDef()
   myPreselectProp->Delete();
 
   myNodeProp->Delete();
-
+  myNodeExtProp->Delete();
+ 
   my1DProp->Delete();
   my1DActor->Delete();
 
@@ -407,6 +427,8 @@ SMESH_ActorDef::~SMESH_ActorDef()
   myNodeActor->Delete();
   myBaseActor->Delete();
 
+  myNodeExtActor->Delete();
+  
   myHighlitableActor->Delete();
 
   //Deleting of pints numbering pipeline
@@ -582,6 +604,10 @@ SetControlMode(eControl theMode,
       aFunctor.reset(new SMESH::Controls::FreeEdges());
       myControlActor = my2DActor;
       break;
+    case eFreeNodes:
+      aFunctor.reset(new SMESH::Controls::FreeNodes());
+      myControlActor = myNodeActor;
+      break;
     case eMultiConnection:
       aFunctor.reset(new SMESH::Controls::MultiConnection());
       myControlActor = my1DActor;
@@ -663,6 +689,9 @@ SetControlMode(eControl theMode,
     if(aNbCells){
       myControlMode = theMode;
       switch(myControlMode){
+      case eFreeNodes:
+	myNodeExtActor->SetExtControlMode(aFunctor);
+	break;
       case eFreeEdges:
       case eFreeBorders:
 	my1DExtActor->SetExtControlMode(aFunctor);
@@ -710,6 +739,8 @@ void SMESH_ActorDef::AddToRender(vtkRenderer* theRenderer){
 
   theRenderer->AddActor(myNodeActor);
   theRenderer->AddActor(myBaseActor);
+  
+  theRenderer->AddActor(myNodeExtActor);
 
   my3DActor->AddToRender(theRenderer);
   my2DActor->AddToRender(theRenderer);
@@ -718,7 +749,7 @@ void SMESH_ActorDef::AddToRender(vtkRenderer* theRenderer){
   theRenderer->AddActor(my1DExtActor);
 
   theRenderer->AddActor(myHighlitableActor);
-
+  
   theRenderer->AddActor2D(myScalarBarActor);
 
   myPtsSelectVisiblePoints->SetRenderer(theRenderer);
@@ -733,6 +764,8 @@ void SMESH_ActorDef::RemoveFromRender(vtkRenderer* theRenderer){
 
   theRenderer->RemoveActor(myNodeActor);
   theRenderer->RemoveActor(myBaseActor);
+
+  theRenderer->RemoveActor(myNodeExtActor);
 
   theRenderer->RemoveActor(myHighlitableActor);
 
@@ -762,8 +795,10 @@ bool SMESH_ActorDef::Init(TVisualObjPtr theVisualObj,
 
   myNodeActor->Init(myVisualObj,myImplicitBoolean);
   myBaseActor->Init(myVisualObj,myImplicitBoolean);
-  
+
   myHighlitableActor->Init(myVisualObj,myImplicitBoolean);
+
+  myNodeExtActor->Init(myVisualObj,myImplicitBoolean);
   
   my1DActor->Init(myVisualObj,myImplicitBoolean);
   my1DExtActor->Init(myVisualObj,myImplicitBoolean);
@@ -826,8 +861,10 @@ void SMESH_ActorDef::SetTransform(VTKViewer_Transform* theTransform){
 
   myNodeActor->SetTransform(theTransform);
   myBaseActor->SetTransform(theTransform);
-
+  
   myHighlitableActor->SetTransform(theTransform);
+
+  myNodeExtActor->SetTransform(theTransform);
 
   my1DActor->SetTransform(theTransform);
   my1DExtActor->SetTransform(theTransform);
@@ -952,6 +989,8 @@ void SMESH_ActorDef::SetVisibility(int theMode, bool theIsUpdateRepersentation){
   myNodeActor->VisibilityOff();
   myBaseActor->VisibilityOff();
   
+  myNodeExtActor->VisibilityOff();
+
   my1DActor->VisibilityOff();
   my1DExtActor->VisibilityOff();
   
@@ -965,9 +1004,12 @@ void SMESH_ActorDef::SetVisibility(int theMode, bool theIsUpdateRepersentation){
   if(GetVisibility()){
     if(theIsUpdateRepersentation)
       SetRepresentation(GetRepresentation());
-
+    
     if(myControlMode != eNone){
       switch(myControlMode){
+      case eFreeNodes:
+	myNodeExtActor->VisibilityOn();
+	break;
       case eFreeEdges:
       case eFreeBorders:
 	my1DExtActor->VisibilityOn();
@@ -1118,6 +1160,7 @@ void SMESH_ActorDef::SetRepresentation(int theMode){
 
   myPickableActor = myBaseActor;
   myNodeActor->SetVisibility(false);
+  myNodeExtActor->SetVisibility(false);
   vtkProperty *aProp = NULL, *aBackProp = NULL;
   SMESH_DeviceActor::EReperesent aReperesent = SMESH_DeviceActor::EReperesent(-1);
   switch(myRepresentation){
@@ -1356,6 +1399,7 @@ void SMESH_ActorDef::GetEdgeColor(vtkFloatingPointType& r,vtkFloatingPointType& 
 
 void SMESH_ActorDef::SetNodeColor(vtkFloatingPointType r,vtkFloatingPointType g,vtkFloatingPointType b){ 
   myNodeProp->SetColor(r,g,b);
+  myNodeExtProp->SetColor(1.0-r,1.0-g,1.0-b);
   Modified();
 }
 
@@ -1399,6 +1443,7 @@ void SMESH_ActorDef::SetLineWidth(vtkFloatingPointType theVal){
 
 void SMESH_ActorDef::SetNodeSize(vtkFloatingPointType theVal){
   myNodeProp->SetPointSize(theVal);
+  myNodeExtProp->SetPointSize(theVal);
   myHighlightProp->SetPointSize(theVal);
   myPreselectProp->SetPointSize(theVal);
 
@@ -1432,6 +1477,8 @@ SetImplicitFunctionUsed(bool theIsImplicitFunctionUsed)
   myBaseActor->SetImplicitFunctionUsed(theIsImplicitFunctionUsed);
   
   myHighlitableActor->SetImplicitFunctionUsed(theIsImplicitFunctionUsed);
+
+  myNodeExtActor->SetImplicitFunctionUsed(theIsImplicitFunctionUsed);
   
   my1DActor->SetImplicitFunctionUsed(theIsImplicitFunctionUsed);
   my1DExtActor->SetImplicitFunctionUsed(theIsImplicitFunctionUsed);

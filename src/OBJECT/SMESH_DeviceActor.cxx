@@ -545,6 +545,19 @@ SMESH_DeviceActor
     SetUnstructuredGrid(aDataSet);
     aDataSet->Delete();
   }
+  else if(FreeNodes* aFreeNodes = dynamic_cast<FreeNodes*>(theFunctor.get())){
+    myExtractUnstructuredGrid->SetModeOfChanging(VTKViewer_ExtractUnstructuredGrid::eAdding);
+    vtkUnstructuredGrid* aGrid = myVisualObj->GetUnstructuredGrid();
+    vtkIdType aNbCells = aGrid->GetNumberOfCells();
+    for( vtkIdType i = 0; i < aNbCells; i++ ){
+      vtkIdType anObjId = myVisualObj->GetNodeObjId(i);
+      if(aFreeNodes->IsSatisfy(anObjId))
+	myExtractUnstructuredGrid->RegisterCell(i);
+    }
+    if(!myExtractUnstructuredGrid->IsCellsRegistered())
+      myExtractUnstructuredGrid->RegisterCell(-1);
+    SetUnstructuredGrid(myVisualObj->GetUnstructuredGrid());
+  }
 }
 
 

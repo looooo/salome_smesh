@@ -306,6 +306,10 @@
             <source>MEN_FREE_EDGE</source>
             <translation>Free Edges</translation>
         </message>
+	<message>
+            <source>MEN_FREE_NODE</source>
+            <translation>Free Nodes</translation>
+        </message>
         <message>
             <source>MEN_GLOBAL_HYPO</source>
             <translation>Global Hypothesis</translation>
@@ -2060,6 +2064,12 @@ Consider saving your work before application crash</translation>
             <source>STB_FREE_EDGE</source>
             <translation>Free Edges</translation>
         </message>
+	<message>
+            <source>STB_FREE_NODE</source>
+            <translation>Free Nodes</translation>
+        </message>
+	
+
         <message>
             <source>STB_GLOBAL_HYPO</source>
             <translation>Global Hypothesis</translation>
@@ -2532,6 +2542,12 @@ Consider saving your work before application crash</translation>
             <source>TOP_FREE_EDGE</source>
             <translation>Free Edges</translation>
         </message>
+	<message>
+            <source>TOP_FREE_NODE</source>
+            <translation>Free Nodes</translation>
+        </message>
+	
+
         <message>
             <source>TOP_GLOBAL_HYPO</source>
             <translation>Global Hypothesis</translation>
@@ -3734,6 +3750,12 @@ Please enter correct value and try again</translation>
             <source>FREE_EDGES</source>
             <translation>Free edges</translation>
         </message>
+	<message>
+            <source>FREE_NODES</source>
+            <translation>Free nodes</translation>
+        </message>
+	
+
         <message>
             <source>ID</source>
             <translation>ID</translation>

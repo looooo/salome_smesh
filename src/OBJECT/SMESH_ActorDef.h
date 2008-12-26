@@ -220,6 +220,9 @@ class SMESH_ActorDef : public SMESH_Actor
   SMESH_DeviceActor* my3DActor;
   SMESH_DeviceActor* myControlActor;
 
+  vtkProperty* myNodeExtProp;
+  SMESH_DeviceActor* myNodeExtActor;
+
   vtkProperty* my1DProp;
   SMESH_DeviceActor* my1DActor;
   vtkProperty* my1DExtProp;

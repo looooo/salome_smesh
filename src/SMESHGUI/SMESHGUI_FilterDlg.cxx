@@ -1071,6 +1071,7 @@ void SMESHGUI_FilterTable::SetCriterion (const int                       theRow,
       theCriterion.Type != SMESH::FT_LyingOnGeom &&
       theCriterion.Type != SMESH::FT_FreeBorders &&
       theCriterion.Type != SMESH::FT_FreeEdges &&
+      theCriterion.Type != SMESH::FT_FreeNodes &&
       theCriterion.Type != SMESH::FT_BadOrientedVolume)
     aTable->item( theRow, 2 )->setText(QString("%1").arg(theCriterion.Threshold, 0, 'g', 15));
   else
@@ -1299,7 +1300,8 @@ void SMESHGUI_FilterTable::onCriterionChanged (const int row, const int col, con
 
   int aCriterionType = GetCriterionType(row);
 
-  if (aType == SMESH::EDGE && aCriterionType == SMESH::FT_FreeBorders ||
+  if ( aType == SMESH::NODE && aCriterionType == SMESH::FT_FreeNodes ||
+       aType == SMESH::EDGE && aCriterionType == SMESH::FT_FreeBorders ||
        aType == SMESH::FACE && aCriterionType == SMESH::FT_FreeEdges ||
        aType == SMESH::VOLUME && aCriterionType == SMESH::FT_BadOrientedVolume)
   {
@@ -1527,6 +1529,7 @@ const QMap<int, QString>& SMESHGUI_FilterTable::getCriteria (const int theType) 
       aCriteria[ SMESH::FT_BelongToCylinder   ] = tr("BELONG_TO_CYLINDER");
       aCriteria[ SMESH::FT_BelongToGenSurface ] = tr("BELONG_TO_GENSURFACE");
       aCriteria[ SMESH::FT_LyingOnGeom        ] = tr("LYING_ON_GEOM");
+      aCriteria[ SMESH::FT_FreeNodes          ] = tr("FREE_NODES");
     }
     return aCriteria;
   }

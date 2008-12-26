@@ -218,9 +218,13 @@
             <source>ICON_FREE_EDGE</source>
             <translation>mesh_free_edges.png</translation>
         </message>
-        <message>
+	<message>
             <source>ICON_FREE_EDGE_2D</source>
             <translation>mesh_free_edges_2d.png</translation>
+        </message>
+	<message>
+            <source>ICON_FREE_NODE</source>
+            <translation>mesh_free_nodes.png</translation>
         </message>
         <message>
             <source>ICON_HYPO</source>

@@ -1691,6 +1691,37 @@ void FreeEdges::GetBoreders(TBorders& theBorders)
   //std::cout<<"theBorders.size() = "<<theBorders.size()<<endl;
 }
 
+
+/*
+  Class       : FreeNodes
+  Description : Predicate for free nodes
+*/
+
+FreeNodes::FreeNodes()
+{
+  myMesh = 0;
+}
+
+void FreeNodes::SetMesh( const SMDS_Mesh* theMesh )
+{
+  myMesh = theMesh;
+}
+
+bool FreeNodes::IsSatisfy( long theNodeId )
+{
+  const SMDS_MeshNode* aNode = myMesh->FindNode( theNodeId );
+  if (!aNode)
+    return false;
+
+  return (aNode->NbInverseElements() < 1);
+}
+
+SMDSAbs_ElementType FreeNodes::GetType() const
+{
+  return SMDSAbs_Node;
+}
+
+
 /*
   Class       : RangeOfIds
   Description : Predicate for Range of Ids.

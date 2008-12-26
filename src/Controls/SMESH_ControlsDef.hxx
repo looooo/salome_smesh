@@ -380,7 +380,23 @@ namespace SMESH{
       const SMDS_Mesh* myMesh;
     };
     typedef boost::shared_ptr<FreeEdges> FreeEdgesPtr;
+    
+    
+    /*
+      Class       : FreeNodes
+      Description : Predicate for free nodes
+    */
+    class SMESHCONTROLS_EXPORT FreeNodes: public virtual Predicate{
+    public:
+      FreeNodes();
+      virtual void SetMesh( const SMDS_Mesh* theMesh );
+      virtual bool IsSatisfy( long theNodeId );
+      virtual SMDSAbs_ElementType GetType() const;
 
+    protected:
+      const SMDS_Mesh* myMesh;
+    };
+    
 
     /*
       Class       : RangeOfIds

@@ -521,6 +521,19 @@ namespace SMESH
     Controls::FreeEdgesPtr          myFreeEdgesPtr;
   };
   
+
+  /*
+    Class       : FreeNodes_i
+    Description : Predicate for free nodes
+  */
+  class SMESH_I_EXPORT FreeNodes_i: public virtual POA_SMESH::FreeNodes,
+		       public virtual Predicate_i
+  {
+  public:
+    FreeNodes_i();
+    FunctorType                     GetFunctorType();
+  };
+  
   
   /*
     Class       : RangeOfIds_i
@@ -816,6 +829,7 @@ namespace SMESH
     
     FreeBorders_ptr           CreateFreeBorders();
     FreeEdges_ptr             CreateFreeEdges();
+    FreeNodes_ptr             CreateFreeNodes();
     
     RangeOfIds_ptr            CreateRangeOfIds();
     

@@ -1284,6 +1284,21 @@ FunctorType FreeEdges_i::GetFunctorType()
 }
 
 /*
+  Class       : FreeNodes_i
+  Description : Predicate for free nodes
+*/
+FreeNodes_i::FreeNodes_i()
+{
+  myPredicatePtr.reset(new Controls::FreeNodes());
+  myFunctorPtr = myPredicatePtr;
+}
+
+FunctorType FreeNodes_i::GetFunctorType()
+{
+  return SMESH::FT_FreeNodes;
+}
+
+/*
   Class       : RangeOfIds_i
   Description : Predicate for Range of Ids.
                 Range may be specified with two ways.
@@ -1763,6 +1778,14 @@ FreeEdges_ptr FilterManager_i::CreateFreeEdges()
   return anObj._retn();
 }
 
+FreeNodes_ptr FilterManager_i::CreateFreeNodes()
+{
+  SMESH::FreeNodes_i* aServant = new SMESH::FreeNodes_i();
+  SMESH::FreeNodes_var anObj = aServant->_this();
+  TPythonDump()<<aServant<<" = "<<this<<".CreateFreeNodes()";
+  return anObj._retn();
+}
+
 RangeOfIds_ptr FilterManager_i::CreateRangeOfIds()
 {
   SMESH::RangeOfIds_i* aServant = new SMESH::RangeOfIds_i();
@@ -2011,6 +2034,7 @@ static inline bool getCriteria( Predicate_i*                thePred,
   {
   case FT_FreeBorders:
   case FT_FreeEdges:
+  case FT_FreeNodes:
     {
       CORBA::ULong i = theCriteria->length();
       theCriteria->length( i + 1 );
@@ -2256,6 +2280,9 @@ CORBA::Boolean Filter_i::SetCriteria( const SMESH::Filter::Criteria& theCriteria
         break;
       case SMESH::FT_FreeEdges:
         aPredicate = aFilterMgr->CreateFreeEdges();
+        break;
+      case SMESH::FT_FreeNodes:
+        aPredicate = aFilterMgr->CreateFreeNodes();
         break;
       case SMESH::FT_BelongToGeom:
         {
@@ -2515,6 +2542,7 @@ static inline LDOMString toString( CORBA::Long theType )
     case FT_RangeOfIds      : return "Range of IDs";
     case FT_FreeBorders     : return "Free borders";
     case FT_FreeEdges       : return "Free edges";
+    case FT_FreeNodes       : return "Free nodes";
     case FT_MultiConnection : return "Borders at multi-connections";
     case FT_MultiConnection2D: return "Borders at multi-connections 2D";
     case FT_Length          : return "Length";
@@ -2550,6 +2578,7 @@ static inline SMESH::FunctorType toFunctorType( const LDOMString& theStr )
   else if ( theStr.equals( "Lying on Geom"                ) ) return FT_LyingOnGeom;
   else if ( theStr.equals( "Free borders"                 ) ) return FT_FreeBorders;
   else if ( theStr.equals( "Free edges"                   ) ) return FT_FreeEdges;
+  else if ( theStr.equals( "Free nodes"                   ) ) return FT_FreeNodes;
   else if ( theStr.equals( "Borders at multi-connections" ) ) return FT_MultiConnection;
   //  else if ( theStr.equals( "Borders at multi-connections 2D" ) ) return FT_MultiConnection2D;
   else if ( theStr.equals( "Length"                       ) ) return FT_Length;

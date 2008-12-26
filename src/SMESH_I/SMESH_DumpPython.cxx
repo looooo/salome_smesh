@@ -224,6 +224,7 @@ namespace SMESH
       case FT_Area:             myStream<< "aArea";             break;
       case FT_FreeBorders:      myStream<< "aFreeBorders";      break;
       case FT_FreeEdges:        myStream<< "aFreeEdges";        break;
+      case FT_FreeNodes:        myStream<< "aFreeNodes";        break;
       case FT_MultiConnection:  myStream<< "aMultiConnection";  break;
       case FT_MultiConnection2D:myStream<< "aMultiConnection2D";break;
       case FT_Length:           myStream<< "aLength";           break;

@@ -48,6 +48,7 @@ module SMESH
     FT_Volume3D,          
     FT_FreeBorders,
     FT_FreeEdges,
+    FT_FreeNodes,
     FT_MultiConnection,
     FT_MultiConnection2D,
     FT_Length,
@@ -241,7 +242,6 @@ module SMESH
   * Verify whether 2D mesh element has free edges( i.e. edges connected to one face only )
   */
   interface FreeEdges: Predicate
-
   {
     struct Border
     {
@@ -252,7 +252,12 @@ module SMESH
     Borders GetBorders();
   };
 
-
+  /*!
+  * Logical functor (predicate) "Free nodes".
+  * Verify whether mesh has free nodes( i.e. nodes are not connected to any element )
+  */
+  interface FreeNodes: Predicate{};
+ 
   /*!
   * Abstract logical functor (predicate) "RangeOfIds".
   * Verify whether an Entity Id belongs to defined sequence of id's
@@ -423,6 +428,7 @@ module SMESH
 
     FreeBorders       CreateFreeBorders();
     FreeEdges         CreateFreeEdges();
+    FreeNodes         CreateFreeNodes();
 
     RangeOfIds        CreateRangeOfIds();
 

@@ -90,7 +90,7 @@
 
 namespace SMESH
 {
-  void ReverseConnectivity( std::vector<int> & ids, int type )
+  void ReverseConnectivity( std::vector<vtkIdType> & ids, int type )
   {
     // for reverse connectivity of other types keeping the first id, see
     // void SMESH_VisualObjDef::buildElemPrs() in SMESH_Object.cxx:900
@@ -138,7 +138,7 @@ namespace SMESH
       reverse( ids.begin(), ids.end() );
     }
     else {
-      std::vector<int> aRevIds( ids.size() );
+      std::vector<vtkIdType> aRevIds( ids.size() );
       for ( int i = 0; i < ids.size(); i++)
         aRevIds[ i ] = ids[ conn[ i ]];
       ids = aRevIds;
@@ -666,7 +666,7 @@ void SMESHGUI_AddQuadraticElementDlg::ClickOnApply()
 
   BusyLocker lock( myBusy );
 
-  std::vector<int> anIds;
+  std::vector<vtkIdType> anIds;
 
   switch (myType) {
   case QUAD_EDGE:

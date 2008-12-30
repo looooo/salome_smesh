@@ -30,6 +30,7 @@
 #include <string>
 #include <stdexcept>
 #include <cassert>
+#include <cstdlib>
 
 namespace UNV{
   using namespace std;

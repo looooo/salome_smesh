@@ -29,6 +29,7 @@ The following dialog box will appear:
 <li>specify the IDs of the elements which will be extruded by
 selecting them in the 3D viewer or select the whole mesh or
 submesh,</li>
+<li>specify the distance at which the elements will be extruded,</li>
 <li>specify the vector along which the elements will be extruded,</li>
 <li>number of steps.</li>
 </ul>

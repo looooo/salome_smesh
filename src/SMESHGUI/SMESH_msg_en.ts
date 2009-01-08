@@ -4366,6 +4366,14 @@ It is impossible to read point coordinates from file</translation>
             <source>TOTAL_ANGLE</source>
             <translation>Total Angle</translation>
         </message>
+	<message>
+	    <source>MEN_POINT_SELECT</source>
+            <translation>Select Point</translation>
+        </message>
+	<message>
+	    <source>MEN_FACE_SELECT</source>
+            <translation>Select Plane</translation>
+        </message>	
     </context>
     <context>
         <name>SMESHGUI_SewingDlg</name>

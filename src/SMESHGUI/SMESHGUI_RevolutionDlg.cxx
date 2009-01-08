@@ -72,6 +72,7 @@
 #include <QGridLayout>
 #include <QSpinBox>
 #include <QKeyEvent>
+#include <QMenu>
 
 // IDL includes
 #include <SALOMEconfig.h>
@@ -88,7 +89,8 @@
 SMESHGUI_RevolutionDlg::SMESHGUI_RevolutionDlg( SMESHGUI* theModule )
   : QDialog( SMESH::GetDesktop( theModule ) ),
     mySMESHGUI( theModule ),
-    mySelectionMgr( SMESH::GetSelectionMgr( theModule ) )
+    mySelectionMgr( SMESH::GetSelectionMgr( theModule ) ),
+    myVectorDefinition(NONE_SELECT)
 {
   mySimulation = new SMESHGUI_MeshEditPreview(SMESH::GetViewWindow( mySMESHGUI ));
 
@@ -305,6 +307,12 @@ SMESHGUI_RevolutionDlg::SMESHGUI_RevolutionDlg( SMESHGUI* theModule )
 
   Init();
 
+  /*Create menu to vector selection*/
+  SelectVectorMenu = new QMenu(this);
+  myMenuActions[SelectVectorMenu->addAction( tr( "MEN_POINT_SELECT" ) )] = POINT_SELECT;
+  myMenuActions[SelectVectorMenu->addAction( tr( "MEN_FACE_SELECT" ) )] = FACE_SELECT;
+  connect( SelectVectorMenu, SIGNAL( triggered( QAction* ) ), SLOT( onSelectVectorMenu( QAction* ) ) );
+
   /* signals and slots connections */
   connect(buttonOk,     SIGNAL(clicked()), this, SLOT(ClickOnOk()));
   connect(buttonCancel, SIGNAL(clicked()), this, SLOT(ClickOnCancel()));
@@ -314,7 +322,7 @@ SMESHGUI_RevolutionDlg::SMESHGUI_RevolutionDlg( SMESHGUI* theModule )
 
   connect(SelectElementsButton, SIGNAL(clicked()), this, SLOT(SetEditCurrentArgument()));
   connect(SelectPointButton,    SIGNAL(clicked()), this, SLOT(SetEditCurrentArgument()));
-  connect(SelectVectorButton,   SIGNAL(clicked()), this, SLOT(SetEditCurrentArgument()));
+  connect(SelectVectorButton,   SIGNAL(clicked()), this, SLOT(onSelectVectorButton()));
 
   connect(SpinBox_X,  SIGNAL(valueChanged(double)), this, SLOT(toDisplaySimulation()));
   connect(SpinBox_Y,  SIGNAL(valueChanged(double)), this, SLOT(toDisplaySimulation()));
@@ -729,30 +737,57 @@ void SMESHGUI_RevolutionDlg::SelectionIntoArgument()
 
     myNbOkElements = true;
   } else {
-    aNbUnits = SMESH::GetNameOfSelectedNodes(mySelector, IO, aString);
-    if (aNbUnits != 1)
-      return;
 
     SMDS_Mesh* aMesh =  myActor->GetObject()->GetMesh();
     if (!aMesh)
       return;
 
-    const SMDS_MeshNode * n = aMesh->FindNode(aString.toInt());
-    if (!n)
+    bool isNodeSelected = (myEditCurrentArgument == (QWidget*)SpinBox_X ||
+                           (myEditCurrentArgument == (QWidget*)SpinBox_DX && 
+                            myVectorDefinition==POINT_SELECT));
+
+    bool isFaceSelected = (myEditCurrentArgument == (QWidget*)SpinBox_DX && 
+                           myVectorDefinition==FACE_SELECT);
+
+    if(isNodeSelected) {
+      aNbUnits = SMESH::GetNameOfSelectedNodes(mySelector, IO, aString);
+    }
+    else if(isFaceSelected){
+      aNbUnits = SMESH::GetNameOfSelectedElements(mySelector, IO, aString);
+    }
+    
+    if (aNbUnits != 1)
       return;
 
-    double x = n->X();
-    double y = n->Y();
-    double z = n->Z();
+    if(isNodeSelected) {
+      const SMDS_MeshNode * n = aMesh->FindNode(aString.toInt());
+      if (!n)
+        return;
 
-    if (myEditCurrentArgument == (QWidget*)SpinBox_X) {
-      SpinBox_X->SetValue(x);
-      SpinBox_Y->SetValue(y);
-      SpinBox_Z->SetValue(z);
-    } else if (myEditCurrentArgument == (QWidget*)SpinBox_DX) {
-      SpinBox_DX->SetValue(x - SpinBox_X->GetValue());
-      SpinBox_DY->SetValue(y - SpinBox_Y->GetValue());
-      SpinBox_DZ->SetValue(z - SpinBox_Z->GetValue());
+      double x = n->X();
+      double y = n->Y();
+      double z = n->Z();
+
+      if (myEditCurrentArgument == (QWidget*)SpinBox_X) {
+        SpinBox_X->SetValue(x);
+        SpinBox_Y->SetValue(y);
+        SpinBox_Z->SetValue(z);
+      } else if (myEditCurrentArgument == (QWidget*)SpinBox_DX) {
+        SpinBox_DX->SetValue(x - SpinBox_X->GetValue());
+        SpinBox_DY->SetValue(y - SpinBox_Y->GetValue());
+        SpinBox_DZ->SetValue(z - SpinBox_Z->GetValue());
+      }
+    }
+    else if(isFaceSelected){
+      const SMDS_MeshFace* face = dynamic_cast<const SMDS_MeshFace*>(aMesh->FindElement(aString.toInt()));
+      if (!face)
+        return;
+      
+      gp_XYZ aNormale = SMESH::getNormale(face);
+      SpinBox_DX->SetValue(aNormale.X());
+      SpinBox_DY->SetValue(aNormale.Y());
+      SpinBox_DZ->SetValue(aNormale.Z());
+      
     }
   }
 
@@ -808,12 +843,6 @@ void SMESHGUI_RevolutionDlg::SetEditCurrentArgument()
     SMESH::SetPointRepresentation(true);
     if ( SVTK_ViewWindow* aViewWindow = SMESH::GetViewWindow( mySMESHGUI ))
       aViewWindow->SetSelectionMode(NodeSelection);
-  } else if (send == SelectVectorButton) {
-    myEditCurrentArgument = (QWidget*)SpinBox_DX;
-    SMESH::SetPointRepresentation(true);
-    if ( SVTK_ViewWindow* aViewWindow = SMESH::GetViewWindow( mySMESHGUI ))
-      aViewWindow->SetSelectionMode(NodeSelection);
-  } else {
   }
 
   myEditCurrentArgument->setFocus();
@@ -1050,4 +1079,43 @@ void SMESHGUI_RevolutionDlg::onDisplaySimulation(bool toDisplayPreview)
     //erase preview
     mySimulation->SetVisibility(false);
   }
+}
+
+//=================================================================================
+// function : onSelectVectorButton()
+// purpose  : [slot]
+//=================================================================================
+void SMESHGUI_RevolutionDlg::onSelectVectorButton(){
+  if(SelectVectorMenu) {
+    SelectVectorMenu->exec( QCursor::pos() );
+  }
+}
+
+//=================================================================================
+// function : onSelectVectorMenu()
+// purpose  : [slot]
+//=================================================================================
+void SMESHGUI_RevolutionDlg::onSelectVectorMenu( QAction* action){
+  if(!action)
+    return;
+
+  switch(myMenuActions[action]) {
+  case POINT_SELECT: 
+    SMESH::SetPointRepresentation(true);
+    if ( SVTK_ViewWindow* aViewWindow = SMESH::GetViewWindow( mySMESHGUI ))
+      aViewWindow->SetSelectionMode(NodeSelection);
+    break;
+    
+  case FACE_SELECT: 
+    SMESH::SetPointRepresentation(false);
+    if ( SVTK_ViewWindow* aViewWindow = SMESH::GetViewWindow( mySMESHGUI ))
+      aViewWindow->SetSelectionMode(FaceSelection);
+    break;
+  }
+
+  myVectorDefinition = myMenuActions[action];
+  myEditCurrentArgument = (QWidget*)SpinBox_DX;
+  myEditCurrentArgument->setFocus();
+  connect(mySelectionMgr, SIGNAL(currentSelectionChanged()), this, SLOT(SelectionIntoArgument()));
+  SelectionIntoArgument();
 }

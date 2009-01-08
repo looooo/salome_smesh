@@ -77,7 +77,7 @@ private:
   SMESHGUI*                        mySMESHGUI;            /* Current SMESHGUI object */
   SMESHGUI_IdValidator*            myIdValidator;
   LightApp_SelectionMgr*           mySelectionMgr;        /* User shape selection */
-  QLineEdit*                       myEditCurrentArgument; /* Current  LineEdit */
+  QWidget*                         myEditCurrentArgument; /* Current  argument editor */
   int                              myNbOkElements;        /* to check when elements are defined */
   SVTK_Selector*                   mySelector;
 
@@ -100,12 +100,20 @@ private:
   QLineEdit*                       LineEditElements;
   QCheckBox*                       CheckBoxMesh;
   QLabel*                          TextLabelVector;
+  QLabel*                          TextLabelDistance;
+  QPushButton*                     SelectVectorButton;
   QLabel*                          TextLabelDx;
   SMESHGUI_SpinBox*                SpinBox_Dx;
   QLabel*                          TextLabelDy;
   SMESHGUI_SpinBox*                SpinBox_Dy;
   QLabel*                          TextLabelDz;
   SMESHGUI_SpinBox*                SpinBox_Dz;
+  QLabel*                          TextLabelVx;
+  SMESHGUI_SpinBox*                SpinBox_Vx;
+  QLabel*                          TextLabelVy;
+  SMESHGUI_SpinBox*                SpinBox_Vy;
+  QLabel*                          TextLabelVz;
+  SMESHGUI_SpinBox*                SpinBox_Vz;
   QLabel*                          TextLabelNbSteps;
   QSpinBox*                        SpinBox_NbSteps;
   QCheckBox*                       MakeGroupsCheck;

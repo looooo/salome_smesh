@@ -91,6 +91,7 @@ protected:
   virtual QWidget*             getCustomWidget( const StdParam&, 
 						QWidget*, const int ) const;
   virtual bool                 getParamFromCustomWidget( StdParam&, QWidget* ) const;
+  virtual void                 valueChanged( QWidget* );
   virtual QString              caption() const;
   virtual QPixmap              icon() const;
   virtual QString              type() const;

@@ -248,6 +248,11 @@ QFrame* SMESHGUI_GenericHypothesisCreator::buildStdFrame()
 
 void SMESHGUI_GenericHypothesisCreator::onValueChanged()
 {
+  valueChanged( (QWidget*) sender() );
+}
+
+void SMESHGUI_GenericHypothesisCreator::valueChanged( QWidget* )
+{
 }
 
 void SMESHGUI_GenericHypothesisCreator::onDialogFinished( int /*result*/ )

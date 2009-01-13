@@ -21,6 +21,11 @@
                 icon-id="mesh_hypo_length.png"
                 dim="1"/>
 
+    <hypothesis type="MaxLength"
+                label-id="Max Size"
+                icon-id="mesh_hypo_length.png"
+                dim="1"/>
+
     <hypothesis type="Arithmetic1D"
                 label-id="Arithmetic 1D"
                 icon-id="mesh_hypo_length.png"
@@ -130,7 +135,7 @@
     <algorithm type="Regular_1D"
 	       label-id="Wire discretisation"
 	       icon-id="mesh_algo_regular.png"
-               hypos="LocalLength,Arithmetic1D,StartEndLength,NumberOfSegments,Deflection1D,AutomaticLength"
+               hypos="LocalLength,MaxLength,Arithmetic1D,StartEndLength,NumberOfSegments,Deflection1D,AutomaticLength"
                opt-hypos="Propagation,QuadraticMesh"
                input="VERTEX"
                output="EDGE"
@@ -139,7 +144,7 @@
     <algorithm type="CompositeSegment_1D"
 	       label-id="Composite side discretisation"
 	       icon-id="mesh_algo_regular.png"
-               hypos="LocalLength,Arithmetic1D,StartEndLength,NumberOfSegments,Deflection1D,AutomaticLength"
+               hypos="LocalLength,MaxLength,Arithmetic1D,StartEndLength,NumberOfSegments,Deflection1D,AutomaticLength"
                opt-hypos="Propagation,QuadraticMesh"
                input="VERTEX"
                output="EDGE"
@@ -242,11 +247,11 @@
 <hypotheses-set-group>
 
     <hypotheses-set name="Automatic Tetrahedralization"
-                    hypos="AutomaticLength"
+                    hypos="MaxLength"
                     algos="Regular_1D, MEFISTO_2D, NETGEN_3D"/>
 
     <hypotheses-set name="Automatic Hexahedralization"
-                    hypos="AutomaticLength"
+                    hypos="NumberOfSegments"
                     algos="Regular_1D, Quadrangle_2D, Hexa_3D"/>
 
 </hypotheses-set-group>

@@ -73,6 +73,44 @@ module StdMeshers
   };
 
   /*!
+   * StdMeshers_MaxLength: interface of "Max length" hypothesis
+   */
+  interface StdMeshers_MaxLength : SMESH::SMESH_Hypothesis
+  {
+    /*!
+     * Sets <length> parameter value
+     */
+    void SetLength(in double length)
+      raises (SALOME::SALOME_Exception);
+    /*!
+     * Returns <length> parameter value
+     */
+    double GetLength();
+    /*!
+     * Returns true if preestemated length is defined
+     */
+    boolean HavePreestimatedLength();
+    /*!
+     * Returns preestemated length
+     */
+    double GetPreestimatedLength();
+    /*!
+     * Sets preestemated length
+     */
+    void SetPreestimatedLength(in double length);
+    /*!
+     * Sets boolean parameter enabling/desabling usage of length computed
+     * basing on size of bounding box of shape to mesh
+     */
+    void SetUsePreestimatedLength(in boolean toUse);
+    /*!
+     * Returns value of boolean parameter enabling/desabling usage of length computed
+     * basing on size of bounding box of shape to mesh
+     */
+    boolean GetUsePreestimatedLength();
+  };
+
+  /*!
    * StdMeshers_AutomaticLength: interface of "Automatic length" hypothesis
    */
   interface StdMeshers_AutomaticLength : SMESH::SMESH_Hypothesis

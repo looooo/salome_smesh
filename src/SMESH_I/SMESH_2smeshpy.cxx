@@ -1187,6 +1187,13 @@ Handle(_pyHypothesis) _pyHypothesis::NewHypothesis( const Handle(_pyCommand)& th
     // i.e. convertion result will be "locallength = regular1d.LocalLength(<arg of SetLength()>)"
     hyp->AddArgMethod( "SetLength" );
   }
+  else if ( hypType == "MaxLength" ) {
+    // set algo's method creating hyp, and algo type
+    hyp->SetConvMethodAndType( "MaxSize", "Regular_1D");
+    // set method whose 1 arg will become the 1-st arg of hyp creation command
+    // i.e. convertion result will be "maxsize = regular1d.MaxSize(<arg of SetLength()>)"
+    hyp->AddArgMethod( "SetLength" );
+  }
   else if ( hypType == "NumberOfSegments" ) {
     hyp = new _pyNumberOfSegmentsHyp( theCreationCmd );
     hyp->SetConvMethodAndType( "NumberOfSegments", "Regular_1D");

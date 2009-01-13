@@ -59,6 +59,8 @@ protected:
   virtual ListOfWidgets* customWidgets() const;
   virtual void     onReject();
 
+  virtual void     valueChanged( QWidget* );
+
   template<class T>
     T* widget(int i) const {
     return dynamic_cast< T* >( getWidgetForParam( i ));

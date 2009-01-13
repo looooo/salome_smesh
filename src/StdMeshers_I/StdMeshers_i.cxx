@@ -51,6 +51,7 @@
 #include "StdMeshers_NumberOfLayers_i.hxx"
 #include "StdMeshers_LayerDistribution_i.hxx"
 #include "StdMeshers_SegmentLengthAroundVertex_i.hxx"
+#include "StdMeshers_MaxLength_i.hxx"
 
 #include "StdMeshers_Regular_1D_i.hxx"
 #include "StdMeshers_MEFISTO_2D_i.hxx"
@@ -87,6 +88,8 @@ STDMESHERS_I_EXPORT
     // Hypotheses
     if      (strcmp(aHypName, "LocalLength") == 0)
       aCreator = new StdHypothesisCreator_i<StdMeshers_LocalLength_i>;
+    else if (strcmp(aHypName, "MaxLength") == 0)
+      aCreator = new StdHypothesisCreator_i<StdMeshers_MaxLength_i>;
     else if (strcmp(aHypName, "NumberOfSegments") == 0)
       aCreator = new StdHypothesisCreator_i<StdMeshers_NumberOfSegments_i>;
     else if (strcmp(aHypName, "LengthFromEdges") == 0)

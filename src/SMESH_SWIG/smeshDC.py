@@ -3040,6 +3040,32 @@ class Mesh_Segment(Mesh_Algorithm):
             return IsEqual(hyp.GetPrecision(), args[1])
         return False
 
+    ## Defines "MaxSize" hypothesis to cut an edge into segments not longer than given value
+    #  @param length is optional maximal allowed length of segment, if it is omitted
+    #                the preestimated length is used that depends on geometry size
+    #  @param UseExisting if ==true - searches for an existing hypothesis created with
+    #                     the same parameters, else (default) - create a new one
+    #  @return an instance of StdMeshers_MaxLength hypothesis
+    #  @ingroup l3_hypos_1dhyps
+    def MaxSize(self, length=0.0, UseExisting=0):
+        hyp = self.Hypothesis("MaxLength", [length], UseExisting=UseExisting)
+        if length > 0.0:
+            # set given length
+            hyp.SetLength(length)
+        if not UseExisting:
+            # set preestimated length
+            gen = self.mesh.smeshpyD
+            initHyp = gen.GetHypothesisParameterValues("MaxLength", "libStdMeshersEngine.so",
+                                                       self.mesh.GetMesh(), self.mesh.GetShape(),
+                                                       False) # <- byMesh
+            preHyp = initHyp._narrow(StdMeshers.StdMeshers_MaxLength)
+            if preHyp:
+                hyp.SetPreestimatedLength( preHyp.GetPreestimatedLength() )
+                pass
+            pass
+        hyp.SetUsePreestimatedLength( length == 0.0 )
+        return hyp
+        
     ## Defines "NumberOfSegments" hypothesis to cut an edge in a fixed number of segments
     #  @param n for the number of segments that cut an edge
     #  @param s for the scale factor (optional)

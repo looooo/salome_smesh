@@ -134,6 +134,9 @@ SALOME_NamingService*   SMESH_Gen_i::myNS  = NULL;
 SALOME_LifeCycleCORBA*  SMESH_Gen_i::myLCC = NULL;
 SMESH_Gen_i*            SMESH_Gen_i::mySMESHGen = NULL;
 
+
+const int nbElemPerDiagonal = 10;
+
 //=============================================================================
 /*!
  *  GetServant [ static ]
@@ -458,6 +461,7 @@ SMESH::SMESH_Mesh_ptr SMESH_Gen_i::createMesh()
     SMESH_Mesh_i* meshServant = new SMESH_Mesh_i( GetPOA(), this, GetCurrentStudyID() );
     // create a new mesh object
     meshServant->SetImpl( myGen.CreateMesh( GetCurrentStudyID(), myIsEmbeddedMode ));
+    meshServant->GetImpl().SetNbElementsPerDiagonal( nbElemPerDiagonal );
 
     // activate the CORBA servant of Mesh
     SMESH::SMESH_Mesh_var mesh = SMESH::SMESH_Mesh::_narrow( meshServant->_this() );
@@ -641,14 +645,15 @@ SMESH::SMESH_Hypothesis_ptr SMESH_Gen_i::CreateHypothesis( const char* theHypNam
 
 //================================================================================
 /*!
- * \brief Return hypothesis of given type holding parameter values of the existing mesh
-  * \param theHypType - hypothesis type name
-  * \param theLibName - plugin library name
-  * \param theMesh - The mesh of interest
-  * \param theGeom - The shape to get parameter values from
-  * \retval SMESH::SMESH_Hypothesis_ptr - The returned hypothesis may be the one existing
-  *    in a study and used to compute the mesh, or a temporary one created just to pass
-  *    parameter values
+ * \brief Return a hypothesis holding parameter values corresponding either to the mesh
+ * existing on the given geometry or to size of the geometry.
+ *  \param theHypType - hypothesis type name
+ *  \param theLibName - plugin library name
+ *  \param theMesh - The mesh of interest
+ *  \param theGeom - The shape to get parameter values from
+ *  \retval SMESH::SMESH_Hypothesis_ptr - The returned hypothesis may be the one existing
+ *     in a study and used to compute the mesh, or a temporary one created just to pass
+ *     parameter values
  */
 //================================================================================
 
@@ -656,11 +661,12 @@ SMESH::SMESH_Hypothesis_ptr
 SMESH_Gen_i::GetHypothesisParameterValues (const char*           theHypType,
                                            const char*           theLibName,
                                            SMESH::SMESH_Mesh_ptr theMesh,
-                                           GEOM::GEOM_Object_ptr theGeom)
-    throw ( SALOME::SALOME_Exception )
+                                           GEOM::GEOM_Object_ptr theGeom,
+                                           CORBA::Boolean        byMesh)
+  throw ( SALOME::SALOME_Exception )
 {
   Unexpect aCatch(SALOME_SalomeException);
-  if ( CORBA::is_nil( theMesh ) )
+  if ( CORBA::is_nil( theMesh ) && byMesh )
     THROW_SALOME_CORBA_EXCEPTION( "bad Mesh reference", SALOME::BAD_PARAM );
   if ( CORBA::is_nil( theGeom ) )
     THROW_SALOME_CORBA_EXCEPTION( "bad shape object reference", SALOME::BAD_PARAM );
@@ -672,11 +678,11 @@ SMESH_Gen_i::GetHypothesisParameterValues (const char*           theHypType,
   // get mesh and shape
   SMESH_Mesh_i* meshServant = SMESH::DownCast<SMESH_Mesh_i*>( theMesh );
   TopoDS_Shape shape = GeomObjectToShape( theGeom );
-  if ( !meshServant || shape.IsNull() )
+  if ( !meshServant && byMesh || shape.IsNull() )
     return SMESH::SMESH_Hypothesis::_nil();
-  ::SMESH_Mesh& mesh = meshServant->GetImpl();
+  ::SMESH_Mesh* mesh = meshServant ? &meshServant->GetImpl() : (::SMESH_Mesh*)0;
 
-  if ( mesh.NbNodes() == 0 ) // empty mesh
+  if ( byMesh && mesh->NbNodes() == 0 ) // empty mesh
     return SMESH::SMESH_Hypothesis::_nil();
 
   // create a temporary hypothesis to know its dimention
@@ -686,34 +692,49 @@ SMESH_Gen_i::GetHypothesisParameterValues (const char*           theHypType,
     return SMESH::SMESH_Hypothesis::_nil();
   ::SMESH_Hypothesis* hyp = hypServant->GetImpl();
 
-  // look for a hypothesis of theHypType used to mesh the shape
-  if ( myGen.GetShapeDim( shape ) == hyp->GetDim() )
-  {
-    // check local shape
-    SMESH::ListOfHypothesis_var aHypList = theMesh->GetHypothesisList( theGeom );
-    int nbLocalHyps = aHypList->length();
-    for ( int i = 0; i < nbLocalHyps; i++ )
-      if ( strcmp( theHypType, aHypList[i]->GetName() ) == 0 ) // FOUND local!
-        return SMESH::SMESH_Hypothesis::_duplicate( aHypList[i] );
-    // check super shapes
-    TopTools_ListIteratorOfListOfShape itShape( mesh.GetAncestors( shape ));
-    while ( nbLocalHyps == 0 && itShape.More() ) {
-      GEOM::GEOM_Object_ptr geomObj = ShapeToGeomObject( itShape.Value() );
-      if ( ! CORBA::is_nil( geomObj )) {
-        SMESH::ListOfHypothesis_var aHypList = theMesh->GetHypothesisList( geomObj );
-        nbLocalHyps = aHypList->length();
-        for ( int i = 0; i < nbLocalHyps; i++ )
-          if ( strcmp( theHypType, aHypList[i]->GetName() ) == 0 ) // FOUND global!
-            return SMESH::SMESH_Hypothesis::_duplicate( aHypList[i] );
+  if ( byMesh ) {
+    // look for a hypothesis of theHypType used to mesh the shape
+    if ( myGen.GetShapeDim( shape ) == hyp->GetDim() )
+    {
+      // check local shape
+      SMESH::ListOfHypothesis_var aHypList = theMesh->GetHypothesisList( theGeom );
+      int nbLocalHyps = aHypList->length();
+      for ( int i = 0; i < nbLocalHyps; i++ )
+        if ( strcmp( theHypType, aHypList[i]->GetName() ) == 0 ) // FOUND local!
+          return SMESH::SMESH_Hypothesis::_duplicate( aHypList[i] );
+      // check super shapes
+      TopTools_ListIteratorOfListOfShape itShape( mesh->GetAncestors( shape ));
+      while ( nbLocalHyps == 0 && itShape.More() ) {
+        GEOM::GEOM_Object_ptr geomObj = ShapeToGeomObject( itShape.Value() );
+        if ( ! CORBA::is_nil( geomObj )) {
+          SMESH::ListOfHypothesis_var aHypList = theMesh->GetHypothesisList( geomObj );
+          nbLocalHyps = aHypList->length();
+          for ( int i = 0; i < nbLocalHyps; i++ )
+            if ( strcmp( theHypType, aHypList[i]->GetName() ) == 0 ) // FOUND global!
+              return SMESH::SMESH_Hypothesis::_duplicate( aHypList[i] );
+        }
+        itShape.Next();
       }
-      itShape.Next();
+    }
+
+    // let the temporary hypothesis find out some how parameter values by mesh
+    if ( hyp->SetParametersByMesh( mesh, shape ))
+      return SMESH::SMESH_Hypothesis::_duplicate( tmpHyp );
+  }
+  else {
+    double diagonal = 0;
+    if ( mesh )
+      diagonal = mesh->GetShapeDiagonalSize();
+    else
+      diagonal = ::SMESH_Mesh::GetShapeDiagonalSize( shape );
+    double elemSize = diagonal / nbElemPerDiagonal;
+    if ( elemSize > 0 ) {
+      // let the temporary hypothesis initialize it's values
+      if ( hyp->SetParametersByElementSize( elemSize, mesh ))
+        return SMESH::SMESH_Hypothesis::_duplicate( tmpHyp );
     }
   }
 
-  // let the temporary hypothesis find out some how parameter values
-  if ( hyp->SetParametersByMesh( &mesh, shape ))
-    return SMESH::SMESH_Hypothesis::_duplicate( tmpHyp );
-    
   return SMESH::SMESH_Hypothesis::_nil();
 }
 

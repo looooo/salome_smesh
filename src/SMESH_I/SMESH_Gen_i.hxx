@@ -202,7 +202,8 @@ public:
   SMESH::SMESH_Hypothesis_ptr GetHypothesisParameterValues (const char*           theHypType,
                                                             const char*           theLibName,
                                                             SMESH::SMESH_Mesh_ptr theMesh,
-                                                            GEOM::GEOM_Object_ptr theGeom)
+                                                            GEOM::GEOM_Object_ptr theGeom,
+                                                            CORBA::Boolean        byMesh)
     throw ( SALOME::SALOME_Exception );
   
   // Create empty mesh on a shape

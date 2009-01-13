@@ -1368,6 +1368,8 @@ bool _pyHypothesis::Addition2Creation( const Handle(_pyCommand)& theCmd,
     algo = theGen->FindAlgo( myGeom, theMesh, this );
     if ( algo.IsNull() )
       return false;
+    // attach hypothesis creation command to be after algo creation command
+    // because it can be new created instance of algorithm
     algo->GetCreationCmd()->AddDependantCmd( theCmd );
   }
   myIsWrapped = true;
@@ -1386,10 +1388,10 @@ bool _pyHypothesis::Addition2Creation( const Handle(_pyCommand)& theCmd,
   }
   // set a new creation command
   GetCreationCmd()->Clear();
-  // set dependance between creation and addition to mesh
-  // SetCreationCmd( theCmd );
-  GetCreationCmd()->AddDependantCmd( theCmd );
-    
+  // replace creation command by wrapped instance
+  // please note, that hypothesis attaches to algo creation command (see upper)
+  SetCreationCmd( theCmd );
+  
 
   // clear commands setting arg values
   list < Handle(_pyCommand) >::iterator argCmd = myArgCommands.begin();

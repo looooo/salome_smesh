@@ -890,13 +890,14 @@ SMESHGUI_MeshOp::getInitParamsHypothesis( const QString& aHypType,
     !myIsMesh :
     myDlg->selectedObject( SMESHGUI_MeshDlg::Obj ).count(':') > nbColonsInMeshEntry;
 
+  // get mesh and geom object
+  SMESH::SMESH_Mesh_var aMeshVar = SMESH::SMESH_Mesh::_nil();
+  GEOM::GEOM_Object_var aGeomVar = GEOM::GEOM_Object::_nil();
+
+  QString anEntry;
   if ( isSubMesh )
   {
-    // get mesh and geom object
-    SMESH::SMESH_Mesh_var aMeshVar = SMESH::SMESH_Mesh::_nil();
-    GEOM::GEOM_Object_var aGeomVar = GEOM::GEOM_Object::_nil();
-
-    QString anEntry = myDlg->selectedObject
+    anEntry = myDlg->selectedObject
       ( myToCreate ? SMESHGUI_MeshDlg::Mesh : SMESHGUI_MeshDlg::Obj );
     if ( _PTR(SObject) pObj = studyDS()->FindObjectID( anEntry.toLatin1().data() ))
     {
@@ -917,13 +918,35 @@ SMESHGUI_MeshOp::getInitParamsHypothesis( const QString& aHypType,
         }
       }
     }
-
-    if ( !aMeshVar->_is_nil() && !aGeomVar->_is_nil() )
-      return SMESHGUI::GetSMESHGen()->GetHypothesisParameterValues( aHypType.toLatin1().data(),
-                                                                    aServerLib.toLatin1().data(),
-                                                                    aMeshVar,
-                                                                    aGeomVar );
   }
+  else // mesh
+  {
+    if ( !myToCreate ) // mesh to edit can be selected
+    {
+      anEntry = myDlg->selectedObject( SMESHGUI_MeshDlg::Obj );
+      if ( _PTR(SObject) pMesh = studyDS()->FindObjectID( anEntry.toLatin1().data() ))
+      {
+        aMeshVar = SMESH::SMESH_Mesh::_narrow( _CAST( SObject,pMesh )->GetObject() );
+        if ( !aMeshVar->_is_nil() )
+          aGeomVar = SMESH::GetShapeOnMeshOrSubMesh( pMesh );
+      }
+    }
+    if ( aGeomVar->_is_nil() ) {
+      anEntry = myDlg->selectedObject( SMESHGUI_MeshDlg::Geom );
+      if ( _PTR(SObject) pGeom = studyDS()->FindObjectID( anEntry.toLatin1().data() ))
+      {
+        aGeomVar= GEOM::GEOM_Object::_narrow( _CAST( SObject,pGeom )->GetObject() );
+      }
+    }
+  }
+
+  if ( (!isSubMesh || !aMeshVar->_is_nil()) && !aGeomVar->_is_nil() )
+    return SMESHGUI::GetSMESHGen()->GetHypothesisParameterValues( aHypType.toLatin1().data(),
+                                                                  aServerLib.toLatin1().data(),
+                                                                  aMeshVar,
+                                                                  aGeomVar,
+                                                                  /*byMesh = */isSubMesh);
+
   return SMESH::SMESH_Hypothesis::_nil();
 }
 

@@ -80,11 +80,17 @@ public:
 
   /*!
    * \brief Initialize my parameter values by the mesh built on the geometry
-    * \param theMesh - the built mesh
-    * \param theShape - the geometry of interest
-    * \retval bool - true if parameter values have been successfully defined
+   *  \param theMesh - the built mesh
+   *  \param theShape - the geometry of interest
+   *  \retval bool - true if parameter values have been successfully defined
    */
   virtual bool SetParametersByMesh(const SMESH_Mesh* theMesh, const TopoDS_Shape& theShape)=0;
+
+  /*!
+   * \brief Initialize my parameter values by linear size of mesh element.
+   *  \retval bool - true if parameter values have been successfully defined
+   */
+  virtual bool SetParametersByElementSize(double elemLenght, const SMESH_Mesh* theMesh=0)=0;
 
   /*!
    * \brief Return true if me is an auxiliary hypothesis

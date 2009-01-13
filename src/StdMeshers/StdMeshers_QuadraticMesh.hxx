@@ -62,6 +62,12 @@ class STDMESHERS_EXPORT StdMeshers_QuadraticMesh:public SMESH_Hypothesis
    */
   virtual bool SetParametersByMesh(const SMESH_Mesh* theMesh, const TopoDS_Shape& theShape);
 
+  /*!
+   * \brief Initialize my parameter values by linear size of mesh element.
+   *  \retval bool - true if parameter values have been successfully defined
+   */
+  virtual bool SetParametersByElementSize( double elemLenght, const SMESH_Mesh* theMesh=0);
+
 };
 
 #endif

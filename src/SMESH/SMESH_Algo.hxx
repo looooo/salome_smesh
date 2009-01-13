@@ -164,12 +164,10 @@ public:
   bool InitCompatibleHypoFilter( SMESH_HypoFilter & theFilter,
                                  const bool         ignoreAuxiliary) const;
   /*!
-   * \brief Initialize my parameter values by the mesh built on the geometry
-   *
-   * Just return false as the algorithm does not hold parameters values
+   * \brief Just return false as the algorithm does not hold parameters values
    */
-  virtual bool SetParametersByMesh(const SMESH_Mesh* theMesh,
-                                   const TopoDS_Shape& theShape);
+  virtual bool SetParametersByMesh(const SMESH_Mesh* theMesh, const TopoDS_Shape& theShape);
+  virtual bool SetParametersByElementSize(double elemLenght, const SMESH_Mesh* theMesh=0);
   /*!
    * \brief return compute error
    */

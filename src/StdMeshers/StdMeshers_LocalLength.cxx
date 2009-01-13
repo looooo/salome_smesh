@@ -235,3 +235,16 @@ bool StdMeshers_LocalLength::SetParametersByMesh(const SMESH_Mesh*   theMesh,
 
   return nbEdges;
 }
+//================================================================================
+/*!
+ * \brief Initialize my parameter values by linear size of mesh element.
+ *  \retval bool - true if parameter values have been successfully defined
+ */
+//================================================================================
+
+bool StdMeshers_LocalLength::SetParametersByElementSize(double            elemLenght,
+                                                        const SMESH_Mesh* /*theMesh*/)
+{
+  return bool( _length = elemLenght );
+}
+

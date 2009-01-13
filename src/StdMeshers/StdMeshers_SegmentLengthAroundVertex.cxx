@@ -202,3 +202,17 @@ bool StdMeshers_SegmentLengthAroundVertex::SetParametersByMesh(const SMESH_Mesh*
 
   return nbSegs;
 }
+
+//================================================================================
+/*!
+ * \brief Initialize my parameter values by linear size of mesh element.
+ *  \retval bool - true if parameter values have been successfully defined
+ */
+//================================================================================
+
+bool StdMeshers_SegmentLengthAroundVertex::SetParametersByElementSize(double,
+                                                                      const SMESH_Mesh*)
+{
+  return false;
+}
+

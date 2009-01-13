@@ -96,13 +96,14 @@ protected:
   StdMeshers_SegmentLengthAroundVertex* getVertexHyp(SMESH_Mesh &          theMesh,
                                                      const TopoDS_Vertex & theV);
 
-  enum HypothesisType { LOCAL_LENGTH, NB_SEGMENTS, BEG_END_LENGTH, DEFLECTION, ARITHMETIC_1D, NONE };
+  enum HypothesisType { LOCAL_LENGTH, MAX_LENGTH, NB_SEGMENTS, BEG_END_LENGTH, DEFLECTION, ARITHMETIC_1D, NONE };
 
   enum ValueIndex {
     SCALE_FACTOR_IND = 0,
     BEG_LENGTH_IND   = 0,
     END_LENGTH_IND   = 1,
-    DEFLECTION_IND   = 0
+    DEFLECTION_IND   = 0,
+    PRECISION_IND    = 0
   };
 
   enum IValueIndex {

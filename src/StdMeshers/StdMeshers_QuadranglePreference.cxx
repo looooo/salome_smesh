@@ -114,3 +114,17 @@ bool StdMeshers_QuadranglePreference::SetParametersByMesh(const SMESH_Mesh* /*th
 {
   return false;
 }
+
+//================================================================================
+/*!
+ * \brief Initialize my parameter values by linear size of mesh element.
+ *  \retval bool - true if parameter values have been successfully defined
+ */
+//================================================================================
+
+bool StdMeshers_QuadranglePreference::SetParametersByElementSize(double            /*elemLenght*/,
+                                                                 const SMESH_Mesh* /*theMesh*/)
+{
+  return false;
+}
+

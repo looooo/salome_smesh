@@ -286,12 +286,7 @@ bool SMESH_Algo::IsReversedSubMesh (const TopoDS_Face&  theFace,
 
 //================================================================================
 /*!
- * \brief Initialize my parameter values by the mesh built on the geometry
- * \param theMesh - the built mesh
- * \param theShape - the geometry of interest
- * \retval bool - true if parameter values have been successfully defined
- *
- * Just return false as the algorithm does not hold parameters values
+ * \brief Just return false as the algorithm does not hold parameters values
  */
 //================================================================================
 
@@ -300,7 +295,10 @@ bool SMESH_Algo::SetParametersByMesh(const SMESH_Mesh* /*theMesh*/,
 {
   return false;
 }
-
+bool SMESH_Algo::SetParametersByElementSize(double, const SMESH_Mesh*)
+{
+  return false;
+}
 //================================================================================
 /*!
  * \brief Fill vector of node parameters on geometrical edge, including vertex nodes

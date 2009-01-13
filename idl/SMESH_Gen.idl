@@ -151,16 +151,17 @@ module SMESH
       raises ( SALOME::SALOME_Exception );
 
     /*!
-     * Return a hypothesis holding parameter values corresponding to the mesh
-     * existing on the given geometry.
+     * Return a hypothesis holding parameter values corresponding either to the mesh
+     * existing on the given geometry or to size of the geometry.
      * The returned hypothesis may be the one existing in a study and used
      * to compute the mesh, or a temporary one created just to pass parameter
-     * values
+     * values.
      */
     SMESH_Hypothesis GetHypothesisParameterValues( in string            theHypName,
                                                    in string            theLibName,
                                                    in SMESH_Mesh        theMesh,
-                                                   in GEOM::GEOM_Object theGeom)
+                                                   in GEOM::GEOM_Object theGeom,
+                                                   in boolean           byMesh)
       raises ( SALOME::SALOME_Exception );
 
     /*!

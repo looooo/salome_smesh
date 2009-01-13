@@ -50,7 +50,9 @@
 #include "DriverUNV_R_SMDS_Mesh.h"
 #include "DriverSTL_R_SMDS_Mesh.h"
 
+#include <BRepBndLib.hxx>
 #include <BRepPrimAPI_MakeBox.hxx>
+#include <Bnd_Box.hxx>
 #include <TopExp.hxx>
 #include <TopExp_Explorer.hxx>
 #include <TopTools_ListIteratorOfListOfShape.hxx>
@@ -95,6 +97,7 @@ SMESH_Mesh::SMESH_Mesh(int               theLocalId,
   _myMeshDS      = theDocument->GetMesh(_idDoc);
   _isShapeToMesh = false;
   _isAutoColor   = false;
+  _shapeDiagonal = 0.0;
   _myMeshDS->ShapeToMesh( PseudoShape() );
 }
 
@@ -155,6 +158,8 @@ void SMESH_Mesh::ShapeToMesh(const TopoDS_Shape & aShape)
     // clear SMESHDS
     TopoDS_Shape aNullShape;
     _myMeshDS->ShapeToMesh( aNullShape );
+
+    _shapeDiagonal = 0.0;
   }
 
   // set a new geometry
@@ -200,6 +205,33 @@ const TopoDS_Solid& SMESH_Mesh::PseudoShape()
     aSolid = BRepPrimAPI_MakeBox(1,1,1);
   }
   return aSolid;
+}
+
+//=======================================================================
+/*!
+ * \brief Return diagonal size of bounding box of a shape
+ */
+//=======================================================================
+
+double SMESH_Mesh::GetShapeDiagonalSize(const TopoDS_Shape & aShape)
+{
+  Bnd_Box Box;
+  BRepBndLib::Add(aShape, Box);
+  return sqrt( Box.SquareExtent() );
+}
+
+//=======================================================================
+/*!
+ * \brief Return diagonal size of bounding box of shape to mesh
+ */
+//=======================================================================
+
+double SMESH_Mesh::GetShapeDiagonalSize() const
+{
+  if ( _shapeDiagonal == 0. && _isShapeToMesh )
+    const_cast<SMESH_Mesh*>(this)->_shapeDiagonal = GetShapeDiagonalSize( GetShapeToMesh() );
+
+  return _shapeDiagonal;
 }
 
 //=======================================================================

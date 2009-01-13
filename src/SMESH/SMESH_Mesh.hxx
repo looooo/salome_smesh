@@ -77,6 +77,14 @@ public:
    */
   bool HasShapeToMesh() const { return _isShapeToMesh; }
   /*!
+   * \brief Return diagonal size of bounding box of shape to mesh.
+   */
+  double GetShapeDiagonalSize() const;
+  /*!
+   * \brief Return diagonal size of bounding box of a shape.
+   */
+  static double GetShapeDiagonalSize(const TopoDS_Shape & aShape);
+  /*!
    * \brief Return a solid which is returned by GetShapeToMesh() if
    *        a real geometry to be meshed was not set
    */
@@ -121,6 +129,10 @@ public:
                     const SMESH_HypoFilter&                  aFilter,
                     std::list <const SMESHDS_Hypothesis * >& aHypList,
                     const bool                               andAncestors) const;
+
+  void SetNbElementsPerDiagonal(int nb) { _nbElemPerDiagonal = nb ;}
+
+  int GetNbElementsPerDiagonal() { return _nbElemPerDiagonal; }
 
   const std::list<SMESHDS_Command*> & GetLog() throw(SALOME_Exception);
   
@@ -260,6 +272,9 @@ protected:
   SMESH_Gen *                _gen;
 
   bool                       _isAutoColor;
+
+  double                     _shapeDiagonal; //!< diagonal size of bounding box of shape to mesh
+  int                        _nbElemPerDiagonal; //!< nb elements per diagonal
   
   TopTools_IndexedDataMapOfShapeListOfShape _mapAncestors;
 

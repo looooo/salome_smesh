@@ -107,7 +107,8 @@ void StdMeshers_MaxLength::SetUsePreestimatedLength(bool toUse)
   if ( toUse != _preestimation )
   {
     _preestimation = toUse;
-    NotifySubMeshesHypothesisModification();
+    // this parameter is just to help the user
+    //NotifySubMeshesHypothesisModification();
   }
 }
 

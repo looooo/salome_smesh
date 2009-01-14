@@ -572,10 +572,17 @@ bool StdMeshersGUI_StdHypothesisCreator::stdParams( ListOfStdParams& p ) const
     item.myValue = h->GetPrecision();
     p.append( item );
   }
-  if( hypType()=="MaxLength" )
+  else if( hypType()=="MaxLength" )
   {
     StdMeshers::StdMeshers_MaxLength_var h =
       StdMeshers::StdMeshers_MaxLength::_narrow( hyp );
+    // try to set a right preestimated length to edited hypothesis
+    if ( !isCreation() ) {
+      StdMeshers::StdMeshers_MaxLength_var initHyp =
+        StdMeshers::StdMeshers_MaxLength::_narrow( initParamsHypothesis(true) );
+      if ( !initHyp->_is_nil() && initHyp->HavePreestimatedLength() )
+        h->SetPreestimatedLength( initHyp->GetPreestimatedLength() );
+    }
 
     item.myName = tr("SMESH_LOCAL_LENGTH_PARAM");
     item.myValue = h->GetLength();

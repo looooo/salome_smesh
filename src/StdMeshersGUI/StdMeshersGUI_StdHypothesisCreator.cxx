@@ -577,10 +577,13 @@ bool StdMeshersGUI_StdHypothesisCreator::stdParams( ListOfStdParams& p ) const
     StdMeshers::StdMeshers_MaxLength_var h =
       StdMeshers::StdMeshers_MaxLength::_narrow( hyp );
     // try to set a right preestimated length to edited hypothesis
+    bool noPreestimatedAtEdition = false;
     if ( !isCreation() ) {
       StdMeshers::StdMeshers_MaxLength_var initHyp =
         StdMeshers::StdMeshers_MaxLength::_narrow( initParamsHypothesis(true) );
-      if ( !initHyp->_is_nil() && initHyp->HavePreestimatedLength() )
+      noPreestimatedAtEdition =
+        ( initHyp->_is_nil() || !initHyp->HavePreestimatedLength() );
+      if ( !noPreestimatedAtEdition )
         h->SetPreestimatedLength( initHyp->GetPreestimatedLength() );
     }
 
@@ -592,7 +595,7 @@ bool StdMeshersGUI_StdHypothesisCreator::stdParams( ListOfStdParams& p ) const
     item.myName = tr("SMESH_USE_PREESTIMATED_LENGTH");
     p.append( item );
     QCheckBox* aQCheckBox = new QCheckBox(dlg());
-    if ( h->HavePreestimatedLength() ) {
+    if ( !noPreestimatedAtEdition && h->HavePreestimatedLength() ) {
       aQCheckBox->setChecked( h->GetUsePreestimatedLength() );
       connect( aQCheckBox, SIGNAL(  stateChanged(int) ), this, SLOT( onValueChanged() ) );
     }

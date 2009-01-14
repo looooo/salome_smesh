@@ -1058,8 +1058,7 @@ void SMESHGUI_MeshOp::createHypothesis (const int theDim,
 
     // Create hypothesis
     if (aCreator) {
-      // When create or edit a submesh, try to initialize a new hypothesis
-      // with values used to mesh a subshape
+      // Get parameters appropriate to initialize a new hypothesis
       SMESH::SMESH_Hypothesis_var initParamHyp =
         getInitParamsHypothesis(theTypeName, aData->ServerLibName);
       myDlg->setEnabled( false );
@@ -1108,7 +1107,11 @@ void SMESHGUI_MeshOp::onEditHyp( const int theHypType, const int theIndex )
 
   SMESHGUI_GenericHypothesisCreator* aCreator = SMESH::GetHypothesisCreator( aHyp->GetName() );
   if ( aCreator ) {
+    // Get initial parameters
+    SMESH::SMESH_Hypothesis_var initParamHyp =
+      getInitParamsHypothesis( aHyp->GetName(), aHyp->GetLibName());
     myDlg->setEnabled( false );
+    aCreator->setInitParamsHypothesis( initParamHyp );
     aCreator->edit( aHyp.in(), aHypItem.second, dlg() );
     myDlg->setEnabled( true );
   }

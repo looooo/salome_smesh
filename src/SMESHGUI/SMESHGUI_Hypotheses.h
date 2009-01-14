@@ -54,6 +54,7 @@ public:
   void                         create( bool, const QString&, QWidget* );
   void                         edit( SMESH::SMESH_Hypothesis_ptr,
 				     const QString&, QWidget* );
+  void                         setInitParamsHypothesis(SMESH::SMESH_Hypothesis_ptr);
 
   virtual bool                 checkParams() const = 0;
   virtual void                 onReject();
@@ -75,7 +76,7 @@ protected:
   typedef QList<QWidget*>      ListOfWidgets;
 
   SMESH::SMESH_Hypothesis_var  hypothesis() const;
-  SMESH::SMESH_Hypothesis_var  initParamsHypothesis() const;
+  SMESH::SMESH_Hypothesis_var  initParamsHypothesis(const bool strict=false) const;
   const ListOfWidgets&         widgets() const;
   ListOfWidgets&               changeWidgets();
   QtxDialog*                   dlg() const;

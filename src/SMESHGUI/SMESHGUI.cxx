@@ -3605,7 +3605,7 @@ void SMESHGUI::preferencesChanged( const QString& sect, const QString& name )
       if(sbX1+sbW > aTol){
 	aWarning = "Origin and Size Vertical: X+Width > 1\n";
 	sbX1=0.01;
-	sbW=0.05;
+	sbW=0.08;
 	aResourceMgr->setValue("SMESH", "scalar_bar_vertical_x", sbX1);
 	aResourceMgr->setValue("SMESH", "scalar_bar_vertical_width", sbW);
       }
@@ -3624,8 +3624,8 @@ void SMESHGUI::preferencesChanged( const QString& sect, const QString& name )
       sbW = aResourceMgr->doubleValue("SMESH", "scalar_bar_horizontal_width", sbW);
       if(sbX1+sbW > aTol){
 	aWarning = "Origin and Size Horizontal: X+Width > 1\n";
-	sbX1=0.01;
-	sbW=0.05;
+	sbX1=0.1;
+	sbW=0.08;
 	aResourceMgr->setValue("SMESH", "scalar_bar_horizontal_x", sbX1);
 	aResourceMgr->setValue("SMESH", "scalar_bar_horizontal_width", sbW);
       }
@@ -3636,7 +3636,7 @@ void SMESHGUI::preferencesChanged( const QString& sect, const QString& name )
       if(sbY1+sbH > aTol){
 	aWarning = "Origin and Size Horizontal: Y+Height > 1\n";
 	sbY1=0.01;
-	sbH=0.05;
+	sbH=0.08;
 	aResourceMgr->setValue("SMESH", "scalar_bar_horizontal_y", sbY1);
 	aResourceMgr->setValue("SMESH", "scalar_bar_horizontal_height",sbH);
       }

@@ -23,9 +23,9 @@
     <parameter name="selection_width"              value="5"/>
     <parameter name="highlight_width"              value="5"/>
     <parameter name="controls_precision"           value="0"/>
-    <parameter name="scalar_bar_horizontal_height" value="0.05"/>
-    <parameter name="scalar_bar_horizontal_width"  value="0.5" />
-    <parameter name="scalar_bar_horizontal_x"      value="0.01"/>
+    <parameter name="scalar_bar_horizontal_height" value="0.08"/>
+    <parameter name="scalar_bar_horizontal_width"  value="0.8" />
+    <parameter name="scalar_bar_horizontal_x"      value="0.1"/>
     <parameter name="scalar_bar_horizontal_y"      value="0.01"/>
     <parameter name="scalar_bar_label_color"       value="255, 255, 255"/>
     <parameter name="scalar_bar_label_font"        value="Arial,12"     />
@@ -34,10 +34,10 @@
     <parameter name="scalar_bar_orientation"       value="0" />
     <parameter name="scalar_bar_title_color"       value="255, 255, 255"/>
     <parameter name="scalar_bar_title_font"        value="Arial,12"     />
-    <parameter name="scalar_bar_vertical_height"   value="0.5"  />
-    <parameter name="scalar_bar_vertical_width"    value="0.05" />
+    <parameter name="scalar_bar_vertical_height"   value="0.8"  />
+    <parameter name="scalar_bar_vertical_width"    value="0.08" />
     <parameter name="scalar_bar_vertical_x"        value="0.01" />
-    <parameter name="scalar_bar_vertical_y"        value="0.01" />
+    <parameter name="scalar_bar_vertical_y"        value="0.1" />
     <parameter name="DisplayMode"                  value="true" />
     <parameter name="auto_update"                  value="true" />
     <parameter name="display_mode"                 value="1"    />

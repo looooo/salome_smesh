@@ -162,7 +162,7 @@ bool StdMeshers_Regular_1D::CheckHypothesis
     ASSERT(hyp);
     _value[ BEG_LENGTH_IND ] = hyp->GetLength();
     if ( hyp->GetUsePreestimatedLength() ) {
-      if ( int nbSeg = aMesh.GetNbElementsPerDiagonal() )
+      if ( int nbSeg = aMesh.GetGen()->GetBoundaryBoxSegmentation() )
         _value[ BEG_LENGTH_IND ] = aMesh.GetShapeDiagonalSize() / nbSeg;
     }
     ASSERT( _value[ BEG_LENGTH_IND ] > 0 );

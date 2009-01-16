@@ -130,10 +130,6 @@ public:
                     std::list <const SMESHDS_Hypothesis * >& aHypList,
                     const bool                               andAncestors) const;
 
-  void SetNbElementsPerDiagonal(int nb) { _nbElemPerDiagonal = nb ;}
-
-  int GetNbElementsPerDiagonal() { return _nbElemPerDiagonal; }
-
   const std::list<SMESHDS_Command*> & GetLog() throw(SALOME_Exception);
   
   void ClearLog() throw(SALOME_Exception);
@@ -274,7 +270,6 @@ protected:
   bool                       _isAutoColor;
 
   double                     _shapeDiagonal; //!< diagonal size of bounding box of shape to mesh
-  int                        _nbElemPerDiagonal; //!< nb elements per diagonal
   
   TopTools_IndexedDataMapOfShapeListOfShape _mapAncestors;
 

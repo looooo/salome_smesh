@@ -1069,6 +1069,11 @@ SalomeApp_Module( "SMESH" )
   {
     CORBA::Boolean anIsEmbeddedMode;
     myComponentSMESH = SMESH_Client::GetSMESHGen(getApp()->orb(),anIsEmbeddedMode);
+
+    //  0019923: EDF 765 SMESH : default values of hypothesis
+    SUIT_ResourceMgr* aResourceMgr = SMESH::GetResourceMgr(this);
+    int nbSeg = aResourceMgr->integerValue( "SMESH", "segmentation" );
+    myComponentSMESH->SetBoundaryBoxSegmentation( nbSeg );
   }
 
   myActiveDialogBox = 0;
@@ -3404,6 +3409,7 @@ void SMESHGUI::onViewManagerActivated( SUIT_ViewManager* mgr )
 
 void SMESHGUI::createPreferences()
 {
+  // General tab ------------------------------------------------------------------------
   int genTab = addPreference( tr( "PREF_TAB_GENERAL" ) );
 
   int updateGroup = addPreference( tr( "PREF_GROUP_UPDATE" ), genTab );
@@ -3457,6 +3463,14 @@ void SMESHGUI::createPreferences()
   setPreferenceProperty( notifyMode, "strings", modes );
   setPreferenceProperty( notifyMode, "indexes", indices );
 
+  int segGroup = addPreference( tr( "PREF_GROUP_SEGMENT_LENGTH" ), genTab );
+  setPreferenceProperty( segGroup, "columns", 2 );
+  int segLen = addPreference( tr( "PREF_SEGMENT_LENGTH" ), segGroup, LightApp_Preferences::IntSpin,
+                              "SMESH", "segmentation" );
+  setPreferenceProperty( segLen, "min", 1 );
+  setPreferenceProperty( segLen, "max", 10000000 );
+
+  // Mesh tab ------------------------------------------------------------------------
   int meshTab = addPreference( tr( "PREF_TAB_MESH" ) );
   int nodeGroup = addPreference( tr( "PREF_GROUP_NODES" ), meshTab );
   setPreferenceProperty( nodeGroup, "columns", 2 );
@@ -3499,6 +3513,7 @@ void SMESHGUI::createPreferences()
 
   addPreference( tr( "PREF_ORIENTATION_3D_VECTORS" ), orientGroup, LightApp_Preferences::Bool, "SMESH", "orientation_3d_vectors" );
 
+  // Selection tab ------------------------------------------------------------------------
   int selTab = addPreference( tr( "PREF_TAB_SELECTION" ) );
 
   int selGroup = addPreference( tr( "PREF_GROUP_SELECTION" ), selTab );
@@ -3527,6 +3542,7 @@ void SMESHGUI::createPreferences()
   addPreference( tr( "PREF_ELEMENTS" ), precSelGroup, LightApp_Preferences::Double, "SMESH", "selection_precision_element" );
   addPreference( tr( "PREF_OBJECTS" ), precSelGroup, LightApp_Preferences::Double, "SMESH", "selection_precision_object" );
 
+  // Scalar Bar tab ------------------------------------------------------------------------
   int sbarTab = addPreference( tr( "SMESH_SCALARBAR" ) );
   int fontGr = addPreference( tr( "SMESH_FONT_SCALARBAR" ), sbarTab );
   setPreferenceProperty( fontGr, "columns", 2 );
@@ -3602,7 +3618,7 @@ void SMESHGUI::createPreferences()
 
 void SMESHGUI::preferencesChanged( const QString& sect, const QString& name )
 {
-  if( sect=="SMESH" ){
+  if( sect=="SMESH" ) {
     float sbX1,sbY1,sbW,sbH;
     float aTol = 1.00000009999999;
     std::string aWarning;
@@ -3653,6 +3669,10 @@ void SMESHGUI::preferencesChanged( const QString& sect, const QString& name )
 	aResourceMgr->setValue("SMESH", "scalar_bar_horizontal_y", sbY1);
 	aResourceMgr->setValue("SMESH", "scalar_bar_horizontal_height",sbH);
       }
+    }
+    else if ( name == "segmentation" ) {
+      int nbSeg = aResourceMgr->integerValue( "SMESH", "segmentation" );
+      myComponentSMESH->SetBoundaryBoxSegmentation( nbSeg );
     }
 
     if(aWarning.size() != 0){

@@ -2889,6 +2889,14 @@ Please, create VTK viewer and try again</translation>
             <translation>Automatically create groups for MED export</translation>
         </message>
         <message>
+            <source>PREF_GROUP_SEGMENT_LENGTH</source>
+            <translation>Segment length</translation>
+        </message>
+        <message>
+            <source>PREF_SEGMENT_LENGTH</source>
+            <translation>Segmentation of diagonal of boundary box of geometry</translation>
+        </message>
+        <message>
             <source>PREF_AUTO_UPDATE</source>
             <translation>Automatic update</translation>
         </message>

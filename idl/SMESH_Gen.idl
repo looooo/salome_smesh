@@ -165,6 +165,12 @@ module SMESH
       raises ( SALOME::SALOME_Exception );
 
     /*!
+     * Sets number of segments per diagonal of boundary box of geometry by which
+     * default segment length of appropriate 1D hypotheses is defined
+     */
+    void SetBoundaryBoxSegmentation( in long theNbSegments );
+
+    /*!
      * Set the object name
      */
     void SetName( in string theObjectIOR,

@@ -206,6 +206,12 @@ public:
                                                             CORBA::Boolean        byMesh)
     throw ( SALOME::SALOME_Exception );
   
+  /*!
+   * Sets number of segments per diagonal of boundary box of geometry by which
+   * default segment length of appropriate 1D hypotheses is defined
+   */
+  void SetBoundaryBoxSegmentation( CORBA::Long theNbSegments );
+
   // Create empty mesh on a shape
   SMESH::SMESH_Mesh_ptr CreateMesh( GEOM::GEOM_Object_ptr theShapeObject )
     throw ( SALOME::SALOME_Exception );

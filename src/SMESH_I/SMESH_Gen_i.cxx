@@ -461,7 +461,6 @@ SMESH::SMESH_Mesh_ptr SMESH_Gen_i::createMesh()
     SMESH_Mesh_i* meshServant = new SMESH_Mesh_i( GetPOA(), this, GetCurrentStudyID() );
     // create a new mesh object
     meshServant->SetImpl( myGen.CreateMesh( GetCurrentStudyID(), myIsEmbeddedMode ));
-    meshServant->GetImpl().SetNbElementsPerDiagonal( nbElemPerDiagonal );
 
     // activate the CORBA servant of Mesh
     SMESH::SMESH_Mesh_var mesh = SMESH::SMESH_Mesh::_narrow( meshServant->_this() );
@@ -727,7 +726,7 @@ SMESH_Gen_i::GetHypothesisParameterValues (const char*           theHypType,
       diagonal = mesh->GetShapeDiagonalSize();
     else
       diagonal = ::SMESH_Mesh::GetShapeDiagonalSize( shape );
-    double elemSize = diagonal / nbElemPerDiagonal;
+    double elemSize = diagonal / myGen.GetBoundaryBoxSegmentation();
     if ( elemSize > 0 ) {
       // let the temporary hypothesis initialize it's values
       if ( hyp->SetParametersByElementSize( elemSize, mesh ))
@@ -736,6 +735,18 @@ SMESH_Gen_i::GetHypothesisParameterValues (const char*           theHypType,
   }
 
   return SMESH::SMESH_Hypothesis::_nil();
+}
+
+//=============================================================================
+/*!
+ * Sets number of segments per diagonal of boundary box of geometry by which
+ * default segment length of appropriate 1D hypotheses is defined
+ */
+//=============================================================================
+
+void SMESH_Gen_i::SetBoundaryBoxSegmentation( CORBA::Long theNbSegments )
+{
+  myGen.SetBoundaryBoxSegmentation( int( theNbSegments ));
 }
 
 //=============================================================================

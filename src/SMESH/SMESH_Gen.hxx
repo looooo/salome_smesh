@@ -86,6 +86,12 @@ class SMESH_EXPORT  SMESH_Gen
   // notify on bad state of attached algos, return false
   // if Compute() would fail because of some algo bad state
 
+  /*!
+   * \brief Sets number of segments per diagonal of boundary box of geometry by which
+   *        default segment length of appropriate 1D hypotheses is defined
+   */
+  void SetBoundaryBoxSegmentation( int theNbSegments ) { _segmentation = theNbSegments; }
+  int  GetBoundaryBoxSegmentation() const { return _segmentation; }
   
   struct TAlgoStateError
   {
@@ -117,13 +123,13 @@ class SMESH_EXPORT  SMESH_Gen
 
   // inherited methods from SALOMEDS::Driver
 
-  void Save(int studyId, const char *aUrlOfFile);
-  void Load(int studyId, const char *aUrlOfFile);
-  void Close(int studyId);
-  const char *ComponentDataType();
+//   void Save(int studyId, const char *aUrlOfFile);
+//   void Load(int studyId, const char *aUrlOfFile);
+//   void Close(int studyId);
+//   const char *ComponentDataType();
 
-  const char *IORToLocalPersistentID(const char *IORString, bool & IsAFile);
-  const char *LocalPersistentIDToIOR(const char *aLocalPersistentID);
+//   const char *IORToLocalPersistentID(const char *IORString, bool & IsAFile);
+//   const char *LocalPersistentIDToIOR(const char *aLocalPersistentID);
 
   int GetANewId();
 
@@ -140,6 +146,10 @@ class SMESH_EXPORT  SMESH_Gen
 
   // hypotheses managing
   int _hypId;
+
+  // number of segments per diagonal of boundary box of geometry by which
+  // default segment length of appropriate 1D hypotheses is defined
+  int _segmentation;
 };
 
 #endif

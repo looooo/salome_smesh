@@ -311,6 +311,10 @@
             <translation>Free Nodes</translation>
         </message>
         <message>
+            <source>MEN_FREE_FACES</source>
+            <translation>Free Faces</translation>
+        </message>
+        <message>
             <source>MEN_GLOBAL_HYPO</source>
             <translation>Global Hypothesis</translation>
         </message>
@@ -2071,6 +2075,10 @@ Consider saving your work before application crash</translation>
 	
 
         <message>
+            <source>STB_FREE_FACES</source>
+            <translation>Free Faces</translation>
+        </message>
+        <message>
             <source>STB_GLOBAL_HYPO</source>
             <translation>Global Hypothesis</translation>
         </message>
@@ -2548,6 +2556,10 @@ Consider saving your work before application crash</translation>
         </message>
 	
 
+        <message>
+            <source>TOP_FREE_FACES</source>
+            <translation>Free Faces</translation>
+        </message>
         <message>
             <source>TOP_GLOBAL_HYPO</source>
             <translation>Global Hypothesis</translation>
@@ -3460,8 +3472,8 @@ Please select a groups and try again</translation>
 Please select valid object and try again</translation>
         </message>
         <message>
-            <source>CURRENT_GROUP</source>
-            <translation>Current Group</translation>
+            <source>CURRENT_DIALOG</source>
+            <translation>Current Dialog</translation>
         </message>
         <message>
             <source>EDGES_TLT</source>
@@ -3757,6 +3769,10 @@ Please enter correct value and try again</translation>
 	
 
         <message>
+            <source>FREE_FACES</source>
+            <translation>Free faces</translation>
+        </message>
+        <message>
             <source>ID</source>
             <translation>ID</translation>
         </message>
@@ -3767,6 +3783,10 @@ Please enter correct value and try again</translation>
         <message>
             <source>LENGTH</source>
             <translation>Length</translation>
+        </message>
+        <message>
+            <source>LENGTH2D</source>
+            <translation>Length 2D</translation>
         </message>
         <message>
             <source>LESS_THAN</source>
@@ -3787,6 +3807,11 @@ Please enter correct value and try again</translation>
         <message>
             <source>MULTIEDGES_ERROR</source>
             <translation>Threshold value of borders at multi-connections can not be equal 1
+Please enter correct value and try again</translation>
+        </message>
+        <message>
+            <source>GROUPCOLOR_ERROR</source>
+            <translation>Color of group can not be undefied
 Please enter correct value and try again</translation>
         </message>
         <message>
@@ -3840,6 +3865,66 @@ Please enter correct value and try again</translation>
         <message>
             <source>WARPING</source>
             <translation>Warping</translation>
+        </message>
+        <message>
+            <source>LINEAR</source>
+            <translation>Linear</translation>
+        </message>
+        <message>
+            <source>GROUP_COLOR</source>
+            <translation>Color of Group</translation>
+        </message>
+        <message>
+            <source>ELEMENTS</source>
+            <translation>Elements</translation>
+        </message>
+        <message>
+            <source>GEOM_TYPE</source>
+            <translation>Geomtry type</translation>
+        </message>
+        <message>
+            <source>GEOM_TYPE_0</source>
+            <translation></translation>
+        </message>
+        <message>
+            <source>GEOM_TYPE_0</source>
+            <translation>Point</translation>
+        </message>
+        <message>
+            <source>GEOM_TYPE_1</source>
+            <translation>Edge</translation>
+        </message>
+        <message>
+            <source>GEOM_TYPE_2</source>
+            <translation>Triangle</translation>
+        </message>
+        <message>
+            <source>GEOM_TYPE_3</source>
+            <translation>Quadrangle</translation>
+        </message>
+        <message>
+            <source>GEOM_TYPE_4</source>
+            <translation>Polygon</translation>
+        </message>
+        <message>
+            <source>GEOM_TYPE_5</source>
+            <translation>Tetrahedron</translation>
+        </message>
+        <message>
+            <source>GEOM_TYPE_6</source>
+            <translation>Pyramid</translation>
+        </message>
+        <message>
+            <source>GEOM_TYPE_7</source>
+            <translation>Hexahedron</translation>
+        </message>
+        <message>
+            <source>GEOM_TYPE_8</source>
+            <translation>Pentahedron</translation>
+        </message>
+        <message>
+            <source>GEOM_TYPE_9</source>
+            <translation>Polyhedra</translation>
         </message>
     </context>
     <context>

@@ -47,6 +47,7 @@ class SMESHGUI;
 class SMESH_Actor;
 class SMESHGUI_IdValidator;
 class SMESHGUI_SpinBox;
+class SMESHGUI_FilterDlg;
 class SVTK_Selector;
 class LightApp_SelectionMgr;
 class SMESH_LogicalFilter;
@@ -127,6 +128,8 @@ private:
 
   QString                myHelpFileName;
 
+  SMESHGUI_FilterDlg*    myFilterDlg;
+
 private slots:
   void                   ClickOnOk();
   void                   ClickOnCancel();
@@ -140,6 +143,7 @@ private slots:
   void                   onSelectMesh( bool );
   void                   onVectorChanged();
   void                   onActionClicked( int );
+  void                   setFilters();
 };
 
 #endif // SMESHGUI_ROTATIONDLG_H

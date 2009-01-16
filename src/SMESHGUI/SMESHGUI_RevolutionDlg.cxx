@@ -33,6 +33,7 @@
 #include "SMESHGUI_MeshUtils.h"
 #include "SMESHGUI_IdValidator.h"
 #include "SMESHGUI_MeshEditPreview.h"
+#include "SMESHGUI_FilterDlg.h"
 
 #include <SMESH_Actor.h>
 #include <SMESH_TypeFilter.hxx>
@@ -90,7 +91,8 @@ SMESHGUI_RevolutionDlg::SMESHGUI_RevolutionDlg( SMESHGUI* theModule )
   : QDialog( SMESH::GetDesktop( theModule ) ),
     mySMESHGUI( theModule ),
     mySelectionMgr( SMESH::GetSelectionMgr( theModule ) ),
-    myVectorDefinition(NONE_SELECT)
+    myVectorDefinition(NONE_SELECT),
+    myFilterDlg( 0 )
 {
   mySimulation = new SMESHGUI_MeshEditPreview(SMESH::GetViewWindow( mySMESHGUI ));
 
@@ -141,6 +143,8 @@ SMESHGUI_RevolutionDlg::SMESHGUI_RevolutionDlg( SMESHGUI* theModule )
 
   LineEditElements  = new QLineEdit(GroupArguments);
   LineEditElements->setValidator(myIdValidator);
+  QPushButton* filterBtn = new QPushButton( tr( "SMESH_BUT_FILTER" ), GroupArguments );
+  connect(filterBtn,   SIGNAL(clicked()), this, SLOT(setFilters()));
 
   // Control for the whole mesh selection
   CheckBoxMesh = new QCheckBox(tr("SMESH_SELECT_WHOLE_MESH"), GroupArguments);
@@ -233,13 +237,14 @@ SMESHGUI_RevolutionDlg::SMESHGUI_RevolutionDlg( SMESHGUI* theModule )
   GroupArgumentsLayout->addWidget(TextLabelElements,    0, 0);
   GroupArgumentsLayout->addWidget(SelectElementsButton, 0, 1);
   GroupArgumentsLayout->addWidget(LineEditElements,     0, 2);
-  GroupArgumentsLayout->addWidget(CheckBoxMesh,         1, 0, 1, 3);
-  GroupArgumentsLayout->addWidget(GroupAxis,            2, 0, 1, 3);
-  GroupArgumentsLayout->addWidget(GroupAngleBox,        3, 0, 1, 3);
+  GroupArgumentsLayout->addWidget(filterBtn,            0, 3);
+  GroupArgumentsLayout->addWidget(CheckBoxMesh,         1, 0, 1, 4);
+  GroupArgumentsLayout->addWidget(GroupAxis,            2, 0, 1, 4);
+  GroupArgumentsLayout->addWidget(GroupAngleBox,        3, 0, 1, 4);
   GroupArgumentsLayout->addWidget(TextLabelTolerance,   4, 0, 1, 2);
-  GroupArgumentsLayout->addWidget(SpinBox_Tolerance,    4, 2);
-  GroupArgumentsLayout->addWidget(CheckBoxPreview,      5, 0, 1, 3);
-  GroupArgumentsLayout->addWidget(MakeGroupsCheck,      6, 0, 1, 3);
+  GroupArgumentsLayout->addWidget(SpinBox_Tolerance,    4, 2, 1, 2);
+  GroupArgumentsLayout->addWidget(CheckBoxPreview,      5, 0, 1, 4);
+  GroupArgumentsLayout->addWidget(MakeGroupsCheck,      6, 0, 1, 4);
 
   /***************************************************************/
   GroupButtons = new QGroupBox(this);
@@ -356,6 +361,11 @@ SMESHGUI_RevolutionDlg::SMESHGUI_RevolutionDlg( SMESHGUI* theModule )
 SMESHGUI_RevolutionDlg::~SMESHGUI_RevolutionDlg()
 {
   delete mySimulation;
+  if ( myFilterDlg ) {
+    myFilterDlg->setParent( 0 );
+    delete myFilterDlg;
+    myFilterDlg = 0;
+  }
 }
 
 //=================================================================================
@@ -523,7 +533,10 @@ void SMESHGUI_RevolutionDlg::ClickOnCancel()
   disconnect(mySelectionMgr, 0, this, 0);
   mySelectionMgr->clearFilters();
   //mySelectionMgr->clearSelected();
-  SMESH::SetPointRepresentation(false);
+  if (SMESH::GetCurrentVtkView()) {
+    SMESH::RemoveFilters(); // PAL6938 -- clean all mesh entity filters
+    SMESH::SetPointRepresentation(false);
+  }
   if ( SVTK_ViewWindow* aViewWindow = SMESH::GetViewWindow( mySMESHGUI ))
     aViewWindow->SetSelectionMode(ActorSelection);
   mySMESHGUI->ResetState();
@@ -1118,4 +1131,26 @@ void SMESHGUI_RevolutionDlg::onSelectVectorMenu( QAction* action){
   myEditCurrentArgument->setFocus();
   connect(mySelectionMgr, SIGNAL(currentSelectionChanged()), this, SLOT(SelectionIntoArgument()));
   SelectionIntoArgument();
+}
+
+//=================================================================================
+// function : setFilters()
+// purpose  : SLOT. Called when "Filter" button pressed.
+//=================================================================================
+void SMESHGUI_RevolutionDlg::setFilters()
+{
+  if ( !myFilterDlg )
+  {
+    QList<int> types;  
+    types.append( SMESH::EDGE );
+    types.append( SMESH::FACE );
+    myFilterDlg = new SMESHGUI_FilterDlg( mySMESHGUI, types );
+  }
+  myFilterDlg->Init( GetConstructorId() ? SMESH::FACE : SMESH::EDGE );
+
+  myFilterDlg->SetSelection();
+  myFilterDlg->SetMesh( myMesh );
+  myFilterDlg->SetSourceWg( LineEditElements );
+
+  myFilterDlg->show();
 }

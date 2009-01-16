@@ -32,6 +32,7 @@
 #include "SMESHGUI_MeshUtils.h"
 #include "SMESHGUI_SpinBox.h"
 #include "SMESHGUI_IdValidator.h"
+#include "SMESHGUI_FilterDlg.h"
 
 #include <SMESH_Actor.h>
 #include <SMESH_TypeFilter.hxx>
@@ -109,7 +110,8 @@ private:
 SMESHGUI_ExtrusionAlongPathDlg::SMESHGUI_ExtrusionAlongPathDlg( SMESHGUI* theModule )
   : QDialog( SMESH::GetDesktop( theModule ) ),
     mySMESHGUI( theModule ),
-    mySelectionMgr( SMESH::GetSelectionMgr( theModule ) )
+    mySelectionMgr( SMESH::GetSelectionMgr( theModule ) ),
+    myFilterDlg( 0 )
 {
   SUIT_ResourceMgr* mgr = SMESH::GetResourceMgr( mySMESHGUI );
   QPixmap edgeImage   ( mgr->loadPixmap("SMESH", tr("ICON_DLG_EDGE")));
@@ -164,6 +166,8 @@ SMESHGUI_ExtrusionAlongPathDlg::SMESHGUI_ExtrusionAlongPathDlg( SMESHGUI* theMod
 
   ElementsLineEdit = new QLineEdit(GroupArguments);
   ElementsLineEdit->setValidator(myIdValidator);
+  QPushButton* filterBtn = new QPushButton( tr( "SMESH_BUT_FILTER" ), GroupArguments );
+  connect(filterBtn,   SIGNAL(clicked()), this, SLOT(setFilters()));
 
   // Controls for the whole mesh selection
   MeshCheck = new QCheckBox(tr("SMESH_SELECT_WHOLE_MESH"), GroupArguments);
@@ -272,11 +276,12 @@ SMESHGUI_ExtrusionAlongPathDlg::SMESHGUI_ExtrusionAlongPathDlg( SMESHGUI* theMod
   GroupArgumentsLayout->addWidget(ElementsLab,          0, 0);
   GroupArgumentsLayout->addWidget(SelectElementsButton, 0, 1);
   GroupArgumentsLayout->addWidget(ElementsLineEdit,     0, 2);
-  GroupArgumentsLayout->addWidget(MeshCheck,            1, 0, 1, 3);
-  GroupArgumentsLayout->addWidget(PathGrp,              2, 0, 1, 3);
-  GroupArgumentsLayout->addWidget(BasePointGrp,         3, 0, 1, 3);
-  GroupArgumentsLayout->addWidget(AnglesGrp,            4, 0, 1, 3);
-  GroupArgumentsLayout->addWidget(MakeGroupsCheck,      5, 0, 1, 3);
+  GroupArgumentsLayout->addWidget(filterBtn,            0, 3);
+  GroupArgumentsLayout->addWidget(MeshCheck,            1, 0, 1, 4);
+  GroupArgumentsLayout->addWidget(PathGrp,              2, 0, 1, 4);
+  GroupArgumentsLayout->addWidget(BasePointGrp,         3, 0, 1, 4);
+  GroupArgumentsLayout->addWidget(AnglesGrp,            4, 0, 1, 4);
+  GroupArgumentsLayout->addWidget(MakeGroupsCheck,      5, 0, 1, 4);
 
   /***************************************************************/
   // common buttons group box
@@ -382,6 +387,10 @@ SMESHGUI_ExtrusionAlongPathDlg::SMESHGUI_ExtrusionAlongPathDlg( SMESHGUI* theMod
 SMESHGUI_ExtrusionAlongPathDlg::~SMESHGUI_ExtrusionAlongPathDlg()
 {
   // no need to delete child widgets, Qt does it all for us
+  if ( myFilterDlg != 0 ) {
+    myFilterDlg->setParent( 0 );
+    delete myFilterDlg;
+  }
 }
 
 //=================================================================================
@@ -693,8 +702,11 @@ void SMESHGUI_ExtrusionAlongPathDlg::reject()
   disconnect(mySelectionMgr, 0, this, 0);
   mySelectionMgr->clearFilters();
   //mySelectionMgr->clearSelected();
-  SMESH::SetPickable(); // ???
-  SMESH::SetPointRepresentation(false);
+  if (SMESH::GetCurrentVtkView()) {
+    SMESH::RemoveFilters(); // PAL6938 -- clean all mesh entity filters
+    SMESH::SetPointRepresentation(false);
+    SMESH::SetPickable();
+  }
   if ( SVTK_ViewWindow* aViewWindow = SMESH::GetViewWindow( mySMESHGUI ))
     aViewWindow->SetSelectionMode(ActorSelection);
   mySMESHGUI->ResetState();
@@ -1198,4 +1210,26 @@ void SMESHGUI_ExtrusionAlongPathDlg::keyPressEvent( QKeyEvent* e )
     e->accept();
     ClickOnHelp();
   }
+}
+
+//=================================================================================
+// function : setFilters()
+// purpose  : SLOT. Called when "Filter" button pressed.
+//=================================================================================
+void SMESHGUI_ExtrusionAlongPathDlg::setFilters()
+{
+  if ( !myFilterDlg )
+  {
+    QList<int> types;  
+    types.append( SMESH::EDGE );
+    types.append( SMESH::FACE );
+    myFilterDlg = new SMESHGUI_FilterDlg( mySMESHGUI, types );
+  }
+  myFilterDlg->Init( Elements1dRB->isChecked() ? SMESH::EDGE : SMESH::FACE );
+
+  myFilterDlg->SetSelection();
+  myFilterDlg->SetMesh( myMesh );
+  myFilterDlg->SetSourceWg( ElementsLineEdit );
+
+  myFilterDlg->show();
 }

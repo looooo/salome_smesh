@@ -45,10 +45,12 @@ libSMESHControls_la_CPPFLAGS = \
 	$(CAS_CPPFLAGS) \
 	$(BOOST_CPPFLAGS) \
 	$(KERNEL_CXXFLAGS) \
-	-I$(srcdir)/../SMDS
+	-I$(srcdir)/../SMDS \
+	-I$(srcdir)/../SMESHDS
 
 libSMESHControls_la_LDFLAGS = \
 	../SMDS/libSMDS.la \
+	../SMESHDS/libSMESHDS.la \
 	$(CAS_LDPATH) -lTKernel -lTKBRep -lTKG3d
 
 SMESHControls_CPPFLAGS = \
@@ -57,6 +59,7 @@ SMESHControls_CPPFLAGS = \
 
 SMESHControls_LDADD = \
 	../SMDS/libSMDS.la \
+	../SMESHDS/libSMESHDS.la \
 	libSMESHControls.la \
 	$(KERNEL_LDFLAGS) -lOpUtil -lSALOMELocalTrace -lSALOMEBasics \
 	$(GEOM_LDFLAGS) -lGEOMAlgo \

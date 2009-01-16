@@ -43,9 +43,10 @@ class QLineEdit;
 class QPushButton;
 class QRadioButton;
 class QCheckBox;
+class SMESHGUI;
 class SMESHGUI_IdValidator;
 class SMESHGUI_SpinBox;
-class SMESHGUI;
+class SMESHGUI_FilterDlg;
 class SMESH_Actor;
 class SVTK_Selector;
 class LightApp_SelectionMgr;
@@ -128,6 +129,8 @@ private:
 
   QString                myHelpFileName;
    
+  SMESHGUI_FilterDlg*    myFilterDlg;
+   
 private slots:
   void                   ConstructorsClicked( int );
   void                   ClickOnOk();
@@ -142,6 +145,7 @@ private slots:
   void                   onSelectMesh( bool );
   void                   onVectorChanged();
   void                   onActionClicked( int );
+  void                   setFilters();
 };
 
 #endif // SMESHGUI_SYMMETRYDLG_H

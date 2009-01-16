@@ -52,6 +52,7 @@ class SMESHGUI;
 class SMESH_Actor;
 class SMESHGUI_IdValidator;
 class SMESHGUI_SpinBox;
+class SMESHGUI_FilterDlg;
 class SVTK_Selector;
 class LightApp_SelectionMgr;
 class SUIT_SelectionFilter;
@@ -126,6 +127,8 @@ private:
 
   QString                          myHelpFileName;
 
+  SMESHGUI_FilterDlg*              myFilterDlg;
+   
 private slots:
   void                            ConstructorsClicked( int );
   void                            CheckIsEnable();
@@ -139,6 +142,7 @@ private slots:
   void                            ActivateThisDialog();
   void                            onTextChange( const QString& );
   void                            onSelectMesh( bool );
+  void                            setFilters();
 };
 
 #endif // SMESHGUI_EXTRUSIONDLG_H

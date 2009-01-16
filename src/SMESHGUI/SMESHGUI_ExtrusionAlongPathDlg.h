@@ -50,6 +50,7 @@ class SMESHGUI;
 class SMESH_Actor;
 class SMESHGUI_IdValidator;
 class SMESHGUI_SpinBox;
+class SMESHGUI_FilterDlg;
 class SVTK_Selector;
 class LightApp_SelectionMgr;
 class SUIT_SelectionFilter;
@@ -134,6 +135,8 @@ private:
 
   QString                   myHelpFileName;
 
+  SMESHGUI_FilterDlg*       myFilterDlg;
+   
 protected slots:
   void                      reject();
 
@@ -150,6 +153,7 @@ private slots:
   void                      onSelectMesh();
   void                      OnAngleAdded();
   void                      OnAngleRemoved();
+  void                      setFilters();
 };
 
 #endif // SMESHGUI_EXTRUSIONALONGPATHDLG_H

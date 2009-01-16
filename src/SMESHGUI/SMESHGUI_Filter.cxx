@@ -82,17 +82,18 @@ bool SMESHGUI_PredicateFilter::IsValid( const int theCellId ) const
     return false;
 
   SMDS_Mesh* aMesh = anActor->GetObject()->GetMesh();
-  SMESH::ElementType anElemType = myPred->GetElementType();
-  int aMeshId = anElemType == SMESH::NODE ? anActor->GetNodeObjId( theCellId )
-                                          : anActor->GetElemObjId( theCellId );
+  SMDSAbs_ElementType anElemType = (SMDSAbs_ElementType)myPred->GetElementType();
+  int aMeshId = anElemType == SMDSAbs_Node ? anActor->GetNodeObjId( theCellId )
+                                           : anActor->GetElemObjId( theCellId );
 
   // if type of element != type of predicate return true because
   // this predicate is not intended for filtering sush elements
-  const SMDS_MeshElement* anElem = anElemType == SMESH::NODE ? aMesh->FindNode( aMeshId )
-                                                             : aMesh->FindElement( aMeshId );
-  if ( anElem != 0 && anElem->GetType() != (SMDSAbs_ElementType)myPred->GetElementType() )
-    return true;
-
+  const SMDS_MeshElement* anElem = anElemType == SMDSAbs_Node ? aMesh->FindNode( aMeshId )
+                                                              : aMesh->FindElement( aMeshId );
+  // here we guess that predicate element type can not be All in case of node selection
+  if ( !anElem || (anElemType != SMDSAbs_All && anElem->GetType() != anElemType) )
+    return false;
+  
   return myPred->IsSatisfy( aMeshId );
 }
 
@@ -110,14 +111,15 @@ bool SMESHGUI_PredicateFilter::IsObjValid( const int theObjId ) const
     return false;
 
   SMDS_Mesh* aMesh = anActor->GetObject()->GetMesh();
-  SMESH::ElementType anElemType = myPred->GetElementType();
+  SMDSAbs_ElementType anElemType = (SMDSAbs_ElementType)myPred->GetElementType();
 
   // if type of element != type of predicate return true because
   // this predicate is not intended for filtering sush elements
-  const SMDS_MeshElement* anElem = anElemType == SMESH::NODE ? aMesh->FindNode( theObjId )
-                                                             : aMesh->FindElement( theObjId );
-  if ( anElem != 0 && anElem->GetType() != (SMDSAbs_ElementType)myPred->GetElementType() )
-    return true;
+  const SMDS_MeshElement* anElem = anElemType == SMDSAbs_Node ? aMesh->FindNode( theObjId )
+                                                              : aMesh->FindElement( theObjId );
+  // here we guess that predicate element type can not be All in case of node selection
+  if ( !anElem || (anElemType != SMDSAbs_All && anElem->GetType() != anElemType) )
+    return false;
 
   return myPred->IsSatisfy( theObjId );
 }

@@ -59,6 +59,9 @@
 #include "SMDS_QuadraticFaceOfNodes.hxx"
 #include "SMDS_QuadraticEdge.hxx"
 
+#include "SMESHDS_Mesh.hxx"
+#include "SMESHDS_GroupBase.hxx"
+
 /*
                             AUXILIARY METHODS
 */
@@ -1721,6 +1724,275 @@ SMDSAbs_ElementType FreeNodes::GetType() const
   return SMDSAbs_Node;
 }
 
+
+/*
+  Class       : FreeFaces
+  Description : Predicate for free faces
+*/
+
+FreeFaces::FreeFaces()
+{
+  myMesh = 0;
+}
+
+void FreeFaces::SetMesh( const SMDS_Mesh* theMesh )
+{
+  myMesh = theMesh;
+}
+
+bool FreeFaces::IsSatisfy( long theId )
+{
+  if (!myMesh) return false;
+  // check that faces nodes refers to less than two common volumes
+  const SMDS_MeshElement* aFace = myMesh->FindElement( theId );
+  if ( !aFace || aFace->GetType() != SMDSAbs_Face )
+    return false;
+
+  int nbNode = aFace->NbNodes();
+
+  // collect volumes check that number of volumss with count equal nbNode not less than 2
+  typedef map< SMDS_MeshElement*, int > TMapOfVolume; // map of volume counters
+  typedef map< SMDS_MeshElement*, int >::iterator TItrMapOfVolume; // iterator
+  TMapOfVolume mapOfVol;
+
+  SMDS_ElemIteratorPtr nodeItr = aFace->nodesIterator();
+  while ( nodeItr->more() ) {
+    const SMDS_MeshNode* aNode = static_cast<const SMDS_MeshNode*>(nodeItr->next());
+    if ( !aNode ) continue;
+    SMDS_ElemIteratorPtr volItr = aNode->GetInverseElementIterator(SMDSAbs_Volume);
+    while ( volItr->more() ) {
+      SMDS_MeshElement* aVol = (SMDS_MeshElement*)volItr->next();
+      TItrMapOfVolume itr = mapOfVol.insert(make_pair(aVol, 0)).first;
+      (*itr).second++;
+    } 
+  }
+  int nbVol = 0;
+  TItrMapOfVolume volItr = mapOfVol.begin();
+  TItrMapOfVolume volEnd = mapOfVol.end();
+  for ( ; volItr != volEnd; ++volItr )
+    if ( (*volItr).second >= nbNode )
+       nbVol++;
+  // face is not free if number of volumes constructed on thier nodes more than one
+  return (nbVol < 2);
+}
+
+SMDSAbs_ElementType FreeFaces::GetType() const
+{
+  return SMDSAbs_Face;
+}
+
+/*
+  Class       : LinearOrQuadratic
+  Description : Predicate to verify whether a mesh element is linear
+*/
+
+LinearOrQuadratic::LinearOrQuadratic()
+{
+  myMesh = 0;
+}
+
+void LinearOrQuadratic::SetMesh( const SMDS_Mesh* theMesh )
+{
+  myMesh = theMesh;
+}
+
+bool LinearOrQuadratic::IsSatisfy( long theId )
+{
+  if (!myMesh) return false;
+  const SMDS_MeshElement* anElem = myMesh->FindElement( theId );
+  if ( !anElem || (myType != SMDSAbs_All && anElem->GetType() != myType) )
+    return false;
+  return (!anElem->IsQuadratic());
+}
+
+void LinearOrQuadratic::SetType( SMDSAbs_ElementType theType )
+{
+  myType = theType;
+}
+
+SMDSAbs_ElementType LinearOrQuadratic::GetType() const
+{
+  return myType;
+}
+
+/*
+  Class       : GroupColor
+  Description : Functor for check color of group to whic mesh element belongs to
+*/
+
+GroupColor::GroupColor()
+{
+}
+
+bool GroupColor::IsSatisfy( long theId )
+{
+  return (myIDs.find( theId ) != myIDs.end());
+}
+
+void GroupColor::SetType( SMDSAbs_ElementType theType )
+{
+  myType = theType;
+}
+
+SMDSAbs_ElementType GroupColor::GetType() const
+{
+  return myType;
+}
+
+static bool isEqual( const Quantity_Color& theColor1,
+                     const Quantity_Color& theColor2 )
+{
+  // tolerance to compare colors
+  const double tol = 5*1e-3;
+  return ( fabs( theColor1.Red() - theColor2.Red() ) < tol &&
+           fabs( theColor1.Green() - theColor2.Green() ) < tol &&
+           fabs( theColor1.Blue() - theColor2.Blue() ) < tol );
+}
+
+
+void GroupColor::SetMesh( const SMDS_Mesh* theMesh )
+{
+  myIDs.clear();
+  
+  const SMESHDS_Mesh* aMesh = dynamic_cast<const SMESHDS_Mesh*>(theMesh);
+  if ( !aMesh )
+    return;
+
+  int nbGrp = aMesh->GetNbGroups();
+  if ( !nbGrp )
+    return;
+  
+  // iterates on groups and find necessary elements ids
+  const std::set<SMESHDS_GroupBase*>& aGroups = aMesh->GetGroups();
+  set<SMESHDS_GroupBase*>::const_iterator GrIt = aGroups.begin();
+  for (; GrIt != aGroups.end(); GrIt++) {
+    SMESHDS_GroupBase* aGrp = (*GrIt);
+    if ( !aGrp )
+      continue;
+    // check type and color of group
+    if ( !isEqual( myColor, aGrp->GetColor() ) )
+      continue;
+    if ( myType != SMDSAbs_All && myType != (SMDSAbs_ElementType)aGrp->GetType() )
+      continue;
+
+    // add elements IDS into control
+    int aSize = aGrp->Extent();
+    for (int i = 0; i < aSize; i++)
+      myIDs.insert( aGrp->GetID(i+1) );
+  }
+}
+
+void GroupColor::SetColorStr( const TCollection_AsciiString& theStr )
+{
+  TCollection_AsciiString aStr = theStr;
+  aStr.RemoveAll( ' ' );
+  aStr.RemoveAll( '\t' );
+  for ( int aPos = aStr.Search( ";;" ); aPos != -1; aPos = aStr.Search( ";;" ) )
+    aStr.Remove( aPos, 2 );
+  Standard_Real clr[3];
+  clr[0] = clr[1] = clr[2] = 0.;
+  for ( int i = 0; i < 3; i++ ) {
+    TCollection_AsciiString tmpStr = aStr.Token( ";", i+1 );
+    if ( !tmpStr.IsEmpty() && tmpStr.IsRealValue() )
+      clr[i] = tmpStr.RealValue();
+  }
+  myColor = Quantity_Color( clr[0], clr[1], clr[2], Quantity_TOC_RGB );
+}
+
+//=======================================================================
+// name    : GetRangeStr
+// Purpose : Get range as a string.
+//           Example: "1,2,3,50-60,63,67,70-"
+//=======================================================================
+void GroupColor::GetColorStr( TCollection_AsciiString& theResStr ) const
+{
+  theResStr.Clear();
+  theResStr += TCollection_AsciiString( myColor.Red() );
+  theResStr += TCollection_AsciiString( ";" ) + TCollection_AsciiString( myColor.Green() );
+  theResStr += TCollection_AsciiString( ";" ) + TCollection_AsciiString( myColor.Blue() );
+}
+
+/*
+  Class       : ElemGeomType
+  Description : Predicate to check element geometry type
+*/
+
+ElemGeomType::ElemGeomType()
+{
+  myMesh = 0;
+  myType = SMDSAbs_All;
+  myGeomType = SMDSGeom_TRIANGLE;
+}
+
+void ElemGeomType::SetMesh( const SMDS_Mesh* theMesh )
+{
+  myMesh = theMesh;
+}
+
+bool ElemGeomType::IsSatisfy( long theId )
+{
+  if (!myMesh) return false;
+  const SMDS_MeshElement* anElem = myMesh->FindElement( theId );
+  const SMDSAbs_ElementType anElemType = anElem->GetType();
+  if ( !anElem || (myType != SMDSAbs_All && anElemType != myType) )
+    return false;
+  const int aNbNode = anElem->NbNodes();
+  bool isOk = false;
+  switch( anElemType )
+  {
+  case SMDSAbs_Node:
+    isOk = (myGeomType == SMDSGeom_POINT);
+    break;
+
+  case SMDSAbs_Edge:
+    isOk = (myGeomType == SMDSGeom_EDGE);
+    break;
+
+  case SMDSAbs_Face:
+    if ( myGeomType == SMDSGeom_TRIANGLE )
+      isOk = (!anElem->IsPoly() && aNbNode == 3);
+    else if ( myGeomType == SMDSGeom_QUADRANGLE )
+      isOk = (!anElem->IsPoly() && aNbNode == 4);
+    else if ( myGeomType == SMDSGeom_POLYGON )
+      isOk = anElem->IsPoly();
+    break;
+
+  case SMDSAbs_Volume:
+    if ( myGeomType == SMDSGeom_TETRA )
+      isOk = (!anElem->IsPoly() && aNbNode == 4);
+    else if ( myGeomType == SMDSGeom_PYRAMID )
+      isOk = (!anElem->IsPoly() && aNbNode == 5);
+    else if ( myGeomType == SMDSGeom_PENTA )
+      isOk = (!anElem->IsPoly() && aNbNode == 6);
+    else if ( myGeomType == SMDSGeom_HEXA )
+      isOk = (!anElem->IsPoly() && aNbNode == 8);
+     else if ( myGeomType == SMDSGeom_POLYHEDRA )
+      isOk = anElem->IsPoly();
+    break;
+    default: break;
+  }
+  return isOk;
+}
+
+void ElemGeomType::SetType( SMDSAbs_ElementType theType )
+{
+  myType = theType;
+}
+
+SMDSAbs_ElementType ElemGeomType::GetType() const
+{
+  return myType;
+}
+
+void ElemGeomType::SetGeomType( SMDSAbs_GeometryType theType )
+{
+  myGeomType = theType;
+}
+
+SMDSAbs_GeometryType ElemGeomType::GetGeomType() const
+{
+  return myGeomType;
+}
 
 /*
   Class       : RangeOfIds

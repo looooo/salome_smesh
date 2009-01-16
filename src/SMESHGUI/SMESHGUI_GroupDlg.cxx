@@ -594,6 +594,7 @@ void SMESHGUI_GroupDlg::init (SMESH::SMESH_GroupBase_ptr theGroup,
     myName->setText( "Group On " + aShapeName);
     myName->blockSignals(false);
   }
+  updateButtons();
 }
 
 //=================================================================================

@@ -31,6 +31,7 @@
 #include "SMESHGUI_VTKUtils.h"
 #include "SMESHGUI_MeshUtils.h"
 #include "SMESHGUI_IdValidator.h"
+#include "SMESHGUI_FilterDlg.h"
 
 #include <SMESH_Actor.h>
 #include <SMDS_Mesh.hxx>
@@ -81,7 +82,8 @@ SMESHGUI_RemoveElementsDlg
     mySelector(SMESH::GetViewWindow(theModule)->GetSelector()),
     mySelectionMgr(SMESH::GetSelectionMgr(theModule)),
     mySMESHGUI(theModule),
-    myBusy(false)
+    myBusy(false),
+    myFilterDlg(0)
 {
   setModal( false );
   setAttribute( Qt::WA_DeleteOnClose, true );
@@ -120,10 +122,13 @@ SMESHGUI_RemoveElementsDlg
   SelectButtonC1A1->setIcon(image1);
   LineEditC1A1 = new QLineEdit(GroupC1);
   LineEditC1A1->setValidator(new SMESHGUI_IdValidator(this));
+  QPushButton* filterBtn = new QPushButton( tr( "SMESH_BUT_FILTER" ), GroupC1 );
+  connect(filterBtn,   SIGNAL(clicked()), this, SLOT(setFilters()));
 
   GroupC1Layout->addWidget(TextLabelC1A1);
   GroupC1Layout->addWidget(SelectButtonC1A1);
   GroupC1Layout->addWidget(LineEditC1A1);
+  GroupC1Layout->addWidget(filterBtn );
 
   /***************************************************************/
   GroupButtons = new QGroupBox(this);
@@ -165,6 +170,11 @@ SMESHGUI_RemoveElementsDlg
 //=================================================================================
 SMESHGUI_RemoveElementsDlg::~SMESHGUI_RemoveElementsDlg()
 {
+  if ( myFilterDlg ) {
+    myFilterDlg->setParent( 0 );
+    delete myFilterDlg;
+    myFilterDlg = 0;
+  }
 }
 
 //=================================================================================
@@ -253,10 +263,13 @@ void SMESHGUI_RemoveElementsDlg::ClickOnOk()
 //=================================================================================
 void SMESHGUI_RemoveElementsDlg::ClickOnCancel()
 {
+  if (SMESH::GetCurrentVtkView())
+    SMESH::RemoveFilters(); // PAL6938 -- clean all mesh entity filters
   //mySelectionMgr->clearSelected();
   if ( SVTK_ViewWindow* aViewWindow = SMESH::GetViewWindow( mySMESHGUI ))
     aViewWindow->SetSelectionMode(ActorSelection);
   disconnect(mySelectionMgr, 0, this, 0);
+  mySelectionMgr->clearFilters();
   mySMESHGUI->ResetState();
   reject();
 }
@@ -486,4 +499,20 @@ void SMESHGUI_RemoveElementsDlg::keyPressEvent( QKeyEvent* e )
     e->accept();
     ClickOnHelp();
   }
+}
+
+//=================================================================================
+// function : setFilters()
+// purpose  : SLOT. Called when "Filter" button pressed.
+//=================================================================================
+void SMESHGUI_RemoveElementsDlg::setFilters()
+{
+  if ( !myFilterDlg )
+    myFilterDlg = new SMESHGUI_FilterDlg( mySMESHGUI, SMESH::ALL );
+
+  myFilterDlg->SetSelection();
+  myFilterDlg->SetMesh( myMesh );
+  myFilterDlg->SetSourceWg( LineEditC1A1 );
+
+  myFilterDlg->show();
 }

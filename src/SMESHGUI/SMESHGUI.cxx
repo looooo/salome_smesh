@@ -811,6 +811,10 @@
 	    aTitle = QObject::tr( "SMESH_VOLUME" );
 	    aControl = SMESH_Actor::eVolume3D;
 	    break;
+	  case 6021:
+	    aTitle = QObject::tr( "FREE_FACES" );
+	    aControl = SMESH_Actor::eFreeFaces;
+	    break;
 	  }
 	  anActor->SetControlMode(aControl);
 	  anActor->GetScalarBarActor()->SetTitle(aTitle.toLatin1().data());
@@ -2431,6 +2435,7 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
   case 6004:
   case 6005:
   case 6009:
+  case 6021:
     if ( vtkwnd ) {
 
       LightApp_SelectionMgr* mgr = selectionMgr();
@@ -2654,6 +2659,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   createSMESHAction(  903, "WHAT_IS",         "ICON_WHAT_IS" );
   createSMESHAction( 6001, "LENGTH",          "ICON_LENGTH",        0, true );
   createSMESHAction( 6002, "FREE_EDGE",       "ICON_FREE_EDGE",     0, true );
+  createSMESHAction( 6021, "FREE_FACES",      "ICON_FREE_FACES",    0, true );
   createSMESHAction( 6003, "FREE_BORDER",     "ICON_FREE_EDGE_2D",  0, true );
   createSMESHAction( 6004, "CONNECTION",      "ICON_CONNECTION",    0, true );
   createSMESHAction( 6005, "FREE_NODE",       "ICON_FREE_NODE",     0, true );
@@ -2813,6 +2819,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   createMenu( separator(), ctrlId, -1 );
   createMenu( 6017, ctrlId, -1 );
   createMenu( 6009, ctrlId, -1 );
+  createMenu( 6021, ctrlId, -1 );
   createMenu( separator(), ctrlId, -1 );
 
   createMenu( 400, addId, -1 );
@@ -2905,6 +2912,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   createTool( separator(), ctrlTb );
   createTool( 6017, ctrlTb );
   createTool( 6009, ctrlTb );
+  createTool( 6021, ctrlTb );
   createTool( separator(), ctrlTb );
 
   createTool( 400, addRemTb );
@@ -3222,6 +3230,11 @@ void SMESHGUI::initialize( CAM_Application* app )
   popupMgr()->insert ( action( 6009 ), anId, -1 ); // VOLUME_3D
   popupMgr()->setRule( action( 6009 ), aMeshInVtkHasVolumes, QtxPopupMgr::VisibleRule );
   popupMgr()->setRule( action( 6009 ), "controlMode = 'eVolume3D'", QtxPopupMgr::ToggleRule );
+
+  popupMgr()->insert( action( 6021 ), anId, -1 ); // FREE_FACE
+  popupMgr()->setRule( action( 6021 ), aMeshInVtkHasFaces /*aMeshInVtkHasVolumes*/,
+                                       QtxPopupMgr::VisibleRule );
+  popupMgr()->setRule( action( 6021 ), "controlMode = 'eFreeFaces'", QtxPopupMgr::ToggleRule );
 
   popupMgr()->insert( separator(), anId, -1 );
 

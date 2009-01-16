@@ -523,6 +523,19 @@ namespace SMESH
   
 
   /*
+    Class       : FreeFaces_i
+    Description : Predicate for free faces
+  */
+  class SMESH_I_EXPORT FreeFaces_i: public virtual POA_SMESH::FreeFaces,
+		       public virtual Predicate_i
+  {
+  public:
+    FreeFaces_i();
+    FunctorType                     GetFunctorType();
+  };
+  
+
+  /*
     Class       : FreeNodes_i
     Description : Predicate for free nodes
   */
@@ -553,6 +566,60 @@ namespace SMESH
     
   protected:
     Controls::RangeOfIdsPtr         myRangeOfIdsPtr;
+  };
+
+  /*
+    Class       : LinearOrQuadratic_i
+    Description : Verify whether a mesh element is linear
+  */
+  class SMESH_I_EXPORT LinearOrQuadratic_i: public virtual POA_SMESH::LinearOrQuadratic,
+			     public virtual Predicate_i
+  {
+  public:
+    LinearOrQuadratic_i();
+    FunctorType                    GetFunctorType();
+    void                           SetElementType( ElementType theType );
+
+  private:
+   Controls::LinearOrQuadraticPtr  myLinearOrQuadraticPtr;
+  };
+  
+  /*
+    Class       : GroupColor_i
+    Description : Functor for check color of group to whic mesh element belongs to
+  */
+  class SMESH_I_EXPORT GroupColor_i: public virtual POA_SMESH::GroupColor,
+		  public virtual Predicate_i
+  {
+  public:
+    GroupColor_i();
+    FunctorType             GetFunctorType();
+
+    void                    SetElementType( ElementType theType );
+    void                    SetColorStr( const char* theColor );
+    char*                   GetColorStr();
+
+  private:
+    Controls::GroupColorPtr myGroupColorPtr;
+  };
+  
+  /*
+    Class       : ElemGeomType_i
+    Description : Functor for check element geometry type
+  */
+  class SMESH_I_EXPORT ElemGeomType_i: public virtual POA_SMESH::ElemGeomType,
+		  public virtual Predicate_i
+  {
+  public:
+    ElemGeomType_i();
+    FunctorType             GetFunctorType();
+
+    void                    SetElementType ( ElementType  theType );
+    void                    SetGeometryType( GeometryType theType );
+    GeometryType            GetGeometryType() const;
+
+  private:
+    Controls::ElemGeomTypePtr myElemGeomTypePtr;
   };
   
   /*
@@ -830,11 +897,17 @@ namespace SMESH
     FreeBorders_ptr           CreateFreeBorders();
     FreeEdges_ptr             CreateFreeEdges();
     FreeNodes_ptr             CreateFreeNodes();
+    FreeFaces_ptr             CreateFreeFaces();
     
     RangeOfIds_ptr            CreateRangeOfIds();
     
     BadOrientedVolume_ptr     CreateBadOrientedVolume();
+    LinearOrQuadratic_ptr     CreateLinearOrQuadratic();
     
+    GroupColor_ptr            CreateGroupColor();
+
+    ElemGeomType_ptr          CreateElemGeomType();
+
     LessThan_ptr              CreateLessThan();
     MoreThan_ptr              CreateMoreThan();
     EqualTo_ptr               CreateEqualTo();

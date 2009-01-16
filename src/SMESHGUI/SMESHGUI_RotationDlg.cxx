@@ -32,6 +32,7 @@
 #include "SMESHGUI_VTKUtils.h"
 #include "SMESHGUI_MeshUtils.h"
 #include "SMESHGUI_IdValidator.h"
+#include "SMESHGUI_FilterDlg.h"
 
 #include <SMESH_Actor.h>
 #include <SMESH_TypeFilter.hxx>
@@ -89,7 +90,8 @@ enum { MOVE_ELEMS_BUTTON = 0, COPY_ELEMS_BUTTON, MAKE_MESH_BUTTON }; //!< action
 SMESHGUI_RotationDlg::SMESHGUI_RotationDlg( SMESHGUI* theModule )
   : QDialog( SMESH::GetDesktop( theModule ) ),
     mySMESHGUI( theModule ),
-    mySelectionMgr( SMESH::GetSelectionMgr( theModule ) )
+    mySelectionMgr( SMESH::GetSelectionMgr( theModule ) ),
+    myFilterDlg(0)
 {
   QPixmap image0 (SMESH::GetResourceMgr( mySMESHGUI )->loadPixmap("SMESH", tr("ICON_DLG_MESH_ROTATION")));
   QPixmap image1 (SMESH::GetResourceMgr( mySMESHGUI )->loadPixmap("SMESH", tr("ICON_SELECT")));
@@ -130,6 +132,8 @@ SMESHGUI_RotationDlg::SMESHGUI_RotationDlg( SMESHGUI* theModule )
   SelectElementsButton->setIcon(image1);
   LineEditElements = new QLineEdit(GroupArguments);
   LineEditElements->setValidator(myIdValidator);
+  QPushButton* filterBtn = new QPushButton( tr( "SMESH_BUT_FILTER" ), GroupArguments );
+  connect(filterBtn,   SIGNAL(clicked()), this, SLOT(setFilters()));
 
   // Control for the whole mesh selection
   CheckBoxMesh = new QCheckBox(tr("SMESH_SELECT_WHOLE_MESH"), GroupArguments);
@@ -209,7 +213,8 @@ SMESHGUI_RotationDlg::SMESHGUI_RotationDlg( SMESHGUI* theModule )
 
   GroupArgumentsLayout->addWidget(TextLabelElements,    0, 0);
   GroupArgumentsLayout->addWidget(SelectElementsButton, 0, 1);
-  GroupArgumentsLayout->addWidget(LineEditElements,     0, 2, 1, 2);
+  GroupArgumentsLayout->addWidget(LineEditElements,     0, 2, 1, 1);
+  GroupArgumentsLayout->addWidget(filterBtn,            0, 3);
   GroupArgumentsLayout->addWidget(CheckBoxMesh,         1, 0, 1, 4);
   GroupArgumentsLayout->addWidget(GroupAxis,            2, 0, 1, 4);
   GroupArgumentsLayout->addWidget(TextLabelAngle,       3, 0, 1, 2);
@@ -310,6 +315,11 @@ SMESHGUI_RotationDlg::SMESHGUI_RotationDlg( SMESHGUI* theModule )
 //=================================================================================
 SMESHGUI_RotationDlg::~SMESHGUI_RotationDlg()
 {
+  if ( myFilterDlg ) {
+    myFilterDlg->setParent( 0 );
+    delete myFilterDlg;
+    myFilterDlg = 0;
+  }
 }
 
 //=================================================================================
@@ -431,7 +441,10 @@ void SMESHGUI_RotationDlg::ClickOnCancel()
   disconnect(mySelectionMgr, 0, this, 0);
   mySelectionMgr->clearFilters();
   //mySelectionMgr->clearSelected();
-  SMESH::SetPointRepresentation(false);
+  if (SMESH::GetCurrentVtkView()) {
+    SMESH::RemoveFilters(); // PAL6938 -- clean all mesh entity filters
+    SMESH::SetPointRepresentation(false);
+  }
   if ( SVTK_ViewWindow* aViewWindow = SMESH::GetViewWindow( mySMESHGUI ))
     aViewWindow->SetSelectionMode(ActorSelection);
   mySMESHGUI->ResetState();
@@ -908,4 +921,20 @@ void SMESHGUI_RotationDlg::keyPressEvent( QKeyEvent* e )
     e->accept();
     ClickOnHelp();
   }
+}
+
+//=================================================================================
+// function : setFilters()
+// purpose  : SLOT. Called when "Filter" button pressed.
+//=================================================================================
+void SMESHGUI_RotationDlg::setFilters()
+{
+  if ( !myFilterDlg )
+    myFilterDlg = new SMESHGUI_FilterDlg( mySMESHGUI, SMESH::ALL );
+
+  myFilterDlg->SetSelection();
+  myFilterDlg->SetMesh( myMesh );
+  myFilterDlg->SetSourceWg( LineEditElements );
+
+  myFilterDlg->show();
 }

@@ -240,6 +240,7 @@ QString SMESHGUI_Selection::controlMode( int ind ) const
     case SMESH_Actor::eLength2D:          return "eLength2D";
     case SMESH_Actor::eFreeEdges:         return "eFreeEdges";
     case SMESH_Actor::eFreeBorders:       return "eFreeBorders";
+    case SMESH_Actor::eFreeFaces:         return "eFreeFaces";
     case SMESH_Actor::eMultiConnection:   return "eMultiConnection";
     case SMESH_Actor::eMultiConnection2D: return "eMultiConnection2D";
     case SMESH_Actor::eArea:              return "eArea";

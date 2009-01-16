@@ -114,6 +114,23 @@ module SMESH
     FACE,
     VOLUME
   };
+
+  /*!
+   * Enumeration for element geometry type, like in SMDS
+   */
+  enum GeometryType
+  {
+    Geom_POINT,
+    Geom_EDGE,
+    Geom_TRIANGLE,
+    Geom_QUADRANGLE,
+    Geom_POLYGON,
+    Geom_TETRA,
+    Geom_PYRAMID,
+    Geom_HEXA,
+    Geom_PENTA,
+    Geom_POLYHEDRA
+  };
   
   /*!
    * ElementOrder points out entities of what order are requested

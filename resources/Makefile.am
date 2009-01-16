@@ -165,7 +165,8 @@ dist_salomeres_DATA = \
 	mesh_node_to_point.png \
 	mesh_tree_mesh_partial.png \
 	mesh_extractGroup.png \
-	mesh_precompute.png
+	mesh_precompute.png \
+        mesh_free_faces.png
 
 # VSR: little trick to avoid putting if SMESHCatalog.xml to the distribution archive
 nodist_salomeres_SCRIPTS = SMESHCatalog.xml

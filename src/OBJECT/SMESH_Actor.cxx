@@ -154,6 +154,27 @@ SMESH_ActorDef::SMESH_ActorDef()
   aFilter->RegisterCellsWithType(VTK_QUADRATIC_TRIANGLE);
   aFilter->RegisterCellsWithType(VTK_QUADRATIC_QUAD);
 
+  my2DExtProp = vtkProperty::New();
+  my2DExtProp->DeepCopy(mySurfaceProp);
+  SMESH::GetColor( "SMESH", "fill_color", anRGB[0], anRGB[1], anRGB[2], QColor( 0, 170, 255 ) );
+  anRGB[0] = 1 - anRGB[0];
+  anRGB[1] = 1 - anRGB[1];
+  anRGB[2] = 1 - anRGB[2];
+  my2DExtProp->SetColor(anRGB[0],anRGB[1],anRGB[2]);
+
+  my2DExtActor = SMESH_DeviceActor::New();
+  my2DExtActor->SetUserMatrix(aMatrix);
+  my2DExtActor->PickableOff();
+  my2DExtActor->SetProperty(my2DExtProp);
+  my2DExtActor->SetBackfaceProperty(my2DExtProp);
+  my2DExtActor->SetRepresentation(SMESH_DeviceActor::eInsideframe);
+  aFilter = my2DExtActor->GetExtractUnstructuredGrid();
+  aFilter->RegisterCellsWithType(VTK_TRIANGLE);
+  aFilter->RegisterCellsWithType(VTK_POLYGON);
+  aFilter->RegisterCellsWithType(VTK_QUAD);
+  aFilter->RegisterCellsWithType(VTK_QUADRATIC_TRIANGLE);
+  aFilter->RegisterCellsWithType(VTK_QUADRATIC_QUAD);
+
   my3DActor = SMESH_DeviceActor::New();
   my3DActor->SetUserMatrix(aMatrix);
   my3DActor->PickableOff();
@@ -422,6 +443,8 @@ SMESH_ActorDef::~SMESH_ActorDef()
   my1DExtActor->Delete();
 
   my2DActor->Delete();
+  my2DExtProp->Delete();
+  my2DExtActor->Delete();
   my3DActor->Delete();
 
   myNodeActor->Delete();
@@ -608,6 +631,10 @@ SetControlMode(eControl theMode,
       aFunctor.reset(new SMESH::Controls::FreeNodes());
       myControlActor = myNodeActor;
       break;
+    case eFreeFaces:
+      aFunctor.reset(new SMESH::Controls::FreeFaces());
+      myControlActor = my2DActor;
+      break;
     case eMultiConnection:
       aFunctor.reset(new SMESH::Controls::MultiConnection());
       myControlActor = my1DActor;
@@ -696,6 +723,9 @@ SetControlMode(eControl theMode,
       case eFreeBorders:
 	my1DExtActor->SetExtControlMode(aFunctor);
 	break;
+      case eFreeFaces:
+	my2DExtActor->SetExtControlMode(aFunctor);
+	break;
       case eLength2D:
       case eMultiConnection2D:
 	my1DExtActor->SetExtControlMode(aFunctor,myScalarBarActor,myLookupTable);
@@ -712,6 +742,7 @@ SetControlMode(eControl theMode,
 	switch(myControlMode){
 	case eLength2D:
 	case eFreeEdges:
+	case eFreeFaces:
 	case eMultiConnection2D:
 	  //SetEntityMode(eEdges);
 	  SetEntityMode(eFaces);
@@ -744,6 +775,7 @@ void SMESH_ActorDef::AddToRender(vtkRenderer* theRenderer){
 
   my3DActor->AddToRender(theRenderer);
   my2DActor->AddToRender(theRenderer);
+  my2DExtActor->AddToRender(theRenderer);
 
   theRenderer->AddActor(my1DActor);
   theRenderer->AddActor(my1DExtActor);
@@ -773,6 +805,7 @@ void SMESH_ActorDef::RemoveFromRender(vtkRenderer* theRenderer){
   theRenderer->RemoveActor(my1DExtActor);
 
   my2DActor->RemoveFromRender(theRenderer);
+  my2DExtActor->RemoveFromRender(theRenderer);
   my3DActor->RemoveFromRender(theRenderer);
 
   theRenderer->RemoveActor(myScalarBarActor);
@@ -804,17 +837,20 @@ bool SMESH_ActorDef::Init(TVisualObjPtr theVisualObj,
   my1DExtActor->Init(myVisualObj,myImplicitBoolean);
   
   my2DActor->Init(myVisualObj,myImplicitBoolean);
+  my2DExtActor->Init(myVisualObj,myImplicitBoolean);
   my3DActor->Init(myVisualObj,myImplicitBoolean);
   
   my1DActor->GetMapper()->SetLookupTable(myLookupTable);
   my1DExtActor->GetMapper()->SetLookupTable(myLookupTable);
 
   my2DActor->GetMapper()->SetLookupTable(myLookupTable);
+  my2DExtActor->GetMapper()->SetLookupTable(myLookupTable);
   my3DActor->GetMapper()->SetLookupTable(myLookupTable);
     
   vtkFloatingPointType aFactor, aUnits;
   my2DActor->GetPolygonOffsetParameters(aFactor,aUnits);
   my2DActor->SetPolygonOffsetParameters(aFactor,aUnits*0.75);
+  my2DExtActor->SetPolygonOffsetParameters(aFactor,aUnits*0.5);
 
   SUIT_ResourceMgr* mgr = SUIT_Session::session()->resourceMgr();
   if( !mgr )
@@ -870,6 +906,7 @@ void SMESH_ActorDef::SetTransform(VTKViewer_Transform* theTransform){
   my1DExtActor->SetTransform(theTransform);
 
   my2DActor->SetTransform(theTransform);
+  my2DExtActor->SetTransform(theTransform);
   my3DActor->SetTransform(theTransform);
 
   Modified();
@@ -924,6 +961,7 @@ void SMESH_ActorDef::SetShrinkFactor(vtkFloatingPointType theValue){
   my1DExtActor->SetShrinkFactor(theValue);
 
   my2DActor->SetShrinkFactor(theValue);
+  my2DExtActor->SetShrinkFactor(theValue);
   my3DActor->SetShrinkFactor(theValue);
 
   Modified();
@@ -938,6 +976,7 @@ void SMESH_ActorDef::SetShrink(){
   my1DExtActor->SetShrink();
 
   my2DActor->SetShrink();
+  my2DExtActor->SetShrink();
   my3DActor->SetShrink();
 
   myIsShrunk = true;
@@ -953,6 +992,7 @@ void SMESH_ActorDef::UnShrink(){
   my1DExtActor->UnShrink();
 
   my2DActor->UnShrink();
+  my2DExtActor->UnShrink();
   my3DActor->UnShrink();
 
   myIsShrunk = false;
@@ -995,6 +1035,7 @@ void SMESH_ActorDef::SetVisibility(int theMode, bool theIsUpdateRepersentation){
   my1DExtActor->VisibilityOff();
   
   my2DActor->VisibilityOff();
+  my2DExtActor->VisibilityOff();
   my3DActor->VisibilityOff();
   
   myScalarBarActor->VisibilityOff();
@@ -1013,6 +1054,9 @@ void SMESH_ActorDef::SetVisibility(int theMode, bool theIsUpdateRepersentation){
       case eFreeEdges:
       case eFreeBorders:
 	my1DExtActor->VisibilityOn();
+	break;
+      case eFreeFaces:
+	my2DExtActor->VisibilityOn();
 	break;
       case eLength2D:
       case eMultiConnection2D:
@@ -1185,12 +1229,15 @@ void SMESH_ActorDef::SetRepresentation(int theMode){
   my2DActor->SetProperty(aProp);
   my2DActor->SetBackfaceProperty(aBackProp);
   my2DActor->SetRepresentation(aReperesent);
+
+  my2DExtActor->SetRepresentation(aReperesent);
   
   my3DActor->SetProperty(aProp);
   my3DActor->SetBackfaceProperty(aBackProp);
   my3DActor->SetRepresentation(aReperesent);
 
   my1DExtActor->SetVisibility(false);
+  my2DExtActor->SetVisibility(false);
 
   switch(myControlMode){
   case eLength:
@@ -1375,6 +1422,7 @@ void SMESH_ActorDef::SetSufaceColor(vtkFloatingPointType r,vtkFloatingPointType 
 
 void SMESH_ActorDef::GetSufaceColor(vtkFloatingPointType& r,vtkFloatingPointType& g,vtkFloatingPointType& b){
   ::GetColor(mySurfaceProp,r,g,b);
+  my2DExtProp->SetColor(1.0-r,1.0-g,1.0-b);
 }
 
 void SMESH_ActorDef::SetBackSufaceColor(vtkFloatingPointType r,vtkFloatingPointType g,vtkFloatingPointType b){
@@ -1484,6 +1532,7 @@ SetImplicitFunctionUsed(bool theIsImplicitFunctionUsed)
   my1DExtActor->SetImplicitFunctionUsed(theIsImplicitFunctionUsed);
   
   my2DActor->SetImplicitFunctionUsed(theIsImplicitFunctionUsed);
+  my2DExtActor->SetImplicitFunctionUsed(theIsImplicitFunctionUsed);
   my3DActor->SetImplicitFunctionUsed(theIsImplicitFunctionUsed);
 }
 

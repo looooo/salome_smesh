@@ -48,6 +48,7 @@ class QSpinBox;
 class SMESHGUI_IdValidator;
 class SMESHGUI_SpinBox;
 class SMESHGUI;
+class SMESHGUI_FilterDlg;
 class SMESH_Actor;
 class SVTK_Selector;
 class LightApp_SelectionMgr;
@@ -148,6 +149,8 @@ private:
   
   QString                   myHelpFileName;
   
+  SMESHGUI_FilterDlg*       myFilterDlg;
+   
 private slots:
   void                      ConstructorsClicked( int );
   void                      ClickOnOk();
@@ -165,6 +168,7 @@ private slots:
   void                      onDisplaySimulation( bool );
   void                      onSelectVectorMenu( QAction* );
   void                      onSelectVectorButton();
+  void                      setFilters();
 };
 
 #endif // SMESHGUI_REVOLUTIONDLG_H

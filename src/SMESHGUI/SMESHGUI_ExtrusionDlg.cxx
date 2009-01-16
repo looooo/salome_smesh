@@ -32,6 +32,7 @@
 #include "SMESHGUI_MeshUtils.h"
 #include "SMESHGUI_SpinBox.h"
 #include "SMESHGUI_IdValidator.h"
+#include "SMESHGUI_FilterDlg.h"
 
 #include <SMESH_Actor.h>
 #include <SMESH_TypeFilter.hxx>
@@ -87,7 +88,8 @@
 SMESHGUI_ExtrusionDlg::SMESHGUI_ExtrusionDlg (SMESHGUI* theModule)
   : QDialog( SMESH::GetDesktop( theModule ) ),
     mySMESHGUI( theModule ),
-    mySelectionMgr( SMESH::GetSelectionMgr( theModule ) )
+    mySelectionMgr( SMESH::GetSelectionMgr( theModule ) ),
+    myFilterDlg( 0 )
 {
   QPixmap image0 (SMESH::GetResourceMgr( mySMESHGUI )->loadPixmap("SMESH", tr("ICON_DLG_EDGE")));
   QPixmap image1 (SMESH::GetResourceMgr( mySMESHGUI )->loadPixmap("SMESH", tr("ICON_DLG_TRIANGLE")));
@@ -160,6 +162,8 @@ SMESHGUI_ExtrusionDlg::SMESHGUI_ExtrusionDlg (SMESHGUI* theModule)
 
   LineEditElements = new QLineEdit(GroupArguments);
   LineEditElements->setValidator(myIdValidator);
+  QPushButton* filterBtn = new QPushButton( tr( "SMESH_BUT_FILTER" ), GroupArguments );
+  connect(filterBtn,   SIGNAL(clicked()), this, SLOT(setFilters()));
 
   // Control for the whole mesh selection
   CheckBoxMesh = new QCheckBox(tr("SMESH_SELECT_WHOLE_MESH"), GroupArguments);
@@ -200,7 +204,8 @@ SMESHGUI_ExtrusionDlg::SMESHGUI_ExtrusionDlg (SMESHGUI* theModule)
 
   GroupArgumentsLayout->addWidget(TextLabelElements,    0, 0);
   GroupArgumentsLayout->addWidget(SelectElementsButton, 0, 1);
-  GroupArgumentsLayout->addWidget(LineEditElements,     0, 2, 1, 6);
+  GroupArgumentsLayout->addWidget(LineEditElements,     0, 2, 1, 5);
+  GroupArgumentsLayout->addWidget(filterBtn,            0, 7);
   GroupArgumentsLayout->addWidget(CheckBoxMesh,         1, 0, 1, 8);
   GroupArgumentsLayout->addWidget(TextLabelDistance,    2, 0);
   GroupArgumentsLayout->addWidget(TextLabelDx,          2, 2);
@@ -296,6 +301,10 @@ SMESHGUI_ExtrusionDlg::SMESHGUI_ExtrusionDlg (SMESHGUI* theModule)
 //=================================================================================
 SMESHGUI_ExtrusionDlg::~SMESHGUI_ExtrusionDlg()
 {
+  if ( myFilterDlg != 0 ) {
+    myFilterDlg->setParent( 0 );
+    delete myFilterDlg;
+  }
 }
 
 //=================================================================================
@@ -452,8 +461,11 @@ void SMESHGUI_ExtrusionDlg::ClickOnCancel()
   disconnect(mySelectionMgr, 0, this, 0);
   mySelectionMgr->clearFilters();
   //mySelectionMgr->clearSelected();
-  SMESH::SetPickable(); // ???
-  SMESH::SetPointRepresentation(false);
+  if (SMESH::GetCurrentVtkView()) {
+    SMESH::RemoveFilters(); // PAL6938 -- clean all mesh entity filters
+    SMESH::SetPointRepresentation(false);
+    SMESH::SetPickable();
+  }
   if ( SVTK_ViewWindow* aViewWindow = SMESH::GetViewWindow( mySMESHGUI ))
     aViewWindow->SetSelectionMode(ActorSelection);
   mySMESHGUI->ResetState();
@@ -821,4 +833,26 @@ void SMESHGUI_ExtrusionDlg::keyPressEvent( QKeyEvent* e )
     e->accept();
     ClickOnHelp();
   }
+}
+
+//=================================================================================
+// function : setFilters()
+// purpose  : SLOT. Called when "Filter" button pressed.
+//=================================================================================
+void SMESHGUI_ExtrusionDlg::setFilters()
+{
+  if ( !myFilterDlg )
+  {
+    QList<int> types;  
+    types.append( SMESH::EDGE );
+    types.append( SMESH::FACE );
+    myFilterDlg = new SMESHGUI_FilterDlg( mySMESHGUI, types );
+  }
+  myFilterDlg->Init( GetConstructorId() ? SMESH::FACE : SMESH::EDGE );
+
+  myFilterDlg->SetSelection();
+  myFilterDlg->SetMesh( myMesh );
+  myFilterDlg->SetSourceWg( LineEditElements );
+
+  myFilterDlg->show();
 }

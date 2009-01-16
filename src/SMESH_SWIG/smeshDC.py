@@ -475,7 +475,8 @@ class smeshDC(SMESH._objref_SMESH_Gen):
             else:
                 print "Error: The treshold should be a string."
                 return None
-        elif CritType in [FT_FreeBorders, FT_FreeEdges, FT_BadOrientedVolume, FT_FreeNodes]:
+        elif CritType in [FT_FreeBorders, FT_FreeEdges, FT_BadOrientedVolume, FT_FreeNodes,
+                          FT_FreeFaces, FT_ElemGeomType, FT_GroupColor]:
             # At this point the treshold is unnecessary
             if aTreshold ==  FT_LogicalNOT:
                 aCriterion.UnaryOp = self.EnumToLong(FT_LogicalNOT)

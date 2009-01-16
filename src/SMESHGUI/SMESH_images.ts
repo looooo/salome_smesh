@@ -227,6 +227,10 @@
             <translation>mesh_free_nodes.png</translation>
         </message>
         <message>
+            <source>ICON_FREE_FACES</source>
+            <translation>mesh_free_faces.png</translation>
+        </message>
+        <message>
             <source>ICON_HYPO</source>
             <translation>mesh_hypo_length.png</translation>
         </message>

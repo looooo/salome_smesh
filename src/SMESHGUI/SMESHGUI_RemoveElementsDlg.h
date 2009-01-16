@@ -43,6 +43,7 @@ class QPushButton;
 class QRadioButton;
 
 class SMESHGUI;
+class SMESHGUI_FilterDlg;
 class SMESH_Actor;
 class SVTK_Selector;
 class LightApp_SelectionMgr;
@@ -92,6 +93,8 @@ private:
   
   QString                myHelpFileName;
 
+  SMESHGUI_FilterDlg*    myFilterDlg;
+
 private slots:
   void                   ClickOnOk();
   void                   ClickOnCancel();
@@ -102,6 +105,7 @@ private slots:
   void                   DeactivateActiveDialog();
   void                   ActivateThisDialog();
   void                   onTextChange( const QString& );
+  void                   setFilters();
 };
 
 #endif // SMESHGUI_REMOVEELEMENTSDLG_H

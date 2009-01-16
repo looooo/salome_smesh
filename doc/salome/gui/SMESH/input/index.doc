@@ -63,6 +63,7 @@
 <li>\ref skew_page</li>
 <li>\ref aspect_ratio_3d_page</li>
 <li>\ref volume_page</li>
+<li>\ref free_faces_page</li>
 </ul>
 <li>\subpage grouping_elements_page</li>
 <ul>

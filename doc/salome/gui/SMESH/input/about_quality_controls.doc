@@ -44,6 +44,7 @@ There are 0D, 1D, 2D and 3D quality controls.
 <ul>
 <li>\ref aspect_ratio_3d_page "Aspect ratio 3D"</li>
 <li>\ref volume_page "Volume"</li>
+<li>\ref free_faces_page "Free faces"</li>
 </ul>
 
 */

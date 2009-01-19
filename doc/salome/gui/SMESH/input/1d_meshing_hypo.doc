@@ -85,7 +85,9 @@ segments not longer than the given length. Definition of this hypothesis
 consists of setting the maximal allowed \b length of segments.
 <b>Use preestimated length</b> check box lets you specify \b length
 automatically calculated basing on size of your geometrical object,
-namely as diagonal of bounding box divided by ten.
+namely as diagonal of bounding box divided by ten. The divider can be
+changed via "Segmentation of diagonal of boundary box of geometry"
+preference parameter.
 <b>Use preestimated length</b> check box is enabled only if the
 geometrical object has been selected before hypothesis definition.
 

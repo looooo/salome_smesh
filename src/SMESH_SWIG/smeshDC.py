@@ -404,6 +404,14 @@ class smeshDC(SMESH._objref_SMESH_Gen):
     def GetPattern(self):
         return SMESH._objref_SMESH_Gen.GetPattern(self)
 
+    ## Sets number of segments per diagonal of boundary box of geometry by which
+    #  default segment length of appropriate 1D hypotheses is defined.
+    #  Default value is 10
+    #  @ingroup l1_auxiliary
+    def SetBoundaryBoxSegmentation(self, nbSegments):
+        #return self.GetCurrentStudy()
+        return SMESH._objref_SMESH_Gen.SetBoundaryBoxSegmentation(self,nbSegments)
+
 
     # Filtering. Auxiliary functions:
     # ------------------------------

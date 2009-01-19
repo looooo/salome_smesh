@@ -409,8 +409,7 @@ class smeshDC(SMESH._objref_SMESH_Gen):
     #  Default value is 10
     #  @ingroup l1_auxiliary
     def SetBoundaryBoxSegmentation(self, nbSegments):
-        #return self.GetCurrentStudy()
-        return SMESH._objref_SMESH_Gen.SetBoundaryBoxSegmentation(self,nbSegments)
+        SMESH._objref_SMESH_Gen.SetBoundaryBoxSegmentation(self,nbSegments)
 
 
     # Filtering. Auxiliary functions:

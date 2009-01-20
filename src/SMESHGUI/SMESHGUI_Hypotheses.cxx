@@ -363,6 +363,11 @@ SMESH::SMESH_Hypothesis_var SMESHGUI_GenericHypothesisCreator::initParamsHypothe
   return myInitParamsHypo;
 }
 
+bool SMESHGUI_GenericHypothesisCreator::hasInitParamsHypothesis() const
+{
+  return !CORBA::is_nil( myInitParamsHypo );
+}
+
 QString SMESHGUI_GenericHypothesisCreator::hypType() const
 {
   return myHypType;

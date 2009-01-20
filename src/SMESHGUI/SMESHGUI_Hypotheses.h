@@ -77,6 +77,7 @@ protected:
 
   SMESH::SMESH_Hypothesis_var  hypothesis() const;
   SMESH::SMESH_Hypothesis_var  initParamsHypothesis(const bool strict=false) const;
+  bool                         hasInitParamsHypothesis() const;
   const ListOfWidgets&         widgets() const;
   ListOfWidgets&               changeWidgets();
   QtxDialog*                   dlg() const;

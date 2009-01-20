@@ -155,11 +155,11 @@
         </message>
         <message>
             <source>MEN_AUTO_COLOR</source>
-            <translation>Auto color</translation>
+            <translation>Auto Color</translation>
         </message>
         <message>
             <source>MEN_AUTO_UPD</source>
-            <translation>Automatic update</translation>
+            <translation>Automatic Update</translation>
         </message>
         <message>
             <source>MEN_BUILD_COMPOUND</source>
@@ -215,7 +215,7 @@
         </message>
         <message>
             <source>MEN_CUT</source>
-            <translation>Cutting of quadrangles</translation>
+            <translation>Cutting of Quadrangles</translation>
         </message>
         <message>
             <source>MEN_CUT_GROUP</source>
@@ -223,7 +223,7 @@
         </message>
         <message>
             <source>MEN_DAT</source>
-            <translation>DAT file</translation>
+            <translation>DAT File</translation>
         </message>
         <message>
             <source>MEN_DELETE</source>
@@ -235,23 +235,23 @@
         </message>
         <message>
             <source>MEN_FACE_ORIENTATION</source>
-            <translation>Orientation of faces</translation>
+            <translation>Orientation of Faces</translation>
         </message>
         <message>
             <source>MEN_DISABLE_AUTO_COLOR</source>
-            <translation>Disable auto color</translation>
+            <translation>Disable Auto Color</translation>
         </message>
         <message>
             <source>MEN_DISPLAY_ONLY</source>
-            <translation>Show only</translation>
+            <translation>Show Only</translation>
         </message>
         <message>
             <source>MEN_DISPMODE</source>
-            <translation>Display mode</translation>
+            <translation>Display Mode</translation>
         </message>
         <message>
             <source>MEN_DISP_ENT</source>
-            <translation>Display entity</translation>
+            <translation>Display Entity</translation>
         </message>
         <message>
             <source>MEN_EDGE</source>
@@ -283,19 +283,19 @@
         </message>
         <message>
             <source>MEN_EXPORT_DAT</source>
-            <translation>Export to DAT file</translation>
+            <translation>Export to DAT File</translation>
         </message>
         <message>
             <source>MEN_EXPORT_MED</source>
-            <translation>Export to MED file</translation>
+            <translation>Export to MED File</translation>
         </message>
         <message>
             <source>MEN_EXPORT_STL</source>
-            <translation>Export to STL file</translation>
+            <translation>Export to STL File</translation>
         </message>
         <message>
             <source>MEN_EXPORT_UNV</source>
-            <translation>Export to UNV file</translation>
+            <translation>Export to UNV File</translation>
         </message>
         <message>
             <source>MEN_EXTRUSION</source>
@@ -303,7 +303,7 @@
         </message>
         <message>
             <source>MEN_EXTRUSION_ALONG</source>
-            <translation>Extrusion along a path</translation>
+            <translation>Extrusion Along a Path</translation>
         </message>
         <message>
             <source>MEN_FACES</source>
@@ -359,7 +359,7 @@
         </message>
         <message>
             <source>MEN_MAP</source>
-            <translation>Pattern mapping</translation>
+            <translation>Pattern Mapping</translation>
         </message>
         <message>
             <source>MEN_MED</source>
@@ -367,11 +367,11 @@
         </message>
         <message>
             <source>MEN_MERGE</source>
-            <translation>Merge nodes</translation>
+            <translation>Merge Nodes</translation>
         </message>
         <message>
             <source>MEN_MERGE_ELEMENTS</source>
-            <translation>Merge elements</translation>
+            <translation>Merge Elements</translation>
         </message>
         <message>
             <source>MEN_MESH</source>
@@ -379,7 +379,7 @@
         </message>
         <message>
             <source>MEN_MESH_THROU_POINT</source>
-            <translation>Mesh to pass through a point</translation>
+            <translation>Mesh to Pass Through a Point</translation>
         </message>
         <message>
             <source>MEN_MIN_ANG</source>
@@ -467,7 +467,7 @@
         </message>
         <message>
             <source>MEN_QUALITY</source>
-            <translation>Quality controls</translation>
+            <translation>Quality Controls</translation>
         </message>
         <message>
             <source>MEN_REMOVE</source>
@@ -511,11 +511,11 @@
         </message>
         <message>
             <source>MEN_SCALAR_BAR</source>
-            <translation>Scalar bar</translation>
+            <translation>Scalar Bar</translation>
         </message>
         <message>
             <source>MEN_SCALAR_BAR_PROP</source>
-            <translation>Scalar bar Properties</translation>
+            <translation>Scalar Bar Properties</translation>
         </message>
         <message>
             <source>MEN_SELECTION</source>
@@ -523,7 +523,7 @@
         </message>
         <message>
             <source>MEN_SEL_FILTER_LIB</source>
-            <translation>Selection filters library</translation>
+            <translation>Selection Filters Library</translation>
         </message>
         <message>
             <source>MEN_SEW</source>
@@ -555,7 +555,7 @@
         </message>
         <message>
             <source>MEN_STL</source>
-            <translation>STL file</translation>
+            <translation>STL File</translation>
         </message>
         <message>
             <source>MEN_SYM</source>
@@ -595,15 +595,15 @@
         </message>
         <message>
             <source>MEN_UNION</source>
-            <translation>Union of triangles</translation>
+            <translation>Union of Triangles</translation>
         </message>
         <message>
             <source>MEN_UNION2</source>
-            <translation>Union of two triangles</translation>
+            <translation>Union of Two Triangles</translation>
         </message>
         <message>
             <source>MEN_UNV</source>
-            <translation>UNV file</translation>
+            <translation>UNV File</translation>
         </message>
         <message>
             <source>MEN_UN_GROUP</source>
@@ -627,7 +627,7 @@
         </message>
         <message>
             <source>MEN_WARP</source>
-            <translation>Warping angle</translation>
+            <translation>Warping Angle</translation>
         </message>
         <message>
             <source>MEN_WHAT_IS</source>
@@ -2793,7 +2793,7 @@ Consider saving your work before application crash</translation>
         </message>
         <message>
             <source>MEN_FILE_INFO</source>
-            <translation>MED file information</translation>
+            <translation>MED File Information</translation>
         </message>
         <message>
             <source>SMESH_WRN_NO_APPROPRIATE_SELECTION</source>

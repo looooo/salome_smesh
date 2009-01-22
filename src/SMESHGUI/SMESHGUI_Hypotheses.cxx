@@ -62,14 +62,18 @@ SMESHGUI_GenericHypothesisCreator::~SMESHGUI_GenericHypothesisCreator()
 {
 }
 
+void SMESHGUI_GenericHypothesisCreator::setInitParamsHypothesis(SMESH::SMESH_Hypothesis_ptr hyp)
+{
+  if ( !CORBA::is_nil( hyp ) && hypType() == hyp->GetName() )
+    myInitParamsHypo = SMESH::SMESH_Hypothesis::_duplicate( hyp );
+}
+
 void SMESHGUI_GenericHypothesisCreator::create( SMESH::SMESH_Hypothesis_ptr initParamsHyp,
 						const QString& theHypName,
                                                 QWidget* parent)
 {
   MESSAGE( "Creation of hypothesis with initial params" );
-
-  if ( !CORBA::is_nil( initParamsHyp ) && hypType() == initParamsHyp->GetName() )
-    myInitParamsHypo = SMESH::SMESH_Hypothesis::_duplicate( initParamsHyp );
+  setInitParamsHypothesis( initParamsHyp );
   create( false, theHypName, parent );
 }
 
@@ -249,6 +253,11 @@ QFrame* SMESHGUI_GenericHypothesisCreator::buildStdFrame()
 
 void SMESHGUI_GenericHypothesisCreator::onValueChanged()
 {
+  valueChanged( (QWidget*) sender() );
+}
+
+void SMESHGUI_GenericHypothesisCreator::valueChanged( QWidget* )
+{
 }
 
 void SMESHGUI_GenericHypothesisCreator::onDialogFinished( int /*result*/ )
@@ -337,11 +346,27 @@ SMESH::SMESH_Hypothesis_var SMESHGUI_GenericHypothesisCreator::hypothesis() cons
   return myHypo;
 }
 
-SMESH::SMESH_Hypothesis_var SMESHGUI_GenericHypothesisCreator::initParamsHypothesis() const
+//================================================================================
+/*!
+ * \brief Return hypothesis containing initial parameters
+ *  \param strictly - if true, always return myInitParamsHypo,
+ *                    else, return myInitParamsHypo only in creation mode and if it
+ *                    is non-nil
+ */
+//================================================================================
+
+SMESH::SMESH_Hypothesis_var SMESHGUI_GenericHypothesisCreator::initParamsHypothesis(const bool strictly) const
 {
-  if ( CORBA::is_nil( myInitParamsHypo ))
+  if ( strictly )
+    return myInitParamsHypo;
+  if ( !isCreation() || CORBA::is_nil( myInitParamsHypo ))
     return myHypo;
   return myInitParamsHypo;
+}
+
+bool SMESHGUI_GenericHypothesisCreator::hasInitParamsHypothesis() const
+{
+  return !CORBA::is_nil( myInitParamsHypo );
 }
 
 QString SMESHGUI_GenericHypothesisCreator::hypType() const

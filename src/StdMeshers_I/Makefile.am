@@ -24,8 +24,7 @@
 #  Author : Julia DOROVSKIKH
 #  Modified by : Alexander BORODIN (OCN) - autotools usage
 #  Module : SMESH
-#  $Header$
-#
+
 include $(top_srcdir)/adm_local/unix/make_common_starter.am
 
 # header files 
@@ -60,6 +59,7 @@ salomeinclude_HEADERS = \
 	StdMeshers_SegmentLengthAroundVertex_i.hxx \
 	StdMeshers_UseExisting_1D2D_i.hxx \
 	StdMeshers_TrianglePreference_i.hxx \
+	StdMeshers_MaxLength_i.hxx \
 	SMESH_StdMeshers_I.hxx
 
 # Libraries targets
@@ -96,7 +96,8 @@ dist_libStdMeshersEngine_la_SOURCES = \
 	StdMeshers_SegmentAroundVertex_0D_i.cxx \
 	StdMeshers_SegmentLengthAroundVertex_i.cxx \
 	StdMeshers_UseExisting_1D2D_i.cxx \
-	StdMeshers_TrianglePreference_i.cxx
+	StdMeshers_TrianglePreference_i.cxx \
+	StdMeshers_MaxLength_i.cxx
 
 # additionnal information to compil and link file
 libStdMeshersEngine_la_CPPFLAGS = \

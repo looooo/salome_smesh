@@ -24,8 +24,7 @@
 //           Moved here from SMESH_MaxElementVolume.hxx
 //  Author : Paul RASCLE, EDF
 //  Module : SMESH
-//  $Header$
-//
+
 #ifndef _SMESH_MAXELEMENTVOLUME_HXX_
 #define _SMESH_MAXELEMENTVOLUME_HXX_
 
@@ -58,6 +57,12 @@ public:
    * \retval bool - true if parameter values have been successfully defined
    */
   virtual bool SetParametersByMesh(const SMESH_Mesh* theMesh, const TopoDS_Shape& theShape);
+
+  /*!
+   * \brief Initialize my parameter values by linear size of mesh element.
+   *  \retval bool - true if parameter values have been successfully defined
+   */
+  virtual bool SetParametersByElementSize( double elemLenght, const SMESH_Mesh* theMesh=0);
 
 protected:
   double _maxVolume;

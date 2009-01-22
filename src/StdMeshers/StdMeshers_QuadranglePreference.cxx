@@ -22,8 +22,7 @@
 //  SMESH StdMeshers_QuadranglePreference : implementaion of SMESH idl descriptions
 //  File   : StdMeshers_QuadranglePreference.cxx
 //  Module : SMESH
-//  $Header$
-//
+
 #include "StdMeshers_QuadranglePreference.hxx"
 #include "utilities.h"
 
@@ -113,3 +112,17 @@ bool StdMeshers_QuadranglePreference::SetParametersByMesh(const SMESH_Mesh* /*th
 {
   return false;
 }
+
+//================================================================================
+/*!
+ * \brief Initialize my parameter values by linear size of mesh element.
+ *  \retval bool - true if parameter values have been successfully defined
+ */
+//================================================================================
+
+bool StdMeshers_QuadranglePreference::SetParametersByElementSize(double            /*elemLenght*/,
+                                                                 const SMESH_Mesh* /*theMesh*/)
+{
+  return false;
+}
+

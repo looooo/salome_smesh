@@ -24,7 +24,6 @@
 //           Moved here from SMESH_MaxElementVolume.cxx
 //  Author : Paul RASCLE, EDF
 //  Module : SMESH
-//  $Header$
 //
 #include "StdMeshers_MaxElementVolume.hxx"
 
@@ -197,3 +196,16 @@ bool StdMeshers_MaxElementVolume::SetParametersByMesh(const SMESH_Mesh*   theMes
   }
   return _maxVolume > 0;
 }
+//================================================================================
+/*!
+ * \brief Initialize my parameter values by linear size of mesh element.
+ *  \retval bool - true if parameter values have been successfully defined
+ */
+//================================================================================
+
+bool StdMeshers_MaxElementVolume::SetParametersByElementSize(double            elemLenght,
+                                                             const SMESH_Mesh* /*theMesh*/)
+{
+  return bool( _maxVolume = elemLenght*elemLenght*elemLenght );
+}
+

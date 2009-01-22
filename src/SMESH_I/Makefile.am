@@ -24,7 +24,6 @@
 #  Author : Paul RASCLE, EDF
 #  Modified by : Alexander BORODIN (OCN) - autotools usage
 #  Module : SMESH
-#  $Header$
 #
 include $(top_srcdir)/adm_local/unix/make_common_starter.am
 
@@ -120,6 +119,7 @@ libSMESHEngine_la_LDFLAGS  = \
 	-lSalomeGenericObj \
 	$(MED_LDFLAGS) \
 	-lMEDWrapper_V2_2 \
+        -lSalomeIDLMED \
 	$(CAS_LDPATH) \
 	-lTKCDF \
 	-lTKBO \

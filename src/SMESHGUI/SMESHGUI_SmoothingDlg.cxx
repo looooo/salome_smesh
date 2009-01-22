@@ -32,6 +32,7 @@
 #include "SMESHGUI_MeshUtils.h"
 #include "SMESHGUI_SpinBox.h"
 #include "SMESHGUI_IdValidator.h"
+#include "SMESHGUI_FilterDlg.h"
 
 #include <SMESH_Actor.h>
 #include <SMESH_TypeFilter.hxx>
@@ -89,7 +90,8 @@
 SMESHGUI_SmoothingDlg::SMESHGUI_SmoothingDlg( SMESHGUI* theModule )
   : QDialog( SMESH::GetDesktop( theModule ) ),
     mySMESHGUI( theModule ),
-    mySelectionMgr( SMESH::GetSelectionMgr( theModule ) )
+    mySelectionMgr( SMESH::GetSelectionMgr( theModule ) ),
+    myFilterDlg(0)
 {
   QPixmap image0 (SMESH::GetResourceMgr( mySMESHGUI )->loadPixmap("SMESH", tr("ICON_DLG_SMOOTHING")));
   QPixmap image1 (SMESH::GetResourceMgr( mySMESHGUI )->loadPixmap("SMESH", tr("ICON_SELECT")));
@@ -133,6 +135,8 @@ SMESHGUI_SmoothingDlg::SMESHGUI_SmoothingDlg( SMESHGUI* theModule )
 
   LineEditElements = new QLineEdit(GroupArguments);
   LineEditElements->setValidator(myIdValidator);
+  QPushButton* filterElemBtn = new QPushButton( tr( "SMESH_BUT_FILTER" ), GroupArguments );
+  connect(filterElemBtn,   SIGNAL(clicked()), this, SLOT(setElemFilters()));
 
   // Control for the whole mesh selection
   CheckBoxMesh = new QCheckBox(tr("SMESH_SELECT_WHOLE_MESH"), GroupArguments);
@@ -145,6 +149,8 @@ SMESHGUI_SmoothingDlg::SMESHGUI_SmoothingDlg( SMESHGUI* theModule )
 
   LineEditNodes  = new QLineEdit(GroupArguments);
   LineEditNodes->setValidator(myIdValidator);
+  QPushButton* filterNodeBtn = new QPushButton( tr( "SMESH_BUT_FILTER" ), GroupArguments );
+  connect(filterNodeBtn,   SIGNAL(clicked()), this, SLOT(setNodeFilters()));
 
   // Controls for method selection
   TextLabelMethod = new QLabel(tr("METHOD"), GroupArguments);
@@ -167,17 +173,19 @@ SMESHGUI_SmoothingDlg::SMESHGUI_SmoothingDlg( SMESHGUI* theModule )
   GroupArgumentsLayout->addWidget(TextLabelElements,      0, 0);
   GroupArgumentsLayout->addWidget(SelectElementsButton,   0, 1);
   GroupArgumentsLayout->addWidget(LineEditElements,       0, 2);
-  GroupArgumentsLayout->addWidget(CheckBoxMesh,           1, 0, 1, 3);
+  GroupArgumentsLayout->addWidget(filterElemBtn,          0, 3);
+  GroupArgumentsLayout->addWidget(CheckBoxMesh,           1, 0, 1, 4);
   GroupArgumentsLayout->addWidget(TextLabelNodes,         2, 0);
   GroupArgumentsLayout->addWidget(SelectNodesButton,      2, 1);
   GroupArgumentsLayout->addWidget(LineEditNodes,          2, 2);
+  GroupArgumentsLayout->addWidget(filterNodeBtn,          2, 3);
   GroupArgumentsLayout->addWidget(TextLabelMethod,        3, 0);
-  GroupArgumentsLayout->addWidget(ComboBoxMethod,         3, 2);
+  GroupArgumentsLayout->addWidget(ComboBoxMethod,         3, 2, 1, 2);
   GroupArgumentsLayout->addWidget(TextLabelLimit,         4, 0);
-  GroupArgumentsLayout->addWidget(SpinBox_IterationLimit, 4, 2);
+  GroupArgumentsLayout->addWidget(SpinBox_IterationLimit, 4, 2, 1, 2);
   GroupArgumentsLayout->addWidget(TextLabelAspectRatio,   5, 0);
-  GroupArgumentsLayout->addWidget(SpinBox_AspectRatio,    5, 2);
-  GroupArgumentsLayout->addWidget(CheckBoxParametric,     6, 0, 1, 3);
+  GroupArgumentsLayout->addWidget(SpinBox_AspectRatio,    5, 2, 1, 2);
+  GroupArgumentsLayout->addWidget(CheckBoxParametric,     6, 0, 1, 4);
 
   /***************************************************************/
   GroupButtons = new QGroupBox(this);
@@ -273,6 +281,10 @@ SMESHGUI_SmoothingDlg::SMESHGUI_SmoothingDlg( SMESHGUI* theModule )
 SMESHGUI_SmoothingDlg::~SMESHGUI_SmoothingDlg()
 {
   // no need to delete child widgets, Qt does it all for us
+  if ( myFilterDlg != 0 ) {
+    myFilterDlg->setParent( 0 );
+    delete myFilterDlg;
+  }
 }
 
 //=================================================================================
@@ -382,8 +394,11 @@ void SMESHGUI_SmoothingDlg::ClickOnCancel()
   disconnect(mySelectionMgr, 0, this, 0);
   mySelectionMgr->clearFilters();
   //mySelectionMgr->clearSelected();
-  SMESH::SetPickable(); // ???
-  SMESH::SetPointRepresentation(false);
+  if (SMESH::GetCurrentVtkView()) {
+    SMESH::RemoveFilters(); // PAL6938 -- clean all mesh entity filters
+    SMESH::SetPointRepresentation(false);
+    SMESH::SetPickable();
+  }
   if ( SVTK_ViewWindow* aViewWindow = SMESH::GetViewWindow( mySMESHGUI ))
     aViewWindow->SetSelectionMode(ActorSelection);
   mySMESHGUI->ResetState();
@@ -494,9 +509,13 @@ void SMESHGUI_SmoothingDlg::SelectionIntoArgument()
   QString aString = "";
 
   myBusy = true;
-  if (myEditCurrentArgument == (QWidget*)LineEditElements) {
-    LineEditElements->setText(aString);
-    myNbOkElements = 0;
+  if (myEditCurrentArgument == LineEditElements ||
+      myEditCurrentArgument == LineEditNodes) {
+    myEditCurrentArgument->setText(aString);
+    if (myEditCurrentArgument == LineEditElements)
+      myNbOkElements = 0;
+    else
+      myNbOkNodes = 0;
     buttonOk->setEnabled(false);
     buttonApply->setEnabled(false);
     myActor = 0;
@@ -591,9 +610,9 @@ void SMESHGUI_SmoothingDlg::SelectionIntoArgument()
 
   // OK
   if (myEditCurrentArgument == LineEditElements)
-    myNbOkElements = true;
+    myNbOkElements = aNbUnits;
   else if (myEditCurrentArgument == LineEditNodes)
-    myNbOkNodes = true;
+    myNbOkNodes = aNbUnits;
 
   if (myNbOkElements && (myNbOkNodes || LineEditNodes->text().trimmed().isEmpty())) {
     buttonOk->setEnabled(true);
@@ -719,8 +738,10 @@ void SMESHGUI_SmoothingDlg::onSelectMesh (bool toSelectMesh)
   else
     TextLabelElements->setText(tr("SMESH_ID_ELEMENTS"));
 
-  if (myEditCurrentArgument != LineEditElements) {
+  if (myEditCurrentArgument != LineEditElements &&
+      myEditCurrentArgument != LineEditNodes) {
     LineEditElements->clear();
+    LineEditNodes->clear();
     return;
   }
 
@@ -732,14 +753,15 @@ void SMESHGUI_SmoothingDlg::onSelectMesh (bool toSelectMesh)
       aViewWindow->SetSelectionMode(ActorSelection);
     //    mySelectionMgr->setSelectionModes(ActorSelection);
     mySelectionMgr->installFilter(myMeshOrSubMeshOrGroupFilter);
-    LineEditElements->setReadOnly(true);
-    LineEditElements->setValidator(0);
+    myEditCurrentArgument->setReadOnly(true);
+    myEditCurrentArgument->setValidator(0);
   } else {
     if ( SVTK_ViewWindow* aViewWindow = SMESH::GetViewWindow( mySMESHGUI ))
-      aViewWindow->SetSelectionMode(FaceSelection);
-    LineEditElements->setReadOnly(false);
+      aViewWindow->SetSelectionMode(myEditCurrentArgument == LineEditElements ? FaceSelection 
+                                                                              : NodeSelection );
+    myEditCurrentArgument->setReadOnly(false);
     LineEditElements->setValidator(myIdValidator);
-    onTextChange(LineEditElements->text());
+    onTextChange(myEditCurrentArgument->text());
   }
 
   SelectionIntoArgument();
@@ -759,4 +781,44 @@ void SMESHGUI_SmoothingDlg::keyPressEvent( QKeyEvent* e )
     e->accept();
     ClickOnHelp();
   }
+}
+
+//=================================================================================
+// function : setFilters()
+// purpose  : activate filter dialog
+//=================================================================================
+void SMESHGUI_SmoothingDlg::setFilters( const bool theIsElem )
+{
+  if ( !myFilterDlg )
+  {
+    QList<int> types;  
+    types.append( SMESH::NODE );
+    types.append( SMESH::ALL );
+    myFilterDlg = new SMESHGUI_FilterDlg( mySMESHGUI, types );
+  }
+  myFilterDlg->Init( theIsElem ? SMESH::ALL : SMESH::NODE );
+
+  myFilterDlg->SetSelection();
+  myFilterDlg->SetMesh( myMesh );
+  myFilterDlg->SetSourceWg( theIsElem ? LineEditElements : LineEditNodes );
+
+  myFilterDlg->show();
+}
+
+//=================================================================================
+// function : setElemFilters()
+// purpose  : SLOT. Called when element "Filter" button pressed.
+//=================================================================================
+void SMESHGUI_SmoothingDlg::setElemFilters()
+{
+  setFilters( true );
+}
+
+//=================================================================================
+// function : setNodeFilters()
+// purpose  : SLOT. Called when node "Filter" button pressed.
+//=================================================================================
+void SMESHGUI_SmoothingDlg::setNodeFilters()
+{
+  setFilters( false );
 }

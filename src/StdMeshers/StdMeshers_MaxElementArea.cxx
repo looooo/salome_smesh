@@ -24,8 +24,8 @@
 //           Moved here from SMESH_MaxElementArea.cxx
 //  Author : Paul RASCLE, EDF
 //  Module : SMESH
-//  $Header$
 //
+
 #include "StdMeshers_MaxElementArea.hxx"
 
 #include "SMESH_ControlsDef.hxx"
@@ -185,3 +185,16 @@ bool StdMeshers_MaxElementArea::SetParametersByMesh(const SMESH_Mesh*   theMesh,
   }
   return _maxArea > 0;
 }
+//================================================================================
+/*!
+ * \brief Initialize my parameter values by linear size of mesh element.
+ *  \retval bool - true if parameter values have been successfully defined
+ */
+//================================================================================
+
+bool StdMeshers_MaxElementArea::SetParametersByElementSize(double            elemLenght,
+                                                           const SMESH_Mesh* /*theMesh*/)
+{
+  return bool( _maxArea = elemLenght*elemLenght );
+}
+

@@ -31,6 +31,7 @@
 
 // Qt includes
 #include <QDialog>
+#include <QMap>
 
 // IDL includes
 #include <SALOMEconfig.h>
@@ -47,12 +48,15 @@ class QSpinBox;
 class SMESHGUI_IdValidator;
 class SMESHGUI_SpinBox;
 class SMESHGUI;
+class SMESHGUI_FilterDlg;
 class SMESH_Actor;
 class SVTK_Selector;
 class LightApp_SelectionMgr;
 class SMESH_LogicalFilter;
 class SALOME_Actor;
 class SMESHGUI_MeshEditPreview;
+class QMenu;
+class QAction;
 
 //=================================================================================
 // class    : SMESHGUI_RevolutionDlg
@@ -67,6 +71,8 @@ public:
   ~SMESHGUI_RevolutionDlg();
 
 private:
+  enum {NONE_SELECT, POINT_SELECT, FACE_SELECT};
+  
   void                      Init( bool = true);
   void                      closeEvent( QCloseEvent* );
   void                      enterEvent( QEvent* );           /* mouse enter the QWidget */
@@ -135,9 +141,16 @@ private:
   QSpinBox*                 SpinBox_NbSteps;
   QLabel*                   TextLabelTolerance;
   SMESHGUI_SpinBox*         SpinBox_Tolerance;
+
+  QMenu*                    SelectVectorMenu;
+  QMap<QAction*,int>        myMenuActions;
+  int                       myVectorDefinition;
+
   
   QString                   myHelpFileName;
   
+  SMESHGUI_FilterDlg*       myFilterDlg;
+   
 private slots:
   void                      ConstructorsClicked( int );
   void                      ClickOnOk();
@@ -153,6 +166,9 @@ private slots:
   void                      onVectorChanged();
   void                      toDisplaySimulation();
   void                      onDisplaySimulation( bool );
+  void                      onSelectVectorMenu( QAction* );
+  void                      onSelectVectorButton();
+  void                      setFilters();
 };
 
 #endif // SMESHGUI_REVOLUTIONDLG_H

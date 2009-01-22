@@ -24,7 +24,6 @@
 //           Moved here from SMESH_NumberOfSegments.hxx
 //  Author : Paul RASCLE, EDF
 //  Module : SMESH
-//  $Header$
 //
 #ifndef _SMESH_NUMBEROFSEGMENTS_HXX_
 #define _SMESH_NUMBEROFSEGMENTS_HXX_
@@ -170,6 +169,12 @@ public:
    * \retval bool - true if parameter values have been successfully defined
    */
   virtual bool SetParametersByMesh(const SMESH_Mesh* theMesh, const TopoDS_Shape& theShape);
+
+  /*!
+   * \brief Initialize my parameter values by linear size of mesh element.
+   *  \retval bool - true if parameter values have been successfully defined
+   */
+  virtual bool SetParametersByElementSize( double elemLenght, const SMESH_Mesh* theMesh=0);
 
   virtual std::ostream & SaveTo(std::ostream & save);
   virtual std::istream & LoadFrom(std::istream & load);

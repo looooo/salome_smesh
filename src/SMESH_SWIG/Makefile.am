@@ -23,7 +23,6 @@
 #  Author : Nicolas REJNERI, Paul RASCLE
 #  Modified by : Alexander BORODIN (OCN) - autotools usage
 #  Module : SMESH
-#  $Header$
 #
 include $(top_srcdir)/adm_local/unix/make_common_starter.am
 
@@ -58,6 +57,8 @@ dist_salomescript_DATA= \
 	ex24_cylinder.py \
 	ex29_refine.py \
 	ex30_tepal.py \
+	ex30_groupsOp.py \
+	ex31_dimGroup.py \
 	SMESH_test.py\
 	SMESH_test0.py\
 	SMESH_test1.py \

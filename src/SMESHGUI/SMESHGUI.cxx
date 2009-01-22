@@ -771,6 +771,10 @@
 	    aTitle = QObject::tr( "MULTI_BORDERS" );
 	    aControl = SMESH_Actor::eMultiConnection;
 	    break;
+	  case 6005:
+	    aTitle = QObject::tr( "FREE_NODES" );
+	    aControl = SMESH_Actor::eFreeNodes;
+	    break;
 	  case 6019:
 	    aTitle = QObject::tr( "MULTI2D_BORDERS" );
 	    aControl = SMESH_Actor::eMultiConnection2D;
@@ -806,6 +810,10 @@
 	  case 6009:
 	    aTitle = QObject::tr( "SMESH_VOLUME" );
 	    aControl = SMESH_Actor::eVolume3D;
+	    break;
+	  case 6021:
+	    aTitle = QObject::tr( "FREE_FACES" );
+	    aControl = SMESH_Actor::eFreeFaces;
 	    break;
 	  }
 	  anActor->SetControlMode(aControl);
@@ -1061,6 +1069,11 @@ SalomeApp_Module( "SMESH" )
   {
     CORBA::Boolean anIsEmbeddedMode;
     myComponentSMESH = SMESH_Client::GetSMESHGen(getApp()->orb(),anIsEmbeddedMode);
+
+    //  0019923: EDF 765 SMESH : default values of hypothesis
+    SUIT_ResourceMgr* aResourceMgr = SMESH::GetResourceMgr(this);
+    int nbSeg = aResourceMgr->integerValue( "SMESH", "segmentation" );
+    myComponentSMESH->SetBoundaryBoxSegmentation( nbSeg );
   }
 
   myActiveDialogBox = 0;
@@ -1564,21 +1577,17 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
     }
 
   case 701:					// COMPUTE MESH
+  case 711:					// PRECOMPUTE MESH
     {
       if (checkLock(aStudy)) break;
-
-      startOperation( 701 );
+      startOperation( theCommandID );
     }
     break;
 
-  case 702:  // Create mesh
-    startOperation( 702 );
-    break;
-  case 703:  // Create sub-mesh
-    startOperation( 703 );
-    break;
+  case 702: // Create mesh
+  case 703: // Create sub-mesh
   case 704: // Edit mesh/sub-mesh
-    startOperation( 704 );
+    startOperation( theCommandID );
     break;
   case 710: // Build compound mesh
     {
@@ -1880,6 +1889,36 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
       break;
     }
 
+  case 815:                                     // Edit GEOM GROUP as standalone
+    {
+      if ( !vtkwnd )
+      {
+        SUIT_MessageBox::warning( desktop(), tr( "SMESH_WRN_WARNING" ),
+				  tr( "NOT_A_VTK_VIEWER" ) );
+        break;
+      }
+
+      if(checkLock(aStudy)) break;
+      EmitSignalDeactivateDialog();
+
+      LightApp_SelectionMgr *aSel = SMESHGUI::selectionMgr();
+      SALOME_ListIO selected;
+      if( aSel )
+        aSel->selectedObjects( selected );
+
+      SALOME_ListIteratorOfListIO It (selected);
+      for ( ; It.More(); It.Next() )
+      {
+        SMESH::SMESH_GroupOnGeom_var aGroup =
+          SMESH::IObjectToInterface<SMESH::SMESH_GroupOnGeom>(It.Value());
+        if (!aGroup->_is_nil()) {
+          SMESHGUI_GroupDlg *aDlg = new SMESHGUI_GroupDlg( this, aGroup, true );
+          aDlg->show();
+	}
+      }
+      break;
+    }
+
     case 810: // Union Groups
     case 811: // Intersect groups
     case 812: // Cut groups
@@ -1896,12 +1935,28 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
 
       EmitSignalDeactivateDialog();
 
-      int aMode;
-      if      ( theCommandID == 810 ) aMode = SMESHGUI_GroupOpDlg::UNION;
-      else if ( theCommandID == 811 ) aMode = SMESHGUI_GroupOpDlg::INTERSECT;
-      else                            aMode = SMESHGUI_GroupOpDlg::CUT;
+      SMESHGUI_GroupOpDlg* aDlg = 0;
+      if ( theCommandID == 810 )
+        aDlg = new SMESHGUI_UnionGroupsDlg( this );
+      else if ( theCommandID == 811 )
+        aDlg = new SMESHGUI_IntersectGroupsDlg( this );
+      else
+        aDlg = new SMESHGUI_CutGroupsDlg( this );
 
-      ( new SMESHGUI_GroupOpDlg( this, aMode ) )->show();
+      aDlg->show();
+
+      break;
+    }
+
+    case 814: // Create groups of entities from existing groups of superior dimensions
+    {
+      if ( checkLock( aStudy ) )
+        break;
+
+      EmitSignalDeactivateDialog();
+      SMESHGUI_GroupOpDlg* aDlg = new SMESHGUI_DimGroupDlg( this );
+      aDlg->show();
+
       break;
     }
 
@@ -2022,7 +2077,7 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
       if( aSel )
         aSel->selectedObjects( selected );
 
-      bool isAny = false; // iss there any appropriate object selected
+      bool isAny = false; // is there any appropriate object selected
 
       SALOME_ListIteratorOfListIO It( selected );
       for ( ; It.More(); It.Next() )
@@ -2050,14 +2105,7 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
               newName = LightApp_NameDlg::getName(desktop(), newName);
               if ( !newName.isEmpty() )
               {
-                //old source: aStudy->renameIObject( IObject, newName );
-                aName->SetValue( newName.toLatin1().constData() );
-
-                // if current object is group update group's name
-                SMESH::SMESH_GroupBase_var aGroup =
-                  SMESH::IObjectToInterface<SMESH::SMESH_GroupBase>(IObject);
-                if (!aGroup->_is_nil() )
-                  aGroup->SetName( newName.toLatin1().constData() );
+                SMESHGUI::GetSMESHGen()->SetName(obj->GetIOR().c_str(), newName.toLatin1().data());
 
                 updateObjBrowser();
               }
@@ -2390,7 +2438,9 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
   case 6002:
   case 6003:
   case 6004:
+  case 6005:
   case 6009:
+  case 6021:
     if ( vtkwnd ) {
 
       LightApp_SelectionMgr* mgr = selectionMgr();
@@ -2596,23 +2646,28 @@ void SMESHGUI::initialize( CAM_Application* app )
   createSMESHAction(  703, "CREATE_SUBMESH",  "ICON_DLG_ADD_SUBMESH" );
   createSMESHAction(  704, "EDIT_MESHSUBMESH","ICON_DLG_EDIT_MESH" );
   createSMESHAction(  710, "BUILD_COMPOUND",  "ICON_BUILD_COMPOUND" );
+  createSMESHAction(  711, "PRECOMPUTE",      "ICON_PRECOMPUTE" );
   createSMESHAction(  806, "CREATE_GEO_GROUP","ICON_CREATE_GEO_GROUP" );
   createSMESHAction(  801, "CREATE_GROUP",    "ICON_CREATE_GROUP" );
   createSMESHAction(  802, "CONSTRUCT_GROUP", "ICON_CONSTRUCT_GROUP" );
   createSMESHAction(  803, "EDIT_GROUP",      "ICON_EDIT_GROUP" );
+  createSMESHAction(  815, "EDIT_GEOMGROUP_AS_GROUP", "ICON_EDIT_GROUP" );
   createSMESHAction(  804, "ADD" );
   createSMESHAction(  805, "REMOVE" );
   createSMESHAction(  810, "UN_GROUP",        "ICON_UNION" );
   createSMESHAction(  811, "INT_GROUP",       "ICON_INTERSECT" );
   createSMESHAction(  812, "CUT_GROUP",       "ICON_CUT" );
+  createSMESHAction(  814, "UNDERLYING_ELEMS","ICON_UNDERLYING_ELEMS" );
   createSMESHAction(  813, "DEL_GROUP",       "ICON_DEL_GROUP" );
   createSMESHAction(  900, "ADV_INFO",        "ICON_ADV_INFO" );
   createSMESHAction(  902, "STD_INFO",        "ICON_STD_INFO" );
   createSMESHAction(  903, "WHAT_IS",         "ICON_WHAT_IS" );
   createSMESHAction( 6001, "LENGTH",          "ICON_LENGTH",        0, true );
   createSMESHAction( 6002, "FREE_EDGE",       "ICON_FREE_EDGE",     0, true );
+  createSMESHAction( 6021, "FREE_FACES",      "ICON_FREE_FACES",    0, true );
   createSMESHAction( 6003, "FREE_BORDER",     "ICON_FREE_EDGE_2D",  0, true );
   createSMESHAction( 6004, "CONNECTION",      "ICON_CONNECTION",    0, true );
+  createSMESHAction( 6005, "FREE_NODE",       "ICON_FREE_NODE",     0, true );
   createSMESHAction( 6011, "AREA",            "ICON_AREA",          0, true );
   createSMESHAction( 6012, "TAPER",           "ICON_TAPER",         0, true );
   createSMESHAction( 6013, "ASPECT",          "ICON_ASPECT",        0, true );
@@ -2731,15 +2786,19 @@ void SMESHGUI::initialize( CAM_Application* app )
   createMenu( 710, meshId, -1 );
   createMenu( separator(), meshId, -1 );
   createMenu( 701, meshId, -1 );
+  createMenu( 711, meshId, -1 );
   createMenu( separator(), meshId, -1 );
   createMenu( 801, meshId, -1 );
   createMenu( 806, meshId, -1 );
   createMenu( 802, meshId, -1 );
   createMenu( 803, meshId, -1 );
+  createMenu( 815, meshId, -1 );
   createMenu( separator(), meshId, -1 );
   createMenu( 810, meshId, -1 );
   createMenu( 811, meshId, -1 );
   createMenu( 812, meshId, -1 );
+  createMenu( separator(), meshId, -1 );
+  createMenu( 814, meshId, -1 );
   createMenu( separator(), meshId, -1 );
   createMenu( 813, meshId, -1 );
   createMenu( separator(), meshId, -1 );
@@ -2752,6 +2811,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   createMenu( 6001, ctrlId, -1 );
   createMenu( 6004, ctrlId, -1 );
   createMenu( separator(), ctrlId, -1 );
+  createMenu( 6005, ctrlId, -1 );
   createMenu( 6002, ctrlId, -1 );
   createMenu( 6018, ctrlId, -1 );
   createMenu( 6019, ctrlId, -1 );
@@ -2764,6 +2824,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   createMenu( separator(), ctrlId, -1 );
   createMenu( 6017, ctrlId, -1 );
   createMenu( 6009, ctrlId, -1 );
+  createMenu( 6021, ctrlId, -1 );
   createMenu( separator(), ctrlId, -1 );
 
   createMenu( 400, addId, -1 );
@@ -2826,11 +2887,13 @@ void SMESHGUI::initialize( CAM_Application* app )
   createTool( 710, meshTb );
   createTool( separator(), meshTb );
   createTool( 701, meshTb );
+  createTool( 711, meshTb );
   createTool( separator(), meshTb );
   createTool( 801, meshTb );
   createTool( 806, meshTb );
   createTool( 802, meshTb );
   createTool( 803, meshTb );
+  //createTool( 815, meshTb );
   createTool( separator(), meshTb );
   createTool( 900, meshTb );
   createTool( 902, meshTb );
@@ -2841,6 +2904,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   createTool( 6003, ctrlTb );
   createTool( 6004, ctrlTb );
   createTool( separator(), ctrlTb );
+  createTool( 6005, ctrlTb );
   createTool( 6002, ctrlTb );
   createTool( 6018, ctrlTb );
   createTool( 6019, ctrlTb );
@@ -2853,6 +2917,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   createTool( separator(), ctrlTb );
   createTool( 6017, ctrlTb );
   createTool( 6009, ctrlTb );
+  createTool( 6021, ctrlTb );
   createTool( separator(), ctrlTb );
 
   createTool( 400, addRemTb );
@@ -2929,12 +2994,15 @@ void SMESHGUI::initialize( CAM_Application* app )
 
   createPopupItem( 150, OB, mesh, "&& selcount=1 && isImported" );      // FILE INFORMATION
   createPopupItem( 703, OB, mesh, "&& isComputable");      // CREATE_SUBMESH
-  createPopupItem( 703, OB, subMesh, "&& isComputable" );  // CREATE_SUBMESH
+  //createPopupItem( 703, OB, subMesh, "&& isComputable" );  // CREATE_SUBMESH
   createPopupItem( 704, OB, mesh, "&& isComputable");      // EDIT_MESHSUBMESH
   createPopupItem( 704, OB, subMesh, "&& isComputable" );  // EDIT_MESHSUBMESH
   createPopupItem( 803, OB, group );                       // EDIT_GROUP
+  createPopupItem( 815, OB, group, "&& groupType = 'GroupOnGeom'" ); // EDIT_GROUP
+
   popupMgr()->insert( separator(), -1, 0 );
   createPopupItem( 701, OB, mesh, "&& isComputable" );     // COMPUTE
+  createPopupItem( 711, OB, mesh, "&& isComputable" );     // PRECOMPUTE
   createPopupItem( 214, OB, mesh_group );                  // UPDATE
   createPopupItem( 900, OB, mesh_group );                  // ADV_INFO
   createPopupItem( 902, OB, mesh );                        // STD_INFO
@@ -2964,6 +3032,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   createPopupItem( 803, View, group ); // EDIT_GROUP
   createPopupItem( 804, View, elems ); // ADD
   createPopupItem( 805, View, elems ); // REMOVE
+
   popupMgr()->insert( separator(), -1, 0 );
   createPopupItem( 214, View, mesh_group ); // UPDATE
   createPopupItem( 900, View, mesh_group ); // ADV_INFO
@@ -3091,6 +3160,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   // Controls
   //-------------------------------------------------
   QString
+    aMeshInVtkHasNodes = aMeshInVTK + "&&" + hasNodes,
     aMeshInVtkHasEdges = aMeshInVTK + "&&" + hasEdges,
     aMeshInVtkHasFaces = aMeshInVTK + "&&" + hasFaces,
     aMeshInVtkHasVolumes = aMeshInVTK + "&&" + hasVolumes;
@@ -3116,8 +3186,12 @@ void SMESHGUI::initialize( CAM_Application* app )
 
   popupMgr()->insert( separator(), anId, -1 );
 
+  popupMgr()->insert( action( 6005 ), anId, -1 ); // FREE_NODE
+  popupMgr()->setRule( action( 6005 ), aMeshInVtkHasNodes, QtxPopupMgr::VisibleRule );
+  popupMgr()->setRule( action( 6005 ), "controlMode = 'eFreeNodes'", QtxPopupMgr::ToggleRule );
+
   popupMgr()->insert( action( 6002 ), anId, -1 ); // FREE_EDGE
-  popupMgr()->setRule( action( 6002 ), aMeshInVtkHasFaces, QtxPopupMgr::VisibleRule );
+  popupMgr()->setRule( action( 6002 ), aMeshInVtkHasEdges, QtxPopupMgr::VisibleRule );
   popupMgr()->setRule( action( 6002 ), "controlMode = 'eFreeEdges'", QtxPopupMgr::ToggleRule );
 
   popupMgr()->insert( action( 6018 ), anId, -1 ); // LENGTH_2D
@@ -3161,6 +3235,11 @@ void SMESHGUI::initialize( CAM_Application* app )
   popupMgr()->insert ( action( 6009 ), anId, -1 ); // VOLUME_3D
   popupMgr()->setRule( action( 6009 ), aMeshInVtkHasVolumes, QtxPopupMgr::VisibleRule );
   popupMgr()->setRule( action( 6009 ), "controlMode = 'eVolume3D'", QtxPopupMgr::ToggleRule );
+
+  popupMgr()->insert( action( 6021 ), anId, -1 ); // FREE_FACE
+  popupMgr()->setRule( action( 6021 ), aMeshInVtkHasFaces /*aMeshInVtkHasVolumes*/,
+                                       QtxPopupMgr::VisibleRule );
+  popupMgr()->setRule( action( 6021 ), "controlMode = 'eFreeFaces'", QtxPopupMgr::ToggleRule );
 
   popupMgr()->insert( separator(), anId, -1 );
 
@@ -3330,6 +3409,7 @@ void SMESHGUI::onViewManagerActivated( SUIT_ViewManager* mgr )
 
 void SMESHGUI::createPreferences()
 {
+  // General tab ------------------------------------------------------------------------
   int genTab = addPreference( tr( "PREF_TAB_GENERAL" ) );
 
   int updateGroup = addPreference( tr( "PREF_GROUP_UPDATE" ), genTab );
@@ -3378,6 +3458,14 @@ void SMESHGUI::createPreferences()
   setPreferenceProperty( notifyMode, "strings", modes );
   setPreferenceProperty( notifyMode, "indexes", indices );
 
+  int segGroup = addPreference( tr( "PREF_GROUP_SEGMENT_LENGTH" ), genTab );
+  setPreferenceProperty( segGroup, "columns", 2 );
+  int segLen = addPreference( tr( "PREF_SEGMENT_LENGTH" ), segGroup, LightApp_Preferences::IntSpin,
+                              "SMESH", "segmentation" );
+  setPreferenceProperty( segLen, "min", 1 );
+  setPreferenceProperty( segLen, "max", 10000000 );
+
+  // Mesh tab ------------------------------------------------------------------------
   int meshTab = addPreference( tr( "PREF_TAB_MESH" ) );
   int nodeGroup = addPreference( tr( "PREF_GROUP_NODES" ), meshTab );
   setPreferenceProperty( nodeGroup, "columns", 2 );
@@ -3420,6 +3508,7 @@ void SMESHGUI::createPreferences()
 
   addPreference( tr( "PREF_ORIENTATION_3D_VECTORS" ), orientGroup, LightApp_Preferences::Bool, "SMESH", "orientation_3d_vectors" );
 
+  // Selection tab ------------------------------------------------------------------------
   int selTab = addPreference( tr( "PREF_TAB_SELECTION" ) );
 
   int selGroup = addPreference( tr( "PREF_GROUP_SELECTION" ), selTab );
@@ -3448,27 +3537,16 @@ void SMESHGUI::createPreferences()
   addPreference( tr( "PREF_ELEMENTS" ), precSelGroup, LightApp_Preferences::Double, "SMESH", "selection_precision_element" );
   addPreference( tr( "PREF_OBJECTS" ), precSelGroup, LightApp_Preferences::Double, "SMESH", "selection_precision_object" );
 
+  // Scalar Bar tab ------------------------------------------------------------------------
   int sbarTab = addPreference( tr( "SMESH_SCALARBAR" ) );
   int fontGr = addPreference( tr( "SMESH_FONT_SCALARBAR" ), sbarTab );
   setPreferenceProperty( fontGr, "columns", 2 );
 
-  int tfont = addPreference( tr( "SMESH_TITLE" ), fontGr, LightApp_Preferences::Font, "SMESH", "scalar_bar_title_font" );
+  addVtkFontPref( tr( "SMESH_TITLE" ), fontGr, "scalar_bar_title_font" );
   addPreference( tr( "PREF_TITLE_COLOR" ), fontGr, LightApp_Preferences::Color, "SMESH", "scalar_bar_title_color" );
-  int lfont = addPreference( tr( "SMESH_LABELS" ), fontGr, LightApp_Preferences::Font, "SMESH", "scalar_bar_label_font" );
+
+  addVtkFontPref( tr( "SMESH_LABELS" ), fontGr, "scalar_bar_label_font" );
   addPreference( tr( "PREF_LABELS_COLOR" ), fontGr, LightApp_Preferences::Color, "SMESH", "scalar_bar_label_color" );
-
-  QStringList fam;
-  fam.append( tr( "SMESH_FONT_ARIAL" ) );
-  fam.append( tr( "SMESH_FONT_COURIER" ) );
-  fam.append( tr( "SMESH_FONT_TIMES" ) );
-  int wflag = ( QtxFontEdit::Family | QtxFontEdit::Scripting );
-
-  setPreferenceProperty( tfont, "families", fam );
-  setPreferenceProperty( tfont, "system", false );
-  setPreferenceProperty( tfont, "widget_flags", wflag );
-  setPreferenceProperty( lfont, "families", fam );
-  setPreferenceProperty( lfont, "system", false );
-  setPreferenceProperty( lfont, "widget_flags", wflag );
 
   int colorsLabelsGr = addPreference( tr( "SMESH_LABELS_COLORS_SCALARBAR" ), sbarTab );
   setPreferenceProperty( colorsLabelsGr, "columns", 2 );
@@ -3535,7 +3613,7 @@ void SMESHGUI::createPreferences()
 
 void SMESHGUI::preferencesChanged( const QString& sect, const QString& name )
 {
-  if( sect=="SMESH" ){
+  if( sect=="SMESH" ) {
     float sbX1,sbY1,sbW,sbH;
     float aTol = 1.00000009999999;
     std::string aWarning;
@@ -3551,7 +3629,7 @@ void SMESHGUI::preferencesChanged( const QString& sect, const QString& name )
       if(sbX1+sbW > aTol){
 	aWarning = "Origin and Size Vertical: X+Width > 1\n";
 	sbX1=0.01;
-	sbW=0.05;
+	sbW=0.08;
 	aResourceMgr->setValue("SMESH", "scalar_bar_vertical_x", sbX1);
 	aResourceMgr->setValue("SMESH", "scalar_bar_vertical_width", sbW);
       }
@@ -3570,8 +3648,8 @@ void SMESHGUI::preferencesChanged( const QString& sect, const QString& name )
       sbW = aResourceMgr->doubleValue("SMESH", "scalar_bar_horizontal_width", sbW);
       if(sbX1+sbW > aTol){
 	aWarning = "Origin and Size Horizontal: X+Width > 1\n";
-	sbX1=0.01;
-	sbW=0.05;
+	sbX1=0.1;
+	sbW=0.08;
 	aResourceMgr->setValue("SMESH", "scalar_bar_horizontal_x", sbX1);
 	aResourceMgr->setValue("SMESH", "scalar_bar_horizontal_width", sbW);
       }
@@ -3582,10 +3660,14 @@ void SMESHGUI::preferencesChanged( const QString& sect, const QString& name )
       if(sbY1+sbH > aTol){
 	aWarning = "Origin and Size Horizontal: Y+Height > 1\n";
 	sbY1=0.01;
-	sbH=0.05;
+	sbH=0.08;
 	aResourceMgr->setValue("SMESH", "scalar_bar_horizontal_y", sbY1);
 	aResourceMgr->setValue("SMESH", "scalar_bar_horizontal_height",sbH);
       }
+    }
+    else if ( name == "segmentation" ) {
+      int nbSeg = aResourceMgr->integerValue( "SMESH", "segmentation" );
+      myComponentSMESH->SetBoundaryBoxSegmentation( nbSeg );
     }
 
     if(aWarning.size() != 0){
@@ -3671,6 +3753,9 @@ LightApp_Operation* SMESHGUI::createOperation( const int id ) const
     break;
     case 704: // Edit mesh/sub-mesh
       op = new SMESHGUI_MeshOp( false );
+    break;
+    case 711: // Precompute mesh
+      op = new SMESHGUI_PrecomputeOp();
     break;
     case 806: // Create group on geom
       op = new SMESHGUI_GroupOnShapeOp();
@@ -4175,3 +4260,35 @@ void SMESHGUI::restoreVisualParameters (int savePoint)
     }
   }
 }
+
+/*!
+  \brief Adds preferences for dfont of VTK viewer
+  \param label label
+  \param pIf group identifier
+  \param param parameter
+  \return identifier of preferences
+*/
+int SMESHGUI::addVtkFontPref( const QString& label, const int pId, const QString& param )
+{
+  int tfont = addPreference( label, pId, LightApp_Preferences::Font, "VISU", param );
+  
+  setPreferenceProperty( tfont, "mode", QtxFontEdit::Custom );
+
+  QStringList fam;
+  fam.append( tr( "SMESH_FONT_ARIAL" ) );
+  fam.append( tr( "SMESH_FONT_COURIER" ) );
+  fam.append( tr( "SMESH_FONT_TIMES" ) );
+
+  setPreferenceProperty( tfont, "fonts", fam );
+
+  int f = QtxFontEdit::Family | QtxFontEdit::Bold | QtxFontEdit::Italic | QtxFontEdit::Shadow;
+  setPreferenceProperty( tfont, "features", f );
+
+  return tfont;
+}
+
+
+
+
+
+

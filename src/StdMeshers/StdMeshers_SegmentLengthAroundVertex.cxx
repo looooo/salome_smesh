@@ -22,8 +22,7 @@
 //  SMESH SMESH : implementaion of SMESH idl descriptions
 //  File   : StdMeshers_SegmentLengthAroundVertex.cxx
 //  Module : SMESH
-//  $Header$
-//
+
 #include "StdMeshers_SegmentLengthAroundVertex.hxx"
 
 #include "SMESH_Mesh.hxx"
@@ -201,3 +200,17 @@ bool StdMeshers_SegmentLengthAroundVertex::SetParametersByMesh(const SMESH_Mesh*
 
   return nbSegs;
 }
+
+//================================================================================
+/*!
+ * \brief Initialize my parameter values by linear size of mesh element.
+ *  \retval bool - true if parameter values have been successfully defined
+ */
+//================================================================================
+
+bool StdMeshers_SegmentLengthAroundVertex::SetParametersByElementSize(double,
+                                                                      const SMESH_Mesh*)
+{
+  return false;
+}
+

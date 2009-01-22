@@ -23,8 +23,8 @@
 //  File   : SMESH_Gen.hxx
 //  Author : Paul RASCLE, EDF
 //  Module : SMESH
-//  $Header$
 //
+
 #ifndef _SMESH_GEN_HXX_
 #define _SMESH_GEN_HXX_
 
@@ -44,6 +44,7 @@
 #include <TopoDS_Shape.hxx>
 
 #include <map>
+#include <list>
 
 class SMESHDS_Document;
 
@@ -55,6 +56,8 @@ typedef struct studyContextStruct
   std::map < int, SMESH_Mesh * >mapMesh;
   SMESHDS_Document * myDocument;
 } StudyContextStruct;
+
+typedef std::set<int> TSetOfInt;
 
 class SMESH_EXPORT  SMESH_Gen
 {
@@ -68,16 +71,26 @@ class SMESH_EXPORT  SMESH_Gen
   /*!
    * \brief Computes aMesh on aShape 
    *  \param anUpward - compute from vertices up to more complex shape (internal usage)
+   *  \param aDim - upper level dimension of the mesh computation
+   *  \param aShapesId - list of shapes with computed mesh entities (elements or nodes)
    *  \retval bool - true if none submesh failed to compute
    */
-  bool Compute(::SMESH_Mesh &       aMesh,
-               const TopoDS_Shape & aShape,
-               const bool           anUpward=false);
+  bool Compute(::SMESH_Mesh &        aMesh,
+               const TopoDS_Shape &  aShape,
+               const bool            anUpward=false,
+	       const ::MeshDimension aDim=::MeshDim_3D,
+	       TSetOfInt*            aShapesId=0);
 
   bool CheckAlgoState(SMESH_Mesh& aMesh, const TopoDS_Shape& aShape);
   // notify on bad state of attached algos, return false
   // if Compute() would fail because of some algo bad state
 
+  /*!
+   * \brief Sets number of segments per diagonal of boundary box of geometry by which
+   *        default segment length of appropriate 1D hypotheses is defined
+   */
+  void SetBoundaryBoxSegmentation( int theNbSegments ) { _segmentation = theNbSegments; }
+  int  GetBoundaryBoxSegmentation() const { return _segmentation; }
   
   struct TAlgoStateError
   {
@@ -109,13 +122,13 @@ class SMESH_EXPORT  SMESH_Gen
 
   // inherited methods from SALOMEDS::Driver
 
-  void Save(int studyId, const char *aUrlOfFile);
-  void Load(int studyId, const char *aUrlOfFile);
-  void Close(int studyId);
-  const char *ComponentDataType();
+//   void Save(int studyId, const char *aUrlOfFile);
+//   void Load(int studyId, const char *aUrlOfFile);
+//   void Close(int studyId);
+//   const char *ComponentDataType();
 
-  const char *IORToLocalPersistentID(const char *IORString, bool & IsAFile);
-  const char *LocalPersistentIDToIOR(const char *aLocalPersistentID);
+//   const char *IORToLocalPersistentID(const char *IORString, bool & IsAFile);
+//   const char *LocalPersistentIDToIOR(const char *aLocalPersistentID);
 
   int GetANewId();
 
@@ -132,6 +145,10 @@ class SMESH_EXPORT  SMESH_Gen
 
   // hypotheses managing
   int _hypId;
+
+  // number of segments per diagonal of boundary box of geometry by which
+  // default segment length of appropriate 1D hypotheses is defined
+  int _segmentation;
 };
 
 #endif

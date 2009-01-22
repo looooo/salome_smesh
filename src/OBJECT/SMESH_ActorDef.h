@@ -23,8 +23,8 @@
 //  File   : SMESH_ActorDef.h
 //  Author : Nicolas REJNERI
 //  Module : SMESH
-//  $Header$
 //
+
 #ifndef SMESH_ACTORDEF_H
 #define SMESH_ACTORDEF_H
 
@@ -215,9 +215,14 @@ class SMESH_ActorDef : public SMESH_Actor
   SMESH_DeviceActor* myHighlitableActor;
 
   eControl myControlMode;
+  vtkProperty* my2DExtProp;
   SMESH_DeviceActor* my2DActor;
+  SMESH_DeviceActor* my2DExtActor;
   SMESH_DeviceActor* my3DActor;
   SMESH_DeviceActor* myControlActor;
+
+  vtkProperty* myNodeExtProp;
+  SMESH_DeviceActor* myNodeExtActor;
 
   vtkProperty* my1DProp;
   SMESH_DeviceActor* my1DActor;

@@ -23,7 +23,6 @@
 //  File   : StdMeshers_AutomaticLength.cxx
 //  Author : Edward AGAPOV, OCC
 //  Module : SMESH
-//  $Header$
 //
 #include "StdMeshers_AutomaticLength.hxx"
 
@@ -367,3 +366,37 @@ bool StdMeshers_AutomaticLength::SetParametersByMesh(const SMESH_Mesh*   theMesh
 
   return nbEdges;
 }
+
+//================================================================================
+/*!
+ * \brief Initialize my parameter values by linear size of mesh element.
+ *  \retval bool - true if parameter values have been successfully defined
+ */
+//================================================================================
+
+bool StdMeshers_AutomaticLength::SetParametersByElementSize(double            elemLenght,
+                                                            const SMESH_Mesh* theMesh)
+{
+  return false;
+
+  // assure the base automatic length is stored in _TShapeToLength
+//   GetLength( theMesh, elemLenght );
+
+//   // find maximal edge length
+//   double maxLen = 0;
+//   map<const TopoDS_TShape*, double>::iterator
+//     tshape_length = _TShapeToLength.begin(), slEnd = _TShapeToLength.end();
+//   for ( ; tshape_length != slEnd; ++tshape_length )
+//     if ( tshape_length->second > maxLen )
+//       maxLen = tshape_length->second;
+
+//   // automatic length for longest element
+//   double autoLen = GetLength( theMesh, maxLen );
+
+//   // elemLenght = autoLen / (theCoarseConst + theFineConst * _fineness) -->
+//   _fineness = ( autoLen / elemLenght - theCoarseConst ) / theFineConst;
+
+//   return true;
+}
+
+

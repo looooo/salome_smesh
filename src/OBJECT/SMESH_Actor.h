@@ -23,8 +23,7 @@
 //  File   : SMESH_Actor.h
 //  Author : Nicolas REJNERI
 //  Module : SMESH
-//  $Header$
-//
+
 #ifndef SMESH_ACTOR_H
 #define SMESH_ACTOR_H
 
@@ -95,9 +94,9 @@ class SMESHOBJECT_EXPORT SMESH_Actor: public SALOME_Actor
   virtual void SetFacesOriented(bool theIsFacesOriented) = 0;
   virtual bool GetFacesOriented() = 0;
 
-  enum eControl{eNone, eLength, eLength2D, eFreeBorders, eFreeEdges, eMultiConnection, 
-		eArea, eTaper, eAspectRatio, eMinimumAngle, eWarping, eSkew,
-		eAspectRatio3D, eMultiConnection2D, eVolume3D};
+  enum eControl{eNone, eLength, eLength2D, eFreeBorders, eFreeEdges, eFreeNodes,
+                eFreeFaces, eMultiConnection, eArea, eTaper, eAspectRatio,
+                eMinimumAngle, eWarping, eSkew,	eAspectRatio3D, eMultiConnection2D, eVolume3D};
   virtual void SetControlMode(eControl theMode) = 0;
   virtual eControl GetControlMode() = 0;
 

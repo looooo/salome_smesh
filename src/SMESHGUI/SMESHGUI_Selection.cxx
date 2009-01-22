@@ -116,6 +116,7 @@ QVariant SMESHGUI_Selection::parameter( const int ind, const QString& p ) const
   else if ( p=="hasReference" )  val = QVariant( hasReference( ind ) );
   else if ( p=="isImported" )    val = QVariant( isImported( ind ) );
   else if ( p=="facesOrientationMode" ) val = QVariant( facesOrientationMode( ind ) );
+  else if ( p=="groupType" )     val = QVariant( groupType( ind ) );
 
   if( val.isValid() )
     return val;
@@ -239,6 +240,7 @@ QString SMESHGUI_Selection::controlMode( int ind ) const
     case SMESH_Actor::eLength2D:          return "eLength2D";
     case SMESH_Actor::eFreeEdges:         return "eFreeEdges";
     case SMESH_Actor::eFreeBorders:       return "eFreeBorders";
+    case SMESH_Actor::eFreeFaces:         return "eFreeFaces";
     case SMESH_Actor::eMultiConnection:   return "eMultiConnection";
     case SMESH_Actor::eMultiConnection2D: return "eMultiConnection2D";
     case SMESH_Actor::eArea:              return "eArea";
@@ -522,4 +524,28 @@ bool SMESHGUI_Selection::isImported( const int ind ) const
   }
   */
   return res;
+}
+
+//=======================================================================
+//function : groupType
+//purpose  : 
+//=======================================================================
+
+QString SMESHGUI_Selection::groupType( int ind ) const
+{
+  QString e = entry( ind );
+  _PTR(SObject) SO = SMESH::GetActiveStudyDocument()->FindObjectID( e.toLatin1().constData() );
+  QString type;
+  if( SO )
+  {
+    CORBA::Object_var obj = SMESH::SObjectToObject( SO );
+  
+    SMESH::SMESH_Group_var aGroup = SMESH::SMESH_Group::_narrow( obj );
+    SMESH::SMESH_GroupOnGeom_var aGroupOnGeom = SMESH::SMESH_GroupOnGeom::_narrow( obj );
+    if( !aGroup->_is_nil() )
+      type = QString( "Group" );
+    else if ( !aGroupOnGeom->_is_nil() )
+      type = QString( "GroupOnGeom" );
+  }
+  return type;
 }

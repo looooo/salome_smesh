@@ -38,6 +38,7 @@
 #include <TopoDS_Face.hxx>
 #include <TopTools_MapOfShape.hxx>
 #include <BRepClass3d_SolidClassifier.hxx>
+#include <Quantity_Color.hxx>
 
 #include "SMDSAbs_ElementType.hxx"
 #include "SMDS_MeshNode.hxx"
@@ -382,7 +383,23 @@ namespace SMESH{
       const SMDS_Mesh* myMesh;
     };
     typedef boost::shared_ptr<FreeEdges> FreeEdgesPtr;
+    
+    
+    /*
+      Class       : FreeNodes
+      Description : Predicate for free nodes
+    */
+    class SMESHCONTROLS_EXPORT FreeNodes: public virtual Predicate{
+    public:
+      FreeNodes();
+      virtual void SetMesh( const SMDS_Mesh* theMesh );
+      virtual bool IsSatisfy( long theNodeId );
+      virtual SMDSAbs_ElementType GetType() const;
 
+    protected:
+      const SMDS_Mesh* myMesh;
+    };
+    
 
     /*
       Class       : RangeOfIds
@@ -695,6 +712,83 @@ namespace SMESH{
 
     typedef boost::shared_ptr<ElementsOnShape> ElementsOnShapePtr;
 
+
+    /*
+      Class       : FreeFaces
+      Description : Predicate for free faces
+    */
+    class SMESHCONTROLS_EXPORT FreeFaces: public virtual Predicate{
+    public:
+      FreeFaces();
+      virtual void SetMesh( const SMDS_Mesh* theMesh );
+      virtual bool IsSatisfy( long theElementId );
+      virtual SMDSAbs_ElementType GetType() const;
+
+    private:
+      const SMDS_Mesh* myMesh;
+    };
+
+    /*
+      Class       : LinearOrQuadratic
+      Description : Predicate for free faces
+    */
+    class SMESHCONTROLS_EXPORT LinearOrQuadratic: public virtual Predicate{
+    public:
+      LinearOrQuadratic();
+      virtual void        SetMesh( const SMDS_Mesh* theMesh );
+      virtual bool        IsSatisfy( long theElementId );
+      void                SetType( SMDSAbs_ElementType theType );
+      virtual SMDSAbs_ElementType GetType() const;
+
+    private:
+      const SMDS_Mesh*    myMesh;
+      SMDSAbs_ElementType myType;
+    };
+    typedef boost::shared_ptr<LinearOrQuadratic> LinearOrQuadraticPtr;
+
+    /*
+      Class       : GroupColor
+      Description : Functor for check color of group to whic mesh element belongs to
+    */
+    class SMESHCONTROLS_EXPORT GroupColor: public virtual Predicate{
+    public:
+      GroupColor();
+      virtual void        SetMesh( const SMDS_Mesh* theMesh );
+      virtual bool        IsSatisfy( long theElementId );
+      void                SetType( SMDSAbs_ElementType theType );
+      virtual             SMDSAbs_ElementType GetType() const;
+      void                SetColorStr( const TCollection_AsciiString& );
+      void                GetColorStr( TCollection_AsciiString& ) const;
+      
+    private:
+      typedef std::set< long > TIDs;
+
+      Quantity_Color      myColor;
+      SMDSAbs_ElementType myType;
+      TIDs                myIDs;
+    };
+    typedef boost::shared_ptr<GroupColor> GroupColorPtr;
+
+    /*
+      Class       : ElemGeomType
+      Description : Predicate to check element geometry type
+    */
+    class SMESHCONTROLS_EXPORT ElemGeomType: public virtual Predicate{
+    public:
+      ElemGeomType();
+      virtual void        SetMesh( const SMDS_Mesh* theMesh );
+      virtual bool        IsSatisfy( long theElementId );
+      void                SetType( SMDSAbs_ElementType theType );
+      virtual             SMDSAbs_ElementType GetType() const;
+      void                SetGeomType( SMDSAbs_GeometryType theType );
+      virtual SMDSAbs_GeometryType GetGeomType() const;
+
+    private:
+      const SMDS_Mesh*     myMesh;
+      SMDSAbs_ElementType  myType;
+      SMDSAbs_GeometryType myGeomType;
+    };
+    typedef boost::shared_ptr<ElemGeomType> ElemGeomTypePtr;
 
     /*
       FILTER

@@ -22,8 +22,7 @@
 //  SMESH StdMeshers_StartEndLength : implementaion of SMESH idl descriptions
 //  File   : StdMeshers_StartEndLength.cxx
 //  Module : SMESH
-//  $Header$
-//
+
 #include "StdMeshers_StartEndLength.hxx"
 
 #include "SMESH_Algo.hxx"
@@ -197,3 +196,17 @@ bool StdMeshers_StartEndLength::SetParametersByMesh(const SMESH_Mesh*   theMesh,
   }
   return nbEdges;
 }
+
+//================================================================================
+/*!
+ * \brief Initialize my parameter values by linear size of mesh element.
+ *  \retval bool - true if parameter values have been successfully defined
+ */
+//================================================================================
+
+bool StdMeshers_StartEndLength::SetParametersByElementSize(double            elemLenght,
+                                                           const SMESH_Mesh* /*theMesh*/)
+{
+  return bool(_begLength = _endLength = elemLenght );
+}
+

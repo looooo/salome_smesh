@@ -23,7 +23,6 @@
 //  File   : StdMeshers_NotConformAllowed.cxx
 //  Author : Paul RASCLE, EDF
 //  Module : SMESH
-//  $Header$
 //
 #include "StdMeshers_NotConformAllowed.hxx"
 #include "utilities.h"
@@ -110,5 +109,18 @@ istream & operator >> (istream & load, StdMeshers_NotConformAllowed & hyp)
 bool StdMeshers_NotConformAllowed::SetParametersByMesh(const SMESH_Mesh* /*theMesh*/,
                                                        const TopoDS_Shape& /*theShape*/)
 {
-  return false;
+  return true;
 }
+//================================================================================
+/*!
+ * \brief Initialize my parameter values by linear size of mesh element.
+ *  \retval bool - true if parameter values have been successfully defined
+ */
+//================================================================================
+
+bool StdMeshers_NotConformAllowed::SetParametersByElementSize(double            /*elemLenght*/,
+                                                              const SMESH_Mesh* /*theMesh*/)
+{
+  return true;
+}
+

@@ -50,6 +50,10 @@
             <translation>mesh_hypo_length.png</translation>
         </message>
         <message>
+            <source>ICON_DLG_MAX_LENGTH</source>
+            <translation>mesh_hypo_length.png</translation>
+        </message>
+        <message>
             <source>ICON_DLG_MAX_ELEMENT_AREA</source>
             <translation>mesh_hypo_area.png</translation>
         </message>
@@ -151,6 +155,10 @@
         </message>
         <message>
             <source>ICON_SMESH_TREE_HYPO_LocalLength</source>
+            <translation>mesh_tree_hypo_length.png</translation>
+        </message>
+        <message>
+            <source>ICON_SMESH_TREE_HYPO_MaxLength</source>
             <translation>mesh_tree_hypo_length.png</translation>
         </message>
         <message>

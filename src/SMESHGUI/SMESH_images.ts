@@ -58,6 +58,10 @@
             <translation>mesh_compute.png</translation>
         </message>
         <message>
+            <source>ICON_PRECOMPUTE</source>
+            <translation>mesh_precompute.png</translation>
+        </message>
+        <message>
             <source>ICON_CONNECTION</source>
             <translation>mesh_multi_edges.png</translation>
         </message>
@@ -237,9 +241,17 @@
             <source>ICON_FREE_EDGE</source>
             <translation>mesh_free_edges.png</translation>
         </message>
-        <message>
+	<message>
             <source>ICON_FREE_EDGE_2D</source>
             <translation>mesh_free_edges_2d.png</translation>
+        </message>
+	<message>
+            <source>ICON_FREE_NODE</source>
+            <translation>mesh_free_nodes.png</translation>
+        </message>
+        <message>
+            <source>ICON_FREE_FACES</source>
+            <translation>mesh_free_faces.png</translation>
         </message>
         <message>
             <source>ICON_HYPO</source>
@@ -424,6 +436,10 @@
         <message>
             <source>ICON_CLEAR_MESH</source>
             <translation>mesh_clear.png</translation>
+        </message>
+        <message>
+            <source>ICON_UNDERLYING_ELEMS</source>
+            <translation>mesh_extractGroup.png</translation>
         </message>
     </context>
 </TS>

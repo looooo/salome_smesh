@@ -22,8 +22,7 @@
 //  SMESH StdMeshers_QuadraticMesh : implementaion of SMESH idl descriptions
 //  File   : StdMeshers_QuadraticMesh.cxx
 //  Module : SMESH
-//  $Header$
-//
+
 #include "StdMeshers_QuadraticMesh.hxx"
 #include "utilities.h"
 
@@ -108,3 +107,17 @@ bool StdMeshers_QuadraticMesh::SetParametersByMesh(const SMESH_Mesh*, const Topo
 {
   return false;
 }
+
+//================================================================================
+/*!
+ * \brief Initialize my parameter values by linear size of mesh element.
+ *  \retval bool - true if parameter values have been successfully defined
+ */
+//================================================================================
+
+bool StdMeshers_QuadraticMesh::SetParametersByElementSize(double            /*elemLenght*/,
+                                                          const SMESH_Mesh* /*theMesh*/)
+{
+  return false;
+}
+

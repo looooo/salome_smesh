@@ -24,7 +24,6 @@
 //           Moved here from SMESH_LengthFromEdges.cxx
 //  Author : Paul RASCLE, EDF
 //  Module : SMESH
-//  $Header$
 //
 #include "StdMeshers_LengthFromEdges.hxx"
 
@@ -151,4 +150,16 @@ bool StdMeshers_LengthFromEdges::SetParametersByMesh(const SMESH_Mesh* /*theMesh
                                                      const TopoDS_Shape& /*theShape*/)
 {
   return false;
+}
+//================================================================================
+/*!
+ * \brief Initialize my parameter values by linear size of mesh element.
+ *  \retval bool - true if parameter values have been successfully defined
+ */
+//================================================================================
+
+bool StdMeshers_LengthFromEdges::SetParametersByElementSize(double            /*elemLenght*/,
+                                                            const SMESH_Mesh* /*theMesh*/)
+{
+  return true;
 }

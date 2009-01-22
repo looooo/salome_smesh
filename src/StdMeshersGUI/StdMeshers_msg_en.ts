@@ -150,6 +150,18 @@
             <translation>Hypothesis Construction</translation>
         </message>
         <message>
+            <source>SMESH_MAX_LENGTH_HYPOTHESIS</source>
+            <translation>Max Length</translation>
+        </message>
+        <message>
+            <source>SMESH_USE_PREESTIMATED_LENGTH</source>
+            <translation>Use preestimated length</translation>
+        </message>
+        <message>
+            <source>SMESH_MAX_LENGTH_TITLE</source>
+            <translation>Hypothesis Construction</translation>
+        </message>
+        <message>
             <source>SMESH_MAX_ELEMENT_AREA_HYPOTHESIS</source>
             <translation>Max. Element Area</translation>
         </message>

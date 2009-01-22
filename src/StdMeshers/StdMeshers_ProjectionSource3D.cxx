@@ -23,8 +23,7 @@
 //  File   : StdMeshers_ProjectionSource3D.cxx
 //  Author : Edward AGAPOV
 //  Module : SMESH
-//  $Header$
-//
+
 #include "StdMeshers_ProjectionSource3D.hxx"
 
 #include "utilities.h"
@@ -296,3 +295,17 @@ void StdMeshers_ProjectionSource3D::RestoreParams(const TopoDS_Shape& s1,
   _targetVertex2 = TopoDS::Vertex( s5 );
   _sourceMesh   = mesh;
 }
+
+//================================================================================
+/*!
+ * \brief Initialize my parameter values by linear size of mesh element.
+ *  \retval bool - true if parameter values have been successfully defined
+ */
+//================================================================================
+
+bool StdMeshers_ProjectionSource3D::SetParametersByElementSize(double            /*elemLenght*/,
+                                                               const SMESH_Mesh* /*theMesh*/)
+{
+  return false;
+}
+

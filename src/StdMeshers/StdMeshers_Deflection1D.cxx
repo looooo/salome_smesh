@@ -22,7 +22,6 @@
 //  SMESH StdMeshers_Deflection1D : implementaion of SMESH idl descriptions
 //  File   : StdMeshers_Deflection1D.cxx
 //  Module : SMESH
-//  $Header$
 //
 #include "StdMeshers_Deflection1D.hxx"
 #include "utilities.h"
@@ -220,4 +219,17 @@ bool StdMeshers_Deflection1D::SetParametersByMesh(const SMESH_Mesh*   theMesh,
       nbEdges++;
   }
   return nbEdges;
+}
+
+//================================================================================
+/*!
+ * \brief Initialize my parameter values by linear size of mesh element.
+ *  \retval bool - true if parameter values have been successfully defined
+ */
+//================================================================================
+
+bool StdMeshers_Deflection1D::SetParametersByElementSize(double            /*elemLenght*/,
+                                                         const SMESH_Mesh* /*theMesh*/)
+{
+  return false;
 }

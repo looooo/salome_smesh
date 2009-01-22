@@ -52,6 +52,7 @@ class SMESHGUI;
 class SMESH_Actor;
 class SMESHGUI_IdValidator;
 class SMESHGUI_SpinBox;
+class SMESHGUI_FilterDlg;
 class SVTK_Selector;
 class LightApp_SelectionMgr;
 class SUIT_SelectionFilter;
@@ -77,7 +78,7 @@ private:
   SMESHGUI*                        mySMESHGUI;            /* Current SMESHGUI object */
   SMESHGUI_IdValidator*            myIdValidator;
   LightApp_SelectionMgr*           mySelectionMgr;        /* User shape selection */
-  QLineEdit*                       myEditCurrentArgument; /* Current  LineEdit */
+  QWidget*                         myEditCurrentArgument; /* Current  argument editor */
   int                              myNbOkElements;        /* to check when elements are defined */
   SVTK_Selector*                   mySelector;
 
@@ -100,12 +101,20 @@ private:
   QLineEdit*                       LineEditElements;
   QCheckBox*                       CheckBoxMesh;
   QLabel*                          TextLabelVector;
+  QLabel*                          TextLabelDistance;
+  QPushButton*                     SelectVectorButton;
   QLabel*                          TextLabelDx;
   SMESHGUI_SpinBox*                SpinBox_Dx;
   QLabel*                          TextLabelDy;
   SMESHGUI_SpinBox*                SpinBox_Dy;
   QLabel*                          TextLabelDz;
   SMESHGUI_SpinBox*                SpinBox_Dz;
+  QLabel*                          TextLabelVx;
+  SMESHGUI_SpinBox*                SpinBox_Vx;
+  QLabel*                          TextLabelVy;
+  SMESHGUI_SpinBox*                SpinBox_Vy;
+  QLabel*                          TextLabelVz;
+  SMESHGUI_SpinBox*                SpinBox_Vz;
   QLabel*                          TextLabelNbSteps;
   QSpinBox*                        SpinBox_NbSteps;
   QCheckBox*                       MakeGroupsCheck;
@@ -118,6 +127,8 @@ private:
 
   QString                          myHelpFileName;
 
+  SMESHGUI_FilterDlg*              myFilterDlg;
+   
 private slots:
   void                            ConstructorsClicked( int );
   void                            CheckIsEnable();
@@ -131,6 +142,7 @@ private slots:
   void                            ActivateThisDialog();
   void                            onTextChange( const QString& );
   void                            onSelectMesh( bool );
+  void                            setFilters();
 };
 
 #endif // SMESHGUI_EXTRUSIONDLG_H

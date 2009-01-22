@@ -23,11 +23,11 @@
 //  File   : StdMeshers_NumberOfLayers.cxx
 //  Author : Edward AGAPOV
 //  Module : SMESH
-//  $Header$
 //
 #include "StdMeshers_NumberOfLayers.hxx"
 
 
+#include "SMESH_Mesh.hxx"
 #include "utilities.h"
 
 using namespace std;
@@ -159,3 +159,17 @@ bool StdMeshers_NumberOfLayers::SetParametersByMesh(const SMESH_Mesh*   ,
 {
   return false;
 }
+
+//================================================================================
+/*!
+ * \brief Initialize my parameter values by linear size of mesh element.
+ *  \retval bool - true if parameter values have been successfully defined
+ */
+//================================================================================
+
+bool StdMeshers_NumberOfLayers::SetParametersByElementSize(double            elemLenght,
+                                                           const SMESH_Mesh* theMesh)
+{
+  return bool( theMesh ? _nbLayers = int( theMesh->GetShapeDiagonalSize() / elemLenght/ 2.) : 0);
+}
+

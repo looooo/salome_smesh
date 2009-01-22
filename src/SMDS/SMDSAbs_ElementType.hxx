@@ -39,6 +39,26 @@ enum SMDSAbs_ElementType
         SMDSAbs_NbElementTypes
 };
 
+/*! enumeration for element geometry type */
+enum SMDSAbs_GeometryType
+{
+  // 0D element
+  SMDSGeom_POINT,
+  // 1D element
+  SMDSGeom_EDGE,
+  // 2D element
+  SMDSGeom_TRIANGLE,
+  SMDSGeom_QUADRANGLE,
+  SMDSGeom_POLYGON,
+  // 3D element
+  SMDSGeom_TETRA,
+  SMDSGeom_PYRAMID,
+  SMDSGeom_PENTA,
+  SMDSGeom_HEXA,
+  SMDSGeom_POLYHEDRA,
+};
+
+
 enum SMDSAbs_ElementOrder {
   ORDER_ANY,          /*! entities of any order */
   ORDER_LINEAR,       /*! entities of 1st order */

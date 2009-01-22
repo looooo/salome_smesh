@@ -22,8 +22,8 @@
 //  SMESH StdMeshers : implementaion of SMESH idl descriptions
 //  File   : StdMeshers_Deflection1D.hxx
 //  Module : SMESH
-//  $Header$
 //
+
 #ifndef _StdMeshers_Deflection1D_HXX_
 #define _StdMeshers_Deflection1D_HXX_
 
@@ -55,7 +55,13 @@ class STDMESHERS_EXPORT StdMeshers_Deflection1D:public SMESH_Hypothesis
    */
   virtual bool SetParametersByMesh(const SMESH_Mesh* theMesh, const TopoDS_Shape& theShape);
 
- protected:
+  /*!
+   * \brief Initialize my parameter values by linear size of mesh element.
+   *  \retval bool - true if parameter values have been successfully defined
+   */
+  virtual bool SetParametersByElementSize( double elemLenght, const SMESH_Mesh* theMesh=0);
+
+protected:
   double _value;
 };
 

@@ -22,8 +22,7 @@
 //  SMESH StdMeshers_TrianglePreference 
 //  File   : StdMeshers_TrianglePreference.cxx
 //  Module : SMESH
-//  $Header$
-//
+
 #include "StdMeshers_TrianglePreference.hxx"
 #include "utilities.h"
 
@@ -113,3 +112,17 @@ bool StdMeshers_TrianglePreference::SetParametersByMesh(const SMESH_Mesh* /*theM
 {
   return false;
 }
+
+//================================================================================
+/*!
+ * \brief Initialize my parameter values by linear size of mesh element.
+ *  \retval bool - true if parameter values have been successfully defined
+ */
+//================================================================================
+
+bool StdMeshers_TrianglePreference::SetParametersByElementSize(double            /*elemLenght*/,
+                                                               const SMESH_Mesh* /*theMesh*/)
+{
+  return false;
+}
+

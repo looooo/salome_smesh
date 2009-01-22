@@ -46,6 +46,7 @@ class QCheckBox;
 class SMESHGUI;
 class SMESHGUI_IdValidator;
 class SMESHGUI_SpinBox;
+class SMESHGUI_FilterDlg;
 class SMESH_Actor;
 class SVTK_Selector;
 class LightApp_SelectionMgr;
@@ -124,6 +125,8 @@ private:
   QLineEdit*             LineEditNewMesh;
 
   QString                myHelpFileName;
+
+  SMESHGUI_FilterDlg*    myFilterDlg;
    
 private slots:
   void                   ConstructorsClicked( int );
@@ -138,6 +141,7 @@ private slots:
   void                   onTextChange( const QString& );
   void                   onSelectMesh( bool );
   void                   onActionClicked( int );
+  void                   setFilters();
 };
 
 #endif // SMESHGUI_TRANSLATIONDLG_H

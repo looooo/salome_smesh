@@ -23,7 +23,6 @@
 //  File   : StdMeshers_Arithmetic1D.cxx
 //  Author : Damien COQUERET, OCC
 //  Module : SMESH
-//  $Header$
 //
 #include "StdMeshers_Arithmetic1D.hxx"
 
@@ -196,3 +195,17 @@ bool StdMeshers_Arithmetic1D::SetParametersByMesh(const SMESH_Mesh*   theMesh,
   }
   return nbEdges;
 }
+
+//================================================================================
+/*!
+ * \brief Initialize my parameter values by linear size of mesh element.
+ *  \retval bool - true if parameter values have been successfully defined
+ */
+//================================================================================
+
+bool StdMeshers_Arithmetic1D::SetParametersByElementSize(double            elemLenght,
+                                                         const SMESH_Mesh* /*mesh*/)
+{
+  return bool( _begLength = _endLength = elemLenght );
+}
+

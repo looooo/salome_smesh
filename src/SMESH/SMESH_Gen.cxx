@@ -23,8 +23,7 @@
 //  File   : SMESH_Gen.cxx
 //  Author : Paul RASCLE, EDF
 //  Module : SMESH
-//  $Header$
-//
+
 #include "SMESH_Gen.hxx"
 #include "SMESH_subMesh.hxx"
 #include "SMESH_HypoFilter.hxx"
@@ -54,6 +53,7 @@ SMESH_Gen::SMESH_Gen()
 	MESSAGE("SMESH_Gen::SMESH_Gen");
 	_localId = 0;
 	_hypId = 0;
+        _segmentation = 10;
 }
 
 //=============================================================================
@@ -128,9 +128,11 @@ SMESH_Mesh* SMESH_Gen::CreateMesh(int theStudyId, bool theIsEmbeddedMode)
  */
 //=============================================================================
 
-bool SMESH_Gen::Compute(SMESH_Mesh &         aMesh,
-                        const TopoDS_Shape & aShape,
-                        const bool           anUpward)
+bool SMESH_Gen::Compute(SMESH_Mesh &          aMesh,
+                        const TopoDS_Shape &  aShape,
+                        const bool            anUpward,
+			const ::MeshDimension aDim,
+			TSetOfInt*            aShapesId)
 {
   MESSAGE("SMESH_Gen::Compute");
 
@@ -154,9 +156,18 @@ bool SMESH_Gen::Compute(SMESH_Mesh &         aMesh,
       SMESH_subMesh* smToCompute = smIt->next();
 
       // do not mesh vertices of a pseudo shape
-      if ( !aMesh.HasShapeToMesh() &&
-           smToCompute->GetSubShape().ShapeType() == TopAbs_VERTEX )
+      const TopAbs_ShapeEnum aShType = smToCompute->GetSubShape().ShapeType();
+      if ( !aMesh.HasShapeToMesh() && aShType == TopAbs_VERTEX )
         continue;
+
+      // check for preview dimension limitations
+      if ( aShapesId && GetShapeDim( aShType ) > (int)aDim )
+      {
+        // clear compute state to not show previous compute errors
+        //  if preview invoked less dimension less than previous
+        smToCompute->ComputeStateEngine( SMESH_subMesh::CHECK_COMPUTE_STATE );
+	continue;
+      }
 
       if (smToCompute->GetComputeState() == SMESH_subMesh::READY_TO_COMPUTE)
         smToCompute->ComputeStateEngine( SMESH_subMesh::COMPUTE );
@@ -164,6 +175,8 @@ bool SMESH_Gen::Compute(SMESH_Mesh &         aMesh,
       // we check all the submeshes here and detect if any of them failed to compute
       if (smToCompute->GetComputeState() == SMESH_subMesh::FAILED_TO_COMPUTE)
         ret = false;
+      else if ( aShapesId )
+	aShapesId->insert( smToCompute->GetId() );
     }
     return ret;
   }
@@ -183,7 +196,12 @@ bool SMESH_Gen::Compute(SMESH_Mesh &         aMesh,
         continue;
 
       const TopoDS_Shape& aSubShape = smToCompute->GetSubShape();
-      if ( GetShapeDim( aSubShape ) < 1 ) break;
+      const int aShapeDim = GetShapeDim( aSubShape );
+      if ( aShapeDim < 1 ) break;
+      
+      // check for preview dimension limitations
+      if ( aShapesId && aShapeDim > (int)aDim )
+	continue;
 
       SMESH_Algo* algo = GetAlgo( aMesh, aSubShape );
       if ( algo && !algo->NeedDescretBoundary() )
@@ -191,7 +209,11 @@ bool SMESH_Gen::Compute(SMESH_Mesh &         aMesh,
         if ( algo->SupportSubmeshes() )
           smWithAlgoSupportingSubmeshes.push_back( smToCompute );
         else
+	{
           smToCompute->ComputeStateEngine( SMESH_subMesh::COMPUTE );
+	  if ( aShapesId )
+	    aShapesId->insert( smToCompute->GetId() );
+	}
       }
     }
     // ------------------------------------------------------------
@@ -218,8 +240,14 @@ bool SMESH_Gen::Compute(SMESH_Mesh &         aMesh,
         SMESH_subMesh* smToCompute = smIt->next();
 
         const TopoDS_Shape& aSubShape = smToCompute->GetSubShape();
-        if ( aSubShape.ShapeType() == TopAbs_VERTEX ) continue;
+	const int aShapeDim = GetShapeDim( aSubShape );
+        //if ( aSubShape.ShapeType() == TopAbs_VERTEX ) continue;
+	if ( aShapeDim < 1 ) continue;
 
+	// check for preview dimension limitations
+	if ( aShapesId && GetShapeDim( aSubShape.ShapeType() ) > (int)aDim )
+	  continue;
+	
         SMESH_HypoFilter filter( SMESH_HypoFilter::IsAlgo() );
         filter
           .And( SMESH_HypoFilter::IsApplicableTo( aSubShape ))
@@ -228,8 +256,8 @@ bool SMESH_Gen::Compute(SMESH_Mesh &         aMesh,
         if ( SMESH_Algo* subAlgo = (SMESH_Algo*) aMesh.GetHypothesis( aSubShape, filter, true )) {
           SMESH_Hypothesis::Hypothesis_Status status;
           if ( subAlgo->CheckHypothesis( aMesh, aSubShape, status ))
-            // mesh a lower smToCompute
-            Compute( aMesh, aSubShape );
+            // mesh a lower smToCompute starting from vertices
+            Compute( aMesh, aSubShape, /*anUpward=*/true, aDim, aShapesId );
         }
       }
     }
@@ -238,12 +266,21 @@ bool SMESH_Gen::Compute(SMESH_Mesh &         aMesh,
     // ----------------------------------------------------------
     for ( subIt = smWithAlgoSupportingSubmeshes.rbegin(); subIt != subEnd; ++subIt )
       if ( sm->GetComputeState() == SMESH_subMesh::READY_TO_COMPUTE)
+      {
+	const TopAbs_ShapeEnum aShType = sm->GetSubShape().ShapeType();
+	// check for preview dimension limitations
+	if ( aShapesId && GetShapeDim( aShType ) > (int)aDim )
+	  continue;
+
         sm->ComputeStateEngine( SMESH_subMesh::COMPUTE );
+	if ( aShapesId )
+	  aShapesId->insert( sm->GetId() );
+      }
 
     // -----------------------------------------------
     // mesh the rest subshapes starting from vertices
     // -----------------------------------------------
-    ret = Compute( aMesh, aShape, /*anUpward=*/true );
+    ret = Compute( aMesh, aShape, /*anUpward=*/true, aDim, aShapesId );
   }
 
   MESSAGE( "VSR - SMESH_Gen::Compute() finished, OK = " << ret);
@@ -665,35 +702,35 @@ StudyContextStruct *SMESH_Gen::GetStudyContext(int studyId)
 	return myStudyContext;
 }
 
-//=============================================================================
-/*!
- *
- */
-//=============================================================================
+// //=============================================================================
+// /*!
+//  *
+//  */
+// //=============================================================================
 
-void SMESH_Gen::Save(int studyId, const char *aUrlOfFile)
-{
-}
+// void SMESH_Gen::Save(int studyId, const char *aUrlOfFile)
+// {
+// }
 
-//=============================================================================
-/*!
- *
- */
-//=============================================================================
+// //=============================================================================
+// /*!
+//  *
+//  */
+// //=============================================================================
 
-void SMESH_Gen::Load(int studyId, const char *aUrlOfFile)
-{
-}
+// void SMESH_Gen::Load(int studyId, const char *aUrlOfFile)
+// {
+// }
 
-//=============================================================================
-/*!
- *
- */
-//=============================================================================
+// //=============================================================================
+// /*!
+//  *
+//  */
+// //=============================================================================
 
-void SMESH_Gen::Close(int studyId)
-{
-}
+// void SMESH_Gen::Close(int studyId)
+// {
+// }
 
 //=============================================================================
 /*!
@@ -707,14 +744,14 @@ int SMESH_Gen::GetShapeDim(const TopAbs_ShapeEnum & aShapeType)
   if ( dim.empty() )
   {
     dim.resize( TopAbs_SHAPE, -1 );
-    dim[ TopAbs_COMPOUND ]  = 3;
-    dim[ TopAbs_COMPSOLID ] = 3;
-    dim[ TopAbs_SOLID ]     = 3;
-    dim[ TopAbs_SHELL ]     = 3;
-    dim[ TopAbs_FACE  ]     = 2;
-    dim[ TopAbs_WIRE ]      = 1;
-    dim[ TopAbs_EDGE ]      = 1;
-    dim[ TopAbs_VERTEX ]    = 0;
+    dim[ TopAbs_COMPOUND ]  = MeshDim_3D;
+    dim[ TopAbs_COMPSOLID ] = MeshDim_3D;
+    dim[ TopAbs_SOLID ]     = MeshDim_3D;
+    dim[ TopAbs_SHELL ]     = MeshDim_3D;
+    dim[ TopAbs_FACE  ]     = MeshDim_2D;
+    dim[ TopAbs_WIRE ]      = MeshDim_1D;
+    dim[ TopAbs_EDGE ]      = MeshDim_1D;
+    dim[ TopAbs_VERTEX ]    = MeshDim_0D;
   }
   return dim[ aShapeType ];
 }

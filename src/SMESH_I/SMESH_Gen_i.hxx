@@ -23,7 +23,6 @@
 //  File   : SMESH_Gen_i.hxx
 //  Author : Paul RASCLE, EDF
 //  Module : SMESH
-//  $Header$
 //
 #ifndef _SMESH_GEN_I_HXX_
 #define _SMESH_GEN_I_HXX_
@@ -175,6 +174,10 @@ public:
   // *****************************************
   // Interface methods
   // *****************************************
+  // Set a new Mesh object name
+  void SetName(const char* theIOR,
+	       const char* theName);
+
   //GEOM::GEOM_Gen_ptr SetGeomEngine( const char* containerLoc );
   void SetGeomEngine( GEOM::GEOM_Gen_ptr geomcompo );
 
@@ -197,9 +200,16 @@ public:
   SMESH::SMESH_Hypothesis_ptr GetHypothesisParameterValues (const char*           theHypType,
                                                             const char*           theLibName,
                                                             SMESH::SMESH_Mesh_ptr theMesh,
-                                                            GEOM::GEOM_Object_ptr theGeom)
+                                                            GEOM::GEOM_Object_ptr theGeom,
+                                                            CORBA::Boolean        byMesh)
     throw ( SALOME::SALOME_Exception );
   
+  /*!
+   * Sets number of segments per diagonal of boundary box of geometry by which
+   * default segment length of appropriate 1D hypotheses is defined
+   */
+  void SetBoundaryBoxSegmentation( CORBA::Long theNbSegments );
+
   // Create empty mesh on a shape
   SMESH::SMESH_Mesh_ptr CreateMesh( GEOM::GEOM_Object_ptr theShapeObject )
     throw ( SALOME::SALOME_Exception );
@@ -235,6 +245,17 @@ public:
   // Returns true if mesh contains enough data to be computed
   CORBA::Boolean IsReadyToCompute( SMESH::SMESH_Mesh_ptr theMesh,
                                    GEOM::GEOM_Object_ptr theShapeObject )
+    throw ( SALOME::SALOME_Exception );
+  
+  /*!
+   * Calculate Mesh as preview till indicated dimension on shape
+   * First, verify list of hypothesis associated with the subShape.
+   * Return mesh preview structure
+   */
+  SMESH::MeshPreviewStruct* Precompute( SMESH::SMESH_Mesh_ptr theMesh,
+					GEOM::GEOM_Object_ptr theSubObject,
+					SMESH::Dimension      theDimension,
+					SMESH::long_array&    theShapesId )
     throw ( SALOME::SALOME_Exception );
 
   // Returns errors of hypotheses definintion

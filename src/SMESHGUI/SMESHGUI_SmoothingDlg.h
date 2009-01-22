@@ -44,9 +44,10 @@ class QRadioButton;
 class QComboBox;
 class QCheckBox;
 class QSpinBox;
+class SMESHGUI;
 class SMESHGUI_IdValidator;
 class SMESHGUI_SpinBox;
-class SMESHGUI;
+class SMESHGUI_FilterDlg;
 class SMESH_Actor;
 class SVTK_Selector;
 class LightApp_SelectionMgr;
@@ -70,6 +71,7 @@ private:
   void                   enterEvent( QEvent* );        /* mouse enter the QWidget */
   void                   hideEvent( QHideEvent* );     /* ESC key */
   void                   keyPressEvent( QKeyEvent* );
+  void                   setFilters( const bool theIsElem );
 
   SMESHGUI*              mySMESHGUI;              /* Current SMESHGUI object */
   SMESHGUI_IdValidator*  myIdValidator;
@@ -111,6 +113,8 @@ private:
 
   QString                myHelpFileName;
     
+  SMESHGUI_FilterDlg*    myFilterDlg;
+   
 private slots:
   void                   ClickOnOk();
   void                   ClickOnCancel();
@@ -122,6 +126,8 @@ private slots:
   void                   ActivateThisDialog();
   void                   onTextChange( const QString& );
   void                   onSelectMesh( bool );
+  void                   setElemFilters();
+  void                   setNodeFilters();
 };
 
 #endif // SMESHGUI_SMOOTHINGDLG_H

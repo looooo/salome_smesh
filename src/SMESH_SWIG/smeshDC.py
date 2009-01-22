@@ -175,18 +175,6 @@ def GetName(obj):
         attr = sobj.FindAttribute("AttributeName")[1]
         return attr.Value()
 
-## Sets a name to the object
-def SetName(obj, name):
-    if isinstance( obj, Mesh ):
-        obj = obj.GetMesh()
-    elif isinstance( obj, Mesh_Algorithm ):
-        obj = obj.GetAlgorithm()
-    ior  = salome.orb.object_to_string(obj)
-    sobj = salome.myStudy.FindObjectIOR(ior)
-    if not sobj is None:
-        attr = sobj.FindAttribute("AttributeName")[1]
-        attr.SetValue(name)
-
 ## Prints error message if a hypothesis was not assigned.
 def TreatHypoStatus(status, hypName, geomName, isAlgo):
     if isAlgo:
@@ -317,6 +305,19 @@ class smeshDC(SMESH._objref_SMESH_Gen):
     # From SMESH_Gen interface:
     # ------------------------
 
+    ## Sets the given name to the object
+    #  @param obj the object to rename
+    #  @param name a new object name
+    #  @ingroup l1_auxiliary
+    def SetName(self, obj, name):
+        print "obj_name = ", name
+        if isinstance( obj, Mesh ):
+            obj = obj.GetMesh()
+        elif isinstance( obj, Mesh_Algorithm ):
+            obj = obj.GetAlgorithm()
+        ior  = salome.orb.object_to_string(obj)
+        SMESH._objref_SMESH_Gen.SetName(self, ior, name)
+
     ## Sets the current mode
     #  @ingroup l1_auxiliary
     def SetEmbeddedMode( self,theMode ):
@@ -406,6 +407,13 @@ class smeshDC(SMESH._objref_SMESH_Gen):
     def GetPattern(self):
         return SMESH._objref_SMESH_Gen.GetPattern(self)
 
+    ## Sets number of segments per diagonal of boundary box of geometry by which
+    #  default segment length of appropriate 1D hypotheses is defined.
+    #  Default value is 10
+    #  @ingroup l1_auxiliary
+    def SetBoundaryBoxSegmentation(self, nbSegments):
+        SMESH._objref_SMESH_Gen.SetBoundaryBoxSegmentation(self,nbSegments)
+
 
     # Filtering. Auxiliary functions:
     # ------------------------------
@@ -477,7 +485,8 @@ class smeshDC(SMESH._objref_SMESH_Gen):
             else:
                 print "Error: The treshold should be a string."
                 return None
-        elif CritType in [FT_FreeBorders, FT_FreeEdges, FT_BadOrientedVolume]:
+        elif CritType in [FT_FreeBorders, FT_FreeEdges, FT_BadOrientedVolume, FT_FreeNodes,
+                          FT_FreeFaces, FT_ElemGeomType, FT_GroupColor]:
             # At this point the treshold is unnecessary
             if aTreshold ==  FT_LogicalNOT:
                 aCriterion.UnaryOp = self.EnumToLong(FT_LogicalNOT)
@@ -560,6 +569,12 @@ class smeshDC(SMESH._objref_SMESH_Gen):
         else:
             print "Error: given parameter is not numerucal functor type."
 
+    ## Creates hypothesis
+    #  @param 
+    #  @param 
+    #  @return created hypothesis instance
+    def CreateHypothesis(self, theHType, theLibName="libStdMeshersEngine.so"):
+        return SMESH._objref_SMESH_Gen.CreateHypothesis(self, theHType, theLibName )
 
 import omniORB
 #Registering the new proxy for SMESH_Gen
@@ -603,9 +618,9 @@ class Mesh:
         else:
             self.mesh = self.smeshpyD.CreateEmptyMesh()
         if name != 0:
-            SetName(self.mesh, name)
+            self.smeshpyD.SetName(self.mesh, name)
         elif obj != 0:
-            SetName(self.mesh, GetName(obj))
+            self.smeshpyD.SetName(self.mesh, GetName(obj))
 
         if not self.geom:
             self.geom = self.mesh.GetShapeToMesh()
@@ -636,7 +651,7 @@ class Mesh:
     #  @param name a new name of the mesh
     #  @ingroup l2_construct
     def SetName(self, name):
-        SetName(self.GetMesh(), name)
+        self.smeshpyD.SetName(self.GetMesh(), name)
 
     ## Gets the subMesh object associated to a \a theSubObject geometrical object.
     #  The subMesh object gives access to the IDs of nodes and elements.
@@ -925,6 +940,16 @@ class Mesh:
     #  @ingroup l2_construct
     def Clear(self):
         self.mesh.Clear()
+        if salome.sg.hasDesktop():
+            smeshgui = salome.ImportComponentGUI("SMESH")
+            smeshgui.Init(salome.myStudyId)
+            smeshgui.SetMeshIcon( salome.ObjectToID( self.mesh ), False, True )
+            salome.sg.updateObjBrowser(1)
+
+    ## Removes all nodes and elements of indicated shape
+    #  @ingroup l2_construct
+    def ClearSubMesh(self, geomId):
+        self.mesh.ClearSubMesh(geomId)
         if salome.sg.hasDesktop():
             smeshgui = salome.ImportComponentGUI("SMESH")
             smeshgui.Init(salome.myStudyId)
@@ -1245,7 +1270,15 @@ class Mesh:
     #  @ingroup l2_grps_operon
     def UnionGroups(self, group1, group2, name):
         return self.mesh.UnionGroups(group1, group2, name)
-
+        
+    ## Produces a union list of groups
+    #  New group is created. All mesh elements that are present in 
+    #  initial groups are added to the new one
+    #  @return an instance of SMESH_Group
+    #  @ingroup l2_grps_operon
+    def UnionListOfGroups(self, groups, name):
+      return self.mesh.UnionListOfGroups(groups, name)
+      
     ## Prodices an intersection of two groups
     #  A new group is created. All mesh elements that are common
     #  for the two initial groups are added to the new one.
@@ -1253,15 +1286,45 @@ class Mesh:
     #  @ingroup l2_grps_operon
     def IntersectGroups(self, group1, group2, name):
         return self.mesh.IntersectGroups(group1, group2, name)
+        
+    ## Produces an intersection of groups
+    #  New group is created. All mesh elements that are present in all 
+    #  initial groups simultaneously are added to the new one
+    #  @return an instance of SMESH_Group
+    #  @ingroup l2_grps_operon
+    def IntersectListOfGroups(self, groups, name):
+      return self.mesh.IntersectListOfGroups(groups, name)
 
     ## Produces a cut of two groups
     #  A new group is created. All mesh elements that are present in
     #  the main group but are not present in the tool group are added to the new one
     #  @return an instance of SMESH_Group
     #  @ingroup l2_grps_operon
-    def CutGroups(self, mainGroup, toolGroup, name):
-        return self.mesh.CutGroups(mainGroup, toolGroup, name)
+    def CutGroups(self, main_group, tool_group, name):
+        return self.mesh.CutGroups(main_group, tool_group, name)
+        
+    ## Produces a cut of groups
+    #  A new group is created. All mesh elements that are present in main groups 
+    #  but do not present in tool groups are added to the new one
+    #  @return an instance of SMESH_Group
+    #  @ingroup l2_grps_operon
+    def CutListOfGroups(self, main_groups, tool_groups, name):
+      return self.mesh.CutListOfGroups(main_groups, tool_groups, name)
+      
+    ## Produces a group of elements with specified element type using list of existing groups
+    #  A new group is created. System 
+    #  1) extract all nodes on which groups elements are built
+    #  2) combine all elements of specified dimension laying on these nodes
+    #  @return an instance of SMESH_Group
+    #  @ingroup l2_grps_operon
+    def CreateDimGroup(self, groups, elem_type, name):
+      return self.mesh.CreateDimGroup(groups, elem_type, name)
 
+
+    ## Convert group on geom into standalone group
+    #  @ingroup l2_grps_delete
+    def ConvertToStandalone(self, group):
+        return self.mesh.ConvertToStandalone(group)
 
     # Get some info about mesh:
     # ------------------------
@@ -2718,6 +2781,43 @@ class Mesh:
     #  @ingroup l1_auxiliary
     def GetLastCreatedElems(self):
         return self.editor.GetLastCreatedElems()
+    
+    ## Creates a hole in a mesh by doubling the nodes of some particular elements
+    #  @param theNodes identifiers of nodes to be doubled
+    #  @param theModifiedElems identifiers of elements to be updated by the new (doubled) 
+    #         nodes. If list of element identifiers is empty then nodes are doubled but 
+    #         they not assigned to elements
+    #  @return TRUE if operation has been completed successfully, FALSE otherwise
+    #  @ingroup l2_modif_edit
+    def DoubleNodes(self, theNodes, theModifiedElems):
+        return self.editor.DoubleNodes(theNodes, theModifiedElems)
+        
+    ## Creates a hole in a mesh by doubling the nodes of some particular elements
+    #  This method provided for convenience works as DoubleNodes() described above.
+    #  @param theNodes identifiers of node to be doubled
+    #  @param theModifiedElems identifiers of elements to be updated
+    #  @return TRUE if operation has been completed successfully, FALSE otherwise
+    #  @ingroup l2_modif_edit
+    def DoubleNode(self, theNodeId, theModifiedElems):
+        return self.editor.DoubleNode(theNodeId, theModifiedElems)
+        
+    ## Creates a hole in a mesh by doubling the nodes of some particular elements
+    #  This method provided for convenience works as DoubleNodes() described above.
+    #  @param theNodes group of nodes to be doubled
+    #  @param theModifiedElems group of elements to be updated.
+    #  @return TRUE if operation has been completed successfully, FALSE otherwise
+    #  @ingroup l2_modif_edit
+    def DoubleNodeGroup(self, theNodes, theModifiedElems):
+        return self.editor.DoubleNodeGroup(theNodes, theModifiedElems)
+        
+    ## Creates a hole in a mesh by doubling the nodes of some particular elements
+    #  This method provided for convenience works as DoubleNodes() described above.
+    #  @param theNodes list of groups of nodes to be doubled
+    #  @param theModifiedElems list of groups of elements to be updated.
+    #  @return TRUE if operation has been completed successfully, FALSE otherwise
+    #  @ingroup l2_modif_edit
+    def DoubleNodeGroups(self, theNodes, theModifiedElems):
+        return self.editor.DoubleNodeGroups(theNodes, theModifiedElems)
 
 ## The mother class to define algorithm, it is not recommended to use it directly.
 #
@@ -2838,7 +2938,7 @@ class Mesh_Algorithm:
 
     ## Sets the name to the algorithm
     def SetName(self, name):
-        SetName(self.algo, name)
+        self.mesh.smeshpyD.SetName(self.algo, name)
 
     ## Gets the id of the algorithm
     def GetId(self):
@@ -2901,7 +3001,7 @@ class Mesh_Algorithm:
                 s = ","
                 i = i + 1
                 pass
-            SetName(hypo, hyp + a)
+            self.mesh.smeshpyD.SetName(hypo, hyp + a)
             pass
         status = self.mesh.mesh.AddHypothesis(self.geom, hypo)
         TreatHypoStatus( status, GetName(hypo), GetName(self.geom), 0 )
@@ -2951,6 +3051,32 @@ class Mesh_Segment(Mesh_Algorithm):
             return IsEqual(hyp.GetPrecision(), args[1])
         return False
 
+    ## Defines "MaxSize" hypothesis to cut an edge into segments not longer than given value
+    #  @param length is optional maximal allowed length of segment, if it is omitted
+    #                the preestimated length is used that depends on geometry size
+    #  @param UseExisting if ==true - searches for an existing hypothesis created with
+    #                     the same parameters, else (default) - create a new one
+    #  @return an instance of StdMeshers_MaxLength hypothesis
+    #  @ingroup l3_hypos_1dhyps
+    def MaxSize(self, length=0.0, UseExisting=0):
+        hyp = self.Hypothesis("MaxLength", [length], UseExisting=UseExisting)
+        if length > 0.0:
+            # set given length
+            hyp.SetLength(length)
+        if not UseExisting:
+            # set preestimated length
+            gen = self.mesh.smeshpyD
+            initHyp = gen.GetHypothesisParameterValues("MaxLength", "libStdMeshersEngine.so",
+                                                       self.mesh.GetMesh(), self.mesh.GetShape(),
+                                                       False) # <- byMesh
+            preHyp = initHyp._narrow(StdMeshers.StdMeshers_MaxLength)
+            if preHyp:
+                hyp.SetPreestimatedLength( preHyp.GetPreestimatedLength() )
+                pass
+            pass
+        hyp.SetUsePreestimatedLength( length == 0.0 )
+        return hyp
+        
     ## Defines "NumberOfSegments" hypothesis to cut an edge in a fixed number of segments
     #  @param n for the number of segments that cut an edge
     #  @param s for the scale factor (optional)

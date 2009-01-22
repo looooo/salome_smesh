@@ -178,6 +178,10 @@
             <translation>Compute</translation>
         </message>
         <message>
+            <source>MEN_PRECOMPUTE</source>
+            <translation>Preview</translation>
+        </message>
+        <message>
             <source>MEN_CONNECTION</source>
             <translation>Borders at Multi-Connection</translation>
         </message>
@@ -270,6 +274,10 @@
             <translation>Edit Group</translation>
         </message>
         <message>
+            <source>MEN_EDIT_GEOMGROUP_AS_GROUP</source>
+            <translation>Edit Group as Standalone</translation>
+        </message>
+        <message>
             <source>MEN_EDIT_HYPO</source>
             <translation>Edit Hypothesis</translation>
         </message>
@@ -320,6 +328,14 @@
         <message>
             <source>MEN_FREE_EDGE</source>
             <translation>Free Edges</translation>
+        </message>
+	<message>
+            <source>MEN_FREE_NODE</source>
+            <translation>Free Nodes</translation>
+        </message>
+        <message>
+            <source>MEN_FREE_FACES</source>
+            <translation>Free Faces</translation>
         </message>
         <message>
             <source>MEN_GLOBAL_HYPO</source>
@@ -608,6 +624,10 @@
         <message>
             <source>MEN_UN_GROUP</source>
             <translation>Union Groups</translation>
+        </message>
+        <message>
+            <source>MEN_UNDERLYING_ELEMS</source>
+            <translation>Group of underlying entities</translation>
         </message>
         <message>
             <source>MEN_UPDATE</source>
@@ -1034,6 +1054,10 @@ so that the application may crash. Do you wish to continue visualization?</trans
         <message>
             <source>SMESH_EDIT_GROUP_TITLE</source>
             <translation>Edit Group</translation>
+        </message>
+        <message>
+            <source>SMESH_EDIT_GEOMGROUP_AS_GROUP_TITLE</source>
+            <translation>Edit Group as Standalone</translation>
         </message>
         <message>
             <source>SMESH_EDIT_HYPOTHESES</source>
@@ -1936,6 +1960,10 @@ Consider saving your work before application crash</translation>
             <translation>Compute</translation>
         </message>
         <message>
+            <source>STB_PRECOMPUTE</source>
+            <translation>Preview</translation>
+        </message>
+        <message>
             <source>STB_CONNECTION</source>
             <translation>Borders at Multi-Connection</translation>
         </message>
@@ -2016,6 +2044,10 @@ Consider saving your work before application crash</translation>
             <translation>Edit Group</translation>
         </message>
         <message>
+            <source>STB_EDIT_GEOMGROUP_AS_GROUP</source>
+            <translation>Edit Group as Standalone</translation>
+        </message>
+        <message>
             <source>STB_EDIT_HYPO</source>
             <translation>Edit Hypothesis</translation>
         </message>
@@ -2058,6 +2090,16 @@ Consider saving your work before application crash</translation>
         <message>
             <source>STB_FREE_EDGE</source>
             <translation>Free Edges</translation>
+        </message>
+	<message>
+            <source>STB_FREE_NODE</source>
+            <translation>Free Nodes</translation>
+        </message>
+	
+
+        <message>
+            <source>STB_FREE_FACES</source>
+            <translation>Free Faces</translation>
         </message>
         <message>
             <source>STB_GLOBAL_HYPO</source>
@@ -2300,6 +2342,10 @@ Consider saving your work before application crash</translation>
             <translation>Union Groups</translation>
         </message>
         <message>
+            <source>STB_UNDERLYING_ELEMS</source>
+            <translation>Create groups of entities from existing groups of superior dimensions</translation>
+        </message>
+        <message>
             <source>STB_UPDATE</source>
             <translation>Update</translation>
         </message>
@@ -2396,6 +2442,10 @@ Consider saving your work before application crash</translation>
             <translation>Compute</translation>
         </message>
         <message>
+            <source>TOP_PRECOMPUTE</source>
+            <translation>Preview</translation>
+        </message>
+        <message>
             <source>TOP_CONNECTION</source>
             <translation>Borders at Multi-Connection</translation>
         </message>
@@ -2476,6 +2526,10 @@ Consider saving your work before application crash</translation>
             <translation>Edit Group</translation>
         </message>
         <message>
+            <source>TOP_EDIT_GEOMGROUP_AS_GROUP</source>
+            <translation>Edit Group as Standalone</translation>
+        </message>
+        <message>
             <source>TOP_EDIT_HYPO</source>
             <translation>Edit Hypothesis</translation>
         </message>
@@ -2518,6 +2572,16 @@ Consider saving your work before application crash</translation>
         <message>
             <source>TOP_FREE_EDGE</source>
             <translation>Free Edges</translation>
+        </message>
+	<message>
+            <source>TOP_FREE_NODE</source>
+            <translation>Free Nodes</translation>
+        </message>
+	
+
+        <message>
+            <source>TOP_FREE_FACES</source>
+            <translation>Free Faces</translation>
         </message>
         <message>
             <source>TOP_GLOBAL_HYPO</source>
@@ -2760,6 +2824,10 @@ Consider saving your work before application crash</translation>
             <translation>Union Groups</translation>
         </message>
         <message>
+            <source>TOP_UNDERLYING_ELEMS</source>
+            <translation>Create groups of entities from existing groups of superior dimensions</translation>
+        </message>
+        <message>
             <source>TOP_UPDATE</source>
             <translation>Update</translation>
         </message>
@@ -2842,6 +2910,14 @@ Please, create VTK viewer and try again</translation>
         <message>
             <source>PREF_AUTO_GROUPS</source>
             <translation>Automatically create groups for MED export</translation>
+        </message>
+        <message>
+            <source>PREF_GROUP_SEGMENT_LENGTH</source>
+            <translation>Segment length</translation>
+        </message>
+        <message>
+            <source>PREF_SEGMENT_LENGTH</source>
+            <translation>Segmentation of diagonal of boundary box of geometry</translation>
         </message>
         <message>
             <source>PREF_AUTO_UPDATE</source>
@@ -3121,6 +3197,38 @@ Please, create VTK viewer and try again</translation>
         </message>
     </context>
     <context>
+        <name>SMESHGUI_PrecomputeDlg</name>
+        <message>
+            <source>CAPTION</source>
+            <translation>Preview and Compute mesh</translation>
+        </message>
+        <message>
+            <source>PREVIEW</source>
+            <translation>Preview</translation>
+        </message>
+        <message>
+            <source>PREVIEW_1</source>
+            <translation>1D Mesh</translation>
+        </message>
+        <message>
+            <source>PREVIEW_2</source>
+            <translation>2D Mesh</translation>
+        </message>
+        <message>
+            <source>COMPUTE</source>
+            <translation>Compute</translation>
+        </message>
+    </context>
+    <context>
+        <name>SMESHGUI_PrecomputeOp</name>
+        <message>
+            <source>CLEAR_SUBMESH_QUESTION</source>
+            <translation>A temporary submeshes on the selected geometry
+ created during preview operation.
+ Do you want to remove all this submeshes?</translation>
+        </message>
+    </context>
+    <context>
         <name>SMESHGUI_ConvToQuadDlg</name>
         <message>
             <source>CAPTION</source>
@@ -3395,8 +3503,8 @@ Please select a groups and try again</translation>
 Please select valid object and try again</translation>
         </message>
         <message>
-            <source>CURRENT_GROUP</source>
-            <translation>Current Group</translation>
+            <source>CURRENT_DIALOG</source>
+            <translation>Current Dialog</translation>
         </message>
         <message>
             <source>EDGES_TLT</source>
@@ -3685,6 +3793,16 @@ Please enter correct value and try again</translation>
             <source>FREE_EDGES</source>
             <translation>Free edges</translation>
         </message>
+	<message>
+            <source>FREE_NODES</source>
+            <translation>Free nodes</translation>
+        </message>
+	
+
+        <message>
+            <source>FREE_FACES</source>
+            <translation>Free faces</translation>
+        </message>
         <message>
             <source>ID</source>
             <translation>ID</translation>
@@ -3696,6 +3814,10 @@ Please enter correct value and try again</translation>
         <message>
             <source>LENGTH</source>
             <translation>Length</translation>
+        </message>
+        <message>
+            <source>LENGTH2D</source>
+            <translation>Length 2D</translation>
         </message>
         <message>
             <source>LESS_THAN</source>
@@ -3716,6 +3838,11 @@ Please enter correct value and try again</translation>
         <message>
             <source>MULTIEDGES_ERROR</source>
             <translation>Threshold value of borders at multi-connections can not be equal 1
+Please enter correct value and try again</translation>
+        </message>
+        <message>
+            <source>GROUPCOLOR_ERROR</source>
+            <translation>Color of group can not be undefied
 Please enter correct value and try again</translation>
         </message>
         <message>
@@ -3770,16 +3897,72 @@ Please enter correct value and try again</translation>
             <source>WARPING</source>
             <translation>Warping</translation>
         </message>
+        <message>
+            <source>LINEAR</source>
+            <translation>Linear</translation>
+        </message>
+        <message>
+            <source>GROUP_COLOR</source>
+            <translation>Color of Group</translation>
+        </message>
+        <message>
+            <source>ELEMENTS</source>
+            <translation>Elements</translation>
+        </message>
+        <message>
+            <source>GEOM_TYPE</source>
+            <translation>Geomtry type</translation>
+        </message>
+        <message>
+            <source>GEOM_TYPE_0</source>
+            <translation></translation>
+        </message>
+        <message>
+            <source>GEOM_TYPE_0</source>
+            <translation>Point</translation>
+        </message>
+        <message>
+            <source>GEOM_TYPE_1</source>
+            <translation>Edge</translation>
+        </message>
+        <message>
+            <source>GEOM_TYPE_2</source>
+            <translation>Triangle</translation>
+        </message>
+        <message>
+            <source>GEOM_TYPE_3</source>
+            <translation>Quadrangle</translation>
+        </message>
+        <message>
+            <source>GEOM_TYPE_4</source>
+            <translation>Polygon</translation>
+        </message>
+        <message>
+            <source>GEOM_TYPE_5</source>
+            <translation>Tetrahedron</translation>
+        </message>
+        <message>
+            <source>GEOM_TYPE_6</source>
+            <translation>Pyramid</translation>
+        </message>
+        <message>
+            <source>GEOM_TYPE_7</source>
+            <translation>Hexahedron</translation>
+        </message>
+        <message>
+            <source>GEOM_TYPE_8</source>
+            <translation>Pentahedron</translation>
+        </message>
+        <message>
+            <source>GEOM_TYPE_9</source>
+            <translation>Polyhedra</translation>
+        </message>
     </context>
     <context>
         <name>SMESHGUI_GroupOpDlg</name>
         <message>
             <source>ARGUMENTS</source>
             <translation>Arguments</translation>
-        </message>
-        <message>
-            <source>CUT_OF_TWO_GROUPS</source>
-            <translation>Cut of two groups</translation>
         </message>
         <message>
             <source>DIFF_MESHES</source>
@@ -3802,14 +3985,6 @@ Please specify non-empty name and try again</translation>
             <source>INCORRECT_ARGUMENTS</source>
             <translation>Arguments of operation are not specified
 Please specify them and try again</translation>
-        </message>
-        <message>
-            <source>INTERSECTION_OF_TWO_GROUPS</source>
-            <translation>Intersection of two groups</translation>
-        </message>
-        <message>
-            <source>MAIN_OBJECT</source>
-            <translation>Main object</translation>
         </message>
         <message>
             <source>NAME</source>
@@ -3836,6 +4011,62 @@ Please specify them and try again</translation>
             <translation>Union of two groups</translation>
         </message>
     </context>
+    <context>
+        <name>SMESHGUI_UnionGroupsDlg</name>
+        <message>
+            <source>UNION_OF_GROUPS</source>
+            <translation>Union of groups</translation>
+        </message>
+    </context>    
+    <context>
+        <name>SMESHGUI_DimGroupDlg</name>
+        <message>
+            <source>CREATE_GROUP_OF_UNDERLYING_ELEMS</source>
+            <translation>Create group of underlying entities</translation>
+        </message>
+    <message>
+        <source>ELEMENTS_TYPE</source>
+        <translation>Elements type</translation>
+    </message>  
+    <message>
+        <source>NODE</source>
+        <translation>Node</translation>
+    </message>  
+    <message>
+        <source>EDGE</source>
+        <translation>Edge</translation>
+    </message>
+    <message>
+        <source>FACE</source>
+        <translation>Face</translation>
+    </message>
+    <message>
+        <source>VOLUME</source>
+        <translation>Volume</translation>
+    </message>
+    </context>
+    <context>
+        <name>SMESHGUI_IntersectGroupsDlg</name>
+        <message>
+            <source>INTERSECTION_OF_GROUPS</source>
+            <translation>Intersection of groups</translation>
+        </message>
+    </context>
+    <context>
+        <name>SMESHGUI_CutGroupsDlg</name>
+        <message>
+            <source>CUT_OF_GROUPS</source>
+            <translation>Cut of groups</translation>
+        </message>
+        <message>
+            <source>MAIN_OBJECT</source>
+            <translation>Main object</translation>
+        </message>
+        <message>
+            <source>TOOL_OBJECT</source>
+            <translation>Tool object</translation>
+        </message>
+    </context>          
     <context>
         <name>SMESHGUI_MakeNodeAtPointDlg</name>
         <message>
@@ -4251,6 +4482,14 @@ It is impossible to read point coordinates from file</translation>
             <source>TOTAL_ANGLE</source>
             <translation>Total Angle</translation>
         </message>
+	<message>
+	    <source>MEN_POINT_SELECT</source>
+            <translation>Select Point</translation>
+        </message>
+	<message>
+	    <source>MEN_FACE_SELECT</source>
+            <translation>Select Plane</translation>
+        </message>	
     </context>
     <context>
         <name>SMESHGUI_SewingDlg</name>

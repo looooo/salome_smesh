@@ -23,8 +23,7 @@
 //  File   : StdMeshers_AutomaticLength.hxx
 //  Author : Edward AGAPOV, OCC
 //  Module : SMESH
-//  $Header$
-//
+
 #ifndef _SMESH_AutomaticLength_HXX_
 #define _SMESH_AutomaticLength_HXX_
 
@@ -95,6 +94,12 @@ public:
     * \retval bool - true if parameter values have been successfully defined
    */
   virtual bool SetParametersByMesh(const SMESH_Mesh* theMesh, const TopoDS_Shape& theShape);
+
+  /*!
+   * \brief Initialize my parameter values by linear size of mesh element.
+   *  \retval bool - true if parameter values have been successfully defined
+   */
+  virtual bool SetParametersByElementSize( double elemLenght, const SMESH_Mesh* theMesh=0);
 
 protected:
   std::map<const TopoDS_TShape*, double> _TShapeToLength;

@@ -25,8 +25,10 @@
 // SMESH includes
 //
 #include "SMESHGUI_Utils.h"
-
 #include "SMESHGUI.h"
+
+#include <SMDS_MeshNode.hxx>
+#include <SMDS_MeshFace.hxx>
 
 // SALOME GUI includes
 #include <SUIT_Desktop.h>
@@ -40,6 +42,10 @@
 #include <SalomeApp_Study.h>
 
 #include <SALOME_ListIO.hxx>
+
+// OCC includes
+#include <gp_XYZ.hxx>
+#include <TColgp_Array1OfXYZ.hxx>
 
 namespace SMESH
 {
@@ -131,12 +137,7 @@ namespace SMESH
     _PTR(Study) aStudy = GetActiveStudyDocument();
     if (aStudy->GetProperties()->IsLocked())
       return;
-    _PTR(StudyBuilder) aBuilder = aStudy->NewBuilder();
-    _PTR(GenericAttribute) anAttr =
-      aBuilder->FindOrCreateAttribute(theSObject, "AttributeName");
-    _PTR(AttributeName) aName = anAttr;
-    if (aName)
-      aName->SetValue(theName.toLatin1().data());
+    SMESHGUI::GetSMESHGen()->SetName(theSObject->GetIOR().c_str(), theName.toLatin1().data());
   }
 
   void SetValue (_PTR(SObject) theSObject, const QString& theValue)
@@ -305,4 +306,35 @@ namespace SMESH
 			       arg(theHelpFileName));
     }
   }
+
+  //=======================================================================
+  /**
+     Return normale to a given face
+  */
+  //=======================================================================
+  gp_XYZ getNormale( const SMDS_MeshFace* theFace )
+  {
+    gp_XYZ n;
+    int aNbNode = theFace->NbNodes();
+    TColgp_Array1OfXYZ anArrOfXYZ(1,4);
+    SMDS_ElemIteratorPtr aNodeItr = theFace->nodesIterator();
+    int i = 1;
+    for ( ; aNodeItr->more() && i <= 4; i++ ) {
+      SMDS_MeshNode* aNode = (SMDS_MeshNode*)aNodeItr->next();
+      anArrOfXYZ.SetValue(i, gp_XYZ( aNode->X(), aNode->Y(), aNode->Z() ) );
+    }
+    
+    gp_XYZ q1 = anArrOfXYZ.Value(2) - anArrOfXYZ.Value(1);
+    gp_XYZ q2 = anArrOfXYZ.Value(3) - anArrOfXYZ.Value(1);
+    n  = q1 ^ q2;
+    if ( aNbNode > 3 ) {
+      gp_XYZ q3 = anArrOfXYZ.Value(4) - anArrOfXYZ.Value(1);
+      n += q2 ^ q3;
+    }
+    double len = n.Modulus();
+    if ( len > 0 )
+      n /= len;
+    return n;
+  }
+  
 } // end of namespace SMESH

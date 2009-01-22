@@ -6,6 +6,7 @@
 <ul>
 <li>\ref arithmetic_1d_anchor "Arithmetic 1D"</li>
 <li>\ref average_length_anchor "Average Length"</li>
+<li>\ref max_length_anchor "Max Size"</li>
 <li>\ref deflection_1d_anchor "Deflection 1D"</li>
 <li>\ref number_of_segments_anchor "Number of segments"</li>
 <li>\ref start_and_end_length_anchor "Start and end length"</li>
@@ -76,6 +77,21 @@ integer. Default value is 1e-07.
 <b>See Also</b> a sample TUI Script of a 
 \ref tui_average_length "Defining Average Length" hypothesis
 operation.
+
+<br>\anchor max_length_anchor
+<h2>Max Size</h2>
+<b>Max Size</b> hypothesis allows splitting geometrical edges into
+segments not longer than the given length. Definition of this hypothesis
+consists of setting the maximal allowed \b length of segments.
+<b>Use preestimated length</b> check box lets you specify \b length
+automatically calculated basing on size of your geometrical object,
+namely as diagonal of bounding box divided by ten. The divider can be
+changed via "Segmentation of diagonal of boundary box of geometry"
+preference parameter.
+<b>Use preestimated length</b> check box is enabled only if the
+geometrical object has been selected before hypothesis definition.
+
+\image html a-maxsize1d.png
 
 <br>
 \anchor number_of_segments_anchor

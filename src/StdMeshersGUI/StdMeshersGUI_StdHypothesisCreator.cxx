@@ -46,6 +46,7 @@
 #include <QHBoxLayout>
 #include <QSlider>
 #include <QLabel>
+#include <QCheckBox>
 
 const double VALUE_MAX = 1.0e+15, // COORD_MAX
              VALUE_MAX_2  = VALUE_MAX * VALUE_MAX,
@@ -92,7 +93,7 @@ QWidget* StdMeshersGUI_StdHypothesisCreator::getWidgetForParam( int i ) const
   if ( i < myCustomWidgets.count() ) {
     QList<QWidget*>::const_iterator anIt  = myCustomWidgets.begin();
     QList<QWidget*>::const_iterator aLast = myCustomWidgets.end();
-    for ( int j = 0 ; !w && anIt != aLast; ++anIt )
+    for ( int j = 0 ; !w && anIt != aLast; ++anIt, ++j )
       if ( i == j )
         w = *anIt;
   }
@@ -409,6 +410,19 @@ QString StdMeshersGUI_StdHypothesisCreator::storeParams() const
       h->SetLength( params[0].myValue.toDouble() );
       h->SetPrecision( params[1].myValue.toDouble() );
     }
+    else if( hypType()=="MaxLength" )
+    {
+      StdMeshers::StdMeshers_MaxLength_var h =
+	StdMeshers::StdMeshers_MaxLength::_narrow( hypothesis() );
+
+      h->SetLength( params[0].myValue.toDouble() );
+      h->SetUsePreestimatedLength( widget< QCheckBox >( 1 )->isChecked() );
+      if ( !h->HavePreestimatedLength() && !h->_is_equivalent( initParamsHypothesis() )) {
+        StdMeshers::StdMeshers_MaxLength_var hInit =
+          StdMeshers::StdMeshers_MaxLength::_narrow( initParamsHypothesis() );
+        h->SetPreestimatedLength( hInit->GetPreestimatedLength() );
+      }
+    }
     else if( hypType()=="SegmentLengthAroundVertex" )
     {
       StdMeshers::StdMeshers_SegmentLengthAroundVertex_var h =
@@ -558,6 +572,39 @@ bool StdMeshersGUI_StdHypothesisCreator::stdParams( ListOfStdParams& p ) const
     item.myName = tr("SMESH_LOCAL_LENGTH_PRECISION");
     item.myValue = h->GetPrecision();
     p.append( item );
+  }
+  else if( hypType()=="MaxLength" )
+  {
+    StdMeshers::StdMeshers_MaxLength_var h =
+      StdMeshers::StdMeshers_MaxLength::_narrow( hyp );
+    // try to set a right preestimated length to edited hypothesis
+    bool noPreestimatedAtEdition = false;
+    if ( !isCreation() ) {
+      StdMeshers::StdMeshers_MaxLength_var initHyp =
+        StdMeshers::StdMeshers_MaxLength::_narrow( initParamsHypothesis(true) );
+      noPreestimatedAtEdition =
+        ( initHyp->_is_nil() || !initHyp->HavePreestimatedLength() );
+      if ( !noPreestimatedAtEdition )
+        h->SetPreestimatedLength( initHyp->GetPreestimatedLength() );
+    }
+
+    item.myName = tr("SMESH_LOCAL_LENGTH_PARAM");
+    item.myValue = h->GetLength();
+    p.append( item );
+    customWidgets()->append(0);
+
+    item.myName = tr("SMESH_USE_PREESTIMATED_LENGTH");
+    p.append( item );
+    QCheckBox* aQCheckBox = new QCheckBox(dlg());
+    if ( !noPreestimatedAtEdition && h->HavePreestimatedLength() ) {
+      aQCheckBox->setChecked( h->GetUsePreestimatedLength() );
+      connect( aQCheckBox, SIGNAL(  stateChanged(int) ), this, SLOT( onValueChanged() ) );
+    }
+    else {
+      aQCheckBox->setChecked( false );
+      aQCheckBox->setEnabled( false );
+    }
+    customWidgets()->append( aQCheckBox );
   }
   else if( hypType()=="SegmentLengthAroundVertex" )
   {
@@ -741,6 +788,11 @@ void StdMeshersGUI_StdHypothesisCreator::attuneStdWidget (QWidget* w, const int)
   {
     sb->RangeStepAndValidator( VALUE_SMALL, VALUE_MAX, 1.0, 6 );
   }
+  else if( hypType()=="MaxLength" && sb )
+  {
+    sb->RangeStepAndValidator( VALUE_SMALL, VALUE_MAX, 1.0, 6 );
+    sb->setEnabled( !widget< QCheckBox >( 1 )->isChecked() );
+  }
   else if( hypType()=="MaxElementArea" && sb )
   {
     sb->RangeStepAndValidator( VALUE_SMALL_2, VALUE_MAX_2, 1.0, 6 );
@@ -828,6 +880,7 @@ QString StdMeshersGUI_StdHypothesisCreator::hypTypeName( const QString& t ) cons
     types.insert( "NumberOfLayers", "NUMBER_OF_LAYERS" );
     types.insert( "LayerDistribution", "LAYER_DISTRIBUTION" );
     types.insert( "SegmentLengthAroundVertex", "SEGMENT_LENGTH_AROUND_VERTEX" );
+    types.insert( "MaxLength", "MAX_LENGTH" );
   }
 
   QString res;
@@ -879,6 +932,10 @@ bool StdMeshersGUI_StdHypothesisCreator::getParamFromCustomWidget( StdParam & pa
       return true;
     }
   }
+  if ( hypType() == "MaxLength" ) {
+    param.myValue = "";
+    return true;
+  }
   if ( widget->inherits( "StdMeshersGUI_ObjectReferenceParamWdg" ))
   {
     // show only 1st reference value
@@ -911,5 +968,23 @@ void StdMeshersGUI_StdHypothesisCreator::onReject()
   {
     // Uninstall filters of StdMeshersGUI_ObjectReferenceParamWdg
     deactivateObjRefParamWdg( customWidgets() );
+  }
+}
+
+//================================================================================
+/*!
+ * \brief 
+ */
+//================================================================================
+
+void StdMeshersGUI_StdHypothesisCreator::valueChanged( QWidget* paramWidget)
+{
+  if ( hypType() == "MaxLength" && paramWidget == getWidgetForParam(1) ) {
+    getWidgetForParam(0)->setEnabled( !widget< QCheckBox >( 1 )->isChecked() );
+    if ( !getWidgetForParam(0)->isEnabled() ) {
+      StdMeshers::StdMeshers_MaxLength_var h =
+        StdMeshers::StdMeshers_MaxLength::_narrow( initParamsHypothesis() );
+      widget< QtxDoubleSpinBox >( 0 )->setValue( h->GetPreestimatedLength() );
+    }
   }
 }

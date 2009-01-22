@@ -23,7 +23,6 @@
 # Author : Patrick GOLDBRONN (CEA)
 # Date : 28/06/2001
 #  Modified by : Alexander BORODIN (OCN) - autotools usage
-# $Header$
 #
 include $(top_srcdir)/adm_local/unix/make_common_starter.am
 
@@ -58,6 +57,7 @@ dist_salomeres_DATA = \
 	mesh_length_2d.png \
 	mesh_free_edges.png \
 	mesh_free_edges_2d.png \
+	mesh_free_nodes.png \
 	mesh_multi_edges.png \
 	mesh_multi_edges_2d.png \
 	mesh_line_n.png \
@@ -162,7 +162,10 @@ dist_salomeres_DATA = \
 	mesh_tree_hypo_projection_2d.png \
 	mesh_build_compound.png \
 	mesh_node_to_point.png \
-	mesh_tree_mesh_partial.png
+	mesh_tree_mesh_partial.png \
+	mesh_extractGroup.png \
+	mesh_precompute.png \
+        mesh_free_faces.png
 
 # VSR: little trick to avoid putting if SMESHCatalog.xml to the distribution archive
 nodist_salomeres_SCRIPTS = SMESHCatalog.xml

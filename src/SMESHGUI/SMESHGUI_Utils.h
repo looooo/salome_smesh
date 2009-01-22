@@ -39,6 +39,9 @@
 #include <SALOME_InteractiveObject.hxx>
 #include <LightApp_DataOwner.h>
 
+//OCC includes
+#include <gp_XYZ.hxx>
+
 class SUIT_ViewWindow;
 class SUIT_Desktop;
 class SUIT_Study;
@@ -52,6 +55,8 @@ class SALOMEDSClient_SObject;
 class SalomeApp_Study;
 class SalomeApp_Module;
 class LightApp_SelectionMgr;
+
+class SMDS_MeshFace;
 
 namespace SMESH
 {
@@ -158,6 +163,15 @@ SMESHGUI_EXPORT
 
 SMESHGUI_EXPORT
   void ShowHelpFile( const QString& );
+
+  /*!
+   * \brief Return the normal to a face
+    * \param theFace - input face
+    * \retval gp_XYZ - normal to a face 
+   */
+SMESHGUI_EXPORT
+  gp_XYZ getNormale( const SMDS_MeshFace* theFace );
+
 }
 
 #endif // SMESHGUI_UTILS_H

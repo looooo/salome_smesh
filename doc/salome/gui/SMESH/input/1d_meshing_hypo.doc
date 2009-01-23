@@ -86,7 +86,7 @@ consists of setting the maximal allowed \b length of segments.
 <b>Use preestimated length</b> check box lets you specify \b length
 automatically calculated basing on size of your geometrical object,
 namely as diagonal of bounding box divided by ten. The divider can be
-changed via "Segmentation of diagonal of boundary box of geometry"
+changed via "Ratio Bounding Box Diagonal / Max Size"
 preference parameter.
 <b>Use preestimated length</b> check box is enabled only if the
 geometrical object has been selected before hypothesis definition.

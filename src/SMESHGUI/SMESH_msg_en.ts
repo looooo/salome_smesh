@@ -2913,11 +2913,15 @@ Please, create VTK viewer and try again</translation>
         </message>
         <message>
             <source>PREF_GROUP_SEGMENT_LENGTH</source>
-            <translation>Segment length</translation>
+            <translation>Automatic parameters</translation>
         </message>
         <message>
             <source>PREF_SEGMENT_LENGTH</source>
-            <translation>Segmentation of diagonal of boundary box of geometry</translation>
+            <translation>Ratio Bounding Box Diagonal / Max Size</translation>
+        </message>
+        <message>
+            <source>PREF_NB_SEGMENTS</source>
+            <translation>Number of Segments</translation>
         </message>
         <message>
             <source>PREF_AUTO_UPDATE</source>

@@ -199,14 +199,14 @@ bool StdMeshers_StartEndLength::SetParametersByMesh(const SMESH_Mesh*   theMesh,
 
 //================================================================================
 /*!
- * \brief Initialize my parameter values by linear size of mesh element.
+ * \brief Initialize my parameter values by default parameters.
  *  \retval bool - true if parameter values have been successfully defined
  */
 //================================================================================
 
-bool StdMeshers_StartEndLength::SetParametersByElementSize(double            elemLenght,
-                                                           const SMESH_Mesh* /*theMesh*/)
+bool StdMeshers_StartEndLength::SetParametersByDefaults(const TDefaults&  dflts,
+                                                        const SMESH_Mesh* /*theMesh*/)
 {
-  return bool(_begLength = _endLength = elemLenght );
+  return bool(_begLength = _endLength = dflts._elemLength );
 }
 

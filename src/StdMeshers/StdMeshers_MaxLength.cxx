@@ -226,17 +226,17 @@ bool StdMeshers_MaxLength::SetParametersByMesh(const SMESH_Mesh*   theMesh,
 }
 //================================================================================
 /*!
- * \brief Initialize my parameter values by linear size of mesh element.
+ * \brief Initialize my parameter values by default parameters.
  *  \retval bool - true if parameter values have been successfully defined
  */
 //================================================================================
 
-bool StdMeshers_MaxLength::SetParametersByElementSize(double            elemLenght,
-                                                      const SMESH_Mesh* /*theMesh*/)
+bool StdMeshers_MaxLength::SetParametersByDefaults(const TDefaults&  dflts,
+                                                   const SMESH_Mesh* /*theMesh*/)
 {
-  _preestimation = ( elemLenght > 0.);
-  if ( _preestimation )
-    _preestimated = elemLenght;
-  return bool( _length = elemLenght );
+  //_preestimation = ( dflts._elemLength > 0.);
+  if ( dflts._elemLength > 0. )
+    _preestimated = dflts._elemLength;
+  return bool( _length = dflts._elemLength );
 }
 

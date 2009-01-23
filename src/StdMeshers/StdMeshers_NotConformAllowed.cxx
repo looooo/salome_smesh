@@ -113,13 +113,13 @@ bool StdMeshers_NotConformAllowed::SetParametersByMesh(const SMESH_Mesh* /*theMe
 }
 //================================================================================
 /*!
- * \brief Initialize my parameter values by linear size of mesh element.
+ * \brief Initialize my parameter values by default parameters.
  *  \retval bool - true if parameter values have been successfully defined
  */
 //================================================================================
 
-bool StdMeshers_NotConformAllowed::SetParametersByElementSize(double            /*elemLenght*/,
-                                                              const SMESH_Mesh* /*theMesh*/)
+bool StdMeshers_NotConformAllowed::SetParametersByDefaults(const TDefaults&  /*dflts*/,
+                                                           const SMESH_Mesh* /*theMesh*/)
 {
   return true;
 }

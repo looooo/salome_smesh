@@ -684,14 +684,14 @@ bool StdMeshers_NumberOfSegments::SetParametersByMesh(const SMESH_Mesh*   theMes
 }
 //================================================================================
 /*!
- * \brief Initialize my parameter values by linear size of mesh element.
+ * \brief Initialize my parameter values by default parameters.
  *  \retval bool - true if parameter values have been successfully defined
  */
 //================================================================================
 
-bool StdMeshers_NumberOfSegments::SetParametersByElementSize(double            elemLenght,
-                                                             const SMESH_Mesh* /*theMesh*/)
+bool StdMeshers_NumberOfSegments::SetParametersByDefaults(const TDefaults&  dflts,
+                                                          const SMESH_Mesh* /*theMesh*/)
 {
-  return false;
+  return bool(_numberOfSegments = dflts._nbSegments );
 }
 

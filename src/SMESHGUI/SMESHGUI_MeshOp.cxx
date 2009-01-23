@@ -944,14 +944,12 @@ SMESHGUI_MeshOp::getInitParamsHypothesis( const QString& aHypType,
     }
   }
 
-  if ( (!isSubMesh || !aMeshVar->_is_nil()) && !aGeomVar->_is_nil() )
-    return SMESHGUI::GetSMESHGen()->GetHypothesisParameterValues( aHypType.toLatin1().data(),
-                                                                  aServerLib.toLatin1().data(),
-                                                                  aMeshVar,
-                                                                  aGeomVar,
-                                                                  /*byMesh = */isSubMesh);
+  return SMESHGUI::GetSMESHGen()->GetHypothesisParameterValues( aHypType.toLatin1().data(),
+                                                                aServerLib.toLatin1().data(),
+                                                                aMeshVar,
+                                                                aGeomVar,
+                                                                /*byMesh = */isSubMesh);
 
-  return SMESH::SMESH_Hypothesis::_nil();
 }
 
 //================================================================================

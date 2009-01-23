@@ -96,7 +96,7 @@ ostream & operator << (ostream & save, StdMeshers_Propagation & hyp)   { return 
 istream & operator >> (istream & load, StdMeshers_Propagation & hyp)   { return hyp.LoadFrom(load); }
 bool StdMeshers_Propagation::SetParametersByMesh(const SMESH_Mesh*,
                                                  const TopoDS_Shape& ) { return false; }
-bool StdMeshers_Propagation::SetParametersByElementSize(double,const SMESH_Mesh*) { return false; }
+bool StdMeshers_Propagation::SetParametersByDefaults(const TDefaults&,const SMESH_Mesh*) { return false; }
 void StdMeshers_Propagation::SetPropagationMgr(SMESH_subMesh* subMesh) { PropagationMgr::Set( subMesh ); }
 /*!
  * \brief Return an edge from which hypotheses are propagated from

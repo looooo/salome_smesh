@@ -230,13 +230,13 @@ void StdMeshers_ProjectionSource1D::RestoreParams(const TopoDS_Shape& s1,
 
 //================================================================================
 /*!
- * \brief Initialize my parameter values by linear size of mesh element.
+ * \brief Initialize my parameter values by default parameters.
  *  \retval bool - true if parameter values have been successfully defined
  */
 //================================================================================
 
-bool StdMeshers_ProjectionSource1D::SetParametersByElementSize(double            /*elemLenght*/,
-                                                               const SMESH_Mesh* /*theMesh*/)
+bool StdMeshers_ProjectionSource1D::SetParametersByDefaults(const TDefaults&  /*dflts*/,
+                                                            const SMESH_Mesh* /*theMesh*/)
 {
   return false;
 }

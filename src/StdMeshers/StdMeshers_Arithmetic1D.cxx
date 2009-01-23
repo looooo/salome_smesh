@@ -198,14 +198,14 @@ bool StdMeshers_Arithmetic1D::SetParametersByMesh(const SMESH_Mesh*   theMesh,
 
 //================================================================================
 /*!
- * \brief Initialize my parameter values by linear size of mesh element.
+ * \brief Initialize my parameter values by default parameters.
  *  \retval bool - true if parameter values have been successfully defined
  */
 //================================================================================
 
-bool StdMeshers_Arithmetic1D::SetParametersByElementSize(double            elemLenght,
-                                                         const SMESH_Mesh* /*mesh*/)
+bool StdMeshers_Arithmetic1D::SetParametersByDefaults(const TDefaults&  dflts,
+                                                      const SMESH_Mesh* /*mesh*/)
 {
-  return bool( _begLength = _endLength = elemLenght );
+  return bool( _begLength = _endLength = dflts._elemLength );
 }
 

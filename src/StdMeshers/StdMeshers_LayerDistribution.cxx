@@ -146,13 +146,13 @@ bool StdMeshers_LayerDistribution::SetParametersByMesh(const SMESH_Mesh*   ,
 }
 //================================================================================
 /*!
- * \brief Initialize my parameter values by linear size of mesh element.
+ * \brief Initialize my parameter values by default parameters.
  *  \retval bool - true if parameter values have been successfully defined
  */
 //================================================================================
 
-bool StdMeshers_LayerDistribution::SetParametersByElementSize(double            elemLenght,
-                                                              const SMESH_Mesh* theMesh)
+bool StdMeshers_LayerDistribution::SetParametersByDefaults(const TDefaults&  dflts,
+                                                           const SMESH_Mesh* theMesh)
 {
-  return myHyp ? myHyp->SetParametersByElementSize(elemLenght,theMesh) : false;
+  return myHyp ? myHyp->SetParametersByDefaults(dflts,theMesh) : false;
 }

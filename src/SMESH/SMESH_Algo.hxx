@@ -166,7 +166,7 @@ public:
    * \brief Just return false as the algorithm does not hold parameters values
    */
   virtual bool SetParametersByMesh(const SMESH_Mesh* theMesh, const TopoDS_Shape& theShape);
-  virtual bool SetParametersByElementSize(double elemLenght, const SMESH_Mesh* theMesh=0);
+  virtual bool SetParametersByDefaults(const TDefaults& dflts, const SMESH_Mesh* theMesh=0);
   /*!
    * \brief return compute error
    */

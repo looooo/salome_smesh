@@ -369,13 +369,13 @@ bool StdMeshers_AutomaticLength::SetParametersByMesh(const SMESH_Mesh*   theMesh
 
 //================================================================================
 /*!
- * \brief Initialize my parameter values by linear size of mesh element.
+ * \brief Initialize my parameter values by default parameters.
  *  \retval bool - true if parameter values have been successfully defined
  */
 //================================================================================
 
-bool StdMeshers_AutomaticLength::SetParametersByElementSize(double            elemLenght,
-                                                            const SMESH_Mesh* theMesh)
+bool StdMeshers_AutomaticLength::SetParametersByDefaults(const TDefaults&  /*theDflts*/,
+                                                         const SMESH_Mesh* /*theMesh*/)
 {
   return false;
 

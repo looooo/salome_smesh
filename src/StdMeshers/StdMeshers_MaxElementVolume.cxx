@@ -198,14 +198,14 @@ bool StdMeshers_MaxElementVolume::SetParametersByMesh(const SMESH_Mesh*   theMes
 }
 //================================================================================
 /*!
- * \brief Initialize my parameter values by linear size of mesh element.
+ * \brief Initialize my parameter values by default parameters.
  *  \retval bool - true if parameter values have been successfully defined
  */
 //================================================================================
 
-bool StdMeshers_MaxElementVolume::SetParametersByElementSize(double            elemLenght,
-                                                             const SMESH_Mesh* /*theMesh*/)
+bool StdMeshers_MaxElementVolume::SetParametersByDefaults(const TDefaults&  dflts,
+                                                          const SMESH_Mesh* /*theMesh*/)
 {
-  return bool( _maxVolume = elemLenght*elemLenght*elemLenght );
+  return bool( _maxVolume = dflts._elemLength*dflts._elemLength*dflts._elemLength );
 }
 

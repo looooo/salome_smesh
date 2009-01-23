@@ -294,7 +294,7 @@ bool SMESH_Algo::SetParametersByMesh(const SMESH_Mesh* /*theMesh*/,
 {
   return false;
 }
-bool SMESH_Algo::SetParametersByElementSize(double, const SMESH_Mesh*)
+bool SMESH_Algo::SetParametersByDefaults(const TDefaults& , const SMESH_Mesh*)
 {
   return false;
 }

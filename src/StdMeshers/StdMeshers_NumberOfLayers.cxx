@@ -162,14 +162,16 @@ bool StdMeshers_NumberOfLayers::SetParametersByMesh(const SMESH_Mesh*   ,
 
 //================================================================================
 /*!
- * \brief Initialize my parameter values by linear size of mesh element.
+ * \brief Initialize my parameter values by default parameters.
  *  \retval bool - true if parameter values have been successfully defined
  */
 //================================================================================
 
-bool StdMeshers_NumberOfLayers::SetParametersByElementSize(double            elemLenght,
-                                                           const SMESH_Mesh* theMesh)
+bool StdMeshers_NumberOfLayers::SetParametersByDefaults(const TDefaults&  dflts,
+                                                        const SMESH_Mesh* theMesh)
 {
-  return bool( theMesh ? _nbLayers = int( theMesh->GetShapeDiagonalSize() / elemLenght/ 2.) : 0);
+  if ( dflts._elemLength )
+    return bool( theMesh ? _nbLayers = int( theMesh->GetShapeDiagonalSize() / dflts._elemLength/ 2.) : 0);
+  return false;
 }
 

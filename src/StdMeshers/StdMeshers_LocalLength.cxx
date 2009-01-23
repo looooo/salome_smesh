@@ -236,14 +236,14 @@ bool StdMeshers_LocalLength::SetParametersByMesh(const SMESH_Mesh*   theMesh,
 }
 //================================================================================
 /*!
- * \brief Initialize my parameter values by linear size of mesh element.
+ * \brief Initialize my parameter values by default parameters.
  *  \retval bool - true if parameter values have been successfully defined
  */
 //================================================================================
 
-bool StdMeshers_LocalLength::SetParametersByElementSize(double            elemLenght,
-                                                        const SMESH_Mesh* /*theMesh*/)
+bool StdMeshers_LocalLength::SetParametersByDefaults(const TDefaults&  dflts,
+                                                     const SMESH_Mesh* /*theMesh*/)
 {
-  return bool( _length = elemLenght );
+  return bool( _length = dflts._elemLength );
 }
 

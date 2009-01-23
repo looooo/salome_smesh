@@ -203,13 +203,13 @@ bool StdMeshers_SegmentLengthAroundVertex::SetParametersByMesh(const SMESH_Mesh*
 
 //================================================================================
 /*!
- * \brief Initialize my parameter values by linear size of mesh element.
+ * \brief Initialize my parameter values by default parameters.
  *  \retval bool - true if parameter values have been successfully defined
  */
 //================================================================================
 
-bool StdMeshers_SegmentLengthAroundVertex::SetParametersByElementSize(double,
-                                                                      const SMESH_Mesh*)
+bool StdMeshers_SegmentLengthAroundVertex::SetParametersByDefaults(const TDefaults&,
+                                                                   const SMESH_Mesh*)
 {
   return false;
 }

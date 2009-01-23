@@ -153,13 +153,13 @@ bool StdMeshers_LengthFromEdges::SetParametersByMesh(const SMESH_Mesh* /*theMesh
 }
 //================================================================================
 /*!
- * \brief Initialize my parameter values by linear size of mesh element.
+ * \brief Initialize my parameter values by default parameters.
  *  \retval bool - true if parameter values have been successfully defined
  */
 //================================================================================
 
-bool StdMeshers_LengthFromEdges::SetParametersByElementSize(double            /*elemLenght*/,
-                                                            const SMESH_Mesh* /*theMesh*/)
+bool StdMeshers_LengthFromEdges::SetParametersByDefaults(const TDefaults&  /*dflts*/,
+                                                         const SMESH_Mesh* /*theMesh*/)
 {
   return true;
 }

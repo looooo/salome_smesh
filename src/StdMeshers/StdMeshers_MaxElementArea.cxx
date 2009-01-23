@@ -187,14 +187,14 @@ bool StdMeshers_MaxElementArea::SetParametersByMesh(const SMESH_Mesh*   theMesh,
 }
 //================================================================================
 /*!
- * \brief Initialize my parameter values by linear size of mesh element.
+ * \brief Initialize my parameter values by default parameters.
  *  \retval bool - true if parameter values have been successfully defined
  */
 //================================================================================
 
-bool StdMeshers_MaxElementArea::SetParametersByElementSize(double            elemLenght,
-                                                           const SMESH_Mesh* /*theMesh*/)
+bool StdMeshers_MaxElementArea::SetParametersByDefaults(const TDefaults&  dflts,
+                                                        const SMESH_Mesh* /*theMesh*/)
 {
-  return bool( _maxArea = elemLenght*elemLenght );
+  return bool( _maxArea = dflts._elemLength*dflts._elemLength );
 }
 

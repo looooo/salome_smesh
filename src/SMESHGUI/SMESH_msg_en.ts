@@ -4484,11 +4484,11 @@ It is impossible to read point coordinates from file</translation>
         </message>
 	<message>
 	    <source>MEN_POINT_SELECT</source>
-            <translation>Select Point</translation>
+            <translation>From Origin to selected Point</translation>
         </message>
 	<message>
 	    <source>MEN_FACE_SELECT</source>
-            <translation>Select Plane</translation>
+            <translation>Normal to selected Face</translation>
         </message>	
     </context>
     <context>

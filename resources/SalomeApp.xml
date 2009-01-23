@@ -67,6 +67,7 @@
     <parameter name="auto_groups"                  value="false"/>
     <parameter name="show_result_notification"     value="2"/>
     <parameter name="segmentation"                 value="10"/>
+    <parameter name="nb_segments_per_edge"         value="15"/>
   </section>
   <section name="resources">
     <!-- Module resources -->

@@ -2921,7 +2921,7 @@ Please, create VTK viewer and try again</translation>
         </message>
         <message>
             <source>PREF_NB_SEGMENTS</source>
-            <translation>Number of Segments</translation>
+            <translation>Default Number of Segments</translation>
         </message>
         <message>
             <source>PREF_AUTO_UPDATE</source>

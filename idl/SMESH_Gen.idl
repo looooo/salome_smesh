@@ -167,7 +167,11 @@ module SMESH
      * Sets number of segments per diagonal of boundary box of geometry by which
      * default segment length of appropriate 1D hypotheses is defined
      */
-    void SetBoundaryBoxSegmentation( in long theNbSegments );
+    void SetBoundaryBoxSegmentation( in long theNbSegments ) raises ( SALOME::SALOME_Exception );
+    /*!
+     * \brief Sets default number of segments per edge
+     */
+    void SetDefaultNbSegments( in long theNbSegments) raises ( SALOME::SALOME_Exception );
 
     /*!
      * Set the object name

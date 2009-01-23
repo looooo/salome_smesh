@@ -91,6 +91,11 @@ class SMESH_EXPORT  SMESH_Gen
    */
   void SetBoundaryBoxSegmentation( int theNbSegments ) { _segmentation = theNbSegments; }
   int  GetBoundaryBoxSegmentation() const { return _segmentation; }
+  /*!
+   * \brief Sets default number of segments per edge
+   */
+  void SetDefaultNbSegments(int nb) { _nbSegments = nb; }
+  int GetDefaultNbSegments() const { return _nbSegments; }
   
   struct TAlgoStateError
   {
@@ -149,6 +154,8 @@ class SMESH_EXPORT  SMESH_Gen
   // number of segments per diagonal of boundary box of geometry by which
   // default segment length of appropriate 1D hypotheses is defined
   int _segmentation;
+  // default of segments
+  int _nbSegments;
 };
 
 #endif

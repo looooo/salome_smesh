@@ -663,10 +663,10 @@ SMESH_Gen_i::GetHypothesisParameterValues (const char*           theHypType,
   throw ( SALOME::SALOME_Exception )
 {
   Unexpect aCatch(SALOME_SalomeException);
-  if ( CORBA::is_nil( theMesh ) && byMesh )
-    THROW_SALOME_CORBA_EXCEPTION( "bad Mesh reference", SALOME::BAD_PARAM );
-  if ( CORBA::is_nil( theGeom ) )
-    THROW_SALOME_CORBA_EXCEPTION( "bad shape object reference", SALOME::BAD_PARAM );
+  if ( byMesh && CORBA::is_nil( theMesh ) )
+    return SMESH::SMESH_Hypothesis::_nil();
+  if ( byMesh && CORBA::is_nil( theGeom ) )
+    return SMESH::SMESH_Hypothesis::_nil();
 
   // -----------------------------------------------
   // find hypothesis used to mesh theGeom
@@ -675,12 +675,9 @@ SMESH_Gen_i::GetHypothesisParameterValues (const char*           theHypType,
   // get mesh and shape
   SMESH_Mesh_i* meshServant = SMESH::DownCast<SMESH_Mesh_i*>( theMesh );
   TopoDS_Shape shape = GeomObjectToShape( theGeom );
-  if ( !meshServant && byMesh || shape.IsNull() )
+  if ( byMesh && ( !meshServant || meshServant->NbNodes()==0 || shape.IsNull() ))
     return SMESH::SMESH_Hypothesis::_nil();
   ::SMESH_Mesh* mesh = meshServant ? &meshServant->GetImpl() : (::SMESH_Mesh*)0;
-
-  if ( byMesh && mesh->NbNodes() == 0 ) // empty mesh
-    return SMESH::SMESH_Hypothesis::_nil();
 
   // create a temporary hypothesis to know its dimention
   SMESH::SMESH_Hypothesis_var tmpHyp = this->createHypothesis( theHypType, theLibName );
@@ -724,12 +721,12 @@ SMESH_Gen_i::GetHypothesisParameterValues (const char*           theHypType,
       diagonal = mesh->GetShapeDiagonalSize();
     else
       diagonal = ::SMESH_Mesh::GetShapeDiagonalSize( shape );
-    double elemSize = diagonal / myGen.GetBoundaryBoxSegmentation();
-    if ( elemSize > 0 ) {
-      // let the temporary hypothesis initialize it's values
-      if ( hyp->SetParametersByElementSize( elemSize, mesh ))
-        return SMESH::SMESH_Hypothesis::_duplicate( tmpHyp );
-    }
+    ::SMESH_Hypothesis::TDefaults dflts;
+    dflts._elemLength = diagonal / myGen.GetBoundaryBoxSegmentation();
+    dflts._nbSegments = myGen.GetDefaultNbSegments();
+    // let the temporary hypothesis initialize it's values
+    if ( hyp->SetParametersByDefaults( dflts, mesh ))
+      return SMESH::SMESH_Hypothesis::_duplicate( tmpHyp );
   }
 
   return SMESH::SMESH_Hypothesis::_nil();
@@ -743,8 +740,25 @@ SMESH_Gen_i::GetHypothesisParameterValues (const char*           theHypType,
 //=============================================================================
 
 void SMESH_Gen_i::SetBoundaryBoxSegmentation( CORBA::Long theNbSegments )
+  throw ( SALOME::SALOME_Exception )
 {
-  myGen.SetBoundaryBoxSegmentation( int( theNbSegments ));
+  if ( theNbSegments > 0 )
+    myGen.SetBoundaryBoxSegmentation( int( theNbSegments ));
+  else
+    THROW_SALOME_CORBA_EXCEPTION( "non-positive number of segments", SALOME::BAD_PARAM );
+}
+//=============================================================================
+  /*!
+   * \brief Sets default number of segments per edge
+   */
+//=============================================================================
+void SMESH_Gen_i::SetDefaultNbSegments(CORBA::Long theNbSegments)
+  throw ( SALOME::SALOME_Exception )
+{
+  if ( theNbSegments )
+    myGen.SetDefaultNbSegments( int(theNbSegments) );
+  else
+    THROW_SALOME_CORBA_EXCEPTION( "non-positive number of segments", SALOME::BAD_PARAM );
 }
 
 //=============================================================================

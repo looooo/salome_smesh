@@ -1072,8 +1072,10 @@ SalomeApp_Module( "SMESH" )
 
     //  0019923: EDF 765 SMESH : default values of hypothesis
     SUIT_ResourceMgr* aResourceMgr = SMESH::GetResourceMgr(this);
-    int nbSeg = aResourceMgr->integerValue( "SMESH", "segmentation" );
+    int nbSeg = aResourceMgr->integerValue( "SMESH", "segmentation", 10 );
     myComponentSMESH->SetBoundaryBoxSegmentation( nbSeg );
+    nbSeg = aResourceMgr->integerValue( "SMESH", "nb_segments_per_edge", 15 );
+    myComponentSMESH->SetDefaultNbSegments( nbSeg );
   }
 
   myActiveDialogBox = 0;
@@ -3464,6 +3466,10 @@ void SMESHGUI::createPreferences()
                               "SMESH", "segmentation" );
   setPreferenceProperty( segLen, "min", 1 );
   setPreferenceProperty( segLen, "max", 10000000 );
+  int nbSeg = addPreference( tr( "PREF_NB_SEGMENTS" ), segGroup, LightApp_Preferences::IntSpin,
+                             "SMESH", "nb_segments_per_edge" );
+  setPreferenceProperty( nbSeg, "min", 1 );
+  setPreferenceProperty( nbSeg, "max", 10000000 );
 
   // Mesh tab ------------------------------------------------------------------------
   int meshTab = addPreference( tr( "PREF_TAB_MESH" ) );
@@ -3666,8 +3672,12 @@ void SMESHGUI::preferencesChanged( const QString& sect, const QString& name )
       }
     }
     else if ( name == "segmentation" ) {
-      int nbSeg = aResourceMgr->integerValue( "SMESH", "segmentation" );
+      int nbSeg = aResourceMgr->integerValue( "SMESH", "segmentation", 10 );
       myComponentSMESH->SetBoundaryBoxSegmentation( nbSeg );
+    }
+    else if ( name == "nb_segments_per_edge" ) {
+      int nbSeg = aResourceMgr->integerValue( "SMESH", "nb_segments_per_edge", 15 );
+      myComponentSMESH->SetDefaultNbSegments( nbSeg );
     }
 
     if(aWarning.size() != 0){

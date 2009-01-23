@@ -208,7 +208,11 @@ public:
    * Sets number of segments per diagonal of boundary box of geometry by which
    * default segment length of appropriate 1D hypotheses is defined
    */
-  void SetBoundaryBoxSegmentation( CORBA::Long theNbSegments );
+  void SetBoundaryBoxSegmentation( CORBA::Long theNbSegments ) throw ( SALOME::SALOME_Exception );
+  /*!
+   * \brief Sets default number of segments per edge
+   */
+  void SetDefaultNbSegments(CORBA::Long theNbSegments) throw ( SALOME::SALOME_Exception );
 
   // Create empty mesh on a shape
   SMESH::SMESH_Mesh_ptr CreateMesh( GEOM::GEOM_Object_ptr theShapeObject )

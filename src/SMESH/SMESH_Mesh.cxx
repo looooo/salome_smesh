@@ -214,9 +214,12 @@ const TopoDS_Solid& SMESH_Mesh::PseudoShape()
 
 double SMESH_Mesh::GetShapeDiagonalSize(const TopoDS_Shape & aShape)
 {
-  Bnd_Box Box;
-  BRepBndLib::Add(aShape, Box);
-  return sqrt( Box.SquareExtent() );
+  if ( !aShape.IsNull() ) {
+    Bnd_Box Box;
+    BRepBndLib::Add(aShape, Box);
+    return sqrt( Box.SquareExtent() );
+  }
+  return 0;
 }
 
 //=======================================================================

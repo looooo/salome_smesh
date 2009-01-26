@@ -101,7 +101,7 @@ protected:
     BEG_LENGTH_IND   = 0,
     END_LENGTH_IND   = 1,
     DEFLECTION_IND   = 0,
-    PRECISION_IND    = 0
+    PRECISION_IND    = 1
   };
 
   enum IValueIndex {

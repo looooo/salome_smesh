@@ -9,7 +9,7 @@ import smesh
 # Parameters
 # ----------
 
-results = "/export/home/wambeke/ZZ"
+results = "/tmp/ZZ"
 
 radius =  50
 height = 200
@@ -48,6 +48,7 @@ algo3d.SetMEDName(results)
 algo3d.SetNbPart(4)
 algo3d.SetBackground(False)
 algo3d.SetKeepFiles(False)
+algo3d.SetToMeshHoles(True)
 
 # Launch meshers
 # --------------

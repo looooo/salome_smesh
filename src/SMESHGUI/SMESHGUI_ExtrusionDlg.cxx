@@ -53,6 +53,8 @@
 #include <SVTK_ViewModel.h>
 #include <SVTK_ViewWindow.h>
 
+#include <SalomeApp_IntSpinBox.h>
+
 // OCCT includes
 #include <TColStd_MapOfInteger.hxx>
 #include <TColStd_IndexedMapOfInteger.hxx>
@@ -67,7 +69,6 @@
 #include <QPushButton>
 #include <QRadioButton>
 #include <QCheckBox>
-#include <QSpinBox>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QGridLayout>
@@ -89,7 +90,8 @@ SMESHGUI_ExtrusionDlg::SMESHGUI_ExtrusionDlg (SMESHGUI* theModule)
   : QDialog( SMESH::GetDesktop( theModule ) ),
     mySMESHGUI( theModule ),
     mySelectionMgr( SMESH::GetSelectionMgr( theModule ) ),
-    myFilterDlg( 0 )
+    myFilterDlg( 0 ),
+    mySelectedObject(SMESH::SMESH_IDSource::_nil())
 {
   QPixmap image0 (SMESH::GetResourceMgr( mySMESHGUI )->loadPixmap("SMESH", tr("ICON_DLG_EDGE")));
   QPixmap image1 (SMESH::GetResourceMgr( mySMESHGUI )->loadPixmap("SMESH", tr("ICON_DLG_TRIANGLE")));
@@ -197,7 +199,7 @@ SMESHGUI_ExtrusionDlg::SMESHGUI_ExtrusionDlg (SMESHGUI* theModule)
 
   // Controls for nb. steps defining
   TextLabelNbSteps = new QLabel(tr("SMESH_NUMBEROFSTEPS"), GroupArguments);
-  SpinBox_NbSteps = new QSpinBox(GroupArguments);
+  SpinBox_NbSteps = new SalomeApp_IntSpinBox(GroupArguments);
 
   // CheckBox for groups generation
   MakeGroupsCheck = new QCheckBox(tr("SMESH_MAKE_GROUPS"), GroupArguments);
@@ -404,6 +406,9 @@ bool SMESHGUI_ExtrusionDlg::ClickOnApply()
   if (mySMESHGUI->isActiveStudyLocked())
     return false;
 
+  if (!isValid())
+    return false;
+
   if (myNbOkElements) {
     
     gp_XYZ aNormale(SpinBox_Vx->GetValue(),
@@ -419,15 +424,41 @@ bool SMESHGUI_ExtrusionDlg::ClickOnApply()
 
     long aNbSteps = (long)SpinBox_NbSteps->value();
 
+    QStringList aParameters;
+    aParameters << SpinBox_Dx->text();
+    aParameters << SpinBox_Dy->text();
+    aParameters << SpinBox_Dz->text();
+    aParameters << SpinBox_NbSteps->text();
+
     try {
       SUIT_OverrideCursor aWaitCursor;
       SMESH::SMESH_MeshEditor_var aMeshEditor = myMesh->GetMeshEditor();
 
-      if ( MakeGroupsCheck->isEnabled() && MakeGroupsCheck->isChecked() )
-        SMESH::ListOfGroups_var groups = 
-          aMeshEditor->ExtrusionSweepMakeGroups(myElementsId.inout(), aVector, aNbSteps);
-      else
-        aMeshEditor->ExtrusionSweep(myElementsId.inout(), aVector, aNbSteps);
+      if ( MakeGroupsCheck->isEnabled() && MakeGroupsCheck->isChecked() ) {
+        if( CheckBoxMesh->isChecked() ) {
+	  if( GetConstructorId() == 0 )
+	    SMESH::ListOfGroups_var groups = 
+	      aMeshEditor->ExtrusionSweepObject1DMakeGroups(mySelectedObject, aVector, aNbSteps);
+	  else
+	    SMESH::ListOfGroups_var groups = 
+	      aMeshEditor->ExtrusionSweepObject2DMakeGroups(mySelectedObject, aVector, aNbSteps);
+	}
+	else
+	  SMESH::ListOfGroups_var groups = 
+	    aMeshEditor->ExtrusionSweepMakeGroups(myElementsId.inout(), aVector, aNbSteps);
+      }
+      else {
+	if( CheckBoxMesh->isChecked() ) {
+	  if( GetConstructorId() == 0 )
+	    aMeshEditor->ExtrusionSweepObject1D(mySelectedObject, aVector, aNbSteps);
+	  else
+	    aMeshEditor->ExtrusionSweepObject2D(mySelectedObject, aVector, aNbSteps);
+	}
+	else
+	  aMeshEditor->ExtrusionSweep(myElementsId.inout(), aVector, aNbSteps);
+      }
+
+      myMesh->SetParameters( SMESHGUI::JoinObjectParameters(aParameters) );
 
     } catch (...) {
     }
@@ -437,6 +468,7 @@ bool SMESHGUI_ExtrusionDlg::ClickOnApply()
       mySMESHGUI->updateObjBrowser(true); // new groups may appear
     Init(false);
     ConstructorsClicked(GetConstructorId());
+    mySelectedObject = SMESH::SMESH_IDSource::_nil();
     SelectionIntoArgument();
   }
   return true;
@@ -603,40 +635,20 @@ void SMESHGUI_ExtrusionDlg::SelectionIntoArgument()
     }
 
     if (CheckBoxMesh->isChecked()) {
-      SMESH::ElementType neededType = GetConstructorId() ? SMESH::FACE : SMESH::EDGE;
-
       SMESH::GetNameOfSelectedIObjects(mySelectionMgr, aString);
 
-      SMESH::SMESH_Mesh_var mesh = SMESH::IObjectToInterface<SMESH::SMESH_Mesh>(IO);
-
-      if (!mesh->_is_nil()) { //MESH
-        // get elements from mesh
-          myElementsId = mesh->GetElementsByType(neededType);
-          aNbElements = myElementsId->length();
-      } else {
-        SMESH::SMESH_subMesh_var aSubMesh =
-          SMESH::IObjectToInterface<SMESH::SMESH_subMesh>(IO);
-        
-        if (!aSubMesh->_is_nil()) { //SUBMESH
-          // get IDs from submesh
-          myElementsId = aSubMesh->GetElementsByType(neededType);
-          aNbElements = myElementsId->length();
-        } else {
-          SMESH::SMESH_GroupBase_var aGroup = 
-            SMESH::IObjectToInterface<SMESH::SMESH_GroupBase>(IO);
-
-          if (!aGroup->_is_nil() && aGroup->GetType() == neededType) { // GROUP
-            // get IDs from smesh group
-            myElementsId = aGroup->GetListOfID();
-            aNbElements = myElementsId->length();
-          }
-        }
-      }
+      if (!SMESH::IObjectToInterface<SMESH::SMESH_IDSource>(IO)->_is_nil())
+        mySelectedObject = SMESH::IObjectToInterface<SMESH::SMESH_IDSource>(IO);
+      else
+        return;
     } else {
       // get indices of selcted elements
       TColStd_IndexedMapOfInteger aMapIndex;
       mySelector->GetIndex(IO,aMapIndex);
       aNbElements = aMapIndex.Extent();
+
+      if (aNbElements < 1)
+	return;
 
       myElementsId = new SMESH::long_array;
       myElementsId->length( aNbElements );
@@ -644,9 +656,6 @@ void SMESHGUI_ExtrusionDlg::SelectionIntoArgument()
       for ( int i = 0; i < aNbElements; ++i )
         aString += QString(" %1").arg( myElementsId[ i ] = aMapIndex( i+1 ) );
     }
-
-    if (aNbElements < 1)
-      return;
 
     myNbOkElements = true;
 
@@ -855,4 +864,27 @@ void SMESHGUI_ExtrusionDlg::setFilters()
   myFilterDlg->SetSourceWg( LineEditElements );
 
   myFilterDlg->show();
+}
+
+//=================================================================================
+// function : isValid
+// purpose  :
+//=================================================================================
+bool SMESHGUI_ExtrusionDlg::isValid()
+{
+  QString msg;
+  bool ok = true;
+  ok = SpinBox_Dx->isValid( msg, true ) && ok;
+  ok = SpinBox_Dy->isValid( msg, true ) && ok;
+  ok = SpinBox_Dz->isValid( msg, true ) && ok;
+  ok = SpinBox_NbSteps->isValid( msg, true ) && ok;
+
+  if( !ok ) {
+    QString str( tr( "SMESH_INCORRECT_INPUT" ) );
+    if ( !msg.isEmpty() )
+      str += "\n" + msg;
+    SUIT_MessageBox::critical( this, tr( "SMESH_ERROR" ), str );
+    return false;
+  }
+  return true;
 }

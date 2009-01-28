@@ -44,7 +44,7 @@ class QRadioButton;
 class QCheckBox;
 class QButtonGroup;
 class QLabel;
-class QSpinBox;
+class SalomeApp_IntSpinBox;
 class vtkUnstructuredGrid;
 class SALOME_Actor;
 class SVTK_Selector;
@@ -130,8 +130,8 @@ private:
   QCheckBox*                          myRefine;
 
   QFrame*                             myRefineGrp;
-  QSpinBox*                           myNode1;
-  QSpinBox*                           myNode2;
+  SalomeApp_IntSpinBox*               myNode1;
+  SalomeApp_IntSpinBox*               myNode2;
   QLabel*                             myNode2Lbl;
 
   QFrame*                             myGeomGrp;

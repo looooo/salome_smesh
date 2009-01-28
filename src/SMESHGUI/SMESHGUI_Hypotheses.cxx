@@ -36,11 +36,11 @@
 #include <utilities.h>
 
 // SALOME GUI includes
-#include <QtxIntSpinBox.h>
 #include <SUIT_Session.h>
 #include <SUIT_MessageBox.h>
 #include <SUIT_ResourceMgr.h>
 #include <LightApp_Application.h>
+#include <SalomeApp_IntSpinBox.h>
 
 // Qt includes
 #include <QFrame>
@@ -211,7 +211,7 @@ QFrame* SMESHGUI_GenericHypothesisCreator::buildStdFrame()
       {
       case QVariant::Int:
         {
-          QtxIntSpinBox* sb = new QtxIntSpinBox( GroupC1 );
+          SalomeApp_IntSpinBox* sb = new SalomeApp_IntSpinBox( GroupC1 );
 	  sb->setObjectName( (*anIt).myName );
           attuneStdWidget( sb, i );
           sb->setValue( (*anIt).myValue.toInt() );
@@ -221,7 +221,7 @@ QFrame* SMESHGUI_GenericHypothesisCreator::buildStdFrame()
         break;
       case QVariant::Double:
         {
-          QtxDoubleSpinBox* sb = new SMESHGUI_SpinBox( GroupC1 );
+          SalomeApp_DoubleSpinBox* sb = new SMESHGUI_SpinBox( GroupC1 );
 	  sb->setObjectName( (*anIt).myName );
           attuneStdWidget( sb, i );
           sb->setValue( (*anIt).myValue.toDouble() );
@@ -231,12 +231,34 @@ QFrame* SMESHGUI_GenericHypothesisCreator::buildStdFrame()
         break;
       case QVariant::String:
         {
-          QLineEdit* le = new QLineEdit( GroupC1 );
-	  le->setObjectName( (*anIt).myName );
-          attuneStdWidget( le, i );
-          le->setText( (*anIt).myValue.toString() );
-          connect( le, SIGNAL( textChanged( const QString& ) ), this, SLOT( onValueChanged() ) );
-          w = le;
+          if((*anIt).isVariable) {
+            _PTR(Study) aStudy = SMESH::GetActiveStudyDocument();
+            QString aVar = (*anIt).myValue.toString();
+            if(aStudy->IsInteger(aVar.toLatin1().constData())){
+              SalomeApp_IntSpinBox* sb = new SalomeApp_IntSpinBox( GroupC1 );
+              sb->setObjectName( (*anIt).myName );
+              attuneStdWidget( sb, i );
+              sb->setText( aVar );
+              connect( sb, SIGNAL( valueChanged( int ) ), this, SLOT( onValueChanged() ) );
+              w = sb;
+            }
+            else if(aStudy->IsReal(aVar.toLatin1().constData())){
+              SalomeApp_DoubleSpinBox* sb = new SalomeApp_DoubleSpinBox( GroupC1 );
+              sb->setObjectName( (*anIt).myName );
+              attuneStdWidget( sb, i );
+              sb->setText( aVar );
+              connect( sb, SIGNAL( valueChanged( double ) ), this, SLOT( onValueChanged() ) );
+              w = sb;
+            }
+          }
+          else {
+            QLineEdit* le = new QLineEdit( GroupC1 );
+            le->setObjectName( (*anIt).myName );
+            attuneStdWidget( le, i );
+            le->setText( (*anIt).myValue.toString() );
+            connect( le, SIGNAL( textChanged( const QString& ) ), this, SLOT( onValueChanged() ) );
+            w = le;
+          }
         }
         break;
       }
@@ -279,16 +301,16 @@ bool SMESHGUI_GenericHypothesisCreator::getStdParamFromDlg( ListOfStdParams& par
   for( ; anIt!=aLast; anIt++ )
   {
     item.myName = (*anIt)->objectName();
-    if( (*anIt)->inherits( "QtxIntSpinBox" ) )
+    if( (*anIt)->inherits( "SalomeApp_IntSpinBox" ) )
     {
-      QtxIntSpinBox* sb = ( QtxIntSpinBox* )( *anIt );
+      SalomeApp_IntSpinBox* sb = ( SalomeApp_IntSpinBox* )( *anIt );
       item.myValue = sb->value();
       params.append( item );
     }
     
-    else if( (*anIt)->inherits( "QtxDoubleSpinBox" ) )
+    else if( (*anIt)->inherits( "SalomeApp_DoubleSpinBox" ) )
     {
-      QtxDoubleSpinBox* sb = ( QtxDoubleSpinBox* )( *anIt );
+      SalomeApp_DoubleSpinBox* sb = ( SalomeApp_DoubleSpinBox* )( *anIt );
       item.myValue = sb->value();
       params.append( item );
     }
@@ -309,6 +331,24 @@ bool SMESHGUI_GenericHypothesisCreator::getStdParamFromDlg( ListOfStdParams& par
       res = false;
   }
   return res;
+}
+
+
+QStringList SMESHGUI_GenericHypothesisCreator::getVariablesFromDlg() const
+{
+  QStringList aResult;
+  ListOfWidgets::const_iterator anIt = widgets().begin(), aLast = widgets().end();
+  for( ; anIt!=aLast; anIt++ ) {
+    if( (*anIt)->inherits( "SalomeApp_IntSpinBox" ) ) {
+      SalomeApp_IntSpinBox* sb = ( SalomeApp_IntSpinBox* )( *anIt );
+      aResult.append(sb->text());
+    } 
+    else if( (*anIt)->inherits( "QtxDoubleSpinBox" ) ) {
+      QtxDoubleSpinBox* sb = ( QtxDoubleSpinBox* )( *anIt );
+      aResult.append(sb->text());
+    } 
+  }
+  return aResult;
 }
 
 QString SMESHGUI_GenericHypothesisCreator::stdParamValues( const ListOfStdParams& params)
@@ -428,6 +468,26 @@ bool SMESHGUI_GenericHypothesisCreator::getParamFromCustomWidget( StdParam&, QWi
   return false;
 }
 
+bool SMESHGUI_GenericHypothesisCreator::checkParams( QString& msg ) const
+{
+  bool ok = true;
+  ListOfWidgets::const_iterator anIt = widgets().begin(), aLast = widgets().end();
+  for( ; anIt!=aLast; anIt++ )
+  {
+    if( (*anIt)->inherits( "SalomeApp_IntSpinBox" ) )
+    {
+      SalomeApp_IntSpinBox* sb = ( SalomeApp_IntSpinBox* )( *anIt );
+      ok = sb->isValid( msg, true ) && ok;
+    }
+    else if( (*anIt)->inherits( "SalomeApp_DoubleSpinBox" ) )
+    {
+      SalomeApp_DoubleSpinBox* sb = ( SalomeApp_DoubleSpinBox* )( *anIt );
+      ok = sb->isValid( msg, true ) && ok;
+    }
+  }
+  return ok;
+}
+
 void SMESHGUI_GenericHypothesisCreator::onReject()
 {
 }
@@ -520,8 +580,15 @@ void SMESHGUI_HypothesisDlg::setCustomFrame( QFrame* f )
 
 void SMESHGUI_HypothesisDlg::accept()
 {
-  if ( myCreator && !myCreator->checkParams() )
+  QString msg;
+  if ( myCreator && !myCreator->checkParams( msg ) )
+  {
+    QString str( tr( "SMESH_INCORRECT_INPUT" ) );
+    if ( !msg.isEmpty() )
+      str += "\n" + msg;
+    SUIT_MessageBox::critical( this, tr( "SMESH_ERROR" ), str );
     return;
+  }
   QtxDialog::accept();
 }
 

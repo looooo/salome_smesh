@@ -73,6 +73,8 @@ private:
   int                    GetConstructorId();
   void                   setNewMeshName();
 
+  bool                   isValid();
+
   SMESHGUI*              mySMESHGUI;              /* Current SMESHGUI object */
   SMESHGUI_IdValidator*  myIdValidator;
   LightApp_SelectionMgr* mySelectionMgr;          /* User shape selection */
@@ -87,6 +89,8 @@ private:
   SMESH::SMESH_Mesh_var  myMesh;
   SMESH_Actor*           myActor;
   SMESH_LogicalFilter*   myMeshOrSubMeshOrGroupFilter;
+
+  SMESH::SMESH_IDSource_var mySelectedObject;
 
   QGroupBox*             ConstructorsBox;
   QButtonGroup*          GroupConstructors;
@@ -132,7 +136,7 @@ private slots:
   void                   ConstructorsClicked( int );
   void                   ClickOnOk();
   void                   ClickOnCancel();
-  void                   ClickOnApply();
+  bool                   ClickOnApply();
   void                   ClickOnHelp();
   void                   SetEditCurrentArgument();
   void                   SelectionIntoArgument();

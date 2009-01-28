@@ -77,6 +77,13 @@ public:
   virtual const char* GetLibName() const;
   void  SetLibName(const char* theLibName);
 
+  void  SetParameters(const char *theParameters);
+  char* GetParameters() const;
+
+  void SetLastParameters(const char* theParameters);
+  char* GetLastParameters() const;
+  void ClearParameters();
+  
   /*!
    * \brief Initialize my parameter values by the mesh built on the geometry
    *  \param theMesh - the built mesh
@@ -115,6 +122,8 @@ protected:
 
 private:
   std::string _libName;
+  std::string _parameters;
+  std::string _lastParameters;
 };
 
 #endif

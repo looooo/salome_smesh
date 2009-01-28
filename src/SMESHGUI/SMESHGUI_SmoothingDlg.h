@@ -43,8 +43,8 @@ class QPushButton;
 class QRadioButton;
 class QComboBox;
 class QCheckBox;
-class QSpinBox;
 class SMESHGUI;
+class SalomeApp_IntSpinBox;
 class SMESHGUI_IdValidator;
 class SMESHGUI_SpinBox;
 class SMESHGUI_FilterDlg;
@@ -73,6 +73,8 @@ private:
   void                   keyPressEvent( QKeyEvent* );
   void                   setFilters( const bool theIsElem );
 
+  bool                   isValid();
+  
   SMESHGUI*              mySMESHGUI;              /* Current SMESHGUI object */
   SMESHGUI_IdValidator*  myIdValidator;
   LightApp_SelectionMgr* mySelectionMgr;          /* User shape selection */
@@ -82,6 +84,8 @@ private:
   int                    myConstructorId;         /* Current constructor id = radio button id */
   QLineEdit*             myEditCurrentArgument;   /* Current  LineEdit */
   SVTK_Selector*         mySelector;
+
+  SMESH::SMESH_IDSource_var mySelectedObject;
 
   bool                   myBusy;
   SMESH::SMESH_Mesh_var  myMesh;
@@ -106,7 +110,7 @@ private:
   QLabel*                TextLabelMethod;
   QComboBox*             ComboBoxMethod;
   QLabel*                TextLabelLimit;
-  QSpinBox*              SpinBox_IterationLimit;
+  SalomeApp_IntSpinBox*  SpinBox_IterationLimit;
   QLabel*                TextLabelAspectRatio;
   SMESHGUI_SpinBox*      SpinBox_AspectRatio;
   QCheckBox*             CheckBoxParametric;
@@ -118,7 +122,7 @@ private:
 private slots:
   void                   ClickOnOk();
   void                   ClickOnCancel();
-  void                   ClickOnApply();
+  bool                   ClickOnApply();
   void                   ClickOnHelp();
   void                   SetEditCurrentArgument();
   void                   SelectionIntoArgument();

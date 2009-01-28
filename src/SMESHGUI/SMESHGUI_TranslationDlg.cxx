@@ -109,7 +109,8 @@ SMESHGUI_TranslationDlg::SMESHGUI_TranslationDlg( SMESHGUI* theModule )
   : QDialog( SMESH::GetDesktop( theModule ) ),
     mySMESHGUI( theModule ),
     mySelectionMgr( SMESH::GetSelectionMgr( theModule ) ),
-    myFilterDlg(0)
+    myFilterDlg(0),
+    mySelectedObject(SMESH::SMESH_IDSource::_nil())
 {
   QPixmap image0 (SMESH::GetResourceMgr( mySMESHGUI )->loadPixmap("SMESH", tr("ICON_SMESH_TRANSLATION_POINTS")));
   QPixmap image1 (SMESH::GetResourceMgr( mySMESHGUI )->loadPixmap("SMESH", tr("ICON_SMESH_TRANSLATION_VECTOR")));
@@ -436,10 +437,13 @@ void SMESHGUI_TranslationDlg::ConstructorsClicked (int constructorId)
 // function : ClickOnApply()
 // purpose  :
 //=================================================================================
-void SMESHGUI_TranslationDlg::ClickOnApply()
+bool SMESHGUI_TranslationDlg::ClickOnApply()
 {
   if (mySMESHGUI->isActiveStudyLocked())
-    return;
+    return false;
+
+  if( !isValid() )
+    return false;
 
   if (myNbOkElements) {
     QStringList aListElementsId = myElementsId.split(" ", QString::SkipEmptyParts);
@@ -461,6 +465,17 @@ void SMESHGUI_TranslationDlg::ClickOnApply()
       aVector.PS.z = SpinBox1_3->GetValue();
     }
 
+    QStringList aParameters;
+    aParameters << SpinBox1_1->text();
+    if (GetConstructorId() == 0)
+      aParameters << SpinBox2_1->text();
+    aParameters << SpinBox1_2->text();
+    if (GetConstructorId() == 0)
+      aParameters << SpinBox2_2->text();
+    aParameters << SpinBox1_3->text();
+    if (GetConstructorId() == 0)
+      aParameters << SpinBox2_3->text();
+
     int actionButton = ActionGroup->checkedId();
     bool makeGroups = ( MakeGroupsCheck->isEnabled() && MakeGroupsCheck->isChecked() );
     try {
@@ -468,31 +483,55 @@ void SMESHGUI_TranslationDlg::ClickOnApply()
       SMESH::SMESH_MeshEditor_var aMeshEditor = myMesh->GetMeshEditor();
       switch ( actionButton ) {
       case MOVE_ELEMS_BUTTON:
-        aMeshEditor->Translate(anElementsId, aVector, false);
+        if(CheckBoxMesh->isChecked())
+          aMeshEditor->TranslateObject(mySelectedObject, aVector, false);
+        else
+          aMeshEditor->Translate(anElementsId, aVector, false);
+	if( !myMesh->_is_nil())
+	  myMesh->SetParameters(SMESHGUI::JoinObjectParameters(aParameters));
         break;
       case COPY_ELEMS_BUTTON:
-        if ( makeGroups )
-          SMESH::ListOfGroups_var groups = 
-            aMeshEditor->TranslateMakeGroups(anElementsId, aVector);
-        else
-          aMeshEditor->Translate(anElementsId, aVector, true);
+        if ( makeGroups ) {
+          SMESH::ListOfGroups_var groups; 
+          if(CheckBoxMesh->isChecked())
+            groups = aMeshEditor->TranslateObjectMakeGroups(mySelectedObject,aVector);
+          else
+            groups = aMeshEditor->TranslateMakeGroups(anElementsId, aVector);
+        }
+        else {
+          if(CheckBoxMesh->isChecked())
+            aMeshEditor->TranslateObject(mySelectedObject, aVector, true);
+          else
+            aMeshEditor->Translate(anElementsId, aVector, true);
+        }
+	if( !myMesh->_is_nil())
+	  myMesh->SetParameters(SMESHGUI::JoinObjectParameters(aParameters));
         break;
       case MAKE_MESH_BUTTON:
-        SMESH::SMESH_Mesh_var mesh = 
-          aMeshEditor->TranslateMakeMesh(anElementsId, aVector, makeGroups,
-                                         LineEditNewMesh->text().toLatin1().data());
+        SMESH::SMESH_Mesh_var mesh; 
+        if(CheckBoxMesh->isChecked())
+          mesh = aMeshEditor->TranslateObjectMakeMesh(mySelectedObject, aVector, makeGroups,
+                                                      LineEditNewMesh->text().toLatin1().data());
+        else
+          mesh = aMeshEditor->TranslateMakeMesh(anElementsId, aVector, makeGroups,
+                                                LineEditNewMesh->text().toLatin1().data());
+	if( !mesh->_is_nil())
+	  mesh->SetParameters(SMESHGUI::JoinObjectParameters(aParameters));
       }
     } catch (...) {
     }
-
+    
     SMESH::UpdateView();
     if ( MakeGroupsCheck->isEnabled() && MakeGroupsCheck->isChecked() ||
          actionButton == MAKE_MESH_BUTTON )
       mySMESHGUI->updateObjBrowser(true); // new groups may appear
     Init(false);
     ConstructorsClicked(GetConstructorId());
+    mySelectedObject = SMESH::SMESH_IDSource::_nil();
     SelectionIntoArgument();
   }
+  
+  return true;
 }
 
 //=================================================================================
@@ -501,8 +540,8 @@ void SMESHGUI_TranslationDlg::ClickOnApply()
 //=================================================================================
 void SMESHGUI_TranslationDlg::ClickOnOk()
 {
-  ClickOnApply();
-  ClickOnCancel();
+  if( ClickOnApply() )
+    ClickOnCancel();
 }
 
 //=================================================================================
@@ -657,8 +696,13 @@ void SMESHGUI_TranslationDlg::SelectionIntoArgument()
     if (CheckBoxMesh->isChecked()) {
       SMESH::GetNameOfSelectedIObjects( mySelectionMgr, aString );
 
-      if (!SMESH::IObjectToInterface<SMESH::SMESH_Mesh>(IO)->_is_nil()) { //MESH
+      if (!SMESH::IObjectToInterface<SMESH::SMESH_IDSource>(IO)->_is_nil()) { //MESH, SUBMESH, OR GROUP
+        mySelectedObject = SMESH::IObjectToInterface<SMESH::SMESH_IDSource>(IO);
+      }
+      else
+        return;
         // get IDs from mesh
+        /*
         SMDS_Mesh* aSMDSMesh = myActor->GetObject()->GetMesh();
         if (!aSMDSMesh)
           return;
@@ -696,13 +740,13 @@ void SMESHGUI_TranslationDlg::SelectionIntoArgument()
         }
         aNbUnits = anElementsIds->length();
       }
+        */
     } else {
       aNbUnits = SMESH::GetNameOfSelectedElements(mySelector, IO, aString);
       myElementsId = aString;
+      if (aNbUnits < 1)
+        return;  
     }
-
-    if (aNbUnits < 1)
-      return;
 
     myNbOkElements = true;
   } else {
@@ -985,4 +1029,32 @@ void SMESHGUI_TranslationDlg::setFilters()
   myFilterDlg->SetSourceWg( LineEditElements );
 
   myFilterDlg->show();
+}
+
+//=================================================================================
+// function : isValid
+// purpose  :
+//=================================================================================
+bool SMESHGUI_TranslationDlg::isValid()
+{
+  bool ok = true;
+  QString msg;
+
+  ok = SpinBox1_1->isValid( msg, true ) && ok;
+  ok = SpinBox1_2->isValid( msg, true ) && ok;
+  ok = SpinBox1_3->isValid( msg, true ) && ok;
+  if (GetConstructorId() == 0) {
+    ok = SpinBox2_1->isValid( msg, true ) && ok;
+    ok = SpinBox2_2->isValid( msg, true ) && ok;
+    ok = SpinBox2_3->isValid( msg, true ) && ok;
+  }
+
+  if( !ok ) {
+    QString str( tr( "SMESH_INCORRECT_INPUT" ) );
+    if ( !msg.isEmpty() )
+      str += "\n" + msg;
+    SUIT_MessageBox::critical( this, tr( "SMESH_ERROR" ), str );
+    return false;
+  }
+  return true;
 }

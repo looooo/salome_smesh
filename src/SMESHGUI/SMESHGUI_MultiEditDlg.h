@@ -107,7 +107,7 @@ protected:
   void                      keyPressEvent( QKeyEvent* );
   QWidget*                  createButtonFrame( QWidget* );
   QWidget*                  createMainFrame( QWidget*, const bool );
-  bool                      isValid( const bool ) const;
+  virtual bool              isValid( const bool );
   SMESH::long_array_var     getIds();
   void                      updateButtons();
   void                      setSelectionMode();
@@ -190,6 +190,7 @@ public:
   virtual ~SMESHGUI_UnionOfTrianglesDlg();
 
 protected:
+  virtual bool      isValid( const bool );
   virtual bool      process( SMESH::SMESH_MeshEditor_ptr, const SMESH::long_array& );
 
 private:

@@ -33,6 +33,7 @@
 #include <SMESH_NumberFilter.hxx>
 #include <StdMeshersGUI_ObjectReferenceParamWdg.h>
 #include <StdMeshersGUI_LayerDistributionParamWdg.h>
+#include <SALOMEDSClient_Study.hxx>
 
 // SALOME GUI includes
 #include <SUIT_ResourceMgr.h>
@@ -340,8 +341,11 @@ namespace {
  */
 //================================================================================
 
-bool StdMeshersGUI_StdHypothesisCreator::checkParams() const
+bool StdMeshersGUI_StdHypothesisCreator::checkParams( QString& msg ) const
 {
+  if( !SMESHGUI_GenericHypothesisCreator::checkParams( msg ) )
+    return false;
+
   // check if object reference parameter is set, as it has no default value
   bool ok = true;
   if ( hypType().startsWith("ProjectionSource" ))
@@ -399,6 +403,7 @@ QString StdMeshersGUI_StdHypothesisCreator::storeParams() const
   }
 
   QString valueStr = stdParamValues( params );
+  QStringList aVariablesList = getVariablesFromDlg();
 
   if( res && !params.isEmpty() )
   {
@@ -408,7 +413,9 @@ QString StdMeshersGUI_StdHypothesisCreator::storeParams() const
 	StdMeshers::StdMeshers_LocalLength::_narrow( hypothesis() );
 
       h->SetLength( params[0].myValue.toDouble() );
+      h->SetParameters(SMESHGUI::JoinObjectParameters(aVariablesList));
       h->SetPrecision( params[1].myValue.toDouble() );
+      h->SetParameters(SMESHGUI::JoinObjectParameters(aVariablesList));
     }
     else if( hypType()=="MaxLength" )
     {
@@ -429,6 +436,7 @@ QString StdMeshersGUI_StdHypothesisCreator::storeParams() const
 	StdMeshers::StdMeshers_SegmentLengthAroundVertex::_narrow( hypothesis() );
 
       h->SetLength( params[0].myValue.toDouble() );
+      h->SetParameters(SMESHGUI::JoinObjectParameters(aVariablesList));
     }
     else if( hypType()=="Arithmetic1D" )
     {
@@ -436,13 +444,15 @@ QString StdMeshersGUI_StdHypothesisCreator::storeParams() const
 	StdMeshers::StdMeshers_Arithmetic1D::_narrow( hypothesis() );
 
       h->SetLength( params[0].myValue.toDouble(), true );
+      h->SetParameters(SMESHGUI::JoinObjectParameters(aVariablesList));
       h->SetLength( params[1].myValue.toDouble(), false );
+      h->SetParameters(SMESHGUI::JoinObjectParameters(aVariablesList));
     }
     else if( hypType()=="MaxElementArea" )
     {
       StdMeshers::StdMeshers_MaxElementArea_var h =
 	StdMeshers::StdMeshers_MaxElementArea::_narrow( hypothesis() );
-
+      h->SetParameters(SMESHGUI::JoinObjectParameters(aVariablesList));
       h->SetMaxElementArea( params[0].myValue.toDouble() );
     }
     else if( hypType()=="MaxElementVolume" )
@@ -451,6 +461,7 @@ QString StdMeshersGUI_StdHypothesisCreator::storeParams() const
 	StdMeshers::StdMeshers_MaxElementVolume::_narrow( hypothesis() );
 
       h->SetMaxElementVolume( params[0].myValue.toDouble() );
+      h->SetParameters(SMESHGUI::JoinObjectParameters(aVariablesList));
     }
     else if( hypType()=="StartEndLength" )
     {
@@ -458,13 +469,15 @@ QString StdMeshersGUI_StdHypothesisCreator::storeParams() const
 	StdMeshers::StdMeshers_StartEndLength::_narrow( hypothesis() );
 
       h->SetLength( params[0].myValue.toDouble(), true );
+      h->SetParameters(SMESHGUI::JoinObjectParameters(aVariablesList));
       h->SetLength( params[1].myValue.toDouble(), false );
+      h->SetParameters(SMESHGUI::JoinObjectParameters(aVariablesList));
     }
     else if( hypType()=="Deflection1D" )
     {
       StdMeshers::StdMeshers_Deflection1D_var h =
 	StdMeshers::StdMeshers_Deflection1D::_narrow( hypothesis() );
-
+      h->SetParameters(SMESHGUI::JoinObjectParameters(aVariablesList));
       h->SetDeflection( params[0].myValue.toDouble() );
     }
     else if( hypType()=="AutomaticLength" )
@@ -480,6 +493,7 @@ QString StdMeshersGUI_StdHypothesisCreator::storeParams() const
 	StdMeshers::StdMeshers_NumberOfLayers::_narrow( hypothesis() );
 
       h->SetNumberOfLayers( params[0].myValue.toInt() );
+      h->SetParameters(SMESHGUI::JoinObjectParameters(aVariablesList));
     }
     else if( hypType()=="LayerDistribution" )
     {
@@ -487,8 +501,10 @@ QString StdMeshersGUI_StdHypothesisCreator::storeParams() const
 	StdMeshers::StdMeshers_LayerDistribution::_narrow( hypothesis() );
       StdMeshersGUI_LayerDistributionParamWdg* w = 
         widget< StdMeshersGUI_LayerDistributionParamWdg >( 0 );
-
+      
       h->SetLayerDistribution( w->GetHypothesis() );
+      h->SetParameters(w->GetHypothesis()->GetParameters());
+      w->GetHypothesis()->ClearParameters();
     }
     else if( hypType()=="ProjectionSource1D" )
     {
@@ -558,20 +574,25 @@ bool StdMeshersGUI_StdHypothesisCreator::stdParams( ListOfStdParams& p ) const
     p.append( item );
     customWidgets()->append(0);
   }
-
+  
   SMESH::SMESH_Hypothesis_var hyp = initParamsHypothesis();
+  SMESH::ListOfParameters_var aParameters = hyp->GetLastParameters();
 
   if( hypType()=="LocalLength" )
   {
     StdMeshers::StdMeshers_LocalLength_var h =
       StdMeshers::StdMeshers_LocalLength::_narrow( hyp );
-
+    
     item.myName = tr("SMESH_LOCAL_LENGTH_PARAM");
-    item.myValue = h->GetLength();
-    p.append( item );
+    if(!initVariableName(aParameters,item,0))
+      item.myValue = h->GetLength();
+    p.append( item );     
+    
     item.myName = tr("SMESH_LOCAL_LENGTH_PRECISION");
-    item.myValue = h->GetPrecision();
+    if(!initVariableName(aParameters,item,1))
+      item.myValue = h->GetPrecision(); 
     p.append( item );
+    
   }
   else if( hypType()=="MaxLength" )
   {
@@ -612,7 +633,9 @@ bool StdMeshersGUI_StdHypothesisCreator::stdParams( ListOfStdParams& p ) const
       StdMeshers::StdMeshers_SegmentLengthAroundVertex::_narrow( hyp );
 
     item.myName = tr("SMESH_LOCAL_LENGTH_PARAM");
-    item.myValue = h->GetLength();
+    if(!initVariableName(aParameters,item,0))
+      item.myValue = h->GetLength();
+    
     p.append( item );
   }
   else if( hypType()=="Arithmetic1D" )
@@ -621,10 +644,13 @@ bool StdMeshersGUI_StdHypothesisCreator::stdParams( ListOfStdParams& p ) const
       StdMeshers::StdMeshers_Arithmetic1D::_narrow( hyp );
 
     item.myName = tr( "SMESH_START_LENGTH_PARAM" );
-    item.myValue = h->GetLength( true );
+    if(!initVariableName(aParameters,item,0))
+      item.myValue = h->GetLength( true );
     p.append( item );
+
     item.myName = tr( "SMESH_END_LENGTH_PARAM" );
-    item.myValue = h->GetLength( false );
+    if(!initVariableName(aParameters,item,1))
+      item.myValue = h->GetLength( false );
     p.append( item );
   }
   else if( hypType()=="MaxElementArea" )
@@ -633,8 +659,10 @@ bool StdMeshersGUI_StdHypothesisCreator::stdParams( ListOfStdParams& p ) const
       StdMeshers::StdMeshers_MaxElementArea::_narrow( hyp );
 
     item.myName = tr( "SMESH_MAX_ELEMENT_AREA_PARAM" );
-    item.myValue = h->GetMaxElementArea();
+    if(!initVariableName(aParameters,item,0))
+      item.myValue = h->GetMaxElementArea();
     p.append( item );
+    
   }
   else if( hypType()=="MaxElementVolume" )
   {
@@ -642,7 +670,8 @@ bool StdMeshersGUI_StdHypothesisCreator::stdParams( ListOfStdParams& p ) const
       StdMeshers::StdMeshers_MaxElementVolume::_narrow( hyp );
 
     item.myName = tr( "SMESH_MAX_ELEMENT_VOLUME_PARAM" );
-    item.myValue = h->GetMaxElementVolume();
+    if(!initVariableName(aParameters,item,0))
+      item.myValue = h->GetMaxElementVolume();
     p.append( item );
   }
   else if( hypType()=="StartEndLength" )
@@ -651,19 +680,25 @@ bool StdMeshersGUI_StdHypothesisCreator::stdParams( ListOfStdParams& p ) const
       StdMeshers::StdMeshers_StartEndLength::_narrow( hyp );
 
     item.myName = tr( "SMESH_START_LENGTH_PARAM" );
-    item.myValue = h->GetLength( true );
+
+    if(!initVariableName(aParameters,item,0)) 
+      item.myValue = h->GetLength( true );
     p.append( item );
+
     item.myName = tr( "SMESH_END_LENGTH_PARAM" );
-    item.myValue = h->GetLength( false );
+    if(!initVariableName(aParameters,item,1)) 
+      item.myValue = h->GetLength( false );
     p.append( item );
+    
   }
   else if( hypType()=="Deflection1D" )
   {
     StdMeshers::StdMeshers_Deflection1D_var h =
       StdMeshers::StdMeshers_Deflection1D::_narrow( hyp );
-
+    
     item.myName = tr( "SMESH_DEFLECTION1D_PARAM" );
-    item.myValue = h->GetDeflection();
+    if(!initVariableName(aParameters,item,0)) 
+      item.myValue = h->GetDeflection();
     p.append( item );
   }
   else if( hypType()=="AutomaticLength" )
@@ -683,15 +718,25 @@ bool StdMeshersGUI_StdHypothesisCreator::stdParams( ListOfStdParams& p ) const
       StdMeshers::StdMeshers_NumberOfLayers::_narrow( hyp );
 
     item.myName = tr( "SMESH_NUMBER_OF_LAYERS" );
-    item.myValue = (int) h->GetNumberOfLayers();
+    if(!initVariableName(aParameters,item,0))     
+      item.myValue = (int) h->GetNumberOfLayers();
     p.append( item );
   }
   else if( hypType()=="LayerDistribution" )
-  {
-    StdMeshers::StdMeshers_LayerDistribution_var h =
+    {
+      StdMeshers::StdMeshers_LayerDistribution_var h =
       StdMeshers::StdMeshers_LayerDistribution::_narrow( hyp );
 
     item.myName = tr( "SMESH_LAYERS_DISTRIBUTION" ); p.append( item );
+    
+    //Set into not published hypo last variables
+    QStringList aLastVarsList;
+    for(int i = 0;i<aParameters->length();i++) 
+      aLastVarsList.append(QString(aParameters[i].in()));
+
+    if(!aLastVarsList.isEmpty())
+      h->GetLayerDistribution()->SetLastParameters(SMESHGUI::JoinObjectParameters(aLastVarsList));
+    
     customWidgets()->append
       ( new StdMeshersGUI_LayerDistributionParamWdg( h->GetLayerDistribution(), hypName(), dlg()));
   }
@@ -987,4 +1032,22 @@ void StdMeshersGUI_StdHypothesisCreator::valueChanged( QWidget* paramWidget)
       widget< QtxDoubleSpinBox >( 0 )->setValue( h->GetPreestimatedLength() );
     }
   }
+}
+
+//================================================================================
+/*!
+ *
+ */
+//================================================================================
+
+bool StdMeshersGUI_StdHypothesisCreator::initVariableName(SMESH::ListOfParameters_var theParameters, 
+                                                          StdParam &theParams, 
+                                                          int order) const
+{
+  QString aVaribaleName = (theParameters->length() > order) ? QString(theParameters[order].in()) : QString("");
+  theParams.isVariable = !aVaribaleName.isEmpty();
+  if(theParams.isVariable) 
+    theParams.myValue = aVaribaleName;
+
+  return theParams.isVariable;
 }

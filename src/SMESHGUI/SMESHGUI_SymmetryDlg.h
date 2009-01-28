@@ -74,6 +74,8 @@ private:
   bool                   IsMirrorOk();
   void                   setNewMeshName();
 
+  bool                   isValid();
+
   SMESHGUI*              mySMESHGUI;              /* Current SMESHGUI object */
   SMESHGUI_IdValidator*  myIdValidator;
   LightApp_SelectionMgr* mySelectionMgr;          /* User shape selection */
@@ -82,6 +84,8 @@ private:
   SVTK_Selector*         mySelector;
 
   QWidget*               myEditCurrentArgument;   /* Current  LineEdit */
+
+  SMESH::SMESH_IDSource_var mySelectedObject;
 
   bool                   myBusy;
   SMESH::SMESH_Mesh_var  myMesh;
@@ -135,7 +139,7 @@ private slots:
   void                   ConstructorsClicked( int );
   void                   ClickOnOk();
   void                   ClickOnCancel();
-  void                   ClickOnApply();
+  bool                   ClickOnApply();
   void                   ClickOnHelp();
   void                   SetEditCurrentArgument();
   void                   SelectionIntoArgument();

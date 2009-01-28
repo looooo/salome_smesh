@@ -487,47 +487,12 @@ bool SMESHGUI_ExtrusionAlongPathDlg::ClickOnApply()
       !myMeshActor || myPathMesh->_is_nil() || myPathShape->_is_nil())
     return false;
 
+  if (!isValid())
+    return false;
+
   SMESH::long_array_var anElementsId = new SMESH::long_array;
 
-  if (MeshCheck->isChecked()) {
-    // If "Select whole mesh, submesh or group" check box is on ->
-    // get all elements of the required type from the object selected
-
-    // if MESH object is selected
-    if (!CORBA::is_nil(SMESH::SMESH_Mesh::_narrow(myIDSource))) {
-      // get mesh
-      SMESH::SMESH_Mesh_var aMesh = SMESH::SMESH_Mesh::_narrow(myIDSource);
-      // get IDs from mesh...
-      if (Elements1dRB->isChecked())
-	// 1d elements
-	anElementsId = aMesh->GetElementsByType(SMESH::EDGE);
-      else if (Elements2dRB->isChecked()) {
-	anElementsId = aMesh->GetElementsByType(SMESH::FACE);
-      }
-    }
-    // SUBMESH is selected
-    if (!CORBA::is_nil(SMESH::SMESH_subMesh::_narrow(myIDSource))) {
-      // get submesh
-      SMESH::SMESH_subMesh_var aSubMesh = SMESH::SMESH_subMesh::_narrow(myIDSource);
-      // get IDs from submesh
-      if (Elements1dRB->isChecked())
-	// 1d elements
-	anElementsId = aSubMesh->GetElementsByType(SMESH::EDGE);
-      else if (Elements2dRB->isChecked())
-	// 2d elements
-	anElementsId = aSubMesh->GetElementsByType(SMESH::FACE);
-    }
-    // GROUP is selected
-    if (!CORBA::is_nil(SMESH::SMESH_GroupBase::_narrow(myIDSource))) {
-      // get smesh group
-      SMESH::SMESH_GroupBase_var aGroup = SMESH::SMESH_GroupBase::_narrow(myIDSource);
-      // get IDs from group
-      // 1d elements or 2d elements
-      if (Elements1dRB->isChecked() && aGroup->GetType() == SMESH::EDGE ||
-	  Elements2dRB->isChecked() && aGroup->GetType() == SMESH::FACE)
-	anElementsId = aGroup->GetListOfID();
-    }
-  } else {
+  if (!MeshCheck->isChecked()) {
     // If "Select whole mesh, submesh or group" check box is off ->
     // use only elements of given type selected by user
 
@@ -552,10 +517,10 @@ bool SMESHGUI_ExtrusionAlongPathDlg::ClickOnApply()
       }
       anElementsId->length(j);
     }
-  }
 
-  if (anElementsId->length() <= 0) {
-    return false;
+    if (anElementsId->length() <= 0) {
+      return false;
+    }
   }
 
   if (StartPointLineEdit->text().trimmed().isEmpty()) {
@@ -568,16 +533,17 @@ bool SMESHGUI_ExtrusionAlongPathDlg::ClickOnApply()
     return false;
   }
 
+  QStringList aParameters;
+
   // get angles
   SMESH::double_array_var anAngles = new SMESH::double_array;
   if (AnglesGrp->isChecked()) {
-    anAngles->length(AnglesList->count());
+    anAngles->length(myAnglesList.count());
     int j = 0;
-    bool bOk;
-    for (int i = 0; i < AnglesList->count(); i++) {
-      double angle = AnglesList->item(i)->text().toDouble(&bOk);
-      if  (bOk)
-	anAngles[ j++ ] = angle*PI/180;
+    for (int i = 0; i < myAnglesList.count(); i++) {
+      double angle = myAnglesList[i];
+      anAngles[ j++ ] = angle*PI/180;
+      aParameters << AnglesList->item(i)->text();
     }
     anAngles->length(j);
   }
@@ -590,6 +556,10 @@ bool SMESHGUI_ExtrusionAlongPathDlg::ClickOnApply()
     aBasePoint.z = ZSpin->GetValue();
   }
 
+  aParameters << XSpin->text();
+  aParameters << YSpin->text();
+  aParameters << ZSpin->text();
+
   try {
     SUIT_OverrideCursor wc;
     SMESH::SMESH_MeshEditor_var aMeshEditor = myMesh->GetMeshEditor();
@@ -597,17 +567,50 @@ bool SMESHGUI_ExtrusionAlongPathDlg::ClickOnApply()
       anAngles = aMeshEditor->LinearAnglesVariation( myPathMesh, myPathShape, anAngles );
 
     SMESH::SMESH_MeshEditor::Extrusion_Error retVal;
-    if ( MakeGroupsCheck->isEnabled() && MakeGroupsCheck->isChecked() )
-      SMESH::ListOfGroups_var groups = 
-        aMeshEditor->ExtrusionAlongPathMakeGroups(anElementsId, myPathMesh,
-                                                  myPathShape, aNodeStart,
-                                                  AnglesGrp->isChecked(), anAngles,
-                                                  BasePointGrp->isChecked(), aBasePoint, retVal);
-    else
-      retVal = aMeshEditor->ExtrusionAlongPath(anElementsId, myPathMesh,
-                                               myPathShape, aNodeStart,
-                                               AnglesGrp->isChecked(), anAngles,
-                                               BasePointGrp->isChecked(), aBasePoint);
+    if ( MakeGroupsCheck->isEnabled() && MakeGroupsCheck->isChecked() ) {
+      if( MeshCheck->isChecked() ) {
+	if( GetConstructorId() == 0 )
+	  SMESH::ListOfGroups_var groups = 
+	    aMeshEditor->ExtrusionAlongPathObject1DMakeGroups(myIDSource, myPathMesh,
+							      myPathShape, aNodeStart,
+							      AnglesGrp->isChecked(), anAngles,
+							      BasePointGrp->isChecked(), aBasePoint, retVal);
+	else
+	  SMESH::ListOfGroups_var groups = 
+	    aMeshEditor->ExtrusionAlongPathObject2DMakeGroups(myIDSource, myPathMesh,
+							      myPathShape, aNodeStart,
+							      AnglesGrp->isChecked(), anAngles,
+							      BasePointGrp->isChecked(), aBasePoint, retVal);
+      }
+      else
+	SMESH::ListOfGroups_var groups = 
+	  aMeshEditor->ExtrusionAlongPathMakeGroups(anElementsId, myPathMesh,
+						    myPathShape, aNodeStart,
+						    AnglesGrp->isChecked(), anAngles,
+						    BasePointGrp->isChecked(), aBasePoint, retVal);
+    }
+    else {
+      if( MeshCheck->isChecked() ) {
+	if( GetConstructorId() == 0 )
+	  retVal = aMeshEditor->ExtrusionAlongPathObject1D(myIDSource, myPathMesh,
+							   myPathShape, aNodeStart,
+							   AnglesGrp->isChecked(), anAngles,
+							   BasePointGrp->isChecked(), aBasePoint);
+	else
+	  retVal = aMeshEditor->ExtrusionAlongPathObject2D(myIDSource, myPathMesh,
+							   myPathShape, aNodeStart,
+							   AnglesGrp->isChecked(), anAngles,
+							   BasePointGrp->isChecked(), aBasePoint);
+      }
+      else
+	retVal = aMeshEditor->ExtrusionAlongPath(anElementsId, myPathMesh,
+						 myPathShape, aNodeStart,
+						 AnglesGrp->isChecked(), anAngles,
+						 BasePointGrp->isChecked(), aBasePoint);
+    }
+
+    if( retVal == SMESH::SMESH_MeshEditor::EXTR_OK )
+      myMesh->SetParameters( SMESHGUI::JoinObjectParameters(aParameters) );
 
     //wc.stop();
     wc.suspend();
@@ -1152,7 +1155,18 @@ int SMESHGUI_ExtrusionAlongPathDlg::GetConstructorId()
 //=======================================================================
 void SMESHGUI_ExtrusionAlongPathDlg::OnAngleAdded()
 {
-  AnglesList->addItem(QString::number(AngleSpin->GetValue()));
+  QString msg;
+  if( !AngleSpin->isValid( msg, true ) ) {
+    QString str( tr( "SMESH_INCORRECT_INPUT" ) );
+    if ( !msg.isEmpty() )
+      str += "\n" + msg;
+    SUIT_MessageBox::critical( this, tr( "SMESH_ERROR" ), str );
+    return;
+  }
+  AnglesList->addItem(AngleSpin->text());
+  myAnglesList.append(AngleSpin->GetValue());
+
+  updateLinearAngles();
 }
 
 //=======================================================================
@@ -1163,7 +1177,12 @@ void SMESHGUI_ExtrusionAlongPathDlg::OnAngleRemoved()
 {
   QList<QListWidgetItem*> aList = AnglesList->selectedItems();
   QListWidgetItem* anItem;
-  foreach(anItem, aList) delete anItem;
+  foreach(anItem, aList) {
+    myAnglesList.removeAt(AnglesList->row(anItem));
+    delete anItem;
+  }
+
+  updateLinearAngles();
 }
 
 //=================================================================================
@@ -1232,4 +1251,46 @@ void SMESHGUI_ExtrusionAlongPathDlg::setFilters()
   myFilterDlg->SetSourceWg( ElementsLineEdit );
 
   myFilterDlg->show();
+}
+
+//=================================================================================
+// function : isValid
+// purpose  :
+//=================================================================================
+bool SMESHGUI_ExtrusionAlongPathDlg::isValid()
+{
+  QString msg;
+  bool ok = true;
+  ok = XSpin->isValid( msg, true ) && ok;
+  ok = YSpin->isValid( msg, true ) && ok;
+  ok = ZSpin->isValid( msg, true ) && ok;
+
+  if( !ok ) {
+    QString str( tr( "SMESH_INCORRECT_INPUT" ) );
+    if ( !msg.isEmpty() )
+      str += "\n" + msg;
+    SUIT_MessageBox::critical( this, tr( "SMESH_ERROR" ), str );
+    return false;
+  }
+  return true;
+}
+
+//=================================================================================
+// function : updateLinearAngles
+// purpose  :
+//=================================================================================
+void SMESHGUI_ExtrusionAlongPathDlg::updateLinearAngles()
+{
+  bool enableLinear = true;
+  for( int row = 0, nbRows = AnglesList->count(); row < nbRows; row++ ) {
+    if( QListWidgetItem* anItem = AnglesList->item( row ) ) {
+      enableLinear = false;
+      anItem->text().toDouble(&enableLinear);
+      if( !enableLinear )
+	break;
+    }
+  }
+  if( !enableLinear )
+    LinearAnglesCheck->setChecked( false );
+  LinearAnglesCheck->setEnabled( enableLinear );
 }

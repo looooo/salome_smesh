@@ -50,6 +50,8 @@
 #include <LightApp_Application.h>
 #include <LightApp_SelectionMgr.h>
 
+#include <SalomeApp_IntSpinBox.h>
+
 #include <SVTK_ViewModel.h>
 #include <SVTK_Selector.h>
 #include <SVTK_ViewWindow.h>
@@ -68,7 +70,6 @@
 #include <QRadioButton>
 #include <QComboBox>
 #include <QCheckBox>
-#include <QSpinBox>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QGridLayout>
@@ -91,7 +92,8 @@ SMESHGUI_SmoothingDlg::SMESHGUI_SmoothingDlg( SMESHGUI* theModule )
   : QDialog( SMESH::GetDesktop( theModule ) ),
     mySMESHGUI( theModule ),
     mySelectionMgr( SMESH::GetSelectionMgr( theModule ) ),
-    myFilterDlg(0)
+    myFilterDlg(0),
+    mySelectedObject(SMESH::SMESH_IDSource::_nil())
 {
   QPixmap image0 (SMESH::GetResourceMgr( mySMESHGUI )->loadPixmap("SMESH", tr("ICON_DLG_SMOOTHING")));
   QPixmap image1 (SMESH::GetResourceMgr( mySMESHGUI )->loadPixmap("SMESH", tr("ICON_SELECT")));
@@ -160,7 +162,7 @@ SMESHGUI_SmoothingDlg::SMESHGUI_SmoothingDlg( SMESHGUI* theModule )
   // Controls for iteration limit defining
   TextLabelLimit = new QLabel(tr("ITERATION_LIMIT"), GroupArguments);
 
-  SpinBox_IterationLimit = new QSpinBox(GroupArguments);
+  SpinBox_IterationLimit = new SalomeApp_IntSpinBox(GroupArguments);
 
   // Controls for max. aspect ratio defining
   TextLabelAspectRatio = new QLabel(tr("MAX_ASPECT_RATIO"), GroupArguments);
@@ -318,10 +320,13 @@ void SMESHGUI_SmoothingDlg::Init()
 // function : ClickOnApply()
 // purpose  : Called when user presses <Apply> button
 //=================================================================================
-void SMESHGUI_SmoothingDlg::ClickOnApply()
+bool SMESHGUI_SmoothingDlg::ClickOnApply()
 {
   if (mySMESHGUI->isActiveStudyLocked())
-    return;
+    return false;
+
+  if (!isValid())
+    return false;
 
   if (myNbOkElements && (myNbOkNodes || LineEditNodes->text().trimmed().isEmpty())) {
     QStringList aListElementsId = myElementsId.split(" ", QString::SkipEmptyParts);
@@ -345,6 +350,10 @@ void SMESHGUI_SmoothingDlg::ClickOnApply()
     long anIterationLimit = (long)SpinBox_IterationLimit->value();
     double aMaxAspectRatio = SpinBox_AspectRatio->GetValue();
 
+    QStringList aParameters;
+    aParameters << SpinBox_IterationLimit->text();
+    aParameters << SpinBox_AspectRatio->text();
+
     SMESH::SMESH_MeshEditor::Smooth_Method aMethod = SMESH::SMESH_MeshEditor::LAPLACIAN_SMOOTH;
     if (ComboBoxMethod->currentIndex() > 0)
       aMethod =  SMESH::SMESH_MeshEditor::CENTROIDAL_SMOOTH;
@@ -354,12 +363,25 @@ void SMESHGUI_SmoothingDlg::ClickOnApply()
       SUIT_OverrideCursor aWaitCursor;
       SMESH::SMESH_MeshEditor_var aMeshEditor = myMesh->GetMeshEditor();
 
-      if ( CheckBoxParametric->isChecked() )
-	aResult = aMeshEditor->SmoothParametric(anElementsId.inout(), aNodesId.inout(),
-						anIterationLimit, aMaxAspectRatio, aMethod);
-      else
-	aResult = aMeshEditor->Smooth(anElementsId.inout(), aNodesId.inout(),
-				      anIterationLimit, aMaxAspectRatio, aMethod);
+      if ( CheckBoxParametric->isChecked() ) {
+        if(CheckBoxMesh->isChecked())
+	  aResult = aMeshEditor->SmoothParametricObject(mySelectedObject, aNodesId.inout(),
+							anIterationLimit, aMaxAspectRatio, aMethod);
+	else
+	  aResult = aMeshEditor->SmoothParametric(anElementsId.inout(), aNodesId.inout(),
+						  anIterationLimit, aMaxAspectRatio, aMethod);
+      }
+      else {
+        if(CheckBoxMesh->isChecked())
+	  aResult = aMeshEditor->SmoothObject(mySelectedObject, aNodesId.inout(),
+					      anIterationLimit, aMaxAspectRatio, aMethod);
+	else
+	  aResult = aMeshEditor->Smooth(anElementsId.inout(), aNodesId.inout(),
+					anIterationLimit, aMaxAspectRatio, aMethod);
+      }
+
+      myMesh->SetParameters( SMESHGUI::JoinObjectParameters(aParameters) );
+
     } catch (...) {
     }
 
@@ -371,8 +393,12 @@ void SMESHGUI_SmoothingDlg::ClickOnApply()
       mySelectionMgr->setSelectedObjects(aList, false);
       SMESH::UpdateView();
       Init();
+
+      mySelectedObject = SMESH::SMESH_IDSource::_nil();
     }
   }
+
+  return true;
 }
 
 //=================================================================================
@@ -381,8 +407,8 @@ void SMESHGUI_SmoothingDlg::ClickOnApply()
 //=================================================================================
 void SMESHGUI_SmoothingDlg::ClickOnOk()
 {
-  ClickOnApply();
-  ClickOnCancel();
+  if( ClickOnApply() )
+    ClickOnCancel();
 }
 
 //=================================================================================
@@ -549,57 +575,21 @@ void SMESHGUI_SmoothingDlg::SelectionIntoArgument()
     if (CheckBoxMesh->isChecked()) {
       SMESH::GetNameOfSelectedIObjects(mySelectionMgr, aString);
 
-      if (!SMESH::IObjectToInterface<SMESH::SMESH_Mesh>(IO)->_is_nil()) { //MESH
-        // get IDs from mesh
-        SMDS_Mesh* aSMDSMesh = myActor->GetObject()->GetMesh();
-        if (!aSMDSMesh)
-          return;
-
-        for (int i = aSMDSMesh->MinElementID(); i <= aSMDSMesh->MaxElementID(); i++ ) {
-          const SMDS_MeshElement * e = aSMDSMesh->FindElement(i);
-          if (e) {
-            myElementsId += QString(" %1").arg(i);
-            aNbUnits++;
-          }
-        }
-      } else if (!SMESH::IObjectToInterface<SMESH::SMESH_subMesh>(IO)->_is_nil()) { //SUBMESH
-        // get submesh
-        SMESH::SMESH_subMesh_var aSubMesh = SMESH::IObjectToInterface<SMESH::SMESH_subMesh>(IO);
-
-        // get IDs from submesh
-        SMESH::long_array_var anElementsIds = new SMESH::long_array;
-        anElementsIds = aSubMesh->GetElementsId();
-        for (int i = 0; i < anElementsIds->length(); i++) {
-          myElementsId += QString(" %1").arg(anElementsIds[i]);
-        }
-        aNbUnits = anElementsIds->length();
-      } else { // GROUP
-        // get smesh group
-        SMESH::SMESH_GroupBase_var aGroup =
-          SMESH::IObjectToInterface<SMESH::SMESH_GroupBase>(IO);
-        if (aGroup->_is_nil())
-          return;
-
-        // get IDs from smesh group
-        SMESH::long_array_var anElementsIds = new SMESH::long_array;
-        anElementsIds = aGroup->GetListOfID();
-        for (int i = 0; i < anElementsIds->length(); i++) {
-          myElementsId += QString(" %1").arg(anElementsIds[i]);
-        }
-        aNbUnits = anElementsIds->length();
-      }
+      if (!SMESH::IObjectToInterface<SMESH::SMESH_IDSource>(IO)->_is_nil())
+        mySelectedObject = SMESH::IObjectToInterface<SMESH::SMESH_IDSource>(IO);
+      else
+        return;
     } else {
       aNbUnits = SMESH::GetNameOfSelectedElements(mySelector, IO, aString);
       myElementsId = aString;
+      if (aNbUnits < 1)
+        return;
     }
   } else if (myEditCurrentArgument == LineEditNodes && !myMesh->_is_nil() && myActor) {
     myNbOkNodes = 0;
     aNbUnits = SMESH::GetNameOfSelectedNodes(mySelector, IO, aString);
   } else {
   }
-
-  if (aNbUnits < 1)
-    return;
 
   myBusy = true;
   myEditCurrentArgument->setText(aString);
@@ -821,4 +811,25 @@ void SMESHGUI_SmoothingDlg::setElemFilters()
 void SMESHGUI_SmoothingDlg::setNodeFilters()
 {
   setFilters( false );
+}
+
+//=================================================================================
+// function : isValid
+// purpose  :
+//=================================================================================
+bool SMESHGUI_SmoothingDlg::isValid()
+{
+  QString msg;
+  bool ok = true;
+  ok = SpinBox_IterationLimit->isValid( msg, true ) && ok;
+  ok = SpinBox_AspectRatio->isValid( msg, true ) && ok;
+
+  if( !ok ) {
+    QString str( tr( "SMESH_INCORRECT_INPUT" ) );
+    if ( !msg.isEmpty() )
+      str += "\n" + msg;
+    SUIT_MessageBox::critical( this, tr( "SMESH_ERROR" ), str );
+    return false;
+  }
+  return true;
 }

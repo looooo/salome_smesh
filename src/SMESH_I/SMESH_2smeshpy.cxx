@@ -29,6 +29,7 @@
 
 #include "utilities.h"
 #include "SMESH_PythonDump.hxx"
+#include "SMESH_NoteBook.hxx"
 #include "Resource_DataMapOfAsciiStringAsciiString.hxx"
 
 #include "SMESH_Gen_i.hxx"
@@ -125,12 +126,31 @@ SMESH_2smeshpy::ConvertScript(const TCollection_AsciiString& theScript,
   theGen = new _pyGen( theEntry2AccessorMethod, theObjectNames );
 
   // split theScript into separate commands
+
+  SMESH_NoteBook * aNoteBook = new SMESH_NoteBook();
+  
   int from = 1, end = theScript.Length(), to;
   while ( from < end && ( to = theScript.Location( "\n", from, end )))
   {
     if ( to != from )
+        // cut out and store a command
+        aNoteBook->AddCommand( theScript.SubString( from, to - 1 ));
+      from = to + 1;
+  }
+  
+  aNoteBook->ReplaceVariables();
+
+  TCollection_AsciiString aNoteScript = aNoteBook->GetResultScript();
+  delete aNoteBook;
+  aNoteBook = 0;
+  
+  // split theScript into separate commands
+  from = 1, end = aNoteScript.Length();
+  while ( from < end && ( to = aNoteScript.Location( "\n", from, end )))
+  {
+    if ( to != from )
       // cut out and store a command
-      theGen->AddCommand( theScript.SubString( from, to - 1 ));
+      theGen->AddCommand( aNoteScript.SubString( from, to - 1 ));
     from = to + 1;
   }
 
@@ -1057,13 +1077,14 @@ void _pyMeshEditor::Process( const Handle(_pyCommand)& theCommand)
   if ( sameMethods.empty() ) {
     const char * names[] = {
       "RemoveElements","RemoveNodes","AddNode","AddEdge","AddFace","AddPolygonalFace",
-      "AddVolume","AddPolyhedralVolume","AddPolyhedralVolumeByFaces","MoveNode",
-      "InverseDiag","DeleteDiag","Reorient","ReorientObject","SplitQuad","SplitQuadObject",
+      "AddVolume","AddPolyhedralVolume","AddPolyhedralVolumeByFaces","MoveNode", "MoveClosestNodeToPoint",
+      "InverseDiag","DeleteDiag","Reorient","ReorientObject","TriToQuad","SplitQuad","SplitQuadObject",
       "BestSplit","Smooth","SmoothObject","SmoothParametric","SmoothParametricObject",
       "ConvertToQuadratic","ConvertFromQuadratic","RenumberNodes","RenumberElements",
-      "RotationSweep","RotationSweepObject","ExtrusionSweep","AdvancedExtrusion",
-      "ExtrusionSweepObject","ExtrusionSweepObject1D","ExtrusionSweepObject2D","Mirror",
-      "MirrorObject","Translate","TranslateObject","Rotate","RotateObject",
+      "RotationSweep","RotationSweepObject","RotationSweepObject1D","RotationSweepObject2D",
+      "ExtrusionSweep","AdvancedExtrusion","ExtrusionSweepObject","ExtrusionSweepObject1D","ExtrusionSweepObject2D",
+      "ExtrusionAlongPath","ExtrusionAlongPathObject","ExtrusionAlongPathObject1D","ExtrusionAlongPathObject2D",
+      "Mirror","MirrorObject","Translate","TranslateObject","Rotate","RotateObject",
       "FindCoincidentNodes","FindCoincidentNodesOnPart","MergeNodes","FindEqualElements",
       "MergeElements","MergeEqualElements","SewFreeBorders","SewConformFreeBorders",
       "SewBorderToSide","SewSideElements","ChangeElemNodes","GetLastCreatedNodes",
@@ -1983,14 +2004,21 @@ const TCollection_AsciiString & _pyCommand::GetArg( int index )
     if ( begPos < 1 )
       begPos = myString.Location( "(", 1, Length() ) + 1;
 
-    int i = 0, prevLen = 0;
+    int i = 0, prevLen = 0, nbNestings = 0;
     while ( begPos != EMPTY ) {
       begPos += prevLen;
+      if( myString.Value( begPos ) == '(' )
+	nbNestings++;
       // check if we are looking at the closing parenthesis
       while ( begPos <= Length() && isspace( myString.Value( begPos )))
         ++begPos;
-      if ( begPos > Length() || myString.Value( begPos ) == ')' )
+      if ( begPos > Length() )
         break;
+      if ( myString.Value( begPos ) == ')' ) {
+	nbNestings--;
+	if( nbNestings == 0 )
+	  break;
+      }
       myArgs.Append( GetWord( myString, begPos, true, true ));
       SetBegPos( ARG1_IND + i, begPos );
       prevLen = myArgs.Last().Length();
@@ -2144,7 +2172,8 @@ void _pyCommand::SetArg( int index, const TCollection_AsciiString& theArg)
   if ( pos < 1 ) // no index-th arg exist, append inexistent args
   {
     // find a closing parenthesis
-    if ( int lastArgInd = GetNbArgs() ) {
+    if ( GetNbArgs() != 0 && index <= GetNbArgs() ) {
+      int lastArgInd = GetNbArgs();
       pos = GetBegPos( ARG1_IND + lastArgInd  - 1 ) + GetArg( lastArgInd ).Length();
       while ( pos > 0 && pos <= Length() && myString.Value( pos ) != ')' )
         ++pos;

@@ -28,6 +28,7 @@
 #include <iostream>
 #include <sstream>
 #include "SMESH_Hypothesis_i.hxx"
+#include "SMESH_Gen_i.hxx"
 #include "utilities.h"
 
 using namespace std;
@@ -118,6 +119,120 @@ CORBA::Long SMESH_Hypothesis_i::GetId()
 {
   MESSAGE( "SMESH_Hypothesis_i::GetId" );
   return myBaseImpl->GetID();
+}
+
+//=============================================================================
+/*!
+ *  SMESH_Hypothesis_i::IsPublished()
+ *
+ */
+//=============================================================================
+bool SMESH_Hypothesis_i::IsPublished(){
+  bool res = false;
+  SMESH_Gen_i *gen = SMESH_Gen_i::GetSMESHGen();
+  if(gen){
+    SALOMEDS::SObject_var SO = 
+      SMESH_Gen_i::ObjectToSObject(gen->GetCurrentStudy() , SMESH::SMESH_Hypothesis::_narrow(_this()));
+    res = !SO->_is_nil();
+  }
+  return res;
+}
+
+//=============================================================================
+/*!
+ *  SMESH_Hypothesis_i::SetParameters()
+ *
+ */
+//=============================================================================
+void SMESH_Hypothesis_i::SetParameters(const char* theParameters)
+{
+  SMESH_Gen_i *gen = SMESH_Gen_i::GetSMESHGen();
+  char * aParameters = CORBA::string_dup(theParameters);
+  if(gen){
+    if(IsPublished()) {
+      SMESH_Gen_i::GetSMESHGen()->UpdateParameters(SMESH::SMESH_Hypothesis::_narrow(_this()),aParameters);
+    }
+    else {
+      myBaseImpl->SetParameters(gen->ParseParameters(aParameters));
+    }
+  }
+}
+
+//=============================================================================
+/*!
+ *  SMESH_Hypothesis_i::GetParameters()
+ *
+ */
+//=============================================================================
+char* SMESH_Hypothesis_i::GetParameters()
+{
+  SMESH_Gen_i *gen = SMESH_Gen_i::GetSMESHGen();
+  char* aResult;
+  if(IsPublished()) {
+    MESSAGE("SMESH_Hypothesis_i::GetParameters() : Get Parameters from SObject");
+    aResult = gen->GetParameters(SMESH::SMESH_Hypothesis::_narrow(_this()));
+  }
+  else {
+    MESSAGE("SMESH_Hypothesis_i::GetParameters() : Get local parameters");
+    aResult = myBaseImpl->GetParameters(); 
+  }
+  return CORBA::string_dup(aResult);
+}
+
+//=============================================================================
+/*!
+ *  SMESH_Hypothesis_i::GetLastParameters()
+ *
+ */
+//=============================================================================
+SMESH::ListOfParameters* SMESH_Hypothesis_i::GetLastParameters()
+{
+  SMESH::ListOfParameters_var aResult = new SMESH::ListOfParameters();
+  SMESH_Gen_i *gen = SMESH_Gen_i::GetSMESHGen();
+  if(gen) {
+    char *aParameters;
+    if(IsPublished())
+     aParameters = GetParameters();
+    else
+      aParameters = myBaseImpl->GetLastParameters();
+
+    SALOMEDS::Study_ptr aStudy = gen->GetCurrentStudy();
+    if(!aStudy->_is_nil()) {
+      SALOMEDS::ListOfListOfStrings_var aSections = aStudy->ParseVariables(aParameters); 
+      if(aSections->length() > 0) {
+        SALOMEDS::ListOfStrings aVars = aSections[aSections->length()-1];
+        aResult->length(aVars.length());
+        for(int i = 0;i < aVars.length();i++)
+          aResult[i] = CORBA::string_dup( aVars[i]);
+      }
+    }
+  }
+  return aResult._retn();
+}
+
+//=============================================================================
+/*!
+ *  SMESH_Hypothesis_i::SetLastParameters()
+ *
+ */
+//=============================================================================
+void SMESH_Hypothesis_i::SetLastParameters(const char* theParameters)
+{
+  if(!IsPublished()) {
+    myBaseImpl->SetLastParameters(theParameters);
+  }
+}
+//=============================================================================
+/*!
+ *  SMESH_Hypothesis_i::ClearParameters()
+ *
+ */
+//=============================================================================
+void SMESH_Hypothesis_i::ClearParameters()
+{
+  if(!IsPublished()) {
+    myBaseImpl->ClearParameters();
+  }
 }
 
 //=============================================================================

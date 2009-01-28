@@ -27,8 +27,8 @@
 
 // SMESH includes
 #include "SMESH_StdMeshersGUI.hxx"
-
 #include <SMESHGUI_Hypotheses.h>
+
 
 /*!
  * \brief Class for creation of standard hypotheses
@@ -41,7 +41,7 @@ public:
   StdMeshersGUI_StdHypothesisCreator( const QString& );
   virtual ~StdMeshersGUI_StdHypothesisCreator();
 
-  virtual bool checkParams() const;
+  virtual bool checkParams( QString& ) const;
 
 protected:
   virtual QFrame*  buildFrame    ();
@@ -59,6 +59,7 @@ protected:
   virtual QWidget* getWidgetForParam( int paramIndex ) const;
   virtual ListOfWidgets* customWidgets() const;
   virtual void     onReject();
+  virtual bool     initVariableName(SMESH::ListOfParameters_var theParameters, StdParam& theParams, int order) const;
 
   virtual void     valueChanged( QWidget* );
 

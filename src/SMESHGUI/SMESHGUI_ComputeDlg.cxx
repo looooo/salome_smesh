@@ -1217,7 +1217,8 @@ void SMESHGUI_BaseComputeOp::showComputeResult( const bool theMemoryLack,
     }
   }
   // show dialog and wait, becase Compute can be invoked from Preview operation
-  aCompDlg->exec();
+  //aCompDlg->exec(); // this way it becomes modal - impossible to rotate model in the Viewer
+  aCompDlg->show();
 }
 
 //================================================================================

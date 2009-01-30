@@ -920,7 +920,7 @@ bool SMESHGUI_FilterTable::IsValid (const bool theMess, const int theEntityType)
          aCriterion == SMESH::FT_BelongToCylinder ||
          aCriterion == SMESH::FT_BelongToGenSurface ||
          aCriterion == SMESH::FT_LyingOnGeom) {
-      if (aTable->text(i, 2).isEmpty());
+      if (aTable->text(i, 2).isEmpty())
         errMsg = tr( "ERROR" );
     }
     else {

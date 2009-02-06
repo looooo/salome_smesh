@@ -3919,7 +3919,7 @@ Please enter correct value and try again</translation>
         </message>
         <message>
             <source>GEOM_TYPE</source>
-            <translation>Geomtry type</translation>
+            <translation>Geometry type</translation>
         </message>
         <message>
             <source>GEOM_TYPE_0</source>

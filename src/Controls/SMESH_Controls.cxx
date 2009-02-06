@@ -1877,10 +1877,13 @@ void GroupColor::SetMesh( const SMDS_Mesh* theMesh )
     if ( myType != SMDSAbs_All && myType != (SMDSAbs_ElementType)aGrp->GetType() )
       continue;
 
-    // add elements IDS into control
-    int aSize = aGrp->Extent();
-    for (int i = 0; i < aSize; i++)
-      myIDs.insert( aGrp->GetID(i+1) );
+    SMDSAbs_ElementType aGrpElType = (SMDSAbs_ElementType)aGrp->GetType();
+    if ( myType == aGrpElType || (myType == SMDSAbs_All && aGrpElType != SMDSAbs_Node) ) {
+      // add elements IDS into control
+      int aSize = aGrp->Extent();
+      for (int i = 0; i < aSize; i++)
+        myIDs.insert( aGrp->GetID(i+1) );
+    }
   }
 }
 

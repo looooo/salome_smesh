@@ -47,7 +47,6 @@
 #include <SUIT_ResourceMgr.h>
 #include <SUIT_Session.h>
 #include <SUIT_MessageBox.h>
-#include <QtxComboBox.h>
 #include <QtxColorButton.h>
 
 #include <LightApp_Application.h>
@@ -910,15 +909,12 @@ bool SMESHGUI_FilterTable::IsValid (const bool theMess, const int theEntityType)
       QtxColorButton* clrBtn = qobject_cast<QtxColorButton*>(aTable->cellWidget(i, 2));
       if (clrBtn && !clrBtn->color().isValid())
         errMsg = tr( "GROUPCOLOR_ERROR" );
-    } else if (aCriterion == SMESH::FT_ElemGeomType ) {
-      QtxComboBox* typeBox = qobject_cast<QtxComboBox*>(aTable->cellWidget(i, 2));
-      if (typeBox && typeBox->currentId() == -1)
-        errMsg = tr( "ERROR" );
     } else if (aCriterion == SMESH::FT_RangeOfIds ||
          aCriterion == SMESH::FT_BelongToGeom ||
          aCriterion == SMESH::FT_BelongToPlane ||
          aCriterion == SMESH::FT_BelongToCylinder ||
          aCriterion == SMESH::FT_BelongToGenSurface ||
+         aCriterion == SMESH::FT_ElemGeomType ||
          aCriterion == SMESH::FT_LyingOnGeom) {
       if (aTable->text(i, 2).isEmpty())
         errMsg = tr( "ERROR" );
@@ -1031,11 +1027,8 @@ void SMESHGUI_FilterTable::GetCriterion (const int                 theRow,
       theCriterion.ThresholdStr = clrStr.toLatin1().constData();
     }
   }
-  else if ( aCriterionType == SMESH::FT_ElemGeomType ) {
-    QtxComboBox* typeBox = qobject_cast<QtxComboBox*>(aTable->cellWidget(theRow, 2));
-    if ( typeBox )
-      theCriterion.Threshold = (double)typeBox->currentId();
-  }
+  else if ( aCriterionType == SMESH::FT_ElemGeomType )
+    theCriterion.Threshold = (double)((ComboItem*)aTable->item(theRow, 2))->value();
   else if ( aCriterionType != SMESH::FT_RangeOfIds &&
             aCriterionType != SMESH::FT_BelongToGeom &&
 	    aCriterionType != SMESH::FT_BelongToPlane &&
@@ -1104,9 +1097,8 @@ void SMESHGUI_FilterTable::SetCriterion (const int                       theRow,
   }
   else if (theCriterion.Type == SMESH::FT_ElemGeomType )
   {
-    QtxComboBox* typeBox = qobject_cast<QtxComboBox*>(aTable->cellWidget(theRow, 2));
-    if ( typeBox )
-      typeBox->setCurrentId( (int)(theCriterion.Threshold + 0.5) );
+    ComboItem* typeBox = (ComboItem*)aTable->item(theRow, 2);
+    typeBox->setValue( (int)(theCriterion.Threshold + 0.5) );
   }
   else if (theCriterion.Type != SMESH::FT_RangeOfIds &&
       theCriterion.Type != SMESH::FT_BelongToGeom &&
@@ -1378,35 +1370,36 @@ void SMESHGUI_FilterTable::onCriterionChanged (const int row, const int col, con
 
   int aCriterionType = GetCriterionType(row);
   QtxColorButton* clrBtn = qobject_cast<QtxColorButton*>(aTable->cellWidget(row, 2));
-  QtxComboBox* typeBox = qobject_cast<QtxComboBox*>(aTable->cellWidget(row, 2));
+  bool isComboItem = aTable->item(row, 2)->type() == ComboItem::Type();
   
+  if ( (aCriterionType != SMESH::FT_GroupColor && clrBtn) ||
+       (aCriterionType != SMESH::FT_ElemGeomType && isComboItem) )
+  {
+    bool isSignalsBlocked = aTable->signalsBlocked();
+    aTable->blockSignals( true );
+    aTable->removeCellWidget( row, 2 );
+    aTable->setItem( row, 2, new QTableWidgetItem() );
+    aTable->blockSignals( isSignalsBlocked );
+  }
   if ( (aCriterionType == SMESH::FT_GroupColor && !clrBtn) ||
-       (aCriterionType == SMESH::FT_ElemGeomType && !typeBox) )
+       (aCriterionType == SMESH::FT_ElemGeomType && !isComboItem) )
   {
     bool isSignalsBlocked = aTable->signalsBlocked();
     aTable->blockSignals( true );
     if ( aCriterionType == SMESH::FT_GroupColor )
       aTable->setCellWidget( row, 2, new QtxColorButton( aTable ) );
     else {
-      QtxComboBox* typeBox = new QtxComboBox( aTable );
-      aTable->setCellWidget( row, 2, typeBox );
       QList<int> typeIds = geomTypes( aType );
+      QMap<int, QString> typeNames;
       QList<int>::const_iterator anIter = typeIds.begin();
-      for ( int i = 0; anIter != typeIds.end(); ++anIter, ++i) {
+      for ( int i = 0; anIter != typeIds.end(); ++anIter, ++i)
+      {
         QString typeKey = QString( "GEOM_TYPE_%1" ).arg( *anIter );
-        typeBox->addItem( tr( typeKey.toLatin1().data() ) );
-	typeBox->setId( i, *anIter );
+        typeNames[ *anIter ] = tr( typeKey.toLatin1().data() );
       }
+      ComboItem* typeBox = new ComboItem( typeNames );
+      aTable->setItem( row, 2, typeBox );
     }
-    aTable->blockSignals( isSignalsBlocked );
-  }
-  else if ( (aCriterionType != SMESH::FT_GroupColor && clrBtn) ||
-            (aCriterionType != SMESH::FT_ElemGeomType && typeBox) )
-  {
-    bool isSignalsBlocked = aTable->signalsBlocked();
-    aTable->blockSignals( true );
-    aTable->setCellWidget( row, 2, 0 );
-    aTable->setItem( row, 2, new QTableWidgetItem() );
     aTable->blockSignals( isSignalsBlocked );
   }
 
@@ -1552,8 +1545,6 @@ void SMESHGUI_FilterTable::addRow (Table* theTable, const int theType, const boo
   if (theTable->item(aCurrRow, 4) == 0 ||
        theTable->item(aCurrRow, 4)->type() != ComboItem::Type())
   {
-
-
     if (anAddBinOpStr >= 0 &&
          (theTable->item(anAddBinOpStr, 4) == 0 ||
            theTable->item(anAddBinOpStr, 4)->type() != ComboItem::Type()))
@@ -2294,6 +2285,7 @@ void SMESHGUI_FilterDlg::Init (const QList<int>& theTypes)
     else if (aType == SMESH::EDGE  ) setWindowTitle(tr("EDGES_TLT"));
     else if (aType == SMESH::FACE  ) setWindowTitle(tr("FACES_TLT"));
     else if (aType == SMESH::VOLUME) setWindowTitle(tr("VOLUMES_TLT"));
+    else if (aType == SMESH::ALL)    setWindowTitle(tr("TLT"));
   }
   else
     setWindowTitle(tr("TLT"));

@@ -27,9 +27,17 @@ The following dialog box shall appear:
 In this dialog box you should specify:
 <ul>
 <li>the type of elements which will be extruded (1D or 2D),</li>
-<li>specify the IDs of the elements which will be revolved by
-selecting them in the 3D viewer or select the whole mesh or
-submesh,</li>
+<li>specify the IDs of the elements which will be revolved
+<ul>
+<li>Check on <b>Select the whole mesh, submesh or group</b> option
+<li>Choosing them manually with the mouse in the 3D Viewer. You can
+click on an element in the 3D viewer and it will be highlighted</li>
+<li>Applying Filters. The <b>Set filter</b> button allows to apply a
+definite filter to selection of the elements. See more
+about filters on the
+\ref selection_filter_library_page "Selection filter library" page.</li>
+</ul>
+</li>
 <li>specify the axis (point and vector) around which the elements will
 be revolved,</li>
 <li>angle of rotation and number of steps,</li>

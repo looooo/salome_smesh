@@ -46,7 +46,7 @@ in the Library.
 is no selected mesh in the Object Browser and the filter can not be
 created. You have to select the mesh and the button will be enabled.
 
-\image html a-filteronedges.png
+\image html a-filteronfaces.png
 
 Some criteria are applicable to all <b>Entity types</b>:
 <ul><li>

@@ -24,7 +24,6 @@
 //           Moved here from SMESH_MEFISTO_2D.cxx
 //  Author : Paul RASCLE, EDF
 //  Module : SMESH
-//  $Header$
 //
 #include "StdMeshers_MEFISTO_2D.hxx"
 

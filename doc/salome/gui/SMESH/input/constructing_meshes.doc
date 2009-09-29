@@ -173,20 +173,20 @@ shape. The main Mesh object:
 </li>
 <li><i>1D</i> <b>Wire discretisation</b> with <b>Number of Segments</b>=20</li>
 </ul>
-The first submesh object "<b>Submesh_1</b>" created on "<b>Face_1</b>"
+The first submesh object <b>Submesh_1</b> created on <b>Face_1</b>
 is:
 <ul>
 <li><i>2D</i> Netgen 1D-2D with Hypothesis <b>Netgen Simple parameters</b>
 (Number of Segments = 4)</li>
 </ul>
-The second submesh object "<b>Submesh_2</b>" created on "<b>Face_2</b>"
+The second submesh object <b>Submesh_2</b> created on <b>Face_2</b>
 is:
 <ul>
 <li><i>2D</i> Netgen 1D-2D with Hypothesis <b>Netgen Simple parameters</b>
 (Number of Segments = 8)</li>
 </ul>
 
-And the last third submesh object "<b>Submesh_3</b>" created on "<b>Face_3</b>"
+And the last third submesh object <b>Submesh_3</b> created on <b>Face_3</b>
 is:
 <ul>
 <li><i>2D</i> Netgen 1D-2D with Hypothesis <b>Netgen Simple parameters</b>

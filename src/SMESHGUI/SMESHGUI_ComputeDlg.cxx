@@ -32,6 +32,9 @@
 #include "SMESHGUI_MeshInfosBox.h"
 #include "SMESHGUI_HypothesesUtils.h"
 #include "SMESHGUI_MeshEditPreview.h"
+#include "SMESHGUI_MeshOrderOp.h"
+#include "SMESHGUI_MeshOrderDlg.h"
+
 #include "SMESH_ActorUtils.h"
 
 #include <SMDS_SetIterator.hxx>
@@ -638,8 +641,8 @@ void SMESHGUI_BaseComputeOp::startOperation()
   int nbSel = selected.Extent();
   if (nbSel != 1) {
     SUIT_MessageBox::warning(desktop(),
-			     tr("SMESH_WRN_WARNING"),
-			     tr("SMESH_WRN_NO_AVAILABLE_DATA"));
+                             tr("SMESH_WRN_WARNING"),
+                             tr("SMESH_WRN_NO_AVAILABLE_DATA"));
     onCancel();
     return;
   }
@@ -648,8 +651,8 @@ void SMESHGUI_BaseComputeOp::startOperation()
   myMesh = SMESH::GetMeshByIO(myIObject);
   if (myMesh->_is_nil()) {
     SUIT_MessageBox::warning(desktop(),
-			     tr("SMESH_WRN_WARNING"),
-			     tr("SMESH_WRN_NO_AVAILABLE_DATA"));
+                             tr("SMESH_WRN_WARNING"),
+                             tr("SMESH_WRN_NO_AVAILABLE_DATA"));
     onCancel();
     return;
   }
@@ -742,9 +745,9 @@ void SMESHGUI_BaseComputeOp::computeMesh()
       LightApp_SelectionMgr *Sel = selectionMgr();
       if ( Sel )
       {
-	SALOME_ListIO selected;
-	selected.Append( myIObject );
-	Sel->setSelectedObjects( selected );
+        SALOME_ListIO selected;
+        selected.Append( myIObject );
+        Sel->setSelectedObjects( selected );
       }
     }
   }
@@ -787,10 +790,10 @@ void SMESHGUI_BaseComputeOp::computeMesh()
 }
 
 void SMESHGUI_BaseComputeOp::showComputeResult( const bool theMemoryLack,
-						const bool theNoCompError,
-						SMESH::compute_error_array_var& theCompErrors,
-						const bool     theNoHypoError,
-						const QString& theHypErrors )
+                                                const bool theNoCompError,
+                                                SMESH::compute_error_array_var& theCompErrors,
+                                                const bool     theNoHypoError,
+                                                const QString& theHypErrors )
 {
   bool hasShape = myMesh->HasShapeToMesh();
   SMESHGUI_ComputeDlg* aCompDlg = computeDlg();
@@ -855,29 +858,29 @@ void SMESHGUI_BaseComputeOp::showComputeResult( const bool theMemoryLack,
       {
         SMESH::ComputeError & err = theCompErrors[ row ];
 
-	QString text = err.algoName.in();
-	if ( !tbl->item( row, COL_ALGO ) ) tbl->setItem( row, COL_ALGO, new QTableWidgetItem( text ) );
-	else tbl->item( row, COL_ALGO )->setText( text );
+        QString text = err.algoName.in();
+        if ( !tbl->item( row, COL_ALGO ) ) tbl->setItem( row, COL_ALGO, new QTableWidgetItem( text ) );
+        else tbl->item( row, COL_ALGO )->setText( text );
 
-	text = SMESH::errorText( err.code, err.comment.in() );
-	if ( !tbl->item( row, COL_ERROR ) ) tbl->setItem( row, COL_ERROR, new QTableWidgetItem( text ) );
-	else tbl->item( row, COL_ERROR )->setText( text );
+        text = SMESH::errorText( err.code, err.comment.in() );
+        if ( !tbl->item( row, COL_ERROR ) ) tbl->setItem( row, COL_ERROR, new QTableWidgetItem( text ) );
+        else tbl->item( row, COL_ERROR )->setText( text );
 
-	text = QString("%1").arg( err.subShapeID );
-	if ( !tbl->item( row, COL_SHAPEID ) ) tbl->setItem( row, COL_SHAPEID, new QTableWidgetItem( text ) );
-	else tbl->item( row, COL_SHAPEID )->setText( text );
+        text = QString("%1").arg( err.subShapeID );
+        if ( !tbl->item( row, COL_SHAPEID ) ) tbl->setItem( row, COL_SHAPEID, new QTableWidgetItem( text ) );
+        else tbl->item( row, COL_SHAPEID )->setText( text );
 
         text = hasShape ? SMESH::shapeText( err.subShapeID, myMainShape ) : QString("");
-	if ( !tbl->item( row, COL_SHAPE ) ) tbl->setItem( row, COL_SHAPE, new QTableWidgetItem( text ) );
-	else tbl->item( row, COL_SHAPE )->setText( text );
+        if ( !tbl->item( row, COL_SHAPE ) ) tbl->setItem( row, COL_SHAPE, new QTableWidgetItem( text ) );
+        else tbl->item( row, COL_SHAPE )->setText( text );
 
         text = ( !hasShape || SMESH::getSubShapeSO( err.subShapeID, myMainShape )) ? "PUBLISHED" : "";
-	if ( !tbl->item( row, COL_PUBLISHED ) ) tbl->setItem( row, COL_PUBLISHED, new QTableWidgetItem( text ) );
-	else tbl->item( row, COL_PUBLISHED )->setText( text ); // if text=="", "PUBLISH" button enabled
+        if ( !tbl->item( row, COL_PUBLISHED ) ) tbl->setItem( row, COL_PUBLISHED, new QTableWidgetItem( text ) );
+        else tbl->item( row, COL_PUBLISHED )->setText( text ); // if text=="", "PUBLISH" button enabled
 
         text = err.hasBadMesh ? "hasBadMesh" : "";
-	if ( !tbl->item( row, COL_BAD_MESH ) ) tbl->setItem( row, COL_BAD_MESH, new QTableWidgetItem( text ) );
-	else tbl->item( row, COL_BAD_MESH )->setText( text );
+        if ( !tbl->item( row, COL_BAD_MESH ) ) tbl->setItem( row, COL_BAD_MESH, new QTableWidgetItem( text ) );
+        else tbl->item( row, COL_BAD_MESH )->setText( text );
         if ( err.hasBadMesh ) hasBadMesh = true;
 
         //tbl->item( row, COL_ERROR )->setWordWrap( true ); // VSR: TODO ???
@@ -1192,6 +1195,7 @@ LightApp_Dialog* SMESHGUI_ComputeOp::dlg() const
 SMESHGUI_PrecomputeOp::SMESHGUI_PrecomputeOp()
  : SMESHGUI_BaseComputeOp(),
  myDlg( 0 ),
+ myOrderMgr( 0 ),
  myActiveDlg( 0 ),
  myPreviewDisplayer( 0 )
 {
@@ -1208,6 +1212,8 @@ SMESHGUI_PrecomputeOp::~SMESHGUI_PrecomputeOp()
 {
   delete myDlg;
   myDlg = 0;
+  delete myOrderMgr;
+  myOrderMgr = 0;
   myActiveDlg = 0;
   if ( myPreviewDisplayer )
     delete myPreviewDisplayer;
@@ -1273,6 +1279,16 @@ void SMESHGUI_PrecomputeOp::startOperation()
   if (myMesh->_is_nil())
     return;
 
+  if (myDlg->getPreviewMode() == -1)
+  {
+    // nothing to preview
+    SUIT_MessageBox::warning(desktop(),
+                             tr("SMESH_WRN_WARNING"),
+                             tr("SMESH_WRN_NOTHING_PREVIEW"));
+    onCancel();
+    return;
+  }
+
   // disconnect slot from preview dialog to have Apply from results of compute operation only 
   disconnect( myDlg, SIGNAL( dlgOk() ), this, SLOT( onOk() ) );
   disconnect( myDlg, SIGNAL( dlgApply() ), this, SLOT( onApply() ) );
@@ -1337,6 +1353,15 @@ void SMESHGUI_PrecomputeOp::initDialog()
       modes.append( SMESH::DIM_1D );
   }
 
+  myOrderMgr = new SMESHGUI_MeshOrderMgr( myDlg->getMeshOrderBox() );
+  myOrderMgr->SetMesh( myMesh );
+  bool isOrder = myOrderMgr->GetMeshOrder(myPrevOrder);
+  myDlg->getMeshOrderBox()->setShown(isOrder);
+  if ( !isOrder ) {
+    delete myOrderMgr;
+    myOrderMgr = 0;
+  }
+
   myDlg->setPreviewModes( modes );
 }
 
@@ -1381,7 +1406,7 @@ void SMESHGUI_PrecomputeOp::getAssignedAlgos(_PTR(SObject) theMesh,
           default: break;
           }
           if ( !algo->_is_nil() )
-	    theModeMap[ dim ] = 0;
+            theModeMap[ dim ] = 0;
         }
       }
     }
@@ -1397,6 +1422,8 @@ void SMESHGUI_PrecomputeOp::getAssignedAlgos(_PTR(SObject) theMesh,
 void SMESHGUI_PrecomputeOp::onCompute()
 {
   myDlg->hide();
+  if (myOrderMgr && myOrderMgr->IsOrderChanged())
+    myOrderMgr->SetMeshOrder();
   myMapShapeId.clear();
   myActiveDlg = computeDlg();
   computeMesh();
@@ -1418,6 +1445,7 @@ void SMESHGUI_PrecomputeOp::onCancel()
     return;
   }
 
+  bool isRestoreOrder = false;
   if ( myActiveDlg == myDlg  && !myMesh->_is_nil() && myMapShapeId.count() )
   {
     // ask to remove already computed mesh elements
@@ -1429,8 +1457,24 @@ void SMESHGUI_PrecomputeOp::onCancel()
       QMap<int,int>::const_iterator it = myMapShapeId.constBegin();
       for ( ; it != myMapShapeId.constEnd(); ++it )
         myMesh->ClearSubMesh( *it );
+      isRestoreOrder = true;
     }
   }
+
+  // return previous mesh order
+  if (myOrderMgr && myOrderMgr->IsOrderChanged()) {
+    if (!isRestoreOrder)
+      isRestoreOrder = 
+        (SUIT_MessageBox::question( desktop(), tr( "SMESH_WARNING" ),
+                                    tr( "SMESH_REJECT_MESH_ORDER" ),
+                                    tr( "SMESH_BUT_YES" ), tr( "SMESH_BUT_NO" ), 0, 1 ) == 0);
+    if (isRestoreOrder)
+      myOrderMgr->SetMeshOrder(myPrevOrder);
+  }
+
+  delete myOrderMgr;
+  myOrderMgr = 0;
+
   myMapShapeId.clear();
   SMESHGUI_BaseComputeOp::onCancel();
 }
@@ -1449,6 +1493,11 @@ void SMESHGUI_PrecomputeOp::onPreview()
   _PTR(SObject) aMeshSObj = SMESH::FindSObject(myMesh);
   if ( !aMeshSObj )
     return;
+
+  // set modified submesh priority if any
+  if (myOrderMgr && myOrderMgr->IsOrderChanged())
+    myOrderMgr->SetMeshOrder();
+
   // Compute preview of mesh, 
   // i.e. compute mesh till indicated dimension
   int dim = myDlg->getPreviewMode();
@@ -1491,7 +1540,7 @@ void SMESHGUI_PrecomputeOp::onPreview()
       myPreviewDisplayer->SetData( previewRes );
       // append shape indeces with computed mesh entities
       for ( int i = 0, n = aShapesId->length(); i < n; i++ )
-	myMapShapeId[ aShapesId[ i ] ] = 0;
+        myMapShapeId[ aShapesId[ i ] ] = 0;
     }
     else
       myPreviewDisplayer->SetVisibility(false);
@@ -1553,7 +1602,8 @@ void SMESHGUI_PrecomputeOp::onPreview()
 //================================================================================
 
 SMESHGUI_PrecomputeDlg::SMESHGUI_PrecomputeDlg( QWidget* parent )
- : SMESHGUI_Dialog( parent, false, false, OK | Cancel | Help )
+ : SMESHGUI_Dialog( parent, false, false, OK | Cancel | Help ),
+   myOrderBox(0)
 {
   setWindowTitle( tr( "CAPTION" ) );
 
@@ -1561,6 +1611,9 @@ SMESHGUI_PrecomputeDlg::SMESHGUI_PrecomputeDlg( QWidget* parent )
   QFrame* main = mainFrame();
 
   QVBoxLayout* layout = new QVBoxLayout( main );
+
+  myOrderBox = new SMESHGUI_MeshOrderBox( main );
+  layout->addWidget(myOrderBox);
 
   QFrame* frame = new QFrame( main );
   layout->setMargin(0); layout->setSpacing(0);
@@ -1616,6 +1669,17 @@ void SMESHGUI_PrecomputeDlg::setPreviewModes( const QList<int>& theModes )
 int SMESHGUI_PrecomputeDlg::getPreviewMode() const
 {
   return myPreviewMode->currentId();
+}
+
+//================================================================================
+/*!
+ * \brief Returns current preview mesh mode
+*/
+//================================================================================
+
+SMESHGUI_MeshOrderBox* SMESHGUI_PrecomputeDlg::getMeshOrderBox() const
+{
+  return myOrderBox;
 }
 
 
@@ -1759,16 +1823,16 @@ void SMESHGUI_BaseComputeOp::evaluateMesh()
   // SHOW RESULTS
   if ( isShowResultDlg )
     showEvaluateResult( aRes, memoryLack, noCompError, aCompErrors,
-			noHypoError, aHypErrors);
+                        noHypoError, aHypErrors);
 }
 
 
 void SMESHGUI_BaseComputeOp::showEvaluateResult(const SMESH::long_array& theRes,
-						const bool theMemoryLack,
-						const bool theNoCompError,
-						SMESH::compute_error_array_var& theCompErrors,
-						const bool theNoHypoError,
-						const QString& theHypErrors)
+                                                const bool theMemoryLack,
+                                                const bool theNoCompError,
+                                                SMESH::compute_error_array_var& theCompErrors,
+                                                const bool theNoHypoError,
+                                                const QString& theHypErrors)
 {
   bool hasShape = myMesh->HasShapeToMesh();
   SMESHGUI_ComputeDlg* aCompDlg = evaluateDlg();
@@ -1825,29 +1889,29 @@ void SMESHGUI_BaseComputeOp::showEvaluateResult(const SMESH::long_array& theRes,
       {
         SMESH::ComputeError & err = theCompErrors[ row ];
 
-	QString text = err.algoName.in();
-	if ( !tbl->item( row, COL_ALGO ) ) tbl->setItem( row, COL_ALGO, new QTableWidgetItem( text ) );
-	else tbl->item( row, COL_ALGO )->setText( text );
+        QString text = err.algoName.in();
+        if ( !tbl->item( row, COL_ALGO ) ) tbl->setItem( row, COL_ALGO, new QTableWidgetItem( text ) );
+        else tbl->item( row, COL_ALGO )->setText( text );
 
-	text = SMESH::errorText( err.code, err.comment.in() );
-	if ( !tbl->item( row, COL_ERROR ) ) tbl->setItem( row, COL_ERROR, new QTableWidgetItem( text ) );
-	else tbl->item( row, COL_ERROR )->setText( text );
+        text = SMESH::errorText( err.code, err.comment.in() );
+        if ( !tbl->item( row, COL_ERROR ) ) tbl->setItem( row, COL_ERROR, new QTableWidgetItem( text ) );
+        else tbl->item( row, COL_ERROR )->setText( text );
 
-	text = QString("%1").arg( err.subShapeID );
-	if ( !tbl->item( row, COL_SHAPEID ) ) tbl->setItem( row, COL_SHAPEID, new QTableWidgetItem( text ) );
-	else tbl->item( row, COL_SHAPEID )->setText( text );
+        text = QString("%1").arg( err.subShapeID );
+        if ( !tbl->item( row, COL_SHAPEID ) ) tbl->setItem( row, COL_SHAPEID, new QTableWidgetItem( text ) );
+        else tbl->item( row, COL_SHAPEID )->setText( text );
 
         text = hasShape ? SMESH::shapeText( err.subShapeID, myMainShape ) : QString("");
-	if ( !tbl->item( row, COL_SHAPE ) ) tbl->setItem( row, COL_SHAPE, new QTableWidgetItem( text ) );
-	else tbl->item( row, COL_SHAPE )->setText( text );
+        if ( !tbl->item( row, COL_SHAPE ) ) tbl->setItem( row, COL_SHAPE, new QTableWidgetItem( text ) );
+        else tbl->item( row, COL_SHAPE )->setText( text );
 
         text = ( !hasShape || SMESH::getSubShapeSO( err.subShapeID, myMainShape )) ? "PUBLISHED" : "";
-	if ( !tbl->item( row, COL_PUBLISHED ) ) tbl->setItem( row, COL_PUBLISHED, new QTableWidgetItem( text ) );
-	else tbl->item( row, COL_PUBLISHED )->setText( text ); // if text=="", "PUBLISH" button enabled
+        if ( !tbl->item( row, COL_PUBLISHED ) ) tbl->setItem( row, COL_PUBLISHED, new QTableWidgetItem( text ) );
+        else tbl->item( row, COL_PUBLISHED )->setText( text ); // if text=="", "PUBLISH" button enabled
 
         text = err.hasBadMesh ? "hasBadMesh" : "";
-	if ( !tbl->item( row, COL_BAD_MESH ) ) tbl->setItem( row, COL_BAD_MESH, new QTableWidgetItem( text ) );
-	else tbl->item( row, COL_BAD_MESH )->setText( text );
+        if ( !tbl->item( row, COL_BAD_MESH ) ) tbl->setItem( row, COL_BAD_MESH, new QTableWidgetItem( text ) );
+        else tbl->item( row, COL_BAD_MESH )->setText( text );
         if ( err.hasBadMesh ) hasBadMesh = true;
 
         //tbl->item( row, COL_ERROR )->setWordWrap( true ); // VSR: TODO ???

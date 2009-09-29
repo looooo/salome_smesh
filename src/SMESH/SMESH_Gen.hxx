@@ -157,7 +157,7 @@ class SMESH_EXPORT  SMESH_Gen
   std::map < int, SMESH_3D_Algo * >_map3D_Algo;
 
  private:
-
+  //! private fields
   int _localId;				// unique Id of created objects, within SMESH_Gen entity
   std::map < int, StudyContextStruct * >_mapStudyContext;
 

@@ -156,6 +156,7 @@ evaluation will be displayed in the following information box:
 
 </ol>
 
+\anchor mesh_order_anchor
 It is allowed to change submesh priority in mesh computation when
 there are concurrent submeshes present. I.e. user can change priority of
 applying algorithms on shared subshapes of Mesh shape.

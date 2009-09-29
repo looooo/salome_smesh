@@ -68,6 +68,7 @@
 #include "SMESHGUI_ComputeDlg.h"
 #include "SMESHGUI_FileInfoDlg.h"
 #include "SMESHGUI_Make2DFrom3DOp.h"
+#include "SMESHGUI_MeshOrderOp.h"
 
 #include "SMESHGUI_Utils.h"
 #include "SMESHGUI_MeshUtils.h"
@@ -1622,6 +1623,7 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
   case 701:					// COMPUTE MESH
   case 711:					// PRECOMPUTE MESH
   case 712:					// EVALUATE MESH
+  case 713:					// MESH ORDER
     {
       if (checkLock(aStudy)) break;
       startOperation( theCommandID );
@@ -2711,6 +2713,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   createSMESHAction(  710, "BUILD_COMPOUND",  "ICON_BUILD_COMPOUND" );
   createSMESHAction(  711, "PRECOMPUTE",      "ICON_PRECOMPUTE" );
   createSMESHAction(  712, "EVALUATE",        "ICON_COMPUTE" );
+  createSMESHAction(  713, "MESH_ORDER",      "ICON_COMPUTE" );
   createSMESHAction(  806, "CREATE_GEO_GROUP","ICON_CREATE_GEO_GROUP" );
   createSMESHAction(  801, "CREATE_GROUP",    "ICON_CREATE_GROUP" );
   createSMESHAction(  802, "CONSTRUCT_GROUP", "ICON_CONSTRUCT_GROUP" );
@@ -2859,6 +2862,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   createMenu( 701, meshId, -1 );
   createMenu( 711, meshId, -1 );
   createMenu( 712, meshId, -1 );
+  createMenu( 713, meshId, -1 );
   createMenu( separator(), meshId, -1 );
   createMenu( 801, meshId, -1 );
   createMenu( 806, meshId, -1 );
@@ -2963,6 +2967,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   createTool( 701, meshTb );
   createTool( 711, meshTb );
   createTool( 712, meshTb );
+  createTool( 713, meshTb );
   createTool( separator(), meshTb );
   createTool( 801, meshTb );
   createTool( 806, meshTb );
@@ -3093,7 +3098,8 @@ void SMESHGUI::initialize( CAM_Application* app )
   popupMgr()->insert( separator(), -1, 0 );
   createPopupItem( 701, OB, mesh, "&& isComputable" );     // COMPUTE
   createPopupItem( 711, OB, mesh, "&& isComputable && isPreComputable" ); // PRECOMPUTE
-  createPopupItem( 712, OB, mesh, "&& isComputable" );     // COMPUTE
+  createPopupItem( 712, OB, mesh, "&& isComputable" );     // EVALUATE
+  createPopupItem( 713, OB, mesh, "&& isComputable" );     // MESH ORDER
   createPopupItem( 214, OB, mesh_group );                  // UPDATE
   createPopupItem( 900, OB, mesh_group );                  // ADV_INFO
   createPopupItem( 902, OB, mesh );                        // STD_INFO
@@ -3904,6 +3910,9 @@ LightApp_Operation* SMESHGUI::createOperation( const int id ) const
     break;
     case 712: // Evaluate mesh
       op = new SMESHGUI_EvaluateOp();
+    break;
+    case 713: // Evaluate mesh
+      op = new SMESHGUI_MeshOrderOp();
     break;
     case 806: // Create group on geom
       op = new SMESHGUI_GroupOnShapeOp();

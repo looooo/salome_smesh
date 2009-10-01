@@ -299,6 +299,11 @@ bool SMESHGUI_MeshOrderMgr::SetMeshOrder( const  ListListId& theListListIds )
     }
   }
 
+  // is it enought to set modifid attribute on root mesh objects only?
+  //  it is seems that modifaction flag will be set on child submeshes 
+  //  automatically  (see SMESH::ModifiedMesh for details)
+  SMESH::ModifiedMesh( aMeshSObj, false, false );
+
   SMESH::submesh_array_array_var meshOrder = new SMESH::submesh_array_array();
   meshOrder->length(theListListIds.count() );
   ListListId::const_iterator it = theListListIds.constBegin();
@@ -313,6 +318,8 @@ bool SMESHGUI_MeshOrderMgr::SetMeshOrder( const  ListListId& theListListIds )
 
     meshOrder[ i++ ] = subMeshList;
   }
+  // update object browser
+  SMESHGUI::GetSMESHGUI()->updateObjBrowser( true, 0 );
 
   return myMesh->SetMeshOrder(meshOrder);
 }

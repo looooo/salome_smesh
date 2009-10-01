@@ -3730,6 +3730,29 @@ SMESH::submesh_array_array* SMESH_Mesh_i::GetMeshOrder()
 
 //=============================================================================
 /*!
+ * \brief find common submeshes with given submesh
+ * \param theSubMeshList list of already collected submesh to check
+ * \param theSubMesh given submesh to intersect with other
+ * \param theCommonSubMeshes collected common submeshes
+ */
+//=============================================================================
+
+static void findCommonSubMesh
+ (std::list<const SMESH_subMesh*>& theSubMeshList,
+  const SMESH_subMesh*             theSubMesh,
+  std::set<const SMESH_subMesh*>&  theCommon )
+{
+  if ( !theSubMesh )
+    return;
+  std::list<const SMESH_subMesh*>::const_iterator it = theSubMeshList.begin();
+  for ( ; it != theSubMeshList.end(); it++ )
+    theSubMesh->FindIntersection( *it, theCommon );
+  theSubMeshList.push_back( theSubMesh );
+  //theCommon.insert( theSubMesh );
+}
+
+//=============================================================================
+/*!
  * \brief Set submesh object order
  * \param theSubMeshArray submesh array order
  */
@@ -3749,6 +3772,11 @@ SMESH::submesh_array_array* SMESH_Mesh_i::GetMeshOrder()
     const SMESH::submesh_array& aSMArray = theSubMeshArray[i];
     TListOfInt subMeshIds;
     aPythonDump << "[ ";
+    // Collect subMeshes which should be clear
+    //  do it list-by-list, because modification of submesh order
+    //  take effect between concurrent submeshes only
+    std::set<const SMESH_subMesh*> subMeshToClear;
+    std::list<const SMESH_subMesh*> subMeshList;
     for ( int j = 0, jn = aSMArray.length(); j < jn; j++ )
     {
       const SMESH::SMESH_subMesh_var subMesh = SMESH::SMESH_subMesh::_duplicate(aSMArray[j]);
@@ -3756,9 +3784,21 @@ SMESH::submesh_array_array* SMESH_Mesh_i::GetMeshOrder()
         aPythonDump << ", ";
       aPythonDump << subMesh;
       subMeshIds.push_back( subMesh->GetId() );
+      // detech common parts of submeshes
+      if ( _mapSubMesh.find(subMesh->GetId()) != _mapSubMesh.end() )
+        findCommonSubMesh( subMeshList, (*_mapSubMesh.find(subMesh->GetId())).second, subMeshToClear );
     }
     aPythonDump << " ]";
     subMeshOrder.push_back( subMeshIds );
+
+    // clear collected submeshes
+    std::set<const SMESH_subMesh*>::iterator clrIt = subMeshToClear.begin();
+    for ( ; clrIt != subMeshToClear.end(); clrIt++ ) {
+      SMESH_subMesh* sm = (SMESH_subMesh*)*clrIt;
+        if ( sm )
+          sm->ComputeStateEngine( SMESH_subMesh::CLEAN );
+        // ClearSubMesh( *clrIt );
+      }
   }
   aPythonDump << " ])";
 
@@ -3799,6 +3839,8 @@ void SMESH_Mesh_i::convertMeshOrder
     aResSubSet->length(aSubOrder.size());
     TListOfInt::const_iterator subIt = aSubOrder.begin();
     for( int j = 0; subIt != aSubOrder.end(); subIt++ ) {
+      if ( _mapSubMeshIor.find(*subIt) == _mapSubMeshIor.end() )
+        continue;
       SMESH::SMESH_subMesh_var subMesh =
         SMESH::SMESH_subMesh::_duplicate( (*_mapSubMeshIor.find(*subIt)).second );
       if ( theIsDump ) {

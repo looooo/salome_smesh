@@ -41,24 +41,24 @@
 #include <SMDS_MeshNode.hxx>
 
 // SALOME GUI includes
-#include <SUIT_Session.h>
-#include <SUIT_OverrideCursor.h>
-#include <SUIT_MessageBox.h>
-#include <SUIT_Desktop.h>
-#include <SUIT_ResourceMgr.h>
+#include <gui/SUIT_Session.h>
+#include <gui/SUIT_OverrideCursor.h>
+#include <gui/SUIT_MessageBox.h>
+#include <gui/SUIT_Desktop.h>
+#include <gui/SUIT_ResourceMgr.h>
 
-#include <LightApp_Application.h>
-#include <LightApp_SelectionMgr.h>
+#include <gui/LightApp_Application.h>
+#include <gui/LightApp_SelectionMgr.h>
 
-#include <SVTK_ViewWindow.h>
-#include <VTKViewer_Algorithm.h>
-#include <VTKViewer_CellLocationsArray.h>
+#include <gui/SVTK_ViewWindow.h>
+#include <gui/VTKViewer_Algorithm.h>
+#include <gui/VTKViewer_CellLocationsArray.h>
 
 // SALOME KERNEL includes
-#include <SALOMEDS_Study.hxx>
-#include <SALOMEDS_SObject.hxx>
+#include <kernel/SALOMEDS_Study.hxx>
+#include <kernel/SALOMEDS_SObject.hxx>
 
-#include <utilities.h>
+#include <kernel/utilities.h>
 
 // VTK includes
 #include <vtkIdList.h>

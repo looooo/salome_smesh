@@ -32,7 +32,7 @@
 #include "SMESH_ControlsDef.hxx"
 #include "SMESH_Mesh.hxx"
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 #include <TopExp.hxx>
 #include <TopExp_Explorer.hxx>

@@ -31,7 +31,7 @@
 #include "SMDS_MeshNode.hxx"
 #include "SMDS_Mesh.hxx"
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 using namespace std;
 

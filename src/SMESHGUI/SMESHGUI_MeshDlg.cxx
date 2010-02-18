@@ -27,8 +27,8 @@
 #include "SMESHGUI_MeshDlg.h"
 
 // SALOME GUI includes
-#include <SUIT_Session.h>
-#include <SUIT_ResourceMgr.h>
+#include <gui/SUIT_Session.h>
+#include <gui/SUIT_ResourceMgr.h>
 
 // Qt includes
 #include <QVBoxLayout>

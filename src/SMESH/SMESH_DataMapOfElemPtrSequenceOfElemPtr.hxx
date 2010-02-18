@@ -28,7 +28,7 @@
 
 #include "SMESH_SMESH.hxx"
 
-#include <SMESH_SequenceOfElemPtr.hxx>
+#include "SMESH_SequenceOfElemPtr.hxx"
 
 #include <NCollection_DefineDataMap.hxx>
 

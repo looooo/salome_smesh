@@ -34,7 +34,7 @@
 #include CORBA_SERVER_HEADER(SMESH_Hypothesis)
 
 #include "SMESH_Hypothesis.hxx"
-#include "SALOME_GenericObj_i.hh"
+#include <kernel/SALOME_GenericObj_i.hh>
 
 #include "SMESH_Gen.hxx"
 

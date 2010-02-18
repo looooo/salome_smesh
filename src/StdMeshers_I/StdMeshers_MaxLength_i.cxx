@@ -27,8 +27,8 @@
 #include "SMESH_Gen.hxx"
 #include "SMESH_PythonDump.hxx"
 
-#include "Utils_CorbaException.hxx"
-#include "utilities.h"
+#include <kernel/Utils_CorbaException.hxx>
+#include <kernel/utilities.h>
 
 #include <TCollection_AsciiString.hxx>
 

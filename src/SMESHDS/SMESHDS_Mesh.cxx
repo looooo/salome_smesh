@@ -40,7 +40,7 @@
 #include <TopExp_Explorer.hxx>
 #include <TopoDS_Iterator.hxx>
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 using namespace std;
 

@@ -39,9 +39,9 @@
 #include "SMESH_Group_i.hxx"
 #include "SMESH_PythonDump.hxx"
 
-#include "utilities.h"
-#include "Utils_ExceptHandlers.hxx"
-#include "Utils_CorbaException.hxx"
+#include <kernel/utilities.h>
+#include <kernel/Utils_ExceptHandlers.hxx>
+#include <kernel/Utils_CorbaException.hxx>
 
 #include <BRepAdaptor_Surface.hxx>
 #include <BRep_Tool.hxx>

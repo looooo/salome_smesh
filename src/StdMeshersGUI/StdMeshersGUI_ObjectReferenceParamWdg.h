@@ -28,7 +28,7 @@
 // SMESH includes
 #include "SMESH_StdMeshersGUI.hxx"
 
-#include <SMESH_Type.h>
+#include "SMESH_Type.h"
 
 // Qt includes
 #include <QWidget>

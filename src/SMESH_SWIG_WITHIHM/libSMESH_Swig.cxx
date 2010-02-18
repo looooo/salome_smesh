@@ -31,17 +31,17 @@
 #include <SMESHGUI_Displayer.h>
 
 // SALOME KERNEL includes
-#include <Utils_ORB_INIT.hxx>
-#include <Utils_SINGLETON.hxx>
-#include <SALOMEDSClient_ClientFactory.hxx>
+#include <kernel/Utils_ORB_INIT.hxx>
+#include <kernel/Utils_SINGLETON.hxx>
+#include <kernel/SALOMEDSClient_ClientFactory.hxx>
 
-#include <utilities.h>
+#include <kernel/utilities.h>
 
 // SALOME GUI includes
-#include <SUIT_Session.h>
-#include <VTKViewer_ViewModel.h>
-#include <SALOME_Event.h>
-#include <SalomeApp_Application.h>
+#include <gui/SUIT_Session.h>
+#include <gui/VTKViewer_ViewModel.h>
+#include <gui/SALOME_Event.h>
+#include <gui/SalomeApp_Application.h>
 
 // OCCT includes
 #include <TopAbs.hxx>

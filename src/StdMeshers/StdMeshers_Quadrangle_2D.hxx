@@ -32,7 +32,7 @@
 #include "SMESH_StdMeshers.hxx"
 
 #include "SMESH_2D_Algo.hxx"
-#include "Utils_SALOME_Exception.hxx"
+#include <kernel/Utils_SALOME_Exception.hxx>
 
 class SMESH_Mesh;
 class SMESH_MesherHelper;

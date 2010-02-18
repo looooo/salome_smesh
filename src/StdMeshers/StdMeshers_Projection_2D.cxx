@@ -42,7 +42,7 @@
 #include "SMESH_Comment.hxx"
 #include "SMDS_EdgePosition.hxx"
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 #include <BRep_Tool.hxx>
 #include <Bnd_B2d.hxx>

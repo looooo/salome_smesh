@@ -22,8 +22,8 @@
 #include "SMESH_FaceOrientationFilter.h"
 #include "SMESH_ActorUtils.h"
 
-#include "SUIT_Session.h"
-#include "SUIT_ResourceMgr.h"
+#include <gui/SUIT_Session.h>
+#include <gui/SUIT_ResourceMgr.h>
 
 #include <vtkCellData.h>
 #include <vtkDataSet.h>

@@ -29,11 +29,11 @@
 #include "SMESHGUI_VTKUtils.h"
 
 // SALOME GUI includes
-#include <SalomeApp_Study.h>
-#include <SalomeApp_Application.h>
-#include <SUIT_ViewManager.h>
-#include <SVTK_ViewModel.h>
-#include <SVTK_ViewWindow.h>
+#include <gui/SalomeApp_Study.h>
+#include <gui/SalomeApp_Application.h>
+#include <gui/SUIT_ViewManager.h>
+#include <gui/SVTK_ViewModel.h>
+#include <gui/SVTK_ViewWindow.h>
 
 SMESHGUI_Displayer::SMESHGUI_Displayer( SalomeApp_Application* app )
 : LightApp_Displayer(),

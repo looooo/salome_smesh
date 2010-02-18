@@ -34,10 +34,10 @@
 #include <QStringList>
 
 // SALOME GUI includes
-#include <SALOME_InteractiveObject.hxx>
+#include <gui/SALOME_InteractiveObject.hxx>
 
 // SALOME KERNEL includes
-#include <SALOMEDSClient_definitions.hxx>
+#include <kernel/SALOMEDSClient_definitions.hxx>
 
 // IDL includes
 #include <SALOMEconfig.h>

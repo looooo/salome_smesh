@@ -72,7 +72,7 @@
 #include "SMESH_MesherHelper.hxx"
 #include "SMESH_subMesh.hxx"
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 using namespace std;
 

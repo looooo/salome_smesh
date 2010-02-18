@@ -24,18 +24,18 @@
 //
 #include "SMESH_NumberFilter.hxx"
 
-#include "GEOM_Client.hxx"
-#include "GeometryGUI.h"
+#include <geom/GEOM_Client.hxx>
+#include <geom/GeometryGUI.h>
 
-#include "SUIT_Application.h"
-#include "SUIT_Session.h"
+#include <gui/SUIT_Application.h>
+#include <gui/SUIT_Session.h>
 
-#include "SalomeApp_Study.h"
-#include "LightApp_DataOwner.h"
+#include <gui/SalomeApp_Study.h>
+#include <gui/LightApp_DataOwner.h>
 
-#include "SALOME_InteractiveObject.hxx"
-#include "SALOMEDSClient_SObject.hxx"
-#include "SALOMEDS_SObject.hxx"
+#include <gui/SALOME_InteractiveObject.hxx>
+#include <kernel/SALOMEDSClient_SObject.hxx>
+#include <kernel/SALOMEDS_SObject.hxx>
 
 #include <TopExp_Explorer.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>

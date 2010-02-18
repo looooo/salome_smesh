@@ -26,7 +26,7 @@
 
 #include "Rn.h"
 #include "aptrte.h"
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 using namespace std;
 

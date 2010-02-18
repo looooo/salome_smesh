@@ -36,27 +36,27 @@
 #include <SMDS_Mesh.hxx>
 
 // SALOME GUI includes
-#include <SUIT_Desktop.h>
-#include <SUIT_Session.h>
-#include <SUIT_MessageBox.h>
-#include <SUIT_ViewManager.h>
-#include <SUIT_ResourceMgr.h>
+#include <gui/SUIT_Desktop.h>
+#include <gui/SUIT_Session.h>
+#include <gui/SUIT_MessageBox.h>
+#include <gui/SUIT_ViewManager.h>
+#include <gui/SUIT_ResourceMgr.h>
 
-#include <SALOME_ListIO.hxx>
-#include <SALOME_ListIteratorOfListIO.hxx>
+#include <gui/SALOME_ListIO.hxx>
+#include <gui/SALOME_ListIteratorOfListIO.hxx>
 
-#include <SVTK_Selector.h>
-#include <SVTK_ViewModel.h>
-#include <SVTK_ViewWindow.h>
+#include <gui/SVTK_Selector.h>
+#include <gui/SVTK_ViewModel.h>
+#include <gui/SVTK_ViewWindow.h>
 
-#include <VTKViewer_Algorithm.h>
+#include <gui/VTKViewer_Algorithm.h>
 
-#include <LightApp_SelectionMgr.h>
-#include <SalomeApp_Application.h>
-#include <SalomeApp_Study.h>
+#include <gui/LightApp_SelectionMgr.h>
+#include <gui/SalomeApp_Application.h>
+#include <gui/SalomeApp_Study.h>
 
 // SALOME KERNEL includes
-#include <utilities.h>
+#include <kernel/utilities.h>
 
 // IDL includes
 #include <SALOMEconfig.h>

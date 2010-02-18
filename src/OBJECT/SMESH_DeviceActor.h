@@ -28,7 +28,7 @@
 #ifndef SMESH_DEVICE_ACTOR_H
 #define SMESH_DEVICE_ACTOR_H
 
-#include <VTKViewer_GeometryFilter.h>
+#include <gui/VTKViewer_GeometryFilter.h>
 #include "SMESH_Controls.hxx"
 #include "SMESH_Object.h"
 

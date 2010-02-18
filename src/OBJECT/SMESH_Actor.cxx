@@ -30,12 +30,12 @@
 #include "SMESH_DeviceActor.h"
 #include "SMESH_ObjectDef.h"
 #include "SMESH_ControlsDef.hxx"
-#include "VTKViewer_ExtractUnstructuredGrid.h"
-#include "VTKViewer_FramedTextActor.h"
-#include "SALOME_InteractiveObject.hxx"
+#include <gui/VTKViewer_ExtractUnstructuredGrid.h>
+#include <gui/VTKViewer_FramedTextActor.h>
+#include <gui/SALOME_InteractiveObject.hxx>
 
-#include "SUIT_Session.h"
-#include "SUIT_ResourceMgr.h"
+#include <gui/SUIT_Session.h>
+#include <gui/SUIT_ResourceMgr.h>
 
 #include <vtkProperty.h>
 #include <vtkTimeStamp.h>
@@ -77,7 +77,7 @@
 #define VTK_XVERSION (VTK_MAJOR_VERSION<<16)+(VTK_MINOR_VERSION<<8)+(VTK_BUILD_VERSION)
 #endif
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 #ifdef _DEBUG_
 static int MYDEBUG = 1;

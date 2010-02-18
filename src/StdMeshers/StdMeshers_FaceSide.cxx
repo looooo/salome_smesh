@@ -51,7 +51,7 @@
 
 #include <map>
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 //================================================================================
 /*!

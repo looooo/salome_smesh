@@ -27,9 +27,9 @@
 
 #include "SMESH_PreviewActorsCollection.h"
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
-#include "SALOME_InteractiveObject.hxx"
+#include <gui/SALOME_InteractiveObject.hxx>
 
 // OCC includes
 #include <TopoDS.hxx>
@@ -43,10 +43,10 @@
 #include <vtkRenderer.h>
 #include <vtkProperty.h>
 
-#include "VTKViewer_Actor.h"
+#include <gui/VTKViewer_Actor.h>
 
-#include "SVTK_DeviceActor.h"
-#include "SALOME_Actor.h"
+#include <gui/SVTK_DeviceActor.h>
+#include <gui/SALOME_Actor.h>
 
 // QT
 #include <QString>

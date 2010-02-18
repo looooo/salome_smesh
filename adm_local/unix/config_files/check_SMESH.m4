@@ -73,7 +73,7 @@ if test -f ${SMESH_DIR}/bin/salome/smesh.py ; then
    AC_SUBST(SMESH_ROOT_DIR)
 
    SMESH_LDFLAGS=-L${SMESH_DIR}/lib${LIB_LOCATION_SUFFIX}/salome
-   SMESH_CXXFLAGS=-I${SMESH_DIR}/include/salome
+   SMESH_CXXFLAGS="-I${SMESH_DIR}/include/salome -I${SMESH_DIR}/include/salome/skel"
 
    AC_SUBST(SMESH_LDFLAGS)
    AC_SUBST(SMESH_CXXFLAGS)   

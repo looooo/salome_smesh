@@ -25,8 +25,8 @@
 //
 #include "StdMeshersGUI_FixedPointsParamWdg.h"
 
-#include <QtxIntSpinBox.h>
-#include <QtxDoubleSpinBox.h>
+#include <gui/QtxIntSpinBox.h>
+#include <gui/QtxDoubleSpinBox.h>
 
 // Qt includes
 #include <QPushButton>

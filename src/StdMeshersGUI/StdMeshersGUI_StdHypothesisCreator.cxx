@@ -35,10 +35,10 @@
 #include "StdMeshersGUI_LayerDistributionParamWdg.h"
 #include "StdMeshersGUI_SubShapeSelectorWdg.h"
 #include "StdMeshersGUI_FixedPointsParamWdg.h"
-#include <SALOMEDSClient_Study.hxx>
+#include <kernel/SALOMEDSClient_Study.hxx>
 
 // SALOME GUI includes
-#include <SUIT_ResourceMgr.h>
+#include <gui/SUIT_ResourceMgr.h>
 
 // IDL includes
 #include <SALOMEconfig.h>

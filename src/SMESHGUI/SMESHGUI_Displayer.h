@@ -30,7 +30,7 @@
 #include "SMESH_SMESHGUI.hxx"
 
 // SALOME GUI includes
-#include <LightApp_Displayer.h>
+#include <gui/LightApp_Displayer.h>
 
 class SalomeApp_Application;
 class SalomeApp_Study;

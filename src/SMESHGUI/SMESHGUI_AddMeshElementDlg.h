@@ -29,7 +29,7 @@
 // SMESH includes
 #include "SMESH_SMESHGUI.hxx"
 
-#include <SMDSAbs_ElementType.hxx>
+#include "SMDSAbs_ElementType.hxx"
 
 // Qt includes
 #include <QDialog>

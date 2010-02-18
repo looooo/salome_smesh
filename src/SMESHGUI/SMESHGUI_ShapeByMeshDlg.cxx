@@ -37,21 +37,21 @@
 #include <SMESH_Actor.h>
 
 // SALOME GEOM includes
-#include <GEOMBase.h>
-#include <GeometryGUI.h>
+#include <geom/GEOMBase.h>
+#include <geom/GeometryGUI.h>
 
 // SALOME GUI includes
-#include <LightApp_DataOwner.h>
-#include <LightApp_SelectionMgr.h>
-#include <SALOME_ListIO.hxx>
-#include <SUIT_Desktop.h>
-#include <SVTK_Selector.h>
-#include <SVTK_ViewWindow.h>
-#include <SVTK_ViewModel.h>
-#include <SalomeApp_Tools.h>
+#include <gui/LightApp_DataOwner.h>
+#include <gui/LightApp_SelectionMgr.h>
+#include <gui/SALOME_ListIO.hxx>
+#include <gui/SUIT_Desktop.h>
+#include <gui/SVTK_Selector.h>
+#include <gui/SVTK_ViewWindow.h>
+#include <gui/SVTK_ViewModel.h>
+#include <gui/SalomeApp_Tools.h>
 
 // SALOME KERNEL includes
-#include <SALOMEDSClient_SObject.hxx>
+#include <kernel/SALOMEDSClient_SObject.hxx>
 
 // OCCT includes
 #include <TColStd_MapOfInteger.hxx>

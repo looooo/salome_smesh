@@ -41,7 +41,7 @@
 #include "SMESH_subMeshEventListener.hxx"
 #include "SMDS_EdgePosition.hxx"
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 #include <BRepTools.hxx>
 #include <BRepTools_WireExplorer.hxx>

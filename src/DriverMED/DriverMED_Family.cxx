@@ -25,7 +25,7 @@
 //  Module : SMESH
 //
 #include "DriverMED_Family.h"
-#include "MED_Factory.hxx"
+#include <med/MED_Factory.hxx>
 
 #include <sstream>      
 

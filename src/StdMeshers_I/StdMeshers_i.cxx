@@ -28,7 +28,7 @@
 
 #include "SMESH_Gen_i.hxx"
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 #include "StdMeshers_LocalLength_i.hxx"
 #include "StdMeshers_AutomaticLength_i.hxx"

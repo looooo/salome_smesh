@@ -26,7 +26,7 @@
 //
 #include "StdMeshers_LayerDistribution2D.hxx"
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 
 //=============================================================================

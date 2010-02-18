@@ -38,7 +38,7 @@
 
 #include "SMDS_MeshElement.hxx"
 #include "SMDS_MeshNode.hxx"
-#include "SALOME_GenericObj_i.hh"
+#include <kernel/SALOME_GenericObj_i.hh>
 
 #define MED_NBR_GEOMETRIE_MAILLE 15
 #define MED_NBR_TYPE 5

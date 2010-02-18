@@ -29,14 +29,14 @@
 #include "SMDS_PolyhedralVolumeOfNodes.hxx"
 #include "SMESHDS_GroupBase.hxx"
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 #include "UNV2411_Structure.hxx"
 #include "UNV2412_Structure.hxx"
 #include "UNV2417_Structure.hxx"
 #include "UNV_Utilities.hxx"
 
-#include <Basics_Utils.hxx>
+#include <kernel/Basics_Utils.hxx>
 
 using namespace std;
 using namespace UNV;

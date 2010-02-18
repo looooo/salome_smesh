@@ -34,7 +34,7 @@
 #include "SMDS_PolyhedralVolumeOfNodes.hxx"
 #include "SMDS_Mesh.hxx"
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 #include <map>
 #include <float.h>

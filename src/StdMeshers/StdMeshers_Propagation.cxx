@@ -25,7 +25,7 @@
 
 #include "StdMeshers_Propagation.hxx"
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 #include "SMDS_SetIterator.hxx"
 #include "SMESH_Algo.hxx"

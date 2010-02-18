@@ -34,7 +34,7 @@
 #include "SMDS_EdgePosition.hxx"
 #include "SMESH_Comment.hxx"
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 #include <BRep_Tool.hxx>
 #include <Geom2dAdaptor_Curve.hxx>

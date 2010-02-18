@@ -27,7 +27,7 @@
 #include <vtkExtractGeometry.h>
 #include <vector>
 
-#include "VTKViewer.h"
+#include <gui/VTKViewer.h>
 
 class SMESHOBJECT_EXPORT SMESH_ExtractGeometry : public vtkExtractGeometry{
 public:

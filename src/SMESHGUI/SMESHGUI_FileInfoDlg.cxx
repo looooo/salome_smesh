@@ -25,7 +25,7 @@
 //
 #include "SMESHGUI_FileInfoDlg.h"
 
-#include <MED_Common.hxx>
+#include <med/MED_Common.hxx>
 
 #include <QGridLayout>
 #include <QLabel>

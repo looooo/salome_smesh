@@ -32,7 +32,7 @@
 #include "SMESHGUI_Operation.h"
 
 // SALOME GUI includes
-#include <SALOME_InteractiveObject.hxx>
+#include <gui/SALOME_InteractiveObject.hxx>
 
 // Qt includes
 #include <QMap>

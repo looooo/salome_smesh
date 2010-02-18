@@ -21,10 +21,10 @@
 //
 #include "SMESH_TypeFilter.hxx"
 
-#include <SUIT_Session.h>
+#include <gui/SUIT_Session.h>
 
-#include <SalomeApp_Study.h>
-#include <LightApp_DataOwner.h>
+#include <gui/SalomeApp_Study.h>
+#include <gui/LightApp_DataOwner.h>
 
 #include <SALOMEconfig.h>
 #include CORBA_CLIENT_HEADER(SMESH_Gen)

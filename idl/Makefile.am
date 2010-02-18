@@ -54,7 +54,7 @@ nodist_libSalomeIDLSMESH_la_SOURCES = \
 	SMESH_MeshEditorSK.cc
 
 # header files must be exported: other modules have to use this library
-nodist_salomeinclude_HEADERS = $(BASEIDL_FILES:%.idl=%.hh)
+nodist_salomeskel_HEADERS = $(BASEIDL_FILES:%.idl=%.hh)
 
 libSalomeIDLSMESH_la_CPPFLAGS =			\
 	-I$(top_builddir)/idl			\

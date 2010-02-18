@@ -30,7 +30,7 @@
 #include "SMESH_SMESHGUI.hxx"
 
 // SALOME GUI includes
-#include <LightApp_Dialog.h>
+#include <gui/LightApp_Dialog.h>
 
 class SUIT_Desktop;
 class SUIT_ResourceMgr;

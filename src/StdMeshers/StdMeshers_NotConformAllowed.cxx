@@ -25,7 +25,7 @@
 //  Module : SMESH
 //
 #include "StdMeshers_NotConformAllowed.hxx"
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 using namespace std;
 

@@ -33,17 +33,17 @@
 #include <SMESH_Actor.h>
 
 // SALOME GUI includes
-#include <SUIT_Desktop.h>
-#include <SUIT_ResourceMgr.h>
-#include <SUIT_Session.h>
-#include <SUIT_MessageBox.h>
+#include <gui/SUIT_Desktop.h>
+#include <gui/SUIT_ResourceMgr.h>
+#include <gui/SUIT_Session.h>
+#include <gui/SUIT_MessageBox.h>
 
-#include <LightApp_Application.h>
-#include <LightApp_SelectionMgr.h>
-#include <SALOME_ListIO.hxx>
+#include <gui/LightApp_Application.h>
+#include <gui/LightApp_SelectionMgr.h>
+#include <gui/SALOME_ListIO.hxx>
 
-#include <QtxDoubleSpinBox.h>
-#include <QtxColorButton.h>
+#include <gui/QtxDoubleSpinBox.h>
+#include <gui/QtxColorButton.h>
 
 // Qt includes
 #include <QButtonGroup>

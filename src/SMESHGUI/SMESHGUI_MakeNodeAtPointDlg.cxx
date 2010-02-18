@@ -39,18 +39,18 @@
 #include <SMESH_LogicalFilter.hxx>
 
 // SALOME GEOM includes
-#include <GEOMBase.h>
+#include <geom/GEOMBase.h>
 
 // SALOME GUI includes
-#include <LightApp_SelectionMgr.h>
-#include <SALOME_ListIO.hxx>
-#include <SUIT_Desktop.h>
-#include <SVTK_ViewModel.h>
-#include <SalomeApp_Tools.h>
-#include <SalomeApp_TypeFilter.h>
-#include <SUIT_ResourceMgr.h>
-#include <SUIT_OverrideCursor.h>
-#include <SUIT_MessageBox.h>
+#include <gui/LightApp_SelectionMgr.h>
+#include <gui/SALOME_ListIO.hxx>
+#include <gui/SUIT_Desktop.h>
+#include <gui/SVTK_ViewModel.h>
+#include <gui/SalomeApp_Tools.h>
+#include <gui/SalomeApp_TypeFilter.h>
+#include <gui/SUIT_ResourceMgr.h>
+#include <gui/SUIT_OverrideCursor.h>
+#include <gui/SUIT_MessageBox.h>
 
 // OCCT includes
 #include <TColStd_MapOfInteger.hxx>

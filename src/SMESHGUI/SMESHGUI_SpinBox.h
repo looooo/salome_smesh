@@ -30,7 +30,7 @@
 #include "SMESH_SMESHGUI.hxx"
 
 // SALOME GUI includes
-#include <SalomeApp_DoubleSpinBox.h>
+#include <gui/SalomeApp_DoubleSpinBox.h>
 
 #define COORD_MIN -1e+15
 #define COORD_MAX +1e+15

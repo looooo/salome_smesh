@@ -40,7 +40,7 @@
 #include "SMDS_MeshElement.hxx"
 #include "SMDS_MeshNode.hxx"
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 #include <BRepAdaptor_CompCurve.hxx>
 #include <BRep_Builder.hxx>

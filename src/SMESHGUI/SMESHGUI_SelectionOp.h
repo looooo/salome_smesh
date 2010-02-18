@@ -32,8 +32,8 @@
 #include "SMESHGUI_Dialog.h"
 
 // SALOME GUI includes
-#include <SVTK_Selection.h>
-#include <SALOME_InteractiveObject.hxx>
+#include <gui/SVTK_Selection.h>
+#include <gui/SALOME_InteractiveObject.hxx>
 
 // IDL includes
 #include <SALOMEconfig.h>

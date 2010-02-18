@@ -29,10 +29,10 @@
 #include "SMESH_Gen_i.hxx"
 #include "SMESH_Mesh_i.hxx"
 
-#include "Utils_CorbaException.hxx"
-#include "utilities.h"
-#include "OpUtil.hxx"
-#include "Utils_ExceptHandlers.hxx"
+#include <kernel/Utils_CorbaException.hxx>
+#include <kernel/utilities.h>
+#include <kernel/OpUtil.hxx>
+#include <kernel/Utils_ExceptHandlers.hxx>
 
 #include <TopoDS_Iterator.hxx>
 #include <TopExp_Explorer.hxx>

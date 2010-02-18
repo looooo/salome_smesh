@@ -34,16 +34,16 @@
 #include <SMESH_TypeFilter.hxx>
 
 // SALOME GUI includes
-#include <SUIT_Desktop.h>
-#include <SUIT_Session.h>
-#include <SUIT_MessageBox.h>
-#include <SUIT_ResourceMgr.h>
-#include <SalomeApp_Study.h>
-#include <SUIT_OverrideCursor.h>
+#include <gui/SUIT_Desktop.h>
+#include <gui/SUIT_Session.h>
+#include <gui/SUIT_MessageBox.h>
+#include <gui/SUIT_ResourceMgr.h>
+#include <gui/SalomeApp_Study.h>
+#include <gui/SUIT_OverrideCursor.h>
 
-#include <LightApp_Application.h>
-#include <LightApp_SelectionMgr.h>
-#include <SALOME_ListIO.hxx>
+#include <gui/LightApp_Application.h>
+#include <gui/LightApp_SelectionMgr.h>
+#include <gui/SALOME_ListIO.hxx>
 
 // Qt includes
 #include <QApplication>

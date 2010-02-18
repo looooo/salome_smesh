@@ -28,10 +28,10 @@
 #include "SMESHGUI_Utils.h"
 
 // SALOME GEOM includes
-#include <GeometryGUI.h>
+#include <geom/GeometryGUI.h>
 
 // SALOME KERNEL includes
-#include <SALOMEDS_SObject.hxx>
+#include <kernel/SALOMEDS_SObject.hxx>
 
 // IDL includes
 #include <SALOMEconfig.h>

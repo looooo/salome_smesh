@@ -26,7 +26,7 @@
 //  $Header: 
 //
 #include "SMESHDS_Document.hxx"
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 using namespace std;
 

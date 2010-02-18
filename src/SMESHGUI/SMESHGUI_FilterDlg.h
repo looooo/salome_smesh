@@ -36,8 +36,8 @@
 #include <QList>
 
 // SALOME GUI includes
-#include <SALOME_DataMapOfIOMapOfInteger.hxx>
-#include <SVTK_Selection.h>
+#include <gui/SALOME_DataMapOfIOMapOfInteger.hxx>
+#include <gui/SVTK_Selection.h>
 
 // IDL includes
 #include <SALOMEconfig.h>

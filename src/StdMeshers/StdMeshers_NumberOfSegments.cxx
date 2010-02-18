@@ -49,7 +49,7 @@
 #include <Standard_ErrorHandler.hxx>
 #endif
 
-#include <Basics_Utils.hxx>
+#include <kernel/Basics_Utils.hxx>
 
 using namespace std;
 

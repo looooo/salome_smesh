@@ -30,10 +30,10 @@
 #include "SMESH_SMESHGUI.hxx"
 
 // SALOME GUI includes
-#include <LightApp_Selection.h>
+#include <gui/LightApp_Selection.h>
 
 // SALOME KERNEL includes
-#include <SALOMEDSClient_definitions.hxx>
+#include <kernel/SALOMEDSClient_definitions.hxx>
 
 class LightApp_SelectionMgr;
 class LightApp_DataOwner;

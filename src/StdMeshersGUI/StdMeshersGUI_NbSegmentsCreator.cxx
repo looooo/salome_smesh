@@ -37,9 +37,9 @@
 #include CORBA_SERVER_HEADER(SMESH_BasicHypothesis)
 
 // SALOME GUI includes
-#include <SalomeApp_Tools.h>
-#include <SalomeApp_IntSpinBox.h>
-#include <QtxComboBox.h>
+#include <gui/SalomeApp_Tools.h>
+#include <gui/SalomeApp_IntSpinBox.h>
+#include <gui/QtxComboBox.h>
 
 // Qt includes
 #include <QLabel>

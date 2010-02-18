@@ -28,7 +28,7 @@
 #include "StdMeshers_Distribution.hxx"
 
 #include <math_GaussSingleIntegration.hxx>
-#include <utilities.h>
+#include <kernel/utilities.h>
 
 #if (OCC_VERSION_MAJOR << 16 | OCC_VERSION_MINOR << 8 | OCC_VERSION_MAINTENANCE) > 0x060100
 #define NO_CAS_CATCH

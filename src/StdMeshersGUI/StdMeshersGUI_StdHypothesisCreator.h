@@ -27,7 +27,7 @@
 
 // SMESH includes
 #include "SMESH_StdMeshersGUI.hxx"
-#include <SMESHGUI_Hypotheses.h>
+#include "SMESHGUI_Hypotheses.h"
 
 
 /*!

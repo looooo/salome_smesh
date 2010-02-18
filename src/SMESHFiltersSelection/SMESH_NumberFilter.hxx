@@ -27,7 +27,7 @@
 
 #include "SMESH_Type.h"
 
-#include "SUIT_SelectionFilter.h"
+#include <gui/SUIT_SelectionFilter.h>
 
 #include <TopAbs_ShapeEnum.hxx>
 #include <TColStd_MapOfInteger.hxx>

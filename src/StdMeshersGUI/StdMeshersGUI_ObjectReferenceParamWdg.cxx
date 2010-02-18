@@ -30,13 +30,13 @@
 #include <SMESH_TypeFilter.hxx>
 
 // SALOME GUI includes
-#include <SUIT_ResourceMgr.h>
-#include <LightApp_SelectionMgr.h>
-#include <SVTK_ViewWindow.h>
-#include <SALOME_ListIO.hxx>
+#include <gui/SUIT_ResourceMgr.h>
+#include <gui/LightApp_SelectionMgr.h>
+#include <gui/SVTK_ViewWindow.h>
+#include <gui/SALOME_ListIO.hxx>
 
 // SALOME KERNEL incldues
-#include <SALOMEDSClient_SObject.hxx>
+#include <kernel/SALOMEDSClient_SObject.hxx>
 
 // Qt includes
 #include <QPushButton>

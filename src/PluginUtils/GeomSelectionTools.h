@@ -32,10 +32,10 @@
 #  define GEOMSELECTIONTOOLS_EXPORT
 #endif
 
-#include "SALOMEDSClient.hxx"
-#include "SALOME_InteractiveObject.hxx"
-#include <SALOME_ListIO.hxx>
-#include <SalomeApp_Application.h>
+#include <kernel/SALOMEDSClient.hxx>
+#include <gui/SALOME_InteractiveObject.hxx>
+#include <gui/SALOME_ListIO.hxx>
+#include <gui/SalomeApp_Application.h>
 
 #include <TopoDS_Shape.hxx>
 #include <GeomAbs_SurfaceType.hxx>

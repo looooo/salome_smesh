@@ -28,7 +28,7 @@
 #include "SMESH_StdMeshers.hxx"
 
 #include "SMESH_Hypothesis.hxx"
-#include "Utils_SALOME_Exception.hxx"
+#include <kernel/Utils_SALOME_Exception.hxx>
 
 class STDMESHERS_EXPORT StdMeshers_MaxLength: public SMESH_Hypothesis
 {

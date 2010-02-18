@@ -35,9 +35,9 @@
 #include <SMESH_Actor.h>
 
 // SALOME GUI includes
-#include <SalomeApp_Study.h>
-#include <LightApp_VTKSelector.h>
-#include <SVTK_ViewWindow.h>
+#include <gui/SalomeApp_Study.h>
+#include <gui/LightApp_VTKSelector.h>
+#include <gui/SVTK_ViewWindow.h>
 
 // IDL includes
 #include <SALOMEconfig.h>

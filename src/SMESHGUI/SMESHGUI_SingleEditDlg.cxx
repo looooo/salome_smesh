@@ -34,16 +34,16 @@
 #include <SMDS_Mesh.hxx>
 
 // SALOME GUI includes
-#include <LightApp_SelectionMgr.h>
-#include <LightApp_Application.h>
-#include <SUIT_ResourceMgr.h>
-#include <SUIT_MessageBox.h>
-#include <SUIT_Desktop.h>
-#include <SUIT_Session.h>
+#include <gui/LightApp_SelectionMgr.h>
+#include <gui/LightApp_Application.h>
+#include <gui/SUIT_ResourceMgr.h>
+#include <gui/SUIT_MessageBox.h>
+#include <gui/SUIT_Desktop.h>
+#include <gui/SUIT_Session.h>
 
-#include <SVTK_Selector.h>
-#include <SVTK_ViewWindow.h>
-#include <SALOME_ListIO.hxx>
+#include <gui/SVTK_Selector.h>
+#include <gui/SVTK_ViewWindow.h>
+#include <gui/SALOME_ListIO.hxx>
 
 // OCCT includes
 #include <TColStd_MapOfInteger.hxx>

@@ -33,16 +33,16 @@
 #include "SMESHGUI_GEOMGenUtils.h"
 
 // SALOME GUI includes
-#include <SUIT_Desktop.h>
-#include <SUIT_MessageBox.h>
-#include <SUIT_OverrideCursor.h>
-#include <SUIT_ResourceMgr.h>
+#include <gui/SUIT_Desktop.h>
+#include <gui/SUIT_MessageBox.h>
+#include <gui/SUIT_OverrideCursor.h>
+#include <gui/SUIT_ResourceMgr.h>
 
-#include <SalomeApp_Study.h>
-#include <SalomeApp_Tools.h>
+#include <gui/SalomeApp_Study.h>
+#include <gui/SalomeApp_Tools.h>
 
 // SALOME KERNEL includes
-#include <utilities.h>
+#include <kernel/utilities.h>
 
 // STL includes
 #include <string>

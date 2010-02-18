@@ -39,11 +39,11 @@
 
 #include "SMESH_Mesh_i.hxx"
 #include "SMESH_Hypothesis_i.hxx"
-#include "SALOME_Component_i.hxx"
-#include "SALOME_NamingService.hxx"
+#include <kernel/SALOME_Component_i.hxx>
+#include <kernel/SALOME_NamingService.hxx>
 
 #include "SMESH_Gen.hxx"
-#include "GEOM_Client.hxx"
+#include <geom/GEOM_Client.hxx>
 
 #include <TCollection_AsciiString.hxx>
 #include <Resource_DataMapOfAsciiStringAsciiString.hxx>

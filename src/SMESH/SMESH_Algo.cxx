@@ -58,7 +58,7 @@
 #include <Standard_ErrorHandler.hxx>
 #include <Standard_Failure.hxx>
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 #include <algorithm>
 

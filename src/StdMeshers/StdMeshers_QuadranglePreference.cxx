@@ -24,7 +24,7 @@
 //  Module : SMESH
 
 #include "StdMeshers_QuadranglePreference.hxx"
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 using namespace std;
 

@@ -31,13 +31,13 @@
 #include "SMESHGUI_FilterDlg.h"
 
 // SALOME GUI includes
-#include <SUIT_Session.h>
-#include <SUIT_Desktop.h>
-#include <SUIT_FileDlg.h>
-#include <SUIT_MessageBox.h>
-#include <SUIT_ResourceMgr.h>
+#include <gui/SUIT_Session.h>
+#include <gui/SUIT_Desktop.h>
+#include <gui/SUIT_FileDlg.h>
+#include <gui/SUIT_MessageBox.h>
+#include <gui/SUIT_ResourceMgr.h>
 
-#include <LightApp_Application.h>
+#include <gui/LightApp_Application.h>
 
 // Qt includes
 #include <QApplication>

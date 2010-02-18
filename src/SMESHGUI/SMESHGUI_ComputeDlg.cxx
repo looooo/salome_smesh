@@ -41,25 +41,25 @@
 #include <SMDS_Mesh.hxx>
 
 // SALOME GEOM includes
-#include <GEOMBase.h>
-#include <GEOM_Actor.h>
+#include <geom/GEOMBase.h>
+#include <geom/GEOM_Actor.h>
 
 // SALOME GUI includes
-#include <LightApp_SelectionMgr.h>
-#include <LightApp_UpdateFlags.h>
-#include <SALOME_ListIO.hxx>
-#include <SVTK_ViewWindow.h>
-#include <SVTK_ViewModel.h>
-#include <SalomeApp_Application.h>
-#include <SUIT_ResourceMgr.h>
-#include <SUIT_OverrideCursor.h>
-#include <SUIT_MessageBox.h>
-#include <SUIT_Desktop.h>
-#include <QtxComboBox.h>
+#include <gui/LightApp_SelectionMgr.h>
+#include <gui/LightApp_UpdateFlags.h>
+#include <gui/SALOME_ListIO.hxx>
+#include <gui/SVTK_ViewWindow.h>
+#include <gui/SVTK_ViewModel.h>
+#include <gui/SalomeApp_Application.h>
+#include <gui/SUIT_ResourceMgr.h>
+#include <gui/SUIT_OverrideCursor.h>
+#include <gui/SUIT_MessageBox.h>
+#include <gui/SUIT_Desktop.h>
+#include <gui/QtxComboBox.h>
 
 // SALOME KERNEL includes
-#include <SALOMEDS_SObject.hxx>
-#include <SALOMEDSClient_SObject.hxx>
+#include <kernel/SALOMEDS_SObject.hxx>
+#include <kernel/SALOMEDSClient_SObject.hxx>
 
 // OCCT includes
 #include <BRep_Tool.hxx>

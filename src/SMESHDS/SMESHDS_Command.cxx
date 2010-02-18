@@ -27,7 +27,7 @@
 //
 #include "SMESHDS_Command.hxx"
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 using namespace std;
 

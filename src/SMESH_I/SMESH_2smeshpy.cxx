@@ -27,7 +27,7 @@
 //
 #include "SMESH_2smeshpy.hxx"
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 #include "SMESH_PythonDump.hxx"
 #include "SMESH_NoteBook.hxx"
 #include "Resource_DataMapOfAsciiStringAsciiString.hxx"

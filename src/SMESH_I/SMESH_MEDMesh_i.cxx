@@ -45,15 +45,15 @@
 #include <TopoDS_Shape.hxx>
 #include <TopTools_MapOfShape.hxx>
 
-#include "utilities.h"
-#include "Utils_CorbaException.hxx"
+#include <kernel/utilities.h>
+#include <kernel/Utils_CorbaException.hxx>
 
 #include "SMESH_MEDSupport_i.hxx"
 #include "SMESH_MEDFamily_i.hxx"
 
-# include "Utils_ORB_INIT.hxx"
-# include "Utils_SINGLETON.hxx"
-# include "Utils_ExceptHandlers.hxx"
+# include <kernel/Utils_ORB_INIT.hxx>
+# include <kernel/Utils_SINGLETON.hxx>
+# include <kernel/Utils_ExceptHandlers.hxx>
 
 extern "C"
 {

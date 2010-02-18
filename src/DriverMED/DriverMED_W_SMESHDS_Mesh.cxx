@@ -34,9 +34,9 @@
 #include "SMDS_MeshNode.hxx"
 #include "SMDS_PolyhedralVolumeOfNodes.hxx"
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
-#include "MED_Utilities.hxx"
+#include <med/MED_Utilities.hxx>
 
 #define _EDF_NODE_IDS_
 //#define _ELEMENTS_BY_DIM_

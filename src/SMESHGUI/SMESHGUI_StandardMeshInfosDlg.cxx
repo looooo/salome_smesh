@@ -33,20 +33,20 @@
 #include <SMESH_TypeFilter.hxx>
 
 // SALOME KERNEL includes 
-#include <SALOMEDSClient_Study.hxx>
-#include <SALOMEDSClient_SObject.hxx>
+#include <kernel/SALOMEDSClient_Study.hxx>
+#include <kernel/SALOMEDSClient_SObject.hxx>
 
 // SALOME GUI includes
-#include <SUIT_Desktop.h>
-#include <SUIT_Session.h>
-#include <SUIT_OverrideCursor.h>
-#include <SUIT_MessageBox.h>
-#include <SUIT_ResourceMgr.h>
+#include <gui/SUIT_Desktop.h>
+#include <gui/SUIT_Session.h>
+#include <gui/SUIT_OverrideCursor.h>
+#include <gui/SUIT_MessageBox.h>
+#include <gui/SUIT_ResourceMgr.h>
 
-#include <LightApp_Application.h>
-#include <LightApp_SelectionMgr.h>
+#include <gui/LightApp_Application.h>
+#include <gui/LightApp_SelectionMgr.h>
 
-#include <SALOME_ListIO.hxx>
+#include <gui/SALOME_ListIO.hxx>
 
 // Qt includes
 #include <QGroupBox>

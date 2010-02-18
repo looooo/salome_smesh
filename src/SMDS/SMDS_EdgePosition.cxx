@@ -26,7 +26,7 @@
 //
 #include "SMDS_EdgePosition.hxx"
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 using namespace std;
 

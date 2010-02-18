@@ -38,23 +38,23 @@
 #include <SMESH_NumberFilter.hxx>
 
 // SALOME GEOM includes
-#include <GEOM_SelectionFilter.h>
-#include <GEOMBase.h>
-#include <GeometryGUI.h>
+#include <geom/GEOM_SelectionFilter.h>
+#include <geom/GEOMBase.h>
+#include <geom/GeometryGUI.h>
 
 // SALOME GUI includes
-#include <SalomeApp_Tools.h>
-#include <SalomeApp_Application.h>
-#include <LightApp_SelectionMgr.h>
-#include <LightApp_UpdateFlags.h>
-#include <SUIT_MessageBox.h>
-#include <SUIT_OverrideCursor.h>
-#include <SALOME_InteractiveObject.hxx>
-#include <SALOME_ListIO.hxx>
+#include <gui/SalomeApp_Tools.h>
+#include <gui/SalomeApp_Application.h>
+#include <gui/LightApp_SelectionMgr.h>
+#include <gui/LightApp_UpdateFlags.h>
+#include <gui/SUIT_MessageBox.h>
+#include <gui/SUIT_OverrideCursor.h>
+#include <gui/SALOME_InteractiveObject.hxx>
+#include <gui/SALOME_ListIO.hxx>
 
 // SALOME KERNEL includes
-#include <SALOMEDS_SComponent.hxx>
-#include <SALOMEDS_SObject.hxx>
+#include <kernel/SALOMEDS_SComponent.hxx>
+#include <kernel/SALOMEDS_SObject.hxx>
 
 // Qt includes
 #include <QStringList>

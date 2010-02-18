@@ -31,7 +31,7 @@
 #include "SMESH_Algo.hxx"
 #include "SMESHDS_SubMesh.hxx"
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 #include <TopTools_IndexedMapOfShape.hxx>
 #include <TopExp.hxx>

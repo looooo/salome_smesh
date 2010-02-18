@@ -27,7 +27,7 @@
 
 #include "StdMeshers_NumberOfLayers2D.hxx"
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 
 //=============================================================================

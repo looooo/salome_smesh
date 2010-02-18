@@ -38,30 +38,30 @@
 #include <SMESH_TypeFilter.hxx>
 
 // SALOME GEOM includes
-#include <GEOMBase.h>
-#include <GEOM_FaceFilter.h>
-#include <GEOM_TypeFilter.h>
+#include <geom/GEOMBase.h>
+#include <geom/GEOM_FaceFilter.h>
+#include <geom/GEOM_TypeFilter.h>
 
 // SALOME GUI includes
-#include <SUIT_Desktop.h>
-#include <SUIT_ResourceMgr.h>
-#include <SUIT_Session.h>
-#include <SUIT_MessageBox.h>
-#include <QtxColorButton.h>
+#include <gui/SUIT_Desktop.h>
+#include <gui/SUIT_ResourceMgr.h>
+#include <gui/SUIT_Session.h>
+#include <gui/SUIT_MessageBox.h>
+#include <gui/QtxColorButton.h>
 
-#include <LightApp_Application.h>
-#include <LightApp_SelectionMgr.h>
-#include <SalomeApp_Tools.h>
-#include <SalomeApp_Study.h>
+#include <gui/LightApp_Application.h>
+#include <gui/LightApp_SelectionMgr.h>
+#include <gui/SalomeApp_Tools.h>
+#include <gui/SalomeApp_Study.h>
 
-#include <SALOME_ListIO.hxx>
-#include <SALOME_ListIteratorOfListIO.hxx>
-#include <SALOME_DataMapIteratorOfDataMapOfIOMapOfInteger.hxx>
+#include <gui/SALOME_ListIO.hxx>
+#include <gui/SALOME_ListIteratorOfListIO.hxx>
+#include <gui/SALOME_DataMapIteratorOfDataMapOfIOMapOfInteger.hxx>
 
-#include <SVTK_ViewWindow.h>
+#include <gui/SVTK_ViewWindow.h>
 
 // SALOME KERNEL includes
-#include <SALOMEDSClient_Study.hxx>
+#include <kernel/SALOMEDSClient_Study.hxx>
 
 // OCCT includes
 #include <StdSelect_TypeOfFace.hxx>

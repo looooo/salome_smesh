@@ -40,31 +40,31 @@
 #include <SMESH_ActorUtils.h>
 
 // SALOME GEOM includes
-#include <GEOMBase.h>
-#include <GEOM_SelectionFilter.h>
+#include <geom/GEOMBase.h>
+#include <geom/GEOM_SelectionFilter.h>
 
 // SALOME GUI includes
-#include <QtxColorButton.h>
+#include <gui/QtxColorButton.h>
 
-#include <SUIT_Desktop.h>
-#include <SUIT_ResourceMgr.h>
-#include <SUIT_Session.h>
-#include <SUIT_MessageBox.h>
+#include <gui/SUIT_Desktop.h>
+#include <gui/SUIT_ResourceMgr.h>
+#include <gui/SUIT_Session.h>
+#include <gui/SUIT_MessageBox.h>
 
-#include <SalomeApp_Tools.h>
-#include <SalomeApp_Application.h>
-#include <SalomeApp_Study.h>
-#include <LightApp_SelectionMgr.h>
+#include <gui/SalomeApp_Tools.h>
+#include <gui/SalomeApp_Application.h>
+#include <gui/SalomeApp_Study.h>
+#include <gui/LightApp_SelectionMgr.h>
 
-#include <SALOME_ListIO.hxx>
-#include <SALOME_ListIteratorOfListIO.hxx>
+#include <gui/SALOME_ListIO.hxx>
+#include <gui/SALOME_ListIteratorOfListIO.hxx>
 
-#include <SVTK_ViewWindow.h>
+#include <gui/SVTK_ViewWindow.h>
 
-#include <VTKViewer_Algorithm.h>
+#include <gui/VTKViewer_Algorithm.h>
 
 // SALOME KERNEL includes
-#include <SALOMEDSClient_Study.hxx>
+#include <kernel/SALOMEDSClient_Study.hxx>
 
 // VTK Includes
 #include <vtkRenderer.h>

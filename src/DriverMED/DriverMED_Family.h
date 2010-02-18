@@ -32,7 +32,7 @@
 #include "SMDS_Mesh.hxx"
 #include "SMESHDS_GroupBase.hxx"
 #include "SMESHDS_SubMesh.hxx"
-#include "MED_Common.hxx"
+#include <med/MED_Common.hxx>
 
 #include <boost/shared_ptr.hpp>
 #include <set>

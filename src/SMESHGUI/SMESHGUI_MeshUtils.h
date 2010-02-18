@@ -33,7 +33,7 @@
 #include <QString>
 
 // SALOME GUI includes
-#include <SALOME_InteractiveObject.hxx>
+#include <gui/SALOME_InteractiveObject.hxx>
 
 // IDL includes
 #include <SALOMEconfig.h>

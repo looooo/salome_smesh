@@ -28,7 +28,7 @@
 #include "SMESH_3D_Algo.hxx"
 #include "SMESH_Gen.hxx"
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 using namespace std;
 

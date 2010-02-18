@@ -48,8 +48,8 @@
 #include "SMDS_MeshElement.hxx"
 #include "SMDS_MeshNode.hxx"
 
-#include "Utils_SALOME_Exception.hxx"
-#include "utilities.h"
+#include <kernel/Utils_SALOME_Exception.hxx>
+#include <kernel/utilities.h>
 
 #include <BRepAdaptor_Curve.hxx>
 #include <BRep_Tool.hxx>

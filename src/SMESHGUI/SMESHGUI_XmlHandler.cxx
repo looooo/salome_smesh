@@ -30,10 +30,10 @@
 #include "SMESHGUI_Hypotheses.h"
 
 // SALOME GUI includes
-#include "SUIT_ResourceMgr.h"
+#include <gui/SUIT_ResourceMgr.h>
 
 // SALOME KERNEL includes
-#include <utilities.h>
+#include <kernel/utilities.h>
 
 /*!
   Constructor

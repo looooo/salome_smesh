@@ -25,24 +25,24 @@
 
 #include "GeomSelectionTools.h"
 
-#include <LightApp_SelectionMgr.h>
-#include <SalomeApp_Application.h>
-#include <SUIT_Session.h>
+#include <gui/LightApp_SelectionMgr.h>
+#include <gui/SalomeApp_Application.h>
+#include <gui/SUIT_Session.h>
 
-#include <SALOME_ListIteratorOfListIO.hxx>
-#include <GEOM_Client.hxx>
+#include <gui/SALOME_ListIteratorOfListIO.hxx>
+#include <geom/GEOM_Client.hxx>
 #include <SMESHGUI_Utils.h>
 #include <boost/shared_ptr.hpp>
-#include <GEOMImpl_Types.hxx>
+#include <geom/GEOMImpl_Types.hxx>
 
 #include <TopoDS.hxx>
 #include <BRep_Tool.hxx>
 #include <Handle_Geom_Surface.hxx>
 #include <BRepAdaptor_Surface.hxx>
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
-#include "SALOME_LifeCycleCORBA.hxx"
+#include <kernel/SALOME_LifeCycleCORBA.hxx>
 #include <sstream>
 
 /*!

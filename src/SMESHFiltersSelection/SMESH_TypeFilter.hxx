@@ -26,7 +26,7 @@
 #define _SMESH_TypeFilter_HeaderFile
 
 #include "SMESH_Type.h"
-#include "SUIT_SelectionFilter.h"
+#include <gui/SUIT_SelectionFilter.h>
 
 class SUIT_DataOwner;
 

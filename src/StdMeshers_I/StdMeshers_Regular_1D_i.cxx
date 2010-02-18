@@ -29,8 +29,8 @@
 #include "StdMeshers_Regular_1D_i.hxx"
 #include "SMESH_Gen.hxx"
 
-#include "Utils_CorbaException.hxx"
-#include "utilities.h"
+#include <kernel/Utils_CorbaException.hxx>
+#include <kernel/utilities.h>
 
 using namespace std;
 

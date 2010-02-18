@@ -27,7 +27,7 @@
 //
 #include "SMESHDS_SubMesh.hxx"
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 #include "SMDS_SetIterator.hxx"
 
 using namespace std;

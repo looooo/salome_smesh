@@ -27,7 +27,7 @@
 #include "SMESHDS_GroupBase.hxx"
 #include "SMESHDS_Mesh.hxx"
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 using namespace std;
 

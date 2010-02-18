@@ -27,7 +27,7 @@
 //
 #include "SMESH_1D_Algo_i.hxx"
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 using namespace std;
 

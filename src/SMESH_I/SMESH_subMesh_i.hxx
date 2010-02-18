@@ -35,7 +35,7 @@
 #include CORBA_CLIENT_HEADER(GEOM_Gen)
 #include CORBA_CLIENT_HEADER(MED)
 
-#include "SALOME_GenericObj_i.hh"
+#include <kernel/SALOME_GenericObj_i.hh>
 #include "SMESH_Mesh_i.hxx"
 
 class SMESH_Gen_i;

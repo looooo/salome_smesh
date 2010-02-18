@@ -30,7 +30,7 @@
 #include <SMESHGUI_Hypotheses.h>
 
 // SALOME GUI includes
-#include <SalomeApp_Tools.h>
+#include <gui/SalomeApp_Tools.h>
 
 // Qt includes
 #include <QPushButton>

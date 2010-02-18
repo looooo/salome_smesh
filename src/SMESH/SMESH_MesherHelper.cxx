@@ -53,7 +53,7 @@
 #include <Standard_Failure.hxx>
 #include <Standard_ErrorHandler.hxx>
 
-#include <utilities.h>
+#include <kernel/utilities.h>
 
 #include <limits>
 

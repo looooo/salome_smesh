@@ -64,7 +64,7 @@ inline Standard_Boolean IsEqual
 #include <OSD_SingleProtection.hxx>
 #include <Standard_NoMoreObject.hxx>
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 static const int HEADER_SIZE           =  84;
 static const int SIZEOF_STL_FACET      =  50;

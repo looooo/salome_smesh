@@ -50,7 +50,7 @@
 # include <algorithm>
 #endif
 
-#include <Basics_Utils.hxx>
+#include <kernel/Basics_Utils.hxx>
 
 StdMeshersGUI_DistrPreview::StdMeshersGUI_DistrPreview( QWidget* p, StdMeshers::StdMeshers_NumberOfSegments_ptr h )
 : QwtPlot( p ),

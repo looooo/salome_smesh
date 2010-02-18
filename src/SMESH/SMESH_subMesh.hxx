@@ -35,7 +35,7 @@
 #include "SMESH_ComputeError.hxx"
 #include "SMESH_Algo.hxx"
 
-#include "Utils_SALOME_Exception.hxx"
+#include <kernel/Utils_SALOME_Exception.hxx>
 
 #include <TopoDS_Shape.hxx>
 

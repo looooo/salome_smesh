@@ -46,9 +46,9 @@
 #include <TCollection_AsciiString.hxx>
 #include <OSD.hxx>
 
-#include "Utils_CorbaException.hxx"
+#include <kernel/Utils_CorbaException.hxx>
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 #include <fstream>
 #include <stdio.h>
 
@@ -70,7 +70,7 @@
  #define UnLoadLib( handle ) dlclose( handle );
 #endif
 
-#include <HDFOI.hxx>
+#include <kernel/HDFOI.hxx>
 
 #include "SMESH_Gen_i.hxx"
 #include "SMESH_Mesh_i.hxx"
@@ -100,18 +100,18 @@
 #include "DriverMED_W_SMESHDS_Mesh.h"
 #include "DriverMED_R_SMESHDS_Mesh.h"
 
-#include "SALOMEDS_Tool.hxx"
-#include "SALOME_NamingService.hxx"
-#include "SALOME_LifeCycleCORBA.hxx"
-#include "Utils_SINGLETON.hxx"
-#include "OpUtil.hxx"
+#include <kernel/SALOMEDS_Tool.hxx>
+#include <kernel/SALOME_NamingService.hxx>
+#include <kernel/SALOME_LifeCycleCORBA.hxx>
+#include <kernel/Utils_SINGLETON.hxx>
+#include <kernel/OpUtil.hxx>
 
 #include CORBA_CLIENT_HEADER(SALOME_ModuleCatalog)
 #include CORBA_CLIENT_HEADER(SALOME_Session)
 
-#include "GEOM_Client.hxx"
-#include "Utils_ExceptHandlers.hxx"
-#include "Basics_Utils.hxx"
+#include <geom/GEOM_Client.hxx>
+#include <kernel/Utils_ExceptHandlers.hxx>
+#include <kernel/Basics_Utils.hxx>
 
 #include <map>
 

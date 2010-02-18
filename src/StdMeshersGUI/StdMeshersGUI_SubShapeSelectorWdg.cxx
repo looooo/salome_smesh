@@ -37,21 +37,21 @@
 #include "SMESHGUI_GEOMGenUtils.h"
 
 // SVTK Includes
-#include <SVTK_ViewWindow.h>
-#include <SVTK_ViewModel.h>
-#include <SVTK_ViewWindow.h>
-#include <SVTK_Selector.h>
+#include <gui/SVTK_ViewWindow.h>
+#include <gui/SVTK_ViewModel.h>
+#include <gui/SVTK_ViewWindow.h>
+#include <gui/SVTK_Selector.h>
 
 // SALOME GUI includes
-#include <SALOME_ListIO.hxx>
-#include <LightApp_SelectionMgr.h>
-#include <SALOME_ListIteratorOfListIO.hxx>
+#include <gui/SALOME_ListIO.hxx>
+#include <gui/LightApp_SelectionMgr.h>
+#include <gui/SALOME_ListIteratorOfListIO.hxx>
 
 // SUIT Includes
-#include <SUIT_ResourceMgr.h>
+#include <gui/SUIT_ResourceMgr.h>
 
 // GEOM Includes
-#include <GEOMBase.h>
+#include <geom/GEOMBase.h>
 
 // Qt includes
 #include <QPushButton>
@@ -68,7 +68,7 @@
 #include <TopExp_Explorer.hxx>
 
 // SALOME KERNEL includes
-#include <SALOMEDS_SObject.hxx>
+#include <kernel/SALOMEDS_SObject.hxx>
 
 #define SPACING 6
 #define MARGIN 0

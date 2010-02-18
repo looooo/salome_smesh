@@ -30,7 +30,7 @@
 #include "SMESH_SMESHGUI.hxx"
 
 // SALOME KERNEL includes
-#include <SALOMEDSClient_definitions.hxx>
+#include <kernel/SALOMEDSClient_definitions.hxx>
 
 // IDL includes
 #include <SALOMEconfig.h>

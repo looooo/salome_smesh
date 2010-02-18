@@ -21,11 +21,11 @@
 //
 #include "SMESH_ActorUtils.h"
 
-#include "SUIT_Tools.h"
-#include "SUIT_Session.h"
-#include "SUIT_ResourceMgr.h"
+#include <gui/SUIT_Tools.h>
+#include <gui/SUIT_Session.h>
+#include <gui/SUIT_ResourceMgr.h>
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 #include <vtkUnstructuredGrid.h>
 #include <vtkUnstructuredGridWriter.h>

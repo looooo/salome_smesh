@@ -41,7 +41,7 @@
 #include "SMESH_subMesh.hxx"
 #include "SMESH_subMeshEventListener.hxx"
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 #include <BRepAdaptor_Curve.hxx>
 #include <BRepBuilderAPI_MakeEdge.hxx>

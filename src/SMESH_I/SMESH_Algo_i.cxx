@@ -28,7 +28,7 @@
 #include "SMESH_Algo_i.hxx"
 #include "SMESH_Algo.hxx"
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 #include <string>
 #include <vector>

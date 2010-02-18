@@ -33,16 +33,16 @@
 #include <SMESH_TypeFilter.hxx>
 
 // SALOME GUI includes
-#include <SUIT_ResourceMgr.h>
-#include <SUIT_Desktop.h>
-#include <SUIT_Session.h>
-#include <SUIT_MessageBox.h>
+#include <gui/SUIT_ResourceMgr.h>
+#include <gui/SUIT_Desktop.h>
+#include <gui/SUIT_Session.h>
+#include <gui/SUIT_MessageBox.h>
 
-#include <LightApp_Application.h>
-#include <LightApp_SelectionMgr.h>
-#include <SVTK_Selection.h>
-#include <SVTK_ViewWindow.h>
-#include <SALOME_ListIO.hxx>
+#include <gui/LightApp_Application.h>
+#include <gui/LightApp_SelectionMgr.h>
+#include <gui/SVTK_Selection.h>
+#include <gui/SVTK_ViewWindow.h>
+#include <gui/SALOME_ListIO.hxx>
 
 // Qt includes
 #include <QHBoxLayout>
@@ -55,9 +55,9 @@
 #include <QKeyEvent>
 #include <QListWidget>
 #include <QButtonGroup>
-#include <SALOME_ListIteratorOfListIO.hxx>
+#include <gui/SALOME_ListIteratorOfListIO.hxx>
 #include <QComboBox>
-#include <QtxColorButton.h>
+#include <gui/QtxColorButton.h>
 
 #define SPACING 6
 #define MARGIN  11

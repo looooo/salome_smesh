@@ -27,7 +27,7 @@
 //
 #include "SMESH_Pattern_i.hxx"
 
-#include "GEOM_Client.hxx"
+#include <geom/GEOM_Client.hxx>
 #include "SMESH_Gen_i.hxx"
 #include "SMESH_Mesh.hxx"
 #include "SMESH_Mesh_i.hxx"

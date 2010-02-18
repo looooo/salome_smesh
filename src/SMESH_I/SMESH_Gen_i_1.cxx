@@ -36,8 +36,8 @@
 
 #include CORBA_CLIENT_HEADER(SALOME_ModuleCatalog)
 
-#include "utilities.h"
-#include "Utils_ExceptHandlers.hxx"
+#include <kernel/utilities.h>
+#include <kernel/Utils_ExceptHandlers.hxx>
 
 #include <TCollection_AsciiString.hxx>
 

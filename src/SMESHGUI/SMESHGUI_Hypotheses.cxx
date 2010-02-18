@@ -32,15 +32,15 @@
 #include "SMESHGUI_SpinBox.h"
 
 // SALOME KERNEL includes
-#include <SALOMEDSClient_Study.hxx>
-#include <utilities.h>
+#include <kernel/SALOMEDSClient_Study.hxx>
+#include <kernel/utilities.h>
 
 // SALOME GUI includes
-#include <SUIT_Session.h>
-#include <SUIT_MessageBox.h>
-#include <SUIT_ResourceMgr.h>
-#include <LightApp_Application.h>
-#include <SalomeApp_IntSpinBox.h>
+#include <gui/SUIT_Session.h>
+#include <gui/SUIT_MessageBox.h>
+#include <gui/SUIT_ResourceMgr.h>
+#include <gui/LightApp_Application.h>
+#include <gui/SalomeApp_IntSpinBox.h>
 
 // Qt includes
 #include <QFrame>

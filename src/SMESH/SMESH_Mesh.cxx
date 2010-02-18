@@ -37,7 +37,7 @@
 #include "SMDS_MeshVolume.hxx"
 #include "SMDS_SetIterator.hxx"
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 #include "DriverMED_W_SMESHDS_Mesh.h"
 #include "DriverDAT_W_SMDS_Mesh.h"
@@ -59,7 +59,7 @@
 #include <TopTools_MapOfShape.hxx>
 #include <TopoDS_Iterator.hxx>
 
-#include "Utils_ExceptHandlers.hxx"
+#include <kernel/Utils_ExceptHandlers.hxx>
 
 using namespace std;
 

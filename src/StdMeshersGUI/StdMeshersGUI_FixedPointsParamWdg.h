@@ -26,7 +26,7 @@
 #define STDMESHERSGUI_FIXEDPOINTSPARAMWGD_H
 
 // SMESH includes
-#include <SMESHGUI.h>
+#include "SMESHGUI.h"
 #include "SMESH_StdMeshersGUI.hxx"
 
 // Qt includes

@@ -30,7 +30,7 @@
 #include "SMESH_SMESHGUI.hxx"
 
 // SALOME GUI includes
-#include <SUIT_FileValidator.h>
+#include <gui/SUIT_FileValidator.h>
 
 class SMESHGUI_EXPORT SMESHGUI_FileValidator : public SUIT_FileValidator
 {

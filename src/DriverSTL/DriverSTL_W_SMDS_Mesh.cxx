@@ -35,7 +35,7 @@
 #include <TCollection_AsciiString.hxx>
 #include <TColgp_Array1OfXYZ.hxx>
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 //using namespace std;
 

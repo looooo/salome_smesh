@@ -35,22 +35,22 @@
 #include <SMESH_NumberFilter.hxx>
 
 // SALOME GUI includes
-#include <SUIT_ResourceMgr.h>
-#include <SUIT_Desktop.h>
-#include <SUIT_FileDlg.h>
-#include <SUIT_Session.h>
-#include <SUIT_MessageBox.h>
+#include <gui/SUIT_ResourceMgr.h>
+#include <gui/SUIT_Desktop.h>
+#include <gui/SUIT_FileDlg.h>
+#include <gui/SUIT_Session.h>
+#include <gui/SUIT_MessageBox.h>
 
-#include <LightApp_Application.h>
-#include <LightApp_SelectionMgr.h>
-#include <SalomeApp_Tools.h>
+#include <gui/LightApp_Application.h>
+#include <gui/LightApp_SelectionMgr.h>
+#include <gui/SalomeApp_Tools.h>
 
-#include <SALOME_ListIO.hxx>
-#include <SVTK_ViewModel.h>
-#include <SVTK_ViewWindow.h>
+#include <gui/SALOME_ListIO.hxx>
+#include <gui/SVTK_ViewModel.h>
+#include <gui/SVTK_ViewWindow.h>
 
 // SALOME KERNEL includes
-#include <SALOMEDS_SObject.hxx>
+#include <kernel/SALOMEDS_SObject.hxx>
 
 // OCCT includes
 #include <TColStd_MapOfInteger.hxx>

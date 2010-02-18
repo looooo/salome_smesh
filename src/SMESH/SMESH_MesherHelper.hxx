@@ -29,8 +29,8 @@
 #include "SMESH_SMESH.hxx"
 
 #include "SMESH_MeshEditor.hxx" // needed for many meshers
-#include <SMDS_MeshNode.hxx>
-#include <SMDS_QuadraticEdge.hxx>
+#include "SMDS_MeshNode.hxx"
+#include "SMDS_QuadraticEdge.hxx"
 
 #include <Geom_Surface.hxx>
 #include <TopoDS_Face.hxx>

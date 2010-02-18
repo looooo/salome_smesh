@@ -31,9 +31,9 @@
 #include "SMDS_PolyhedralVolumeOfNodes.hxx"
 #include "SMESH_Actor.h"
 #include "SMESH_ControlsDef.hxx"
-#include "SalomeApp_Application.h"
-#include "VTKViewer_ExtractUnstructuredGrid.h"
-#include "VTKViewer_CellLocationsArray.h"
+#include <gui/SalomeApp_Application.h>
+#include <gui/VTKViewer_ExtractUnstructuredGrid.h>
+#include <gui/VTKViewer_CellLocationsArray.h>
 
 #include CORBA_SERVER_HEADER(SMESH_Gen)
 #include CORBA_SERVER_HEADER(SALOME_Exception)
@@ -50,7 +50,7 @@
 #include <stdexcept>
 #include <set>
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 using namespace std;
 

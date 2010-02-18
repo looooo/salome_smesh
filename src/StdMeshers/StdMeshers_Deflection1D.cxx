@@ -24,7 +24,7 @@
 //  Module : SMESH
 //
 #include "StdMeshers_Deflection1D.hxx"
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 #include "SMESH_Mesh.hxx"
 #include "SMESH_Algo.hxx"

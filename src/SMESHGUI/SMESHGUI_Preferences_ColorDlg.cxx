@@ -30,10 +30,10 @@
 #include "SMESHGUI_Utils.h"
 
 // SALOME GUI includes
-#include <SUIT_Desktop.h>
-#include <QtxColorButton.h>
-#include <QtxDoubleSpinBox.h>
-#include <QtxIntSpinBox.h>
+#include <gui/SUIT_Desktop.h>
+#include <gui/QtxColorButton.h>
+#include <gui/QtxDoubleSpinBox.h>
+#include <gui/QtxIntSpinBox.h>
 
 // Qt includes
 #include <QGroupBox>

@@ -29,7 +29,7 @@
 #include <sstream>
 #include "SMESH_Hypothesis_i.hxx"
 #include "SMESH_Gen_i.hxx"
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 using namespace std;
 

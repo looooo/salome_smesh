@@ -34,7 +34,8 @@ AM_CPPFLAGS = @KERNEL_CXXFLAGS@ -include SALOMEconfig.h
 # ============================================================
 # Standard directory for installation
 #
-salomeincludedir   = $(includedir)/salome
+salomeincludedir   = $(includedir)/salome/@MODULE_NAME@
+salomeskeldir      = $(includedir)/salome/skel
 libdir             = $(prefix)/lib@LIB_LOCATION_SUFFIX@/salome
 bindir             = $(prefix)/bin/salome
 salomescriptdir    = $(bindir)

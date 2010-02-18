@@ -46,7 +46,7 @@
 #include "SMDS_EdgePosition.hxx"
 #include "SMDS_FacePosition.hxx"
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 #include <BRepTools.hxx>
 #include <BRep_Tool.hxx>

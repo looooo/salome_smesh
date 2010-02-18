@@ -31,7 +31,7 @@
 #include "SMDS_SetIterator.hxx"
 #include "SMDS_VolumeTool.hxx"
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 using namespace std;
 

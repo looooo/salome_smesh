@@ -27,7 +27,7 @@
 #include "SMESH_Mesh.hxx"
 #include "SMESH_Algo.hxx"
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 #include <BRep_Tool.hxx>
 #include <GCPnts_AbscissaPoint.hxx>

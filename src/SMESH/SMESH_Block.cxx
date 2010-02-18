@@ -55,7 +55,7 @@
 #include "SMDS_MeshNode.hxx"
 #include "SMDS_MeshVolume.hxx"
 #include "SMDS_VolumeTool.hxx"
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 #include <list>
 

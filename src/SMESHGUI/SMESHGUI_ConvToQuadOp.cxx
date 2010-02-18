@@ -32,10 +32,10 @@
 #include <SMESH_TypeFilter.hxx>
 
 // SALOME GUI includes
-#include <LightApp_UpdateFlags.h>
-#include <SUIT_MessageBox.h>
-#include <SUIT_OverrideCursor.h>
-#include <SalomeApp_Tools.h>
+#include <gui/LightApp_UpdateFlags.h>
+#include <gui/SUIT_MessageBox.h>
+#include <gui/SUIT_OverrideCursor.h>
+#include <gui/SalomeApp_Tools.h>
 
 // IDL includes
 #include <SALOMEconfig.h>

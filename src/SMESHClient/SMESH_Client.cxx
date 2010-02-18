@@ -27,15 +27,15 @@
 #include "SMESH_Client.hxx"
 #include "SMESH_Mesh.hxx"
 
-#include "SALOME_NamingService.hxx"
-#include "SALOME_LifeCycleCORBA.hxx"
+#include <kernel/SALOME_NamingService.hxx>
+#include <kernel/SALOME_LifeCycleCORBA.hxx>
 
 #include <SALOMEconfig.h>
 #include CORBA_SERVER_HEADER(SALOME_Component)
 #include CORBA_SERVER_HEADER(SALOME_Exception)
 
-#include "Basics_Utils.hxx"
-#include "utilities.h"
+#include <kernel/Basics_Utils.hxx>
+#include <kernel/utilities.h>
 
 #ifdef WNT
 #include <process.h>

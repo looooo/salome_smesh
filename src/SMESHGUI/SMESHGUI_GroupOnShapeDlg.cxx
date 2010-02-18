@@ -32,13 +32,13 @@
 #include "SMESHGUI_Utils.h"
 #include "SMESHGUI_GEOMGenUtils.h"
 
-#include <GeometryGUI.h>
-#include <GEOM_SelectionFilter.h>
+#include <geom/GeometryGUI.h>
+#include <geom/GEOM_SelectionFilter.h>
 
-#include <SUIT_Session.h>
-#include <SUIT_OverrideCursor.h>
-#include <LightApp_UpdateFlags.h>
-#include <SUIT_ResourceMgr.h>
+#include <gui/SUIT_Session.h>
+#include <gui/SUIT_OverrideCursor.h>
+#include <gui/LightApp_UpdateFlags.h>
+#include <gui/SUIT_ResourceMgr.h>
 
 #include <SALOMEconfig.h>
 #include CORBA_SERVER_HEADER(SMESH_Mesh)

@@ -30,8 +30,8 @@
 #include "SMESH_SMESHGUI.hxx"
 
 // SALOME GUI includes
-#include <SalomeApp_Module.h>
-#include <SALOME_InteractiveObject.hxx>
+#include <gui/SalomeApp_Module.h>
+#include <gui/SALOME_InteractiveObject.hxx>
 
 // IDL includes
 #include <SALOMEconfig.h>

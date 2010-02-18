@@ -33,11 +33,11 @@
 #include <omniORB4/CORBA.h>
 
 // SALOME KERNEL includes
-#include <SALOMEDSClient_definitions.hxx>
+#include <kernel/SALOMEDSClient_definitions.hxx>
 
 // SALOME GUI includes
-#include <SALOME_InteractiveObject.hxx>
-#include <LightApp_DataOwner.h>
+#include <gui/SALOME_InteractiveObject.hxx>
+#include <gui/LightApp_DataOwner.h>
 
 //OCC includes
 #include <gp_XYZ.hxx>

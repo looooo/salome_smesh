@@ -35,18 +35,18 @@
 #include <SMESH_ActorUtils.h>
 
 // SALOME GUI includes
-#include <SUIT_Desktop.h>
-#include <SUIT_Session.h>
-#include <SUIT_OverrideCursor.h>
-#include <SUIT_MessageBox.h>
-#include <SUIT_ResourceMgr.h>
+#include <gui/SUIT_Desktop.h>
+#include <gui/SUIT_Session.h>
+#include <gui/SUIT_OverrideCursor.h>
+#include <gui/SUIT_MessageBox.h>
+#include <gui/SUIT_ResourceMgr.h>
 
-#include <SALOME_ListIO.hxx>
+#include <gui/SALOME_ListIO.hxx>
 
-#include <LightApp_Application.h>
-#include <LightApp_SelectionMgr.h>
+#include <gui/LightApp_Application.h>
+#include <gui/LightApp_SelectionMgr.h>
 
-#include <SVTK_ViewWindow.h>
+#include <gui/SVTK_ViewWindow.h>
 
 // Qt includes
 #include <QLabel>

@@ -29,7 +29,7 @@
 #include "SMESH_DriverMED.hxx"
 
 #include "Driver_SMESHDS_Mesh.h"
-#include "MED_Factory.hxx"
+#include <med/MED_Factory.hxx>
 
 #include <string>
 #include <list>

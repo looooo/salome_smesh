@@ -29,7 +29,7 @@
 #include "SMDS_MeshNode.hxx"
 #include "SMDS_SetIterator.hxx"
 #include "SMDS_VolumeTool.hxx"
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 #include <set>
 

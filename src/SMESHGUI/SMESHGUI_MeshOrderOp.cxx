@@ -30,16 +30,16 @@
 #include "SMESHGUI_MeshUtils.h"
 
 // SALOME GUI includes
-#include <LightApp_SelectionMgr.h>
-#include <SALOME_ListIO.hxx>
-#include <SUIT_ResourceMgr.h>
-#include <SUIT_OverrideCursor.h>
-#include <SUIT_MessageBox.h>
-#include <SUIT_Desktop.h>
+#include <gui/LightApp_SelectionMgr.h>
+#include <gui/SALOME_ListIO.hxx>
+#include <gui/SUIT_ResourceMgr.h>
+#include <gui/SUIT_OverrideCursor.h>
+#include <gui/SUIT_MessageBox.h>
+#include <gui/SUIT_Desktop.h>
 
 // SALOME KERNEL includes
-#include <SALOMEDS_SObject.hxx>
-#include <SALOMEDSClient_SObject.hxx>
+#include <kernel/SALOMEDS_SObject.hxx>
+#include <kernel/SALOMEDSClient_SObject.hxx>
 
 // STL includes
 #include <set>

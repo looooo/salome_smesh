@@ -33,7 +33,7 @@
 #include "SMESH_3D_Algo.hxx"
 #include "SMESH_Mesh.hxx"
 #include "StdMeshers_Quadrangle_2D.hxx"
-#include "Utils_SALOME_Exception.hxx"
+#include <kernel/Utils_SALOME_Exception.hxx>
 
 #include "SMESH_MesherHelper.hxx"
 

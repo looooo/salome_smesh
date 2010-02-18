@@ -32,8 +32,8 @@
 #include <SMESH_ActorUtils.h>
 
 // SALOME GUI includes
-#include <VTKViewer_CellLocationsArray.h>
-#include <SVTK_ViewWindow.h>
+#include <gui/VTKViewer_CellLocationsArray.h>
+#include <gui/SVTK_ViewWindow.h>
 
 // VTK includes
 #include <vtkPoints.h>

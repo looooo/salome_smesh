@@ -29,7 +29,7 @@
 #include "SMESHGUI_Utils.h"
 
 // SALOME KERNEL includes
-#include <SALOMEDSClient_Study.hxx>
+#include <kernel/SALOMEDSClient_Study.hxx>
 
 // Qt includes
 #include <QStringList>

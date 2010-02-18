@@ -40,7 +40,7 @@
 #include "SMESH_MesherHelper.hxx"
 #include "SMESH_subMesh.hxx"
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 #include <BRepAdaptor_Curve.hxx>
 #include <BRepBuilderAPI_MakeEdge.hxx>

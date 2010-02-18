@@ -39,16 +39,16 @@
 #include <SMDS_Mesh.hxx>
 
 // SALOME GUI inclues
-#include <SUIT_Desktop.h>
-#include <SUIT_Session.h>
-#include <SUIT_ResourceMgr.h>
-#include <SUIT_MessageBox.h>
-#include <SUIT_ViewManager.h>
-#include <LightApp_SelectionMgr.h>
-#include <SALOME_ListIO.hxx>
-#include <SalomeApp_Application.h>
-#include <SVTK_ViewModel.h>
-#include <SVTK_ViewWindow.h>
+#include <gui/SUIT_Desktop.h>
+#include <gui/SUIT_Session.h>
+#include <gui/SUIT_ResourceMgr.h>
+#include <gui/SUIT_MessageBox.h>
+#include <gui/SUIT_ViewManager.h>
+#include <gui/LightApp_SelectionMgr.h>
+#include <gui/SALOME_ListIO.hxx>
+#include <gui/SalomeApp_Application.h>
+#include <gui/SVTK_ViewModel.h>
+#include <gui/SVTK_ViewWindow.h>
 
 // IDL incldues
 #include CORBA_SERVER_HEADER(SMESH_MeshEditor)

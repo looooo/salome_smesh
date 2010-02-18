@@ -29,7 +29,7 @@
 #endif
 
 #include "SMDS_MeshGroup.hxx"
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 using namespace std;
 

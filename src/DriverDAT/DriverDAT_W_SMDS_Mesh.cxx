@@ -25,9 +25,9 @@
 
 #include "SMDS_Mesh.hxx"
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
-#include <Basics_Utils.hxx>
+#include <kernel/Basics_Utils.hxx>
 
 using namespace std;
 

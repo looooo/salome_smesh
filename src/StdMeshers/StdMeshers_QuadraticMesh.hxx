@@ -29,7 +29,7 @@
 #include "SMESH_StdMeshers.hxx"
 
 #include "SMESH_Hypothesis.hxx"
-#include "Utils_SALOME_Exception.hxx"
+#include <kernel/Utils_SALOME_Exception.hxx>
 
 /*!
  * \brief Hypothesis for StdMeshers_Regular_1D, forcing construction of quadratic edges.

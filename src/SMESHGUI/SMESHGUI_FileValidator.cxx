@@ -27,8 +27,8 @@
 #include "SMESHGUI_FileValidator.h"
 
 // SALOME GUI includes
-#include <SUIT_MessageBox.h>
-#include <SUIT_Tools.h>
+#include <gui/SUIT_MessageBox.h>
+#include <gui/SUIT_Tools.h>
 
 // Qt includes
 #include <QFileInfo>

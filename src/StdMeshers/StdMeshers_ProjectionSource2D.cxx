@@ -28,7 +28,7 @@
 
 #include "SMESH_Mesh.hxx"
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 #include <TopoDS.hxx>
 

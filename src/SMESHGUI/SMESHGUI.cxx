@@ -85,35 +85,35 @@
 #include <SMESH_TypeFilter.hxx>
 
 // SALOME GUI includes
-#include <SalomeApp_Tools.h>
-#include <SalomeApp_Study.h>
-#include <SalomeApp_Application.h>
-#include <SalomeApp_CheckFileDlg.h>
+#include <gui/SalomeApp_Tools.h>
+#include <gui/SalomeApp_Study.h>
+#include <gui/SalomeApp_Application.h>
+#include <gui/SalomeApp_CheckFileDlg.h>
 
-#include <LightApp_DataOwner.h>
-#include <LightApp_Preferences.h>
-#include <LightApp_SelectionMgr.h>
-#include <LightApp_UpdateFlags.h>
-#include <LightApp_NameDlg.h>
+#include <gui/LightApp_DataOwner.h>
+#include <gui/LightApp_Preferences.h>
+#include <gui/LightApp_SelectionMgr.h>
+#include <gui/LightApp_UpdateFlags.h>
+#include <gui/LightApp_NameDlg.h>
 
-#include <SVTK_ViewWindow.h>
-#include <SVTK_ViewModel.h>
-#include <SVTK_ViewManager.h>
+#include <gui/SVTK_ViewWindow.h>
+#include <gui/SVTK_ViewModel.h>
+#include <gui/SVTK_ViewManager.h>
 
-#include <VTKViewer_Algorithm.h>
+#include <gui/VTKViewer_Algorithm.h>
 
-#include <SUIT_MessageBox.h>
-#include <SUIT_ResourceMgr.h>
-#include <SUIT_FileDlg.h>
-#include <SUIT_Desktop.h>
-#include <SUIT_OverrideCursor.h>
-#include <SUIT_Session.h>
+#include <gui/SUIT_MessageBox.h>
+#include <gui/SUIT_ResourceMgr.h>
+#include <gui/SUIT_FileDlg.h>
+#include <gui/SUIT_Desktop.h>
+#include <gui/SUIT_OverrideCursor.h>
+#include <gui/SUIT_Session.h>
 
-#include <QtxPopupMgr.h>
-#include <QtxFontEdit.h>
+#include <gui/QtxPopupMgr.h>
+#include <gui/QtxFontEdit.h>
 
-#include <SALOME_ListIO.hxx>
-#include <SALOME_ListIteratorOfListIO.hxx>
+#include <gui/SALOME_ListIO.hxx>
+#include <gui/SALOME_ListIteratorOfListIO.hxx>
 
 // IDL includes
 #include <SALOMEconfig.h>
@@ -134,11 +134,11 @@
 #include <vtkPlane.h>
 
 // SALOME KERNEL includes
-#include <SALOMEDS_Study.hxx>
-#include <SALOMEDSClient_StudyBuilder.hxx>
-#include <SALOMEDSClient_SComponent.hxx>
-#include <SALOMEDSClient_ClientFactory.hxx>
-#include <SALOMEDSClient_IParameters.hxx>
+#include <kernel/SALOMEDS_Study.hxx>
+#include <kernel/SALOMEDSClient_StudyBuilder.hxx>
+#include <kernel/SALOMEDSClient_SComponent.hxx>
+#include <kernel/SALOMEDSClient_ClientFactory.hxx>
+#include <kernel/SALOMEDSClient_IParameters.hxx>
 
 // OCCT includes
 #include <Standard_ErrorHandler.hxx>

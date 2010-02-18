@@ -30,7 +30,7 @@
 #include "SMESH_SMESHGUI.hxx"
 
 // SALOME includes
-#include <SVTK_ViewWindow.h>
+#include <gui/SVTK_ViewWindow.h>
 
 // Qt includes
 #include <QDialog>

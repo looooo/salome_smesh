@@ -44,7 +44,7 @@
 #include "SMESH_OctreeNode.hxx"
 #include "SMESH_Group.hxx"
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 #include <BRepAdaptor_Surface.hxx>
 #include <BRepClass3d_SolidClassifier.hxx>

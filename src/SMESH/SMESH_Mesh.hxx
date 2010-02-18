@@ -35,7 +35,7 @@
 #include "SMESHDS_Command.hxx"
 #include "SMDSAbs_ElementType.hxx"
 
-#include "Utils_SALOME_Exception.hxx"
+#include <kernel/Utils_SALOME_Exception.hxx>
 
 #include <TopoDS_Shape.hxx>
 #include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>

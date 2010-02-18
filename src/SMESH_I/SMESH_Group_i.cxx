@@ -35,7 +35,7 @@
 #include "SMESH_Filter_i.hxx"
 #include "SMESH_PythonDump.hxx"
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 using namespace SMESH;
 

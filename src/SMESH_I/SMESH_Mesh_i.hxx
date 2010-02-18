@@ -41,7 +41,7 @@
 //#include "SMESH_subMesh_i.hxx"
 #include "SMESH_subMesh.hxx"
 
-#include "SALOME_GenericObj_i.hh"
+#include <kernel/SALOME_GenericObj_i.hh>
 
 class SMESH_Gen_i;
 class SMESH_GroupBase_i;

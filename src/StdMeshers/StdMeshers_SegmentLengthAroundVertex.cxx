@@ -32,7 +32,7 @@
 #include "SMESHDS_SubMesh.hxx"
 #include "SMESH_MesherHelper.hxx"
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 #include <BRepAdaptor_Curve.hxx>
 #include <GCPnts_AbscissaPoint.hxx>

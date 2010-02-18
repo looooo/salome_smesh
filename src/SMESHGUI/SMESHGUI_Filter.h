@@ -30,7 +30,7 @@
 #include "SMESH_SMESHGUI.hxx"
 
 // SALOME GUI includes
-#include <VTKViewer_Filter.h>
+#include <gui/VTKViewer_Filter.h>
 
 // IDL includes
 #include <SALOMEconfig.h>

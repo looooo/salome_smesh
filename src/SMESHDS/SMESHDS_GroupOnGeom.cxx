@@ -25,7 +25,7 @@
 //
 #include "SMESHDS_GroupOnGeom.hxx"
 #include "SMESHDS_Mesh.hxx"
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 using namespace std;
 

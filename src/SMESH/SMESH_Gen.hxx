@@ -30,7 +30,7 @@
 
 #include "SMESH_SMESH.hxx"
 
-#include "Utils_SALOME_Exception.hxx"
+#include <kernel/Utils_SALOME_Exception.hxx>
 
 #include "SMESH_Hypothesis.hxx"
 #include "SMESH_ComputeError.hxx"

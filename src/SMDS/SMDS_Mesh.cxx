@@ -25,7 +25,7 @@
 #pragma warning(disable:4786)
 #endif
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 #include "SMDS_Mesh.hxx"
 #include "SMDS_VolumeOfNodes.hxx"
 #include "SMDS_VolumeOfFaces.hxx"

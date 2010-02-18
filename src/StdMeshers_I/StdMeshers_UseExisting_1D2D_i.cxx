@@ -30,7 +30,7 @@
 
 #include "SMESH_Gen.hxx"
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 //=============================================================================
 /*!

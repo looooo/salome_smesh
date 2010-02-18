@@ -31,17 +31,17 @@
 #include <SMDS_MeshFace.hxx>
 
 // SALOME GUI includes
-#include <SUIT_Desktop.h>
-#include <SUIT_Session.h>
-#include <SUIT_MessageBox.h>
-#include <SUIT_ResourceMgr.h>
+#include <gui/SUIT_Desktop.h>
+#include <gui/SUIT_Session.h>
+#include <gui/SUIT_MessageBox.h>
+#include <gui/SUIT_ResourceMgr.h>
 
-#include <LightApp_SelectionMgr.h>
-#include <SalomeApp_Application.h>
-#include <SalomeApp_Module.h>
-#include <SalomeApp_Study.h>
+#include <gui/LightApp_SelectionMgr.h>
+#include <gui/SalomeApp_Application.h>
+#include <gui/SalomeApp_Module.h>
+#include <gui/SalomeApp_Study.h>
 
-#include <SALOME_ListIO.hxx>
+#include <gui/SALOME_ListIO.hxx>
 
 // OCC includes
 #include <gp_XYZ.hxx>

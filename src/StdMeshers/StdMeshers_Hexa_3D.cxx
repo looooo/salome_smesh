@@ -53,8 +53,8 @@
 #include <TopoDS.hxx>
 #include <gp_Pnt2d.hxx>
 
-#include "utilities.h"
-#include "Utils_ExceptHandlers.hxx"
+#include <kernel/utilities.h>
+#include <kernel/Utils_ExceptHandlers.hxx>
 
 typedef SMESH_Comment TComm;
 

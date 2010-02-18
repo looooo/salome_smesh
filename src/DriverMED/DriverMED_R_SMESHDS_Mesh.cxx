@@ -26,15 +26,15 @@
 #include "DriverMED_R_SMESHDS_Mesh.h"
 #include "DriverMED_R_SMDS_Mesh.h"
 #include "SMESHDS_Mesh.hxx"
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 #include "DriverMED_Family.h"
 
 #include "SMESHDS_Group.hxx"
 
-#include "MED_Factory.hxx"
-#include "MED_CoordUtils.hxx"
-#include "MED_Utilities.hxx"
+#include <med/MED_Factory.hxx>
+#include <med/MED_CoordUtils.hxx>
+#include <med/MED_Utilities.hxx>
 
 #include <stdlib.h>
 

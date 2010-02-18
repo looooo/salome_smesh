@@ -30,7 +30,7 @@
 #include "SMDS_MeshEdge.hxx"
 #include "SMDS_MeshFace.hxx"
 #include "SMDS_MeshVolume.hxx"
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 using namespace std;
 

@@ -27,7 +27,7 @@
 //
 #include "StdMeshers_LengthFromEdges.hxx"
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 using namespace std;
 

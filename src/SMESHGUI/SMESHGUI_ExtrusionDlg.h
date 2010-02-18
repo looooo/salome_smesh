@@ -30,7 +30,7 @@
 #include "SMESH_SMESHGUI.hxx"
 
 // SALOME GUI includes
-#include <SALOME_InteractiveObject.hxx>
+#include <gui/SALOME_InteractiveObject.hxx>
 
 // Qt includes
 #include <QDialog>

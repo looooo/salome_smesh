@@ -31,7 +31,7 @@
 #include "SMESHGUI_HypothesesUtils.h"
 
 // Qt includes
-#include <QtxDialog.h>
+#include <gui/QtxDialog.h>
 #include <QVariant>
 
 // IDL includes

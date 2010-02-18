@@ -26,7 +26,7 @@
 
 #include "StdMeshers_ProjectionSource3D.hxx"
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 #include "SMESH_Gen.hxx"
 
 #include <TopoDS.hxx>

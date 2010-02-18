@@ -35,7 +35,7 @@
 #include <LDOM_Document.hxx>
 #include <TopoDS_Shape.hxx>
 
-#include "SALOME_GenericObj_i.hh"
+#include <kernel/SALOME_GenericObj_i.hh>
 #include "SMESH_ControlsDef.hxx"
 
 class SMESHDS_Mesh;

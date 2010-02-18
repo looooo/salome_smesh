@@ -55,8 +55,8 @@
 #include <TopTools_MapOfShape.hxx>
 #include <TopoDS.hxx>
 
-#include "utilities.h"
-#include "Utils_ExceptHandlers.hxx"
+#include <kernel/utilities.h>
+#include <kernel/Utils_ExceptHandlers.hxx>
 
 #ifndef StdMeshers_Array2OfNode_HeaderFile
 #define StdMeshers_Array2OfNode_HeaderFile

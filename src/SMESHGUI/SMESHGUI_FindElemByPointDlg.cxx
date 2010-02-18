@@ -36,17 +36,17 @@
 #include <SMESH_TypeFilter.hxx>
 
 // SALOME GUI includes
-#include <LightApp_SelectionMgr.h>
-#include <QtxComboBox.h>
-#include <SALOME_ListIO.hxx>
-#include <SUIT_Desktop.h>
-#include <SUIT_MessageBox.h>
-#include <SUIT_OverrideCursor.h>
-#include <SUIT_ResourceMgr.h>
-#include <SVTK_ViewModel.h>
-#include <SVTK_ViewWindow.h>
-#include <SalomeApp_Tools.h>
-#include <SalomeApp_TypeFilter.h>
+#include <gui/LightApp_SelectionMgr.h>
+#include <gui/QtxComboBox.h>
+#include <gui/SALOME_ListIO.hxx>
+#include <gui/SUIT_Desktop.h>
+#include <gui/SUIT_MessageBox.h>
+#include <gui/SUIT_OverrideCursor.h>
+#include <gui/SUIT_ResourceMgr.h>
+#include <gui/SVTK_ViewModel.h>
+#include <gui/SVTK_ViewWindow.h>
+#include <gui/SalomeApp_Tools.h>
+#include <gui/SalomeApp_TypeFilter.h>
 
 // Qt includes
 #include <QAbstractButton>

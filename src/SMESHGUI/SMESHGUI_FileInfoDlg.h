@@ -26,7 +26,7 @@
 #ifndef SMESHGUI_FILEINFODLG_H
 #define SMESHGUI_FILEINFODLG_H
 
-#include <QtxDialog.h>
+#include <gui/QtxDialog.h>
 
 #include <SALOMEconfig.h>
 #include CORBA_CLIENT_HEADER(MED)

@@ -30,14 +30,14 @@
 #include "SMESH_SMESHGUI.hxx"
 
 #include "SMESHGUI_Utils.h"
-#include <SMESH_Object.h>
+#include "SMESH_Object.h"
 
 // SALOME KERNEL includes
-#include <SALOMEDSClient_definitions.hxx>
+#include <kernel/SALOMEDSClient_definitions.hxx>
 
 // SALOME GUI includes
-#include <SALOME_InteractiveObject.hxx>
-#include <VTKViewer_Filter.h>
+#include <gui/SALOME_InteractiveObject.hxx>
+#include <gui/VTKViewer_Filter.h>
 
 class TColStd_IndexedMapOfInteger;
 

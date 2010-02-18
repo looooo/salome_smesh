@@ -29,10 +29,10 @@
 #define SMESH_PREVIEW_ACTOR_COLLECTION_H
 
 #include "SMESH_Actor.h"
-#include <GEOM_Actor.h>
+#include <geom/GEOM_Actor.h>
 #include "SMESH_Object.h"
 #include <TopoDS_Shape.hxx>
-#include <SMDS_SetIterator.hxx>
+#include "SMDS_SetIterator.hxx"
 #include <TopAbs_ShapeEnum.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
 #include <QString>

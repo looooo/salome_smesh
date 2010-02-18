@@ -35,17 +35,17 @@
 #include <SMDS_MeshNode.hxx>
 
 // SALOME GUI includes
-#include <SUIT_SelectionFilter.h>
-#include <LightApp_SelectionMgr.h>
-#include <SalomeApp_Study.h>
-#include <SVTK_ViewWindow.h>
-#include <SVTK_ViewModel.h>
+#include <gui/SUIT_SelectionFilter.h>
+#include <gui/LightApp_SelectionMgr.h>
+#include <gui/SalomeApp_Study.h>
+#include <gui/SVTK_ViewWindow.h>
+#include <gui/SVTK_ViewModel.h>
 
-#include <SALOME_ListIO.hxx>
-#include <SALOME_ListIteratorOfListIO.hxx>
+#include <gui/SALOME_ListIO.hxx>
+#include <gui/SALOME_ListIteratorOfListIO.hxx>
 
 // SALOME KERNEL includes 
-#include <SALOMEDS_SObject.hxx>
+#include <kernel/SALOMEDS_SObject.hxx>
 
 /*
   Class       : SMESHGUI_SelectionOp

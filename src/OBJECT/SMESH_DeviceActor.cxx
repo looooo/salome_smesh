@@ -30,11 +30,11 @@
 #include "SMESH_ControlsDef.hxx"
 #include "SMESH_ActorUtils.h"
 #include "SMESH_FaceOrientationFilter.h"
-#include "VTKViewer_CellLocationsArray.h"
+#include <gui/VTKViewer_CellLocationsArray.h>
 
-#include <VTKViewer_Transform.h>
-#include <VTKViewer_TransformFilter.h>
-#include <VTKViewer_ExtractUnstructuredGrid.h>
+#include <gui/VTKViewer_Transform.h>
+#include <gui/VTKViewer_TransformFilter.h>
+#include <gui/VTKViewer_ExtractUnstructuredGrid.h>
 
 // VTK Includes
 #include <vtkObjectFactory.h>
@@ -62,7 +62,7 @@
 
 #include <vtkRenderer.h>
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 #ifdef _DEBUG_
 static int MYDEBUG = 0;

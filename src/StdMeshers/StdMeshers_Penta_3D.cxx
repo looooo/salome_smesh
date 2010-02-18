@@ -25,8 +25,8 @@
 //
 #include "StdMeshers_Penta_3D.hxx"
 
-#include "utilities.h"
-#include "Utils_ExceptHandlers.hxx"
+#include <kernel/utilities.h>
+#include <kernel/Utils_ExceptHandlers.hxx>
 
 #include "SMDS_EdgePosition.hxx"
 #include "SMDS_MeshElement.hxx"

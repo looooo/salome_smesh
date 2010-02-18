@@ -26,7 +26,7 @@
 #define STDMESHERSGUI_SUBSHAPESELECTORWDG_H
 
 // SMESH includes
-#include <SMESHGUI.h>
+#include "SMESHGUI.h"
 #include "SMESH_StdMeshersGUI.hxx"
 #include "SMESH_SMESHGUI.hxx"
 
@@ -35,7 +35,7 @@
 #include <QStringList>
 #include <TopoDS_Shape.hxx>
 
-#include <SMESHGUI_VTKUtils.h>
+#include "SMESHGUI_VTKUtils.h"
 
 class SMESHGUI;
 class LightApp_SelectionMgr;

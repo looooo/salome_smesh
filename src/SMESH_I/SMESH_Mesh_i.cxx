@@ -47,13 +47,13 @@
 #include "SMDS_EdgePosition.hxx"
 #include "SMDS_FacePosition.hxx"
 
-#include "OpUtil.hxx"
-#include "SALOME_NamingService.hxx"
-#include "Utils_CorbaException.hxx"
-#include "Utils_ExceptHandlers.hxx"
-#include "Utils_SINGLETON.hxx"
-#include "utilities.h"
-#include "GEOMImpl_Types.hxx"
+#include <kernel/OpUtil.hxx>
+#include <kernel/SALOME_NamingService.hxx>
+#include <kernel/Utils_CorbaException.hxx>
+#include <kernel/Utils_ExceptHandlers.hxx>
+#include <kernel/Utils_SINGLETON.hxx>
+#include <kernel/utilities.h>
+#include <geom/GEOMImpl_Types.hxx>
 
 // OCCT Includes
 #include <BRep_Builder.hxx>

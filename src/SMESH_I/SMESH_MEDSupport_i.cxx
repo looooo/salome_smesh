@@ -24,9 +24,9 @@
 //  Module : SMESH
 //
 #include "SMESH_MEDSupport_i.hxx"
-#include "utilities.h"
-#include "Utils_CorbaException.hxx"
-#include "Utils_ExceptHandlers.hxx"
+#include <kernel/utilities.h>
+#include <kernel/Utils_CorbaException.hxx>
+#include <kernel/Utils_ExceptHandlers.hxx>
 
 #include <TopoDS_Iterator.hxx>
 #include "SMESHDS_Mesh.hxx"

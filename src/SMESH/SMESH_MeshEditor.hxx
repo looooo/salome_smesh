@@ -36,7 +36,7 @@
 #include "SMESH_SequenceOfElemPtr.hxx"
 #include "SMESH_SequenceOfNode.hxx"
 
-#include <utilities.h>
+#include <kernel/utilities.h>
 
 #include <TColStd_HSequenceOfReal.hxx>
 #include <gp_Dir.hxx>

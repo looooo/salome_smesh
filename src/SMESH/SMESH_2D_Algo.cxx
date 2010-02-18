@@ -28,7 +28,7 @@
 #include "SMESH_2D_Algo.hxx"
 #include "SMESH_Gen.hxx"
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 #include <TopExp_Explorer.hxx>
 #include <TopExp.hxx>

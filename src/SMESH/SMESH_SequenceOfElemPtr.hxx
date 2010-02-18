@@ -30,7 +30,7 @@
 
 #include <NCollection_DefineSequence.hxx>
 
-#include <SMDS_MeshElement.hxx>
+#include "SMDS_MeshElement.hxx"
 
 typedef const SMDS_MeshElement* SMDS_MeshElementPtr;
 

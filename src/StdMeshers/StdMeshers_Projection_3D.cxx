@@ -43,7 +43,7 @@
 #include "SMESH_subMesh.hxx"
 #include "SMESH_subMeshEventListener.hxx"
 
-#include "utilities.h"
+#include <kernel/utilities.h>
 
 #include <TopExp.hxx>
 #include <TopExp_Explorer.hxx>

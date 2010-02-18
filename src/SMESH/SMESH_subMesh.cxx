@@ -37,8 +37,8 @@
 #include "SMDS_SetIterator.hxx"
 #include "SMDSAbs_ElementType.hxx"
 
-#include "utilities.h"
-#include "OpUtil.hxx"
+#include <kernel/utilities.h>
+#include <kernel/OpUtil.hxx>
 
 #include <BRep_Builder.hxx>
 #include <BRep_Tool.hxx>

@@ -24,8 +24,8 @@
 //  Module : SMESH
 //
 #include "SMESH_MEDFamily_i.hxx"
-#include "utilities.h"
-#include "Utils_CorbaException.hxx"
+#include <kernel/utilities.h>
+#include <kernel/Utils_CorbaException.hxx>
 
 using namespace std;
 

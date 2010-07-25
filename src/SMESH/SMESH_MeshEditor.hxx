@@ -627,6 +627,9 @@ public:
                             const TIDSortedElemSet& theNodesNot,
                             const TopoDS_Shape&     theShape );
   
+  bool DoubleNodesOnGroupBoundaries( const std::vector<TIDSortedElemSet>& theElems,
+                                     bool createJointElems);
+
   /*!
    * \brief Generated skin mesh (containing 2D cells) from 3D mesh
    * The created 2D mesh elements based on nodes of free faces of boundary volumes

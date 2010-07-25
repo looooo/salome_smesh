@@ -4766,3 +4766,51 @@ CORBA::Boolean SMESH_MeshEditor_i::Make2DMeshFrom3D()
   TPythonDump() << "isDone = " << this << ".Make2DMeshFrom3D()";
   return aResult;
 }
+
+//================================================================================
+/*!
+ * \brief Double nodes on shared faces between groups of volumes and create flat elements on demand.
+ * The list of groups must describe a partition of the mesh volumes.
+ * The nodes of the internal faces at the boundaries of the groups are doubled.
+ * In option, the internal faces are replaced by flat elements.
+ * Triangles are transformed in prisms, and quadrangles in hexahedrons.
+ * @param theDomains - list of groups of volumes
+ * @param createJointElems - if TRUE, create the elements
+ * @return TRUE if operation has been completed successfully, FALSE otherwise
+ */
+//================================================================================
+
+CORBA::Boolean SMESH_MeshEditor_i::DoubleNodesOnGroupBoundaries( const SMESH::ListOfGroups& theDomains,
+                                                                 CORBA::Boolean createJointElems )
+{
+  initData();
+
+  ::SMESH_MeshEditor aMeshEditor( myMesh );
+
+  SMESHDS_Mesh* aMeshDS = GetMeshDS();
+
+  vector<TIDSortedElemSet> domains;
+  domains.clear();
+
+  for ( int i = 0, n = theDomains.length(); i < n; i++ )
+  {
+    SMESH::SMESH_GroupBase_var aGrp = theDomains[ i ];
+    if ( !CORBA::is_nil( aGrp ) && ( aGrp->GetType() != SMESH::NODE ) )
+    {
+      TIDSortedElemSet domain;
+      domain.clear();
+      domains.push_back(domain);
+      SMESH::long_array_var anIDs = aGrp->GetIDs();
+      arrayToSet( anIDs, aMeshDS, domains[ i ], SMDSAbs_All );
+    }
+  }
+
+  bool aResult = aMeshEditor.DoubleNodesOnGroupBoundaries( domains, createJointElems );
+
+  storeResult( aMeshEditor) ;
+
+  // Update Python script
+  TPythonDump() << "isDone = " << this << ".DoubleNodesOnGroupBoundaries( " << &theDomains
+      << ", " << createJointElems << " )";
+  return aResult;
+}

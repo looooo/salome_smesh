@@ -66,7 +66,7 @@ public:
   static std::vector<SMDS_Mesh*> _meshList;
 
   //! actual nodes coordinates, cells definition and reverse connectivity are stored in a vtkUnstructuredGrid
-  inline vtkUnstructuredGrid* getGrid() {return myGrid; };
+  inline SMDS_UnstructuredGrid* getGrid() {return myGrid; };
   inline int getMeshId() {return myMeshId; };
 
   SMDS_NodeIteratorPtr nodesIterator(bool idInceasingOrder=false) const;
@@ -573,7 +573,6 @@ public:
   void incrementCellsCapacity(int nbCells);
   void adjustStructure();
   void dumpGrid(string ficdump="dumpGrid");
-
   static int chunkSize;
 
 protected:
@@ -608,8 +607,9 @@ protected:
   inline void adjustmyCellsCapacity(int ID)
   {
     assert(ID >= 0);
+    myElementIDFactory->adjustMaxId(ID);
     if (ID >= myCells.size())
-        myCells.resize(ID+SMDS_Mesh::chunkSize,0);
+      myCells.resize(ID+SMDS_Mesh::chunkSize,0);
   };
 
   // Fields PRIVATE

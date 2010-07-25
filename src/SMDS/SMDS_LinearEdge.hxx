@@ -43,6 +43,10 @@ public:
   {
     return SMDSEntity_Edge;
   }
+  virtual bool ChangeNodes(const SMDS_MeshNode* nodes[], const int nbNodes)
+  {
+    return false;
+  }
   int NbNodes() const;
   int NbEdges() const;
   friend bool operator<(const SMDS_LinearEdge& e1, const SMDS_LinearEdge& e2);

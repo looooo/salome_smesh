@@ -51,6 +51,7 @@ void SMDS_VtkFace::init(std::vector<vtkIdType> nodeIds, SMDS_Mesh* mesh)
 
 bool SMDS_VtkFace::ChangeNodes(const SMDS_MeshNode* nodes[], const int nbNodes)
 {
+  // TODO
   return true;
 }
 

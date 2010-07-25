@@ -61,7 +61,7 @@ void SMDS_VtkVolume::init(std::vector<vtkIdType> nodeIds, SMDS_Mesh* mesh)
 bool SMDS_VtkVolume::ChangeNodes(const SMDS_MeshNode* nodes[],
                                  const int nbNodes)
 {
-  // utilise dans SMDS_Mesh
+  // TODO utilise dans SMDS_Mesh
   return true;
 }
 

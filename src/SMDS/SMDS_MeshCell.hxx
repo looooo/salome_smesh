@@ -12,6 +12,9 @@ class SMDS_EXPORT SMDS_MeshCell: public SMDS_MeshElement
 public:
   SMDS_MeshCell();
   virtual ~SMDS_MeshCell();
+
+  virtual bool ChangeNodes(const SMDS_MeshNode* nodes[], const int nbNodes)= 0;
+
   inline void setVtkId(int vtkId)
   {
     myVtkID = vtkId;

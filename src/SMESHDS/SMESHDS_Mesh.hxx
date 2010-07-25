@@ -56,6 +56,7 @@
 #include "SMESHDS_DataMapOfShape.hxx"
 
 class SMESHDS_GroupBase;
+class DownIdType;
 
 class SMESHDS_EXPORT SMESHDS_Mesh:public SMDS_Mesh{
 public:
@@ -397,6 +398,8 @@ public:
   bool ChangePolyhedronNodes(const SMDS_MeshElement * elem,
                              std::vector<const SMDS_MeshNode*> nodes,
                              std::vector<int>                  quantities);
+  bool ModifyCellNodes(int smdsVolId, std::map<int,int> localClonedNodeIds);
+  bool extrudeVolumeFromFace(int smdsVolId, std::map<int,int> localClonedNodeIds);
   void Renumber (const bool isNodes, const int startID=1, const int deltaID=1);
 
   void SetNodeInVolume(SMDS_MeshNode * aNode, const TopoDS_Shell & S);
@@ -440,6 +443,7 @@ public:
   bool IsGroupOfSubShapes (const TopoDS_Shape& aSubShape) const;
 
   void compactMesh();
+  void BuildDownWardConnectivity(bool withEdges);
 
   ~SMESHDS_Mesh();
   

@@ -37,6 +37,13 @@ void SMDS_VtkEdge::init(std::vector<vtkIdType> nodeIds, SMDS_Mesh* mesh)
 bool SMDS_VtkEdge::ChangeNodes(const SMDS_MeshNode * node1,
                                const SMDS_MeshNode * node2)
 {
+  // TODO remove
+  return true;
+}
+
+bool SMDS_VtkEdge::ChangeNodes(const SMDS_MeshNode* nodes[], const int nbNodes)
+{
+  // TODO
   return true;
 }
 

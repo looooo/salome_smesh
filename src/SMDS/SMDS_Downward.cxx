@@ -265,6 +265,12 @@ const unsigned char* SMDS_Down1D::getUpTypes(int cellId)
   return &_upCellTypes[_upCellIndex[cellId]];
 }
 
+void SMDS_Down1D::getNodeIds(int cellId, std::set<int>& nodeSet)
+{
+  for (int i = 0; i < _nbDownCells; i++)
+    nodeSet.insert(_cellIds[_nbDownCells * cellId + i]);
+}
+
 int SMDS_Down1D::getNodeSet(int cellId, int* nodeSet)
 {
   for (int i = 0; i < _nbDownCells; i++)
@@ -479,6 +485,16 @@ const unsigned char* SMDS_Down2D::getUpTypes(int cellId)
 {
   //ASSERT((cellId >=0) && (cellId < _maxId));
   return &_upCellTypes[2 * cellId];
+}
+
+void SMDS_Down2D::getNodeIds(int cellId, std::set<int>& nodeSet)
+{
+  for (int i = 0; i < _nbDownCells; i++)
+    {
+      int downCellId = _cellIds[_nbDownCells * cellId + i];
+      unsigned char cellType = _cellTypes[i];
+      this->_grid->getDownArray(cellType)->getNodeIds(downCellId, nodeSet);
+    }
 }
 
 /*! Find in vtkUnstructuredGrid the volumes containing a face already stored in vtkUnstructuredGrid.
@@ -751,6 +767,16 @@ const int* SMDS_Down3D::getUpCells(int cellId)
 const unsigned char* SMDS_Down3D::getUpTypes(int cellId)
 {
   return 0;
+}
+
+void SMDS_Down3D::getNodeIds(int cellId, std::set<int>& nodeSet)
+{
+  int vtkId = this->_vtkCellIds[cellId];
+  vtkIdType npts = 0;
+  vtkIdType *nodes; // will refer to the point id's of the volume
+  _grid->GetCellPoints(vtkId, npts, nodes);
+  for (int i = 0; i < npts; i++)
+    nodeSet.insert(nodes[i]);
 }
 
 int SMDS_Down3D::FindFaceByNodes(int cellId, ElemByNodesType& faceByNodes)
@@ -1074,6 +1100,37 @@ SMDS_DownTetra::~SMDS_DownTetra()
 {
 }
 
+void SMDS_DownTetra::getOrderedNodesOfFace(int cellId, std::vector<int>& orderedNodes)
+{
+  set<int> setNodes;
+  setNodes.clear();
+  for (int i = 0; i < orderedNodes.size(); i++)
+    setNodes.insert(orderedNodes[i]);
+  //MESSAGE("cellId = " << cellId);
+
+  vtkIdType npts = 0;
+  vtkIdType *nodes; // will refer to the point id's of the volume
+  _grid->GetCellPoints(this->_vtkCellIds[cellId], npts, nodes);
+
+  set<int> tofind;
+  int ids[12] = { 0, 1, 2, 0, 1, 3, 0, 2, 3, 1, 2, 3 };
+  for (int k = 0; k < 4; k++)
+    {
+      tofind.clear();
+      for (int i = 0; i < 3; i++)
+        tofind.insert(nodes[ids[3 * k + i]]);
+      if (setNodes == tofind)
+        {
+          for (int i = 0; i < 3; i++)
+            orderedNodes[i] = nodes[ids[3 * k + i]];
+          return;
+        }
+    }
+  MESSAGE("=== Problem volume " << _vtkCellIds[cellId] << " " << _grid->_mesh->fromVtkToSmds(_vtkCellIds[cellId]));
+  MESSAGE(orderedNodes[0] << " " << orderedNodes[1] << " " << orderedNodes[2]);
+  MESSAGE(nodes[0] << " " << nodes[1] << " " << nodes[2] << " " << nodes[3]);
+}
+
 void SMDS_DownTetra::addDownCell(int cellId, int lowCellId, unsigned char aType)
 {
   //ASSERT((cellId >=0)&& (cellId < _maxId));
@@ -1148,6 +1205,11 @@ SMDS_DownQuadTetra::SMDS_DownQuadTetra(SMDS_UnstructuredGrid *grid) :
 
 SMDS_DownQuadTetra::~SMDS_DownQuadTetra()
 {
+}
+
+void SMDS_DownQuadTetra::getOrderedNodesOfFace(int cellId, std::vector<int>& orderedNodes)
+{
+  // TODO
 }
 
 void SMDS_DownQuadTetra::addDownCell(int cellId, int lowCellId, unsigned char aType)
@@ -1239,6 +1301,11 @@ SMDS_DownPyramid::SMDS_DownPyramid(SMDS_UnstructuredGrid *grid) :
 
 SMDS_DownPyramid::~SMDS_DownPyramid()
 {
+}
+
+void SMDS_DownPyramid::getOrderedNodesOfFace(int cellId, std::vector<int>& orderedNodes)
+{
+  // TODO
 }
 
 void SMDS_DownPyramid::addDownCell(int cellId, int lowCellId, unsigned char aType)
@@ -1338,6 +1405,11 @@ SMDS_DownQuadPyramid::SMDS_DownQuadPyramid(SMDS_UnstructuredGrid *grid) :
 
 SMDS_DownQuadPyramid::~SMDS_DownQuadPyramid()
 {
+}
+
+void SMDS_DownQuadPyramid::getOrderedNodesOfFace(int cellId, std::vector<int>& orderedNodes)
+{
+  // TODO
 }
 
 void SMDS_DownQuadPyramid::addDownCell(int cellId, int lowCellId, unsigned char aType)
@@ -1456,6 +1528,11 @@ SMDS_DownPenta::~SMDS_DownPenta()
 {
 }
 
+void SMDS_DownPenta::getOrderedNodesOfFace(int cellId, std::vector<int>& orderedNodes)
+{
+  // TODO
+}
+
 void SMDS_DownPenta::addDownCell(int cellId, int lowCellId, unsigned char aType)
 {
   //ASSERT((cellId >=0) && (cellId < _maxId));
@@ -1557,6 +1634,11 @@ SMDS_DownQuadPenta::SMDS_DownQuadPenta(SMDS_UnstructuredGrid *grid) :
 
 SMDS_DownQuadPenta::~SMDS_DownQuadPenta()
 {
+}
+
+void SMDS_DownQuadPenta::getOrderedNodesOfFace(int cellId, std::vector<int>& orderedNodes)
+{
+  // TODO
 }
 
 void SMDS_DownQuadPenta::addDownCell(int cellId, int lowCellId, unsigned char aType)
@@ -1682,6 +1764,11 @@ SMDS_DownHexa::~SMDS_DownHexa()
 {
 }
 
+void SMDS_DownHexa::getOrderedNodesOfFace(int cellId, std::vector<int>& orderedNodes)
+{
+  // TODO
+}
+
 void SMDS_DownHexa::addDownCell(int cellId, int lowCellId, unsigned char aType)
 {
   //ASSERT((cellId >=0)&& (cellId < _maxId));
@@ -1778,6 +1865,11 @@ SMDS_DownQuadHexa::SMDS_DownQuadHexa(SMDS_UnstructuredGrid *grid) :
 
 SMDS_DownQuadHexa::~SMDS_DownQuadHexa()
 {
+}
+
+void SMDS_DownQuadHexa::getOrderedNodesOfFace(int cellId, std::vector<int>& orderedNodes)
+{
+  // TODO
 }
 
 void SMDS_DownQuadHexa::addDownCell(int cellId, int lowCellId, unsigned char aType)

@@ -111,3 +111,4 @@ void SMDS_MeshIDFactory::emptyPool(int maxId)
 	myMaxID = maxId-1;
 	myPoolOfID.clear();
 }
+

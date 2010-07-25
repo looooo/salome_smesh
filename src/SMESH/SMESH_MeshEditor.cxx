@@ -36,6 +36,7 @@
 #include "SMDS_QuadraticFaceOfNodes.hxx"
 #include "SMDS_MeshGroup.hxx"
 #include "SMDS_LinearEdge.hxx"
+#include "SMDS_Downward.hxx"
 
 #include "SMESHDS_Group.hxx"
 #include "SMESHDS_Mesh.hxx"
@@ -798,7 +799,7 @@ bool SMESH_MeshEditor::DeleteDiag (const SMDS_MeshNode * theNode1,
       return false;
 
     //MESSAGE( endl << tr1 << tr2 );
-
+    // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
     GetMeshDS()->ChangeElementNodes( tr1, aNodes, 4 );
     myLastCreatedElems.Append(tr1);
     GetMeshDS()->RemoveElement( tr2 );
@@ -844,6 +845,7 @@ bool SMESH_MeshEditor::DeleteDiag (const SMDS_MeshNode * theNode1,
   aNodes[6] = N2[3];
   aNodes[7] = N1[5];
 
+  // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
   GetMeshDS()->ChangeElementNodes( tr1, aNodes, 8 );
   myLastCreatedElems.Append(tr1);
   GetMeshDS()->RemoveElement( tr2 );
@@ -1017,11 +1019,13 @@ bool SMESH_MeshEditor::QuadToTri (TIDSortedElemSet &                   theElems,
 
       if ( aBadRate1 <= aBadRate2 ) {
         // tr1 + tr2 is better
+        // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
         aMesh->ChangeElementNodes( elem, aNodes, 3 );
         newElem = aMesh->AddFace( aNodes[2], aNodes[3], aNodes[0] );
       }
       else {
         // tr3 + tr4 is better
+        // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
         aMesh->ChangeElementNodes( elem, &aNodes[1], 3 );
         newElem = aMesh->AddFace( aNodes[3], aNodes[0], aNodes[1] );
       }
@@ -1097,6 +1101,7 @@ bool SMESH_MeshEditor::QuadToTri (TIDSortedElemSet &                   theElems,
         newElem = aMesh->AddFace(aNodes[3], aNodes[0], aNodes[1],
                                  aNodes[7], aNodes[4], newN );
       }
+      // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
       aMesh->ChangeElementNodes( elem, N, 6 );
 
     } // quadratic case
@@ -1729,10 +1734,12 @@ bool SMESH_MeshEditor::QuadToTri (TIDSortedElemSet & theElems,
       int aShapeId = FindShape( elem );
       const SMDS_MeshElement* newElem = 0;
       if ( the13Diag ) {
+        // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
         aMesh->ChangeElementNodes( elem, aNodes, 3 );
         newElem = aMesh->AddFace( aNodes[2], aNodes[3], aNodes[0] );
       }
       else {
+        // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
         aMesh->ChangeElementNodes( elem, &aNodes[1], 3 );
         newElem = aMesh->AddFace( aNodes[3], aNodes[0], aNodes[1] );
       }
@@ -1818,6 +1825,7 @@ bool SMESH_MeshEditor::QuadToTri (TIDSortedElemSet & theElems,
                                  aNodes[7], aNodes[4], newN );
       }
       myLastCreatedElems.Append(newElem);
+      // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
       aMesh->ChangeElementNodes( elem, N, 6 );
       // put a new triangle on the same shape and add to the same groups
       if ( aShapeId )
@@ -2119,11 +2127,13 @@ bool SMESH_MeshEditor::TriToQuad (TIDSortedElemSet &                   theElems,
           mapLi_listEl.erase( *link12 );
           if(tr1->NbNodes()==3) {
             if( tr1->GetID() < tr2->GetID() ) {
+              // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
               aMesh->ChangeElementNodes( tr1, n12, 4 );
               myLastCreatedElems.Append(tr1);
               aMesh->RemoveElement( tr2 );
             }
             else {
+              // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
               aMesh->ChangeElementNodes( tr2, n12, 4 );
               myLastCreatedElems.Append(tr2);
               aMesh->RemoveElement( tr1);
@@ -2146,11 +2156,13 @@ bool SMESH_MeshEditor::TriToQuad (TIDSortedElemSet &                   theElems,
             aNodes[6] = N2[3];
             aNodes[7] = N1[5];
             if( tr1->GetID() < tr2->GetID() ) {
+              // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
               GetMeshDS()->ChangeElementNodes( tr1, aNodes, 8 );
               myLastCreatedElems.Append(tr1);
               GetMeshDS()->RemoveElement( tr2 );
             }
             else {
+              // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
               GetMeshDS()->ChangeElementNodes( tr2, aNodes, 8 );
               myLastCreatedElems.Append(tr2);
               GetMeshDS()->RemoveElement( tr1 );
@@ -2164,11 +2176,13 @@ bool SMESH_MeshEditor::TriToQuad (TIDSortedElemSet &                   theElems,
           mapLi_listEl.erase( *link13 );
           if(tr1->NbNodes()==3) {
             if( tr1->GetID() < tr2->GetID() ) {
+              // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
               aMesh->ChangeElementNodes( tr1, n13, 4 );
               myLastCreatedElems.Append(tr1);
               aMesh->RemoveElement( tr3 );
             }
             else {
+              // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
               aMesh->ChangeElementNodes( tr3, n13, 4 );
               myLastCreatedElems.Append(tr3);
               aMesh->RemoveElement( tr1 );
@@ -2191,11 +2205,13 @@ bool SMESH_MeshEditor::TriToQuad (TIDSortedElemSet &                   theElems,
             aNodes[6] = N2[3];
             aNodes[7] = N1[5];
             if( tr1->GetID() < tr2->GetID() ) {
+              // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
               GetMeshDS()->ChangeElementNodes( tr1, aNodes, 8 );
               myLastCreatedElems.Append(tr1);
               GetMeshDS()->RemoveElement( tr3 );
             }
             else {
+              // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
               GetMeshDS()->ChangeElementNodes( tr3, aNodes, 8 );
               myLastCreatedElems.Append(tr3);
               GetMeshDS()->RemoveElement( tr1 );
@@ -3872,6 +3888,7 @@ void SMESH_MeshEditor::makeWalls (TNodeOfNodeListMap &     mapNewNodes,
               if ( !f )
                 myLastCreatedElems.Append(aMesh->AddFace( nodes[ 0 ], nodes[ 1 ], nodes[ 2 ] ));
               else if ( nodes[ 1 ] != f->GetNodeWrap( f->GetNodeIndex( nodes[ 0 ] ) + 1 ))
+                // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
                 aMesh->ChangeElementNodes( f, nodes, nbn );
               break;
             }
@@ -3880,6 +3897,7 @@ void SMESH_MeshEditor::makeWalls (TNodeOfNodeListMap &     mapNewNodes,
               if ( !f )
                 myLastCreatedElems.Append(aMesh->AddFace( nodes[ 0 ], nodes[ 1 ], nodes[ 2 ], nodes[ 3 ] ));
               else if ( nodes[ 1 ] != f->GetNodeWrap( f->GetNodeIndex( nodes[ 0 ] ) + 1 ))
+                // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
                 aMesh->ChangeElementNodes( f, nodes, nbn );
               break;
             }
@@ -3900,6 +3918,7 @@ void SMESH_MeshEditor::makeWalls (TNodeOfNodeListMap &     mapNewNodes,
                     tmpnodes[3] = nodes[1];
                     tmpnodes[4] = nodes[3];
                     tmpnodes[5] = nodes[5];
+                    // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
                     aMesh->ChangeElementNodes( f, tmpnodes, nbn );
                   }
                 }
@@ -3920,6 +3939,7 @@ void SMESH_MeshEditor::makeWalls (TNodeOfNodeListMap &     mapNewNodes,
                     tmpnodes[5] = nodes[3];
                     tmpnodes[6] = nodes[5];
                     tmpnodes[7] = nodes[7];
+                    // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
                     aMesh->ChangeElementNodes( f, tmpnodes, nbn );
                   }
                 }
@@ -3930,6 +3950,7 @@ void SMESH_MeshEditor::makeWalls (TNodeOfNodeListMap &     mapNewNodes,
                 if ( !f )
                   myLastCreatedElems.Append(aMesh->AddPolygonalFace(polygon_nodes));
                 else if ( nodes[ 1 ] != f->GetNodeWrap( f->GetNodeIndex( nodes[ 0 ] ) + 1 ))
+                  // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
                   aMesh->ChangeElementNodes( f, nodes, nbn );
               }
             }
@@ -8645,6 +8666,7 @@ void SMESH_MeshEditor::InsertNodesIntoLink(const SMDS_MeshElement*     theFace,
     newNodes[ 1 ] = linkNodes[ i2 ];
     newNodes[ 2 ] = nodes[ iSplit >= iBestQuad ? i3 : i4 ];
     newNodes[ 3 ] = nodes[ i4 ];
+    // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
     aMesh->ChangeElementNodes( theFace, newNodes, iSplit == iBestQuad ? 4 : 3 );
   } // end if(!theFace->IsQuadratic())
   else { // theFace is quadratic
@@ -9740,6 +9762,7 @@ SMESH_MeshEditor::SewSideElements (TIDSortedElemSet&    theSide1,
         //         elemIDsToRemove.push_back( e->GetID() );
         //       else
         if ( nbReplaced )
+          // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
           aMesh->ChangeElementNodes( e, & nodes[0], nbNodes );
       }
     }
@@ -10232,6 +10255,192 @@ bool SMESH_MeshEditor::DoubleNodesInRegion( const TIDSortedElemSet& theElems,
     }
   }
   return DoubleNodes( theElems, theNodesNot, anAffected );
+}
+
+/*!
+ * \brief Double nodes on shared faces between groups of volumes and create flat elements on demand.
+ * The list of groups must describe a partition of the mesh volumes.
+ * The nodes of the internal faces at the boundaries of the groups are doubled.
+ * In option, the internal faces are replaced by flat elements.
+ * Triangles are transformed in prisms, and quadrangles in hexahedrons.
+ * @param theElems - list of groups of volumes, where a group of volume is a set of
+ * SMDS_MeshElements sorted by Id.
+ * @param createJointElems - if TRUE, create the elements
+ * @return TRUE if operation has been completed successfully, FALSE otherwise
+ */
+bool SMESH_MeshEditor::DoubleNodesOnGroupBoundaries( const std::vector<TIDSortedElemSet>& theElems,
+                                                     bool createJointElems)
+{
+  MESSAGE("------------------------------------------------------");
+  MESSAGE("SMESH_MeshEditor::CreateJointElementsOnGroupBoundaries");
+  MESSAGE("------------------------------------------------------");
+
+  SMESHDS_Mesh *meshDS = this->myMesh->GetMeshDS();
+  meshDS->BuildDownWardConnectivity(false);
+  SMDS_UnstructuredGrid *grid = meshDS->getGrid();
+
+  // --- build the list of faces shared by 2 domains (group of elements), with their domain and volume indexes
+  //     build the list of nodes shared by 2 or more domains, with their domain indexes
+
+  std::map<DownIdType, std::map<int,int>, DownIdCompare> faceDomains; // 2x(id domain --> id volume)
+  std::map<int, std::map<int,int> > nodeDomains; //oldId ->  (domainId -> newId)
+  faceDomains.clear();
+  nodeDomains.clear();
+  std::map<int,int> emptyMap;
+  emptyMap.clear();
+
+  for (int idom = 0; idom < theElems.size(); idom++)
+    {
+
+      // --- build a map (face to duplicate --> volume to modify)
+      //     with all the faces shared by 2 domains (group of elements)
+      //     and corresponding volume of this domain, for each shared face.
+      //     a volume has a face shared by 2 domains if it has a neighbor which is not in is domain.
+
+      const TIDSortedElemSet& domain = theElems[idom];
+      TIDSortedElemSet::const_iterator elemItr = domain.begin();
+      for (; elemItr != domain.end(); ++elemItr)
+        {
+          SMDS_MeshElement* anElem = (SMDS_MeshElement*) *elemItr;
+          if (!anElem)
+            continue;
+          int vtkId = meshDS->fromSmdsToVtk(anElem->getId());
+          int neighborsVtkIds[NBMAXNEIGHBORS];
+          int downIds[NBMAXNEIGHBORS];
+          unsigned char downTypes[NBMAXNEIGHBORS];
+          int nbNeighbors = grid->GetNeighbors(neighborsVtkIds, downIds, downTypes, vtkId);
+          for (int n = 0; n < nbNeighbors; n++)
+            {
+              int smdsId = meshDS->fromVtkToSmds(neighborsVtkIds[n]);
+              const SMDS_MeshElement* elem = meshDS->FindElement(smdsId);
+              if (! domain.count(elem)) // neighbor is in another domain : face is shared
+                {
+                  DownIdType face(downIds[n], downTypes[n]);
+                  if (!faceDomains.count(face))
+                    faceDomains[face] = emptyMap; // create an empty entry for face
+                  if (!faceDomains[face].count(idom))
+                    {
+                      faceDomains[face][idom] = vtkId; // volume associated to face in this domain
+                    }
+                }
+            }
+        }
+    }
+
+  MESSAGE("Number of shared faces " << faceDomains.size());
+
+  // --- for each shared face, get the nodes
+  //     for each node, for each domain of the face, create a clone of the node
+
+  std::map<DownIdType, std::map<int,int>, DownIdCompare>::iterator itface = faceDomains.begin();
+  for( ; itface != faceDomains.end();++itface )
+    {
+      DownIdType face = itface->first;
+      std::map<int,int> domvol = itface->second;
+      std::set<int> oldNodes;
+      oldNodes.clear();
+      grid->GetNodeIds(oldNodes, face.cellId, face.cellType);
+      std::set<int>::iterator itn = oldNodes.begin();
+      for (;itn != oldNodes.end(); ++itn)
+        {
+          int oldId = *itn;
+          if (!nodeDomains.count(oldId))
+            nodeDomains[oldId] = emptyMap; // create an empty entry for node
+          std::map<int,int>::iterator itdom = domvol.begin();
+          for(; itdom != domvol.end(); ++itdom)
+            {
+              int idom = itdom->first;
+              if ( nodeDomains[oldId].empty() )
+                nodeDomains[oldId][idom] = oldId; // keep the old node in the first domain
+              else
+                {
+                  double *coords = grid->GetPoint(oldId);
+                  SMDS_MeshNode *newNode = meshDS->AddNode(coords[0], coords[1], coords[2]);
+                  int newId = newNode->GetID();
+                  nodeDomains[oldId][idom] = newId; // cloned node for other domains
+                }
+            }
+        }
+    }
+
+  // --- iterate on shared faces (volumes to modify, face to extrude)
+  //     get node id's of the face (id SMDS = id VTK)
+  //     create flat element with old and new nodes if requested
+
+  if (createJointElems)
+    {
+      itface = faceDomains.begin();
+      for( ; itface != faceDomains.end();++itface )
+        {
+          DownIdType face = itface->first;
+          std::set<int> oldNodes;
+          std::set<int>::iterator itn;
+          oldNodes.clear();
+          grid->GetNodeIds(oldNodes, face.cellId, face.cellType);
+          std::map<int,int> localClonedNodeIds;
+
+          std::map<int,int> domvol = itface->second;
+          std::map<int,int>::iterator itdom = domvol.begin();
+          int dom1 = itdom->first;
+          int vtkVolId = itdom->second;
+          itdom++;
+          int dom2 = itdom->first;
+
+          localClonedNodeIds.clear();
+          for (itn = oldNodes.begin(); itn != oldNodes.end(); ++itn)
+            {
+              int oldId = *itn;
+              int refid = oldId;
+              if (nodeDomains[oldId].count(dom1))
+                refid = nodeDomains[oldId][dom1];
+              else
+                MESSAGE("--- problem domain node " << dom1 << " " << oldId);
+              int newid = oldId;
+              if (nodeDomains[oldId].count(dom2))
+                newid = nodeDomains[oldId][dom2];
+              else
+                MESSAGE("--- problem domain node " << dom2 << " " << oldId);
+              localClonedNodeIds[oldId] = newid;
+            }
+          int smdsId = meshDS->fromVtkToSmds(vtkVolId);
+          meshDS->extrudeVolumeFromFace(smdsId, localClonedNodeIds);
+        }
+    }
+
+  // --- iterate on shared faces (volumes to modify, face to extrude)
+  //     get node id's of the face (id SMDS = id VTK)
+  //     replace old nodes by new nodes in volumes, and update inverse connectivity
+
+  itface = faceDomains.begin();
+  for( ; itface != faceDomains.end();++itface )
+    {
+      DownIdType face = itface->first;
+      std::set<int> oldNodes;
+      std::set<int>::iterator itn;
+      oldNodes.clear();
+      grid->GetNodeIds(oldNodes, face.cellId, face.cellType);
+      std::map<int,int> localClonedNodeIds;
+
+      std::map<int,int> domvol = itface->second;
+      std::map<int,int>::iterator itdom = domvol.begin();
+      for(; itdom != domvol.end(); ++itdom)
+        {
+          int idom = itdom->first;
+          int vtkVolId = itdom->second;
+          localClonedNodeIds.clear();
+          for (itn = oldNodes.begin(); itn != oldNodes.end(); ++itn)
+            {
+              int oldId = *itn;
+              if (nodeDomains[oldId].count(idom))
+                localClonedNodeIds[oldId] = nodeDomains[oldId][idom];
+            }
+          int smdsId = meshDS->fromVtkToSmds(vtkVolId);
+          meshDS->ModifyCellNodes(smdsId, localClonedNodeIds);
+        }
+    }
+  grid->BuildLinks();
+
+  // TODO replace also old nodes by new nodes in faces and edges
 }
 
 //================================================================================

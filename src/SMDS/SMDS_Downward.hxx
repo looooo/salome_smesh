@@ -26,6 +26,28 @@ typedef struct
   int nbElems;
 } ListElemByNodesType; // TODO resize for polyhedrons
 
+class DownIdType
+{
+public:
+  DownIdType(int a, unsigned char b) :
+    cellId(a), cellType(b)
+  {
+  }
+  int cellId;
+  unsigned char cellType;
+};
+
+struct DownIdCompare
+{
+  bool operator ()(const DownIdType e1, const DownIdType e2) const
+  {
+    if (e1.cellId == e2.cellId)
+      return (e1.cellType < e2.cellType);
+    else
+      return (e1.cellId < e2.cellId);
+  }
+};
+
 class SMDS_Downward
 {
   friend class SMDS_UnstructuredGrid;
@@ -38,6 +60,7 @@ public:
   virtual int getNumberOfUpCells(int cellId) = 0;
   virtual const int* getUpCells(int cellId) = 0;
   virtual const unsigned char* getUpTypes(int cellId) = 0;
+  virtual void getNodeIds(int cellId, std::set<int>& nodeSet) = 0;
   int getVtkCellId(int cellId)
   {
     return _vtkCellIds[cellId];
@@ -75,6 +98,7 @@ public:
   virtual int getNumberOfUpCells(int cellId);
   virtual const int* getUpCells(int cellId);
   virtual const unsigned char* getUpTypes(int cellId);
+  virtual void getNodeIds(int cellId, std::set<int>& nodeSet);
 protected:
   SMDS_Down1D(SMDS_UnstructuredGrid *grid, int nbDownCells);
   ~SMDS_Down1D();
@@ -105,6 +129,7 @@ public:
   virtual int getNumberOfUpCells(int cellId);
   virtual const int* getUpCells(int cellId);
   virtual const unsigned char* getUpTypes(int cellId);
+  virtual void getNodeIds(int cellId, std::set<int>& nodeSet);
 protected:
   SMDS_Down2D(SMDS_UnstructuredGrid *grid, int nbDownCells);
   ~SMDS_Down2D();
@@ -134,6 +159,8 @@ public:
   virtual int getNumberOfUpCells(int cellId);
   virtual const int* getUpCells(int cellId);
   virtual const unsigned char* getUpTypes(int cellId);
+  virtual void getNodeIds(int cellId, std::set<int>& nodeSet);
+  virtual void getOrderedNodesOfFace(int cellId, std::vector<int>& orderedNodes) = 0;
 protected:
   SMDS_Down3D(SMDS_UnstructuredGrid *grid, int nbDownCells);
   ~SMDS_Down3D();
@@ -225,6 +252,7 @@ class SMDS_DownTetra: public SMDS_Down3D
 {
   friend class SMDS_UnstructuredGrid;
 public:
+  virtual void getOrderedNodesOfFace(int cellId, std::vector<int>& orderedNodes);
 protected:
   SMDS_DownTetra(SMDS_UnstructuredGrid *grid);
   ~SMDS_DownTetra();
@@ -236,6 +264,7 @@ class SMDS_DownQuadTetra: public SMDS_Down3D
 {
   friend class SMDS_UnstructuredGrid;
 public:
+  virtual void getOrderedNodesOfFace(int cellId, std::vector<int>& orderedNodes);
 protected:
   SMDS_DownQuadTetra(SMDS_UnstructuredGrid *grid);
   ~SMDS_DownQuadTetra();
@@ -247,6 +276,7 @@ class SMDS_DownPyramid: public SMDS_Down3D
 {
   friend class SMDS_UnstructuredGrid;
 public:
+  virtual void getOrderedNodesOfFace(int cellId, std::vector<int>& orderedNodes);
 protected:
   SMDS_DownPyramid(SMDS_UnstructuredGrid *grid);
   ~SMDS_DownPyramid();
@@ -258,6 +288,7 @@ class SMDS_DownQuadPyramid: public SMDS_Down3D
 {
   friend class SMDS_UnstructuredGrid;
 public:
+  virtual void getOrderedNodesOfFace(int cellId, std::vector<int>& orderedNodes);
 protected:
   SMDS_DownQuadPyramid(SMDS_UnstructuredGrid *grid);
   ~SMDS_DownQuadPyramid();
@@ -267,18 +298,21 @@ protected:
 
 class SMDS_DownPenta: public SMDS_Down3D
 {
+  friend class SMDS_UnstructuredGrid;
 public:
+  virtual void getOrderedNodesOfFace(int cellId, std::vector<int>& orderedNodes);
+protected:
   SMDS_DownPenta(SMDS_UnstructuredGrid *grid);
   ~SMDS_DownPenta();
   virtual void addDownCell(int cellId, int lowCellId, unsigned char aType);
   virtual void computeFacesWithNodes(int cellId, ListElemByNodesType& facesWithNodes);
-protected:
 };
 
 class SMDS_DownQuadPenta: public SMDS_Down3D
 {
   friend class SMDS_UnstructuredGrid;
 public:
+  virtual void getOrderedNodesOfFace(int cellId, std::vector<int>& orderedNodes);
 protected:
   SMDS_DownQuadPenta(SMDS_UnstructuredGrid *grid);
   ~SMDS_DownQuadPenta();
@@ -290,6 +324,7 @@ class SMDS_DownHexa: public SMDS_Down3D
 {
   friend class SMDS_UnstructuredGrid;
 public:
+  virtual void getOrderedNodesOfFace(int cellId, std::vector<int>& orderedNodes);
 protected:
   SMDS_DownHexa(SMDS_UnstructuredGrid *grid);
   ~SMDS_DownHexa();
@@ -301,6 +336,7 @@ class SMDS_DownQuadHexa: public SMDS_Down3D
 {
   friend class SMDS_UnstructuredGrid;
 public:
+  virtual void getOrderedNodesOfFace(int cellId, std::vector<int>& orderedNodes);
 protected:
   SMDS_DownQuadHexa(SMDS_UnstructuredGrid *grid);
   ~SMDS_DownQuadHexa();

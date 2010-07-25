@@ -16,6 +16,7 @@ public:
   ~SMDS_VtkEdge();
   void init(std::vector<vtkIdType> nodeIds, SMDS_Mesh* mesh);
   bool ChangeNodes(const SMDS_MeshNode * node1, const SMDS_MeshNode * node2);
+  virtual bool ChangeNodes(const SMDS_MeshNode* nodes[], const int nbNodes);
 
   void Print(std::ostream & OS) const;
   int NbNodes() const;

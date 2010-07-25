@@ -303,9 +303,10 @@ void SMDS_UnstructuredGrid::setCellIdToDownId(int vtkCellId, int downId)
  *  Downward connectivity is no more valid if vtkUnstructuredGrid is modified.
  *
  */
-void SMDS_UnstructuredGrid::BuildDownwardConnectivity()
+void SMDS_UnstructuredGrid::BuildDownwardConnectivity(bool withEdges)
 {
   MESSAGE("SMDS_UnstructuredGrid::BuildDownwardConnectivity");CHRONO(2);
+  // TODO calcul partiel sans edges
 
   // --- erase previous data if any
 
@@ -665,3 +666,107 @@ void SMDS_UnstructuredGrid::BuildDownwardConnectivity()
     }CHRONOSTOP(24);CHRONOSTOP(2);
   _counters->stats();
 }
+
+/*! Get the neighbors of a cell.
+ * Only the neighbors having the dimension of the cell are taken into account
+ * (neighbors of a volume are the volumes sharing a face with this volume,
+ *  neighbors of a face are the faces sharing an edge with this face...).
+ * @param neighborsVtkIds vector of neighbors vtk id's to fill (reserve enough space).
+ * @param downIds downward id's of cells of dimension n-1, to fill (reserve enough space).
+ * @param downTypes vtk types of cells of dimension n-1, to fill (reserve enough space).
+ * @param vtkId the vtk id of the cell
+ * @return number of neighbors
+ */
+int SMDS_UnstructuredGrid::GetNeighbors(int* neighborsVtkIds, int* downIds, unsigned char* downTypes, int vtkId)
+{
+  int vtkType = this->GetCellType(vtkId);
+  int cellDim = SMDS_Downward::getCellDimension(vtkType);
+  if (cellDim != 3)
+    return 0; // TODO voisins des faces ou edges
+  int cellId = this->_cellIdToDownId[vtkId];
+
+  int nbCells = _downArray[vtkType]->getNumberOfDownCells(cellId);
+  const int *downCells = _downArray[vtkType]->getDownCells(cellId);
+  const unsigned char* downTyp = _downArray[vtkType]->getDownTypes(cellId);
+
+  // --- iteration on faces of the 3D cell.
+
+  int nb = 0;
+  for (int i = 0; i < nbCells; i++)
+    {
+      int downId = downCells[i];
+      int cellType = downTyp[i];
+      int nbUp = _downArray[cellType]->getNumberOfUpCells(downId);
+      const int *upCells = _downArray[cellType]->getUpCells(downId);
+      const unsigned char* upTypes = _downArray[cellType]->getUpTypes(downId);
+
+      // --- max 2 upCells, one is this cell, the other is a neighbor
+
+      for (int j = 0; j < nbUp; j++)
+        {
+          if ((upCells[j] == cellId) && (upTypes[j] == vtkType))
+            continue;
+          int vtkNeighbor = _downArray[upTypes[j]]->getVtkCellId(upCells[j]);
+          neighborsVtkIds[nb] = vtkNeighbor;
+          downIds[nb] = downId;
+          downTypes[nb] = cellType;
+          nb++;
+        }
+      if (nb >= NBMAXNEIGHBORS)
+        assert(0);
+    }
+  return nb;
+}
+
+/*! get the node id's of a cell.
+ * The cell is defined by it's downward connectivity id and type.
+ * @param nodeSet set of of vtk node id's to fill.
+ * @param downId downward connectivity id of the cell.
+ * @param downType type of cell.
+ */
+void SMDS_UnstructuredGrid::GetNodeIds(std::set<int>& nodeSet, int downId, unsigned char downType)
+{
+  _downArray[downType]->getNodeIds(downId, nodeSet);
+}
+
+/*! change some nodes in cell without modifying type or internal connectivity.
+ * Nodes inverse connectivity is maintained up to date.
+ * @param vtkVolId vtk id of the cell
+ * @param localClonedNodeIds map old node id to new node id.
+ */
+void SMDS_UnstructuredGrid::ModifyCellNodes(int vtkVolId, std::map<int, int> localClonedNodeIds)
+{
+  vtkIdType npts = 0;
+  vtkIdType *pts; // will refer to the point id's of the face
+  this->GetCellPoints(vtkVolId, npts, pts);
+  for (int i = 0; i < npts; i++)
+    {
+      if (localClonedNodeIds.count(pts[i]))
+        {
+          vtkIdType oldpt = pts[i];
+          pts[i] = localClonedNodeIds[oldpt];
+          //MESSAGE(oldpt << " --> " << pts[i]);
+          //this->RemoveReferenceToCell(oldpt, vtkVolId);
+          //this->AddReferenceToCell(pts[i], vtkVolId);
+        }
+    }
+}
+
+/*! Create a volume (prism or hexahedron) by duplication of a face.
+ * the nodes of the new face are already created.
+ * @param vtkVolId vtk id of a volume containing the face, to get an orientation for the face.
+ * @param localClonedNodeIds map old node id to new node id.
+ * @return vtk id of the new volume.
+ */
+int SMDS_UnstructuredGrid::getOrderedNodesOfFace(int vtkVolId, std::vector<int>& orderedNodes)
+{
+  int vtkType = this->GetCellType(vtkVolId);
+  int cellDim = SMDS_Downward::getCellDimension(vtkType);
+  if (cellDim != 3)
+    return 0;
+  SMDS_Down3D *downvol = static_cast<SMDS_Down3D*> (_downArray[vtkType]);
+  int downVolId = this->_cellIdToDownId[vtkVolId];
+  downvol->getOrderedNodesOfFace(downVolId, orderedNodes);
+  return orderedNodes.size();
+}
+

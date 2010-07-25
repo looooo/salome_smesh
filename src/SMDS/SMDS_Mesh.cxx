@@ -209,6 +209,7 @@ SMDS_MeshNode * SMDS_Mesh::AddNodeWithID(double x, double y, double z, int ID)
   if(!node){
     //if ( myNodes.Extent() % CHECKMEMORY_INTERVAL == 0 ) CheckMemory();
     //SMDS_MeshNode * node=new SMDS_MeshNode(ID, myMeshId, -1, x, y, z);
+    myNodeIDFactory->adjustMaxId(ID);
     SMDS_MeshNode * node = myNodePool->getNew();
     node->init(ID, myMeshId, -1, x, y, z);
     if (ID >= myNodes.size())
@@ -1453,6 +1454,7 @@ bool SMDS_Mesh::ChangeElementNodes(const SMDS_MeshElement * element,
                                    const SMDS_MeshNode    * nodes[],
                                    const int                nbnodes)
 {
+  // TODO use polymorphism, check number of nodes and type are unchanged.
   MYASSERT(0); // REVOIR LES TYPES
   // keep current nodes of elem
   set<const SMDS_MeshElement*> oldNodes;
@@ -1465,47 +1467,51 @@ bool SMDS_Mesh::ChangeElementNodes(const SMDS_MeshElement * element,
 
   // change nodes
   bool Ok = false;
-  SMDS_MeshElement* elem = const_cast<SMDS_MeshElement*>(element);
-  switch ( elem->GetType() )
-  {
-  case SMDSAbs_0DElement: {
-    if ( SMDS_Mesh0DElement* elem0d = dynamic_cast<SMDS_Mesh0DElement*>( elem ))
-      Ok = elem0d->ChangeNode( nodes[0] );
-    break;
-  }
-  case SMDSAbs_Edge: {
-    if ( nbnodes == 2 ) {
-      if ( SMDS_VtkEdge* edge = dynamic_cast<SMDS_VtkEdge*>( elem ))
-        Ok = edge->ChangeNodes( nodes[0], nodes[1] );
-    }
-    else if ( nbnodes == 3 ) {
-      if ( SMDS_QuadraticEdge* edge = dynamic_cast<SMDS_QuadraticEdge*>( elem ))
-        Ok = edge->ChangeNodes( nodes[0], nodes[1], nodes[2] );
-    }
-    break;
-  }
-  case SMDSAbs_Face: {
-    if ( SMDS_FaceOfNodes* face = dynamic_cast<SMDS_FaceOfNodes*>( elem ))
-      Ok = face->ChangeNodes( nodes, nbnodes );
-    else
-      if ( SMDS_QuadraticFaceOfNodes* QF = dynamic_cast<SMDS_QuadraticFaceOfNodes*>( elem ))
-        Ok = QF->ChangeNodes( nodes, nbnodes );
-      else
-        if (SMDS_PolygonalFaceOfNodes* face = dynamic_cast<SMDS_PolygonalFaceOfNodes*>(elem))
-          Ok = face->ChangeNodes(nodes, nbnodes);
-    break;
-  }
-  case SMDSAbs_Volume: {
-    if ( SMDS_VolumeOfNodes* vol = dynamic_cast<SMDS_VolumeOfNodes*>( elem ))
-      Ok = vol->ChangeNodes( nodes, nbnodes );
-    else
-      if ( SMDS_QuadraticVolumeOfNodes* QV = dynamic_cast<SMDS_QuadraticVolumeOfNodes*>( elem ))
-        Ok = QV->ChangeNodes( nodes, nbnodes );
-    break;
-  }
-  default:
-    MESSAGE ( "WRONG ELEM TYPE");
-  }
+  SMDS_MeshCell* cell = dynamic_cast<SMDS_MeshCell*>((SMDS_MeshElement*) element);
+  if (cell)
+    Ok = cell->ChangeNodes(nodes, nbnodes);
+
+//  SMDS_MeshElement* elem = const_cast<SMDS_MeshElement*>(element);
+//  switch ( elem->GetType() )
+//  {
+//  case SMDSAbs_0DElement: {
+//    if ( SMDS_Mesh0DElement* elem0d = dynamic_cast<SMDS_Mesh0DElement*>( elem ))
+//      Ok = elem0d->ChangeNode( nodes[0] );
+//    break;
+//  }
+//  case SMDSAbs_Edge: {
+//    if ( nbnodes == 2 ) {
+//      if ( SMDS_VtkEdge* edge = dynamic_cast<SMDS_VtkEdge*>( elem ))
+//        Ok = edge->ChangeNodes( nodes[0], nodes[1] );
+//    }
+//    else if ( nbnodes == 3 ) {
+//      if ( SMDS_QuadraticEdge* edge = dynamic_cast<SMDS_QuadraticEdge*>( elem ))
+//        Ok = edge->ChangeNodes( nodes[0], nodes[1], nodes[2] );
+//    }
+//    break;
+//  }
+//  case SMDSAbs_Face: {
+//    if ( SMDS_FaceOfNodes* face = dynamic_cast<SMDS_FaceOfNodes*>( elem ))
+//      Ok = face->ChangeNodes( nodes, nbnodes );
+//    else
+//      if ( SMDS_QuadraticFaceOfNodes* QF = dynamic_cast<SMDS_QuadraticFaceOfNodes*>( elem ))
+//        Ok = QF->ChangeNodes( nodes, nbnodes );
+//      else
+//        if (SMDS_PolygonalFaceOfNodes* face = dynamic_cast<SMDS_PolygonalFaceOfNodes*>(elem))
+//          Ok = face->ChangeNodes(nodes, nbnodes);
+//    break;
+//  }
+//  case SMDSAbs_Volume: {
+//    if ( SMDS_VolumeOfNodes* vol = dynamic_cast<SMDS_VolumeOfNodes*>( elem ))
+//      Ok = vol->ChangeNodes( nodes, nbnodes );
+//    else
+//      if ( SMDS_QuadraticVolumeOfNodes* QV = dynamic_cast<SMDS_QuadraticVolumeOfNodes*>( elem ))
+//        Ok = QV->ChangeNodes( nodes, nbnodes );
+//    break;
+//  }
+//  default:
+//    MESSAGE ( "WRONG ELEM TYPE");
+//  }
 
   if ( Ok ) { // update InverseElements
 
@@ -1516,7 +1522,7 @@ bool SMDS_Mesh::ChangeElementNodes(const SMDS_MeshElement * element,
       it = oldNodes.find( nodes[i] );
       if ( it == oldNodes.end() )
         // new node
-        const_cast<SMDS_MeshNode*>( nodes[i] )->AddInverseElement( elem );
+        const_cast<SMDS_MeshNode*>( nodes[i] )->AddInverseElement( cell );
       else
         // remove from oldNodes a node that remains in elem
         oldNodes.erase( it );
@@ -1526,7 +1532,7 @@ bool SMDS_Mesh::ChangeElementNodes(const SMDS_MeshElement * element,
     {
       SMDS_MeshNode * n = static_cast<SMDS_MeshNode *>
         (const_cast<SMDS_MeshElement *>( *it ));
-      n->RemoveInverseElement( elem );
+      n->RemoveInverseElement( cell );
     }
   }
 

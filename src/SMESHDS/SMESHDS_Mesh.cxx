@@ -33,6 +33,7 @@
 #include "SMDS_EdgePosition.hxx"
 #include "SMDS_FacePosition.hxx"
 #include "SMDS_SpacePosition.hxx"
+#include "SMDS_Downward.hxx"
 #include "SMESHDS_GroupOnGeom.hxx"
 
 #include <Standard_ErrorHandler.hxx>
@@ -1914,8 +1915,6 @@ void SMESHDS_Mesh::compactMesh()
 	myVtkIndex.swap(newVtkToSmds);
 	MESSAGE("myCells.size()=" << myCells.size() << " myIDElements.size()=" << myIDElements.size() << " myVtkIndex.size()=" << myVtkIndex.size() );
 
-	myGrid->BuildDownwardConnectivity();
-
 	// ---TODO: myNodes, myElements in submeshes
 
 //    map<int,SMESHDS_SubMesh*>::iterator it = myShapeIndexToSubMesh.begin();
@@ -1926,3 +1925,53 @@ void SMESHDS_Mesh::compactMesh()
 
 }
 
+void SMESHDS_Mesh::BuildDownWardConnectivity(bool withEdges)
+{
+  myGrid->BuildDownwardConnectivity(withEdges);
+}
+
+/*! change some nodes in cell without modifying type or internal connectivity.
+ * Nodes inverse connectivity is maintained up to date.
+ * @param smdsVolId smds id of the cell.
+ * @param localClonedNodeIds map old node id to new node id.
+ * @return ok if success.
+ */
+bool SMESHDS_Mesh::ModifyCellNodes(int smdsVolId, std::map<int,int> localClonedNodeIds)
+{
+  int vtkVolId = this->fromSmdsToVtk(smdsVolId);
+  myGrid->ModifyCellNodes(vtkVolId, localClonedNodeIds);
+  return true;
+}
+
+/*! Create a volume (prism or hexahedron) by duplication of a face.
+ * the nodes of the new face are already created.
+ * @param vtkVolId vtk id of a volume containing the face, to get an orientation for the face.
+ * @param localClonedNodeIds map old node id to new node id. The old nodes define the face in the volume.
+ * @return ok if success.
+ */
+bool SMESHDS_Mesh::extrudeVolumeFromFace(int smdsVolId, std::map<int,int> localClonedNodeIds)
+{
+  int vtkVolId = this->fromSmdsToVtk(smdsVolId);
+  //MESSAGE(smdsVolId << " " << vtkVolId);
+  vector<int> orderedNodes;
+  orderedNodes.clear();
+  map<int, int>::iterator it = localClonedNodeIds.begin();
+  for (; it != localClonedNodeIds.end(); ++it)
+    orderedNodes.push_back(it->first);
+
+  int nbNodes = myGrid->getOrderedNodesOfFace(vtkVolId, orderedNodes);
+  if (nbNodes == 3)
+    {
+      int newVtkVolId =myElementIDFactory->GetFreeID();
+      SMDS_MeshVolume *vol = this->AddVolumeWithID(orderedNodes[0],
+                                                   orderedNodes[1],
+                                                   orderedNodes[2],
+                                                   localClonedNodeIds[orderedNodes[0]],
+                                                   localClonedNodeIds[orderedNodes[1]],
+                                                   localClonedNodeIds[orderedNodes[2]],
+                                                   newVtkVolId);
+    }
+
+  // TODO update subshape list of elements and nodes
+  return true;
+}

@@ -59,7 +59,6 @@ protected:
   std::vector<int> _cellIdToDownId; //!< convert vtk Id to downward[vtkType] id, initialized with -1
   std::vector<unsigned char> _downTypes;
   std::vector<SMDS_Downward*> _downArray;
-  counters *_counters;
 };
 
 #endif	/* _SMDS_UNSTRUCTUREDGRID_HXX */

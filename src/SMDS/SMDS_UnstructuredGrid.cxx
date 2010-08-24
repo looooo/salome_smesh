@@ -28,7 +28,6 @@ SMDS_UnstructuredGrid::SMDS_UnstructuredGrid() :
   _downTypes.clear();
   _downArray.clear();
   _mesh = 0;
-  _counters = new counters(100);
 }
 
 SMDS_UnstructuredGrid::~SMDS_UnstructuredGrid()
@@ -664,7 +663,7 @@ void SMDS_UnstructuredGrid::BuildDownwardConnectivity(bool withEdges)
             }
         }
     }CHRONOSTOP(24);CHRONOSTOP(2);
-  _counters->stats();
+  counters::stats();
 }
 
 /*! Get the neighbors of a cell.

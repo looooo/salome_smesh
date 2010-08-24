@@ -25,6 +25,7 @@
 // Created   : Mon Apr 12 16:10:22 2004
 // Author    : Edward AGAPOV (eap)
 //
+#define CHRONODEF
 #include "SMESH_MeshEditor.hxx"
 
 #include "SMDS_FaceOfNodes.hxx"
@@ -10277,6 +10278,7 @@ bool SMESH_MeshEditor::DoubleNodesOnGroupBoundaries( const std::vector<TIDSorted
 
   SMESHDS_Mesh *meshDS = this->myMesh->GetMeshDS();
   meshDS->BuildDownWardConnectivity(false);
+  CHRONO(50);
   SMDS_UnstructuredGrid *grid = meshDS->getGrid();
 
   // --- build the list of faces shared by 2 domains (group of elements), with their domain and volume indexes
@@ -10441,6 +10443,8 @@ bool SMESH_MeshEditor::DoubleNodesOnGroupBoundaries( const std::vector<TIDSorted
   grid->BuildLinks();
 
   // TODO replace also old nodes by new nodes in faces and edges
+  CHRONOSTOP(50);
+  counters::stats();
 }
 
 //================================================================================

@@ -23,14 +23,15 @@
 using namespace std;
 
 cntStruct* counters::_ctrs = 0;
-  
+int counters::_nbChrono = 0;
+
 counters::counters(int nb)
 {
   MESSAGE("counters::counters(int nb)");
   _nbChrono = nb;
   _ctrs = new cntStruct[_nbChrono];
 
-  for (int i=0; i< _nbChrono; i++)
+  for (int i = 0; i < _nbChrono; i++)
     {
       _ctrs[i]._ctrNames = 0;
       _ctrs[i]._ctrLines = 0;
@@ -49,7 +50,7 @@ counters::~counters()
 void counters::stats()
 {
   MESSAGE("counters::stats()");
-  for (int i=0; i < _nbChrono; i++)
+  for (int i = 0; i < _nbChrono; i++)
     if (_ctrs[i]._ctrOccur)
       {
         MESSAGE("Compteur[" << i << "]: "<< _ctrs[i]._ctrNames << "[" << _ctrs[i]._ctrLines << "]");
@@ -58,17 +59,17 @@ void counters::stats()
       }
 }
 
-
-
-chrono::chrono(int i) : _ctr(i), _run(true)
+chrono::chrono(int i) :
+  _ctr(i), _run(true)
 {
   //MESSAGE("chrono::chrono " << _ctr << " " << _run);
-  _start = clock();    
+  _start = clock();
 }
 
 chrono::~chrono()
 {
-  if (_run) stop();
+  if (_run)
+    stop();
 }
 
 void chrono::stop()
@@ -78,7 +79,7 @@ void chrono::stop()
     {
       _run = false;
       _end = clock();
-      double elapse = double(_end - _start)/double(CLOCKS_PER_SEC);
+      double elapse = double(_end - _start) / double(CLOCKS_PER_SEC);
       counters::_ctrs[_ctr]._ctrOccur++;
       counters::_ctrs[_ctr]._ctrCumul += elapse;
     }

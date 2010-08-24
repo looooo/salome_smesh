@@ -25,6 +25,7 @@
 //  Author : Paul RASCLE, EDF
 //  Module : SMESH
 //
+#define CHRONODEF
 #include "SMESH_Gen.hxx"
 #include "SMESH_subMesh.hxx"
 #include "SMESH_HypoFilter.hxx"
@@ -60,6 +61,7 @@ SMESH_Gen::SMESH_Gen()
         _segmentation = 10;
         SMDS_Mesh::_meshList.clear();
         MESSAGE(SMDS_Mesh::_meshList.size());
+        _counters = new counters(100);
 }
 
 //=============================================================================

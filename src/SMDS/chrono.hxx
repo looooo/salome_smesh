@@ -39,9 +39,9 @@ public:
   static cntStruct *_ctrs;
   counters(int nb);
   ~counters();
-  void stats();
+  static void stats();
 protected:
-  int _nbChrono;
+  static int _nbChrono;
 };
 
 class chrono

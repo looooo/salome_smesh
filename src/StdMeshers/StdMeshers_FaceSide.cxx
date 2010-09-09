@@ -594,9 +594,9 @@ TSideVector StdMeshers_FaceSide::GetFaceWires(const TopoDS_Face& theFace,
   list< int >::iterator nbE = nbEdgesInWires.begin();
   list< TopoDS_Edge >::iterator from, to;
   from = to = edges.begin();
-  for ( int iW = 0; iW < nbWires; ++iW )
+  for ( int iW = 0; iW < nbWires; ++iW, ++nbE )
   {
-    std::advance( to, *nbE++ );
+    std::advance( to, *nbE );
     if ( *nbE == 0 ) // Issue 0020676
     {
       --nbWires;

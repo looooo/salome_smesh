@@ -1,7 +1,8 @@
 #include "SMDS_VtkCellIterator.hxx"
+#include "utilities.h"
 
-SMDS_VtkCellIterator::SMDS_VtkCellIterator(SMDS_Mesh* mesh, int vtkCellId,
-                                           SMDSAbs_EntityType aType) :
+
+SMDS_VtkCellIterator::SMDS_VtkCellIterator(SMDS_Mesh* mesh, int vtkCellId, SMDSAbs_EntityType aType) :
   _mesh(mesh), _cellId(vtkCellId), _index(0), _type(aType)
 {
   vtkUnstructuredGrid* grid = _mesh->getGrid();
@@ -59,6 +60,7 @@ SMDS_VtkCellIterator::SMDS_VtkCellIterator(SMDS_Mesh* mesh, int vtkCellId,
       }
     case SMDSEntity_Quad_Hexa:
       {
+        MESSAGE("SMDS_VtkCellIterator Quad_Hexa");
         this->exchange(1, 3);
         this->exchange(5, 7);
         this->exchange(8, 11);
@@ -66,6 +68,11 @@ SMDS_VtkCellIterator::SMDS_VtkCellIterator(SMDS_Mesh* mesh, int vtkCellId,
         this->exchange(12, 15);
         this->exchange(13, 14);
         this->exchange(17, 19);
+        break;
+      }
+    case SMDSEntity_Polyhedra:
+      {
+        MESSAGE("SMDS_VtkCellIterator Polyhedra");
         break;
       }
     default:

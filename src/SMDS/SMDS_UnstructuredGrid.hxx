@@ -8,12 +8,19 @@
 #ifndef _SMDS_UNSTRUCTUREDGRID_HXX
 #define	_SMDS_UNSTRUCTUREDGRID_HXX
 
+#include <vtkUnstructuredGrid.h>
+#include "chrono.hxx"
+
 #include <vector>
 #include <set>
 #include <map>
 
-#include <vtkUnstructuredGrid.h>
-#include "chrono.hxx"
+#define VTK_HAVE_POLYHEDRON
+#ifdef VTK_HAVE_POLYHEDRON
+  #define VTK_MAXTYPE VTK_POLYHEDRON
+#else
+  #define VTK_MAXTYPE VTK_QUADRATIC_PYRAMID
+#endif
 
 #define NBMAXNEIGHBORS 10
 
@@ -30,6 +37,11 @@ public:
   virtual unsigned long GetMTime();
   virtual void Update();
   virtual void UpdateInformation();
+  virtual vtkPoints *GetPoints();
+
+#ifdef VTK_HAVE_POLYHEDRON
+  int InsertNextLinkedCell(int type, int npts, vtkIdType *pts);
+#endif
 
   int CellIdToDownId(int vtkCellId);
   void setCellIdToDownId(int vtkCellId, int downId);

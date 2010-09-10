@@ -1172,7 +1172,7 @@ SMDS_MeshVolume * SMDS_Mesh::AddPolyhedralVolumeWithID
 SMDS_MeshVolume* SMDS_Mesh::AddPolyhedralVolumeWithID
                             (vector<const SMDS_MeshNode*> nodes,
                              vector<int>                  quantities,
-                             const int                         ID)
+                             const int                    ID)
 {
   SMDS_MeshVolume* volume;
   //if ( myVolumes.Extent() % CHECKMEMORY_INTERVAL == 0 ) CheckMemory();
@@ -1183,9 +1183,21 @@ SMDS_MeshVolume* SMDS_Mesh::AddPolyhedralVolumeWithID
     MESSAGE("Error : Not implemented");
     return NULL;
   } else {
+#ifdef VTK_HAVE_POLYHEDRON
+    vector<vtkIdType> nodeIds;
+    nodeIds.clear();
+    vector<const SMDS_MeshNode*>::iterator it = nodes.begin();
+    for ( ; it != nodes.end(); ++it)
+      nodeIds.push_back((*it)->getId());
+
+    SMDS_VtkVolume *volvtk = myVolumePool->getNew();
+    volvtk->initPoly(nodeIds, quantities, this);
+    volume = volvtk;
+#else
     for ( int i = 0; i < nodes.size(); ++i )
       if ( !nodes[ i ] ) return 0;
     volume = new SMDS_PolyhedralVolumeOfNodes(nodes, quantities);
+#endif
     adjustmyCellsCapacity(ID);
     myCells[ID] = volume;
     myInfo.myNbPolyhedrons++;
@@ -1261,7 +1273,9 @@ const SMDS_MeshNode * SMDS_Mesh::FindNode(int ID) const
 {
   if (ID < 0 || ID >= myNodes.size())
   {
+    MESSAGE("------------------------------------------------------------------------- ");
     MESSAGE("----------------------------------- bad ID " << ID << " " << myNodes.size());
+    MESSAGE("------------------------------------------------------------------------- ");
     return 0;
   }
   return (const SMDS_MeshNode *)myNodes[ID];
@@ -1986,8 +2000,11 @@ const SMDS_MeshElement* SMDS_Mesh::FindElement(int IDelem) const
 {
   if ((IDelem < 0) || IDelem >= myCells.size())
   {
+    MESSAGE("--------------------------------------------------------------------------------- ");
     MESSAGE("----------------------------------- bad IDelem " << IDelem << " " << myCells.size());
-    assert(0);
+    MESSAGE("--------------------------------------------------------------------------------- ");
+    // TODO raise an exception
+    //assert(0);
     return 0;
   }
   return myCells[IDelem];

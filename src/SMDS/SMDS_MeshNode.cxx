@@ -134,43 +134,59 @@ const SMDS_PositionPtr& SMDS_MeshNode::GetPosition() const
  */
 //=======================================================================
 
-class SMDS_MeshNode_MyInvIterator:public SMDS_ElemIterator
+class SMDS_MeshNode_MyInvIterator: public SMDS_ElemIterator
 {
 private:
   SMDS_Mesh* myMesh;
   vtkIdType* myCells;
-  int  myNcells;
-  SMDSAbs_ElementType                                 myType;
-  int  iter;
+  int myNcells;
+  SMDSAbs_ElementType myType;
+  int iter;
+  vector<vtkIdType> cellList;
 
- public:
-  SMDS_MeshNode_MyInvIterator(SMDS_Mesh *mesh,
-                              vtkIdType* cells,
-                              int ncells,
-                              SMDSAbs_ElementType type):
+public:
+  SMDS_MeshNode_MyInvIterator(SMDS_Mesh *mesh, vtkIdType* cells, int ncells, SMDSAbs_ElementType type) :
     myMesh(mesh), myCells(cells), myNcells(ncells), myType(type), iter(0)
   {
-     //MESSAGE("SMDS_MeshNode_MyInvIterator : ncells " << myNcells);
+    //MESSAGE("SMDS_MeshNode_MyInvIterator : ncells " << myNcells);
+    if (type == SMDSAbs_All)
+      return;
+    cellList.clear();
+    for (int i = 0; i < ncells; i++)
+      {
+        int vtkId = cells[i];
+        int smdsId = myMesh->fromVtkToSmds(vtkId);
+        const SMDS_MeshElement* elem = myMesh->FindElement(smdsId);
+        if (elem->GetType() == type)
+          {
+            //MESSAGE("Add element vtkId " << vtkId << " " << elem->GetType())
+            cellList.push_back(vtkId);
+          }
+      }
+    myCells = &cellList[0];
+    myNcells = cellList.size();
+    //MESSAGE("myNcells="<<myNcells);
   }
 
   bool more()
   {
-      return (iter< myNcells);
+    //MESSAGE("iter " << iter << " ncells " << myNcells);
+    return (iter < myNcells);
   }
 
   const SMDS_MeshElement* next()
   {
-      int vtkId = myCells[iter];
-      int smdsId = myMesh->fromVtkToSmds(vtkId);
-      const SMDS_MeshElement* elem = myMesh->FindElement(smdsId);
-      if (!elem)
+    int vtkId = myCells[iter];
+    int smdsId = myMesh->fromVtkToSmds(vtkId);
+    const SMDS_MeshElement* elem = myMesh->FindElement(smdsId);
+    if (!elem)
       {
-          assert(0);
-          throw SALOME_Exception("SMDS_MeshNode_MyInvIterator problem Null element");
+        assert(0);
+        throw SALOME_Exception("SMDS_MeshNode_MyInvIterator problem Null element");
       }
-      //MESSAGE("vtkId " << vtkId << " smdsId " << smdsId << " " << (elem!=0));
-      iter++;
-      return elem;
+    //MESSAGE("vtkId " << vtkId << " smdsId " << smdsId << " " << elem->GetType());
+    iter++;
+    return elem;
   }
 };
 

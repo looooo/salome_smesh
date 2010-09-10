@@ -46,7 +46,7 @@ SMDS_Downward::SMDS_Downward(SMDS_UnstructuredGrid *grid, int nbDownCells) :
   this->_cellTypes.clear();
   if (_cellDimension.empty())
     {
-      _cellDimension.resize(VTK_QUADRATIC_PYRAMID + 1, 0);
+      _cellDimension.resize(VTK_MAXTYPE + 1, 0);
       _cellDimension[VTK_LINE] = 1;
       _cellDimension[VTK_QUADRATIC_EDGE] = 1;
       _cellDimension[VTK_TRIANGLE] = 2;

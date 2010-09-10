@@ -35,7 +35,7 @@
 
 #include "utilities.h"
 
-#include <vtkUnstructuredGrid.h>
+#include <SMDS_UnstructuredGrid.hxx>
 #include <vtkCellType.h>
 
 using namespace std;
@@ -69,7 +69,11 @@ SMDS_MeshElementIDFactory::SMDS_MeshElementIDFactory():
     myVtkCellTypes[SMDSEntity_Quad_Hexa]       = VTK_QUADRATIC_HEXAHEDRON;
     myVtkCellTypes[SMDSEntity_Penta]           = VTK_WEDGE;
     myVtkCellTypes[SMDSEntity_Quad_Penta]      = VTK_QUADRATIC_WEDGE;
+#ifdef VTK_HAVE_POLYHEDRON
+    myVtkCellTypes[SMDSEntity_Polyhedra]       = VTK_POLYHEDRON;
+#else
     myVtkCellTypes[SMDSEntity_Polyhedra]       = VTK_CONVEX_POINT_SET;
+#endif
     myVtkCellTypes[SMDSEntity_Quad_Polyhedra]  = VTK_CONVEX_POINT_SET;
 }
 

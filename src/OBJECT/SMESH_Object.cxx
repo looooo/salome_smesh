@@ -65,7 +65,7 @@ using namespace std;
 
 #ifdef _DEBUG_
 static int MYDEBUG = 1;
-static int MYDEBUGWITHFILES = 0;
+static int MYDEBUGWITHFILES = 1;
 #else
 static int MYDEBUG = 0;
 static int MYDEBUGWITHFILES = 0;
@@ -268,7 +268,7 @@ void SMESH_VisualObjDef::buildPrs(bool buildGrid)
   	//MESSAGE(myGrid->GetReferenceCount());
   	//MESSAGE( "Update - myGrid->GetNumberOfCells() = "<<myGrid->GetNumberOfCells() );
   	//MESSAGE( "Update - myGrid->GetNumberOfPoints() = "<<myGrid->GetNumberOfPoints() );
-  	if( MYDEBUGWITHFILES ) SMESH::WriteUnstructuredGrid( myGrid,"/tmp/buildPrs" );
+  	if( MYDEBUGWITHFILES ) SMESH::WriteUnstructuredGrid( myGrid,"buildPrs.vtu" );
   }
 }
 

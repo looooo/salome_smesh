@@ -7770,8 +7770,10 @@ SMESH_MeshEditor::FindFaceInSet(const SMDS_MeshNode*    n1,
   const SMDS_MeshElement* face = 0;
 
   SMDS_ElemIteratorPtr invElemIt = n1->GetInverseElementIterator(SMDSAbs_Face);
+  //MESSAGE("n1->GetInverseElementIterator(SMDSAbs_Face) " << invElemIt);
   while ( invElemIt->more() && !face ) // loop on inverse faces of n1
   {
+    //MESSAGE("in while ( invElemIt->more() && !face )");
     const SMDS_MeshElement* elem = invElemIt->next();
     if (avoidSet.count( elem ))
       continue;

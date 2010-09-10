@@ -53,6 +53,51 @@ void SMDS_UnstructuredGrid::UpdateInformation()
   return vtkUnstructuredGrid::UpdateInformation();
 }
 
+vtkPoints* SMDS_UnstructuredGrid::GetPoints()
+{
+  // TODO erreur incomprehensible de la macro vtk GetPoints apparue avec la version paraview de fin aout 2010
+  //MESSAGE("*********************** SMDS_UnstructuredGrid::GetPoints " << this->Points << " " << vtkUnstructuredGrid::GetPoints());
+  return this->Points;
+}
+
+#ifdef VTK_HAVE_POLYHEDRON
+int SMDS_UnstructuredGrid::InsertNextLinkedCell(int type, int npts, vtkIdType *pts)
+{
+  if (type != VTK_POLYHEDRON)
+    return vtkUnstructuredGrid::InsertNextLinkedCell(type, npts, pts);
+
+  // --- type = VTK_POLYHEDRON
+  MESSAGE("InsertNextLinkedCell VTK_POLYHEDRON");
+  int cellid = this->InsertNextCell(type, npts, pts);
+
+  set<vtkIdType> setOfNodes;
+  setOfNodes.clear();
+  int nbfaces = npts;
+  int i = 0;
+  for (int nf = 0; nf < nbfaces; nf++)
+    {
+      int nbnodes = pts[i];
+      i++;
+      for (int k = 0; k < nbnodes; k++)
+        {
+          MESSAGE(" cell " << cellid << " face " << nf << " node " << pts[i]);
+          setOfNodes.insert(pts[i]);
+          i++;
+        }
+    }
+
+  set<vtkIdType>::iterator it = setOfNodes.begin();
+  for (; it != setOfNodes.end(); ++it)
+    {
+      MESSAGE("reverse link for node " << *it << " cell " << cellid);
+      this->Links->ResizeCellList(*it, 1);
+      this->Links->AddCellReference(cellid, *it);
+    }
+
+  return cellid;
+}
+#endif
+
 void SMDS_UnstructuredGrid::setSMDS_mesh(SMDS_Mesh *mesh)
 {
   _mesh = mesh;
@@ -61,6 +106,8 @@ void SMDS_UnstructuredGrid::setSMDS_mesh(SMDS_Mesh *mesh)
 void SMDS_UnstructuredGrid::compactGrid(std::vector<int>& idNodesOldToNew, int newNodeSize,
                                         std::vector<int>& idCellsOldToNew, int newCellSize)
 {
+  // TODO utiliser mieux vtk pour faire plus simple (plus couteux ?)
+
   MESSAGE("------------------------- SMDS_UnstructuredGrid::compactGrid " << newNodeSize << " " << newCellSize);CHRONO(1);
   int startHole = 0;
   int endHole = 0;
@@ -238,7 +285,29 @@ void SMDS_UnstructuredGrid::compactGrid(std::vector<int>& idNodesOldToNew, int n
       this->SetPoints(newPoints);
       MESSAGE("NumberOfPoints: " << this->GetNumberOfPoints());
     }
+#ifdef VTK_HAVE_POLYHEDRON
+  // TODO compact faces for Polyhedrons
+  // refaire completement faces et faceLocation
+  // pour chaque cell, recup oldCellId, oldFacesId, recopie dans newFaces de la faceStream
+  // en changeant les numeros de noeuds
+//  vtkIdTypeArray *newFaceLocations = vtkIdTypeArray::New();
+//  newFaceLocations->Initialize();
+//  vtkIdTypeArray *newFaces = vtkIdTypeArray::New();
+//  newFaces->Initialize();
+//  newFaceLocations->DeepCopy(this->FaceLocations);
+//  newFaces->DeepCopy(this->Faces);
+//  this->SetCells(newTypes, newLocations, newConnectivity, newFaceLocations, newFaces);
+//  newFaceLocations->Delete();
+//  newFaces->Delete();
+  if (this->FaceLocations) this->FaceLocations->Register(this);
+  if (this->Faces) this->Faces->Register(this);
+  this->SetCells(newTypes, newLocations, newConnectivity, FaceLocations, Faces);
+#else
   this->SetCells(newTypes, newLocations, newConnectivity);
+#endif
+  newTypes->Delete();
+  newLocations->Delete();
+  newConnectivity->Delete();
   this->BuildLinks();
 }
 
@@ -319,7 +388,7 @@ void SMDS_UnstructuredGrid::BuildDownwardConnectivity(bool withEdges)
 
   // --- create SMDS_Downward structures (in _downArray vector[vtkCellType])
 
-  _downArray.resize(VTK_QUADRATIC_PYRAMID + 1, 0); // --- max. type value = VTK_QUADRATIC_PYRAMID
+  _downArray.resize(VTK_MAXTYPE + 1, 0); // --- max. type value = VTK_QUADRATIC_PYRAMID
 
   _downArray[VTK_LINE] = new SMDS_DownEdge(this);
   _downArray[VTK_QUADRATIC_EDGE] = new SMDS_DownQuadEdge(this);

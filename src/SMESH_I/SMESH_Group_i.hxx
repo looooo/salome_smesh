@@ -92,7 +92,7 @@ private:
   int myLocalID;
 
   void changeLocalId(int localId) { myLocalID = localId; }
-  friend void SMESH_Mesh_i::CheckGeomGroupModif();
+  friend SMESH_Mesh_i;
 };
 
 // ======

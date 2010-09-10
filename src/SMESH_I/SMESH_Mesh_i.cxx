@@ -121,11 +121,13 @@ SMESH_Mesh_i::~SMESH_Mesh_i()
   INFOS("~SMESH_Mesh_i");
   map<int, SMESH::SMESH_GroupBase_ptr>::iterator it;
   for ( it = _mapGroups.begin(); it != _mapGroups.end(); it++ ) {
+	if ( CORBA::is_nil( it->second ))
+		continue;
     SMESH_GroupBase_i* aGroup = dynamic_cast<SMESH_GroupBase_i*>( SMESH_Gen_i::GetServant( it->second ).in() );
     if ( aGroup ) {
       // this method is colled from destructor of group (PAL6331)
       //_impl->RemoveGroup( aGroup->GetLocalID() );
-      
+	  aGroup->myMeshServant = 0;
       aGroup->Destroy();
     }
   }

@@ -92,7 +92,7 @@ private:
   int myLocalID;
 
   void changeLocalId(int localId) { myLocalID = localId; }
-  friend SMESH_Mesh_i;
+  friend class SMESH_Mesh_i;
 };
 
 // ======

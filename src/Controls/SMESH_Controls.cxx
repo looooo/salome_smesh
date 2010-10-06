@@ -428,7 +428,7 @@ double AspectRatio::GetValue( const TSequenceOfXYZ& P )
 
     return ar;
   }
-  else { // nbNodes==8 - quadratic quadrangle
+  else if( nbNodes == 8 ){ // nbNodes==8 - quadratic quadrangle
     // return aspect ratio of the worst triange which can be built
     // taking three nodes of the quadrangle
     TSequenceOfXYZ triaPnts(3);
@@ -449,6 +449,7 @@ double AspectRatio::GetValue( const TSequenceOfXYZ& P )
 
     return ar;
   }
+  return 0;
 }
 
 double AspectRatio::GetBadRate( double Value, int /*nbNodes*/ ) const
@@ -964,16 +965,20 @@ SMDSAbs_ElementType Skew::GetType() const
 */
 double Area::GetValue( const TSequenceOfXYZ& P )
 {
-  gp_Vec aVec1( P(2) - P(1) );
-  gp_Vec aVec2( P(3) - P(1) );
-  gp_Vec SumVec = aVec1 ^ aVec2;
-  for (int i=4; i<=P.size(); i++) {
-    gp_Vec aVec1( P(i-1) - P(1) );
-    gp_Vec aVec2( P(i) - P(1) );
-    gp_Vec tmp = aVec1 ^ aVec2;
-    SumVec.Add(tmp);
+  double val = 0.0;
+  if ( P.size() > 2 ) {
+    gp_Vec aVec1( P(2) - P(1) );
+    gp_Vec aVec2( P(3) - P(1) );
+    gp_Vec SumVec = aVec1 ^ aVec2;
+    for (int i=4; i<=P.size(); i++) {
+      gp_Vec aVec1( P(i-1) - P(1) );
+      gp_Vec aVec2( P(i) - P(1) );
+      gp_Vec tmp = aVec1 ^ aVec2;
+      SumVec.Add(tmp);
+    }
+    val = SumVec.Magnitude() * 0.5;
   }
-  return SumVec.Magnitude() * 0.5;
+  return val;
 }
 
 double Area::GetBadRate( double Value, int /*nbNodes*/ ) const

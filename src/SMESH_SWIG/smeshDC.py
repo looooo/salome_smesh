@@ -87,6 +87,7 @@
 ##   @defgroup l2_modif_tofromqu Convert to/from Quadratic Mesh
 
 ## @}
+## @defgroup l1_measurements Measurements
 
 import salome
 import geompyDC
@@ -3791,6 +3792,75 @@ class Mesh:
     #  @ingroup l2_modif_edit
     def DoubleNodeElemGroupsInRegion(self, theElems, theNodesNot, theShape):
         return self.editor.DoubleNodeElemGroupsInRegion(theElems, theNodesNot, theShape)
+
+    def _valueFromFunctor(self, funcType, elemId):
+        fn = self.smeshpyD.GetFunctor(funcType)
+        fn.SetMesh(self.mesh)
+        if fn.GetElementType() == self.GetElementType(elemId, True):
+            val = fn.GetValue(elemId)
+        else:
+            val = 0
+        return val
+        
+    ## Get length of 1D element.
+    #  @param elemId mesh element ID
+    #  @return element's length value
+    #  @ingroup l1_measurements
+    def GetLength(self, elemId):
+        return self._valueFromFunctor(SMESH.FT_Length, elemId)    
+
+    ## Get area of 2D element.
+    #  @param elemId mesh element ID
+    #  @return element's area value
+    #  @ingroup l1_measurements
+    def GetArea(self, elemId):
+        return self._valueFromFunctor(SMESH.FT_Area, elemId)    
+
+    ## Get volume of 3D element.
+    #  @param elemId mesh element ID
+    #  @return element's volume value
+    #  @ingroup l1_measurements
+    def GetVolume(self, elemId):
+        return self._valueFromFunctor(SMESH.FT_Volume3D, elemId)    
+
+    ## Get aspect ratio of 2D or 3D element.
+    #  @param elemId mesh element ID
+    #  @return element's aspect ratio value
+    #  @ingroup l1_measurements
+    def GetAspectRatio(self, elemId):
+        if self.GetElementType(elemId, True) == SMESH.VOLUME:
+            ftype = SMESH.FT_AspectRatio3D
+        else:
+            ftype = SMESH.FT_AspectRatio
+        return self._valueFromFunctor(ftype, elemId)    
+
+    ## Get warping angle of 2D element.
+    #  @param elemId mesh element ID
+    #  @return element's warping angle value
+    #  @ingroup l1_measurements
+    def GetWarping(self, elemId):
+        return self._valueFromFunctor(SMESH.FT_Warping, elemId)
+
+    ## Get minimum angle of 2D element.
+    #  @param elemId mesh element ID
+    #  @return element's minimum angle value
+    #  @ingroup l1_measurements
+    def GetMinimumAngle(self, elemId):
+        return self._valueFromFunctor(SMESH.FT_MinimumAngle, elemId)
+
+    ## Get taper of 2D element.
+    #  @param elemId mesh element ID
+    #  @return element's taper value
+    #  @ingroup l1_measurements
+    def GetTaper(self, elemId):
+        return self._valueFromFunctor(SMESH.FT_Taper, elemId)
+
+    ## Get skew of 2D element.
+    #  @param elemId mesh element ID
+    #  @return element's skew value
+    #  @ingroup l1_measurements
+    def GetSkew(self, elemId):
+        return self._valueFromFunctor(SMESH.FT_Skew, elemId)
 
 ## The mother class to define algorithm, it is not recommended to use it directly.
 #

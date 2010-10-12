@@ -277,6 +277,62 @@ double NumericalFunctor::GetValue( long theId )
   return 0.;
 }
 
+//================================================================================
+/*!
+ * \brief Return histogram of functor values
+ *  \param nbIntervals - number of intervals
+ *  \param nbEvents - number of mesh elements having values within i-th interval
+ *  \param funValues - boundaries of intervals
+ */
+//================================================================================
+
+void NumericalFunctor::GetHistogram(int                  nbIntervals,
+                                    std::vector<int>&    nbEvents,
+                                    std::vector<double>& funValues)
+{
+  if ( nbIntervals < 1 ||
+       !myMesh ||
+       !myMesh->GetMeshInfo().NbElements( GetType() ))
+    return;
+  nbEvents.resize( nbIntervals, 0 );
+  funValues.resize( nbIntervals+1 );
+
+  // get all values sorted
+  std::multiset< double > values;
+  SMDS_ElemIteratorPtr elemIt = myMesh->elementsIterator(GetType());
+  while ( elemIt->more() )
+    values.insert( GetValue( elemIt->next()->GetID() ));
+
+  // case nbIntervals == 1
+  funValues[0] = *values.begin();
+  funValues[nbIntervals] = *values.rbegin();
+  if ( nbIntervals == 1 )
+  {
+    nbEvents[0] = values.size();
+    return;
+  }
+  // case of 1 value
+  if (funValues.front() == funValues.back())
+  {
+    nbIntervals = 1;
+    nbEvents.resize( nbIntervals, values.size() );
+    funValues.resize( nbIntervals+1);
+  }
+  // generic case
+  std::multiset< double >::iterator min = values.begin(), max;
+  for ( int i = 0; i < nbIntervals; ++i )
+  {
+    double r = (i+1) / double( nbIntervals );
+    funValues[i+1] = funValues.front() * (1-r) + funValues.back() * r;
+    if ( min != values.end() && *min <= funValues[i+1] )
+    {
+      max = values.upper_bound( funValues[i+1] ); // greater than funValues[i+1], or end()
+      nbEvents[i] = std::distance( min, max );
+      min = max;
+    }
+  }
+}
+
 //=======================================================================
 //function : GetValue
 //purpose  : 

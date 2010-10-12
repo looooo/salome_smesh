@@ -75,6 +75,17 @@ module SMESH
   };
 
   /*!
+  * Parameters of a reclangle of histogram
+  */
+  struct HistogramRectangle
+  {
+    long nbEvents;
+    double min;
+    double max;
+  };
+  typedef sequence<HistogramRectangle> Histogram;
+
+  /*!
   * Base interface for all functors ( i.e. numerical functors and predicates )
   */
   interface Functor: SALOME::GenericObj
@@ -92,6 +103,8 @@ module SMESH
   interface NumericalFunctor: Functor
   {
     double GetValue( in long theElementId );
+
+    Histogram GetHistogram( in short nbIntervals );
 
     /*!
     * Set precision for calculation. It is a position after point which is

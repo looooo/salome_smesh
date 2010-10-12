@@ -157,6 +157,7 @@ namespace SMESH
   {
   public:
     CORBA::Double                   GetValue( CORBA::Long theElementId );
+    SMESH::Histogram*               GetHistogram(CORBA::Short nbIntervals);
     void                            SetPrecision( CORBA::Long thePrecision );
     CORBA::Long                     GetPrecision();
     Controls::NumericalFunctorPtr   GetNumericalFunctor();

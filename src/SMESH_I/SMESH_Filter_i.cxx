@@ -596,6 +596,28 @@ CORBA::Double NumericalFunctor_i::GetValue( CORBA::Long theId )
   return myNumericalFunctorPtr->GetValue( theId );
 }
 
+SMESH::Histogram* NumericalFunctor_i::GetHistogram(CORBA::Short nbIntervals)
+{
+  std::vector<int> nbEvents;
+  std::vector<double> funValues;
+  myNumericalFunctorPtr->GetHistogram(nbIntervals,nbEvents,funValues);
+
+  nbIntervals = CORBA::Short( std::min( nbEvents.size(), funValues.size() - 1));
+  SMESH::Histogram_var histogram = new SMESH::Histogram;
+  if ( nbIntervals > 0 )
+  {
+    histogram->length( nbIntervals );
+    for ( int i = 0; i < nbIntervals; ++i )
+    {
+      HistogramRectangle& rect = histogram[i];
+      rect.nbEvents = nbEvents[i];
+      rect.min = funValues[i];
+      rect.max = funValues[i+1];
+    }
+  }
+  return histogram._retn();
+}
+
 void NumericalFunctor_i::SetPrecision( CORBA::Long thePrecision )
 {
   myNumericalFunctorPtr->SetPrecision( thePrecision );

@@ -314,9 +314,10 @@ void NumericalFunctor::GetHistogram(int                  nbIntervals,
   // case of 1 value
   if (funValues.front() == funValues.back())
   {
-    nbIntervals = 1;
-    nbEvents.resize( nbIntervals, values.size() );
-    funValues.resize( nbIntervals+1);
+    nbEvents.resize( 1 );
+    nbEvents[0] = values.size();
+    funValues[1] = funValues.back();
+    funValues.resize( 2 );
   }
   // generic case
   std::multiset< double >::iterator min = values.begin(), max;

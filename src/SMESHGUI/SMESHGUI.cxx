@@ -753,121 +753,125 @@
         SMESHGUI::GetSMESHGUI()->EmitSignalDeactivateDialog();
         (new SMESHGUI_TransparencyDlg( SMESHGUI::GetSMESHGUI() ))->show();
         return;
-      }}
-      SALOME_ListIteratorOfListIO It( selected );
-      for( ; It.More(); It.Next()){
-        Handle(SALOME_InteractiveObject) IObject = It.Value();
-        if(IObject->hasEntry()){
-          if(SMESH_Actor *anActor = SMESH::FindActorByEntry(IObject->getEntry())){
-            switch(theCommandID){
-            case 211:
-              anActor->SetRepresentation(SMESH_Actor::eEdge);
-              break;
-            case 212:
-              anActor->SetRepresentation(SMESH_Actor::eSurface);
-              break;
-            case 213:
-              if(anActor->IsShrunk())
-                anActor->UnShrink();
-              else
-                anActor->SetShrink();
-              break;
-            case 215:
-              anActor->SetRepresentation(SMESH_Actor::ePoint);
-              break;
-            case 231:
-              if(anActor->GetQuadratic2DRepresentation() != SMESH_Actor::eLines)
-                anActor->SetQuadratic2DRepresentation(SMESH_Actor::eLines);
-              break;
-            case 232:
-              if(anActor->GetQuadratic2DRepresentation() != SMESH_Actor::eArcs)
-                anActor->SetQuadratic2DRepresentation(SMESH_Actor::eArcs);
-              break;
-            case 1132:{
+      }
+      case 1132:{
+        QColor c, e, b, n, c0D, o;
+        int size0D = 0;
+        int Edgewidth = 0;
+        vtkFloatingPointType Shrink = 0.0;
+        vtkFloatingPointType faces_orientation_scale = 0.0;
+        bool faces_orientation_3dvectors = false;
+
+        VTK::MarkerType aMarkerTypeCurrent = VTK::MT_NONE;
+        VTK::MarkerScale aMarkerScaleCurrent = VTK::MS_NONE;
+        int aMarkerTextureCurrent = 0;
+
+        SALOME_ListIteratorOfListIO It( selected );
+        for( ; It.More(); It.Next()){
+          Handle(SALOME_InteractiveObject) IObject = It.Value();
+          if(IObject->hasEntry()){
+            if(SMESH_Actor *anActor = SMESH::FindActorByEntry(IObject->getEntry())){
               vtkFloatingPointType color[3];
               anActor->GetSufaceColor(color[0], color[1], color[2]);
               int c0 = int (color[0] * 255);
               int c1 = int (color[1] * 255);
               int c2 = int (color[2] * 255);
-              QColor c(c0, c1, c2);
+              c.setRgb(c0, c1, c2);
 
               vtkFloatingPointType edgecolor[3];
               anActor->GetEdgeColor(edgecolor[0], edgecolor[1], edgecolor[2]);
               c0 = int (edgecolor[0] * 255);
               c1 = int (edgecolor[1] * 255);
               c2 = int (edgecolor[2] * 255);
-              QColor e(c0, c1, c2);
+              e.setRgb(c0, c1, c2);
 
               vtkFloatingPointType backfacecolor[3];
               anActor->GetBackSufaceColor(backfacecolor[0], backfacecolor[1], backfacecolor[2]);
               c0 = int (backfacecolor[0] * 255);
               c1 = int (backfacecolor[1] * 255);
               c2 = int (backfacecolor[2] * 255);
-              QColor b(c0, c1, c2);
+              b.setRgb(c0, c1, c2);
 
               vtkFloatingPointType nodecolor[3];
               anActor->GetNodeColor(nodecolor[0], nodecolor[1], nodecolor[2]);
               c0 = int (nodecolor[0] * 255);
               c1 = int (nodecolor[1] * 255);
               c2 = int (nodecolor[2] * 255);
-              QColor n(c0, c1, c2);
+              n.setRgb(c0, c1, c2);
 
               vtkFloatingPointType color0D[3];
               anActor->Get0DColor(color0D[0], color0D[1], color0D[2]);
               c0 = int (color0D[0] * 255);
               c1 = int (color0D[1] * 255);
               c2 = int (color0D[2] * 255);
-              QColor c0D(c0, c1, c2);
+              c0D.setRgb(c0, c1, c2);
 
-              int size0D = (int)anActor->Get0DSize();
+              size0D = (int)anActor->Get0DSize();
               if(size0D == 0)
                 size0D = 1;
-              int Edgewidth = (int)anActor->GetLineWidth();
+              Edgewidth = (int)anActor->GetLineWidth();
               if(Edgewidth == 0)
                 Edgewidth = 1;
-              vtkFloatingPointType Shrink = anActor->GetShrinkFactor();
+              Shrink = anActor->GetShrinkFactor();
 
               vtkFloatingPointType faces_orientation_color[3];
               anActor->GetFacesOrientationColor(faces_orientation_color);
               c0 = int (faces_orientation_color[0] * 255);
               c1 = int (faces_orientation_color[1] * 255);
               c2 = int (faces_orientation_color[2] * 255);
-              QColor o(c0, c1, c2);
+              o.setRgb(c0, c1, c2);
 
-              vtkFloatingPointType faces_orientation_scale = anActor->GetFacesOrientationScale();
-              bool faces_orientation_3dvectors = anActor->GetFacesOrientation3DVectors();
+              faces_orientation_scale = anActor->GetFacesOrientationScale();
+              faces_orientation_3dvectors = anActor->GetFacesOrientation3DVectors();
 
-              SMESHGUI_Preferences_ColorDlg *aDlg =
-                new SMESHGUI_Preferences_ColorDlg( SMESHGUI::GetSMESHGUI() );
-              aDlg->SetColor(1, c);
-              aDlg->SetColor(2, e);
-              aDlg->SetColor(3, n);
-              aDlg->SetColor(4, b);
-              aDlg->SetColor(5, c0D);
-              aDlg->SetColor(6, o);
-              aDlg->SetIntValue(1, Edgewidth);
-              aDlg->SetIntValue(2, int(Shrink*100.));
-              aDlg->SetIntValue(3, size0D);
-              aDlg->SetDoubleValue(1, faces_orientation_scale);
-              aDlg->SetBooleanValue(1, faces_orientation_3dvectors);
+              aMarkerTypeCurrent = anActor->GetMarkerType();
+              aMarkerScaleCurrent = anActor->GetMarkerScale();
+              aMarkerTextureCurrent = anActor->GetMarkerTexture();
 
-              aDlg->setCustomMarkerMap( theMarkerMap[ aStudy->StudyId() ] );
+              // even if there are multiple objects in the selection,
+              // we need only the first one to get values for the dialog
+              break;
+            }
+          }
+        }
 
-              VTK::MarkerType aMarkerTypeCurrent = anActor->GetMarkerType();
-              VTK::MarkerScale aMarkerScaleCurrent = anActor->GetMarkerScale();
-              int aMarkerTextureCurrent = anActor->GetMarkerTexture();
-              if( aMarkerTypeCurrent != VTK::MT_USER )
-                aDlg->setStandardMarker( aMarkerTypeCurrent, aMarkerScaleCurrent );
-              else
-                aDlg->setCustomMarker( aMarkerTextureCurrent );
+        SMESHGUI_Preferences_ColorDlg *aDlg =
+          new SMESHGUI_Preferences_ColorDlg( SMESHGUI::GetSMESHGUI() );
+        aDlg->SetColor(1, c);
+        aDlg->SetColor(2, e);
+        aDlg->SetColor(3, n);
+        aDlg->SetColor(4, b);
+        aDlg->SetColor(5, c0D);
+        aDlg->SetColor(6, o);
+        aDlg->SetIntValue(1, Edgewidth);
+        aDlg->SetIntValue(2, int(Shrink*100.));
+        aDlg->SetIntValue(3, size0D);
+        aDlg->SetDoubleValue(1, faces_orientation_scale);
+        aDlg->SetBooleanValue(1, faces_orientation_3dvectors);
+ 
+        aDlg->setCustomMarkerMap( theMarkerMap[ aStudy->StudyId() ] );
 
-              if(aDlg->exec()){
-                QColor color = aDlg->GetColor(1);
-                QColor edgecolor = aDlg->GetColor(2);
-                QColor nodecolor = aDlg->GetColor(3);
-                QColor backfacecolor = aDlg->GetColor(4);
-                QColor color0D = aDlg->GetColor(5);
-                QColor faces_orientation_color = aDlg->GetColor(6);
+        if( aMarkerTypeCurrent != VTK::MT_USER )
+          aDlg->setStandardMarker( aMarkerTypeCurrent, aMarkerScaleCurrent );
+        else
+          aDlg->setCustomMarker( aMarkerTextureCurrent );
+
+        if(aDlg->exec()){
+          QColor color = aDlg->GetColor(1);
+          QColor edgecolor = aDlg->GetColor(2);
+          QColor nodecolor = aDlg->GetColor(3);
+          QColor backfacecolor = aDlg->GetColor(4);
+          QColor color0D = aDlg->GetColor(5);
+          QColor faces_orientation_color = aDlg->GetColor(6);
+
+          /* Point marker */
+          theMarkerMap[ aStudy->StudyId() ] = aDlg->getCustomMarkerMap();
+
+          SALOME_ListIteratorOfListIO It( selected );
+          for( ; It.More(); It.Next()){
+            Handle(SALOME_InteractiveObject) IObject = It.Value();
+            if(IObject->hasEntry()){
+              if(SMESH_Actor *anActor = SMESH::FindActorByEntry(IObject->getEntry())){
                 /* actor color and backface color */
                 anActor->SetSufaceColor(vtkFloatingPointType (color.red()) / 255.,
                                         vtkFloatingPointType (color.green()) / 255.,
@@ -904,9 +908,6 @@
                 anActor->SetFacesOrientationScale(aDlg->GetDoubleValue(1));
                 anActor->SetFacesOrientation3DVectors(aDlg->GetBooleanValue(1));
 
-                /* Point marker */
-                theMarkerMap[ aStudy->StudyId() ] = aDlg->getCustomMarkerMap();
-
                 VTK::MarkerType aMarkerTypeNew = aDlg->getMarkerType();
                 VTK::MarkerScale aMarkerScaleNew = aDlg->getStandardMarkerScale();
                 int aMarkerTextureNew = aDlg->getCustomMarkerID();
@@ -937,11 +938,45 @@
                   aGroupColor.B = (float)aColor.blue() / 255.0;
                   aGroupObject->SetColor( aGroupColor );
                 }
-
-                delete aDlg;
               }
+            }
+          }
+          SMESH::RepaintCurrentView();
+        }
+        delete aDlg;
+        return;
+      }
+      }
+      SALOME_ListIteratorOfListIO It( selected );
+      for( ; It.More(); It.Next()){
+        Handle(SALOME_InteractiveObject) IObject = It.Value();
+        if(IObject->hasEntry()){
+          if(SMESH_Actor *anActor = SMESH::FindActorByEntry(IObject->getEntry())){
+            switch(theCommandID){
+            case 211:
+              anActor->SetRepresentation(SMESH_Actor::eEdge);
               break;
-            }}
+            case 212:
+              anActor->SetRepresentation(SMESH_Actor::eSurface);
+              break;
+            case 213:
+              if(anActor->IsShrunk())
+                anActor->UnShrink();
+              else
+                anActor->SetShrink();
+              break;
+            case 215:
+              anActor->SetRepresentation(SMESH_Actor::ePoint);
+              break;
+            case 231:
+              if(anActor->GetQuadratic2DRepresentation() != SMESH_Actor::eLines)
+                anActor->SetQuadratic2DRepresentation(SMESH_Actor::eLines);
+              break;
+            case 232:
+              if(anActor->GetQuadratic2DRepresentation() != SMESH_Actor::eArcs)
+                anActor->SetQuadratic2DRepresentation(SMESH_Actor::eArcs);
+              break;
+            }
           }
         }
       }

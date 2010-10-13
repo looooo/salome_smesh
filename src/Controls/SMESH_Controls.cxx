@@ -465,46 +465,92 @@ double AspectRatio::GetValue( const TSequenceOfXYZ& P )
     return alfa * maxLen * half_perimeter / anArea;
   }
   else if( nbNodes == 4 ) { // quadrangle
-    // return aspect ratio of the worst triange which can be built
+    // Compute lengths of the sides
+    std::vector< double > aLen (4);
+    aLen[0] = getDistance( P(1), P(2) );
+    aLen[1] = getDistance( P(2), P(3) );
+    aLen[2] = getDistance( P(3), P(4) );
+    aLen[3] = getDistance( P(4), P(1) );
+    // Compute lengths of the diagonals
+    std::vector< double > aDia (2);
+    aDia[0] = getDistance( P(1), P(3) );
+    aDia[1] = getDistance( P(2), P(4) );
+    // Compute areas of all triangles which can be built
     // taking three nodes of the quadrangle
-    TSequenceOfXYZ triaPnts(3);
-    // triangle on nodes 1 3 2
-    triaPnts(1) = P(1);
-    triaPnts(2) = P(3);
-    triaPnts(3) = P(2);
-    double ar = GetValue( triaPnts );
-    // triangle on nodes 1 3 4
-    triaPnts(3) = P(4);
-    ar = Max ( ar, GetValue( triaPnts ));
-    // triangle on nodes 1 2 4
-    triaPnts(2) = P(2);
-    ar = Max ( ar, GetValue( triaPnts ));
-    // triangle on nodes 3 2 4
-    triaPnts(1) = P(3);
-    ar = Max ( ar, GetValue( triaPnts ));
-
-    return ar;
+    std::vector< double > anArea (4);
+    anArea[0] = getArea( P(1), P(2), P(3) );
+    anArea[1] = getArea( P(1), P(2), P(4) );
+    anArea[2] = getArea( P(1), P(3), P(4) );
+    anArea[3] = getArea( P(2), P(3), P(4) );
+    // Q = alpha * L * C1 / C2, where
+    //
+    // alpha = sqrt( 1/32 )
+    // L = max( L1, L2, L3, L4, D1, D2 )
+    // C1 = sqrt( ( L1^2 + L1^2 + L1^2 + L1^2 ) / 4 )
+    // C2 = min( S1, S2, S3, S4 )
+    // Li - lengths of the edges
+    // Di - lengths of the diagonals
+    // Si - areas of the triangles
+    const double alpha = sqrt( 1 / 32. );
+    double L = Max( aLen[ 0 ],
+                 Max( aLen[ 1 ],
+                   Max( aLen[ 2 ],
+                     Max( aLen[ 3 ],
+                       Max( aDia[ 0 ], aDia[ 1 ] ) ) ) ) );
+    double C1 = sqrt( ( aLen[0] * aLen[0] +
+                        aLen[1] * aLen[1] +
+                        aLen[2] * aLen[2] +
+                        aLen[3] * aLen[3] ) / 4. );
+    double C2 = Min( anArea[ 0 ],
+                  Min( anArea[ 1 ],
+                    Min( anArea[ 2 ], anArea[ 3 ] ) ) );
+    if ( C2 <= Precision::Confusion() )
+      return 0.;
+    return alpha * L * C1 / C2;
   }
   else if( nbNodes == 8 ){ // nbNodes==8 - quadratic quadrangle
-    // return aspect ratio of the worst triange which can be built
+    // Compute lengths of the sides
+    std::vector< double > aLen (4);
+    aLen[0] = getDistance( P(1), P(3) );
+    aLen[1] = getDistance( P(3), P(5) );
+    aLen[2] = getDistance( P(5), P(7) );
+    aLen[3] = getDistance( P(7), P(1) );
+    // Compute lengths of the diagonals
+    std::vector< double > aDia (2);
+    aDia[0] = getDistance( P(1), P(5) );
+    aDia[1] = getDistance( P(3), P(7) );
+    // Compute areas of all triangles which can be built
     // taking three nodes of the quadrangle
-    TSequenceOfXYZ triaPnts(3);
-    // triangle on nodes 1 3 2
-    triaPnts(1) = P(1);
-    triaPnts(2) = P(5);
-    triaPnts(3) = P(3);
-    double ar = GetValue( triaPnts );
-    // triangle on nodes 1 3 4
-    triaPnts(3) = P(7);
-    ar = Max ( ar, GetValue( triaPnts ));
-    // triangle on nodes 1 2 4
-    triaPnts(2) = P(3);
-    ar = Max ( ar, GetValue( triaPnts ));
-    // triangle on nodes 3 2 4
-    triaPnts(1) = P(5);
-    ar = Max ( ar, GetValue( triaPnts ));
-
-    return ar;
+    std::vector< double > anArea (4);
+    anArea[0] = getArea( P(1), P(3), P(5) );
+    anArea[1] = getArea( P(1), P(3), P(7) );
+    anArea[2] = getArea( P(1), P(5), P(7) );
+    anArea[3] = getArea( P(3), P(5), P(7) );
+    // Q = alpha * L * C1 / C2, where
+    //
+    // alpha = sqrt( 1/32 )
+    // L = max( L1, L2, L3, L4, D1, D2 )
+    // C1 = sqrt( ( L1^2 + L1^2 + L1^2 + L1^2 ) / 4 )
+    // C2 = min( S1, S2, S3, S4 )
+    // Li - lengths of the edges
+    // Di - lengths of the diagonals
+    // Si - areas of the triangles
+    const double alpha = sqrt( 1 / 32. );
+    double L = Max( aLen[ 0 ],
+                 Max( aLen[ 1 ],
+                   Max( aLen[ 2 ],
+                     Max( aLen[ 3 ],
+                       Max( aDia[ 0 ], aDia[ 1 ] ) ) ) ) );
+    double C1 = sqrt( ( aLen[0] * aLen[0] +
+                        aLen[1] * aLen[1] +
+                        aLen[2] * aLen[2] +
+                        aLen[3] * aLen[3] ) / 4. );
+    double C2 = Min( anArea[ 0 ],
+                  Min( anArea[ 1 ],
+                    Min( anArea[ 2 ], anArea[ 3 ] ) ) );
+    if ( C2 <= Precision::Confusion() )
+      return 0.;
+    return alpha * L * C1 / C2;
   }
   return 0;
 }

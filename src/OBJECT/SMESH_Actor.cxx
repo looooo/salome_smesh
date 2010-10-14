@@ -801,6 +801,22 @@ SetControlMode(eControl theMode,
       myControlActor = my3DActor;
       break;
     }
+    case eMaxElementLength2D:
+    {
+      SMESH::Controls::MaxElementLength2D* aControl = new SMESH::Controls::MaxElementLength2D();
+      aControl->SetPrecision( myControlsPrecision );
+      aFunctor.reset( aControl );
+      myControlActor = my2DActor;
+      break;
+    }
+    case eMaxElementLength3D:
+    {
+      SMESH::Controls::MaxElementLength3D* aControl = new SMESH::Controls::MaxElementLength3D();
+      aControl->SetPrecision( myControlsPrecision );
+      aFunctor.reset( aControl );
+      myControlActor = my3DActor;
+      break;
+    }
     case eMinimumAngle:
     {
       SMESH::Controls::MinimumAngle* aControl = new SMESH::Controls::MinimumAngle();

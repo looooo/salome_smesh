@@ -160,6 +160,30 @@ namespace SMESH{
   
   
     /*
+      Class       : MaxElementLength2D
+      Description : Functor calculating maximum length of 2D element
+    */
+    class SMESHCONTROLS_EXPORT MaxElementLength2D: public virtual NumericalFunctor{
+    public:
+      virtual double GetValue( long theElementId );
+      virtual double GetBadRate( double Value, int nbNodes ) const;
+      virtual SMDSAbs_ElementType GetType() const;
+    };
+  
+  
+    /*
+      Class       : MaxElementLength3D
+      Description : Functor calculating maximum length of 3D element
+    */
+    class SMESHCONTROLS_EXPORT MaxElementLength3D: public virtual NumericalFunctor{
+    public:
+      virtual double GetValue( long theElementId );
+      virtual double GetBadRate( double Value, int nbNodes ) const;
+      virtual SMDSAbs_ElementType GetType() const;
+    };
+  
+  
+    /*
       Class       : SMESH_MinimumAngle
       Description : Functor for calculation of minimum angle
     */

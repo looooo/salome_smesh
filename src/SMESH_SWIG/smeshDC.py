@@ -866,6 +866,10 @@ class smeshDC(SMESH._objref_SMESH_Gen):
             return aFilterMgr.CreateArea()
         elif theCriterion == FT_Volume3D:
             return aFilterMgr.CreateVolume3D()
+        elif theCriterion == FT_MaxElementLength2D:
+            return aFilterMgr.CreateMaxElementLength2D()
+        elif theCriterion == FT_MaxElementLength3D:
+            return aFilterMgr.CreateMaxElementLength3D()
         elif theCriterion == FT_MultiConnection:
             return aFilterMgr.CreateMultiConnection()
         elif theCriterion == FT_MultiConnection2D:
@@ -3822,6 +3826,17 @@ class Mesh:
     #  @ingroup l1_measurements
     def GetVolume(self, elemId):
         return self._valueFromFunctor(SMESH.FT_Volume3D, elemId)    
+
+    ## Get maximum element length.
+    #  @param elemId mesh element ID
+    #  @return element's maximum length value
+    #  @ingroup l1_measurements
+    def GetMaxElementLength(self, elemId):
+        if self.GetElementType(elemId, True) == SMESH.VOLUME:
+            ftype = SMESH.FT_MaxElementLength3D
+        else:
+            ftype = SMESH.FT_MaxElementLength2D
+        return self._valueFromFunctor(ftype, elemId)    
 
     ## Get aspect ratio of 2D or 3D element.
     #  @param elemId mesh element ID

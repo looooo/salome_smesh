@@ -371,6 +371,246 @@ SMDSAbs_ElementType Volume::GetType() const
 
 
 /*
+  Class       : MaxElementLength2D
+  Description : Functor calculating maximum length of 2D element
+*/
+
+double MaxElementLength2D::GetValue( long theElementId )
+{
+  TSequenceOfXYZ P;
+  if( GetPoints( theElementId, P ) ) {
+    double aVal = 0;
+    const SMDS_MeshElement* aElem = myMesh->FindElement( theElementId );
+    SMDSAbs_ElementType aType = aElem->GetType();
+    int len = P.size();
+    switch( aType ) {
+    case SMDSAbs_Face:
+      if( len == 3 ) { // triangles
+        double L1 = getDistance(P( 1 ),P( 2 ));
+        double L2 = getDistance(P( 2 ),P( 3 ));
+        double L3 = getDistance(P( 3 ),P( 1 ));
+        aVal = Max(L1,Max(L2,L3));
+        break;
+      }
+      else if( len == 4 ) { // quadrangles
+        double L1 = getDistance(P( 1 ),P( 2 ));
+        double L2 = getDistance(P( 2 ),P( 3 ));
+        double L3 = getDistance(P( 3 ),P( 4 ));
+        double L4 = getDistance(P( 4 ),P( 1 ));
+        double D1 = getDistance(P( 1 ),P( 3 ));
+        double D2 = getDistance(P( 2 ),P( 4 ));
+        aVal = Max(Max(Max(L1,L2),Max(L3,L4)),Max(D1,D2));
+        break;
+      }
+      else if( len == 6 ) { // quadratic triangles
+        double L1 = getDistance(P( 1 ),P( 2 )) + getDistance(P( 2 ),P( 3 ));
+        double L2 = getDistance(P( 3 ),P( 4 )) + getDistance(P( 4 ),P( 5 ));
+        double L3 = getDistance(P( 5 ),P( 6 )) + getDistance(P( 6 ),P( 1 ));
+        aVal = Max(L1,Max(L2,L3));
+        break;
+      }
+      else if( len == 8 ) { // quadratic quadrangles
+        double L1 = getDistance(P( 1 ),P( 2 )) + getDistance(P( 2 ),P( 3 ));
+        double L2 = getDistance(P( 3 ),P( 4 )) + getDistance(P( 4 ),P( 5 ));
+        double L3 = getDistance(P( 5 ),P( 6 )) + getDistance(P( 6 ),P( 7 ));
+        double L4 = getDistance(P( 7 ),P( 8 )) + getDistance(P( 8 ),P( 1 ));
+        double D1 = getDistance(P( 1 ),P( 5 ));
+        double D2 = getDistance(P( 3 ),P( 7 ));
+        aVal = Max(Max(Max(L1,L2),Max(L3,L4)),Max(D1,D2));
+        break;
+      }
+    }
+
+    if( myPrecision >= 0 )
+    {
+      double prec = pow( 10., (double)myPrecision );
+      aVal = floor( aVal * prec + 0.5 ) / prec;
+    }
+    return aVal;
+  }
+  return 0.;
+}
+
+double MaxElementLength2D::GetBadRate( double Value, int /*nbNodes*/ ) const
+{
+  return Value;
+}
+
+SMDSAbs_ElementType MaxElementLength2D::GetType() const
+{
+  return SMDSAbs_Face;
+}
+
+/*
+  Class       : MaxElementLength3D
+  Description : Functor calculating maximum length of 3D element
+*/
+
+double MaxElementLength3D::GetValue( long theElementId )
+{
+  TSequenceOfXYZ P;
+  if( GetPoints( theElementId, P ) ) {
+    double aVal = 0;
+    const SMDS_MeshElement* aElem = myMesh->FindElement( theElementId );
+    SMDSAbs_ElementType aType = aElem->GetType();
+    int len = P.size();
+    switch( aType ) {
+    case SMDSAbs_Volume:
+      if( len == 4 ) { // tetras
+        double L1 = getDistance(P( 1 ),P( 2 ));
+        double L2 = getDistance(P( 2 ),P( 3 ));
+        double L3 = getDistance(P( 3 ),P( 1 ));
+        double L4 = getDistance(P( 1 ),P( 4 ));
+        double L5 = getDistance(P( 2 ),P( 4 ));
+        double L6 = getDistance(P( 3 ),P( 4 ));
+        aVal = Max(Max(Max(L1,L2),Max(L3,L4)),Max(L5,L6));
+        break;
+      }
+      else if( len == 5 ) { // pyramids
+        double L1 = getDistance(P( 1 ),P( 2 ));
+        double L2 = getDistance(P( 2 ),P( 3 ));
+        double L3 = getDistance(P( 3 ),P( 4 ));
+        double L4 = getDistance(P( 4 ),P( 1 ));
+        double L5 = getDistance(P( 1 ),P( 5 ));
+        double L6 = getDistance(P( 2 ),P( 5 ));
+        double L7 = getDistance(P( 3 ),P( 5 ));
+        double L8 = getDistance(P( 4 ),P( 5 ));
+        aVal = Max(Max(Max(L1,L2),Max(L3,L4)),Max(L5,L6));
+        aVal = Max(aVal,Max(L7,L8));
+        break;
+      }
+      else if( len == 6 ) { // pentas
+        double L1 = getDistance(P( 1 ),P( 2 ));
+        double L2 = getDistance(P( 2 ),P( 3 ));
+        double L3 = getDistance(P( 3 ),P( 1 ));
+        double L4 = getDistance(P( 4 ),P( 5 ));
+        double L5 = getDistance(P( 5 ),P( 6 ));
+        double L6 = getDistance(P( 6 ),P( 4 ));
+        double L7 = getDistance(P( 1 ),P( 4 ));
+        double L8 = getDistance(P( 2 ),P( 5 ));
+        double L9 = getDistance(P( 3 ),P( 6 ));
+        aVal = Max(Max(Max(L1,L2),Max(L3,L4)),Max(L5,L6));
+        aVal = Max(aVal,Max(Max(L7,L8),L9));
+        break;
+      }
+      else if( len == 8 ) { // hexas
+        double L1 = getDistance(P( 1 ),P( 2 ));
+        double L2 = getDistance(P( 2 ),P( 3 ));
+        double L3 = getDistance(P( 3 ),P( 4 ));
+        double L4 = getDistance(P( 4 ),P( 1 ));
+        double L5 = getDistance(P( 5 ),P( 6 ));
+        double L6 = getDistance(P( 6 ),P( 7 ));
+        double L7 = getDistance(P( 7 ),P( 8 ));
+        double L8 = getDistance(P( 8 ),P( 5 ));
+        double L9 = getDistance(P( 1 ),P( 5 ));
+        double L10= getDistance(P( 2 ),P( 6 ));
+        double L11= getDistance(P( 3 ),P( 7 ));
+        double L12= getDistance(P( 4 ),P( 8 ));
+        double D1 = getDistance(P( 1 ),P( 7 ));
+        double D2 = getDistance(P( 2 ),P( 8 ));
+        double D3 = getDistance(P( 3 ),P( 5 ));
+        double D4 = getDistance(P( 4 ),P( 6 ));
+        aVal = Max(Max(Max(L1,L2),Max(L3,L4)),Max(L5,L6));
+        aVal = Max(aVal,Max(Max(L7,L8),Max(L9,L10)));
+        aVal = Max(aVal,Max(L11,L12));
+        aVal = Max(aVal,Max(Max(D1,D2),Max(D3,D4)));
+        break;
+      }
+      else if( len == 10 ) { // quadratic tetras
+        double L1 = getDistance(P( 1 ),P( 5 )) + getDistance(P( 5 ),P( 2 ));
+        double L2 = getDistance(P( 2 ),P( 6 )) + getDistance(P( 6 ),P( 3 ));
+        double L3 = getDistance(P( 3 ),P( 7 )) + getDistance(P( 7 ),P( 1 ));
+        double L4 = getDistance(P( 1 ),P( 8 )) + getDistance(P( 8 ),P( 4 ));
+        double L5 = getDistance(P( 2 ),P( 9 )) + getDistance(P( 9 ),P( 4 ));
+        double L6 = getDistance(P( 3 ),P( 10 )) + getDistance(P( 10 ),P( 4 ));
+        aVal = Max(Max(Max(L1,L2),Max(L3,L4)),Max(L5,L6));
+        break;
+      }
+      else if( len == 13 ) { // quadratic pyramids
+        double L1 = getDistance(P( 1 ),P( 6 )) + getDistance(P( 6 ),P( 2 ));
+        double L2 = getDistance(P( 2 ),P( 7 )) + getDistance(P( 7 ),P( 3 ));
+        double L3 = getDistance(P( 3 ),P( 8 )) + getDistance(P( 8 ),P( 4 ));
+        double L4 = getDistance(P( 4 ),P( 9 )) + getDistance(P( 9 ),P( 1 ));
+        double L5 = getDistance(P( 1 ),P( 10 )) + getDistance(P( 10 ),P( 5 ));
+        double L6 = getDistance(P( 2 ),P( 11 )) + getDistance(P( 11 ),P( 5 ));
+        double L7 = getDistance(P( 3 ),P( 12 )) + getDistance(P( 12 ),P( 5 ));
+        double L8 = getDistance(P( 4 ),P( 13 )) + getDistance(P( 13 ),P( 5 ));
+        aVal = Max(Max(Max(L1,L2),Max(L3,L4)),Max(L5,L6));
+        aVal = Max(aVal,Max(L7,L8));
+        break;
+      }
+      else if( len == 15 ) { // quadratic pentas
+        double L1 = getDistance(P( 1 ),P( 7 )) + getDistance(P( 7 ),P( 2 ));
+        double L2 = getDistance(P( 2 ),P( 8 )) + getDistance(P( 8 ),P( 3 ));
+        double L3 = getDistance(P( 3 ),P( 9 )) + getDistance(P( 9 ),P( 1 ));
+        double L4 = getDistance(P( 4 ),P( 10 )) + getDistance(P( 10 ),P( 5 ));
+        double L5 = getDistance(P( 5 ),P( 11 )) + getDistance(P( 11 ),P( 6 ));
+        double L6 = getDistance(P( 6 ),P( 12 )) + getDistance(P( 12 ),P( 4 ));
+        double L7 = getDistance(P( 1 ),P( 13 )) + getDistance(P( 13 ),P( 4 ));
+        double L8 = getDistance(P( 2 ),P( 14 )) + getDistance(P( 14 ),P( 5 ));
+        double L9 = getDistance(P( 3 ),P( 15 )) + getDistance(P( 15 ),P( 6 ));
+        aVal = Max(Max(Max(L1,L2),Max(L3,L4)),Max(L5,L6));
+        aVal = Max(aVal,Max(Max(L7,L8),L9));
+        break;
+      }
+      else if( len == 20 ) { // quadratic hexas
+        double L1 = getDistance(P( 1 ),P( 9 )) + getDistance(P( 9 ),P( 2 ));
+        double L2 = getDistance(P( 2 ),P( 10 )) + getDistance(P( 10 ),P( 3 ));
+        double L3 = getDistance(P( 3 ),P( 11 )) + getDistance(P( 11 ),P( 4 ));
+        double L4 = getDistance(P( 4 ),P( 12 )) + getDistance(P( 12 ),P( 1 ));
+        double L5 = getDistance(P( 5 ),P( 13 )) + getDistance(P( 13 ),P( 6 ));
+        double L6 = getDistance(P( 6 ),P( 14 )) + getDistance(P( 14 ),P( 7 ));
+        double L7 = getDistance(P( 7 ),P( 15 )) + getDistance(P( 15 ),P( 8 ));
+        double L8 = getDistance(P( 8 ),P( 16 )) + getDistance(P( 16 ),P( 5 ));
+        double L9 = getDistance(P( 1 ),P( 17 )) + getDistance(P( 17 ),P( 5 ));
+        double L10= getDistance(P( 2 ),P( 18 )) + getDistance(P( 18 ),P( 6 ));
+        double L11= getDistance(P( 3 ),P( 19 )) + getDistance(P( 19 ),P( 7 ));
+        double L12= getDistance(P( 4 ),P( 20 )) + getDistance(P( 20 ),P( 8 ));
+        double D1 = getDistance(P( 1 ),P( 7 ));
+        double D2 = getDistance(P( 2 ),P( 8 ));
+        double D3 = getDistance(P( 3 ),P( 5 ));
+        double D4 = getDistance(P( 4 ),P( 6 ));
+        aVal = Max(Max(Max(L1,L2),Max(L3,L4)),Max(L5,L6));
+        aVal = Max(aVal,Max(Max(L7,L8),Max(L9,L10)));
+        aVal = Max(aVal,Max(L11,L12));
+        aVal = Max(aVal,Max(Max(D1,D2),Max(D3,D4)));
+        break;
+      }
+      else if( len > 1 && aElem->IsPoly() ) { // polys
+        // get the maximum distance between all pairs of nodes
+        for( int i = 1; i <= len; i++ ) {
+          for( int j = 1; j <= len; j++ ) {
+            if( j > i ) { // optimization of the loop
+              double D = getDistance( P(i), P(j) );
+              aVal = Max( aVal, D );
+            }
+          }
+        }
+      }
+    }
+
+    if( myPrecision >= 0 )
+    {
+      double prec = pow( 10., (double)myPrecision );
+      aVal = floor( aVal * prec + 0.5 ) / prec;
+    }
+    return aVal;
+  }
+  return 0.;
+}
+
+double MaxElementLength3D::GetBadRate( double Value, int /*nbNodes*/ ) const
+{
+  return Value;
+}
+
+SMDSAbs_ElementType MaxElementLength3D::GetType() const
+{
+  return SMDSAbs_Volume;
+}
+
+
+/*
   Class       : MinimumAngle
   Description : Functor for calculation of minimum angle
 */
@@ -1198,7 +1438,7 @@ double Length2D::GetValue( long theElementId)
       else if (len == 5){ // piramids
         double L1 = getDistance(P( 1 ),P( 2 ));
         double L2 = getDistance(P( 2 ),P( 3 ));
-        double L3 = getDistance(P( 3 ),P( 1 ));
+        double L3 = getDistance(P( 3 ),P( 4 ));
         double L4 = getDistance(P( 4 ),P( 1 ));
         double L5 = getDistance(P( 1 ),P( 5 ));
         double L6 = getDistance(P( 2 ),P( 5 ));
@@ -1258,7 +1498,7 @@ double Length2D::GetValue( long theElementId)
       else if (len == 13){ // quadratic piramids
         double L1 = getDistance(P( 1 ),P( 6 )) + getDistance(P( 6 ),P( 2 ));
         double L2 = getDistance(P( 2 ),P( 7 )) + getDistance(P( 7 ),P( 3 ));
-        double L3 = getDistance(P( 3 ),P( 8 )) + getDistance(P( 8 ),P( 1 ));
+        double L3 = getDistance(P( 3 ),P( 8 )) + getDistance(P( 8 ),P( 4 ));
         double L4 = getDistance(P( 4 ),P( 9 )) + getDistance(P( 9 ),P( 1 ));
         double L5 = getDistance(P( 1 ),P( 10 )) + getDistance(P( 10 ),P( 5 ));
         double L6 = getDistance(P( 2 ),P( 11 )) + getDistance(P( 11 ),P( 5 ));

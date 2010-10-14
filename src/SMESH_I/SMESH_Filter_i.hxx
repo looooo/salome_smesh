@@ -272,6 +272,32 @@ namespace SMESH
   
   
   /*
+    Class       : MaxElementLength2D_i
+    Description : Functor for calculating maximum length of 2D element
+  */
+  class SMESH_I_EXPORT MaxElementLength2D_i: public virtual POA_SMESH::MaxElementLength2D,
+                                             public virtual NumericalFunctor_i
+  {
+  public:
+    MaxElementLength2D_i();
+    FunctorType                     GetFunctorType();
+  };
+  
+  
+  /*
+    Class       : MaxElementLength3D_i
+    Description : Functor for calculating maximum length of 3D element
+  */
+  class SMESH_I_EXPORT MaxElementLength3D_i: public virtual POA_SMESH::MaxElementLength3D,
+                                             public virtual NumericalFunctor_i
+  {
+  public:
+    MaxElementLength3D_i();
+    FunctorType                     GetFunctorType();
+  };
+  
+  
+  /*
     Class       : Length_i
     Description : Functor for calculating length of edge
   */
@@ -891,6 +917,8 @@ namespace SMESH
     Skew_ptr                  CreateSkew();
     Area_ptr                  CreateArea();
     Volume3D_ptr              CreateVolume3D();
+    MaxElementLength2D_ptr    CreateMaxElementLength2D();
+    MaxElementLength3D_ptr    CreateMaxElementLength3D();
     Length_ptr                CreateLength();
     Length2D_ptr              CreateLength2D();
     MultiConnection_ptr       CreateMultiConnection();

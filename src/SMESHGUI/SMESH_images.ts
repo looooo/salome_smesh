@@ -290,6 +290,14 @@
             <translation>mesh_pattern.png</translation>
         </message>
         <message>
+            <source>ICON_MAX_ELEMENT_LENGTH_2D</source>
+            <translation>mesh_max_element_length_2d.png</translation>
+        </message>
+        <message>
+            <source>ICON_MAX_ELEMENT_LENGTH_3D</source>
+            <translation>mesh_max_element_length_3d.png</translation>
+        </message>
+        <message>
             <source>ICON_OBJBROWSER_SMESH</source>
             <translation>mesh.png</translation>
         </message>

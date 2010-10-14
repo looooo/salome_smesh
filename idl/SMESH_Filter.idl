@@ -47,6 +47,8 @@ module SMESH
     FT_Skew,         
     FT_Area,          
     FT_Volume3D,          
+    FT_MaxElementLength2D,
+    FT_MaxElementLength3D,
     FT_FreeBorders,
     FT_FreeEdges,
     FT_FreeNodes,
@@ -121,6 +123,8 @@ module SMESH
   interface Skew            : NumericalFunctor{};
   interface Area            : NumericalFunctor{};
   interface Volume3D        : NumericalFunctor{};
+  interface MaxElementLength2D : NumericalFunctor{};
+  interface MaxElementLength3D : NumericalFunctor{};
   interface Length          : NumericalFunctor{};
   interface Length2D        : NumericalFunctor
   {
@@ -463,6 +467,8 @@ module SMESH
     Skew              CreateSkew();
     Area              CreateArea();
     Volume3D          CreateVolume3D();
+    MaxElementLength2D CreateMaxElementLength2D();
+    MaxElementLength3D CreateMaxElementLength3D();
     Length            CreateLength();
     Length2D          CreateLength2D();
     MultiConnection   CreateMultiConnection();

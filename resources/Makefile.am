@@ -57,6 +57,8 @@ dist_salomeres_DATA = \
 	mesh_free_edges.png \
 	mesh_free_edges_2d.png \
 	mesh_free_nodes.png \
+	mesh_max_element_length_2d.png \
+	mesh_max_element_length_3d.png \
 	mesh_multi_edges.png \
 	mesh_multi_edges_2d.png \
 	mesh_line_n.png \

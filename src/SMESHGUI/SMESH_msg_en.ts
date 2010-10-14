@@ -108,6 +108,14 @@
         <translation>Local</translation>
     </message>
     <message>
+        <source>MAX_ELEMENT_LENGTH_2D</source>
+        <translation>Max Element Length 2D</translation>
+    </message>
+    <message>
+        <source>MAX_ELEMENT_LENGTH_3D</source>
+        <translation>Max Element Length 3D</translation>
+    </message>
+    <message>
         <source>MEN_ADD</source>
         <translation>Add</translation>
     </message>
@@ -206,6 +214,22 @@
     <message>
         <source>MEN_CTRL</source>
         <translation>Controls</translation>
+    </message>
+    <message>
+        <source>MEN_NODE_CTRL</source>
+        <translation>Node Controls</translation>
+    </message>
+    <message>
+        <source>MEN_EDGE_CTRL</source>
+        <translation>Edge Controls</translation>
+    </message>
+    <message>
+        <source>MEN_FACE_CTRL</source>
+        <translation>Face Controls</translation>
+    </message>
+    <message>
+        <source>MEN_VOLUME_CTRL</source>
+        <translation>Volume Controls</translation>
     </message>
     <message>
         <source>MEN_CUT</source>
@@ -386,6 +410,14 @@
     <message>
         <source>MEN_MAP</source>
         <translation>Pattern Mapping</translation>
+    </message>
+    <message>
+        <source>MEN_MAX_ELEMENT_LENGTH_2D</source>
+        <translation>Max Element Length 2D</translation>
+    </message>
+    <message>
+        <source>MEN_MAX_ELEMENT_LENGTH_3D</source>
+        <translation>Max Element Length 3D</translation>
     </message>
     <message>
         <source>MEN_MED</source>
@@ -2345,6 +2377,14 @@ Consider saving your work before application crash</translation>
         <translation>Pattern mapping</translation>
     </message>
     <message>
+        <source>STB_MAX_ELEMENT_LENGTH_2D</source>
+        <translation>Max Element Length 2D</translation>
+    </message>
+    <message>
+        <source>STB_MAX_ELEMENT_LENGTH_3D</source>
+        <translation>Max Element Length 3D</translation>
+    </message>
+    <message>
         <source>STB_MED</source>
         <translation>Import MED file</translation>
     </message>
@@ -2863,6 +2903,14 @@ Consider saving your work before application crash</translation>
     <message>
         <source>TOP_MAP</source>
         <translation>Pattern mapping</translation>
+    </message>
+    <message>
+        <source>TOP_MAX_ELEMENT_LENGTH_2D</source>
+        <translation>Max Element Length 2D</translation>
+    </message>
+    <message>
+        <source>TOP_MAX_ELEMENT_LENGTH_3D</source>
+        <translation>Max Element Length 3D</translation>
     </message>
     <message>
         <source>TOP_MED</source>
@@ -4203,6 +4251,14 @@ Please enter correct value and try again</translation>
     <message>
         <source>LYING_ON_GEOM</source>
         <translation>Lying on Geom</translation>
+    </message>
+    <message>
+        <source>MAX_ELEMENT_LENGTH_2D</source>
+        <translation>Max Element Length 2D</translation>
+    </message>
+    <message>
+        <source>MAX_ELEMENT_LENGTH_3D</source>
+        <translation>Max Element Length 3D</translation>
     </message>
     <message>
         <source>MINIMUM_ANGLE</source>

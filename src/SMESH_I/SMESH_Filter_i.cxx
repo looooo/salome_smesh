@@ -761,6 +761,36 @@ FunctorType Volume3D_i::GetFunctorType()
 }
 
 /*
+  Class       : MaxElementLength2D_i
+  Description : Functor for calculating maximum length of 2D element
+*/
+MaxElementLength2D_i::MaxElementLength2D_i()
+{
+  myNumericalFunctorPtr.reset( new Controls::MaxElementLength2D() );
+  myFunctorPtr = myNumericalFunctorPtr;
+}
+
+FunctorType MaxElementLength2D_i::GetFunctorType()
+{
+  return SMESH::FT_MaxElementLength2D;
+}
+
+/*
+  Class       : MaxElementLength3D_i
+  Description : Functor for calculating maximum length of 3D element
+*/
+MaxElementLength3D_i::MaxElementLength3D_i()
+{
+  myNumericalFunctorPtr.reset( new Controls::MaxElementLength3D() );
+  myFunctorPtr = myNumericalFunctorPtr;
+}
+
+FunctorType MaxElementLength3D_i::GetFunctorType()
+{
+  return SMESH::FT_MaxElementLength3D;
+}
+
+/*
   Class       : Length_i
   Description : Functor for calculating length off edge
 */
@@ -1817,6 +1847,24 @@ Volume3D_ptr FilterManager_i::CreateVolume3D()
 }
 
 
+MaxElementLength2D_ptr FilterManager_i::CreateMaxElementLength2D()
+{
+  SMESH::MaxElementLength2D_i* aServant = new SMESH::MaxElementLength2D_i();
+  SMESH::MaxElementLength2D_var anObj = aServant->_this();
+  TPythonDump()<<aServant<<" = "<<this<<".CreateMaxElementLength2D()";
+  return anObj._retn();
+}
+
+
+MaxElementLength3D_ptr FilterManager_i::CreateMaxElementLength3D()
+{
+  SMESH::MaxElementLength3D_i* aServant = new SMESH::MaxElementLength3D_i();
+  SMESH::MaxElementLength3D_var anObj = aServant->_this();
+  TPythonDump()<<aServant<<" = "<<this<<".CreateMaxElementLength3D()";
+  return anObj._retn();
+}
+
+
 Length_ptr FilterManager_i::CreateLength()
 {
   SMESH::Length_i* aServant = new SMESH::Length_i();
@@ -2528,6 +2576,12 @@ CORBA::Boolean Filter_i::SetCriteria( const SMESH::Filter::Criteria& theCriteria
       case SMESH::FT_Volume3D:
         aFunctor = aFilterMgr->CreateVolume3D();
         break;
+      case SMESH::FT_MaxElementLength2D:
+        aFunctor = aFilterMgr->CreateMaxElementLength2D();
+        break;
+      case SMESH::FT_MaxElementLength3D:
+        aFunctor = aFilterMgr->CreateMaxElementLength3D();
+        break;
 
       // Predicates
 
@@ -2817,6 +2871,8 @@ static inline LDOMString toString( CORBA::Long theType )
     case FT_Skew            : return "Skew";
     case FT_Area            : return "Area";
     case FT_Volume3D        : return "Volume3D";
+    case FT_MaxElementLength2D: return "Max element length 2D";
+    case FT_MaxElementLength3D: return "Max element length 3D";
     case FT_BelongToGeom    : return "Belong to Geom";
     case FT_BelongToPlane   : return "Belong to Plane";
     case FT_BelongToCylinder: return "Belong to Cylinder";
@@ -2859,6 +2915,8 @@ static inline SMESH::FunctorType toFunctorType( const LDOMString& theStr )
   else if ( theStr.equals( "Skew"                         ) ) return FT_Skew;
   else if ( theStr.equals( "Area"                         ) ) return FT_Area;
   else if ( theStr.equals( "Volume3D"                     ) ) return FT_Volume3D;
+  else if ( theStr.equals( "Max element length 2D"        ) ) return FT_MaxElementLength2D;
+  else if ( theStr.equals( "Max element length 3D"        ) ) return FT_MaxElementLength3D;
   else if ( theStr.equals( "Belong to Geom"               ) ) return FT_BelongToGeom;
   else if ( theStr.equals( "Belong to Plane"              ) ) return FT_BelongToPlane;
   else if ( theStr.equals( "Belong to Cylinder"           ) ) return FT_BelongToCylinder;

@@ -181,7 +181,7 @@ public:
     const SMDS_MeshElement* elem = myMesh->FindElement(smdsId);
     if (!elem)
       {
-        assert(0);
+        MESSAGE("SMDS_MeshNode_MyInvIterator problem Null element");
         throw SALOME_Exception("SMDS_MeshNode_MyInvIterator problem Null element");
       }
     //MESSAGE("vtkId " << vtkId << " smdsId " << smdsId << " " << elem->GetType());

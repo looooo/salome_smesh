@@ -51,7 +51,19 @@ void SMDS_VtkFace::init(std::vector<vtkIdType> nodeIds, SMDS_Mesh* mesh)
 
 bool SMDS_VtkFace::ChangeNodes(const SMDS_MeshNode* nodes[], const int nbNodes)
 {
-  // TODO
+  vtkUnstructuredGrid* grid = SMDS_Mesh::_meshList[myMeshId]->getGrid();
+  vtkIdType npts = 0;
+  vtkIdType* pts = 0;
+  grid->GetCellPoints(myVtkID, npts, pts);
+  if (nbNodes != npts)
+    {
+      MESSAGE("ChangeNodes problem: not the same number of nodes " << npts << " -> " << nbNodes);
+      return false;
+    }
+  for (int i=0; i<nbNodes; i++)
+    {
+      pts[i] = nodes[i]->GetID();
+    }
   return true;
 }
 
@@ -110,16 +122,20 @@ bool SMDS_VtkFace::IsQuadratic() const
 
 SMDSAbs_EntityType SMDS_VtkFace::GetEntityType() const
 {
-  SMDSAbs_EntityType aType = SMDSEntity_Triangle;
+  SMDSAbs_EntityType aType = SMDSEntity_Polygon;
   switch (NbNodes())
   {
     case 3:
-    case 6:
       aType = SMDSEntity_Triangle;
       break;
+   case 6:
+      aType = SMDSEntity_Quad_Triangle;
+      break;
     case 4:
-    case 8:
       aType = SMDSEntity_Quadrangle;
+      break;
+    case 8:
+      aType = SMDSEntity_Quad_Quadrangle;
       break;
   }
   return aType;
@@ -137,6 +153,8 @@ vtkIdType SMDS_VtkFace::GetVtkType() const
       return VTK_QUAD;
     case 8:
       return VTK_QUADRATIC_QUAD;
+    default:
+      return VTK_POLYGON;
   }
 }
 
@@ -145,15 +163,14 @@ SMDS_ElemIteratorPtr SMDS_VtkFace::elementsIterator(SMDSAbs_ElementType type) co
   switch (type)
   {
     case SMDSAbs_Node:
-      return SMDS_ElemIteratorPtr(
-                                  new SMDS_VtkCellIterator(
-                                                           SMDS_Mesh::_meshList[myMeshId],
-                                                           myVtkID,
-                                                           GetEntityType()));
+      return SMDS_ElemIteratorPtr(new SMDS_VtkCellIterator(SMDS_Mesh::_meshList[myMeshId], myVtkID, GetEntityType()));
     default:
-      MESSAGE("ERROR : Iterator not implemented")
-      ;
+      MESSAGE("ERROR : Iterator not implemented");
       return SMDS_ElemIteratorPtr((SMDS_ElemIterator*) NULL);
   }
 }
 
+SMDS_ElemIteratorPtr SMDS_VtkFace::nodesIteratorToUNV() const
+{
+  return SMDS_ElemIteratorPtr(new SMDS_VtkCellIteratorToUNV(SMDS_Mesh::_meshList[myMeshId], myVtkID, GetEntityType()));
+}

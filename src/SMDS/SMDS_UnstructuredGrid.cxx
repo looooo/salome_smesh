@@ -142,6 +142,7 @@ void SMDS_UnstructuredGrid::compactGrid(std::vector<int>& idNodesOldToNew, int n
 
       for (int i = 0; i < oldNodeSize; i++)
         {
+          //MESSAGE("                                    " << i << " " << idNodesOldToNew[i]);
           switch (compactState)
           {
             case lookHoleStart:
@@ -175,7 +176,7 @@ void SMDS_UnstructuredGrid::compactGrid(std::vector<int>& idNodesOldToNew, int n
                 {
                   MESSAGE("-------------- newNodeSize, endbloc " << endBloc << " " << oldNodeSize);
                   copyNodes(newPoints, idNodesOldToNew, alreadyCopied, startBloc, endBloc);
-                  compactState = lookHoleStart;
+                  compactState = lookHoleEnd;
                   startHole = i;
                   endHole = 0;
                   startBloc = 0;

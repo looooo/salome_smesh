@@ -83,7 +83,19 @@ void SMDS_VtkVolume::initPoly(std::vector<vtkIdType> nodeIds, std::vector<int> n
 
 bool SMDS_VtkVolume::ChangeNodes(const SMDS_MeshNode* nodes[], const int nbNodes)
 {
-  // TODO utilise dans SMDS_Mesh
+  vtkUnstructuredGrid* grid = SMDS_Mesh::_meshList[myMeshId]->getGrid();
+  vtkIdType npts = 0;
+  vtkIdType* pts = 0;
+  grid->GetCellPoints(myVtkID, npts, pts);
+  if (nbNodes != npts)
+    {
+      MESSAGE("ChangeNodes problem: not the same number of nodes " << npts << " -> " << nbNodes);
+      return false;
+    }
+  for (int i=0; i<nbNodes; i++)
+    {
+      pts[i] = nodes[i]->GetID();
+    }
   return true;
 }
 
@@ -158,11 +170,16 @@ SMDS_ElemIteratorPtr SMDS_VtkVolume::elementsIterator(SMDSAbs_ElementType type) 
     case SMDSAbs_Node:
       return SMDS_ElemIteratorPtr(new SMDS_VtkCellIterator(SMDS_Mesh::_meshList[myMeshId], myVtkID, GetEntityType()));
     default:
-      MESSAGE("ERROR : Iterator not implemented")
-      ;
+      MESSAGE("ERROR : Iterator not implemented");
       return SMDS_ElemIteratorPtr((SMDS_ElemIterator*) NULL);
   }
 }
+
+SMDS_ElemIteratorPtr SMDS_VtkVolume::nodesIteratorToUNV() const
+{
+  return SMDS_ElemIteratorPtr(new SMDS_VtkCellIteratorToUNV(SMDS_Mesh::_meshList[myMeshId], myVtkID, GetEntityType()));
+}
+
 
 SMDSAbs_ElementType SMDS_VtkVolume::GetType() const
 {

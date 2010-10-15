@@ -476,15 +476,19 @@ static bool GetNodesFromTwoTria(const SMDS_MeshElement * theTria1,
 bool SMESH_MeshEditor::InverseDiag (const SMDS_MeshElement * theTria1,
                                     const SMDS_MeshElement * theTria2 )
 {
+  MESSAGE("InverseDiag");
   myLastCreatedElems.Clear();
   myLastCreatedNodes.Clear();
 
   if (!theTria1 || !theTria2)
     return false;
 
-  const SMDS_FaceOfNodes* F1 = dynamic_cast<const SMDS_FaceOfNodes*>( theTria1 );
-  const SMDS_FaceOfNodes* F2 = dynamic_cast<const SMDS_FaceOfNodes*>( theTria2 );
-  if (F1 && F2) {
+  const SMDS_VtkFace* F1 = dynamic_cast<const SMDS_VtkFace*>( theTria1 );
+  if (!F1) return false;
+  const SMDS_VtkFace* F2 = dynamic_cast<const SMDS_VtkFace*>( theTria2 );
+  if (!F2) return false;
+  if ((theTria1->GetEntityType() == SMDSEntity_Triangle) &&
+      (theTria2->GetEntityType() == SMDSEntity_Triangle)) {
 
     //  1 +--+ A  theTria1: ( 1 A B ) A->2 ( 1 2 B ) 1 +--+ A
     //    | /|    theTria2: ( B A 2 ) B->1 ( 1 A 2 )   |\ |
@@ -537,24 +541,18 @@ bool SMESH_MeshEditor::InverseDiag (const SMDS_MeshElement * theTria1,
     // theTria2: B->1
     aNodes[ sameInd[ iB ]] = aNodes[ i1 ];
 
-    //MESSAGE( theTria1 << theTria2 );
-
     GetMeshDS()->ChangeElementNodes( theTria1, aNodes, 3 );
     GetMeshDS()->ChangeElementNodes( theTria2, &aNodes[ 3 ], 3 );
-
-    //MESSAGE( theTria1 << theTria2 );
 
     return true;
 
   } // end if(F1 && F2)
 
   // check case of quadratic faces
-  const SMDS_QuadraticFaceOfNodes* QF1 =
-    dynamic_cast<const SMDS_QuadraticFaceOfNodes*> (theTria1);
-  if(!QF1) return false;
-  const SMDS_QuadraticFaceOfNodes* QF2 =
-    dynamic_cast<const SMDS_QuadraticFaceOfNodes*> (theTria2);
-  if(!QF2) return false;
+  if (theTria1->GetEntityType() != SMDSEntity_Quad_Triangle)
+    return false;
+  if (theTria2->GetEntityType() == SMDSEntity_Quad_Triangle)
+    return false;
 
   //       5
   //  1 +--+--+ 2  theTria1: (1 2 4 5 9 7) or (2 4 1 9 7 5) or (4 1 2 7 5 9)
@@ -657,11 +655,12 @@ bool SMESH_MeshEditor::InverseDiag (const SMDS_MeshNode * theNode1,
   if ( !findTriangles( theNode1, theNode2, tr1, tr2 ))
     return false;
 
-  const SMDS_FaceOfNodes* F1 = dynamic_cast<const SMDS_FaceOfNodes*>( tr1 );
-  //if (!F1) return false;
-  const SMDS_FaceOfNodes* F2 = dynamic_cast<const SMDS_FaceOfNodes*>( tr2 );
-  //if (!F2) return false;
-  if (F1 && F2) {
+  const SMDS_VtkFace* F1 = dynamic_cast<const SMDS_VtkFace*>( tr1 );
+  if (!F1) return false;
+  const SMDS_VtkFace* F2 = dynamic_cast<const SMDS_VtkFace*>( tr2 );
+  if (!F2) return false;
+  if ((tr1->GetEntityType() == SMDSEntity_Triangle) &&
+      (tr2->GetEntityType() == SMDSEntity_Triangle)) {
 
     //  1 +--+ A  tr1: ( 1 A B ) A->2 ( 1 2 B ) 1 +--+ A
     //    | /|    tr2: ( B A 2 ) B->1 ( 1 A 2 )   |\ |
@@ -699,23 +698,13 @@ bool SMESH_MeshEditor::InverseDiag (const SMDS_MeshNode * theNode1,
     // tr2: B->1
     aNodes2[ iB2 ] = aNodes1[ i1 ];
 
-    //MESSAGE( tr1 << tr2 );
-
     GetMeshDS()->ChangeElementNodes( tr1, aNodes1, 3 );
     GetMeshDS()->ChangeElementNodes( tr2, aNodes2, 3 );
-
-    //MESSAGE( tr1 << tr2 );
 
     return true;
   }
 
   // check case of quadratic faces
-  const SMDS_QuadraticFaceOfNodes* QF1 =
-    dynamic_cast<const SMDS_QuadraticFaceOfNodes*> (tr1);
-  if(!QF1) return false;
-  const SMDS_QuadraticFaceOfNodes* QF2 =
-    dynamic_cast<const SMDS_QuadraticFaceOfNodes*> (tr2);
-  if(!QF2) return false;
   return InverseDiag(tr1,tr2);
 }
 
@@ -789,34 +778,34 @@ bool SMESH_MeshEditor::DeleteDiag (const SMDS_MeshNode * theNode1,
   if ( !findTriangles( theNode1, theNode2, tr1, tr2 ))
     return false;
 
-  const SMDS_FaceOfNodes* F1 = dynamic_cast<const SMDS_FaceOfNodes*>( tr1 );
-  //if (!F1) return false;
-  const SMDS_FaceOfNodes* F2 = dynamic_cast<const SMDS_FaceOfNodes*>( tr2 );
-  //if (!F2) return false;
-  if (F1 && F2) {
+  const SMDS_VtkFace* F1 = dynamic_cast<const SMDS_VtkFace*>( tr1 );
+  if (!F1) return false;
+  const SMDS_VtkFace* F2 = dynamic_cast<const SMDS_VtkFace*>( tr2 );
+  if (!F2) return false;
+  SMESHDS_Mesh * aMesh = GetMeshDS();
+
+  if ((tr1->GetEntityType() == SMDSEntity_Triangle) &&
+      (tr2->GetEntityType() == SMDSEntity_Triangle)) {
 
     const SMDS_MeshNode* aNodes [ 4 ];
     if ( ! getQuadrangleNodes( aNodes, theNode1, theNode2, tr1, tr2 ))
       return false;
 
-    //MESSAGE( endl << tr1 << tr2 );
-    // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
-    GetMeshDS()->ChangeElementNodes( tr1, aNodes, 4 );
-    myLastCreatedElems.Append(tr1);
-    GetMeshDS()->RemoveElement( tr2 );
-
-    //MESSAGE( endl << tr1 );
+    const SMDS_MeshElement* newElem = 0;
+    newElem = aMesh->AddFace( aNodes[0], aNodes[1], aNodes[2], aNodes[3] );
+    myLastCreatedElems.Append(newElem);
+    AddToSameGroups( newElem, tr1, aMesh );
+    aMesh->RemoveElement( tr1 );
+    aMesh->RemoveElement( tr2 );
 
     return true;
   }
 
   // check case of quadratic faces
-  const SMDS_QuadraticFaceOfNodes* QF1 =
-    dynamic_cast<const SMDS_QuadraticFaceOfNodes*> (tr1);
-  if(!QF1) return false;
-  const SMDS_QuadraticFaceOfNodes* QF2 =
-    dynamic_cast<const SMDS_QuadraticFaceOfNodes*> (tr2);
-  if(!QF2) return false;
+  if (tr1->GetEntityType() != SMDSEntity_Quad_Triangle)
+    return false;
+  if (tr2->GetEntityType() != SMDSEntity_Quad_Triangle)
+    return false;
 
   //       5
   //  1 +--+--+ 2  tr1: (1 2 4 5 9 7) or (2 4 1 9 7 5) or (4 1 2 7 5 9)
@@ -846,10 +835,13 @@ bool SMESH_MeshEditor::DeleteDiag (const SMDS_MeshNode * theNode1,
   aNodes[6] = N2[3];
   aNodes[7] = N1[5];
 
-  // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
-  GetMeshDS()->ChangeElementNodes( tr1, aNodes, 8 );
-  myLastCreatedElems.Append(tr1);
-  GetMeshDS()->RemoveElement( tr2 );
+  const SMDS_MeshElement* newElem = 0;
+  newElem = aMesh->AddFace( aNodes[0], aNodes[1], aNodes[2], aNodes[3],
+                            aNodes[4], aNodes[5], aNodes[6], aNodes[7]);
+  myLastCreatedElems.Append(newElem);
+  AddToSameGroups( newElem, tr1, aMesh );
+  aMesh->RemoveElement( tr1 );
+  aMesh->RemoveElement( tr2 );
 
   // remove middle node (9)
   GetMeshDS()->RemoveNode( N1[4] );
@@ -864,6 +856,7 @@ bool SMESH_MeshEditor::DeleteDiag (const SMDS_MeshNode * theNode1,
 
 bool SMESH_MeshEditor::Reorient (const SMDS_MeshElement * theElem)
 {
+  MESSAGE("Reorient");
   myLastCreatedElems.Clear();
   myLastCreatedNodes.Clear();
 
@@ -910,6 +903,8 @@ bool SMESH_MeshEditor::Reorient (const SMDS_MeshElement * theElem)
   }
   case SMDSAbs_Volume: {
     if (theElem->IsPoly()) {
+      // TODO reorient vtk polyhedron
+      MESSAGE("reorient vtk polyhedron ?");
       const SMDS_PolyhedralVolumeOfNodes* aPolyedre =
         static_cast<const SMDS_PolyhedralVolumeOfNodes*>( theElem );
       if (!aPolyedre) {
@@ -940,6 +935,7 @@ bool SMESH_MeshEditor::Reorient (const SMDS_MeshElement * theElem)
       if ( !vTool.Set( theElem ))
         return false;
       vTool.Inverse();
+      MESSAGE("ChangeElementNodes reorient: check vTool.Inverse");
       return GetMeshDS()->ChangeElementNodes( theElem, vTool.GetNodes(), vTool.NbNodes() );
     }
   }
@@ -1012,23 +1008,21 @@ bool SMESH_MeshEditor::QuadToTri (TIDSortedElemSet &                   theElems,
     aBadRate2 = getBadRate( &tr3, theCrit ) + getBadRate( &tr4, theCrit );
 
     int aShapeId = FindShape( elem );
-    const SMDS_MeshElement* newElem = 0;
+    const SMDS_MeshElement* newElem1 = 0;
+    const SMDS_MeshElement* newElem2 = 0;
 
     if( !elem->IsQuadratic() ) {
 
       // split liner quadrangle
-
       if ( aBadRate1 <= aBadRate2 ) {
         // tr1 + tr2 is better
-        // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
-        aMesh->ChangeElementNodes( elem, aNodes, 3 );
-        newElem = aMesh->AddFace( aNodes[2], aNodes[3], aNodes[0] );
+        newElem1 = aMesh->AddFace( aNodes[2], aNodes[3], aNodes[0] );
+        newElem2 = aMesh->AddFace( aNodes[2], aNodes[0], aNodes[1] );
       }
       else {
         // tr3 + tr4 is better
-        // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
-        aMesh->ChangeElementNodes( elem, &aNodes[1], 3 );
-        newElem = aMesh->AddFace( aNodes[3], aNodes[0], aNodes[1] );
+        newElem1 = aMesh->AddFace( aNodes[3], aNodes[0], aNodes[1] );
+        newElem2 = aMesh->AddFace( aNodes[3], aNodes[1], aNodes[2] );
       }
     }
     else {
@@ -1089,8 +1083,10 @@ bool SMESH_MeshEditor::QuadToTri (TIDSortedElemSet &                   theElems,
         N[3] = aNodes[4];
         N[4] = aNodes[5];
         N[5] = newN;
-        newElem = aMesh->AddFace(aNodes[2], aNodes[3], aNodes[0],
-                                 aNodes[6], aNodes[7], newN );
+        newElem1 = aMesh->AddFace(aNodes[2], aNodes[3], aNodes[0],
+                                  aNodes[6], aNodes[7], newN );
+        newElem2 = aMesh->AddFace(aNodes[2], aNodes[0], aNodes[1],
+                                  newN,      aNodes[4], aNodes[5] );
       }
       else {
         N[0] = aNodes[1];
@@ -1099,22 +1095,27 @@ bool SMESH_MeshEditor::QuadToTri (TIDSortedElemSet &                   theElems,
         N[3] = aNodes[5];
         N[4] = aNodes[6];
         N[5] = newN;
-        newElem = aMesh->AddFace(aNodes[3], aNodes[0], aNodes[1],
-                                 aNodes[7], aNodes[4], newN );
+        newElem1 = aMesh->AddFace(aNodes[3], aNodes[0], aNodes[1],
+                                  aNodes[7], aNodes[4], newN );
+        newElem2 = aMesh->AddFace(aNodes[3], aNodes[1], aNodes[2],
+                                  newN,      aNodes[5], aNodes[6] );
       }
-      // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
-      aMesh->ChangeElementNodes( elem, N, 6 );
-
     } // quadratic case
 
     // care of a new element
 
-    myLastCreatedElems.Append(newElem);
-    AddToSameGroups( newElem, elem, aMesh );
+    myLastCreatedElems.Append(newElem1);
+    myLastCreatedElems.Append(newElem2);
+    AddToSameGroups( newElem1, elem, aMesh );
+    AddToSameGroups( newElem2, elem, aMesh );
 
     // put a new triangle on the same shape
     if ( aShapeId )
-      aMesh->SetMeshElementOnShape( newElem, aShapeId );
+      {
+        aMesh->SetMeshElementOnShape( newElem1, aShapeId );
+        aMesh->SetMeshElementOnShape( newElem2, aShapeId );
+      }
+    aMesh->RemoveElement( elem );
   }
   return true;
 }
@@ -1733,22 +1734,28 @@ bool SMESH_MeshEditor::QuadToTri (TIDSortedElemSet & theElems,
         aNodes[ i++ ] = static_cast<const SMDS_MeshNode*>( itN->next() );
 
       int aShapeId = FindShape( elem );
-      const SMDS_MeshElement* newElem = 0;
+      const SMDS_MeshElement* newElem1 = 0;
+      const SMDS_MeshElement* newElem2 = 0;
       if ( the13Diag ) {
-        // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
-        aMesh->ChangeElementNodes( elem, aNodes, 3 );
-        newElem = aMesh->AddFace( aNodes[2], aNodes[3], aNodes[0] );
+        newElem1 = aMesh->AddFace( aNodes[2], aNodes[0], aNodes[1] );
+        newElem2 = aMesh->AddFace( aNodes[2], aNodes[3], aNodes[0] );
       }
       else {
-        // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
-        aMesh->ChangeElementNodes( elem, &aNodes[1], 3 );
-        newElem = aMesh->AddFace( aNodes[3], aNodes[0], aNodes[1] );
+        newElem1 = aMesh->AddFace( aNodes[3], aNodes[0], aNodes[1] );
+        newElem2 = aMesh->AddFace( aNodes[3], aNodes[1], aNodes[2] );
       }
-      myLastCreatedElems.Append(newElem);
+      myLastCreatedElems.Append(newElem1);
+      myLastCreatedElems.Append(newElem2);
       // put a new triangle on the same shape and add to the same groups
       if ( aShapeId )
-        aMesh->SetMeshElementOnShape( newElem, aShapeId );
-      AddToSameGroups( newElem, elem, aMesh );
+        {
+          aMesh->SetMeshElementOnShape( newElem1, aShapeId );
+          aMesh->SetMeshElementOnShape( newElem2, aShapeId );
+        }
+      AddToSameGroups( newElem1, elem, aMesh );
+      AddToSameGroups( newElem2, elem, aMesh );
+      //aMesh->RemoveFreeElement(elem, aMesh->MeshElements(aShapeId), true);
+      aMesh->RemoveElement( elem );
     }
 
     // Quadratic quadrangle
@@ -1803,7 +1810,8 @@ bool SMESH_MeshEditor::QuadToTri (TIDSortedElemSet & theElems,
       myLastCreatedNodes.Append(newN);
 
       // create a new element
-      const SMDS_MeshElement* newElem = 0;
+      const SMDS_MeshElement* newElem1 = 0;
+      const SMDS_MeshElement* newElem2 = 0;
       const SMDS_MeshNode* N[6];
       if ( the13Diag ) {
         N[0] = aNodes[0];
@@ -1812,8 +1820,10 @@ bool SMESH_MeshEditor::QuadToTri (TIDSortedElemSet & theElems,
         N[3] = aNodes[4];
         N[4] = aNodes[5];
         N[5] = newN;
-        newElem = aMesh->AddFace(aNodes[2], aNodes[3], aNodes[0],
-                                 aNodes[6], aNodes[7], newN );
+        newElem1 = aMesh->AddFace(aNodes[2], aNodes[3], aNodes[0],
+                                  aNodes[6], aNodes[7], newN );
+        newElem2 = aMesh->AddFace(aNodes[2], aNodes[0], aNodes[1],
+                                  newN,      aNodes[4], aNodes[5] );
       }
       else {
         N[0] = aNodes[1];
@@ -1822,16 +1832,22 @@ bool SMESH_MeshEditor::QuadToTri (TIDSortedElemSet & theElems,
         N[3] = aNodes[5];
         N[4] = aNodes[6];
         N[5] = newN;
-        newElem = aMesh->AddFace(aNodes[3], aNodes[0], aNodes[1],
-                                 aNodes[7], aNodes[4], newN );
+        newElem1 = aMesh->AddFace(aNodes[3], aNodes[0], aNodes[1],
+                                  aNodes[7], aNodes[4], newN );
+        newElem2 = aMesh->AddFace(aNodes[3], aNodes[1], aNodes[2],
+                                  newN,      aNodes[5], aNodes[6] );
       }
-      myLastCreatedElems.Append(newElem);
-      // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
-      aMesh->ChangeElementNodes( elem, N, 6 );
+      myLastCreatedElems.Append(newElem1);
+      myLastCreatedElems.Append(newElem2);
       // put a new triangle on the same shape and add to the same groups
       if ( aShapeId )
-        aMesh->SetMeshElementOnShape( newElem, aShapeId );
-      AddToSameGroups( newElem, elem, aMesh );
+        {
+          aMesh->SetMeshElementOnShape( newElem1, aShapeId );
+          aMesh->SetMeshElementOnShape( newElem2, aShapeId );
+        }
+      AddToSameGroups( newElem1, elem, aMesh );
+      AddToSameGroups( newElem2, elem, aMesh );
+      aMesh->RemoveElement( elem );
     }
   }
 
@@ -2127,18 +2143,12 @@ bool SMESH_MeshEditor::TriToQuad (TIDSortedElemSet &                   theElems,
           mapEl_setLi.erase( tr2 );
           mapLi_listEl.erase( *link12 );
           if(tr1->NbNodes()==3) {
-            if( tr1->GetID() < tr2->GetID() ) {
-              // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
-              aMesh->ChangeElementNodes( tr1, n12, 4 );
-              myLastCreatedElems.Append(tr1);
-              aMesh->RemoveElement( tr2 );
-            }
-            else {
-              // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
-              aMesh->ChangeElementNodes( tr2, n12, 4 );
-              myLastCreatedElems.Append(tr2);
-              aMesh->RemoveElement( tr1);
-            }
+            const SMDS_MeshElement* newElem = 0;
+            newElem = aMesh->AddFace(n12[0], n12[1], n12[2], n12[3] );
+            myLastCreatedElems.Append(newElem);
+            AddToSameGroups( newElem, tr1, aMesh );
+            aMesh->RemoveElement( tr1 );
+            aMesh->RemoveElement( tr2 );
           }
           else {
             const SMDS_MeshNode* N1 [6];
@@ -2156,18 +2166,13 @@ bool SMESH_MeshEditor::TriToQuad (TIDSortedElemSet &                   theElems,
             aNodes[5] = N2[5];
             aNodes[6] = N2[3];
             aNodes[7] = N1[5];
-            if( tr1->GetID() < tr2->GetID() ) {
-              // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
-              GetMeshDS()->ChangeElementNodes( tr1, aNodes, 8 );
-              myLastCreatedElems.Append(tr1);
-              GetMeshDS()->RemoveElement( tr2 );
-            }
-            else {
-              // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
-              GetMeshDS()->ChangeElementNodes( tr2, aNodes, 8 );
-              myLastCreatedElems.Append(tr2);
-              GetMeshDS()->RemoveElement( tr1 );
-            }
+            const SMDS_MeshElement* newElem = 0;
+            newElem = aMesh->AddFace(aNodes[0], aNodes[1], aNodes[2], aNodes[3],
+                                     aNodes[4], aNodes[5], aNodes[6], aNodes[7]);
+            myLastCreatedElems.Append(newElem);
+            AddToSameGroups( newElem, tr1, aMesh );
+            aMesh->RemoveElement( tr1 );
+            aMesh->RemoveElement( tr2 );
             // remove middle node (9)
             GetMeshDS()->RemoveNode( N1[4] );
           }
@@ -2176,18 +2181,12 @@ bool SMESH_MeshEditor::TriToQuad (TIDSortedElemSet &                   theElems,
           mapEl_setLi.erase( tr3 );
           mapLi_listEl.erase( *link13 );
           if(tr1->NbNodes()==3) {
-            if( tr1->GetID() < tr2->GetID() ) {
-              // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
-              aMesh->ChangeElementNodes( tr1, n13, 4 );
-              myLastCreatedElems.Append(tr1);
-              aMesh->RemoveElement( tr3 );
-            }
-            else {
-              // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
-              aMesh->ChangeElementNodes( tr3, n13, 4 );
-              myLastCreatedElems.Append(tr3);
-              aMesh->RemoveElement( tr1 );
-            }
+            const SMDS_MeshElement* newElem = 0;
+            newElem = aMesh->AddFace(n13[0], n13[1], n13[2], n13[3] );
+            myLastCreatedElems.Append(newElem);
+            AddToSameGroups( newElem, tr1, aMesh );
+            aMesh->RemoveElement( tr1 );
+            aMesh->RemoveElement( tr3 );
           }
           else {
             const SMDS_MeshNode* N1 [6];
@@ -2205,18 +2204,13 @@ bool SMESH_MeshEditor::TriToQuad (TIDSortedElemSet &                   theElems,
             aNodes[5] = N2[5];
             aNodes[6] = N2[3];
             aNodes[7] = N1[5];
-            if( tr1->GetID() < tr2->GetID() ) {
-              // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
-              GetMeshDS()->ChangeElementNodes( tr1, aNodes, 8 );
-              myLastCreatedElems.Append(tr1);
-              GetMeshDS()->RemoveElement( tr3 );
-            }
-            else {
-              // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
-              GetMeshDS()->ChangeElementNodes( tr3, aNodes, 8 );
-              myLastCreatedElems.Append(tr3);
-              GetMeshDS()->RemoveElement( tr1 );
-            }
+            const SMDS_MeshElement* newElem = 0;
+            newElem = aMesh->AddFace(aNodes[0], aNodes[1], aNodes[2], aNodes[3],
+                                     aNodes[4], aNodes[5], aNodes[6], aNodes[7]);
+            myLastCreatedElems.Append(newElem);
+            AddToSameGroups( newElem, tr1, aMesh );
+            aMesh->RemoveElement( tr1 );
+            aMesh->RemoveElement( tr3 );
             // remove middle node (9)
             GetMeshDS()->RemoveNode( N1[4] );
           }
@@ -3689,6 +3683,7 @@ void SMESH_MeshEditor::makeWalls (TNodeOfNodeListMap &     mapNewNodes,
                                   const int                nbSteps,
                                   SMESH_SequenceOfElemPtr& srcElements)
 {
+  MESSAGE("makeWalls");
   ASSERT( newElemsMap.size() == elemNewNodesMap.size() );
   SMESHDS_Mesh* aMesh = GetMeshDS();
 
@@ -3889,8 +3884,10 @@ void SMESH_MeshEditor::makeWalls (TNodeOfNodeListMap &     mapNewNodes,
               if ( !f )
                 myLastCreatedElems.Append(aMesh->AddFace( nodes[ 0 ], nodes[ 1 ], nodes[ 2 ] ));
               else if ( nodes[ 1 ] != f->GetNodeWrap( f->GetNodeIndex( nodes[ 0 ] ) + 1 ))
-                // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
-                aMesh->ChangeElementNodes( f, nodes, nbn );
+                {
+                  myLastCreatedElems.Append(aMesh->AddFace( nodes[ 0 ], nodes[ 1 ], nodes[ 2 ] ));
+                  aMesh->RemoveElement(f);
+                }
               break;
             }
             case 4: { ///// quadrangle
@@ -3898,8 +3895,10 @@ void SMESH_MeshEditor::makeWalls (TNodeOfNodeListMap &     mapNewNodes,
               if ( !f )
                 myLastCreatedElems.Append(aMesh->AddFace( nodes[ 0 ], nodes[ 1 ], nodes[ 2 ], nodes[ 3 ] ));
               else if ( nodes[ 1 ] != f->GetNodeWrap( f->GetNodeIndex( nodes[ 0 ] ) + 1 ))
-                // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
-                aMesh->ChangeElementNodes( f, nodes, nbn );
+                {
+                  myLastCreatedElems.Append(aMesh->AddFace( nodes[ 0 ], nodes[ 1 ], nodes[ 2 ], nodes[ 3 ] ));
+                  aMesh->RemoveElement(f);
+                }
               break;
             }
             default:
@@ -3919,8 +3918,9 @@ void SMESH_MeshEditor::makeWalls (TNodeOfNodeListMap &     mapNewNodes,
                     tmpnodes[3] = nodes[1];
                     tmpnodes[4] = nodes[3];
                     tmpnodes[5] = nodes[5];
-                    // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
-                    aMesh->ChangeElementNodes( f, tmpnodes, nbn );
+                    myLastCreatedElems.Append(aMesh->AddFace(nodes[0], nodes[2], nodes[4],
+                                                             nodes[1], nodes[3], nodes[5]));
+                    aMesh->RemoveElement(f);
                   }
                 }
                 else {       /////// quadratic quadrangle
@@ -3940,8 +3940,9 @@ void SMESH_MeshEditor::makeWalls (TNodeOfNodeListMap &     mapNewNodes,
                     tmpnodes[5] = nodes[3];
                     tmpnodes[6] = nodes[5];
                     tmpnodes[7] = nodes[7];
-                    // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
-                    aMesh->ChangeElementNodes( f, tmpnodes, nbn );
+                    myLastCreatedElems.Append(aMesh->AddFace(nodes[0], nodes[2], nodes[4], nodes[6],
+                                                             nodes[1], nodes[3], nodes[5], nodes[7]));
+                    aMesh->RemoveElement(f);
                   }
                 }
               }
@@ -3951,8 +3952,11 @@ void SMESH_MeshEditor::makeWalls (TNodeOfNodeListMap &     mapNewNodes,
                 if ( !f )
                   myLastCreatedElems.Append(aMesh->AddPolygonalFace(polygon_nodes));
                 else if ( nodes[ 1 ] != f->GetNodeWrap( f->GetNodeIndex( nodes[ 0 ] ) + 1 ))
+                  {
                   // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
+                  MESSAGE("ChangeElementNodes");
                   aMesh->ChangeElementNodes( f, nodes, nbn );
+                  }
               }
             }
             while ( srcElements.Length() < myLastCreatedElems.Length() )
@@ -5244,7 +5248,7 @@ SMESH_MeshEditor::Transform (TIDSortedElemSet & theElems,
     theElems.insert( *invElemIt );
 
   // replicate or reverse elements
-
+  // TODO revoir ordre reverse vtk
   enum {
     REV_TETRA   = 0,  //  = nbNodes - 4
     REV_PYRAMID = 1,  //  = nbNodes - 4
@@ -5459,6 +5463,7 @@ SMESH_MeshEditor::Scale (TIDSortedElemSet & theElems,
                          const bool         theMakeGroups,
                          SMESH_Mesh*        theTargetMesh)
 {
+  MESSAGE("Scale");
   myLastCreatedElems.Clear();
   myLastCreatedNodes.Clear();
 
@@ -7057,6 +7062,7 @@ int SMESH_MeshEditor::SimplifyFace (const vector<const SMDS_MeshNode *> faceNode
 
 void SMESH_MeshEditor::MergeNodes (TListOfListOfNodes & theGroupsOfNodes)
 {
+  MESSAGE("MergeNodes");
   myLastCreatedElems.Clear();
   myLastCreatedNodes.Clear();
 
@@ -7171,6 +7177,7 @@ void SMESH_MeshEditor::MergeNodes (TListOfListOfNodes & theGroupsOfNodes)
               if (aShapeId)
                 aMesh->SetMeshElementOnShape(newElem, aShapeId);
             }
+            MESSAGE("ChangeElementNodes MergeNodes Poly");
             aMesh->ChangeElementNodes(elem, &polygons_nodes[inode], quantities[nbNew - 1]);
           }
           else {
@@ -7594,7 +7601,34 @@ void SMESH_MeshEditor::MergeNodes (TListOfListOfNodes & theGroupsOfNodes)
       }
       else {
         // Change regular element or polygon
-        aMesh->ChangeElementNodes( elem, & uniqueNodes[0], nbUniqueNodes );
+        SMDS_MeshElement* newElem = 0;
+        switch (nbUniqueNodes)
+        {
+          case 3:
+            newElem = aMesh->AddFace(uniqueNodes[0], uniqueNodes[1], uniqueNodes[2]);
+            break;
+          case 4:
+            newElem = aMesh->AddVolume(uniqueNodes[0], uniqueNodes[1], uniqueNodes[2],
+                                       uniqueNodes[3]);
+            break;
+          case 5:
+            newElem = aMesh->AddVolume(uniqueNodes[0], uniqueNodes[1], uniqueNodes[2],
+                                       uniqueNodes[3], uniqueNodes[4]);
+            break;
+          case 6:
+            newElem = aMesh->AddVolume(uniqueNodes[0], uniqueNodes[1], uniqueNodes[2],
+                                       uniqueNodes[3], uniqueNodes[4], uniqueNodes[5]);
+            break;
+          default:
+            MESSAGE("invalid number of nodes:" << nbUniqueNodes);
+        }
+        if (newElem)
+          {
+            myLastCreatedElems.Append(newElem);
+            if ( aShapeId )
+              aMesh->SetMeshElementOnShape( newElem, aShapeId );
+          }
+        aMesh->RemoveElement(elem);
       }
     }
     else {
@@ -8670,6 +8704,7 @@ void SMESH_MeshEditor::InsertNodesIntoLink(const SMDS_MeshElement*     theFace,
     newNodes[ 2 ] = nodes[ iSplit >= iBestQuad ? i3 : i4 ];
     newNodes[ 3 ] = nodes[ i4 ];
     // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
+    MESSAGE("ChangeElementNodes");
     aMesh->ChangeElementNodes( theFace, newNodes, iSplit == iBestQuad ? 4 : 3 );
   } // end if(!theFace->IsQuadratic())
   else { // theFace is quadratic
@@ -8959,6 +8994,7 @@ int SMESH_MeshEditor::convertElemToQuadratic(SMESHDS_SubMesh *   theSm,
     if( NewElem )
       theSm->AddElement( NewElem );
   }
+  GetMeshDS()->compactMesh();
   return nbElem;
 }
 
@@ -9086,6 +9122,7 @@ void SMESH_MeshEditor::ConvertToQuadratic(const bool theForce3d)
     aHelper.SetSubShape(0); // apply to the whole mesh
     aHelper.FixQuadraticElements();
   }
+  GetMeshDS()->compactMesh();
 }
 
 //=======================================================================
@@ -9765,8 +9802,11 @@ SMESH_MeshEditor::SewSideElements (TIDSortedElemSet&    theSide1,
         //         elemIDsToRemove.push_back( e->GetID() );
         //       else
         if ( nbReplaced )
+          {
           // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
+          MESSAGE("ChangeElementNodes");
           aMesh->ChangeElementNodes( e, & nodes[0], nbNodes );
+          }
       }
     }
 
@@ -10002,6 +10042,7 @@ bool SMESH_MeshEditor::doubleNodes( SMESHDS_Mesh*     theMeshDS,
                                     const SMDS_MeshNode* >& theNodeNodeMap,
                                     const bool theIsDoubleElem )
 {
+  MESSAGE("doubleNodes");
   // iterate on through element and duplicate them (by nodes duplication)
   bool res = false;
   TIDSortedElemSet::const_iterator elemItr = theElems.begin();
@@ -10039,8 +10080,10 @@ bool SMESH_MeshEditor::doubleNodes( SMESHDS_Mesh*     theMeshDS,
     if ( theIsDoubleElem )
       myLastCreatedElems.Append( AddElement(newNodes, anElem->GetType(), anElem->IsPoly()) );
     else
+      {
+      MESSAGE("ChangeElementNodes");
       theMeshDS->ChangeElementNodes( anElem, &newNodes[ 0 ], anElem->NbNodes() );
-
+      }
     res = true;
   }
   return res;
@@ -10060,6 +10103,7 @@ bool SMESH_MeshEditor::doubleNodes( SMESHDS_Mesh*     theMeshDS,
 bool SMESH_MeshEditor::DoubleNodes( const std::list< int >& theListOfNodes, 
                                     const std::list< int >& theListOfModifiedElems )
 {
+  MESSAGE("DoubleNodes");
   myLastCreatedElems.Clear();
   myLastCreatedNodes.Clear();
 
@@ -10132,7 +10176,10 @@ bool SMESH_MeshEditor::DoubleNodes( const std::list< int >& theListOfNodes,
     const SMDS_MeshElement* anElem = anElemToNodesIter->first;
     vector<const SMDS_MeshNode*> aNodeArr = anElemToNodesIter->second;
     if ( anElem )
+      {
+      MESSAGE("ChangeElementNodes");
       aMeshDS->ChangeElementNodes( anElem, &aNodeArr[ 0 ], anElem->NbNodes() );
+      }
   }
 
   return true;

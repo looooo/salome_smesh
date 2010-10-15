@@ -11,8 +11,7 @@
 class SMDS_VtkCellIterator: public SMDS_ElemIterator
 {
 public:
-      SMDS_VtkCellIterator(SMDS_Mesh* mesh, int vtkCellId,
-                           SMDSAbs_EntityType aType);
+  SMDS_VtkCellIterator(SMDS_Mesh* mesh, int vtkCellId, SMDSAbs_EntityType aType);
   virtual ~SMDS_VtkCellIterator();
   virtual bool more();
   virtual const SMDS_MeshElement* next();
@@ -24,12 +23,21 @@ public:
   }
 
 protected:
+  SMDS_VtkCellIterator() {};
+
   SMDS_Mesh* _mesh;
   int _cellId;
   int _index;
   int _nbNodes;
   SMDSAbs_EntityType _type;
   vtkIdList* _vtkIdList;
+};
+
+class SMDS_VtkCellIteratorToUNV: public SMDS_VtkCellIterator
+{
+public:
+  SMDS_VtkCellIteratorToUNV(SMDS_Mesh* mesh, int vtkCellId, SMDSAbs_EntityType aType);
+  virtual ~SMDS_VtkCellIteratorToUNV();
 };
 
 #endif

@@ -151,6 +151,7 @@ class SMDS_MeshElement_MyIterator:public SMDS_ElemIterator
     return myElement;   
   }     
 };
+
 SMDS_ElemIteratorPtr SMDS_MeshElement::
         elementsIterator(SMDSAbs_ElementType type) const
 {
@@ -165,6 +166,13 @@ SMDS_ElemIteratorPtr SMDS_MeshElement::
           MESSAGE("Iterator not implemented");
           return SMDS_ElemIteratorPtr((SMDS_ElemIterator*)NULL);
         }
+}
+
+//! virtual, redefined in vtkEdge, vtkFace and vtkVolume classes
+SMDS_ElemIteratorPtr SMDS_MeshElement::nodesIteratorToUNV() const
+{
+  MESSAGE("Iterator not implemented");
+  return SMDS_ElemIteratorPtr((SMDS_ElemIterator*) NULL);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

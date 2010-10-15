@@ -34,16 +34,27 @@ void SMDS_VtkEdge::init(std::vector<vtkIdType> nodeIds, SMDS_Mesh* mesh)
   myVtkID = grid->InsertNextLinkedCell(aType, nodeIds.size(), &nodeIds[0]);
 }
 
-bool SMDS_VtkEdge::ChangeNodes(const SMDS_MeshNode * node1,
-                               const SMDS_MeshNode * node2)
+bool SMDS_VtkEdge::ChangeNodes(const SMDS_MeshNode * node1, const SMDS_MeshNode * node2)
 {
-  // TODO remove
-  return true;
+  const SMDS_MeshNode* nodes[] = { node1, node2 };
+  return ChangeNodes(nodes, 2);
 }
 
 bool SMDS_VtkEdge::ChangeNodes(const SMDS_MeshNode* nodes[], const int nbNodes)
 {
-  // TODO
+  vtkUnstructuredGrid* grid = SMDS_Mesh::_meshList[myMeshId]->getGrid();
+  vtkIdType npts = 0;
+  vtkIdType* pts = 0;
+  grid->GetCellPoints(myVtkID, npts, pts);
+  if (nbNodes != npts)
+    {
+      MESSAGE("ChangeNodes problem: not the same number of nodes " << npts << " -> " << nbNodes);
+      return false;
+    }
+  for (int i = 0; i < nbNodes; i++)
+    {
+      pts[i] = nodes[i]->GetID();
+    }
   return true;
 }
 
@@ -106,14 +117,15 @@ SMDS_ElemIteratorPtr SMDS_VtkEdge::elementsIterator(SMDSAbs_ElementType type) co
   switch (type)
   {
     case SMDSAbs_Node:
-      return SMDS_ElemIteratorPtr(
-                                  new SMDS_VtkCellIterator(
-                                                           SMDS_Mesh::_meshList[myMeshId],
-                                                           myVtkID,
-                                                           GetEntityType()));
+      return SMDS_ElemIteratorPtr(new SMDS_VtkCellIterator(SMDS_Mesh::_meshList[myMeshId], myVtkID, GetEntityType()));
     default:
       MESSAGE("ERROR : Iterator not implemented")
       ;
       return SMDS_ElemIteratorPtr((SMDS_ElemIterator*) NULL);
   }
+}
+
+SMDS_ElemIteratorPtr SMDS_VtkEdge::nodesIteratorToUNV() const
+{
+  return SMDS_ElemIteratorPtr(new SMDS_VtkCellIteratorToUNV(SMDS_Mesh::_meshList[myMeshId], myVtkID, GetEntityType()));
 }

@@ -28,8 +28,7 @@ public:
   virtual bool IsQuadratic() const;
 
 protected:
-  SMDS_ElemIteratorPtr
-  elementsIterator(SMDSAbs_ElementType type) const;
-
+  virtual SMDS_ElemIteratorPtr elementsIterator(SMDSAbs_ElementType type) const;
+  virtual SMDS_ElemIteratorPtr nodesIteratorToUNV() const;
 };
 #endif

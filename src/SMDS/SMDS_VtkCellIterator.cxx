@@ -1,15 +1,14 @@
 #include "SMDS_VtkCellIterator.hxx"
 #include "utilities.h"
 
-
 SMDS_VtkCellIterator::SMDS_VtkCellIterator(SMDS_Mesh* mesh, int vtkCellId, SMDSAbs_EntityType aType) :
   _mesh(mesh), _cellId(vtkCellId), _index(0), _type(aType)
 {
-  vtkUnstructuredGrid* grid = _mesh->getGrid();
+  //MESSAGE("SMDS_VtkCellIterator " << _type);
   _vtkIdList = vtkIdList::New();
+  vtkUnstructuredGrid* grid = _mesh->getGrid();
   grid->GetCellPoints(_cellId, _vtkIdList);
   _nbNodes = _vtkIdList->GetNumberOfIds();
-  vtkIdType tempid;
   switch (_type)
   {
     case SMDSEntity_Tetra:
@@ -95,3 +94,99 @@ const SMDS_MeshElement* SMDS_VtkCellIterator::next()
   vtkIdType id = _vtkIdList->GetId(_index++);
   return _mesh->FindNode(id);
 }
+
+SMDS_VtkCellIteratorToUNV::SMDS_VtkCellIteratorToUNV(SMDS_Mesh* mesh,
+                                                               int vtkCellId,
+                                                               SMDSAbs_EntityType aType)
+: SMDS_VtkCellIterator()
+{
+  _mesh = mesh;
+  _cellId = vtkCellId;
+  _index = 0;
+  _type = aType;
+  MESSAGE("SMDS_VtkCellInterlacedIterator " << _type);
+
+  _vtkIdList = vtkIdList::New();
+  vtkIdType* pts;
+  vtkUnstructuredGrid* grid = _mesh->getGrid();
+  grid->GetCellPoints(_cellId, _nbNodes, pts);
+  _vtkIdList->SetNumberOfIds(_nbNodes);
+  int *ids = 0;
+  switch (_type)
+  {
+    case SMDSEntity_Quad_Edge:
+      {
+        static int id[] = {0,2,1};
+        ids = id;
+        break;
+      }
+    case SMDSEntity_Quad_Triangle:
+      {
+        static int id[] = {0,3,1,4,2,5};
+        ids = id;
+        break;
+      }
+    case SMDSEntity_Quad_Quadrangle:
+      {
+        static int id[] = {0,4,1,5,2,6,3,7};
+        ids = id;
+        break;
+      }
+   case SMDSEntity_Quad_Tetra:
+      {
+        static int id[] = {0,4,1,5,2,6,7,8,9,3};
+        ids = id;
+        break;
+      }
+    case SMDSEntity_Quad_Pyramid:
+      {
+        static int id[] = {0,5,1,6,2,7,3,8,9,10,11,12,4};
+        ids = id;
+        break;
+      }
+    case SMDSEntity_Penta:
+      {
+        static int id[] = {0,2,1,3,5,4};
+        ids = id;
+        break;
+      }
+   case SMDSEntity_Quad_Penta:
+      {
+        static int id[] = {0,8,2,7,1,6,12,14,13,3,11,5,10,4,9};
+        ids = id;
+        break;
+      }
+    case SMDSEntity_Quad_Hexa:
+      {
+        static int id[] = {0,8,1,9,2,10,3,11,16,17,18,19,4,12,5,13,6,14,7,15};
+        ids = id;
+       break;
+      }
+    case SMDSEntity_Polygon:
+    case SMDSEntity_Quad_Polygon:
+      {
+        MESSAGE("SMDS_VtkCellIterator polygon");
+        break;
+      }
+    case SMDSEntity_Polyhedra:
+    case SMDSEntity_Quad_Polyhedra:
+      {
+        MESSAGE("SMDS_VtkCellIterator Polyhedra");
+        break;
+      }
+    default:
+      {
+        static int id[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19};
+        ids = id;
+        break;
+      }
+  }
+  //MESSAGE("_nbNodes " << _nbNodes);
+  for (int i=0; i<_nbNodes; i++)
+    _vtkIdList->SetId(i, pts[ids[i]]);
+}
+
+SMDS_VtkCellIteratorToUNV::~SMDS_VtkCellIteratorToUNV()
+{
+}
+

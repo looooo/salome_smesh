@@ -79,7 +79,7 @@ SMDS_MeshElementIDFactory::SMDS_MeshElementIDFactory():
 
 int SMDS_MeshElementIDFactory::SetInVtkGrid(SMDS_MeshElement * elem)
 {
-   // --- retreive nodes ID
+   // --- retrieve nodes ID
 
   vector<vtkIdType> nodeIds;
   SMDS_ElemIteratorPtr it = elem->nodesIterator();
@@ -132,10 +132,18 @@ SMDS_MeshElement* SMDS_MeshElementIDFactory::MeshElement(int ID)
 //=======================================================================
 void SMDS_MeshElementIDFactory::ReleaseID(const int ID)
 {
+  if (ID < 0)
+    {
+      MESSAGE("~~~~~~~~~~~~~~ SMDS_MeshElementIDFactory::ReleaseID ID = " << ID);
+      return;
+    }
   int vtkId = myMesh->myIDElements[ID];
   //MESSAGE("~~~~~~~~~~~~~~ SMDS_MeshElementIDFactory::ReleaseID smdsId vtkId " << ID << " " << vtkId);
-  myMesh->myIDElements[ID] = -1;
-  myMesh->myVtkIndex[vtkId] = -1;
+  if (ID >=0)
+    {
+      myMesh->myIDElements[ID] = -1;
+      myMesh->myVtkIndex[vtkId] = -1;
+    }
   SMDS_MeshIDFactory::ReleaseID(ID);
   if (ID == myMax)
     myMax = 0;

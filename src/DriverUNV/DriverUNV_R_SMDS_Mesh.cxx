@@ -37,7 +37,7 @@ using namespace std;
 
 
 #ifdef _DEBUG_
-static int MYDEBUG = 0;
+static int MYDEBUG = 1;
 #else
 static int MYDEBUG = 0;
 #endif
@@ -65,6 +65,7 @@ Driver_Mesh::Status DriverUNV_R_SMDS_Mesh::Perform()
       for(; anIter != aDataSet2411.end(); anIter++){
         const TNodeLab& aLabel = anIter->first;
         const TRecord& aRec = anIter->second;
+        MESSAGE("AddNodeWithID " << aLabel << " " << aRec.coord[0] << " " << aRec.coord[1] << " " << aRec.coord[2]);
         myMesh->AddNodeWithID(aRec.coord[0],aRec.coord[1],aRec.coord[2],aLabel);
       }
     }
@@ -82,11 +83,13 @@ Driver_Mesh::Status DriverUNV_R_SMDS_Mesh::Perform()
         if(IsBeam(aRec.fe_descriptor_id)) {
           switch ( aRec.node_labels.size() ) {
           case 2: // edge with two nodes
+            MESSAGE("add edge " << aLabel << " " << aRec.node_labels[0] << " " << aRec.node_labels[1]);
             anElement = myMesh->AddEdgeWithID(aRec.node_labels[0],
                                               aRec.node_labels[1],
                                               aLabel);
             break;
           case 3: // quadratic edge (with 3 nodes)
+            MESSAGE("add edge " << aLabel << " " << aRec.node_labels[0] << " " << aRec.node_labels[1] << " " << aRec.node_labels[2]);
             anElement = myMesh->AddEdgeWithID(aRec.node_labels[0],
                                               aRec.node_labels[2],
                                               aRec.node_labels[1],
@@ -94,6 +97,7 @@ Driver_Mesh::Status DriverUNV_R_SMDS_Mesh::Perform()
           }
         }
         else if(IsFace(aRec.fe_descriptor_id)) {
+          MESSAGE("add face " << aLabel);
           switch(aRec.fe_descriptor_id){
           case 71: // TRI3
           case 72:
@@ -109,6 +113,7 @@ Driver_Mesh::Status DriverUNV_R_SMDS_Mesh::Perform()
             
           case 42: // Plane Stress Quadratic Triangle - TRI6
           case 92: // Thin Shell Quadratic Triangle - TRI6
+            MESSAGE("add face " << aLabel << " " << aRec.node_labels[0] << " " << aRec.node_labels[1] << " " << aRec.node_labels[2] << " " << aRec.node_labels[3] << " " << aRec.node_labels[4] << " " << aRec.node_labels[5]);
             anElement = myMesh->AddFaceWithID(aRec.node_labels[0],
                                               aRec.node_labels[2],
                                               aRec.node_labels[4],
@@ -142,6 +147,7 @@ Driver_Mesh::Status DriverUNV_R_SMDS_Mesh::Perform()
           }
         }
         else if(IsVolume(aRec.fe_descriptor_id)){
+          MESSAGE("add volume " << aLabel);
           switch(aRec.fe_descriptor_id){
             
           case 111: // Solid Linear Tetrahedron - TET4
@@ -365,5 +371,7 @@ Driver_Mesh::Status DriverUNV_R_SMDS_Mesh::Perform()
   catch(...){
     INFOS("Unknown exception was cought !!!");
   }
+  if (myMesh)
+    myMesh->compactMesh();
   return aResult;
 }

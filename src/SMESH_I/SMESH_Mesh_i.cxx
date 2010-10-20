@@ -3581,6 +3581,16 @@ SMESH::array_of_ElementType* SMESH_Mesh_i::GetTypes()
   return types._retn();
 }
 
+//=======================================================================
+//function : GetMesh
+//purpose  : Returns self
+//=======================================================================
+
+SMESH::SMESH_Mesh_ptr SMESH_Mesh_i::GetMesh()
+{
+  return SMESH::SMESH_Mesh::_duplicate( _this() );
+}
+
 //=============================================================================
 /*!
  * \brief Returns statistic of mesh elements

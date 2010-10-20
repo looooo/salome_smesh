@@ -114,6 +114,7 @@ QVariant SMESHGUI_Selection::parameter( const int ind, const QString& p ) const
   else if ( p=="shrinkMode" )    val = QVariant( shrinkMode( ind ) );
   else if ( p=="entityMode" )    val = QVariant( entityMode( ind ) );
   else if ( p=="controlMode" )   val = QVariant( controlMode( ind ) );
+  else if ( p=="isNumFunctor" )  val = QVariant( isNumFunctor( ind ) );
   else if ( p=="displayMode" )   val = QVariant( displayMode( ind ) );
   else if ( p=="isComputable" )  val = QVariant( isComputable( ind ) );
   else if ( p=="isPreComputable" )  val = QVariant( isPreComputable( ind ) );
@@ -283,6 +284,35 @@ QString SMESHGUI_Selection::controlMode( int ind ) const
     }
   }
   return "eNone";
+}
+
+bool SMESHGUI_Selection::isNumFunctor( int ind ) const
+{
+  bool result = false;
+  SMESH_Actor* actor = getActor( ind );
+  if ( actor ) {
+    switch( actor->GetControlMode() ) {
+    case SMESH_Actor::eLength:
+    case SMESH_Actor::eLength2D:
+    case SMESH_Actor::eMultiConnection:
+    case SMESH_Actor::eMultiConnection2D:
+    case SMESH_Actor::eArea:
+    case SMESH_Actor::eVolume3D:
+    case SMESH_Actor::eMaxElementLength2D:
+    case SMESH_Actor::eMaxElementLength3D:
+    case SMESH_Actor::eTaper:
+    case SMESH_Actor::eAspectRatio:
+    case SMESH_Actor::eAspectRatio3D:
+    case SMESH_Actor::eMinimumAngle:
+    case SMESH_Actor::eWarping:
+    case SMESH_Actor::eSkew:
+      result = true;
+      break;
+    default:
+      break;
+    }
+  }
+  return result;
 }
 
 //=======================================================================

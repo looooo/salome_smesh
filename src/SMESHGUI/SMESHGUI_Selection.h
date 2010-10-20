@@ -68,6 +68,7 @@ public:
   virtual QString         shrinkMode( int ) const;
   virtual QList<QVariant> entityMode( int ) const;
   virtual QString         controlMode( int ) const;
+  virtual bool            isNumFunctor( int ) const;
   virtual QString         facesOrientationMode( int ) const;
   virtual QString         groupType( int ) const;
   

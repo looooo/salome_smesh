@@ -84,6 +84,7 @@
 #include <SMESH_Client.hxx>
 #include <SMESH_Actor.h>
 #include <SMESH_TypeFilter.hxx>
+#include "SMESH_ControlsDef.hxx"
 
 // SALOME GUI includes
 #include <SalomeApp_Tools.h>
@@ -124,6 +125,7 @@
 // Qt includes
 // #define       INCLUDE_MENUITEM_DEF // VSR commented ????????
 #include <QMenu>
+#include <QTextStream>
 
 // BOOST includes
 #include <boost/shared_ptr.hpp>
@@ -173,14 +175,14 @@
     std::string myExtension;
 
     if ( theCommandID == 113 ) {
-      filter.append( QObject::tr( "MED files (*.med)" ) );
-      filter.append( QObject::tr( "All files (*)" ) );
+      filter.append( QObject::tr( "MED_FILES_FILTER" ) + " (*.med)" );
+      filter.append( QObject::tr( "ALL_FILES_FILTER" ) + " (*)" );
     }
     else if ( theCommandID == 112 ) {
-      filter.append( QObject::tr( "IDEAS files (*.unv)" ) );
+      filter.append( QObject::tr( "IDEAS_FILES_FILTER" ) + " (*.unv)" );
     }
     else if ( theCommandID == 111 ) {
-      filter.append( QObject::tr( "DAT files (*.dat)" ) );
+      filter.append( QObject::tr( "DAT_FILES_FILTER" ) + " (*.dat)" );
     }
 
     QString anInitialPath = "";
@@ -333,7 +335,7 @@
 
     QList<SALOMEDS::Color> aReservedColors;
 
-    QString aFilter, aTitle = QObject::tr("Export mesh");
+    QString aFilter, aTitle = QObject::tr("SMESH_EXPORT_MESH");
     QMap<QString, SMESH::MED_VERSION> aFilterMap;
     QMap<QString, int> aFilterMapSTL;
     switch ( theCommandID ) {
@@ -356,13 +358,13 @@
         // PAL18696
         QString v21 (aMesh->GetVersionString(SMESH::MED_V2_1, 2));
         QString v22 (aMesh->GetVersionString(SMESH::MED_V2_2, 2));
-        aFilterMap.insert( QString("MED ") +  v21 + " (*.med)", SMESH::MED_V2_1 );
-        aFilterMap.insert( QString("MED ") +  v22 + " (*.med)", SMESH::MED_V2_2 );
+        aFilterMap.insert( QObject::tr( "MED_VX_FILES_FILTER" ).arg( v21 ) + " (*.med)", SMESH::MED_V2_1 );
+        aFilterMap.insert( QObject::tr( "MED_VX_FILES_FILTER" ).arg( v22 ) + " (*.med)", SMESH::MED_V2_2 );
       }
       break;
     case 124:
     case 121:
-      aFilter = QObject::tr("DAT files (*.dat)");
+      aFilter = QObject::tr( "DAT_FILES_FILTER" ) + " (*.dat)";
       break;
     case 126:
     case 123:
@@ -377,7 +379,7 @@
           if (aRet != 0)
             return;
         }
-        aFilter = QObject::tr("IDEAS files (*.unv)");
+        aFilter = QObject::tr( "IDEAS_FILES_FILTER" ) + " (*.unv)";
       }
       break;
     case 140:
@@ -405,8 +407,8 @@
             return;
         }
 
-        aFilterMapSTL.insert( QObject::tr("STL ASCII (*.stl)"), 1 ); // 1 - ASCII mode
-        aFilterMapSTL.insert( QObject::tr("STL Binary (*.stl)"), 0 ); // 0 - Binary mode
+        aFilterMapSTL.insert( QObject::tr( "STL_ASCII_FILES_FILTER" ) + " (*.stl)", 1 ); // 1 - ASCII mode
+        aFilterMapSTL.insert( QObject::tr( "STL_BIN_FILES_FILTER" )   + " (*.stl)", 0 ); // 0 - Binary mode
       }
       break;
     default:
@@ -441,7 +443,7 @@
       SUIT_FileDlg* fd = new SUIT_FileDlg( SMESHGUI::desktop(), false, true, true );
       fd->setWindowTitle( aTitle );
       fd->setNameFilters( filters );
-      fd->selectNameFilter( QObject::tr("STL ASCII (*.stl)") );
+      fd->selectNameFilter( QObject::tr( "STL_ASCII_FILES_FILTER" ) + " (*.stl)" );
       if ( !anInitialPath.isEmpty() )
         fd->setDirectory( anInitialPath );
       fd->selectFile(aMeshName);
@@ -710,6 +712,103 @@
     }
 
     SMESH::RepaintCurrentView();
+  }
+
+  QString functorToString( SMESH::Controls::FunctorPtr f )
+  {
+    QString type = QObject::tr( "UNKNOWN_CONTROL" );
+    if ( dynamic_cast< SMESH::Controls::Volume* >( f.get() ) )
+      type = QObject::tr( "VOLUME_3D_ELEMENTS" );
+    else if ( dynamic_cast< SMESH::Controls::MaxElementLength2D* >( f.get() ) )
+      type = QObject::tr( "MAX_ELEMENT_LENGTH_2D" );
+    else if ( dynamic_cast< SMESH::Controls::MaxElementLength3D* >( f.get() ) )
+      type = QObject::tr( "MAX_ELEMENT_LENGTH_3D" );
+    else if ( dynamic_cast< SMESH::Controls::MinimumAngle* >( f.get() ) )
+      type = QObject::tr( "MINIMUMANGLE_ELEMENTS" );
+    else if ( dynamic_cast< SMESH::Controls::AspectRatio* >( f.get() ) )
+      type = QObject::tr( "ASPECTRATIO_ELEMENTS" );
+    else if ( dynamic_cast< SMESH::Controls::AspectRatio3D* >( f.get() ) )
+      type = QObject::tr( "ASPECTRATIO_3D_ELEMENTS" );
+    else if ( dynamic_cast< SMESH::Controls::Warping* >( f.get() ) )
+      type = QObject::tr( "WARP_ELEMENTS" );
+    else if ( dynamic_cast< SMESH::Controls::Taper* >( f.get() ) )
+      type = QObject::tr( "TAPER_ELEMENTS" );
+    else if ( dynamic_cast< SMESH::Controls::Skew* >( f.get() ) )
+      type = QObject::tr( "SKEW_ELEMENTS" );
+    else if ( dynamic_cast< SMESH::Controls::Area* >( f.get() ) )
+      type = QObject::tr( "AREA_ELEMENTS" );
+    else if ( dynamic_cast< SMESH::Controls::Length* >( f.get() ) )
+      type = QObject::tr( "LENGTH_EDGES" );
+    else if ( dynamic_cast< SMESH::Controls::Length2D* >( f.get() ) )
+      type = QObject::tr( "LENGTH2D_EDGES" );
+    else if ( dynamic_cast< SMESH::Controls::MultiConnection* >( f.get() ) )
+      type = QObject::tr( "MULTI_BORDERS" );
+    else if ( dynamic_cast< SMESH::Controls::MultiConnection2D* >( f.get() ) )
+      type = QObject::tr( "MULTI2D_BORDERS" );
+    else if ( dynamic_cast< SMESH::Controls::FreeNodes* >( f.get() ) )
+      type = QObject::tr( "FREE_NODES" );
+    else if ( dynamic_cast< SMESH::Controls::FreeEdges* >( f.get() ) )
+      type = QObject::tr( "FREE_EDGES" );
+    else if ( dynamic_cast< SMESH::Controls::FreeBorders* >( f.get() ) )
+      type = QObject::tr( "FREE_BORDERS" );
+    else if ( dynamic_cast< SMESH::Controls::FreeFaces* >( f.get() ) )
+      type = QObject::tr( "FREE_FACES" );
+    return type;
+  }
+
+  void SaveDistribution()
+  {
+    LightApp_SelectionMgr* aSel = SMESHGUI::selectionMgr();
+    SALOME_ListIO selected;
+    if ( aSel )
+      aSel->selectedObjects( selected );
+
+    if ( selected.Extent() == 1 ) {
+      Handle(SALOME_InteractiveObject) anIO = selected.First();
+      if ( anIO->hasEntry() ) {
+	SMESH_Actor* anActor = SMESH::FindActorByEntry( anIO->getEntry() );
+	if ( anActor && anActor->GetScalarBarActor() && anActor->GetControlMode() != SMESH_Actor::eNone ) {
+	  vtkScalarBarActor* aScalarBarActor = anActor->GetScalarBarActor();
+	  SMESH::Controls::FunctorPtr aFunctor = anActor->GetFunctor();
+	  if ( aScalarBarActor && aFunctor ) {
+	    SMESH::Controls::NumericalFunctor* aNumFun = dynamic_cast<SMESH::Controls::NumericalFunctor*>( aFunctor.get() );
+	    if ( aNumFun ) {
+	      int nbRanges = aScalarBarActor->GetMaximumNumberOfColors();
+	      std::vector<int>    nbEvents;
+	      std::vector<double> funValues;
+	      aNumFun->GetHistogram( nbRanges, nbEvents, funValues );
+	      QString anInitialPath = "";
+	      if ( SUIT_FileDlg::getLastVisitedPath().isEmpty() )
+		anInitialPath = QDir::currentPath();
+	      QString aMeshName = anIO->getName();
+	      QStringList filter;
+	      filter.append( QObject::tr( "TEXT_FILES_FILTER" ) + " (*.txt)" );
+	      filter.append( QObject::tr( "ALL_FILES_FILTER" ) + " (*)" );
+	      QString aFilename = anInitialPath + "/" + aMeshName + "_" + 
+		functorToString( aFunctor ).toLower().simplified().replace( QRegExp( " |-" ), "_" ) + ".txt";
+	      aFilename = SUIT_FileDlg::getFileName( SMESHGUI::desktop(),
+						     aFilename,
+						     filter,
+						     QObject::tr( "SMESH_SAVE_DISTRIBUTION" ),
+						     false );
+	      if ( !aFilename.isEmpty() ) {
+		QFile f( aFilename );
+		if ( f.open( QFile::WriteOnly | QFile::Truncate ) ) {
+		  QTextStream out( &f );
+		  out << "# Mesh: " << aMeshName << endl;
+		  out << "# Control: " << functorToString( aFunctor ) << endl;
+		  out << "#" << endl;
+		  out.setFieldWidth( 10 );
+		  for ( int i = 0; i < qMin( nbEvents.size(), funValues.size()-1 ); i++ )
+		    out << funValues[i] << "\t" << funValues[i+1] << "\t" << nbEvents[i] << endl;
+		  f.close();
+		}
+	      }
+	    }
+	  }
+	}
+      }
+    }
   }
 
   void DisableAutoColor(){
@@ -994,85 +1093,66 @@
     if( !selected.IsEmpty() ){
       Handle(SALOME_InteractiveObject) anIO = selected.First();
       if(!anIO.IsNull()){
-        QString aTitle;
         SMESH_Actor::eControl aControl = SMESH_Actor::eNone;
         if(SMESH_Actor *anActor = SMESH::FindActorByEntry(anIO->getEntry())){
           switch ( theCommandID ){
           case 6001:
-            aTitle = QObject::tr( "LENGTH_EDGES" );
             aControl = SMESH_Actor::eLength;
             break;
           case 6018:
-            aTitle = QObject::tr( "LENGTH2D_EDGES" );
             aControl = SMESH_Actor::eLength2D;
             break;
           case 6002:
-            aTitle = QObject::tr( "FREE_EDGES" );
             aControl = SMESH_Actor::eFreeEdges;
             break;
           case 6003:
-            aTitle = QObject::tr( "FREE_BORDERS" );
             aControl = SMESH_Actor::eFreeBorders;
             break;
           case 6004:
-            aTitle = QObject::tr( "MULTI_BORDERS" );
             aControl = SMESH_Actor::eMultiConnection;
             break;
           case 6005:
-            aTitle = QObject::tr( "FREE_NODES" );
             aControl = SMESH_Actor::eFreeNodes;
             break;
           case 6019:
-            aTitle = QObject::tr( "MULTI2D_BORDERS" );
             aControl = SMESH_Actor::eMultiConnection2D;
             break;
           case 6011:
-            aTitle = QObject::tr( "AREA_ELEMENTS" );
             aControl = SMESH_Actor::eArea;
             break;
           case 6012:
-            aTitle = QObject::tr( "TAPER_ELEMENTS" );
             aControl = SMESH_Actor::eTaper;
             break;
           case 6013:
-            aTitle = QObject::tr( "ASPECTRATIO_ELEMENTS" );
             aControl = SMESH_Actor::eAspectRatio;
             break;
           case 6017:
-            aTitle = QObject::tr( "ASPECTRATIO_3D_ELEMENTS" );
             aControl = SMESH_Actor::eAspectRatio3D;
             break;
           case 6014:
-            aTitle = QObject::tr( "MINIMUMANGLE_ELEMENTS" );
             aControl = SMESH_Actor::eMinimumAngle;
             break;
           case 6015:
-            aTitle = QObject::tr( "WARP_ELEMENTS" );
             aControl = SMESH_Actor::eWarping;
             break;
           case 6016:
-            aTitle = QObject::tr( "SKEW_ELEMENTS" );
             aControl = SMESH_Actor::eSkew;
             break;
           case 6009:
-            aTitle = QObject::tr( "SMESH_VOLUME" );
             aControl = SMESH_Actor::eVolume3D;
             break;
           case 6021:
-            aTitle = QObject::tr( "FREE_FACES" );
             aControl = SMESH_Actor::eFreeFaces;
             break;
           case 6022:
-            aTitle = QObject::tr( "MAX_ELEMENT_LENGTH_2D" );
             aControl = SMESH_Actor::eMaxElementLength2D;
             break;
           case 6023:
-            aTitle = QObject::tr( "MAX_ELEMENT_LENGTH_3D" );
             aControl = SMESH_Actor::eMaxElementLength3D;
             break;
           }
           anActor->SetControlMode(aControl);
-          anActor->GetScalarBarActor()->SetTitle(aTitle.toLatin1().data());
+          anActor->GetScalarBarActor()->SetTitle( functorToString( anActor->GetFunctor() ).toLatin1().constData() );
           SMESH::RepaintCurrentView();
         }
       }
@@ -1692,6 +1772,12 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
   case 201:
     {
       SMESHGUI_Preferences_ScalarBarDlg::ScalarBarProperties( this );
+      break;
+    }
+  case 202:
+    {
+      // dump control distribution data to the text file
+      ::SaveDistribution();
       break;
     }
 
@@ -3105,6 +3191,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   createSMESHAction(  419, "SPLIT_TO_TETRA",  "ICON_SPLIT_TO_TETRA" );
   createSMESHAction(  200, "RESET" );
   createSMESHAction(  201, "SCALAR_BAR_PROP" );
+  createSMESHAction(  202, "SAVE_DISTRIBUTION" );
   createSMESHAction(  211, "WIRE",           "ICON_WIRE", 0, true );
   createSMESHAction(  212, "SHADE",          "ICON_SHADE", 0, true );
   createSMESHAction(  213, "SHRINK",         "ICON_SHRINK", 0, true );
@@ -3704,6 +3791,11 @@ void SMESHGUI::initialize( CAM_Application* app )
 
   popupMgr()->insert( action( 201 ), anId, -1 ); // SCALAR_BAR_PROP
   popupMgr()->setRule( action( 201 ), aMeshInVTK + "&& controlMode <> 'eNone'", QtxPopupMgr::VisibleRule );
+
+  popupMgr()->insert( separator(), anId, -1 );
+
+  popupMgr()->insert( action( 202 ), anId, -1 ); // SAVE_DISTRIBUTION
+  popupMgr()->setRule( action( 202 ), aMeshInVTK + "&& isNumFunctor", QtxPopupMgr::VisibleRule );
 
   popupMgr()->insert( separator(), -1, -1 );
 

@@ -4,6 +4,42 @@
 <context>
     <name>@default</name>
     <message>
+        <source>SMESH_EXPORT_MESH</source>
+        <translation>Export mesh</translation>
+    </message>
+    <message>
+        <source>MED_FILES_FILTER</source>
+        <translation>MED files</translation>
+    </message>
+    <message>
+        <source>IDEAS_FILES_FILTER</source>
+        <translation>IDEAS files</translation>
+    </message>
+    <message>
+        <source>DAT_FILES_FILTER</source>
+        <translation>DAT files</translation>
+    </message>
+    <message>
+        <source>TEXT_FILES_FILTER</source>
+        <translation>TXT files</translation>
+    </message>
+    <message>
+        <source>MED_VX_FILES_FILTER</source>
+        <translation>MED %1 files</translation>
+    </message>
+    <message>
+        <source>STL_ASCII_FILES_FILTER</source>
+        <translation>STL ASCII files</translation>
+    </message>
+    <message>
+        <source>STL_BIN_FILES_FILTER</source>
+        <translation>STL binary files</translation>
+    </message>
+    <message>
+        <source>ALL_FILES_FILTER</source>
+        <translation>All files</translation>
+    </message>
+    <message>
         <source>AREA_ELEMENTS</source>
         <translation>Area</translation>
     </message>
@@ -566,6 +602,10 @@
     <message>
         <source>MEN_RESET</source>
         <translation>Reset</translation>
+    </message>
+    <message>
+        <source>MEN_SAVE_DISTRIBUTION</source>
+        <translation>Export Distribution...</translation>
     </message>
     <message>
         <source>MEN_REVOLUTION</source>
@@ -2505,6 +2545,10 @@ Consider saving your work before application crash</translation>
         <translation>Reset</translation>
     </message>
     <message>
+        <source>STB_SAVE_DISTRIBUTION</source>
+        <translation>Save distribution to the file</translation>
+    </message>
+    <message>
         <source>STB_REVOLUTION</source>
         <translation>Revolution</translation>
     </message>
@@ -3033,6 +3077,10 @@ Consider saving your work before application crash</translation>
         <translation>Reset</translation>
     </message>
     <message>
+        <source>TOP_SAVE_DISTRIBUTION</source>
+        <translation>Export distribution</translation>
+    </message>
+    <message>
         <source>TOP_REVOLUTION</source>
         <translation>Revolution</translation>
     </message>
@@ -3165,8 +3213,12 @@ Consider saving your work before application crash</translation>
         <translation>Wireframe</translation>
     </message>
     <message>
+        <source>UNKNOWN_CONTROL</source>
+        <translation>Unknown</translation>
+    </message>
+    <message>
         <source>VOLUME_3D_ELEMENTS</source>
-        <translation>Area</translation>
+        <translation>Volume</translation>
     </message>
     <message>
         <source>WARP_ELEMENTS</source>
@@ -3265,6 +3317,10 @@ Input value precision can be adjusted using
     <message>
         <source>NB_NODES_REMOVED</source>
         <translation>Removed %1 node(s).</translation>
+    </message>
+    <message>
+        <source>SMESH_SAVE_DISTRIBUTION</source>
+        <translation>Export Distribution</translation>
     </message>
 </context>
 <context>

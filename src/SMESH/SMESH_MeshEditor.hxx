@@ -162,14 +162,14 @@ public:
   SMDS_MeshElement* AddElement(const std::vector<const SMDS_MeshNode*> & nodes,
                                const SMDSAbs_ElementType                 type,
                                const bool                                isPoly,
-                               const int                                 ID = 0);
+                               const int                                 ID = -1);
   /*!
    * \brief Add element
    */
   SMDS_MeshElement* AddElement(const std::vector<int>  & nodeIDs,
                                const SMDSAbs_ElementType type,
                                const bool                isPoly,
-                               const int                 ID = 0);
+                               const int                 ID = -1);
 
   bool Remove (const std::list< int >& theElemIDs, const bool isNodes);
   // Remove a node or an element.

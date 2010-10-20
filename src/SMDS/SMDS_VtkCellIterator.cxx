@@ -104,7 +104,7 @@ SMDS_VtkCellIteratorToUNV::SMDS_VtkCellIteratorToUNV(SMDS_Mesh* mesh,
   _cellId = vtkCellId;
   _index = 0;
   _type = aType;
-  MESSAGE("SMDS_VtkCellInterlacedIterator " << _type);
+  //MESSAGE("SMDS_VtkCellInterlacedIterator " << _type);
 
   _vtkIdList = vtkIdList::New();
   vtkIdType* pts;
@@ -164,19 +164,11 @@ SMDS_VtkCellIteratorToUNV::SMDS_VtkCellIteratorToUNV(SMDS_Mesh* mesh,
       }
     case SMDSEntity_Polygon:
     case SMDSEntity_Quad_Polygon:
-      {
-        MESSAGE("SMDS_VtkCellIterator polygon");
-        break;
-      }
     case SMDSEntity_Polyhedra:
     case SMDSEntity_Quad_Polyhedra:
-      {
-        MESSAGE("SMDS_VtkCellIterator Polyhedra");
-        break;
-      }
     default:
       {
-        static int id[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19};
+        static int id[] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29};
         ids = id;
         break;
       }

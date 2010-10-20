@@ -1931,6 +1931,7 @@ void SMESHDS_Mesh::compactMesh()
   myIDElements.swap(newSmdsToVtk);
   myVtkIndex.swap(newVtkToSmds);
   MESSAGE("myCells.size()=" << myCells.size() << " myIDElements.size()=" << myIDElements.size() << " myVtkIndex.size()=" << myVtkIndex.size() );
+  this->myElementIDFactory->emptyPool(newSmdsId);
 
   // ---TODO: myNodes, myElements in submeshes
 

@@ -134,7 +134,7 @@ void SMDS_MeshElementIDFactory::ReleaseID(const int ID)
 {
   if (ID < 0)
     {
-      MESSAGE("~~~~~~~~~~~~~~ SMDS_MeshElementIDFactory::ReleaseID ID = " << ID);
+      //MESSAGE("~~~~~~~~~~~~~~ SMDS_MeshElementIDFactory::ReleaseID ID = " << ID);
       return;
     }
   int vtkId = myMesh->myIDElements[ID];

@@ -58,6 +58,15 @@ bool SMDS_VtkEdge::ChangeNodes(const SMDS_MeshNode* nodes[], const int nbNodes)
   return true;
 }
 
+bool SMDS_VtkEdge::IsMediumNode(const SMDS_MeshNode* node) const
+{
+  vtkUnstructuredGrid* grid = SMDS_Mesh::_meshList[myMeshId]->getGrid();
+  vtkIdType npts = 0;
+  vtkIdType* pts = 0;
+  grid->GetCellPoints(myVtkID, npts, pts);
+  return ((npts == 3) && (node->GetID() == pts[2]));
+}
+
 void SMDS_VtkEdge::Print(std::ostream & OS) const
 {
   OS << "edge <" << GetID() << "> : ";
@@ -101,7 +110,8 @@ vtkIdType SMDS_VtkEdge::GetVtkType() const
 const SMDS_MeshNode*
 SMDS_VtkEdge::GetNode(const int ind) const
 {
-  return SMDS_MeshElement::GetNode(ind); // --- a optimiser !
+  // TODO optimize !!
+  return SMDS_MeshElement::GetNode(ind);
 }
 
 bool SMDS_VtkEdge::IsQuadratic() const

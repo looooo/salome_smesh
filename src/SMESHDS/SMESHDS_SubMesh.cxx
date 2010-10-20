@@ -49,11 +49,16 @@ SMESHDS_SubMesh::SMESHDS_SubMesh()
 //=======================================================================
 void SMESHDS_SubMesh::AddElement(const SMDS_MeshElement * ME)
 {
-  if ( !IsComplexSubmesh() )
+  if (!IsComplexSubmesh())
     {
       int idInSubShape = ME->getIdInShape();
-      assert(idInSubShape == -1);
-      SMDS_MeshElement* elem = (SMDS_MeshElement*)(ME);
+      if (idInSubShape != -1)
+        {
+          MESSAGE("add element in subshape already belonging to a subshape "
+              << ME->GetID() << "  " << ME->getIdInShape() << " " << ME->getshapeId());
+          throw SALOME_Exception(LOCALIZED("add element in subshape already belonging to a subshape"));
+        }
+      SMDS_MeshElement* elem = (SMDS_MeshElement*) (ME);
       elem->setIdInShape(myElements.size());
       myElements.push_back(ME);
     }

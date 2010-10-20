@@ -43,10 +43,18 @@ void SMDS_VtkFace::init(std::vector<vtkIdType> nodeIds, SMDS_Mesh* mesh)
       aType = VTK_QUADRATIC_QUAD;
       break;
     default:
-      aType = VTK_TRIANGLE;
+      aType = VTK_POLYGON;
       break;
   }
   myVtkID = grid->InsertNextLinkedCell(aType, nodeIds.size(), &nodeIds[0]);
+}
+
+void SMDS_VtkFace::initPoly(std::vector<vtkIdType> nodeIds, SMDS_Mesh* mesh)
+{
+  vtkUnstructuredGrid* grid = mesh->getGrid();
+  myIdInShape = -1;
+  myMeshId = mesh->getMeshId();
+  myVtkID = grid->InsertNextLinkedCell(VTK_POLYGON, nodeIds.size(), &nodeIds[0]);
 }
 
 bool SMDS_VtkFace::ChangeNodes(const SMDS_MeshNode* nodes[], const int nbNodes)
@@ -60,7 +68,7 @@ bool SMDS_VtkFace::ChangeNodes(const SMDS_MeshNode* nodes[], const int nbNodes)
       MESSAGE("ChangeNodes problem: not the same number of nodes " << npts << " -> " << nbNodes);
       return false;
     }
-  for (int i=0; i<nbNodes; i++)
+  for (int i = 0; i < nbNodes; i++)
     {
       pts[i] = nodes[i]->GetID();
     }
@@ -69,24 +77,31 @@ bool SMDS_VtkFace::ChangeNodes(const SMDS_MeshNode* nodes[], const int nbNodes)
 
 void SMDS_VtkFace::Print(std::ostream & OS) const
 {
-  OS << "edge <" << GetID() << "> : ";
+  OS << "face <" << GetID() << "> : ";
 }
 
 int SMDS_VtkFace::NbEdges() const
 {
-  switch (NbNodes())
+  // TODO quadratic polygons ?
+  vtkUnstructuredGrid* grid = SMDS_Mesh::_meshList[myMeshId]->getGrid();
+  vtkIdType aVtkType = grid->GetCellType(this->myVtkID);
+  int nbEdges = 3;
+  switch (aVtkType)
   {
-    case 3:
-    case 6:
-      return 3;
-    case 4:
-    case 8:
-      return 4;
+    case VTK_TRIANGLE:
+    case VTK_QUADRATIC_TRIANGLE:
+      nbEdges = 3;
+      break;
+    case VTK_QUAD:
+    case VTK_QUADRATIC_QUAD:
+      nbEdges = 4;
+      break;
+    case VTK_POLYGON:
     default:
-      MESSAGE("invalid number of nodes")
-      ;
+      nbEdges = grid->GetCell(myVtkID)->GetNumberOfPoints();
+      break;
   }
-  return 0;
+  return nbEdges;
 }
 
 int SMDS_VtkFace::NbFaces() const
@@ -114,63 +129,73 @@ SMDS_VtkFace::GetNode(const int ind) const
 
 bool SMDS_VtkFace::IsQuadratic() const
 {
-  if (this->NbNodes() > 5)
-    return true;
-  else
-    return false;
+  vtkUnstructuredGrid* grid = SMDS_Mesh::_meshList[myMeshId]->getGrid();
+  vtkIdType aVtkType = grid->GetCellType(this->myVtkID);
+  // TODO quadratic polygons ?
+  switch (aVtkType)
+  {
+    case VTK_QUADRATIC_TRIANGLE:
+    case VTK_QUADRATIC_QUAD:
+      return true;
+      break;
+    default:
+      return false;
+  }
+}
+
+bool SMDS_VtkFace::IsPoly() const
+{
+  vtkUnstructuredGrid* grid = SMDS_Mesh::_meshList[myMeshId]->getGrid();
+  vtkIdType aVtkType = grid->GetCellType(this->myVtkID);
+  return (aVtkType == VTK_POLYGON);
 }
 
 SMDSAbs_EntityType SMDS_VtkFace::GetEntityType() const
 {
+  vtkUnstructuredGrid* grid = SMDS_Mesh::_meshList[myMeshId]->getGrid();
+  vtkIdType aVtkType = grid->GetCellType(this->myVtkID);
   SMDSAbs_EntityType aType = SMDSEntity_Polygon;
-  switch (NbNodes())
+  switch (aVtkType)
   {
-    case 3:
+    case VTK_TRIANGLE:
       aType = SMDSEntity_Triangle;
       break;
-   case 6:
-      aType = SMDSEntity_Quad_Triangle;
-      break;
-    case 4:
+    case VTK_QUAD:
       aType = SMDSEntity_Quadrangle;
       break;
-    case 8:
+    case VTK_QUADRATIC_TRIANGLE:
+      aType = SMDSEntity_Quad_Triangle;
+      break;
+    case VTK_QUADRATIC_QUAD:
       aType = SMDSEntity_Quad_Quadrangle;
       break;
+    default:
+      aType = SMDSEntity_Polygon;
   }
   return aType;
 }
 
-vtkIdType SMDS_VtkFace::GetVtkType() const
-{
-  switch (NbNodes())
+  vtkIdType SMDS_VtkFace::GetVtkType() const
   {
-    case 3:
-      return VTK_TRIANGLE;
-    case 6:
-      return VTK_QUADRATIC_TRIANGLE;
-    case 4:
-      return VTK_QUAD;
-    case 8:
-      return VTK_QUADRATIC_QUAD;
-    default:
-      return VTK_POLYGON;
+    vtkUnstructuredGrid* grid = SMDS_Mesh::_meshList[myMeshId]->getGrid();
+    vtkIdType aVtkType = grid->GetCellType(this->myVtkID);
+    return aVtkType;
   }
-}
 
-SMDS_ElemIteratorPtr SMDS_VtkFace::elementsIterator(SMDSAbs_ElementType type) const
-{
-  switch (type)
+  SMDS_ElemIteratorPtr SMDS_VtkFace::elementsIterator(SMDSAbs_ElementType type) const
   {
-    case SMDSAbs_Node:
-      return SMDS_ElemIteratorPtr(new SMDS_VtkCellIterator(SMDS_Mesh::_meshList[myMeshId], myVtkID, GetEntityType()));
-    default:
-      MESSAGE("ERROR : Iterator not implemented");
-      return SMDS_ElemIteratorPtr((SMDS_ElemIterator*) NULL);
+    switch (type)
+    {
+      case SMDSAbs_Node:
+        return SMDS_ElemIteratorPtr(new SMDS_VtkCellIterator(SMDS_Mesh::_meshList[myMeshId], myVtkID, GetEntityType()));
+      default:
+        MESSAGE("ERROR : Iterator not implemented")
+        ;
+        return SMDS_ElemIteratorPtr((SMDS_ElemIterator*) NULL);
+    }
   }
-}
 
-SMDS_ElemIteratorPtr SMDS_VtkFace::nodesIteratorToUNV() const
-{
-  return SMDS_ElemIteratorPtr(new SMDS_VtkCellIteratorToUNV(SMDS_Mesh::_meshList[myMeshId], myVtkID, GetEntityType()));
-}
+  SMDS_ElemIteratorPtr SMDS_VtkFace::nodesIteratorToUNV() const
+  {
+    return SMDS_ElemIteratorPtr(new SMDS_VtkCellIteratorToUNV(SMDS_Mesh::_meshList[myMeshId], myVtkID, GetEntityType()));
+  }

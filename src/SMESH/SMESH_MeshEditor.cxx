@@ -124,75 +124,76 @@ SMESH_MeshEditor::AddElement(const vector<const SMDS_MeshNode*> & node,
                              const bool                           isPoly,
                              const int                            ID)
 {
+  //MESSAGE("AddElement " <<node.size() << " " << type << " " << isPoly << " " << ID);
   SMDS_MeshElement* e = 0;
   int nbnode = node.size();
   SMESHDS_Mesh* mesh = GetMeshDS();
   switch ( type ) {
   case SMDSAbs_0DElement:
     if ( nbnode == 1 )
-      if ( ID ) e = mesh->Add0DElementWithID(node[0], ID);
+      if ( ID >= 0 ) e = mesh->Add0DElementWithID(node[0], ID);
       else      e = mesh->Add0DElement      (node[0] );
     break;
   case SMDSAbs_Edge:
     if ( nbnode == 2 )
-      if ( ID ) e = mesh->AddEdgeWithID(node[0], node[1], ID);
+      if ( ID >= 0 ) e = mesh->AddEdgeWithID(node[0], node[1], ID);
       else      e = mesh->AddEdge      (node[0], node[1] );
     else if ( nbnode == 3 )
-      if ( ID ) e = mesh->AddEdgeWithID(node[0], node[1], node[2], ID);
+      if ( ID >= 0 ) e = mesh->AddEdgeWithID(node[0], node[1], node[2], ID);
       else      e = mesh->AddEdge      (node[0], node[1], node[2] );
     break;
   case SMDSAbs_Face:
     if ( !isPoly ) {
       if      (nbnode == 3)
-        if ( ID ) e = mesh->AddFaceWithID(node[0], node[1], node[2], ID);
+        if ( ID >= 0 ) e = mesh->AddFaceWithID(node[0], node[1], node[2], ID);
         else      e = mesh->AddFace      (node[0], node[1], node[2] );
       else if (nbnode == 4) 
-        if ( ID ) e = mesh->AddFaceWithID(node[0], node[1], node[2], node[3], ID);
+        if ( ID >= 0 ) e = mesh->AddFaceWithID(node[0], node[1], node[2], node[3], ID);
         else      e = mesh->AddFace      (node[0], node[1], node[2], node[3] );
       else if (nbnode == 6)
-        if ( ID ) e = mesh->AddFaceWithID(node[0], node[1], node[2], node[3],
+        if ( ID >= 0 ) e = mesh->AddFaceWithID(node[0], node[1], node[2], node[3],
                                           node[4], node[5], ID);
         else      e = mesh->AddFace      (node[0], node[1], node[2], node[3],
                                           node[4], node[5] );
       else if (nbnode == 8)
-        if ( ID ) e = mesh->AddFaceWithID(node[0], node[1], node[2], node[3],
+        if ( ID >= 0 ) e = mesh->AddFaceWithID(node[0], node[1], node[2], node[3],
                                           node[4], node[5], node[6], node[7], ID);
         else      e = mesh->AddFace      (node[0], node[1], node[2], node[3],
                                           node[4], node[5], node[6], node[7] );
     } else {
-      if ( ID ) e = mesh->AddPolygonalFaceWithID(node, ID);
+      if ( ID >= 0 ) e = mesh->AddPolygonalFaceWithID(node, ID);
       else      e = mesh->AddPolygonalFace      (node    );
     }
     break;
   case SMDSAbs_Volume:
     if ( !isPoly ) {
       if      (nbnode == 4)
-        if ( ID ) e = mesh->AddVolumeWithID(node[0], node[1], node[2], node[3], ID);
+        if ( ID >= 0 ) e = mesh->AddVolumeWithID(node[0], node[1], node[2], node[3], ID);
         else      e = mesh->AddVolume      (node[0], node[1], node[2], node[3] );
       else if (nbnode == 5)
-        if ( ID ) e = mesh->AddVolumeWithID(node[0], node[1], node[2], node[3],
+        if ( ID >= 0 ) e = mesh->AddVolumeWithID(node[0], node[1], node[2], node[3],
                                             node[4], ID);
         else      e = mesh->AddVolume      (node[0], node[1], node[2], node[3],
                                             node[4] );
       else if (nbnode == 6)
-        if ( ID ) e = mesh->AddVolumeWithID(node[0], node[1], node[2], node[3],
+        if ( ID >= 0 ) e = mesh->AddVolumeWithID(node[0], node[1], node[2], node[3],
                                             node[4], node[5], ID);
         else      e = mesh->AddVolume      (node[0], node[1], node[2], node[3],
                                             node[4], node[5] );
       else if (nbnode == 8)
-        if ( ID ) e = mesh->AddVolumeWithID(node[0], node[1], node[2], node[3],
+        if ( ID >= 0 ) e = mesh->AddVolumeWithID(node[0], node[1], node[2], node[3],
                                             node[4], node[5], node[6], node[7], ID);
         else      e = mesh->AddVolume      (node[0], node[1], node[2], node[3],
                                             node[4], node[5], node[6], node[7] );
       else if (nbnode == 10)
-        if ( ID ) e = mesh->AddVolumeWithID(node[0], node[1], node[2], node[3],
+        if ( ID >= 0 ) e = mesh->AddVolumeWithID(node[0], node[1], node[2], node[3],
                                             node[4], node[5], node[6], node[7],
                                             node[8], node[9], ID);
         else      e = mesh->AddVolume      (node[0], node[1], node[2], node[3],
                                             node[4], node[5], node[6], node[7],
                                             node[8], node[9] );
       else if (nbnode == 13)
-        if ( ID ) e = mesh->AddVolumeWithID(node[0], node[1], node[2], node[3],
+        if ( ID >= 0 ) e = mesh->AddVolumeWithID(node[0], node[1], node[2], node[3],
                                             node[4], node[5], node[6], node[7],
                                             node[8], node[9], node[10],node[11],
                                             node[12],ID);
@@ -201,7 +202,7 @@ SMESH_MeshEditor::AddElement(const vector<const SMDS_MeshNode*> & node,
                                             node[8], node[9], node[10],node[11],
                                             node[12] );
       else if (nbnode == 15)
-        if ( ID ) e = mesh->AddVolumeWithID(node[0], node[1], node[2], node[3],
+        if ( ID >= 0 ) e = mesh->AddVolumeWithID(node[0], node[1], node[2], node[3],
                                             node[4], node[5], node[6], node[7],
                                             node[8], node[9], node[10],node[11],
                                             node[12],node[13],node[14],ID);
@@ -210,7 +211,7 @@ SMESH_MeshEditor::AddElement(const vector<const SMDS_MeshNode*> & node,
                                             node[8], node[9], node[10],node[11],
                                             node[12],node[13],node[14] );
       else if (nbnode == 20)
-        if ( ID ) e = mesh->AddVolumeWithID(node[0], node[1], node[2], node[3],
+        if ( ID >= 0 ) e = mesh->AddVolumeWithID(node[0], node[1], node[2], node[3],
                                             node[4], node[5], node[6], node[7],
                                             node[8], node[9], node[10],node[11],
                                             node[12],node[13],node[14],node[15],
@@ -551,7 +552,7 @@ bool SMESH_MeshEditor::InverseDiag (const SMDS_MeshElement * theTria1,
   // check case of quadratic faces
   if (theTria1->GetEntityType() != SMDSEntity_Quad_Triangle)
     return false;
-  if (theTria2->GetEntityType() == SMDSEntity_Quad_Triangle)
+  if (theTria2->GetEntityType() != SMDSEntity_Quad_Triangle)
     return false;
 
   //       5
@@ -7079,10 +7080,12 @@ void SMESH_MeshEditor::MergeNodes (TListOfListOfNodes & theGroupsOfNodes)
     list<const SMDS_MeshNode*>& nodes = *grIt;
     list<const SMDS_MeshNode*>::iterator nIt = nodes.begin();
     const SMDS_MeshNode* nToKeep = *nIt;
+    //MESSAGE("node to keep " << nToKeep->GetID());
     for ( ++nIt; nIt != nodes.end(); nIt++ ) {
       const SMDS_MeshNode* nToRemove = *nIt;
       nodeNodeMap.insert( TNodeNodeMap::value_type( nToRemove, nToKeep ));
       if ( nToRemove != nToKeep ) {
+        //MESSAGE("  node to remove " << nToRemove->GetID());
         rmNodeIds.push_back( nToRemove->GetID() );
         AddToSameGroups( nToKeep, nToRemove, aMesh );
       }
@@ -7099,6 +7102,7 @@ void SMESH_MeshEditor::MergeNodes (TListOfListOfNodes & theGroupsOfNodes)
   set<const SMDS_MeshElement*>::iterator eIt = elems.begin();
   for ( ; eIt != elems.end(); eIt++ ) {
     const SMDS_MeshElement* elem = *eIt;
+    //MESSAGE(" ---- inverse elem on node to remove " << elem->GetID());
     int nbNodes = elem->NbNodes();
     int aShapeId = FindShape( elem );
 
@@ -7148,6 +7152,7 @@ void SMESH_MeshEditor::MergeNodes (TListOfListOfNodes & theGroupsOfNodes)
 
     bool isOk = true;
     int nbUniqueNodes = nodeSet.size();
+    //MESSAGE("nbNodes nbUniqueNodes " << nbNodes << " " << nbUniqueNodes);
     if ( nbNodes != nbUniqueNodes ) { // some nodes stick
       // Polygons and Polyhedral volumes
       if (elem->IsPoly()) {
@@ -7251,6 +7256,7 @@ void SMESH_MeshEditor::MergeNodes (TListOfListOfNodes & theGroupsOfNodes)
             isOk = false;
           else if ( nbRepl == 2 && iRepl[ 1 ] - iRepl[ 0 ] == 2 )
             isOk = false; // opposite nodes stick
+          //MESSAGE("isOk " << isOk);
         }
         break;
       case 6: ///////////////////////////////////// PENTAHEDRON
@@ -7600,28 +7606,10 @@ void SMESH_MeshEditor::MergeNodes (TListOfListOfNodes & theGroupsOfNodes)
         }
       }
       else {
-        // Change regular element or polygon
-        SMDS_MeshElement* newElem = 0;
-        switch (nbUniqueNodes)
-        {
-          case 3:
-            newElem = aMesh->AddFace(uniqueNodes[0], uniqueNodes[1], uniqueNodes[2]);
-            break;
-          case 4:
-            newElem = aMesh->AddVolume(uniqueNodes[0], uniqueNodes[1], uniqueNodes[2],
-                                       uniqueNodes[3]);
-            break;
-          case 5:
-            newElem = aMesh->AddVolume(uniqueNodes[0], uniqueNodes[1], uniqueNodes[2],
-                                       uniqueNodes[3], uniqueNodes[4]);
-            break;
-          case 6:
-            newElem = aMesh->AddVolume(uniqueNodes[0], uniqueNodes[1], uniqueNodes[2],
-                                       uniqueNodes[3], uniqueNodes[4], uniqueNodes[5]);
-            break;
-          default:
-            MESSAGE("invalid number of nodes:" << nbUniqueNodes);
-        }
+        //MESSAGE("Change regular element or polygon " << elem->GetID());
+        SMDSAbs_ElementType etyp = elem->GetType();
+        uniqueNodes.resize(nbUniqueNodes);
+        SMDS_MeshElement* newElem = this->AddElement(uniqueNodes, etyp, false);
         if (newElem)
           {
             myLastCreatedElems.Append(newElem);
@@ -7633,6 +7621,7 @@ void SMESH_MeshEditor::MergeNodes (TListOfListOfNodes & theGroupsOfNodes)
     }
     else {
       // Remove invalid regular element or invalid polygon
+      //MESSAGE("Remove invalid " << elem->GetID());
       rmElemIds.push_back( elem->GetID() );
     }
 
@@ -8088,7 +8077,7 @@ SMESH_MeshEditor::SewFreeBorder (const SMDS_MeshNode* theBordFirstNode,
     //    links of the free border
     // -------------------------------------------------------------------------
 
-    // 1. Since sewing may brake if there are volumes to split on the side 2,
+    // 1. Since sewing may break if there are volumes to split on the side 2,
     //    we wont move nodes but just compute new coordinates for them
     typedef map<const SMDS_MeshNode*, gp_XYZ> TNodeXYZMap;
     TNodeXYZMap nBordXYZ;
@@ -8627,6 +8616,7 @@ void SMESH_MeshEditor::InsertNodesIntoLink(const SMDS_MeshElement*     theFace,
     return;
   }
 
+  SMESHDS_Mesh *aMesh = GetMeshDS();
   if( !theFace->IsQuadratic() ) {
 
     // put aNodesToInsert between theBetweenNode1 and theBetweenNode2
@@ -8677,7 +8667,6 @@ void SMESH_MeshEditor::InsertNodesIntoLink(const SMDS_MeshElement*     theFace,
     }
 
     // create new elements
-    SMESHDS_Mesh *aMesh = GetMeshDS();
     int aShapeId = FindShape( theFace );
 
     i1 = 0; i2 = 1;
@@ -8703,10 +8692,16 @@ void SMESH_MeshEditor::InsertNodesIntoLink(const SMDS_MeshElement*     theFace,
     newNodes[ 1 ] = linkNodes[ i2 ];
     newNodes[ 2 ] = nodes[ iSplit >= iBestQuad ? i3 : i4 ];
     newNodes[ 3 ] = nodes[ i4 ];
-    // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
-    MESSAGE("ChangeElementNodes");
-    aMesh->ChangeElementNodes( theFace, newNodes, iSplit == iBestQuad ? 4 : 3 );
-  } // end if(!theFace->IsQuadratic())
+    //aMesh->ChangeElementNodes( theFace, newNodes, iSplit == iBestQuad ? 4 : 3 );
+    const SMDS_MeshElement* newElem = 0;
+    if (iSplit == iBestQuad)
+      newElem = aMesh->AddFace( newNodes[0], newNodes[1], newNodes[2], newNodes[3] );
+    else
+      newElem = aMesh->AddFace( newNodes[0], newNodes[1], newNodes[2] );
+    myLastCreatedElems.Append(newElem);
+    if ( aShapeId && newElem )
+      aMesh->SetMeshElementOnShape( newElem, aShapeId );
+} // end if(!theFace->IsQuadratic())
   else { // theFace is quadratic
     // we have to split theFace on simple triangles and one simple quadrangle
     int tmp = il1/2;
@@ -8733,7 +8728,6 @@ void SMESH_MeshEditor::InsertNodesIntoLink(const SMDS_MeshElement*     theFace,
     //           n4           n6      n5     n4
 
     // create new elements
-    SMESHDS_Mesh *aMesh = GetMeshDS();
     int aShapeId = FindShape( theFace );
 
     int n1,n2,n3;
@@ -8816,9 +8810,9 @@ void SMESH_MeshEditor::InsertNodesIntoLink(const SMDS_MeshElement*     theFace,
       if ( aShapeId && newElem )
         aMesh->SetMeshElementOnShape( newElem, aShapeId );
     }
-    // remove old quadratic face
-    aMesh->RemoveElement(theFace);
   }
+  // remove old face
+  aMesh->RemoveElement(theFace);
 }
 
 //=======================================================================
@@ -9250,7 +9244,7 @@ SMESH_MeshEditor::SewSideElements (TIDSortedElemSet&    theSide1,
   // 1. Build set of faces representing each side:
   // =======================================================================
   // a. build set of nodes belonging to faces
-  // b. complete set of faces: find missing fices whose nodes are in set of nodes
+  // b. complete set of faces: find missing faces whose nodes are in set of nodes
   // c. create temporary faces representing side of volumes if correspondent
   //    face does not exist
 
@@ -9292,7 +9286,7 @@ SMESH_MeshEditor::SewSideElements (TIDSortedElemSet&    theSide1,
     // -----------------------------------------------------------
     // 1a. Collect nodes of existing faces
     //     and build set of face nodes in order to detect missing
-    //     faces corresponing to sides of volumes
+    //     faces corresponding to sides of volumes
     // -----------------------------------------------------------
 
     set< set <const SMDS_MeshNode*> > setOfFaceNodeSet;
@@ -9316,7 +9310,7 @@ SMESH_MeshEditor::SewSideElements (TIDSortedElemSet&    theSide1,
         volSet->insert( elem );
     }
     // ------------------------------------------------------------------------------
-    // 1b. Complete set of faces: find missing fices whose nodes are in set of nodes
+    // 1b. Complete set of faces: find missing faces whose nodes are in set of nodes
     // ------------------------------------------------------------------------------
 
     for ( nIt = nodeSet->begin(); nIt != nodeSet->end(); nIt++ ) { // loop on nodes of iSide
@@ -9425,7 +9419,7 @@ SMESH_MeshEditor::SewSideElements (TIDSortedElemSet&    theSide1,
               fIt++;
             }
             else
-              freeFaceList.erase( fIt++ ); // here fIt++ occures before erase
+              freeFaceList.erase( fIt++ ); // here fIt++ occurs before erase
           }
           if ( freeFaceList.size() > 1 )
           {
@@ -9803,9 +9797,14 @@ SMESH_MeshEditor::SewSideElements (TIDSortedElemSet&    theSide1,
         //       else
         if ( nbReplaced )
           {
-          // TODO problem ChangeElementNodes : not the same number of nodes, not the same type
-          MESSAGE("ChangeElementNodes");
-          aMesh->ChangeElementNodes( e, & nodes[0], nbNodes );
+            SMDSAbs_ElementType etyp = e->GetType();
+            SMDS_MeshElement* newElem = this->AddElement(nodes, etyp, false);
+            if (newElem)
+              {
+                myLastCreatedElems.Append(newElem);
+                AddToSameGroups(newElem, e, aMesh);
+              }
+            aMesh->RemoveElement(e);
           }
       }
     }

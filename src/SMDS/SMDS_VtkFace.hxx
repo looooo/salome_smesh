@@ -14,6 +14,7 @@ public:
   SMDS_VtkFace(std::vector<vtkIdType> nodeIds, SMDS_Mesh* mesh);
   ~SMDS_VtkFace();
   void init(std::vector<vtkIdType> nodeIds, SMDS_Mesh* mesh);
+  void initPoly(std::vector<vtkIdType> nodeIds, SMDS_Mesh* mesh);
   bool ChangeNodes(const SMDS_MeshNode* nodes[], const int nbNodes);
 
   void Print(std::ostream & OS) const;
@@ -25,6 +26,7 @@ public:
   virtual SMDSAbs_EntityType GetEntityType() const;
   virtual const SMDS_MeshNode* GetNode(const int ind) const;
   virtual bool IsQuadratic() const;
+  virtual bool IsPoly() const;
 
 protected:
   virtual SMDS_ElemIteratorPtr elementsIterator(SMDSAbs_ElementType type) const;

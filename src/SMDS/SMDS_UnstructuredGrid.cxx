@@ -264,7 +264,7 @@ void SMDS_UnstructuredGrid::compactGrid(std::vector<int>& idNodesOldToNew, int n
               MESSAGE(" -------- newCellSize, endBloc " << endBloc << " " << oldCellSize);
               copyBloc(newTypes, idCellsOldToNew, idNodesOldToNew, newConnectivity, newLocations, pointsCell,
                        alreadyCopied, startBloc, endBloc);
-              compactState = lookHoleStart;
+              compactState = lookHoleEnd;
             }
           break;
       }

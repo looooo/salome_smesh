@@ -28,6 +28,12 @@ public:
   virtual SMDSAbs_EntityType GetEntityType() const;
   virtual const SMDS_MeshNode* GetNode(const int ind) const;
   virtual bool IsQuadratic() const;
+  virtual bool IsPoly() const;
+  static void gravityCenter(SMDS_UnstructuredGrid* grid,
+                            vtkIdType *nodeIds,
+                            int nbNodes,
+                            double* result);
+  static bool isForward(double* a,double* b,double* c,double* d);
 
 protected:
   virtual SMDS_ElemIteratorPtr elementsIterator(SMDSAbs_ElementType type) const;

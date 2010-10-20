@@ -119,6 +119,7 @@ class SMESHOBJECT_EXPORT SMESH_Actor: public SALOME_Actor
                 eMaxElementLength2D, eMaxElementLength3D};
   virtual void SetControlMode(eControl theMode) = 0;
   virtual eControl GetControlMode() = 0;
+  virtual SMESH::Controls::FunctorPtr GetFunctor() = 0;
 
   virtual vtkScalarBarActor* GetScalarBarActor() = 0;
 

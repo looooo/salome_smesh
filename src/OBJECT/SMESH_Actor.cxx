@@ -721,51 +721,50 @@ SetControlMode(eControl theMode,
   bool anIsScalarVisible = theMode > eNone;
 
   if(anIsScalarVisible){
-    SMESH::Controls::FunctorPtr aFunctor;
     switch(theMode){
     case eLength:
     {
       SMESH::Controls::Length* aControl = new SMESH::Controls::Length();
       aControl->SetPrecision( myControlsPrecision );
-      aFunctor.reset( aControl );
+      myFunctor.reset( aControl );
       myControlActor = my1DActor;
       break;
     }
     case eLength2D:
     {
-      aFunctor.reset(new SMESH::Controls::Length2D());
+      myFunctor.reset(new SMESH::Controls::Length2D());
       myControlActor = my2DActor;
       break;
     }
     case eFreeBorders:
-      aFunctor.reset(new SMESH::Controls::FreeBorders());
+      myFunctor.reset(new SMESH::Controls::FreeBorders());
       myControlActor = my1DActor;
       break;
     case eFreeEdges:
-      aFunctor.reset(new SMESH::Controls::FreeEdges());
+      myFunctor.reset(new SMESH::Controls::FreeEdges());
       myControlActor = my2DActor;
       break;
     case eFreeNodes:
-      aFunctor.reset(new SMESH::Controls::FreeNodes());
+      myFunctor.reset(new SMESH::Controls::FreeNodes());
       myControlActor = myNodeActor;
       break;
     case eFreeFaces:
-      aFunctor.reset(new SMESH::Controls::FreeFaces());
+      myFunctor.reset(new SMESH::Controls::FreeFaces());
       myControlActor = my2DActor;
       break;
     case eMultiConnection:
-      aFunctor.reset(new SMESH::Controls::MultiConnection());
+      myFunctor.reset(new SMESH::Controls::MultiConnection());
       myControlActor = my1DActor;
       break;
     case eMultiConnection2D:
-      aFunctor.reset(new SMESH::Controls::MultiConnection2D());
+      myFunctor.reset(new SMESH::Controls::MultiConnection2D());
       myControlActor = my2DActor;
       break;
     case eArea:
     {
       SMESH::Controls::Area* aControl = new SMESH::Controls::Area();
       aControl->SetPrecision( myControlsPrecision );
-      aFunctor.reset( aControl );
+      myFunctor.reset( aControl );
       myControlActor = my2DActor;
       break;
     }
@@ -773,7 +772,7 @@ SetControlMode(eControl theMode,
     {
       SMESH::Controls::Taper* aControl = new SMESH::Controls::Taper();
       aControl->SetPrecision( myControlsPrecision );
-      aFunctor.reset( aControl );
+      myFunctor.reset( aControl );
       myControlActor = my2DActor;
       break;
     }
@@ -781,7 +780,7 @@ SetControlMode(eControl theMode,
     {
       SMESH::Controls::AspectRatio* aControl = new SMESH::Controls::AspectRatio();
       aControl->SetPrecision( myControlsPrecision );
-      aFunctor.reset( aControl );
+      myFunctor.reset( aControl );
       myControlActor = my2DActor;
       break;
     }
@@ -789,7 +788,7 @@ SetControlMode(eControl theMode,
     {
       SMESH::Controls::AspectRatio3D* aControl = new SMESH::Controls::AspectRatio3D();
       aControl->SetPrecision( myControlsPrecision );
-      aFunctor.reset( aControl );
+      myFunctor.reset( aControl );
       myControlActor = my3DActor;
       break;
     }
@@ -797,7 +796,7 @@ SetControlMode(eControl theMode,
     {
       SMESH::Controls::Volume* aControl = new SMESH::Controls::Volume();
       aControl->SetPrecision( myControlsPrecision );
-      aFunctor.reset( aControl );
+      myFunctor.reset( aControl );
       myControlActor = my3DActor;
       break;
     }
@@ -805,7 +804,7 @@ SetControlMode(eControl theMode,
     {
       SMESH::Controls::MaxElementLength2D* aControl = new SMESH::Controls::MaxElementLength2D();
       aControl->SetPrecision( myControlsPrecision );
-      aFunctor.reset( aControl );
+      myFunctor.reset( aControl );
       myControlActor = my2DActor;
       break;
     }
@@ -813,7 +812,7 @@ SetControlMode(eControl theMode,
     {
       SMESH::Controls::MaxElementLength3D* aControl = new SMESH::Controls::MaxElementLength3D();
       aControl->SetPrecision( myControlsPrecision );
-      aFunctor.reset( aControl );
+      myFunctor.reset( aControl );
       myControlActor = my3DActor;
       break;
     }
@@ -821,7 +820,7 @@ SetControlMode(eControl theMode,
     {
       SMESH::Controls::MinimumAngle* aControl = new SMESH::Controls::MinimumAngle();
       aControl->SetPrecision( myControlsPrecision );
-      aFunctor.reset( aControl );
+      myFunctor.reset( aControl );
       myControlActor = my2DActor;
       break;
     }
@@ -829,7 +828,7 @@ SetControlMode(eControl theMode,
     {
       SMESH::Controls::Warping* aControl = new SMESH::Controls::Warping();
       aControl->SetPrecision( myControlsPrecision );
-      aFunctor.reset( aControl );
+      myFunctor.reset( aControl );
       myControlActor = my2DActor;
       break;
     }
@@ -837,7 +836,7 @@ SetControlMode(eControl theMode,
     {
       SMESH::Controls::Skew* aControl = new SMESH::Controls::Skew();
       aControl->SetPrecision( myControlsPrecision );
-      aFunctor.reset( aControl );
+      myFunctor.reset( aControl );
       myControlActor = my2DActor;
       break;
     }
@@ -851,21 +850,21 @@ SetControlMode(eControl theMode,
       myControlMode = theMode;
       switch(myControlMode){
       case eFreeNodes:
-        myNodeExtActor->SetExtControlMode(aFunctor);
+        myNodeExtActor->SetExtControlMode(myFunctor);
         break;
       case eFreeEdges:
       case eFreeBorders:
-        my1DExtActor->SetExtControlMode(aFunctor);
+        my1DExtActor->SetExtControlMode(myFunctor);
         break;
       case eFreeFaces:
-        my2DExtActor->SetExtControlMode(aFunctor);
+        my2DExtActor->SetExtControlMode(myFunctor);
         break;
       case eLength2D:
       case eMultiConnection2D:
-        my1DExtActor->SetExtControlMode(aFunctor,myScalarBarActor,myLookupTable);
+        my1DExtActor->SetExtControlMode(myFunctor,myScalarBarActor,myLookupTable);
         break;
       default:
-        myControlActor->SetControlMode(aFunctor,myScalarBarActor,myLookupTable);
+        myControlActor->SetControlMode(myFunctor,myScalarBarActor,myLookupTable);
       }
     }
 
@@ -888,8 +887,11 @@ SetControlMode(eControl theMode,
         SetEntityMode(eVolumes);
     }
 
-  }else if(theCheckEntityMode){
-    myEntityMode = eAllEntity;
+  }
+  else {
+    if(theCheckEntityMode)
+      myEntityMode = eAllEntity;
+    myFunctor.reset();
   }
 
   SetRepresentation(GetRepresentation());

@@ -185,6 +185,7 @@ class SMESH_ActorDef : public SMESH_Actor
 
   virtual void SetControlMode(eControl theMode);
   virtual eControl GetControlMode(){ return myControlMode;}
+  virtual SMESH::Controls::FunctorPtr GetFunctor() { return myFunctor; }
 
   virtual vtkScalarBarActor* GetScalarBarActor(){ return myScalarBarActor;}
 
@@ -235,6 +236,7 @@ class SMESH_ActorDef : public SMESH_Actor
   SMESH_DeviceActor* myHighlitableActor;
 
   eControl myControlMode;
+  SMESH::Controls::FunctorPtr myFunctor;
   vtkProperty* my2DExtProp;
   SMESH_DeviceActor* my2DActor;
   SMESH_DeviceActor* my2DExtActor;

@@ -2294,6 +2294,16 @@ SMESH::array_of_ElementType* Filter_i::GetTypes()
 }
 
 //=======================================================================
+//function : GetMesh
+//purpose  : Returns mesh
+//=======================================================================
+
+SMESH::SMESH_Mesh_ptr Filter_i::GetMesh()
+{
+  return SMESH_Mesh::_duplicate( myMesh );
+}
+
+//=======================================================================
 // name    : getCriteria
 // Purpose : Retrieve criterions from predicate
 //=======================================================================

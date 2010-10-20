@@ -809,18 +809,6 @@ namespace SMESH
     void
     SetMesh( SMESH_Mesh_ptr );
 
-    virtual
-    SMESH::long_array* 
-    GetIDs();
-    
-    virtual
-    SMESH::long_array*
-    GetMeshInfo();
-
-    virtual
-    SMESH::array_of_ElementType*
-    GetTypes();
-
     static
     void
     GetElementsId( Predicate_i*,
@@ -853,6 +841,14 @@ namespace SMESH
     GetPredicate();
 
     Predicate_i*     GetPredicate_i();
+
+    // =========================
+    // SMESH_IDSource interface
+    // =========================
+    virtual SMESH::long_array*           GetIDs();
+    virtual SMESH::long_array*           GetMeshInfo();
+    virtual SMESH::array_of_ElementType* GetTypes();
+    virtual SMESH::SMESH_Mesh_ptr        GetMesh();
 
   private:
     Controls::Filter myFilter;

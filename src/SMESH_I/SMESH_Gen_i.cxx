@@ -4278,7 +4278,7 @@ bool SMESH_Gen_i::LoadASCII( SALOMEDS::SComponent_ptr theComponent,
                              const char*              theURL,
                              bool                     isMultiFile ) {
   if(MYDEBUG) MESSAGE( "SMESH_Gen_i::LoadASCII" );
-  //return Load( theComponent, theStream, theURL, isMultiFile );
+  return Load( theComponent, theStream, theURL, isMultiFile );
 
   //before call main ::Load method it's need for decipher text format to
   //binary ( "|xx" => x' )

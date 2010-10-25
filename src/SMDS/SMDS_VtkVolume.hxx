@@ -23,6 +23,13 @@ public:
   int NbFaces() const;
   int NbNodes() const;
   int NbEdges() const;
+
+  // 1 <= face_ind <= NbFaces()
+  int NbFaceNodes (const int face_ind) const;
+  // 1 <= face_ind <= NbFaces()
+  // 1 <= node_ind <= NbFaceNodes()
+  const SMDS_MeshNode* GetFaceNode (const int face_ind, const int node_ind) const;
+
   virtual SMDSAbs_ElementType GetType() const;
   virtual vtkIdType GetVtkType() const;
   virtual SMDSAbs_EntityType GetEntityType() const;
@@ -34,10 +41,15 @@ public:
                             int nbNodes,
                             double* result);
   static bool isForward(double* a,double* b,double* c,double* d);
+  int NbUniqueNodes() const;
+  SMDS_ElemIteratorPtr uniqueNodesIterator() const;
+  const std::vector<int> & GetQuantities() const;
 
-protected:
   virtual SMDS_ElemIteratorPtr elementsIterator(SMDSAbs_ElementType type) const;
   virtual SMDS_ElemIteratorPtr nodesIteratorToUNV() const;
+  virtual SMDS_ElemIteratorPtr interlacedNodesElemIterator() const;
+
+protected:
 };
 
 #endif

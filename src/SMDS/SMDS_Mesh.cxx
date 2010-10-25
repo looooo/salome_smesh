@@ -1608,7 +1608,7 @@ bool SMDS_Mesh::ChangePolyhedronNodes (const SMDS_MeshElement *            elem,
     return false;
   }
 
-  const SMDS_PolyhedralVolumeOfNodes* vol = dynamic_cast<const SMDS_PolyhedralVolumeOfNodes*>(elem);
+  const SMDS_VtkVolume* vol = dynamic_cast<const SMDS_VtkVolume*>(elem);
   if (!vol) {
     return false;
   }
@@ -1621,7 +1621,9 @@ bool SMDS_Mesh::ChangePolyhedronNodes (const SMDS_MeshElement *            elem,
   }
 
   // change nodes
-  bool Ok = const_cast<SMDS_PolyhedralVolumeOfNodes*>(vol)->ChangeNodes(nodes, quantities);
+  // TODO remove this function
+  //bool Ok = const_cast<SMDS_VtkVolume*>(vol)->ChangeNodes(nodes, quantities);
+  bool Ok = false;
   if (!Ok) {
     return false;
   }

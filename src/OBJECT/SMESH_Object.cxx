@@ -416,8 +416,8 @@ void SMESH_VisualObjDef::buildElemPrs()
           // Convertions connectivities from SMDS to VTK
           if (anElem->IsPoly() && aNbNodes > 3) { // POLYEDRE
 
-            if ( const SMDS_PolyhedralVolumeOfNodes* ph =
-                 dynamic_cast<const SMDS_PolyhedralVolumeOfNodes*> (anElem))
+            if ( const SMDS_VtkVolume* ph =
+                 dynamic_cast<const SMDS_VtkVolume*> (anElem))
             {
               aNbNodes = GetConnect(ph->uniqueNodesIterator(),aConnect);
               anIdList->SetNumberOfIds( aNbNodes );

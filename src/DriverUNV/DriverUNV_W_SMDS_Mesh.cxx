@@ -163,8 +163,8 @@ Driver_Mesh::Status DriverUNV_W_SMDS_Mesh::Perform()
           aNodesIter = anElem->nodesIteratorToUNV();
           if ( anElem->IsPoly() ) {
             MESSAGE("anElem->IsPoly");
-            if ( const SMDS_PolyhedralVolumeOfNodes* ph =
-                 dynamic_cast<const SMDS_PolyhedralVolumeOfNodes*> (anElem))
+            if ( const SMDS_VtkVolume* ph =
+                 dynamic_cast<const SMDS_VtkVolume*> (anElem))
             {
               aNbNodes = ph->NbUniqueNodes();
               aNodesIter = ph->uniqueNodesIterator();

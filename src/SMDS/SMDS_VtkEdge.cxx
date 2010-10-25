@@ -139,3 +139,8 @@ SMDS_ElemIteratorPtr SMDS_VtkEdge::nodesIteratorToUNV() const
 {
   return SMDS_ElemIteratorPtr(new SMDS_VtkCellIteratorToUNV(SMDS_Mesh::_meshList[myMeshId], myVtkID, GetEntityType()));
 }
+
+SMDS_ElemIteratorPtr SMDS_VtkEdge::interlacedNodesElemIterator() const
+{
+  return SMDS_ElemIteratorPtr(new SMDS_VtkCellIteratorToUNV(SMDS_Mesh::_meshList[myMeshId], myVtkID, GetEntityType()));
+}

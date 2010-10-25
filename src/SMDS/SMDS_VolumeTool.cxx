@@ -32,7 +32,7 @@
 
 #include "SMDS_MeshElement.hxx"
 #include "SMDS_MeshNode.hxx"
-#include "SMDS_PolyhedralVolumeOfNodes.hxx"
+#include "SMDS_VtkVolume.hxx"
 #include "SMDS_Mesh.hxx"
 
 #include "utilities.h"
@@ -499,7 +499,7 @@ bool SMDS_VolumeTool::Set (const SMDS_MeshElement* theVolume)
     }
 
     if (myVolume->IsPoly()) {
-      myPolyedre = static_cast<const SMDS_PolyhedralVolumeOfNodes*>( myVolume );
+      myPolyedre = dynamic_cast<const SMDS_VtkVolume*>( myVolume );
       if (!myPolyedre) {
         MESSAGE("Warning: bad volumic element");
         return false;

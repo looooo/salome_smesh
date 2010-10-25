@@ -199,3 +199,8 @@ SMDSAbs_EntityType SMDS_VtkFace::GetEntityType() const
   {
     return SMDS_ElemIteratorPtr(new SMDS_VtkCellIteratorToUNV(SMDS_Mesh::_meshList[myMeshId], myVtkID, GetEntityType()));
   }
+
+  SMDS_ElemIteratorPtr SMDS_VtkFace::interlacedNodesElemIterator() const
+  {
+    return SMDS_ElemIteratorPtr(new SMDS_VtkCellIteratorToUNV(SMDS_Mesh::_meshList[myMeshId], myVtkID, GetEntityType()));
+  }

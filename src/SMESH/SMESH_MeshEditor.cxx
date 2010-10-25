@@ -34,7 +34,7 @@
 #include "SMDS_PolyhedralVolumeOfNodes.hxx"
 #include "SMDS_FacePosition.hxx"
 #include "SMDS_SpacePosition.hxx"
-#include "SMDS_QuadraticFaceOfNodes.hxx"
+//#include "SMDS_QuadraticFaceOfNodes.hxx"
 #include "SMDS_MeshGroup.hxx"
 #include "SMDS_LinearEdge.hxx"
 #include "SMDS_Downward.hxx"
@@ -906,8 +906,8 @@ bool SMESH_MeshEditor::Reorient (const SMDS_MeshElement * theElem)
     if (theElem->IsPoly()) {
       // TODO reorient vtk polyhedron
       MESSAGE("reorient vtk polyhedron ?");
-      const SMDS_PolyhedralVolumeOfNodes* aPolyedre =
-        static_cast<const SMDS_PolyhedralVolumeOfNodes*>( theElem );
+      const SMDS_VtkVolume* aPolyedre =
+        dynamic_cast<const SMDS_VtkVolume*>( theElem );
       if (!aPolyedre) {
         MESSAGE("Warning: bad volumic element");
         return false;
@@ -3176,14 +3176,14 @@ void SMESH_MeshEditor::Smooth (TIDSortedElemSet &          theElems,
         helper.SetSubShape( face );
       list< const SMDS_MeshElement* >::iterator elemIt = elemsOnFace.begin();
       for ( ; elemIt != elemsOnFace.end(); ++elemIt ) {
-        const SMDS_QuadraticFaceOfNodes* QF =
-          dynamic_cast<const SMDS_QuadraticFaceOfNodes*> (*elemIt);
-        if(QF) {
+        const SMDS_VtkFace* QF =
+          dynamic_cast<const SMDS_VtkFace*> (*elemIt);
+        if(QF && QF->IsQuadratic()) {
           vector<const SMDS_MeshNode*> Ns;
           Ns.reserve(QF->NbNodes()+1);
-          SMDS_NodeIteratorPtr anIter = QF->interlacedNodesIterator();
+          SMDS_ElemIteratorPtr anIter = QF->interlacedNodesElemIterator();
           while ( anIter->more() )
-            Ns.push_back( anIter->next() );
+            Ns.push_back( cast2Node(anIter->next()) );
           Ns.push_back( Ns[0] );
           double x, y, z;
           for(int i=0; i<QF->NbNodes(); i=i+2) {
@@ -5317,8 +5317,8 @@ SMESH_MeshEditor::Transform (TIDSortedElemSet & theElems,
       case SMDSAbs_Volume:
         {
           // ATTENTION: Reversing is not yet done!!!
-          const SMDS_PolyhedralVolumeOfNodes* aPolyedre =
-            dynamic_cast<const SMDS_PolyhedralVolumeOfNodes*>( elem );
+          const SMDS_VtkVolume* aPolyedre =
+            dynamic_cast<const SMDS_VtkVolume*>( elem );
           if (!aPolyedre) {
             MESSAGE("Warning: bad volumic element");
             continue;
@@ -5640,8 +5640,8 @@ SMESH_MeshEditor::Scale (TIDSortedElemSet & theElems,
       case SMDSAbs_Volume:
         {
           // ATTENTION: Reversing is not yet done!!!
-          const SMDS_PolyhedralVolumeOfNodes* aPolyedre =
-            dynamic_cast<const SMDS_PolyhedralVolumeOfNodes*>( elem );
+          const SMDS_VtkVolume* aPolyedre =
+            dynamic_cast<const SMDS_VtkVolume*>( elem );
           if (!aPolyedre) {
             MESSAGE("Warning: bad volumic element");
             continue;
@@ -6836,9 +6836,9 @@ bool SMESH_MeshEditor::isOut( const SMDS_MeshElement* element, const gp_Pnt& poi
 
   SMDS_ElemIteratorPtr nodeIt = element->nodesIterator();
   if ( element->IsQuadratic() )
-    if (const SMDS_QuadraticFaceOfNodes* f=dynamic_cast<const SMDS_QuadraticFaceOfNodes*>(element))
+    if (const SMDS_VtkFace* f=dynamic_cast<const SMDS_VtkFace*>(element))
       nodeIt = f->interlacedNodesElemIterator();
-    else if (const SMDS_QuadraticEdge*  e =dynamic_cast<const SMDS_QuadraticEdge*>(element))
+    else if (const SMDS_VtkEdge*  e =dynamic_cast<const SMDS_VtkEdge*>(element))
       nodeIt = e->interlacedNodesElemIterator();
 
   while ( nodeIt->more() )
@@ -7182,8 +7182,19 @@ void SMESH_MeshEditor::MergeNodes (TListOfListOfNodes & theGroupsOfNodes)
               if (aShapeId)
                 aMesh->SetMeshElementOnShape(newElem, aShapeId);
             }
-            MESSAGE("ChangeElementNodes MergeNodes Poly");
-            aMesh->ChangeElementNodes(elem, &polygons_nodes[inode], quantities[nbNew - 1]);
+
+            MESSAGE("ChangeElementNodes MergeNodes Polygon");
+            //aMesh->ChangeElementNodes(elem, &polygons_nodes[inode], quantities[nbNew - 1]);
+            vector<const SMDS_MeshNode *> polynodes(polygons_nodes.begin()+inode,polygons_nodes.end());
+            int quid =0;
+            if (nbNew > 0) quid = nbNew - 1;
+            vector<int> newquant(quantities.begin()+quid, quantities.end());
+            const SMDS_MeshElement* newElem = 0;
+            newElem = aMesh->AddPolyhedralVolume(polynodes, newquant);
+            myLastCreatedElems.Append(newElem);
+            if ( aShapeId && newElem )
+              aMesh->SetMeshElementOnShape( newElem, aShapeId );
+            rmElemIds.push_back(elem->GetID());
           }
           else {
             rmElemIds.push_back(elem->GetID());
@@ -7196,9 +7207,9 @@ void SMESH_MeshEditor::MergeNodes (TListOfListOfNodes & theGroupsOfNodes)
             rmElemIds.push_back(elem->GetID());
           }
           else {
-            // each face has to be analized in order to check volume validity
-            const SMDS_PolyhedralVolumeOfNodes* aPolyedre =
-              static_cast<const SMDS_PolyhedralVolumeOfNodes*>( elem );
+            // each face has to be analyzed in order to check volume validity
+            const SMDS_VtkVolume* aPolyedre =
+              dynamic_cast<const SMDS_VtkVolume*>( elem );
             if (aPolyedre) {
               int nbFaces = aPolyedre->NbFaces();
 
@@ -7226,10 +7237,16 @@ void SMESH_MeshEditor::MergeNodes (TListOfListOfNodes & theGroupsOfNodes)
               }
 
               if (quantities.size() > 3)
-                aMesh->ChangePolyhedronNodes(elem, poly_nodes, quantities);
-              else
-                rmElemIds.push_back(elem->GetID());
-
+                {
+                  MESSAGE("ChangeElementNodes MergeNodes Polyhedron");
+                  //aMesh->ChangePolyhedronNodes(elem, poly_nodes, quantities);
+                  const SMDS_MeshElement* newElem = 0;
+                  newElem = aMesh->AddPolyhedralVolume(poly_nodes, quantities);
+                  myLastCreatedElems.Append(newElem);
+                  if ( aShapeId && newElem )
+                    aMesh->SetMeshElementOnShape( newElem, aShapeId );
+                  rmElemIds.push_back(elem->GetID());
+                }
             }
             else {
               rmElemIds.push_back(elem->GetID());
@@ -7580,8 +7597,8 @@ void SMESH_MeshEditor::MergeNodes (TListOfListOfNodes & theGroupsOfNodes)
     if ( isOk ) {
       if (elem->IsPoly() && elem->GetType() == SMDSAbs_Volume) {
         // Change nodes of polyedre
-        const SMDS_PolyhedralVolumeOfNodes* aPolyedre =
-          static_cast<const SMDS_PolyhedralVolumeOfNodes*>( elem );
+        const SMDS_VtkVolume* aPolyedre =
+          dynamic_cast<const SMDS_VtkVolume*>( elem );
         if (aPolyedre) {
           int nbFaces = aPolyedre->NbFaces();
 
@@ -7815,10 +7832,11 @@ SMESH_MeshEditor::FindFaceInSet(const SMDS_MeshNode*    n1,
     if ( !face && elem->IsQuadratic())
     {
       // analysis for quadratic elements using all nodes
-      const SMDS_QuadraticFaceOfNodes* F =
-        static_cast<const SMDS_QuadraticFaceOfNodes*>(elem);
+      const SMDS_VtkFace* F =
+        dynamic_cast<const SMDS_VtkFace*>(elem);
+      if (!F) throw SALOME_Exception(LOCALIZED("not an SMDS_VtkFace"));
       // use special nodes iterator
-      SMDS_NodeIteratorPtr anIter = F->interlacedNodesIterator();
+      SMDS_ElemIteratorPtr anIter = F->interlacedNodesElemIterator();
       const SMDS_MeshNode* prevN = cast2Node( anIter->next() );
       for ( i1 = -1, i2 = 0; anIter->more() && !face; i1++, i2++ )
       {
@@ -7902,12 +7920,13 @@ bool SMESH_MeshEditor::FindFreeBorder (const SMDS_MeshNode*             theFirst
         vector<const SMDS_MeshNode*> nodes(nbNodes+1);
 
         if(e->IsQuadratic()) {
-          const SMDS_QuadraticFaceOfNodes* F =
-            static_cast<const SMDS_QuadraticFaceOfNodes*>(e);
+          const SMDS_VtkFace* F =
+            dynamic_cast<const SMDS_VtkFace*>(e);
+          if (!F) throw SALOME_Exception(LOCALIZED("not an SMDS_VtkFace"));
           // use special nodes iterator
-          SMDS_NodeIteratorPtr anIter = F->interlacedNodesIterator();
+          SMDS_ElemIteratorPtr anIter = F->interlacedNodesElemIterator();
           while( anIter->more() ) {
-            nodes[ iNode++ ] = anIter->next();
+            nodes[ iNode++ ] = cast2Node(anIter->next());
           }
         }
         else {
@@ -8175,12 +8194,13 @@ SMESH_MeshEditor::SewFreeBorder (const SMDS_MeshNode* theBordFirstNode,
         else if ( elem->GetType()==SMDSAbs_Face ) { // --face
           // retrieve all face nodes and find iPrevNode - an index of the prevSideNode
           if(elem->IsQuadratic()) {
-            const SMDS_QuadraticFaceOfNodes* F =
-              static_cast<const SMDS_QuadraticFaceOfNodes*>(elem);
+            const SMDS_VtkFace* F =
+              dynamic_cast<const SMDS_VtkFace*>(elem);
+            if (!F) throw SALOME_Exception(LOCALIZED("not an SMDS_VtkFace"));
             // use special nodes iterator
-            SMDS_NodeIteratorPtr anIter = F->interlacedNodesIterator();
+            SMDS_ElemIteratorPtr anIter = F->interlacedNodesElemIterator();
             while( anIter->more() ) {
-              nodes[ iNode ] = anIter->next();
+              nodes[ iNode ] = cast2Node(anIter->next());
               if ( nodes[ iNode++ ] == prevSideNode )
                 iPrevNode = iNode - 1;
             }
@@ -8494,12 +8514,13 @@ void SMESH_MeshEditor::InsertNodesIntoLink(const SMDS_MeshElement*     theFace,
   vector<const SMDS_MeshNode*> nodes( theFace->NbNodes() );
 
   if(theFace->IsQuadratic()) {
-    const SMDS_QuadraticFaceOfNodes* F =
-      static_cast<const SMDS_QuadraticFaceOfNodes*>(theFace);
+    const SMDS_VtkFace* F =
+      dynamic_cast<const SMDS_VtkFace*>(theFace);
+    if (!F) throw SALOME_Exception(LOCALIZED("not an SMDS_VtkFace"));
     // use special nodes iterator
-    SMDS_NodeIteratorPtr anIter = F->interlacedNodesIterator();
+    SMDS_ElemIteratorPtr anIter = F->interlacedNodesElemIterator();
     while( anIter->more() ) {
-      const SMDS_MeshNode* n = anIter->next();
+      const SMDS_MeshNode* n = cast2Node(anIter->next());
       if ( n == theBetweenNode1 )
         il1 = iNode;
       else if ( n == theBetweenNode2 )
@@ -8555,12 +8576,13 @@ void SMESH_MeshEditor::InsertNodesIntoLink(const SMDS_MeshElement*     theFace,
     bool isFLN = false;
 
     if(theFace->IsQuadratic()) {
-      const SMDS_QuadraticFaceOfNodes* F =
-        static_cast<const SMDS_QuadraticFaceOfNodes*>(theFace);
+      const SMDS_VtkFace* F =
+        dynamic_cast<const SMDS_VtkFace*>(theFace);
+      if (!F) throw SALOME_Exception(LOCALIZED("not an SMDS_VtkFace"));
       // use special nodes iterator
-      SMDS_NodeIteratorPtr anIter = F->interlacedNodesIterator();
+      SMDS_ElemIteratorPtr anIter = F->interlacedNodesElemIterator();
       while( anIter->more()  && !isFLN ) {
-        const SMDS_MeshNode* n = anIter->next();
+        const SMDS_MeshNode* n = cast2Node(anIter->next());
         poly_nodes[iNode++] = n;
         if (n == nodes[il1]) {
           isFLN = true;
@@ -8573,7 +8595,7 @@ void SMESH_MeshEditor::InsertNodesIntoLink(const SMDS_MeshElement*     theFace,
       }
       // add nodes of face starting from last node of link
       while ( anIter->more() ) {
-        poly_nodes[iNode++] = anIter->next();
+        poly_nodes[iNode++] = cast2Node(anIter->next());
       }
     }
     else {
@@ -9618,10 +9640,11 @@ SMESH_MeshEditor::SewSideElements (TIDSortedElemSet&    theSide1,
               }
             }
             else { // f->IsQuadratic()
-              const SMDS_QuadraticFaceOfNodes* F =
-                static_cast<const SMDS_QuadraticFaceOfNodes*>(f);
+              const SMDS_VtkFace* F =
+                dynamic_cast<const SMDS_VtkFace*>(f);
+              if (!F) throw SALOME_Exception(LOCALIZED("not an SMDS_VtkFace"));
               // use special nodes iterator
-              SMDS_NodeIteratorPtr anIter = F->interlacedNodesIterator();
+              SMDS_ElemIteratorPtr anIter = F->interlacedNodesElemIterator();
               while ( anIter->more() ) {
                 const SMDS_MeshNode* n =
                   static_cast<const SMDS_MeshNode*>( anIter->next() );

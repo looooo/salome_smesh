@@ -28,9 +28,10 @@ public:
   virtual bool IsQuadratic() const;
   virtual bool IsPoly() const;
 
-protected:
   virtual SMDS_ElemIteratorPtr elementsIterator(SMDSAbs_ElementType type) const;
   virtual SMDS_ElemIteratorPtr nodesIteratorToUNV() const;
+  virtual SMDS_ElemIteratorPtr interlacedNodesElemIterator() const;
+protected:
 };
 
 #endif

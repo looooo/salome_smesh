@@ -221,7 +221,8 @@ void SMDS_UnstructuredGrid::compactGrid(std::vector<int>& idNodesOldToNew, int n
   holes = 0;
   compactState = lookHoleStart;
 
-  vtkIdType tmpid[50];
+  // TODO some polyhedron may be huge (only in some tests)
+  vtkIdType tmpid[NBMAXNODESINCELL];
   vtkIdType *pointsCell = &tmpid[0]; // --- points id to fill a new cell
 
   for (int i = 0; i < oldCellSize; i++)
@@ -341,6 +342,7 @@ void SMDS_UnstructuredGrid::copyBloc(vtkUnsignedCharArray *newTypes, std::vector
       vtkIdType nbpts;
       vtkIdType *oldPtsCell = 0;
       this->Connectivity->GetCell(oldLoc, nbpts, oldPtsCell);
+      assert(nbpts < NBMAXNODESINCELL);
       //MESSAGE(j << " " << alreadyCopied << " " << (int)this->Types->GetValue(j) << " " << oldLoc << " " << nbpts );
       for (int l = 0; l < nbpts; l++)
         {

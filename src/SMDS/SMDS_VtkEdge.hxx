@@ -28,8 +28,9 @@ public:
   virtual const SMDS_MeshNode* GetNode(const int ind) const;
   virtual bool IsQuadratic() const;
 
-protected:
   virtual SMDS_ElemIteratorPtr elementsIterator(SMDSAbs_ElementType type) const;
   virtual SMDS_ElemIteratorPtr nodesIteratorToUNV() const;
+  virtual SMDS_ElemIteratorPtr interlacedNodesElemIterator() const;
+protected:
 };
 #endif

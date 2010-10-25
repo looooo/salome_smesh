@@ -1997,11 +1997,11 @@ SMESH_Gen_i::ConcatenateCommon(const SMESH::mesh_array& theMeshesArray,
               // creates a corresponding element on existent nodes in new mesh
               if ( anElem->IsPoly() && anElemType == SMDSAbs_Volume )
                 {
-                  const SMDS_PolyhedralVolumeOfNodes* aVolume =
-                    dynamic_cast<const SMDS_PolyhedralVolumeOfNodes*> (anElem);
+                  const SMDS_VtkVolume* aVolume =
+                    dynamic_cast<const SMDS_VtkVolume*> (anElem);
                   if ( aVolume ) {
                     aNewElem = aNewMeshDS->AddPolyhedralVolume(aNodesArray, 
-                                                               aVolume->GetQuanities());
+                                                               aVolume->GetQuantities());
                     elemsMap.insert(make_pair(anElem->GetID(), aNewElem->GetID()));
                     if( theCommonGroups )
                       anIDsVolumes[anNbVolumes++] = aNewElem->GetID();

@@ -40,4 +40,14 @@ public:
   virtual ~SMDS_VtkCellIteratorToUNV();
 };
 
+class SMDS_VtkCellIteratorPolyH: public SMDS_VtkCellIterator
+{
+public:
+  SMDS_VtkCellIteratorPolyH(SMDS_Mesh* mesh, int vtkCellId, SMDSAbs_EntityType aType);
+  virtual ~SMDS_VtkCellIteratorPolyH();
+  virtual bool more();
+protected:
+  int _nbNodesInFaces;
+};
+
 #endif

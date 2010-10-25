@@ -223,11 +223,11 @@ bool NumericalFunctor::GetPoints(const SMDS_MeshElement* anElem,
   if ( anElem->IsQuadratic() ) {
     switch ( anElem->GetType() ) {
     case SMDSAbs_Edge:
-      anIter = static_cast<const SMDS_QuadraticEdge*>
+      anIter = dynamic_cast<const SMDS_VtkEdge*>
         (anElem)->interlacedNodesElemIterator();
       break;
     case SMDSAbs_Face:
-      anIter = static_cast<const SMDS_QuadraticFaceOfNodes*>
+      anIter = dynamic_cast<const SMDS_VtkFace*>
         (anElem)->interlacedNodesElemIterator();
       break;
     default:
@@ -1247,10 +1247,10 @@ void Length2D::GetValues(TValues& theValues){
     const SMDS_MeshFace* anElem = anIter->next();
 
     if(anElem->IsQuadratic()) {
-      const SMDS_QuadraticFaceOfNodes* F =
-        static_cast<const SMDS_QuadraticFaceOfNodes*>(anElem);
+      const SMDS_VtkFace* F =
+        dynamic_cast<const SMDS_VtkFace*>(anElem);
       // use special nodes iterator
-      SMDS_NodeIteratorPtr anIter = F->interlacedNodesIterator();
+      SMDS_ElemIteratorPtr anIter = F->interlacedNodesElemIterator();
       long aNodeId[4];
       gp_Pnt P[4];
 
@@ -1444,7 +1444,7 @@ void MultiConnection2D::GetValues(MValues& theValues){
     const SMDS_MeshFace* anElem = anIter->next();
     SMDS_ElemIteratorPtr aNodesIter;
     if ( anElem->IsQuadratic() )
-      aNodesIter = static_cast<const SMDS_QuadraticFaceOfNodes*>
+      aNodesIter = dynamic_cast<const SMDS_VtkFace*>
         (anElem)->interlacedNodesElemIterator();
     else
       aNodesIter = anElem->nodesIterator();
@@ -1603,7 +1603,7 @@ bool FreeEdges::IsSatisfy( long theId )
 
   SMDS_ElemIteratorPtr anIter;
   if ( aFace->IsQuadratic() ) {
-    anIter = static_cast<const SMDS_QuadraticFaceOfNodes*>
+    anIter = dynamic_cast<const SMDS_VtkFace*>
       (aFace)->interlacedNodesElemIterator();
   }
   else {
@@ -1672,7 +1672,7 @@ void FreeEdges::GetBoreders(TBorders& theBorders)
     long anElemId = anElem->GetID();
     SMDS_ElemIteratorPtr aNodesIter;
     if ( anElem->IsQuadratic() )
-      aNodesIter = static_cast<const SMDS_QuadraticFaceOfNodes*>(anElem)->
+      aNodesIter = static_cast<const SMDS_VtkFace*>(anElem)->
         interlacedNodesElemIterator();
     else
       aNodesIter = anElem->nodesIterator();

@@ -175,6 +175,13 @@ SMDS_ElemIteratorPtr SMDS_MeshElement::nodesIteratorToUNV() const
   return SMDS_ElemIteratorPtr((SMDS_ElemIterator*) NULL);
 }
 
+//! virtual, redefined in vtkEdge, vtkFace and vtkVolume classes
+SMDS_ElemIteratorPtr SMDS_MeshElement::interlacedNodesElemIterator() const
+{
+  MESSAGE("Iterator not implemented");
+  return SMDS_ElemIteratorPtr((SMDS_ElemIterator*) NULL);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 ///Return the ID of the element
 ///////////////////////////////////////////////////////////////////////////////

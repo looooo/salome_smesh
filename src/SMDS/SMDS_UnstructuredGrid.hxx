@@ -24,6 +24,9 @@
 
 #define NBMAXNEIGHBORS 10
 
+// allow very huge polyhedrons in tests
+#define NBMAXNODESINCELL 5000
+
 class SMDS_Downward;
 class SMDS_Mesh;
 

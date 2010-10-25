@@ -129,11 +129,11 @@ namespace {
       SMDS_MeshElement* anElemCopy = 0;
       if ( anElem->IsPoly() && anElem->GetType() == SMDSAbs_Volume )
       {
-        const SMDS_PolyhedralVolumeOfNodes* ph =
-          dynamic_cast<const SMDS_PolyhedralVolumeOfNodes*> (anElem);
+        const SMDS_VtkVolume* ph =
+          dynamic_cast<const SMDS_VtkVolume*> (anElem);
         if ( ph )
           anElemCopy = _myMeshDS->AddPolyhedralVolumeWithID
-            (anElemNodesID, ph->GetQuanities(),anElem->GetID());
+            (anElemNodesID, ph->GetQuantities(),anElem->GetID());
       }
       else {
         anElemCopy = ::SMESH_MeshEditor(this).AddElement( anElemNodesID,

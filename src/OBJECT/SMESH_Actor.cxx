@@ -500,6 +500,9 @@ SMESH_ActorDef::~SMESH_ActorDef()
 {
   if(MYDEBUG) MESSAGE("~SMESH_ActorDef - "<<this);
 
+  // caught by SMESHGUI::ProcessEvents() static method
+  this->InvokeEvent( SMESH::DeleteActorEvent, NULL );
+
   myScalarBarActor->Delete();
   myLookupTable->Delete();
 
@@ -1821,92 +1824,6 @@ GetClippingPlane(vtkIdType theID)
   if(theID >= myCippingPlaneCont.size())
     return NULL;
   return myCippingPlaneCont[theID].Get();
-}
-
-
-static void ComputeBoundsParam(vtkDataSet* theDataSet,
-                               vtkFloatingPointType theDirection[3], vtkFloatingPointType theMinPnt[3],
-                               vtkFloatingPointType& theMaxBoundPrj, vtkFloatingPointType& theMinBoundPrj)
-{
-  vtkFloatingPointType aBounds[6];
-  theDataSet->GetBounds(aBounds);
-
-  //Enlarge bounds in order to avoid conflicts of precision
-  for(int i = 0; i < 6; i += 2){
-    static double EPS = 1.0E-3;
-    vtkFloatingPointType aDelta = (aBounds[i+1] - aBounds[i])*EPS;
-    aBounds[i] -= aDelta;
-    aBounds[i+1] += aDelta;
-  }
-
-  vtkFloatingPointType aBoundPoints[8][3] = { {aBounds[0],aBounds[2],aBounds[4]},
-                               {aBounds[1],aBounds[2],aBounds[4]},
-                               {aBounds[0],aBounds[3],aBounds[4]},
-                               {aBounds[1],aBounds[3],aBounds[4]},
-                               {aBounds[0],aBounds[2],aBounds[5]},
-                               {aBounds[1],aBounds[2],aBounds[5]}, 
-                               {aBounds[0],aBounds[3],aBounds[5]}, 
-                               {aBounds[1],aBounds[3],aBounds[5]}};
-
-  int aMaxId = 0, aMinId = aMaxId;
-  theMaxBoundPrj = vtkMath::Dot(theDirection,aBoundPoints[aMaxId]);
-  theMinBoundPrj = theMaxBoundPrj;
-  for(int i = 1; i < 8; i++){
-    vtkFloatingPointType aTmp = vtkMath::Dot(theDirection,aBoundPoints[i]);
-    if(theMaxBoundPrj < aTmp){
-      theMaxBoundPrj = aTmp;
-      aMaxId = i;
-    }
-    if(theMinBoundPrj > aTmp){
-      theMinBoundPrj = aTmp;
-      aMinId = i;
-    }
-  }
-  vtkFloatingPointType *aMinPnt = aBoundPoints[aMaxId];
-  theMinPnt[0] = aMinPnt[0];
-  theMinPnt[1] = aMinPnt[1];
-  theMinPnt[2] = aMinPnt[2];
-}
-
-
-static void DistanceToPosition(vtkDataSet* theDataSet,
-                               vtkFloatingPointType theDirection[3], vtkFloatingPointType theDist, vtkFloatingPointType thePos[3])
-{
-  vtkFloatingPointType aMaxBoundPrj, aMinBoundPrj, aMinPnt[3];
-  ComputeBoundsParam(theDataSet,theDirection,aMinPnt,aMaxBoundPrj,aMinBoundPrj);
-  vtkFloatingPointType aLength = (aMaxBoundPrj-aMinBoundPrj)*theDist;
-  thePos[0] = aMinPnt[0]-theDirection[0]*aLength;
-  thePos[1] = aMinPnt[1]-theDirection[1]*aLength;
-  thePos[2] = aMinPnt[2]-theDirection[2]*aLength;
-}
-
-
-static void PositionToDistance(vtkDataSet* theDataSet, 
-                               vtkFloatingPointType theDirection[3], vtkFloatingPointType thePos[3], vtkFloatingPointType& theDist)
-{
-  vtkFloatingPointType aMaxBoundPrj, aMinBoundPrj, aMinPnt[3];
-  ComputeBoundsParam(theDataSet,theDirection,aMinPnt,aMaxBoundPrj,aMinBoundPrj);
-  vtkFloatingPointType aPrj = vtkMath::Dot(theDirection,thePos);
-  theDist = (aPrj-aMinBoundPrj)/(aMaxBoundPrj-aMinBoundPrj);
-}
-
-
-void SMESH_ActorDef::SetPlaneParam(vtkFloatingPointType theDir[3], vtkFloatingPointType theDist, vtkPlane* thePlane)
-{
-  thePlane->SetNormal(theDir);
-  vtkFloatingPointType anOrigin[3];
-  ::DistanceToPosition(GetUnstructuredGrid(),theDir,theDist,anOrigin);
-  thePlane->SetOrigin(anOrigin);
-}
-
-
-void SMESH_ActorDef::GetPlaneParam(vtkFloatingPointType theDir[3], vtkFloatingPointType& theDist, vtkPlane* thePlane)
-{
-  thePlane->GetNormal(theDir);
-
-  vtkFloatingPointType anOrigin[3];
-  thePlane->GetOrigin(anOrigin);
-  ::PositionToDistance(GetUnstructuredGrid(),theDir,anOrigin,theDist);
 }
 
 void SMESH_ActorDef::UpdateScalarBar()

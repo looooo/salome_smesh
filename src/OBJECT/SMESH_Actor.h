@@ -31,12 +31,19 @@
 #include <SALOME_Actor.h>
 #include "SMESH_Object.h"
 
+#include <vtkCommand.h>
+
 class vtkUnstructuredGrid;
 
 class vtkScalarBarActor;
 
 class vtkPlane;
 class vtkImplicitBoolean;
+
+namespace SMESH
+{
+  const vtkIdType DeleteActorEvent = vtkCommand::UserEvent + 100;
+}
 
 class SMESHOBJECT_EXPORT SMESH_Actor: public SALOME_Actor
 {
@@ -122,9 +129,6 @@ class SMESHOBJECT_EXPORT SMESH_Actor: public SALOME_Actor
   virtual SMESH::Controls::FunctorPtr GetFunctor() = 0;
 
   virtual vtkScalarBarActor* GetScalarBarActor() = 0;
-
-  virtual void SetPlaneParam(vtkFloatingPointType theDir[3], vtkFloatingPointType theDist, vtkPlane* thePlane) = 0;
-  virtual void GetPlaneParam(vtkFloatingPointType theDir[3], vtkFloatingPointType& theDist, vtkPlane* thePlane) = 0;
 
   virtual void RemoveAllClippingPlanes() = 0; 
   virtual vtkIdType GetNumberOfClippingPlanes() = 0; 

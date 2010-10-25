@@ -5265,6 +5265,14 @@ It is impossible to read point coordinates from file</translation>
         <translation>Clipping planes</translation>
     </message>
     <message>
+        <source>MESHES_SUBMESHES_GROUPS</source>
+        <translation>Meshes, sub-meshes and groups</translation>
+    </message>
+    <message>
+        <source>SELECT_ALL</source>
+        <translation>Select all</translation>
+    </message>
+    <message>
         <source>ROTATION_AROUND_X_Y2Z</source>
         <translation>Rotation around X (Y to Z):</translation>
     </message>

@@ -135,6 +135,7 @@
 #include <vtkCamera.h>
 #include <vtkRenderer.h>
 #include <vtkPlane.h>
+#include <vtkCallbackCommand.h>
 
 // SALOME KERNEL includes
 #include <SALOMEDS_Study.hxx>
@@ -837,17 +838,21 @@
     if( !aSel || !appStudy )
       return;
 
+    if( theCommandID == 1134 ) { // Clipping dialog can be activated without selection
+      if( SMESHGUI* aModule = SMESHGUI::GetSMESHGUI() ) {
+        aModule->EmitSignalDeactivateDialog();
+        if( SVTK_ViewWindow* aViewWindow = SMESH::GetViewWindow( aModule ) )
+          (new SMESHGUI_ClippingDlg( aModule, aViewWindow ))->show();
+      }
+      return;
+    }
+
     _PTR(Study) aStudy = appStudy->studyDS();
 
     aSel->selectedObjects( selected );
 
     if(selected.Extent() >= 1){
       switch(theCommandID){
-      case 1134:{
-        SMESHGUI::GetSMESHGUI()->EmitSignalDeactivateDialog();
-        (new SMESHGUI_ClippingDlg( SMESHGUI::GetSMESHGUI() ))->show();
-        return;
-      }
       case 1133:{
         SMESHGUI::GetSMESHGUI()->EmitSignalDeactivateDialog();
         (new SMESHGUI_TransparencyDlg( SMESHGUI::GetSMESHGUI() ))->show();
@@ -1418,6 +1423,12 @@ LightApp_Module( "SMESH" )
   myFilterLibraryDlg = 0;
   myState = -1;
   myDisplayer = 0;
+
+  myEventCallbackCommand = vtkCallbackCommand::New();
+  myEventCallbackCommand->Delete();
+  myEventCallbackCommand->SetClientData( this );
+  myEventCallbackCommand->SetCallback( SMESHGUI::ProcessEvents );
+  myPriority = 0.0;
 
   SMESH::GetFilterManager();
   SMESH::GetPattern();
@@ -3683,14 +3694,6 @@ void SMESHGUI::initialize( CAM_Application* app )
   popupMgr()->setRule( action( 1133 ), aMeshInVTK + "&& isVisible", QtxPopupMgr::VisibleRule );
 
   //-------------------------------------------------
-  // Clipping
-  //-------------------------------------------------
-  popupMgr()->insert( action( 1134 ), -1, -1 );
-  popupMgr()->setRule( action( 1134 ), aMeshInVTK + "&& selcount=1 && isVisible", QtxPopupMgr::VisibleRule );
-
-  popupMgr()->insert( separator(), -1, -1 );
-
-  //-------------------------------------------------
   // Controls
   //-------------------------------------------------
   QString
@@ -3815,8 +3818,19 @@ void SMESHGUI::initialize( CAM_Application* app )
 
   popupMgr()->insert( separator(), -1, -1 );
 
+  //-------------------------------------------------
+  // Clipping
+  //-------------------------------------------------
+  popupMgr()->insert( action( 1134 ), -1, -1 );
+  popupMgr()->setRule( action( 1134 ), "client='VTKViewer'", QtxPopupMgr::VisibleRule );
+
+  popupMgr()->insert( separator(), -1, -1 );
+
   connect( application(), SIGNAL( viewManagerActivated( SUIT_ViewManager* ) ),
            this, SLOT( onViewManagerActivated( SUIT_ViewManager* ) ) );
+
+  connect( application(), SIGNAL( viewManagerRemoved( SUIT_ViewManager* ) ),
+           this, SLOT( onViewManagerRemoved( SUIT_ViewManager* ) ) );
 }
 
 //================================================================================
@@ -3971,6 +3985,49 @@ void SMESHGUI::onViewManagerActivated( SUIT_ViewManager* mgr )
 {
   if ( dynamic_cast<SVTK_ViewManager*>( mgr ) )
     SMESH::UpdateSelectionProp( this );
+}
+
+void SMESHGUI::onViewManagerRemoved( SUIT_ViewManager* theViewManager )
+{
+  if( theViewManager && theViewManager->getType() == SVTK_Viewer::Type() )
+    myClippingPlaneInfoMap.erase( theViewManager );
+}
+
+void SMESHGUI::addActorAsObserver( SMESH_Actor* theActor )
+{
+  theActor->AddObserver( SMESH::DeleteActorEvent,
+                         myEventCallbackCommand.GetPointer(),
+                         myPriority );
+}
+
+void SMESHGUI::ProcessEvents( vtkObject* theObject,
+                              unsigned long theEvent,
+                              void* theClientData,
+                              void* theCallData )
+{
+  if( SMESHGUI* aSMESHGUI = reinterpret_cast<SMESHGUI*>( theClientData ) ) {
+    if( theObject && theEvent == SMESH::DeleteActorEvent ) {
+      if( SMESH_Actor* anActor = SMESH_Actor::SafeDownCast( theObject ) ) {
+        SMESHGUI_ClippingPlaneInfoMap& aClippingPlaneInfoMap = aSMESHGUI->getClippingPlaneInfoMap();
+        SMESHGUI_ClippingPlaneInfoMap::iterator anIter1 = aClippingPlaneInfoMap.begin();
+        for( ; anIter1 != aClippingPlaneInfoMap.end(); anIter1++ ) {
+          SMESHGUI_ClippingPlaneInfoList& aClippingPlaneInfoList = anIter1->second;
+          SMESHGUI_ClippingPlaneInfoList::iterator anIter2 = aClippingPlaneInfoList.begin();
+          for( ; anIter2 != aClippingPlaneInfoList.end(); anIter2++ ) {
+            SMESH::ClippingPlaneInfo& aClippingPlaneInfo = *anIter2;
+            std::list<vtkActor*>& anActorList = aClippingPlaneInfo.ActorList;
+            SMESH::TActorList::iterator anIter3 = anActorList.begin();
+            for ( ; anIter3 != anActorList.end(); anIter3++ ) {
+              if( anActor == *anIter3 ) {
+                anActorList.erase( anIter3 );
+                break;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 void SMESHGUI::createPreferences()
@@ -4481,12 +4538,9 @@ SALOMEDS::Color SMESHGUI::getUniqueColor( const QList<SALOMEDS::Color>& theReser
       if( aTolerance < 1 )
         break;
     }
-    //cout << "Iteration N" << anIterations << " (tolerance=" << aTolerance << ")"<< endl;
 
     aHue = (int)( 360.0 * rand() / RAND_MAX );
-    //cout << "Hue = " << aHue << endl;
 
-    //cout << "Auto colors : ";
     bool ok = true;
     QList<SALOMEDS::Color>::const_iterator it = theReservedColors.constBegin();
     QList<SALOMEDS::Color>::const_iterator itEnd = theReservedColors.constEnd();
@@ -4497,21 +4551,17 @@ SALOMEDS::Color SMESHGUI::getUniqueColor( const QList<SALOMEDS::Color>& theReser
 
       int h, s, v;
       aQColor.getHsv( &h, &s, &v );
-      //cout << h << " ";
       if( abs( h - aHue ) < aTolerance )
       {
         ok = false;
-        //cout << "break (diff = " << abs( h - aHue ) << ")";
         break;
       }
     }
-    //cout << endl;
 
     if( ok )
       break;
   }
 
-  //cout << "Hue of the returned color = " << aHue << endl;
   QColor aColor;
   aColor.setHsv( aHue, 255, 255 );
 
@@ -4599,6 +4649,37 @@ void SMESHGUI::storeVisualParameters (int savePoint)
     // saving VTK actors properties
     if (vType == SVTK_Viewer::Type())
     {
+      // store the clipping planes attached to the view manager
+      SMESHGUI_ClippingPlaneInfoList aClippingPlaneInfoList;
+      SMESHGUI_ClippingPlaneInfoMap::const_iterator anIter = myClippingPlaneInfoMap.find( vman );
+      if( anIter != myClippingPlaneInfoMap.end() )
+        aClippingPlaneInfoList = anIter->second;
+
+      if( !aClippingPlaneInfoList.empty() ) {
+        SMESHGUI_ClippingPlaneInfoList::const_iterator anIter = aClippingPlaneInfoList.begin();
+        for( int anId = 0; anIter != aClippingPlaneInfoList.end(); anIter++, anId++ )
+        {
+          const SMESH::ClippingPlaneInfo& aClippingPlaneInfo = *anIter;
+          SMESH::OrientedPlane* aPlane = aClippingPlaneInfo.Plane;
+
+          QString aPropertyName( "ClippingPlane" );
+          aPropertyName += gSeparator;
+          aPropertyName += QString::number( vtkViewers );
+          aPropertyName += gSeparator;
+          aPropertyName += QString::number( anId );
+
+          QString aPropertyValue = QString::number( (int)aPlane->GetOrientation() ).toLatin1().constData();
+          aPropertyValue += gDigitsSep;
+          aPropertyValue += QString::number( aPlane->GetDistance() ).toLatin1().constData();
+          aPropertyValue += gDigitsSep;
+          aPropertyValue += QString::number( aPlane->myAngle[0] ).toLatin1().constData();
+          aPropertyValue += gDigitsSep;
+          aPropertyValue += QString::number( aPlane->myAngle[1] ).toLatin1().constData();
+
+          ip->setProperty( aPropertyName.toStdString(), aPropertyValue.toStdString() );
+        }
+      }
+
       QVector<SUIT_ViewWindow*> views = vman->getViews();
       for (int i = 0, iEnd = vman->getViewsCount(); i < iEnd; i++)
       {
@@ -4724,22 +4805,25 @@ void SMESHGUI::storeVisualParameters (int savePoint)
 
                   // Clipping
                   param = vtkParam + "ClippingPlane";
-                  int nPlanes = aSmeshActor->GetNumberOfClippingPlanes();
-                  if (!nPlanes)
-                    ip->setParameter(entry, param, "Off");
-                  for (int ipl = 0; ipl < nPlanes; ipl++) {
-                    //vtkPlane* plane = aSmeshActor->GetClippingPlane(ipl);
-                    SMESH::Orientation anOrientation;
-                    double aDistance;
-                    vtkFloatingPointType anAngle[2];
-                    SMESHGUI_ClippingDlg::GetPlaneParam(aSmeshActor, ipl, anOrientation, aDistance, anAngle);
-                    std::string planeValue = QString::number((int)anOrientation).toLatin1().data();
-                    planeValue += gDigitsSep; planeValue += QString::number(aDistance).toLatin1().data();
-                    planeValue += gDigitsSep; planeValue += QString::number(anAngle[0]).toLatin1().data();
-                    planeValue += gDigitsSep; planeValue += QString::number(anAngle[1]).toLatin1().data();
-
-                    ip->setParameter(entry, param + QString::number(ipl+1).toLatin1().data(), planeValue);
+                  int aPlaneId = 0;
+                  if( !aClippingPlaneInfoList.empty() ) {
+                    SMESHGUI_ClippingPlaneInfoList::const_iterator anIter1 = aClippingPlaneInfoList.begin();
+                    for( int anId = 0; anIter1 != aClippingPlaneInfoList.end(); anIter1++, anId++ )
+                    {
+                      const SMESH::ClippingPlaneInfo& aClippingPlaneInfo = *anIter1;
+                      std::list<vtkActor*> anActorList = aClippingPlaneInfo.ActorList;
+                      SMESH::TActorList::iterator anIter2 = anActorList.begin();
+                      for ( ; anIter2 != anActorList.end(); anIter2++ ) {
+                        if( aSmeshActor == *anIter2 ) {
+                          ip->setParameter( entry, param + QString::number( ++aPlaneId ).toLatin1().constData(),
+                                            QString::number( anId ).toLatin1().constData() );                          
+                          break;
+                        }
+                      }
+                    }
                   }
+                  if( aPlaneId == 0 )
+                    ip->setParameter( entry, param, "Off" );
                 } // if (io->hasEntry())
               } // SMESH_Actor && hasIO
             } // isVisible
@@ -4750,6 +4834,25 @@ void SMESHGUI::storeVisualParameters (int savePoint)
     } // if (SVTK view model)
   } // for (viewManagers)
 }
+
+// data structures for clipping planes processing
+typedef struct {
+  int Id;
+  vtkIdType Orientation;
+  vtkFloatingPointType Distance;
+  vtkFloatingPointType Angle[2];
+} TPlaneData;
+typedef std::list<TPlaneData>         TPlaneDataList;
+typedef std::map<int, TPlaneDataList> TPlaneDataMap;
+
+typedef std::list<vtkActor*>          TActorList;
+typedef struct {
+  int PlaneId;
+  TActorList ActorList;
+  SUIT_ViewManager* ViewManager;
+} TPlaneInfo;
+typedef std::list<TPlaneInfo>         TPlaneInfoList;
+typedef std::map<int, TPlaneInfoList> TPlaneInfoMap;
 
 /*!
  * \brief Restore visual parameters
@@ -4775,8 +4878,9 @@ void SMESHGUI::restoreVisualParameters (int savePoint)
                                                              savePoint);
   _PTR(IParameters) ip = ClientFactory::getIParameters(ap);
 
-  // restore map of custom markers
+  // restore map of custom markers and map of clipping planes
   VTK::MarkerMap& aMarkerMap = myMarkerMap[ studyDS->StudyId() ];
+  TPlaneDataMap aPlaneDataMap;
 
   std::vector<std::string> properties = ip->getProperties();
   for (std::vector<std::string>::iterator propIt = properties.begin(); propIt != properties.end(); ++propIt)
@@ -4786,51 +4890,102 @@ void SMESHGUI::restoreVisualParameters (int savePoint)
     QString aPropertyValue( ip->getProperty( property ).c_str() );
 
     QStringList aPropertyNameList = aPropertyName.split( gSeparator, QString::SkipEmptyParts );
-    if( aPropertyNameList.size() != 2 )
+    if( aPropertyNameList.isEmpty() )
       continue;
 
-    int anId = 0;
-    bool ok = false;
-    if( aPropertyNameList[0] == "texture" )
-      anId = aPropertyNameList[1].toInt( &ok );
-
-    if( !ok || anId < 1 )
-      continue;
-
-    QStringList aPropertyValueList = aPropertyValue.split( gPathSep, QString::SkipEmptyParts );
-    if( aPropertyValueList.size() != 2 )
-      continue;
-
-    std::string aMarkerFileName = aPropertyValueList[0].toStdString();
-    QString aMarkerTextureString = aPropertyValueList[1];
-    QStringList aMarkerTextureStringList = aMarkerTextureString.split( gDigitsSep, QString::SkipEmptyParts );
-    if( aMarkerTextureStringList.size() != 3 )
-      continue;
-
-    ok = false;
-    ushort aWidth = aMarkerTextureStringList[0].toUShort( &ok );
-    if( !ok )
-      continue;
-
-    ok = false;
-    ushort aHeight = aMarkerTextureStringList[1].toUShort( &ok );
-    if( !ok )
-      continue;
-
-    VTK::MarkerTexture aMarkerTexture;
-    aMarkerTexture.push_back( aWidth );
-    aMarkerTexture.push_back( aHeight );
-
-    QString aMarkerTextureData = aMarkerTextureStringList[2];
-    for( int i = 0, n = aMarkerTextureData.length(); i < n; i++ )
+    QString aPropertyType = aPropertyNameList[0];
+    if( aPropertyType == "texture" )
     {
-      QChar aChar = aMarkerTextureData.at( i );
-      if( aChar.isDigit() )
-        aMarkerTexture.push_back( aChar.digitValue() );
-    }
+      if( aPropertyNameList.size() != 2 )
+        continue;
 
-    aMarkerMap[ anId ] = VTK::MarkerData( aMarkerFileName, aMarkerTexture );
+      bool ok = false;
+      int anId = aPropertyNameList[1].toInt( &ok );
+      if( !ok || anId < 1 )
+        continue;
+
+      QStringList aPropertyValueList = aPropertyValue.split( gPathSep, QString::SkipEmptyParts );
+      if( aPropertyValueList.size() != 2 )
+        continue;
+
+      std::string aMarkerFileName = aPropertyValueList[0].toStdString();
+      QString aMarkerTextureString = aPropertyValueList[1];
+      QStringList aMarkerTextureStringList = aMarkerTextureString.split( gDigitsSep, QString::SkipEmptyParts );
+      if( aMarkerTextureStringList.size() != 3 )
+        continue;
+
+      ok = false;
+      ushort aWidth = aMarkerTextureStringList[0].toUShort( &ok );
+      if( !ok )
+        continue;
+
+      ok = false;
+      ushort aHeight = aMarkerTextureStringList[1].toUShort( &ok );
+      if( !ok )
+        continue;
+
+      VTK::MarkerTexture aMarkerTexture;
+      aMarkerTexture.push_back( aWidth );
+      aMarkerTexture.push_back( aHeight );
+
+      QString aMarkerTextureData = aMarkerTextureStringList[2];
+      for( int i = 0, n = aMarkerTextureData.length(); i < n; i++ )
+      {
+        QChar aChar = aMarkerTextureData.at( i );
+        if( aChar.isDigit() )
+          aMarkerTexture.push_back( aChar.digitValue() );
+      }
+
+      aMarkerMap[ anId ] = VTK::MarkerData( aMarkerFileName, aMarkerTexture );
+    }
+    else if( aPropertyType == "ClippingPlane" )
+    {
+      if( aPropertyNameList.size() != 3 )
+        continue;
+
+      bool ok = false;
+      int aViewId = aPropertyNameList[1].toInt( &ok );
+      if( !ok || aViewId < 0 )
+        continue;
+
+      ok = false;
+      int aClippingPlaneId = aPropertyNameList[2].toInt( &ok );
+      if( !ok || aClippingPlaneId < 0 )
+        continue;
+
+      QStringList aPropertyValueList = aPropertyValue.split( gDigitsSep, QString::SkipEmptyParts );
+      if( aPropertyValueList.size() != 4 )
+        continue;
+
+      TPlaneData aPlaneData;
+      aPlaneData.Id = aClippingPlaneId;
+
+      ok = false;
+      aPlaneData.Orientation = aPropertyValueList[0].toInt( &ok );
+      if( !ok )
+        continue;
+
+      ok = false;
+      aPlaneData.Distance = aPropertyValueList[1].toDouble( &ok );
+      if( !ok )
+        continue;
+
+      ok = false;
+      aPlaneData.Angle[0] = aPropertyValueList[2].toDouble( &ok );
+      if( !ok )
+        continue;
+
+      ok = false;
+      aPlaneData.Angle[1] = aPropertyValueList[3].toDouble( &ok );
+      if( !ok )
+        continue;
+
+      TPlaneDataList& aPlaneDataList = aPlaneDataMap[ aViewId ];
+      aPlaneDataList.push_back( aPlaneData );      
+    }
   }
+
+  TPlaneInfoMap aPlaneInfoMap;
 
   std::vector<std::string> entries = ip->getEntries();
 
@@ -4878,39 +5033,40 @@ void SMESHGUI::restoreVisualParameters (int savePoint)
         if (vtkActors.IsBound(viewIndex))
           aSmeshActor = vtkActors.Find(viewIndex);
 
+        QList<SUIT_ViewManager*> lst;
+        getApp()->viewManagers(viewerTypStr, lst);
+
+        // SVTK ViewManager always has 1 ViewWindow, so view index is index of view manager
+        SUIT_ViewManager* vman = NULL;
+        if (viewIndex >= 0 && viewIndex < lst.count())
+          vman = lst.at(viewIndex);
+
         if (paramNameStr == "Visibility")
         {
-          if (!aSmeshActor && displayer())
+          if (!aSmeshActor && displayer() && vman)
           {
-            QList<SUIT_ViewManager*> lst;
-            getApp()->viewManagers(viewerTypStr, lst);
+            SUIT_ViewModel* vmodel = vman->getViewModel();
+            // SVTK view model can be casted to SALOME_View
+            displayer()->Display(entry, true, dynamic_cast<SALOME_View*>(vmodel));
 
-            // SVTK ViewManager always has 1 ViewWindow, so view index is index of view manager
-            if (viewIndex >= 0 && viewIndex < lst.count()) {
-              SUIT_ViewManager* vman = lst.at(viewIndex);
-              SUIT_ViewModel* vmodel = vman->getViewModel();
-              // SVTK view model can be casted to SALOME_View
-              displayer()->Display(entry, true, dynamic_cast<SALOME_View*>(vmodel));
-
-              // store displayed actor in a temporary map for quicker
-              // access later when restoring other parameters
-              SVTK_ViewWindow* vtkView = (SVTK_ViewWindow*) vman->getActiveView();
-              vtkRenderer* Renderer = vtkView->getRenderer();
-              VTK::ActorCollectionCopy aCopy(Renderer->GetActors());
-              vtkActorCollection* theActors = aCopy.GetActors();
-              theActors->InitTraversal();
-              bool isFound = false;
-              vtkActor *ac = theActors->GetNextActor();
-              for (; ac != NULL && !isFound; ac = theActors->GetNextActor()) {
-                if (ac->IsA("SMESH_Actor")) {
-                  SMESH_Actor* aGeomAc = SMESH_Actor::SafeDownCast(ac);
-                  if (aGeomAc->hasIO()) {
-                    Handle(SALOME_InteractiveObject) io =
-                      Handle(SALOME_InteractiveObject)::DownCast(aGeomAc->getIO());
-                    if (io->hasEntry() && strcmp(io->getEntry(), entry.toLatin1().data()) == 0) {
-                      isFound = true;
-                      vtkActors.Bind(viewIndex, aGeomAc);
-                    }
+            // store displayed actor in a temporary map for quicker
+            // access later when restoring other parameters
+            SVTK_ViewWindow* vtkView = (SVTK_ViewWindow*) vman->getActiveView();
+            vtkRenderer* Renderer = vtkView->getRenderer();
+            VTK::ActorCollectionCopy aCopy(Renderer->GetActors());
+            vtkActorCollection* theActors = aCopy.GetActors();
+            theActors->InitTraversal();
+            bool isFound = false;
+            vtkActor *ac = theActors->GetNextActor();
+            for (; ac != NULL && !isFound; ac = theActors->GetNextActor()) {
+              if (ac->IsA("SMESH_Actor")) {
+                SMESH_Actor* aGeomAc = SMESH_Actor::SafeDownCast(ac);
+                if (aGeomAc->hasIO()) {
+                  Handle(SALOME_InteractiveObject) io =
+                    Handle(SALOME_InteractiveObject)::DownCast(aGeomAc->getIO());
+                  if (io->hasEntry() && strcmp(io->getEntry(), entry.toLatin1().data()) == 0) {
+                    isFound = true;
+                    vtkActors.Bind(viewIndex, aGeomAc);
                   }
                 }
               }
@@ -5027,14 +5183,16 @@ void SMESHGUI::restoreVisualParameters (int savePoint)
             }
             // Clipping
             else if (paramNameStr.startsWith("ClippingPlane")) {
-              cout << "$$$ ClippingPlane 1" << endl;
-              if (paramNameStr == "ClippingPlane1" || val == "Off")
-                aSmeshActor->RemoveAllClippingPlanes();
-              if (val != "Off") {
-                cout << "$$$ ClippingPlane 2" << endl;
-                QStringList vals = val.split(gDigitsSep, QString::SkipEmptyParts);
-                if (vals.count() == 4) { // format check: 4 values
-                  cout << "$$$ ClippingPlane 3" << endl;
+              QStringList vals = val.split(gDigitsSep, QString::SkipEmptyParts);
+              // old format - val looks like "Off" or "0:0.5:0:0" (orientation, distance, two angles)
+              // new format - val looks like "Off" or "0" (plane id)
+              // (note: in new format "Off" value is used only for consistency,
+              //  so it is processed together with values in old format)
+              bool anIsOldFormat = ( vals.count() == 4 || val == "Off" );
+              if( anIsOldFormat ) {
+                if (paramNameStr == "ClippingPlane1" || val == "Off")
+                  aSmeshActor->RemoveAllClippingPlanes();
+                if (val != "Off") {
                   SMESH::Orientation anOrientation = (SMESH::Orientation)vals[0].toInt();
                   double aDistance = vals[1].toFloat();
                   vtkFloatingPointType anAngle[2];
@@ -5047,8 +5205,43 @@ void SMESHGUI::restoreVisualParameters (int savePoint)
                   if (viewIndex >= 0 && viewIndex < lst.count()) {
                     SUIT_ViewManager* vman = lst.at(viewIndex);
                     SVTK_ViewWindow* vtkView = (SVTK_ViewWindow*) vman->getActiveView();
-                    SMESHGUI_ClippingDlg::AddPlane(aSmeshActor, vtkView,
-                                                   anOrientation, aDistance, anAngle);
+
+                    SMESHGUI_ClippingPlaneInfoList& aClippingPlaneInfoList = myClippingPlaneInfoMap[ vman ];
+
+                    SMESH::TActorList anActorList;
+                    anActorList.push_back( aSmeshActor );
+                    SMESH::OrientedPlane* aPlane =
+                      SMESHGUI_ClippingDlg::AddPlane(anActorList, vtkView, anOrientation, aDistance, anAngle);
+                    if( aPlane ) {
+                      SMESH::ClippingPlaneInfo aClippingPlaneInfo;
+                      aClippingPlaneInfo.Plane = aPlane;
+                      aClippingPlaneInfo.ActorList = anActorList;
+                      aClippingPlaneInfoList.push_back( aClippingPlaneInfo );
+                    }
+                  }
+                }
+              }
+              else {
+                bool ok = false;
+                int aPlaneId = val.toInt( &ok );
+                if( ok && aPlaneId >= 0 ) {
+                  bool anIsDefinedPlane = false;
+                  TPlaneInfoList& aPlaneInfoList = aPlaneInfoMap[ viewIndex ];
+                  TPlaneInfoList::iterator anIter = aPlaneInfoList.begin();
+                  for( ; anIter != aPlaneInfoList.end(); anIter++ ) {
+                    TPlaneInfo& aPlaneInfo = *anIter;
+                    if( aPlaneInfo.PlaneId == aPlaneId ) {
+                      aPlaneInfo.ActorList.push_back( aSmeshActor );
+                      anIsDefinedPlane = true;
+                      break;
+                    }
+                  }
+                  if( !anIsDefinedPlane ) {
+                    TPlaneInfo aPlaneInfo;
+                    aPlaneInfo.PlaneId = aPlaneId;
+                    aPlaneInfo.ActorList.push_back( aSmeshActor );
+                    aPlaneInfo.ViewManager = vman;
+                    aPlaneInfoList.push_back( aPlaneInfo );
                   }
                 }
               }
@@ -5058,6 +5251,55 @@ void SMESHGUI::restoreVisualParameters (int savePoint)
       }
     } // for names/parameters iterator
   } // for entries iterator
+
+  // add clipping planes to actors according to the restored parameters
+  // and update the clipping plane map
+  TPlaneInfoMap::const_iterator anIter1 = aPlaneInfoMap.begin();
+  for( ; anIter1 != aPlaneInfoMap.end(); anIter1++ ) {
+    int aViewId = anIter1->first;
+    const TPlaneInfoList& aPlaneInfoList = anIter1->second;
+
+    TPlaneDataMap::const_iterator anIter2 = aPlaneDataMap.find( aViewId );
+    if( anIter2 == aPlaneDataMap.end() )
+      continue;
+    const TPlaneDataList& aPlaneDataList = anIter2->second;
+
+    TPlaneInfoList::const_iterator anIter3 = aPlaneInfoList.begin();
+    for( ; anIter3 != aPlaneInfoList.end(); anIter3++ ) {
+      const TPlaneInfo& aPlaneInfo = *anIter3;
+      int aPlaneId = aPlaneInfo.PlaneId;
+      const TActorList& anActorList = aPlaneInfo.ActorList;
+      SUIT_ViewManager* aViewManager = aPlaneInfo.ViewManager;
+      if( !aViewManager )
+        continue;
+
+      SVTK_ViewWindow* aViewWindow = dynamic_cast<SVTK_ViewWindow*>( aViewManager->getActiveView() );
+      if( !aViewWindow )
+        continue;
+
+      SMESHGUI_ClippingPlaneInfoList& aClippingPlaneInfoList = myClippingPlaneInfoMap[ aViewManager ];
+
+      TPlaneDataList::const_iterator anIter4 = aPlaneDataList.begin();
+      for( ; anIter4 != aPlaneDataList.end(); anIter4++ ) {
+        const TPlaneData& aPlaneData = *anIter4;
+        if( aPlaneData.Id == aPlaneId ) {
+          SMESH::OrientedPlane* aPlane =
+            SMESHGUI_ClippingDlg::AddPlane( anActorList,
+                                            aViewWindow,
+                                            (SMESH::Orientation)aPlaneData.Orientation,
+                                            aPlaneData.Distance,
+                                            aPlaneData.Angle );
+          if( aPlane ) {
+            SMESH::ClippingPlaneInfo aClippingPlaneInfo;
+            aClippingPlaneInfo.Plane = aPlane;
+            aClippingPlaneInfo.ActorList = anActorList;
+            aClippingPlaneInfoList.push_back( aClippingPlaneInfo );
+          }
+          break;
+        }
+      }
+    }
+  }
 
   // update all VTK views
   QList<SUIT_ViewManager*> lst;

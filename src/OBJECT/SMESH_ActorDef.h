@@ -189,9 +189,6 @@ class SMESH_ActorDef : public SMESH_Actor
 
   virtual vtkScalarBarActor* GetScalarBarActor(){ return myScalarBarActor;}
 
-  virtual void SetPlaneParam(vtkFloatingPointType theDir[3], vtkFloatingPointType theDist, vtkPlane* thePlane);
-  virtual void GetPlaneParam(vtkFloatingPointType theDir[3], vtkFloatingPointType& theDist, vtkPlane* thePlane);
-
   virtual void RemoveAllClippingPlanes();
   virtual vtkIdType GetNumberOfClippingPlanes();
   virtual vtkPlane* GetClippingPlane(vtkIdType theID);

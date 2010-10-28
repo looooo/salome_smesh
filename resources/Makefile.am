@@ -49,6 +49,7 @@ dist_salomeres_DATA = \
 	mesh_info.png \
 	advanced_mesh_info.png \
 	standard_mesh_info.png \
+	mesh_elem_info.png \
 	mesh_whatis.png \
 	mesh_init.png \
 	mesh_length.png \

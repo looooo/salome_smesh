@@ -48,7 +48,8 @@
 #include "SMESHGUI_Hypotheses.h"
 #include "SMESHGUI_Make2DFrom3DOp.h"
 #include "SMESHGUI_MakeNodeAtPointDlg.h"
-#include "SMESHGUI_MeshInfosDlg.h"
+//#include "SMESHGUI_MeshInfosDlg.h"
+#include "SMESHGUI_MeshInfo.h"
 #include "SMESHGUI_MeshOp.h"
 #include "SMESHGUI_MeshOrderOp.h"
 #include "SMESHGUI_MeshPatternDlg.h"
@@ -65,12 +66,12 @@
 #include "SMESHGUI_SewingDlg.h"
 #include "SMESHGUI_SingleEditDlg.h"
 #include "SMESHGUI_SmoothingDlg.h"
-#include "SMESHGUI_StandardMeshInfosDlg.h"
+//#include "SMESHGUI_StandardMeshInfosDlg.h"
 #include "SMESHGUI_SymmetryDlg.h"
 #include "SMESHGUI_TranslationDlg.h"
 #include "SMESHGUI_ScaleDlg.h"
 #include "SMESHGUI_TransparencyDlg.h"
-#include "SMESHGUI_WhatIsDlg.h"
+//#include "SMESHGUI_WhatIsDlg.h"
 #include "SMESHGUI_DuplicateNodesDlg.h"
 
 #include "SMESHGUI_Utils.h"
@@ -2369,7 +2370,9 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
     }
 
   case 900:                                     // MESH INFOS
+  case 903:                                     // WHAT IS
     {
+      int page = theCommandID == 900 ? SMESHGUI_MeshInfoDlg::BaseInfo : SMESHGUI_MeshInfoDlg::ElemInfo;
       EmitSignalDeactivateDialog();
       LightApp_SelectionMgr *aSel = SMESHGUI::selectionMgr();
       SALOME_ListIO selected;
@@ -2377,21 +2380,20 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
         aSel->selectedObjects( selected );
 
       if ( selected.Extent() > 1 ) { // a dlg for each IO
-        SALOME_ListIO IOs;
-        SALOME_ListIteratorOfListIO It (selected);
+        SALOME_ListIteratorOfListIO It( selected );
         for ( ; It.More(); It.Next() ) {
-          IOs.Clear(); IOs.Append( It.Value() );
-          aSel->setSelectedObjects( IOs );
-          ( new SMESHGUI_MeshInfosDlg( this ) )->show();
-        }
-        // restore selection
-        aSel->setSelectedObjects( selected );
+	  SMESHGUI_MeshInfoDlg* dlg = new SMESHGUI_MeshInfoDlg( SMESHGUI::desktop(), page );
+	  dlg->showInfo( It.Value() ); 
+	  dlg->show();
+	}
       }
-      else
-        ( new SMESHGUI_MeshInfosDlg( this ) )->show();
+      else {
+	SMESHGUI_MeshInfoDlg* dlg = new SMESHGUI_MeshInfoDlg( SMESHGUI::desktop(), page );
+	dlg->show();
+      }
       break;
     }
-
+    /*
   case 902:                                     // STANDARD MESH INFOS
     {
       EmitSignalDeactivateDialog();
@@ -2416,13 +2418,13 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
         ( new SMESHGUI_StandardMeshInfosDlg( this ) )->show();
       break;
     }
-
   case 903:                                     // WHAT IS
     {
       EmitSignalDeactivateDialog();
       ( new SMESHGUI_WhatIsDlg( this ) )->show();
       break;
     }
+    */
 
   case 904:                                     // FIND ELEM
     {
@@ -3143,7 +3145,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   createSMESHAction(  814, "UNDERLYING_ELEMS","ICON_UNDERLYING_ELEMS" );
   createSMESHAction(  813, "DEL_GROUP",       "ICON_DEL_GROUP" );
   createSMESHAction(  900, "ADV_INFO",        "ICON_ADV_INFO" );
-  createSMESHAction(  902, "STD_INFO",        "ICON_STD_INFO" );
+  //createSMESHAction(  902, "STD_INFO",        "ICON_STD_INFO" );
   createSMESHAction(  903, "WHAT_IS",         "ICON_WHAT_IS" );
   createSMESHAction(  904, "FIND_ELEM",       "ICON_FIND_ELEM" );
   createSMESHAction( 6001, "LENGTH",          "ICON_LENGTH",        0, true );
@@ -3306,7 +3308,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   createMenu( 813, meshId, -1 );
   createMenu( separator(), meshId, -1 );
   createMenu( 900, meshId, -1 );
-  createMenu( 902, meshId, -1 );
+  //createMenu( 902, meshId, -1 );
   createMenu( 903, meshId, -1 );
   createMenu( 904, meshId, -1 );
   createMenu( separator(), meshId, -1 );
@@ -3407,7 +3409,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   //createTool( 815, meshTb );
   createTool( separator(), meshTb );
   createTool( 900, meshTb );
-  createTool( 902, meshTb );
+  //createTool( 902, meshTb );
   createTool( 903, meshTb );
   createTool( 904, meshTb );
   createTool( separator(), meshTb );
@@ -3540,7 +3542,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   createPopupItem( 713, OB, mesh, "&& isComputable" );     // MESH ORDER
   createPopupItem( 214, OB, mesh_group );                  // UPDATE
   createPopupItem( 900, OB, mesh_group );                  // ADV_INFO
-  createPopupItem( 902, OB, mesh );                        // STD_INFO
+  //createPopupItem( 902, OB, mesh );                        // STD_INFO
   createPopupItem( 903, OB, mesh_group );                  // WHAT_IS
   createPopupItem( 904, OB, mesh_group );                  // FIND_ELEM
   popupMgr()->insert( separator(), -1, 0 );
@@ -3576,7 +3578,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   popupMgr()->insert( separator(), -1, 0 );
   createPopupItem( 214, View, mesh_group ); // UPDATE
   createPopupItem( 900, View, mesh_group ); // ADV_INFO
-  createPopupItem( 902, View, mesh );       // STD_INFO
+  //createPopupItem( 902, View, mesh );       // STD_INFO
   createPopupItem( 903, View, mesh_group ); // WHAT_IS
   createPopupItem( 904, View, mesh_group ); // FIND_ELEM
   popupMgr()->insert( separator(), -1, 0 );

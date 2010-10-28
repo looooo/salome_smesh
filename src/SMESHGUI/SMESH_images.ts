@@ -463,7 +463,7 @@
         </message>
         <message>
             <source>ICON_WHAT_IS</source>
-            <translation>mesh_whatis.png</translation>
+            <translation>mesh_elem_info.png</translation>
         </message>
         <message>
             <source>ICON_WIRE</source>

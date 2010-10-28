@@ -157,7 +157,7 @@
     </message>
     <message>
         <source>MEN_ADV_INFO</source>
-        <translation>Advanced Mesh Infos</translation>
+        <translation>Mesh Information</translation>
     </message>
     <message>
         <source>MEN_ALL</source>
@@ -761,7 +761,7 @@
     </message>
     <message>
         <source>MEN_WHAT_IS</source>
-        <translation>Mesh Element Info</translation>
+        <translation>Mesh Element Information</translation>
     </message>
     <message>
         <source>MEN_WIRE</source>
@@ -2178,7 +2178,7 @@ Consider saving your work before application crash</translation>
     </message>
     <message>
         <source>STB_ADV_INFO</source>
-        <translation>Advanced Mesh Infos</translation>
+        <translation>Show base information about the mesh object</translation>
     </message>
     <message>
         <source>STB_ALL</source>
@@ -2674,7 +2674,7 @@ Consider saving your work before application crash</translation>
     </message>
     <message>
         <source>STB_WHAT_IS</source>
-        <translation>Mesh Element Info</translation>
+        <translation>Show information about the mesh node or element</translation>
     </message>
     <message>
         <source>STB_WIRE</source>
@@ -2710,7 +2710,7 @@ Consider saving your work before application crash</translation>
     </message>
     <message>
         <source>TOP_ADV_INFO</source>
-        <translation>Advanced Mesh Infos</translation>
+        <translation>Mesh Information</translation>
     </message>
     <message>
         <source>TOP_ALL</source>
@@ -3206,7 +3206,7 @@ Consider saving your work before application crash</translation>
     </message>
     <message>
         <source>TOP_WHAT_IS</source>
-        <translation>Mesh Element Info</translation>
+        <translation>Mesh Element Information</translation>
     </message>
     <message>
         <source>TOP_WIRE</source>
@@ -5366,6 +5366,247 @@ It is impossible to read point coordinates from file</translation>
     <message>
         <source>CONSTRUCT_NEW_GROUP_ELEMENTS</source>
         <translation>Construct group with newly created elements</translation>
+    </message>
+</context>
+<context>
+    <name>SMESHGUI_MeshInfo</name>
+    <message>
+        <source>NAME_LAB</source>
+        <translation>Name:</translation>
+    </message>
+    <message>
+        <source>OBJECT_LAB</source>
+        <translation>Object:</translation>
+    </message>
+    <message>
+        <source>NODES_LAB</source>
+        <translation>Nodes:</translation>
+    </message>
+    <message>
+        <source>ELEMENTS_LAB</source>
+        <translation>Elements:</translation>
+    </message>
+    <message>
+        <source>TOTAL_LAB</source>
+        <translation>Total</translation>
+    </message>
+    <message>
+        <source>LINEAR_LAB</source>
+        <translation>Linear</translation>
+    </message>
+    <message>
+        <source>QUADRATIC_LAB</source>
+        <translation>Quadratic</translation>
+    </message>
+    <message>
+        <source>0D_LAB</source>
+        <translation>0D:</translation>
+    </message>
+    <message>
+        <source>1D_LAB</source>
+        <translation>1D (edges):</translation>
+    </message>
+    <message>
+        <source>2D_LAB</source>
+        <translation>2D (faces):</translation>
+    </message>
+    <message>
+        <source>TRIANGLES_LAB</source>
+        <translation>Triangles:</translation>
+    </message>
+    <message>
+        <source>QUADRANGLES_LAB</source>
+        <translation>Quadrandgles:</translation>
+    </message>
+    <message>
+        <source>POLYGONS_LAB</source>
+        <translation>Polygons:</translation>
+    </message>
+    <message>
+        <source>3D_LAB</source>
+        <translation>3D (volumes):</translation>
+    </message>
+    <message>
+        <source>TETRAHEDRONS_LAB</source>
+        <translation>Tetrahedrons:</translation>
+    </message>
+    <message>
+        <source>HEXAHEDONRS_LAB</source>
+        <translation>Hexahedrons:</translation>
+    </message>
+    <message>
+        <source>PYRAMIDS_LAB</source>
+        <translation>Pyramids:</translation>
+    </message>
+    <message>
+        <source>PRISMS_LAB</source>
+        <translation>Prisms:</translation>
+    </message>
+    <message>
+        <source>POLYHEDRONS_LAB</source>
+        <translation>Polyhedrons:</translation>
+    </message>
+    <message>
+        <source>OBJECT_MESH</source>
+        <translation>Mesh</translation>
+    </message>
+    <message>
+        <source>OBJECT_SUBMESH</source>
+        <translation>Sub-mesh</translation>
+    </message>
+    <message>
+        <source>OBJECT_GROUP</source>
+        <translation>Group</translation>
+    </message>
+    <message>
+        <source>OBJECT_GROUP_NODES</source>
+        <translation>Group of nodes</translation>
+    </message>
+    <message>
+        <source>OBJECT_GROUP_EDGES</source>
+        <translation>Group of edges</translation>
+    </message>
+    <message>
+        <source>OBJECT_GROUP_FACES</source>
+        <translation>Group of faces</translation>
+    </message>
+    <message>
+        <source>OBJECT_GROUP_VOLUMES</source>
+        <translation>Group of volumes</translation>
+    </message>
+    <message>
+        <source>OBJECT_GROUP_0DELEMS</source>
+        <translation>Group of 0D elements</translation>
+    </message>
+</context>
+<context>
+    <name>SMESHGUI_MeshInfoDlg</name>
+    <message>
+        <source>MESH_INFO</source>
+        <translation>Mesh Information</translation>
+    </message>
+    <message>
+        <source>BASE_INFO</source>
+        <translation>Base Info</translation>
+    </message>
+    <message>
+        <source>ELEM_INFO</source>
+        <translation>Element Info</translation>
+    </message>
+    <message>
+        <source>NODE_MODE</source>
+        <translation>Node</translation>
+    </message>
+    <message>
+        <source>ELEM_MODE</source>
+        <translation>Element</translation>
+    </message>
+</context>
+<context>
+    <name>SMESHGUI_ElemInfo</name>
+    <message>
+        <source>COORDINATES</source>
+        <translation>COORDINATES</translation>
+    </message>
+    <message>
+        <source>CONNECTIVITY</source>
+        <translation>CONNECTIVITY</translation>
+    </message>
+    <message>
+        <source>GRAVITY_CENTER</source>
+        <translation>GRAVITY CENTER</translation>
+    </message>
+    <message>
+        <source>NODE</source>
+        <translation>NODE</translation>
+    </message>
+    <message>
+        <source>0D_ELEMENT</source>
+        <translation>0D ELEMENT</translation>
+    </message>
+    <message>
+        <source>0D_ELEMENTS</source>
+        <translation>0D ELEMENTS</translation>
+    </message>
+    <message>
+        <source>EDGE</source>
+        <translation>EDGE</translation>
+    </message>
+    <message>
+        <source>EDGES</source>
+        <translation>EDGES</translation>
+    </message>
+    <message>
+        <source>FACE</source>
+        <translation>FACE</translation>
+    </message>
+    <message>
+        <source>FACES</source>
+        <translation>FACES</translation>
+    </message>
+    <message>
+        <source>VOLUME</source>
+        <translation>VOLUME</translation>
+    </message>
+    <message>
+        <source>VOLUMES</source>
+        <translation>VOLUMES</translation>
+    </message>
+    <message>
+        <source>FREE_NODE</source>
+        <translation>Free node (no connectivity)</translation>
+    </message>
+    <message>
+        <source>TYPE</source>
+        <translation>TYPE</translation>
+    </message>
+    <message>
+        <source>TRIANGLE</source>
+        <translation>Triangle</translation>
+    </message>
+    <message>
+        <source>QUADRANGLE</source>
+        <translation>Quadrangle</translation>
+    </message>
+    <message>
+        <source>POLYGON</source>
+        <translation>Polygon</translation>
+    </message>
+    <message>
+        <source>TETRAHEDRON</source>
+        <translation>Tetrahedron</translation>
+    </message>
+    <message>
+        <source>HEXAHEDRON</source>
+        <translation>Hexahedron</translation>
+    </message>
+    <message>
+        <source>PYRAMID</source>
+        <translation>Pyramid</translation>
+    </message>
+    <message>
+        <source>PRISM</source>
+        <translation>Prism</translation>
+    </message>
+    <message>
+        <source>POLYHEDRON</source>
+        <translation>Polyhedron</translation>
+    </message>
+    <message>
+        <source>QUADRATIC</source>
+        <translation>QUADRATIC</translation>
+    </message>
+    <message>
+        <source>YES</source>
+        <translation>Yes</translation>
+    </message>
+    <message>
+        <source>NO</source>
+        <translation>No</translation>
+    </message>
+    <message>
+        <source>GRAVITY_CENTER</source>
+        <translation>GRAVITY CENTER</translation>
     </message>
 </context>
 </TS>

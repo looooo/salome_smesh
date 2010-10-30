@@ -4092,15 +4092,27 @@ void SMESHGUI::createPreferences()
   setPreferenceProperty( computeGroup, "columns", 2 );
   int notifyMode = addPreference( tr( "PREF_NOTIFY_MODE" ), computeGroup, LightApp_Preferences::Selector, "SMESH", "show_result_notification" );
   modes.clear();
-  modes.append( "Never" );
-  modes.append( "Errors only" );
-  modes.append( "Always" );
+  modes.append( tr( "PREF_NOTIFY_NEVER" ) );
+  modes.append( tr( "PREF_NOTIFY_ERROR" ) );
+  modes.append( tr( "PREF_NOTIFY_ALWAYS" ) );
   indices.clear();
   indices.append( 0 );
   indices.append( 1 );
   indices.append( 2 );
   setPreferenceProperty( notifyMode, "strings", modes );
   setPreferenceProperty( notifyMode, "indexes", indices );
+
+  int infoGroup = addPreference( tr( "PREF_GROUP_INFO" ), genTab );
+  setPreferenceProperty( computeGroup, "columns", 2 );
+  int elemInfo = addPreference( tr( "PREF_ELEM_INFO" ), infoGroup, LightApp_Preferences::Selector, "SMESH", "mesh_elem_info" );
+  modes.clear();
+  modes.append( tr( "PREF_ELEM_INFO_SIMPLE" ) );
+  modes.append( tr( "PREF_ELEM_INFO_TREE" ) );
+  indices.clear();
+  indices.append( 0 );
+  indices.append( 1 );
+  setPreferenceProperty( elemInfo, "strings", modes );
+  setPreferenceProperty( elemInfo, "indexes", indices );
 
   int segGroup = addPreference( tr( "PREF_GROUP_SEGMENT_LENGTH" ), genTab );
   setPreferenceProperty( segGroup, "columns", 2 );

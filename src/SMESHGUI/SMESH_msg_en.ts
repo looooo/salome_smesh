@@ -3403,6 +3403,30 @@ Please, create VTK viewer and try again</translation>
         <translation>Show a computation result notification</translation>
     </message>
     <message>
+        <source>PREF_NOTIFY_NEVER</source>
+        <translation>Never</translation>
+    </message>
+    <message>
+        <source>PREF_NOTIFY_ERROR</source>
+        <translation>Errors only</translation>
+    </message>
+    <message>
+        <source>PREF_NOTIFY_ALWAYS</source>
+        <translation>Always</translation>
+    </message>
+    <message>
+        <source>PREF_ELEM_INFO</source>
+        <translation>Mesh element information</translation>
+    </message>
+    <message>
+        <source>PREF_ELEM_INFO_SIMPLE</source>
+        <translation>Simple</translation>
+    </message>
+    <message>
+        <source>PREF_ELEM_INFO_TREE</source>
+        <translation>Tree</translation>
+    </message>
+    <message>
         <source>SMESH_PREF_GROUP_PRECISION</source>
         <translation>Input fields precision</translation>
     </message>
@@ -3453,6 +3477,10 @@ Please, create VTK viewer and try again</translation>
     <message>
         <source>PREF_GROUP_UPDATE</source>
         <translation>Update</translation>
+    </message>
+    <message>
+        <source>PREF_GROUP_INFO</source>
+        <translation>Mesh information</translation>
     </message>
     <message>
         <source>PREF_HIGHLIGHT_COLOR</source>
@@ -5607,6 +5635,14 @@ It is impossible to read point coordinates from file</translation>
     <message>
         <source>GRAVITY_CENTER</source>
         <translation>GRAVITY CENTER</translation>
+    </message>
+    <message>
+        <source>PROPERTY</source>
+        <translation>Property</translation>
+    </message>
+    <message>
+        <source>VALUE</source>
+        <translation>Value</translation>
     </message>
 </context>
 </TS>

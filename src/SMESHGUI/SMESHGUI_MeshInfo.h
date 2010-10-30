@@ -42,6 +42,8 @@ class QLabel;
 class QLineEdit;
 class QTabWidget;
 class QTextBrowser;
+class QTreeWidget;
+class QTreeWidgetItem;
 class SMESH_Actor;
 class SMDS_MeshNode;
 class SMDS_MeshElement;
@@ -119,8 +121,7 @@ public:
   ~SMESHGUI_ElemInfo();
 
   void         setSource( SMESH_Actor* );
-
-  virtual void showInfo( long, bool ) = 0;
+  virtual void showInfo( long, bool );
   virtual void clear() = 0;
 
 protected:
@@ -137,10 +138,13 @@ protected:
   typedef QMap< int, QList<int> > Connectivity;
 
   Connectivity nodeConnectivity( const SMDS_MeshNode* );
+  QString      formatConnectivity( Connectivity, int );
   XYZ          gravityCenter( const SMDS_MeshElement* );
 
 protected:
   SMESH_Actor* myActor;
+  long         myID;
+  int          myIsElement;
 };
 
 class SMESHGUI_EXPORT SMESHGUI_SimpleElemInfo : public SMESHGUI_ElemInfo
@@ -151,20 +155,25 @@ public:
   void          showInfo( long, bool );
   void          clear();
 
-protected:
-  QString       formatConnectivity( Connectivity, int );
-
 private:
   QTextBrowser* myInfo;
 };
 
 class SMESHGUI_EXPORT SMESHGUI_TreeElemInfo : public SMESHGUI_ElemInfo
 {
+  class ItemDelegate;
+
 public:
   SMESHGUI_TreeElemInfo( QWidget* = 0 );
 
-  void showInfo( long, bool );
-  void clear();
+  void             showInfo( long, bool );
+  void             clear();
+
+private:
+  QTreeWidgetItem* createItem( QTreeWidgetItem* = 0, int = 100 );
+  
+private:
+  QTreeWidget*     myInfo;
 };
 
 class SMESHGUI_EXPORT SMESHGUI_MeshInfoDlg : public QDialog

@@ -27,6 +27,7 @@
 //
 #include "SMESHGUI_MeshUtils.h"
 
+#include "SMESHGUI.h"
 #include "SMESHGUI_Utils.h"
 
 // SALOME KERNEL includes
@@ -38,6 +39,7 @@
 // IDL includes
 #include <SALOMEconfig.h>
 #include CORBA_SERVER_HEADER(SMESH_Group)
+#include CORBA_SERVER_HEADER(SMESH_Measurements)
 
 namespace SMESH
 {
@@ -81,5 +83,15 @@ namespace SMESH
       return name;
     }
     return baseName;
+  }
+
+
+  SMESH::Measurements_var& GetMeasurements()
+  {
+    static SMESH::Measurements_var aMeasurements;
+    if (CORBA::is_nil(aMeasurements)) {
+      aMeasurements = SMESHGUI::GetSMESHGen()->CreateMeasurements();
+    }
+    return aMeasurements;
   }
 } // end of namespace SMESH

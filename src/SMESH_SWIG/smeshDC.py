@@ -842,6 +842,7 @@ class smeshDC(SMESH._objref_SMESH_Gen):
         aCriteria = []
         aCriteria.append(aCriterion)
         aFilter.SetCriteria(aCriteria)
+        aFilterMgr.Destroy()
         return aFilter
 
     ## Creates a numerical functor by its type
@@ -1628,6 +1629,7 @@ class Mesh:
         aCriteria.append(Criterion)
         aFilter.SetCriteria(aCriteria)
         group = self.MakeGroupByFilter(groupName, aFilter)
+        aFilterMgr.Destroy()
         return group
 
     ## Creates a mesh group by the given criteria (list of criteria)
@@ -1640,6 +1642,7 @@ class Mesh:
         aFilter = aFilterMgr.CreateFilter()
         aFilter.SetCriteria(theCriteria)
         group = self.MakeGroupByFilter(groupName, aFilter)
+        aFilterMgr.Destroy()
         return group
 
     ## Creates a mesh group by the given filter
@@ -1669,6 +1672,7 @@ class Mesh:
         aPredicate = aFilterMgr.CreateFreeEdges()
         aPredicate.SetMesh(self.mesh)
         aBorders = aPredicate.GetBorders()
+        aFilterMgr.Destroy()
         return aBorders
 
     ## Removes a group
@@ -2188,6 +2192,62 @@ class Mesh:
         return self.mesh.BaryCenter(id)
 
 
+    # Get mesh measurements information:
+    # ------------------------------------
+
+    def MinDistance(self, id1, id2, isElem1=False, isElem2=False):
+        aMeasure = self.GetMinDistance(id1, id2, isElem1, isElem2)
+        return aMeasure.value
+    
+    #  @param node1, node2 is nodes to measure distance
+    #  @return Measure structure
+    def GetMinDistance(self, id1, id2, isElem1=False, isElem2=False):
+        if isinstance( id1, int):
+            if (isElem1):
+                id1 = self.editor.MakeIDSource([id1], SMESH.FACE)
+            else:
+                id1 = self.editor.MakeIDSource([id1], SMESH.NODE)
+        if isinstance( id2, int):
+            if (isElem2):
+                id2 = self.editor.MakeIDSource([id2], SMESH.FACE)
+            else:
+                id2 = self.editor.MakeIDSource([id2], SMESH.NODE)
+        
+        aMeasurements = self.smeshpyD.CreateMeasurements()
+        aMeasure = aMeasurements.MinDistance(id1, id2)
+        aMeasurements.Destroy()
+        return aMeasure
+    
+    #  @param IDsOfElements is a list of ids of elements or nodes
+    #  @return Measure structure
+    def GetBoundingBox(self, IDs = None, isElem=True):
+        if isinstance( IDs, Mesh ):
+            IDs = [ IDs.mesh ]
+        elif (IDs == None):
+            IDs = [ self.mesh ]
+        elif isinstance( IDs, int):
+            if (isElem):
+                IDs = [ self.editor.MakeIDSource(IDs, SMESH.FACE) ]
+            else:
+                IDs = [ self.editor.MakeIDSource(IDs, SMESH.NODE) ]
+        elif isinstance( IDs, list ) and isinstance( IDs[0], int):
+            if (isElem):
+                IDs = [ self.editor.MakeIDSource(IDs, SMESH.FACE) ]
+            else:
+                IDs = [ self.editor.MakeIDSource(IDs, SMESH.NODE) ]
+        elif hasattr(IDs, "_narrow"):
+            anIDs = IDs._narrow(SMESH.SMESH_IDSource)
+            if (anIDs):
+                IDs = [ anIDs ]
+                
+        aMeasure = None
+        if isinstance(IDs, list):
+            aMeasurements = self.smeshpyD.CreateMeasurements()
+            aMeasure = aMeasurements.BoundingBox(IDs)
+            aMeasurements.Destroy()
+            
+        return aMeasure
+    
     # Mesh edition (SMESH_MeshEditor functionality):
     # ---------------------------------------------
 

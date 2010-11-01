@@ -20,36 +20,47 @@
 //  See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 //
 
-// SMESH SMESHGUI : GUI for SMESH component
-// File   : SMESHGUI_MeshUtils.h
-// Author : Open CASCADE S.A.S.
+//  SMESH SMESH_I : idl implementation based on 'SMESH' unit's calsses
+//  File   : SMESH_Measurements_i.hxx
+//  Author : Pavel Telkov, OCC
+//  Module : SMESH
 //
-#ifndef SMESHGUI_MESHUTILS_H
-#define SMESHGUI_MESHUTILS_H
+#ifndef _SMESH_MEASUREMENTS_I_HXX_
+#define _SMESH_MEASUREMENTS_I_HXX_
 
-// SMESH includes
-#include "SMESH_SMESHGUI.hxx"
+#include "SMESH.hxx"
 
-// Qt includes
-#include <QString>
-
-// SALOME GUI includes
-#include <SALOME_InteractiveObject.hxx>
-
-// IDL includes
 #include <SALOMEconfig.h>
-#include CORBA_SERVER_HEADER(SMESH_Mesh)
 #include CORBA_SERVER_HEADER(SMESH_Measurements)
+
+#include "SALOME_GenericObj_i.hh"
+
+class SMESHDS_Mesh;
 
 namespace SMESH
 {
-  SMESHGUI_EXPORT
-    SMESH_Mesh_var GetMeshByIO( const Handle(SALOME_InteractiveObject)& );
- 
-  SMESHGUI_EXPORT
-    QString        UniqueMeshName( const QString&, const QString& = QString() );
 
-  SMESHGUI_EXPORT  SMESH::Measurements_var& GetMeasurements();
+  /*
+    Measurements
+  */
+  class SMESH_I_EXPORT Measurements_i: public virtual POA_SMESH::Measurements,
+                                       public virtual SALOME::GenericObj_i
+  {
+  public:
+    Measurements_i();
+    ~Measurements_i();
+
+    /*!
+     * minimal distance between two given entities
+     */
+    SMESH::Measure MinDistance(SMESH::SMESH_IDSource_ptr theSource1,
+                               SMESH::SMESH_IDSource_ptr theSource2);
+
+    /*!
+     * common bounding box of entities
+     */
+    SMESH::Measure BoundingBox(const SMESH::ListOfIDSources& theSources);
+  };
 }
 
-#endif // SMESHGUI_MESHUTILS_H
+#endif

@@ -308,6 +308,15 @@ namespace SMESH
     return *this;
   }
 
+  TPythonDump& 
+  TPythonDump::
+  operator<<(SMESH::Measurements_i* theArg)
+  {
+    myStream<<"aMeasurements";
+    return *this;
+  }
+
+
   TPythonDump& TPythonDump:: operator<<(SMESH_Gen_i* theArg)
   {
     myStream << SMESHGenName(); return *this;
@@ -685,6 +694,7 @@ TCollection_AsciiString SMESH_Gen_i::DumpPython_impl
   TCollection_AsciiString aScript;
   aScript = "def RebuildData(theStudy):\n\t";
   aScript += helper + "aFilterManager = " + aSMESHGen + ".CreateFilterManager()\n\t";
+  aScript += helper + "aMeasurements = " + aSMESHGen + ".CreateMeasurements()\n\t";
   if ( isPublished )
     aScript += aSMESHGen + ".SetCurrentStudy(theStudy)";
   else

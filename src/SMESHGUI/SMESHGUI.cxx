@@ -122,6 +122,7 @@
 #include <SALOMEconfig.h>
 #include CORBA_CLIENT_HEADER(SALOMEDS_Attributes)
 #include CORBA_CLIENT_HEADER(SMESH_MeshEditor)
+#include CORBA_CLIENT_HEADER(SMESH_Measurements)
 
 // Qt includes
 // #define       INCLUDE_MENUITEM_DEF // VSR commented ????????
@@ -1433,6 +1434,7 @@ LightApp_Module( "SMESH" )
 
   SMESH::GetFilterManager();
   SMESH::GetPattern();
+  SMESH::GetMeasurements();
 
   /* load resources for all available meshers */
   SMESH::InitAvailableHypotheses();
@@ -1447,8 +1449,10 @@ SMESHGUI::~SMESHGUI()
 {
 #ifdef WITHGENERICOBJ
   SMESH::GetFilterManager()->Destroy();
+  SMESH::GetMeasurements()->Destroy();
 #endif
   SMESH::GetFilterManager() = SMESH::FilterManager::_nil();
+  SMESH::GetMeasurements() = SMESH::Measurements::_nil();
 }
 
 //=============================================================================

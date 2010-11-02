@@ -31,7 +31,6 @@
 #include "SMESHGUI_VTKUtils.h"
 #include "SMDSAbs_ElementType.hxx"
 #include "SMDS_Mesh.hxx"
-#include "SMDS_VolumeTool.hxx"
 
 #include <LightApp_SelectionMgr.h>
 #include <SUIT_OverrideCursor.h>

@@ -49,6 +49,7 @@
 #include "SMESHGUI_Make2DFrom3DOp.h"
 #include "SMESHGUI_MakeNodeAtPointDlg.h"
 //#include "SMESHGUI_MeshInfosDlg.h"
+#include "SMESHGUI_Measurements.h"
 #include "SMESHGUI_MeshInfo.h"
 #include "SMESHGUI_MeshOp.h"
 #include "SMESHGUI_MeshOrderOp.h"
@@ -2985,6 +2986,15 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
       }
       break;
     }
+  case 501:
+  case 502:
+    {
+      int page = theCommandID == 501 ? SMESHGUI_MeasureDlg::MinDistance : SMESHGUI_MeasureDlg::BoundingBox;
+      EmitSignalDeactivateDialog();
+      SMESHGUI_MeasureDlg* dlg = new SMESHGUI_MeasureDlg( SMESHGUI::desktop(), page );
+      dlg->show();
+      break;
+    }
   }
 
   anApp->updateActions(); //SRN: To update a Save button in the toolbar
@@ -3238,6 +3248,9 @@ void SMESHGUI::initialize( CAM_Application* app )
   createSMESHAction( 1137, "DISABLE_AUTO_COLOR" );
   createSMESHAction( 2000, "CTRL" );
 
+  createSMESHAction( 501, "MEASURE_MIN_DIST" );
+  createSMESHAction( 502, "MEASURE_BND_BOX" );
+
   createSMESHAction( 300, "ERASE" );
   createSMESHAction( 301, "DISPLAY" );
   createSMESHAction( 302, "DISPLAY_ONLY" );
@@ -3251,13 +3264,14 @@ void SMESHGUI::initialize( CAM_Application* app )
   createSMESHAction( 4040, "QUADRATIC_HEXAHEDRON", "ICON_DLG_QUADRATIC_HEXAHEDRON" );
 
   // ----- create menu --------------
-  int fileId   = createMenu( tr( "MEN_FILE" ),   -1,  1 ),
-      editId   = createMenu( tr( "MEN_EDIT" ),   -1,  3 ),
-      toolsId  = createMenu( tr( "MEN_TOOLS" ),  -1,  5, 50 ),
-      meshId   = createMenu( tr( "MEN_MESH" ),   -1, 70, 10 ),
-      ctrlId   = createMenu( tr( "MEN_CTRL" ),   -1, 60, 10 ),
-      modifyId = createMenu( tr( "MEN_MODIFY" ), -1, 40, 10 ),
-      viewId   = createMenu( tr( "MEN_VIEW" ),   -1,  2 );
+  int fileId    = createMenu( tr( "MEN_FILE" ),    -1,  1 ),
+      editId    = createMenu( tr( "MEN_EDIT" ),    -1,  3 ),
+      toolsId   = createMenu( tr( "MEN_TOOLS" ),   -1,  5, 50 ),
+      meshId    = createMenu( tr( "MEN_MESH" ),    -1, 70, 10 ),
+      ctrlId    = createMenu( tr( "MEN_CTRL" ),    -1, 60, 10 ),
+      modifyId  = createMenu( tr( "MEN_MODIFY" ),  -1, 40, 10 ),
+      measureId = createMenu( tr( "MEN_MEASURE" ), -1, 50, 10 ),
+      viewId    = createMenu( tr( "MEN_VIEW" ),    -1,  2 );
 
   createMenu( separator(), fileId );
 
@@ -3387,6 +3401,8 @@ void SMESHGUI::initialize( CAM_Application* app )
   createMenu( 417, modifyId, -1 );
   createMenu( 418, modifyId, -1 );
 
+  createMenu( 501, measureId, -1 );
+  createMenu( 502, measureId, -1 );
   createMenu( 214, viewId, -1 );
 
   // ----- create toolbars --------------

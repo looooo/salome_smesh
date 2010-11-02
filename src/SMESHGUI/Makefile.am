@@ -48,6 +48,7 @@ salomeinclude_HEADERS = \
 	SMESHGUI_RemoveNodesDlg.h \
 	SMESHGUI_RemoveElementsDlg.h \
 	SMESHGUI_MeshInfo.h \
+	SMESHGUI_Measurements.h \
 	SMESHGUI_Preferences_ColorDlg.h \
 	SMESHGUI_Preferences_ScalarBarDlg.h \
 	SMESHGUI_AddMeshElementDlg.h \
@@ -110,6 +111,7 @@ dist_libSMESH_la_SOURCES = \
 	SMESHGUI_RemoveNodesDlg.cxx \
 	SMESHGUI_RemoveElementsDlg.cxx \
 	SMESHGUI_MeshInfo.cxx \
+	SMESHGUI_Measurements.cxx \
 	SMESHGUI_Preferences_ColorDlg.cxx \
 	SMESHGUI_Preferences_ScalarBarDlg.cxx \
 	SMESHGUI_AddMeshElementDlg.cxx \
@@ -180,6 +182,7 @@ MOC_FILES = \
 	SMESHGUI_RemoveNodesDlg_moc.cxx \
 	SMESHGUI_RemoveElementsDlg_moc.cxx \
 	SMESHGUI_MeshInfo_moc.cxx \
+	SMESHGUI_Measurements_moc.cxx \
 	SMESHGUI_Preferences_ColorDlg_moc.cxx \
 	SMESHGUI_Preferences_ScalarBarDlg_moc.cxx \
 	SMESHGUI_AddMeshElementDlg_moc.cxx \

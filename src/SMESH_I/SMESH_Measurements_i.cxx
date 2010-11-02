@@ -95,18 +95,27 @@ Measurements_i::~Measurements_i()
   //TPythonDump()<<this<<".Destroy()";
 }
 
-static double getNodeNodeDistance (const SMDS_MeshNode* theNode1,
-                                   const SMDS_MeshNode* theNode2)
+static bool getNodeNodeDistance (SMESH::Measure& theMeasure,
+				 const SMDS_MeshNode* theNode1,
+				 const SMDS_MeshNode* theNode2 = 0)
 {
   double dist = 0., dd = 0.;
-  if (!theNode1 || !theNode2)
-    return dist;
-  dd = theNode1->X(); dd -= theNode2->X(); dd *= dd; dist += dd;
-  dd = theNode1->Y(); dd -= theNode2->Y(); dd *= dd; dist += dd;
-  dd = theNode1->Z(); dd -= theNode2->Z(); dd *= dd; dist += dd;
+
+  if (!theNode1)
+    return false;
+
+  dd = theNode1->X(); if (theNode2) dd -= theNode2->X(); theMeasure.minX = dd; dd *= dd; dist += dd;
+  dd = theNode1->Y(); if (theNode2) dd -= theNode2->Y(); theMeasure.minY = dd; dd *= dd; dist += dd;
+  dd = theNode1->Z(); if (theNode2) dd -= theNode2->Z(); theMeasure.minZ = dd; dd *= dd; dist += dd;
+
   if (dist < 0)
-    return 0;
-  return sqrt(dist);
+    return false;
+  
+  theMeasure.value = sqrt(dist);
+  theMeasure.node1 = theNode1->GetID();
+  theMeasure.node2 = theNode2 ? theNode2->GetID() : 0;
+
+  return true;
 }
 
 static SMESHDS_Mesh* getMesh(SMESH::SMESH_IDSource_ptr theSource)
@@ -136,38 +145,39 @@ SMESH::Measure Measurements_i::MinDistance
   SMESH::Measure aMeasure;
   initMeasure(aMeasure);
 
-  if (CORBA::is_nil( theSource1 ) || CORBA::is_nil( theSource2 ))
+  if (CORBA::is_nil( theSource1 ))
     return aMeasure;
+  
+  // if second source is null, min distance from theSource1 to the origin is calculated
+  bool isOrigin =  CORBA::is_nil( theSource2 );
 
   // calculate minimal distance between two mesh entities
   SMESH::array_of_ElementType_var types1 = theSource1->GetTypes();
-  SMESH::array_of_ElementType_var types2 = theSource2->GetTypes();
+  SMESH::array_of_ElementType_var types2;
+  if ( !isOrigin ) types2 = theSource2->GetTypes();
+
   // here we assume that type of all IDs defined by first type in array
-  const bool isNode1 = isNodeType(types1);
-  const bool isNode2 = isNodeType(types2);
+  bool isNode1 = isNodeType(types1);
+  bool isNode2 = isOrigin || isNodeType(types2);
 
   SMESH::long_array_var aElementsId1 = theSource1->GetIDs();
-  SMESH::long_array_var aElementsId2 = theSource2->GetIDs();
+  SMESH::long_array_var aElementsId2;
+  if ( !isOrigin ) aElementsId2 = theSource2->GetIDs();
 
   // compute distance between two entities
-  /** NOTE: currently only node-node case implemented
-   * all other cases could be implemented later
-   * this IF should be replaced by comples swtich
+  /* NOTE: currently only node-to-node case is implemented
+   * all other cases will be implemented later
+   * below IF should be replaced by complete switch
    * on mesh entities types
    */
   if (isNode1 && isNode2)
   {
     // node - node
     const SMESHDS_Mesh* aMesh1 = getMesh( theSource1 );
-    const SMESHDS_Mesh* aMesh2 = getMesh( theSource2 );
+    const SMESHDS_Mesh* aMesh2 = isOrigin ? 0 : getMesh( theSource2 );
     const SMDS_MeshNode* theNode1 = aMesh1 ? aMesh1->FindNode( aElementsId1[0] ) : 0;
     const SMDS_MeshNode* theNode2 = aMesh2 ? aMesh2->FindNode( aElementsId2[0] ) : 0;
-    aMeasure.value = getNodeNodeDistance( theNode1, theNode2 );
-    if (theNode1 && theNode2)
-    {
-      aMeasure.node1 = theNode1->GetID();
-      aMeasure.node2 = theNode2->GetID();
-    }
+    getNodeNodeDistance( aMeasure, theNode1, theNode2 );
   }
   else
   {
@@ -216,7 +226,7 @@ static void enlargeBoundingBox(const SMESH::SMESH_IDSource_ptr theObject,
       enlargeBoundingBox( aMesh->FindNode( aElementsId[i] ), theMeasure);
     else
     {
-      const SMDS_MeshElement * elem = aMesh->FindElement( aElementsId[i] );
+      const SMDS_MeshElement* elem = aMesh->FindElement( aElementsId[i] );
       if (!elem)
         continue;
       SMDS_ElemIteratorPtr aNodeIter = elem->nodesIterator();

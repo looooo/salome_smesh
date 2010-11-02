@@ -488,6 +488,34 @@
         <translation>Modification</translation>
     </message>
     <message>
+        <source>MEN_MEASURE</source>
+        <translation>Measurements</translation>
+    </message>
+    <message>
+        <source>MEN_MEASURE_MIN_DIST</source>
+        <translation>Minimum Distance</translation>
+    </message>
+    <message>
+        <source>STB_MEASURE_MIN_DIST</source>
+        <translation>Calculate minimum distance between two objects</translation>
+    </message>
+    <message>
+        <source>TOP_MEASURE_MIN_DIST</source>
+        <translation>Minimum distance</translation>
+    </message>
+    <message>
+        <source>MEN_MEASURE_BND_BOX</source>
+        <translation>Bounding Box</translation>
+    </message>
+    <message>
+        <source>STB_MEASURE_BND_BOX</source>
+        <translation>Calculate bounding box for the selected object(s)</translation>
+    </message>
+    <message>
+        <source>TOP_MEASURE_BND_BOX</source>
+        <translation>Bounding box</translation>
+    </message>
+    <message>
         <source>MEN_MOVE</source>
         <translation>Move Node</translation>
     </message>
@@ -5643,6 +5671,99 @@ It is impossible to read point coordinates from file</translation>
     <message>
         <source>VALUE</source>
         <translation>Value</translation>
+    </message>
+</context>
+<context>
+    <name>SMESHGUI_MinDistance</name>
+    <message>
+        <source>FIRST_TARGET</source>
+        <translation>First target</translation>
+    </message>
+    <message>
+        <source>SECOND_TARGET</source>
+        <translation>Second target</translation>
+    </message>
+    <message>
+        <source>NODE</source>
+        <translation>Node</translation>
+    </message>
+    <message>
+        <source>ELEMENT</source>
+        <translation>Element</translation>
+    </message>
+    <message>
+        <source>OBJECT</source>
+        <translation>Object</translation>
+    </message>
+    <message>
+        <source>ORIGIN</source>
+        <translation>Origin</translation>
+    </message>
+    <message>
+        <source>COMPUTE</source>
+        <translation>Compute</translation>
+    </message>
+    <message>
+        <source>RESULT</source>
+        <translation>Distance between targets</translation>
+    </message>
+    <message>
+        <source>DISTANCE</source>
+        <translation>Distance</translation>
+    </message>
+</context>
+<context>
+    <name>SMESHGUI_MeasureDlg</name>
+    <message>
+        <source>MEASUREMENTS</source>
+        <translation>Measurements</translation>
+    </message>
+    <message>
+        <source>MIN_DIST</source>
+        <translation>Minimum Distance</translation>
+    </message>
+    <message>
+        <source>BND_BOX</source>
+        <translation>Bounding Box</translation>
+    </message>
+</context>
+<context>
+    <name>SMESHGUI_BoundingBox</name>
+    <message>
+        <source>SOURCE</source>
+        <translation>Source</translation>
+    </message>
+    <message>
+        <source>OBJECTS</source>
+        <translation>Objects</translation>
+    </message>
+    <message>
+        <source>NODES</source>
+        <translation>Nodes</translation>
+    </message>
+    <message>
+        <source>ELEMENTS</source>
+        <translation>Elements</translation>
+    </message>
+    <message>
+        <source>COMPUTE</source>
+        <translation>Compute</translation>
+    </message>
+    <message>
+        <source>RESULT</source>
+        <translation>Bounding Box</translation>
+    </message>
+    <message>
+        <source>SELECTED_NB_OBJ</source>
+        <translation>%1 %2 selected</translation>
+    </message>
+    <message>
+        <source>NB_NODES</source>
+        <translation>nodes</translation>
+    </message>
+    <message>
+        <source>NB_ELEMENTS</source>
+        <translation>elements</translation>
     </message>
 </context>
 </TS>

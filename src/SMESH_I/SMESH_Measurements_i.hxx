@@ -19,12 +19,9 @@
 //
 //  See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 //
-
-//  SMESH SMESH_I : idl implementation based on 'SMESH' unit's calsses
 //  File   : SMESH_Measurements_i.hxx
-//  Author : Pavel Telkov, OCC
-//  Module : SMESH
-//
+//  Author : Pavel TELKOV, Open CASCADE S.A.S. (pavel.telkov@opencascade.com)
+
 #ifndef _SMESH_MEASUREMENTS_I_HXX_
 #define _SMESH_MEASUREMENTS_I_HXX_
 

@@ -341,6 +341,7 @@ void SMESHGUI_MinDistance::selectionChanged()
       }
     }
   }
+  clear();
 }
 
 /*!
@@ -376,7 +377,8 @@ void SMESHGUI_MinDistance::secondChanged()
 void SMESHGUI_MinDistance::firstEdited()
 {
   setTarget( FirstTgt );
-  clear();
+  if ( sender() == myFirstTgt )
+    clear();
   SVTK_Selector* selector = SMESH::GetViewWindow()->GetSelector();
   if ( myFirstActor && selector ) {
     Handle(SALOME_InteractiveObject) IO = myFirstActor->getIO();
@@ -396,7 +398,8 @@ void SMESHGUI_MinDistance::firstEdited()
 void SMESHGUI_MinDistance::secondEdited()
 {
   setTarget( SecondTgt );
-  clear();
+  if ( sender() == mySecondTgt )
+    clear();
   SVTK_Selector* selector = SMESH::GetViewWindow()->GetSelector();
   if ( mySecondActor && selector ) {
     Handle(SALOME_InteractiveObject) IO = mySecondActor->getIO();
@@ -723,6 +726,7 @@ void SMESHGUI_BoundingBox::selectionChanged()
       mySource->clear();
     }
   }
+  clear();
 }
 
 /*!
@@ -743,7 +747,8 @@ void SMESHGUI_BoundingBox::sourceChanged()
 */
 void SMESHGUI_BoundingBox::sourceEdited()
 {
-  clear();
+  if ( sender() == mySource )
+    clear();
   SVTK_Selector* selector = SMESH::GetViewWindow()->GetSelector();
   if ( myActor && selector ) {
     Handle(SALOME_InteractiveObject) IO = myActor->getIO();
@@ -751,7 +756,7 @@ void SMESHGUI_BoundingBox::sourceEdited()
       TColStd_MapOfInteger ID;
       if ( !mySource->isReadOnly() )
 	myIDs = mySource->text();
-      QStringList ids = mySource->text().split( " ", QString::SkipEmptyParts );
+      QStringList ids = myIDs.split( " ", QString::SkipEmptyParts );
       foreach ( QString id, ids )
 	ID.Add( id.trimmed().toLong() );
       selector->AddOrRemoveIndex( IO, ID, false );
@@ -767,9 +772,45 @@ void SMESHGUI_BoundingBox::sourceEdited()
 void SMESHGUI_BoundingBox::compute()
 {
   SUIT_OverrideCursor wc;
-  if ( mySourceMode->checkedId() == NodesSrc ) {
+  SMESH::ListOfIDSources_var srcList = new SMESH::ListOfIDSources();
+  if ( mySourceMode->checkedId() == NodesSrc || mySourceMode->checkedId() == ElementsSrc ) {
+    if ( mySrc.count() > 0 && !CORBA::is_nil( mySrc[0] ) ) {
+      SMESH::SMESH_Mesh_var m = mySrc[0]->GetMesh();
+      QStringList ids = myIDs.split( " ", QString::SkipEmptyParts );
+      if ( !CORBA::is_nil( m ) && ids.count() > 0 ) {
+	SMESH::long_array_var ids_in = new SMESH::long_array();
+	ids_in->length( ids.count() );
+	for( int i = 0; i < ids.count(); i++ )
+	  ids_in[i] = ids[i].trimmed().toLong();
+	SMESH::SMESH_MeshEditor_var me = m->GetMeshEditor();
+	SMESH::SMESH_IDSource_var s = me->MakeIDSource( ids_in.in(), mySourceMode->checkedId() == NodesSrc ? SMESH::NODE : SMESH::FACE ); 
+	srcList->length( 1 );
+	srcList[0] = s;
+      }
+    }
   }
   else {
+    srcList->length( mySrc.count() );
+    for( int i = 0; i < mySrc.count(); i++ )
+      srcList[i] = mySrc[i];
+  }
+  if ( srcList->length() > 0 ) {
+    int precision = SMESHGUI::resourceMgr()->integerValue( "SMESH", "length_precision", 6 );
+    SMESH::Measurements_var measure = SMESHGUI::GetSMESHGen()->CreateMeasurements();
+    SMESH::Measure result = measure->BoundingBox( srcList.in() );
+    measure->Destroy();
+    myXmin->setText( QString::number( result.minX, precision > 0 ? 'f' : 'g', qAbs( precision ) ) );
+    myXmax->setText( QString::number( result.maxX, precision > 0 ? 'f' : 'g', qAbs( precision ) ) );
+    myDX->setText( QString::number( result.maxX-result.minX, precision > 0 ? 'f' : 'g', qAbs( precision ) ) );
+    myYmin->setText( QString::number( result.minY, precision > 0 ? 'f' : 'g', qAbs( precision ) ) );
+    myYmax->setText( QString::number( result.maxY, precision > 0 ? 'f' : 'g', qAbs( precision ) ) );
+    myDY->setText( QString::number( result.maxY-result.minY, precision > 0 ? 'f' : 'g', qAbs( precision ) ) );
+    myZmin->setText( QString::number( result.minZ, precision > 0 ? 'f' : 'g', qAbs( precision ) ) );
+    myZmax->setText( QString::number( result.maxZ, precision > 0 ? 'f' : 'g', qAbs( precision ) ) );
+    myDZ->setText( QString::number( result.maxZ-result.minZ, precision > 0 ? 'f' : 'g', qAbs( precision ) ) );
+  }
+  else {
+    clear();
   }
 }
 

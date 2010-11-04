@@ -19,12 +19,9 @@
 //
 //  See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 //
+//  File   : SMESH_Measurements_i.cxx
+//  Author : Pavel TELKOV, Open CASCADE S.A.S. (pavel.telkov@opencascade.com)
 
-//  SMESH SMESH_I : idl implementation based on 'SMESH' unit's calsses
-//  File   : SMESH_Filter_i.cxx
-//  Author : Alexey Petrov, OCC
-//  Module : SMESH
-//
 #include "SMESH_Measurements_i.hxx"
 
 #include "SMESH_Gen_i.hxx"
@@ -196,12 +193,21 @@ static void enlargeBoundingBox(const SMDS_MeshNode* theNode,
 {
   if (!theNode)
     return;
-  theMeasure.minX = min( theMeasure.minX, theNode->X() );
-  theMeasure.maxX = max( theMeasure.maxX, theNode->X() );
-  theMeasure.minY = min( theMeasure.minY, theNode->Y() );
-  theMeasure.maxY = max( theMeasure.maxY, theNode->Y() );
-  theMeasure.minZ = min( theMeasure.minZ, theNode->Z() );
-  theMeasure.maxZ = max( theMeasure.maxZ, theNode->Z() );
+  if ( theMeasure.node1 == -1 ) {
+    // we use this attribute as a flag that it is the first node added to the bnd box 
+    theMeasure.minX = theMeasure.maxX = theNode->X();
+    theMeasure.minY = theMeasure.maxY = theNode->Y();
+    theMeasure.minZ = theMeasure.maxZ = theNode->Z();
+    theMeasure.node1 = theNode->GetID();
+  }
+  else {
+    theMeasure.minX = min( theMeasure.minX, theNode->X() );
+    theMeasure.maxX = max( theMeasure.maxX, theNode->X() );
+    theMeasure.minY = min( theMeasure.minY, theNode->Y() );
+    theMeasure.maxY = max( theMeasure.maxY, theNode->Y() );
+    theMeasure.minZ = min( theMeasure.minZ, theNode->Z() );
+    theMeasure.maxZ = max( theMeasure.maxZ, theNode->Z() );
+  }
 }
 
 //=======================================================================

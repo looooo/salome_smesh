@@ -33,6 +33,7 @@ class QButtonGroup;
 class QLineEdit;
 class QTabWidget;
 class SUIT_SelectionFilter;
+class SALOME_Actor;
 class SMESH_Actor;
 class SMESHGUI_IdValidator;
 
@@ -56,6 +57,9 @@ public:
 
 private: 
   void setTarget( int );
+  void erasePreview();
+  void displayPreview();
+  void createPreview( double, double, double, double, double, double );
 
 private slots:
   void selectionChanged();
@@ -82,6 +86,7 @@ private:
   SMESH_Actor*              mySecondActor;
   SMESHGUI_IdValidator*     myValidator;
   SUIT_SelectionFilter*     myFilter;
+  SALOME_Actor*             myPreview;
 };
 
 class SMESHGUI_EXPORT SMESHGUI_BoundingBox : public QWidget
@@ -96,6 +101,11 @@ public:
 
   void updateSelection();
   void deactivate();
+
+private:
+  void erasePreview();
+  void displayPreview();
+  void createPreview( double, double, double, double, double, double );
 
 private slots:
   void selectionChanged();
@@ -122,6 +132,7 @@ private:
   SMESHGUI_IdValidator*     myValidator;
   QString                   myIDs;
   SUIT_SelectionFilter*     myFilter;
+  SALOME_Actor*             myPreview;
 };
 
 class SMESHGUI_EXPORT SMESHGUI_MeasureDlg : public QDialog

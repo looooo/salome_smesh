@@ -50,6 +50,15 @@
 #include <QTabWidget>
 #include <QVBoxLayout>
 
+#include <vtkPoints.h>
+#include <vtkUnstructuredGrid.h>
+#include <vtkIdList.h>
+#include <vtkCellArray.h>
+#include <vtkUnsignedCharArray.h>
+#include <vtkDataSetMapper.h>
+#include <VTKViewer_CellLocationsArray.h>
+#include <vtkProperty.h>
+
 #include <SALOMEconfig.h>
 #include CORBA_SERVER_HEADER(SMESH_MeshEditor)
 #include CORBA_SERVER_HEADER(SMESH_Measurements)
@@ -76,7 +85,7 @@ const int MAX_NB_FOR_EDITOR = 40; // max nb of items in the ID list editor field
   \param parent parent widget
 */
 SMESHGUI_MinDistance::SMESHGUI_MinDistance( QWidget* parent )
-: QWidget( parent ), myCurrentTgt( FirstTgt ), myFirstActor( 0 ), mySecondActor( 0 )
+: QWidget( parent ), myCurrentTgt( FirstTgt ), myFirstActor( 0 ), mySecondActor( 0 ), myPreview( 0 )
 {
   QGroupBox*    aFirstTgtGrp = new QGroupBox( tr( "FIRST_TARGET" ), this );
   QRadioButton* aFNode       = new QRadioButton( tr( "NODE" ),    aFirstTgtGrp );
@@ -185,6 +194,7 @@ SMESHGUI_MinDistance::SMESHGUI_MinDistance( QWidget* parent )
   filters.append( new SMESH_TypeFilter( GROUP ) );
   myFilter = new SMESH_LogicalFilter( filters, SMESH_LogicalFilter::LO_OR );
 
+  mySecondTgt->setEnabled( mySecond->checkedId() != OriginTgt );
   clear();
 
   //setTarget( FirstTgt );
@@ -195,6 +205,9 @@ SMESHGUI_MinDistance::SMESHGUI_MinDistance( QWidget* parent )
 */
 SMESHGUI_MinDistance::~SMESHGUI_MinDistance()
 {
+  erasePreview();
+  if ( myPreview )
+    myPreview->Delete();
 }
 
 /*!
@@ -280,6 +293,91 @@ void SMESHGUI_MinDistance::setTarget( int target )
 }
 
 /*!
+  \brief Erase preview actor
+*/
+void SMESHGUI_MinDistance::erasePreview()
+{
+  SVTK_ViewWindow* aViewWindow = SMESH::GetViewWindow();
+  if ( aViewWindow && myPreview ) {
+    aViewWindow->RemoveActor( myPreview );
+    aViewWindow->Repaint();
+  }
+}
+
+/*!
+  \brief Display preview actor
+*/
+void SMESHGUI_MinDistance::displayPreview()
+{
+  SVTK_ViewWindow* aViewWindow = SMESH::GetViewWindow();
+  if ( aViewWindow && myPreview ) {
+    aViewWindow->AddActor( myPreview );
+    aViewWindow->Repaint();
+  }
+}
+
+/*!
+  \brief Create preview actor
+  \param x1 X coordinate of first point
+  \param y1 X coordinate of first point
+  \param z1 Y coordinate of first point
+  \param x2 Y coordinate of second point
+  \param y2 Z coordinate of second point
+  \param z2 Z coordinate of second point
+*/
+void SMESHGUI_MinDistance::createPreview( double x1, double y1, double z1, double x2, double y2, double z2 )
+{
+  if ( myPreview )
+    myPreview->Delete();
+
+  vtkUnstructuredGrid* aGrid = vtkUnstructuredGrid::New();
+  // create points
+  vtkPoints* aPoints = vtkPoints::New();
+  aPoints->SetNumberOfPoints( 2 );
+  aPoints->SetPoint( 0, x1, y1, z1 );
+  aPoints->SetPoint( 1, x2, y2, z2 );
+  aGrid->SetPoints( aPoints );
+  aPoints->Delete();
+  // create cells
+  vtkIdList* anIdList = vtkIdList::New();
+  anIdList->SetNumberOfIds( 2 );
+  vtkCellArray* aCells = vtkCellArray::New();
+  aCells->Allocate( 2, 0);
+  vtkUnsignedCharArray* aCellTypesArray = vtkUnsignedCharArray::New();
+  aCellTypesArray->SetNumberOfComponents( 1 );
+  aCellTypesArray->Allocate( 1 );
+  anIdList->SetId( 0, 0 ); anIdList->SetId( 1, 1 );
+  aCells->InsertNextCell( anIdList );
+  aCellTypesArray->InsertNextValue( VTK_LINE );
+  anIdList->Delete();
+  VTKViewer_CellLocationsArray* aCellLocationsArray = VTKViewer_CellLocationsArray::New();
+  aCellLocationsArray->SetNumberOfComponents( 1 );
+  aCellLocationsArray->SetNumberOfTuples( 1 );
+  aCells->InitTraversal();
+  for( vtkIdType idType = 0, *pts, npts; aCells->GetNextCell( npts, pts ); idType++ )
+    aCellLocationsArray->SetValue( idType, aCells->GetTraversalLocation( npts ) );
+  aGrid->SetCells( aCellTypesArray, aCellLocationsArray, aCells );
+  aCellLocationsArray->Delete();
+  aCellTypesArray->Delete();
+  aCells->Delete();
+  // create actor
+  vtkDataSetMapper* aMapper = vtkDataSetMapper::New();
+  aMapper->SetInput( aGrid );
+  aGrid->Delete();
+  myPreview = SALOME_Actor::New();
+  myPreview->PickableOff();
+  myPreview->SetMapper( aMapper );
+  aMapper->Delete();
+  vtkProperty* aProp = vtkProperty::New();
+  aProp->SetRepresentationToWireframe();
+  aProp->SetColor( 250, 0, 250 );
+  aProp->SetPointSize( 5 );
+  aProp->SetLineWidth( 3 );
+  myPreview->SetProperty( aProp );
+  aProp->Delete();
+}
+
+/*!
   \brief Called when selection is changed
 */
 void SMESHGUI_MinDistance::selectionChanged()
@@ -349,6 +447,7 @@ void SMESHGUI_MinDistance::selectionChanged()
 */
 void SMESHGUI_MinDistance::firstChanged()
 {
+  myFirstSrc = SMESH::SMESH_IDSource::_nil();
   myFirstTgt->clear();
   myFirstTgt->setReadOnly( myFirst->checkedId() == ObjectTgt );
   myFirstTgt->setValidator( myFirst->checkedId() == ObjectTgt ? 0 : myValidator );
@@ -362,6 +461,7 @@ void SMESHGUI_MinDistance::firstChanged()
 */
 void SMESHGUI_MinDistance::secondChanged()
 {
+  mySecondSrc = SMESH::SMESH_IDSource::_nil();
   mySecondTgt->setEnabled( mySecond->checkedId() != OriginTgt );
   mySecondTgt->setReadOnly( mySecond->checkedId() == ObjectTgt );
   mySecondTgt->setValidator( mySecond->checkedId() == ObjectTgt ? 0 : myValidator );
@@ -460,6 +560,7 @@ void SMESHGUI_MinDistance::compute()
   }
 
   if ( !CORBA::is_nil( s1 ) && ( !CORBA::is_nil( s2 ) || isOrigin ) ) {
+    // compute min distance
     int precision = SMESHGUI::resourceMgr()->integerValue( "SMESH", "length_precision", 6 );
     SMESH::Measurements_var measure = SMESHGUI::GetSMESHGen()->CreateMeasurements();
     SMESH::Measure result = measure->MinDistance( s1.in(), s2.in() );
@@ -468,6 +569,20 @@ void SMESHGUI_MinDistance::compute()
     myDY->setText( QString::number( result.minY, precision > 0 ? 'f' : 'g', qAbs( precision ) ) );
     myDZ->setText( QString::number( result.minZ, precision > 0 ? 'f' : 'g', qAbs( precision ) ) );
     myDistance->setText( QString::number( result.value, precision > 0 ? 'f' : 'g', qAbs( precision ) ) );
+    // update preview actor
+    erasePreview();
+    double x1, y1, z1, x2, y2, z2;
+    SMESH::double_array_var coord = s1->GetMesh()->GetNodeXYZ( result.node1 );
+    x1 = coord[0]; y1 = coord[1]; z1 = coord[2];
+    if ( isOrigin ) {
+      x2 = y2 = z2 = 0.;
+    }
+    else {
+      coord = s2->GetMesh()->GetNodeXYZ( result.node2 );
+      x2 = coord[0]; y2 = coord[1]; z2 = coord[2];
+    }
+    createPreview( x1, y1, z1, x2, y2, z2 );
+    displayPreview();
   }
   else {
     clear();
@@ -483,6 +598,7 @@ void SMESHGUI_MinDistance::clear()
   myDY->clear();
   myDZ->clear();
   myDistance->clear();
+  erasePreview();
 }
 
 /*!
@@ -497,7 +613,7 @@ void SMESHGUI_MinDistance::clear()
   \param parent parent widget
 */
 SMESHGUI_BoundingBox::SMESHGUI_BoundingBox( QWidget* parent )
-: QWidget( parent ), myActor( 0 )
+: QWidget( parent ), myActor( 0 ), myPreview( 0 )
 {
   QGroupBox* aSourceGrp = new QGroupBox( tr( "SOURCE" ), this );
   QRadioButton* aObjects  = new QRadioButton( tr( "OBJECTS" ),  aSourceGrp );
@@ -602,6 +718,9 @@ SMESHGUI_BoundingBox::SMESHGUI_BoundingBox( QWidget* parent )
 */
 SMESHGUI_BoundingBox::~SMESHGUI_BoundingBox()
 {
+  erasePreview();
+  if ( myPreview )
+    myPreview->Delete();
 }
 
 /*!
@@ -648,6 +767,131 @@ void SMESHGUI_BoundingBox::updateSelection()
 void SMESHGUI_BoundingBox::deactivate()
 {
   disconnect( SMESHGUI::selectionMgr(), 0, this, 0 );
+}
+
+/*!
+  \brief Erase preview actor
+*/
+void SMESHGUI_BoundingBox::erasePreview()
+{
+  SVTK_ViewWindow* aViewWindow = SMESH::GetViewWindow();
+  if ( aViewWindow && myPreview ) {
+    aViewWindow->RemoveActor( myPreview );
+    aViewWindow->Repaint();
+  }
+}
+
+/*!
+  \brief Display preview actor
+*/
+void SMESHGUI_BoundingBox::displayPreview()
+{
+  SVTK_ViewWindow* aViewWindow = SMESH::GetViewWindow();
+  if ( aViewWindow && myPreview ) {
+    aViewWindow->AddActor( myPreview );
+    aViewWindow->Repaint();
+  }
+}
+
+/*!
+  \brief Create preview actor
+  \param minX min X coordinate of bounding box
+  \param maxX max X coordinate of bounding box
+  \param minY min Y coordinate of bounding box
+  \param maxY max Y coordinate of bounding box
+  \param minZ min Z coordinate of bounding box
+  \param maxZ max Z coordinate of bounding box
+*/
+void SMESHGUI_BoundingBox::createPreview( double minX, double maxX, double minY, double maxY, double minZ, double maxZ )
+{
+  if ( myPreview )
+    myPreview->Delete();
+
+  vtkUnstructuredGrid* aGrid = vtkUnstructuredGrid::New();
+  // create points
+  vtkPoints* aPoints = vtkPoints::New();
+  aPoints->SetNumberOfPoints( 8 );
+  aPoints->SetPoint( 0, minX, minY, minZ );
+  aPoints->SetPoint( 1, maxX, minY, minZ );
+  aPoints->SetPoint( 2, minX, maxY, minZ );
+  aPoints->SetPoint( 3, maxX, maxY, minZ );
+  aPoints->SetPoint( 4, minX, minY, maxZ );
+  aPoints->SetPoint( 5, maxX, minY, maxZ );
+  aPoints->SetPoint( 6, minX, maxY, maxZ );
+  aPoints->SetPoint( 7, maxX, maxY, maxZ );
+  aGrid->SetPoints( aPoints );
+  aPoints->Delete();
+  // create cells
+  // connectivity: 0-1 0-4 0-2 1-5 1-3 2-6 2-3 3-7 4-6 4-5 5-7 6-7
+  vtkIdList* anIdList = vtkIdList::New();
+  anIdList->SetNumberOfIds( 2 );
+  vtkCellArray* aCells = vtkCellArray::New();
+  aCells->Allocate( 2*12, 0);
+  vtkUnsignedCharArray* aCellTypesArray = vtkUnsignedCharArray::New();
+  aCellTypesArray->SetNumberOfComponents( 1 );
+  aCellTypesArray->Allocate( 12 );
+  anIdList->SetId( 0, 0 ); anIdList->SetId( 1, 1 );
+  aCells->InsertNextCell( anIdList );
+  aCellTypesArray->InsertNextValue( VTK_LINE );
+  anIdList->SetId( 0, 0 ); anIdList->SetId( 1, 4 );
+  aCells->InsertNextCell( anIdList );
+  aCellTypesArray->InsertNextValue( VTK_LINE );
+  anIdList->SetId( 0, 0 ); anIdList->SetId( 1, 2 );
+  aCells->InsertNextCell( anIdList );
+  aCellTypesArray->InsertNextValue( VTK_LINE );
+  anIdList->SetId( 0, 1 ); anIdList->SetId( 1, 5 );
+  aCells->InsertNextCell( anIdList );
+  aCellTypesArray->InsertNextValue( VTK_LINE );
+  anIdList->SetId( 0, 1 ); anIdList->SetId( 1, 3 );
+  aCells->InsertNextCell( anIdList );
+  aCellTypesArray->InsertNextValue( VTK_LINE );
+  anIdList->SetId( 0, 2 ); anIdList->SetId( 1, 6 );
+  aCells->InsertNextCell( anIdList );
+  aCellTypesArray->InsertNextValue( VTK_LINE );
+  anIdList->SetId( 0, 2 ); anIdList->SetId( 1, 3 );
+  aCells->InsertNextCell( anIdList );
+  aCellTypesArray->InsertNextValue( VTK_LINE );
+  anIdList->SetId( 0, 3 ); anIdList->SetId( 1, 7 );
+  aCells->InsertNextCell( anIdList );
+  aCellTypesArray->InsertNextValue( VTK_LINE );
+  anIdList->SetId( 0, 4 ); anIdList->SetId( 1, 6 );
+  aCells->InsertNextCell( anIdList );
+  aCellTypesArray->InsertNextValue( VTK_LINE );
+  anIdList->SetId( 0, 4 ); anIdList->SetId( 1, 5 );
+  aCells->InsertNextCell( anIdList );
+  aCellTypesArray->InsertNextValue( VTK_LINE );
+  anIdList->SetId( 0, 5 ); anIdList->SetId( 1, 7 );
+  aCells->InsertNextCell( anIdList );
+  aCellTypesArray->InsertNextValue( VTK_LINE );
+  anIdList->SetId( 0, 6 ); anIdList->SetId( 1, 7 );
+  aCells->InsertNextCell( anIdList );
+  aCellTypesArray->InsertNextValue( VTK_LINE );
+  anIdList->Delete();
+  VTKViewer_CellLocationsArray* aCellLocationsArray = VTKViewer_CellLocationsArray::New();
+  aCellLocationsArray->SetNumberOfComponents( 1 );
+  aCellLocationsArray->SetNumberOfTuples( 12 );
+  aCells->InitTraversal();
+  for( vtkIdType idType = 0, *pts, npts; aCells->GetNextCell( npts, pts ); idType++ )
+    aCellLocationsArray->SetValue( idType, aCells->GetTraversalLocation( npts ) );
+  aGrid->SetCells( aCellTypesArray, aCellLocationsArray, aCells );
+  aCellLocationsArray->Delete();
+  aCellTypesArray->Delete();
+  aCells->Delete();
+  // create actor
+  vtkDataSetMapper* aMapper = vtkDataSetMapper::New();
+  aMapper->SetInput( aGrid );
+  aGrid->Delete();
+  myPreview = SALOME_Actor::New();
+  myPreview->PickableOff();
+  myPreview->SetMapper( aMapper );
+  aMapper->Delete();
+  vtkProperty* aProp = vtkProperty::New();
+  aProp->SetRepresentationToWireframe();
+  aProp->SetColor( 250, 0, 250 );
+  aProp->SetPointSize( 5 );
+  aProp->SetLineWidth( 3 );
+  myPreview->SetProperty( aProp );
+  aProp->Delete();
 }
 
 /*!
@@ -795,6 +1039,7 @@ void SMESHGUI_BoundingBox::compute()
       srcList[i] = mySrc[i];
   }
   if ( srcList->length() > 0 ) {
+    // compute bounding box
     int precision = SMESHGUI::resourceMgr()->integerValue( "SMESH", "length_precision", 6 );
     SMESH::Measurements_var measure = SMESHGUI::GetSMESHGen()->CreateMeasurements();
     SMESH::Measure result = measure->BoundingBox( srcList.in() );
@@ -808,6 +1053,10 @@ void SMESHGUI_BoundingBox::compute()
     myZmin->setText( QString::number( result.minZ, precision > 0 ? 'f' : 'g', qAbs( precision ) ) );
     myZmax->setText( QString::number( result.maxZ, precision > 0 ? 'f' : 'g', qAbs( precision ) ) );
     myDZ->setText( QString::number( result.maxZ-result.minZ, precision > 0 ? 'f' : 'g', qAbs( precision ) ) );
+    // update preview actor
+    erasePreview();
+    createPreview( result.minX, result.maxX, result.minY, result.maxY, result.minZ, result.maxZ );
+    displayPreview();
   }
   else {
     clear();
@@ -828,6 +1077,7 @@ void SMESHGUI_BoundingBox::clear()
   myZmin->clear();
   myZmax->clear();
   myDZ->clear();
+  erasePreview();
 }
 
 /*!

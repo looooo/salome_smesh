@@ -28,16 +28,13 @@
 #include "SMESH_SMESHGUI.hxx"
 
 #include "SMESHGUI_Dialog.h"
-#include "SMESHGUI_SelectionOp.h"
+#include "SMESHGUI_Operation.h"
 
 // IDL includes
 #include <SALOMEconfig.h>
 #include CORBA_SERVER_HEADER(SMESH_Mesh)
 
 class QFrame;
-class QCheckBox;
-class QLineEdit;
-class QRadioButton;
 class SMESHGUI_MeshInfosBox;
 
 /*!
@@ -48,79 +45,41 @@ class SMESHGUI_Make2DFrom3DDlg :  public SMESHGUI_Dialog
 {
   Q_OBJECT
 
-public:
+ public:
   SMESHGUI_Make2DFrom3DDlg( QWidget* );
   virtual ~SMESHGUI_Make2DFrom3DDlg();
 
   void                   SetMeshName(const QString& theName);
   void                   SetMeshInfo(const SMESH::long_array& theInfo);
 
-private:
+ private:
   QFrame*                createMainFrame( QWidget* );
 
-private:
+ private:
   QLabel*                myMeshName;
   SMESHGUI_MeshInfosBox* myFullInfo;
 };
 
-/*!
- * \brief Dialog to show result mesh statistic
- */
-
-class SMESHGUI_CopyMeshDlg :  public SMESHGUI_Dialog
-{
-  Q_OBJECT
-
-public:
-  enum { Mesh };
-
-  SMESHGUI_CopyMeshDlg( QWidget* );
-  virtual ~SMESHGUI_CopyMeshDlg();
-
-  void enableControls( bool );
-
-private slots:
-  void onTargetChanged();
-  void onGroupChecked();
-
-private:
-  QRadioButton* myThisMeshRB;
-  QRadioButton* myNewMeshRB;
-  QLineEdit*    myMeshName;
-  QCheckBox*    myCopyCheck;
-  QCheckBox*    myMissingCheck;
-  QCheckBox*    myGroupCheck;
-  QLineEdit*    myGroupName;
-};
 
 /*!
  * \brief Operation to compute 2D mesh on 3D
  */
 
-class SMESHGUI_Make2DFrom3DOp : public SMESHGUI_SelectionOp
+class SMESHGUI_Make2DFrom3DOp : public SMESHGUI_Operation
 {
-  Q_OBJECT
-
-public:
+ public:
   SMESHGUI_Make2DFrom3DOp();
   virtual ~SMESHGUI_Make2DFrom3DOp();
 
-  virtual LightApp_Dialog*           dlg() const;
-
-protected:
+ protected:
   virtual void                       startOperation();
-  virtual void                       selectionDone();
-  virtual SUIT_SelectionFilter*      createFilter( const int ) const;
 
-protected slots:
-  virtual bool                       onApply();
-
-private:
+ private:
   bool                               compute2DMesh();
 
-private:
-  SMESH::SMESH_IDSource_var          mySrc;
-  QPointer<SMESHGUI_CopyMeshDlg>     myDlg;
+ private:
+  SMESH::SMESH_Mesh_var              myMesh;
+  QPointer<SMESHGUI_Make2DFrom3DDlg> myDlg;
 };
 
 #endif // SMESHGUI_Make2DFrom3DOp_H

@@ -903,6 +903,110 @@ class smeshDC(SMESH._objref_SMESH_Gen):
             pass
         return d
 
+    ## Get minimum distance between two objects
+    #
+    #  If @a src2 is None, and @a id2 = 0, distance from @a src1 / @a id1 to the origin is computed.
+    #  If @a src2 is None, and @a id2 != 0, it is assumed that both @a id1 and @a id2 belong to @a src1.
+    #
+    #  @param src1 first source object 
+    #  @param src2 second source object
+    #  @param id1 node/element id from the first source
+    #  @param id2 node/element id from the second (or first) source
+    #  @param isElem1 @c True if @a id1 is element id, @c False if it is node id
+    #  @param isElem2 @c True if @a id2 is element id, @c False if it is node id
+    #  @return minimum distance value
+    #  @sa GetMinDistance()
+    #  @ingroup l1_measurements
+    def MinDistance(self, src1, src2=None, id1=0, id2=0, isElem1=False, isElem2=False):
+        result = self.GetMinDistance(src1, src2, id1, id2, isElem1, isElem2)
+        if result is None:
+            result = 0.0
+        else:
+            result = result.value
+        return result
+    
+    ## Get measure structure specifying minimum distance data between two objects
+    #
+    #  If @a src2 is None, and @a id2 = 0, distance from @a src1 / @a id1 to the origin is computed.
+    #  If @a src2 is None, and @a id2 != 0, it is assumed that both @a id1 and @a id2 belong to @a src1.
+    #
+    #  @param src1 first source object 
+    #  @param src2 second source object
+    #  @param id1 node/element id from the first source
+    #  @param id2 node/element id from the second (or first) source
+    #  @param isElem1 @c True if @a id1 is element id, @c False if it is node id
+    #  @param isElem2 @c True if @a id2 is element id, @c False if it is node id
+    #  @return Measure structure or None if input data is invalid
+    #  @sa MinDistance()
+    #  @ingroup l1_measurements
+    def GetMinDistance(self, src1, src2=None, id1=0, id2=0, isElem1=False, isElem2=False):
+        if isinstance(src1, Mesh): src1 = src1.mesh
+        if isinstance(src2, Mesh): src2 = src2.mesh
+        if src2 is None and id2 != 0: src2 = src1
+        if not hasattr(src1, "_narrow"): return None
+        src1 = src1._narrow(SMESH.SMESH_IDSource)
+        if not src1: return None
+        if id1 != 0:
+            m = src1.GetMesh()
+            e = m.GetMeshEditor()
+            if isElem1:
+                src1 = e.MakeIDSource([id1], SMESH.FACE)
+            else:
+                src1 = e.MakeIDSource([id1], SMESH.NODE)
+            pass
+        if hasattr(src2, "_narrow"):
+            src2 = src2._narrow(SMESH.SMESH_IDSource)
+            if src2 and id2 != 0:
+                m = src2.GetMesh()
+                e = m.GetMeshEditor()
+                if isElem2:
+                    src2 = e.MakeIDSource([id2], SMESH.FACE)
+                else:
+                    src2 = e.MakeIDSource([id2], SMESH.NODE)
+                pass
+            pass
+        aMeasurements = self.CreateMeasurements()
+        result = aMeasurements.MinDistance(src1, src2)
+        aMeasurements.Destroy()
+        return result
+    
+    ## Get bounding box of the specified object(s)
+    #  @param objects single source object or list of source objects
+    #  @return tuple of six values (minX, minY, minZ, maxX, maxY, maxZ)
+    #  @sa GetBoundingBox()
+    #  @ingroup l1_measurements
+    def BoundingBox(self, objects):
+        result = self.GetBoundingBox(objects)
+        if result is None:
+            result = (0.0,)*6
+        else:
+            result = (result.minX, result.minY, result.minZ, result.maxX, result.maxY, result.maxZ)
+        return result
+
+    ## Get measure structure specifying bounding box data of the specified object(s)
+    #  @param objects single source object or list of source objects
+    #  @return Measure structure
+    #  @sa BoundingBox()
+    #  @ingroup l1_measurements
+    def GetBoundingBox(self, objects):
+        if isinstance(objects, tuple):
+            objects = list(objects)
+        if not isinstance(objects, list):
+            objects = [objects]
+        srclist = []
+        for o in objects:
+            if isinstance(o, Mesh):
+                srclist.append(o.mesh)
+            elif hasattr(o, "_narrow"):
+                src = o._narrow(SMESH.SMESH_IDSource)
+                if src: srclist.append(src)
+                pass
+            pass
+        aMeasurements = self.CreateMeasurements()
+        result = aMeasurements.BoundingBox(srclist)
+        aMeasurements.Destroy()
+        return result
+
 import omniORB
 #Registering the new proxy for SMESH_Gen
 omniORB.registerObjref(SMESH._objref_SMESH_Gen._NP_RepositoryId, smeshDC)
@@ -2195,57 +2299,90 @@ class Mesh:
     # Get mesh measurements information:
     # ------------------------------------
 
-    def MinDistance(self, id1, id2, isElem1=False, isElem2=False):
+    ## Get minimum distance between two nodes, elements or distance to the origin
+    #  @param id1 first node/element id
+    #  @param id2 second node/element id (if 0, distance from @a id1 to the origin is computed)
+    #  @param isElem1 @c True if @a id1 is element id, @c False if it is node id
+    #  @param isElem2 @c True if @a id2 is element id, @c False if it is node id
+    #  @return minimum distance value
+    #  @sa GetMinDistance()
+    def MinDistance(self, id1, id2=0, isElem1=False, isElem2=False):
         aMeasure = self.GetMinDistance(id1, id2, isElem1, isElem2)
         return aMeasure.value
     
-    #  @param node1, node2 is nodes to measure distance
+    ## Get measure structure specifying minimum distance data between two objects
+    #  @param id1 first node/element id
+    #  @param id2 second node/element id (if 0, distance from @a id1 to the origin is computed)
+    #  @param isElem1 @c True if @a id1 is element id, @c False if it is node id
+    #  @param isElem2 @c True if @a id2 is element id, @c False if it is node id
     #  @return Measure structure
-    def GetMinDistance(self, id1, id2, isElem1=False, isElem2=False):
-        if isinstance( id1, int):
-            if (isElem1):
-                id1 = self.editor.MakeIDSource([id1], SMESH.FACE)
-            else:
-                id1 = self.editor.MakeIDSource([id1], SMESH.NODE)
-        if isinstance( id2, int):
-            if (isElem2):
+    #  @sa MinDistance()
+    def GetMinDistance(self, id1, id2=0, isElem1=False, isElem2=False):
+        if isElem1:
+            id1 = self.editor.MakeIDSource([id1], SMESH.FACE)
+        else:
+            id1 = self.editor.MakeIDSource([id1], SMESH.NODE)
+        if id2 != 0:
+            if isElem2:
                 id2 = self.editor.MakeIDSource([id2], SMESH.FACE)
             else:
                 id2 = self.editor.MakeIDSource([id2], SMESH.NODE)
+            pass
+        else:
+            id2 = None
         
         aMeasurements = self.smeshpyD.CreateMeasurements()
         aMeasure = aMeasurements.MinDistance(id1, id2)
         aMeasurements.Destroy()
         return aMeasure
     
-    #  @param IDsOfElements is a list of ids of elements or nodes
+    ## Get bounding box of the specified object(s)
+    #  @param objects single source object or list of source objects or list of nodes/elements IDs
+    #  @param isElem if @a objects is a list of IDs, @c True value in this parameters specifies that @a objects are elements,
+    #  @c False specifies that @a objects are nodes
+    #  @return tuple of six values (minX, minY, minZ, maxX, maxY, maxZ)
+    #  @sa GetBoundingBox()
+    def BoundingBox(self, objects=None, isElem=False):
+        result = self.GetBoundingBox(objects, isElem)
+        if result is None:
+            result = (0.0,)*6
+        else:
+            result = (result.minX, result.minY, result.minZ, result.maxX, result.maxY, result.maxZ)
+        return result
+
+    ## Get measure structure specifying bounding box data of the specified object(s)
+    #  @param objects single source object or list of source objects or list of nodes/elements IDs
+    #  @param isElem if @a objects is a list of IDs, @c True value in this parameters specifies that @a objects are elements,
+    #  @c False specifies that @a objects are nodes
     #  @return Measure structure
-    def GetBoundingBox(self, IDs = None, isElem=True):
-        if isinstance( IDs, Mesh ):
-            IDs = [ IDs.mesh ]
-        elif (IDs == None):
-            IDs = [ self.mesh ]
-        elif isinstance( IDs, int):
-            if (isElem):
-                IDs = [ self.editor.MakeIDSource(IDs, SMESH.FACE) ]
-            else:
-                IDs = [ self.editor.MakeIDSource(IDs, SMESH.NODE) ]
-        elif isinstance( IDs, list ) and isinstance( IDs[0], int):
-            if (isElem):
-                IDs = [ self.editor.MakeIDSource(IDs, SMESH.FACE) ]
-            else:
-                IDs = [ self.editor.MakeIDSource(IDs, SMESH.NODE) ]
-        elif hasattr(IDs, "_narrow"):
-            anIDs = IDs._narrow(SMESH.SMESH_IDSource)
-            if (anIDs):
-                IDs = [ anIDs ]
-                
-        aMeasure = None
-        if isinstance(IDs, list):
-            aMeasurements = self.smeshpyD.CreateMeasurements()
-            aMeasure = aMeasurements.BoundingBox(IDs)
-            aMeasurements.Destroy()
-            
+    #  @sa BoundingBox()
+    def GetBoundingBox(self, IDs=None, isElem=False):
+        if IDs is None:
+            IDs = [self.mesh]
+        elif isinstance(IDs, tuple):
+            IDs = list(IDs)
+        if not isinstance(IDs, list):
+            IDs = [IDs]
+        if len(IDs) > 0 and isinstance(IDs[0], int):
+            IDs = [IDs]
+        srclist = []
+        for o in IDs:
+            if isinstance(o, Mesh):
+                srclist.append(o.mesh)
+            elif hasattr(o, "_narrow"):
+                src = o._narrow(SMESH.SMESH_IDSource)
+                if src: srclist.append(src)
+                pass
+            elif isinstance(o, list):
+                if isElem:
+                    srclist.append(self.editor.MakeIDSource(o, SMESH.FACE))
+                else:
+                    srclist.append(self.editor.MakeIDSource(o, SMESH.NODE))
+                pass
+            pass
+        aMeasurements = self.smeshpyD.CreateMeasurements()
+        aMeasure = aMeasurements.BoundingBox(srclist)
+        aMeasurements.Destroy()
         return aMeasure
     
     # Mesh edition (SMESH_MeshEditor functionality):

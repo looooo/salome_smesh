@@ -47,7 +47,6 @@ of the selected node or edge.</li>
 or vice versa.</li>
 <li>Create \subpage double_nodes_page "double nodes".</li>
 <li>\subpage make_2dmesh_from_3d_page "Create 2D mesh from 3D".</li>
-
 </ul>
 
 \note It is possible to use the variables defined in the SALOME \b NoteBook

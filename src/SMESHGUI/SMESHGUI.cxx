@@ -3248,8 +3248,8 @@ void SMESHGUI::initialize( CAM_Application* app )
   createSMESHAction( 1137, "DISABLE_AUTO_COLOR" );
   createSMESHAction( 2000, "CTRL" );
 
-  createSMESHAction( 501, "MEASURE_MIN_DIST" );
-  createSMESHAction( 502, "MEASURE_BND_BOX" );
+  createSMESHAction( 501, "MEASURE_MIN_DIST", "ICON_MEASURE_MIN_DIST" );
+  createSMESHAction( 502, "MEASURE_BND_BOX",  "ICON_MEASURE_BND_BOX" );
 
   createSMESHAction( 300, "ERASE" );
   createSMESHAction( 301, "DISPLAY" );

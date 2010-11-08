@@ -1098,17 +1098,19 @@ SMESHGUI_MeasureDlg::SMESHGUI_MeasureDlg( QWidget* parent, int page )
   setWindowTitle( tr( "MEASUREMENTS" ) );
   setSizeGripEnabled( true );
 
+  SUIT_ResourceMgr* resMgr = SMESHGUI::resourceMgr();
+
   myTabWidget = new QTabWidget( this );
 
   // min distance
 
   myMinDist = new SMESHGUI_MinDistance( myTabWidget );
-  myTabWidget->addTab( myMinDist, tr( "MIN_DIST" ) );
+  myTabWidget->addTab( myMinDist, resMgr->loadPixmap( "SMESH", tr( "ICON_MEASURE_MIN_DIST" ) ), tr( "MIN_DIST" ) );
 
   // bounding box
   
   myBndBox = new SMESHGUI_BoundingBox( myTabWidget );
-  myTabWidget->addTab( myBndBox, tr( "BND_BOX" ) );
+  myTabWidget->addTab( myBndBox, resMgr->loadPixmap( "SMESH", tr( "ICON_MEASURE_BND_BOX" ) ), tr( "BND_BOX" ) );
 
   // buttons
   QPushButton* okBtn = new QPushButton( tr( "SMESH_BUT_OK" ), this );

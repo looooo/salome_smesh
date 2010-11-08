@@ -485,5 +485,13 @@
             <source>ICON_SPLIT_TO_TETRA</source>
             <translation>split_into_tetra.png</translation>
         </message>
+        <message>
+            <source>ICON_MEASURE_MIN_DIST</source>
+            <translation>mesh_min_dist.png</translation>
+        </message>
+        <message>
+            <source>ICON_MEASURE_BND_BOX</source>
+            <translation>mesh_bounding_box.png</translation>
+        </message>
     </context>
 </TS>

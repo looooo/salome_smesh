@@ -42,6 +42,7 @@ SMDS_FacePosition::SMDS_FacePosition(const int aEdgeId,
   :SMDS_Position(aEdgeId),
    myUParameter(aUParam),myVParameter(aVParam)
 {
+  //MESSAGE("******************************************************** SMDS_FacePosition");
 }
 
 //=======================================================================

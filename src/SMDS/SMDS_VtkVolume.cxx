@@ -56,6 +56,7 @@ void SMDS_VtkVolume::init(std::vector<vtkIdType> nodeIds, SMDS_Mesh* mesh)
       break;
   }
   myVtkID = grid->InsertNextLinkedCell(aType, nodeIds.size(), &nodeIds[0]);
+  //MESSAGE("SMDS_VtkVolume::init myVtkID " << myVtkID);
 }
 
 #ifdef VTK_HAVE_POLYHEDRON
@@ -108,9 +109,64 @@ bool SMDS_VtkVolume::ChangeNodes(const SMDS_MeshNode* nodes[], const int nbNodes
     }
   for (int i = 0; i < nbNodes; i++)
     {
-      pts[i] = nodes[i]->GetID();
+      pts[i] = nodes[i]->getVtkId();
     }
   return true;
+}
+
+/*!
+ * Reorder in VTK order a list of nodes given in SMDS order.
+ * To be used before ChangeNodes: lists are given or computed in SMDS order.
+ */
+bool SMDS_VtkVolume::vtkOrder(const SMDS_MeshNode* nodes[], const int nbNodes)
+{
+  if (nbNodes != this->NbNodes())
+    {
+      MESSAGE("vtkOrder, wrong number of nodes " << nbNodes << " instead of "<< this->NbNodes());
+      return false;
+    }
+  vtkUnstructuredGrid* grid = SMDS_Mesh::_meshList[myMeshId]->getGrid();
+  vtkIdType aVtkType = grid->GetCellType(this->myVtkID);
+  switch (aVtkType)
+  {
+    case VTK_TETRA:
+      this->exchange(nodes, 1, 2);
+      break;
+    case VTK_QUADRATIC_TETRA:
+      this->exchange(nodes, 1, 2);
+      this->exchange(nodes, 4, 6);
+      this->exchange(nodes, 8, 9);
+      break;
+    case VTK_PYRAMID:
+      this->exchange(nodes, 1, 3);
+      break;
+    case VTK_WEDGE:
+      break;
+    case VTK_QUADRATIC_PYRAMID:
+      this->exchange(nodes, 1, 3);
+      this->exchange(nodes, 5, 8);
+      this->exchange(nodes, 6, 7);
+      this->exchange(nodes, 10, 12);
+      break;
+    case VTK_QUADRATIC_WEDGE:
+      break;
+    case VTK_HEXAHEDRON:
+      this->exchange(nodes, 1, 3);
+      this->exchange(nodes, 5, 7);
+      break;
+    case VTK_QUADRATIC_HEXAHEDRON:
+      this->exchange(nodes, 1, 3);
+      this->exchange(nodes, 5, 7);
+      this->exchange(nodes, 8, 11);
+      this->exchange(nodes, 9, 10);
+      this->exchange(nodes, 12, 15);
+      this->exchange(nodes, 13, 14);
+      this->exchange(nodes, 17, 19);
+      break;
+    case VTK_POLYHEDRON:
+    default:
+      break;
+  }
 }
 
 SMDS_VtkVolume::~SMDS_VtkVolume()
@@ -283,7 +339,7 @@ const SMDS_MeshNode* SMDS_VtkVolume::GetFaceNode(const int face_ind, const int n
           if (i == face_ind - 1) // first face is number 1
             {
               if ((node_ind > 0) && (node_ind <= nodesInFace))
-                node = mesh->FindNode(ptIds[id + node_ind]); // ptIds[id+1] : first node
+                node = mesh->FindNodeVtk(ptIds[id + node_ind]); // ptIds[id+1] : first node
               break;
             }
           id += (nodesInFace + 1);
@@ -385,6 +441,49 @@ bool SMDS_VtkVolume::IsPoly() const
   vtkUnstructuredGrid* grid = SMDS_Mesh::_meshList[myMeshId]->getGrid();
   vtkIdType aVtkType = grid->GetCellType(this->myVtkID);
   return (aVtkType == VTK_POLYHEDRON);
+}
+
+bool SMDS_VtkVolume::IsMediumNode(const SMDS_MeshNode* node) const
+{
+  vtkUnstructuredGrid* grid = SMDS_Mesh::_meshList[myMeshId]->getGrid();
+  vtkIdType aVtkType = grid->GetCellType(this->myVtkID);
+  int rankFirstMedium = 0;
+  switch (aVtkType)
+  {
+    case VTK_QUADRATIC_TETRA:
+      rankFirstMedium = 4; // medium nodes are of rank 4 to 9
+      break;
+    case VTK_QUADRATIC_PYRAMID:
+      rankFirstMedium = 5; // medium nodes are of rank 5 to 12
+      break;
+    case VTK_QUADRATIC_WEDGE:
+      rankFirstMedium = 6; // medium nodes are of rank 6 to 14
+      break;
+    case VTK_QUADRATIC_HEXAHEDRON:
+      rankFirstMedium = 8; // medium nodes are of rank 8 to 19
+      break;
+    default:
+      return false;
+  }
+  vtkIdType npts = 0;
+  vtkIdType* pts = 0;
+  grid->GetCellPoints(myVtkID, npts, pts);
+  vtkIdType nodeId = node->getVtkId();
+  for (int rank = 0; rank < npts; rank++)
+    {
+      if (pts[rank] == nodeId)
+        {
+          if (rank < rankFirstMedium)
+            return false;
+          else
+            return true;
+        }
+    }
+  //throw SALOME_Exception(LOCALIZED("node does not belong to this element"));
+  MESSAGE("======================================================");
+  MESSAGE("= IsMediumNode: node does not belong to this element =");
+  MESSAGE("======================================================");
+  return false;
 }
 
 SMDSAbs_EntityType SMDS_VtkVolume::GetEntityType() const

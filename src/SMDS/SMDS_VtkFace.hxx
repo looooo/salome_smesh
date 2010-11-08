@@ -27,6 +27,7 @@ public:
   virtual const SMDS_MeshNode* GetNode(const int ind) const;
   virtual bool IsQuadratic() const;
   virtual bool IsPoly() const;
+  virtual bool IsMediumNode(const SMDS_MeshNode* node) const;
 
   virtual SMDS_ElemIteratorPtr elementsIterator(SMDSAbs_ElementType type) const;
   virtual SMDS_ElemIteratorPtr nodesIteratorToUNV() const;

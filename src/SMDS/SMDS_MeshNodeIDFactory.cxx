@@ -62,7 +62,7 @@ bool SMDS_MeshNodeIDFactory::BindID(int ID, SMDS_MeshElement * elem)
 //=======================================================================
 SMDS_MeshElement* SMDS_MeshNodeIDFactory::MeshElement(int ID)
 {
-  if ((ID < 0) || (ID > myMax))
+  if ((ID < 1) || (ID > myMax))
     return NULL;
   const SMDS_MeshElement* elem = GetMesh()->FindNode(ID);
   return (SMDS_MeshElement*) (elem);
@@ -126,4 +126,10 @@ void SMDS_MeshNodeIDFactory::Clear()
 {
   myMin = myMax = 0;
   SMDS_MeshIDFactory::Clear();
+}
+
+void SMDS_MeshNodeIDFactory::emptyPool(int maxId)
+{
+  SMDS_MeshIDFactory::emptyPool(maxId);
+  myMax = maxId;
 }

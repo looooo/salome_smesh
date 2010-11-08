@@ -31,47 +31,53 @@
 
 #include "SMDS_MeshElement.hxx"
 #include "SMDS_Position.hxx"
+#include "ObjectPool.hxx"
 #include <NCollection_List.hxx>
 
 class SMDS_EXPORT SMDS_MeshNode:public SMDS_MeshElement
 {
-
 public:
-  SMDS_MeshNode();
-  SMDS_MeshNode(int id, int meshId, int shapeId = -1, double x=0, double y=0, double z=0);
-  virtual ~SMDS_MeshNode();
+  friend class SMESHDS_Mesh;
+  friend class SMDS_Mesh;
+  friend class ObjectPool<SMDS_MeshNode>;
 
-  void init(int id, int meshId, int shapeId = -1, double x=0, double y=0, double z=0);
-  
   double* getCoord() const;
-
   void Print(std::ostream & OS) const;
   double X() const;
   double Y() const;
   double Z() const;
-  void AddInverseElement(const SMDS_MeshElement * ME);
-  void RemoveInverseElement(const SMDS_MeshElement * parent);
-  void ClearInverseElements();
-  bool emptyInverseElements();
   SMDS_ElemIteratorPtr GetInverseElementIterator(SMDSAbs_ElementType type=SMDSAbs_All) const;
   int NbInverseElements(SMDSAbs_ElementType type=SMDSAbs_All) const;
-  void SetPosition(const SMDS_PositionPtr& aPos);
   const SMDS_PositionPtr& GetPosition() const;
   SMDSAbs_ElementType GetType() const;
   virtual vtkIdType GetVtkType() const;
   SMDSAbs_EntityType  GetEntityType() const {return SMDSEntity_Node;}
   int NbNodes() const;
-  void setXYZ(double x, double y, double z);
+
   friend bool operator<(const SMDS_MeshNode& e1, const SMDS_MeshNode& e2);
+
+  void SetPosition(const SMDS_PositionPtr& aPos);
+  void AddInverseElement(const SMDS_MeshElement * ME);
+  void RemoveInverseElement(const SMDS_MeshElement * parent);
+  void ClearInverseElements();
+  bool emptyInverseElements();
+  void setXYZ(double x, double y, double z);
 
   /*!
    * \brief Return node by its index
    * \param ind - node index
    * \retval const SMDS_MeshNode* - the node
    */
-  virtual const SMDS_MeshNode* GetNode(const int) const { return this; }
+  //virtual const SMDS_MeshNode* GetNode(const int) const { return this; }
   static int nbNodes;
+
 protected:
+  SMDS_MeshNode();
+  SMDS_MeshNode(int id, int meshId, int shapeId = -1, double x=0, double y=0, double z=0);
+  virtual ~SMDS_MeshNode();
+  void init(int id, int meshId, int shapeId = -1, double x=0, double y=0, double z=0);
+  inline void setVtkId(int vtkId) { myVtkID = vtkId; };
+
   SMDS_ElemIteratorPtr
   elementsIterator(SMDSAbs_ElementType type) const;
 

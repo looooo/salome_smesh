@@ -418,6 +418,7 @@ SMDS_VolumeTool::SMDS_VolumeTool ()
        myFaceNodeIndices( NULL ),
        myFaceNodes( NULL )
 {
+  //MESSAGE("******************************************************** SMDS_VolumeToo");
 }
 
 //=======================================================================
@@ -438,6 +439,7 @@ SMDS_VolumeTool::SMDS_VolumeTool (const SMDS_MeshElement* theVolume)
        myFaceNodeIndices( NULL ),
        myFaceNodes( NULL )
 {
+  //MESSAGE("******************************************************** SMDS_VolumeToo");
   Set( theVolume );
 }
 
@@ -692,12 +694,13 @@ double SMDS_VolumeTool::GetSize() const
     if ( !myPolyedre )
       return 0.;
 
+    SMDS_Mesh *mesh = SMDS_Mesh::_meshList[myPolyedre->getMeshId()];
     // split a polyhedron into tetrahedrons
 
     SMDS_VolumeTool* me = const_cast< SMDS_VolumeTool* > ( this );
     XYZ baryCenter;
     me->GetBaryCenter(baryCenter.x, baryCenter.y, baryCenter.z);
-    SMDS_MeshNode bcNode ( baryCenter.x, baryCenter.y, baryCenter.z );
+    SMDS_MeshNode *bcNode = mesh->AddNode( baryCenter.x, baryCenter.y, baryCenter.z );
 
     for ( int f = 0; f < NbFaces(); ++f )
     {
@@ -707,11 +710,12 @@ double SMDS_VolumeTool::GetSize() const
         double Vn = getTetraVolume( myFaceNodes[ 0 ],
                                     myFaceNodes[ n-1 ],
                                     myFaceNodes[ n ],
-                                    & bcNode );
+                                    bcNode );
 ///         cout <<"++++   " << Vn << "   nodes " <<myFaceNodes[ 0 ]->GetID() << " " <<myFaceNodes[ n-1 ]->GetID() << " " <<myFaceNodes[ n ]->GetID() << "        < " << V << endl;
         V += externalFace ? -Vn : Vn;
       }
     }
+    mesh->RemoveNode(bcNode);
   }
   else 
   {

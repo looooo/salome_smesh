@@ -75,7 +75,7 @@ public:
   virtual int NbNodes() const;
   virtual int NbEdges() const;
   virtual int NbFaces() const;
-  int GetID() const;
+  inline int GetID() const { return myID; };
 
   ///Return the type of the current element
   virtual SMDSAbs_ElementType GetType() const = 0;
@@ -137,12 +137,22 @@ public:
    */
   int GetNodeIndex( const SMDS_MeshNode* node ) const;
 
-  inline int getId() const {return myID; };
+  //inline int getId() const {return myID; };
   inline ShortType getMeshId() const {return myMeshId; };
   inline ShortType getshapeId() const {return myShapeId; };
   inline void setShapeId(ShortType shapeId) {myShapeId = shapeId; };
   inline int getIdInShape() const { return myIdInShape; };
   inline void setIdInShape(int id) { myIdInShape = id; };
+
+  inline void setVtkId(int vtkId)
+  {
+    myVtkID = vtkId;
+  }
+
+  inline int getVtkId() const
+  {
+    return myVtkID;
+  }
 
 protected:
   inline void setId(int id) {myID = id; };
@@ -152,6 +162,9 @@ protected:
 
   //! Element index in vector SMDS_Mesh::myNodes or SMDS_Mesh::myCells
   int myID;
+
+  // index in vtkUnstructuredGrid
+  int myVtkID;
 
   //! SMDS_Mesh identification in SMESH
   ShortType myMeshId;

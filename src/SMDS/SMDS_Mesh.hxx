@@ -475,6 +475,7 @@ public:
   virtual void compactMesh();
 
   const SMDS_MeshNode *FindNode(int idnode) const;
+  const SMDS_MeshNode *FindNodeVtk(int idnode) const;
   const SMDS_Mesh0DElement* Find0DElement(int idnode) const;
   const SMDS_MeshEdge *FindEdge(int idnode1, int idnode2) const;
   const SMDS_MeshEdge *FindEdge(int idnode1, int idnode2, int idnode3) const;
@@ -567,8 +568,8 @@ public:
   typedef std::vector<SMDS_MeshCell *> SetOfCells;
 
   void updateNodeMinMax();
-  inline int fromVtkToSmds(int vtkid) { MYASSERT(vtkid>=0); return myVtkIndex[vtkid]; };
-  inline int fromSmdsToVtk(int smdsid) { MYASSERT(smdsid>=0); return myIDElements[smdsid]; };
+  int fromVtkToSmds(int vtkid);
+  int fromSmdsToVtk(int smdsid);
 
   void incrementNodesCapacity(int nbNodes);
   void incrementCellsCapacity(int nbCells);
@@ -636,10 +637,10 @@ protected:
   SetOfCells             myCells;
 
   //! for cells only: index = ID for SMDS users, value = ID in vtkUnstructuredGrid
-  std::vector<int>       myIDElements;
+  std::vector<int>       myCellIdSmdsToVtk;
 
   //! for cells only: index = ID in vtkUnstructuredGrid, value = ID for SMDS users
-  std::vector<int>       myVtkIndex;
+  std::vector<int>       myCellIdVtkToSmds;
 
   SMDS_Mesh *            myParent;
   std::list<SMDS_Mesh *> myChildren;

@@ -24,7 +24,7 @@
 //  inherites global class SMESH_Octree
 //  File      : SMESH_OctreeNode.cxx
 //  Created   : Tue Jan 16 16:00:00 2007
-//  Author    : Nicolas Geimer & Aurélien Motteux (OCC)
+//  Author    : Nicolas Geimer & Aurelien Motteux (OCC)
 //  Module    : SMESH
 //
 #include "SMESH_OctreeNode.hxx"
@@ -107,9 +107,9 @@ Bnd_B3d* SMESH_OctreeNode::buildRootBox()
  */
 //====================================================================================
 
-const bool SMESH_OctreeNode::isInside (const SMDS_MeshNode * Node, const double precision)
+const bool SMESH_OctreeNode::isInside (const gp_XYZ& p, const double precision)
 {
-  gp_XYZ p (Node->X(),Node->Y(),Node->Z());
+  //gp_XYZ p (Node->X(),Node->Y(),Node->Z());
   if (precision <= 0.)
     return !(getBox().IsOut(p));
   Bnd_B3d BoxWithPrecision = getBox();
@@ -159,7 +159,8 @@ void SMESH_OctreeNode::NodesAround (const SMDS_MeshNode * Node,
                                     list<const SMDS_MeshNode*>* Result,
                                     const double precision)
 {
-  if (isInside(Node,precision))
+  gp_XYZ p(Node->X(), Node->Y(), Node->Z());
+  if (isInside(p, precision))
   {
     if (isLeaf())
     {
@@ -186,7 +187,7 @@ void SMESH_OctreeNode::NodesAround (const SMDS_MeshNode * Node,
  */
 //================================================================================
 
-bool SMESH_OctreeNode::NodesAround(const SMDS_MeshNode *              node,
+bool SMESH_OctreeNode::NodesAround(const gp_XYZ &node,
                                    map<double, const SMDS_MeshNode*>& dist2Nodes,
                                    double                             precision)
 {
@@ -195,13 +196,14 @@ bool SMESH_OctreeNode::NodesAround(const SMDS_MeshNode *              node,
   else if ( precision == 0. )
     precision = maxSize() / 2;
 
-  if (isInside(node,precision))
+  //gp_XYZ p(node->X(), node->Y(), node->Z());
+  if (isInside(node, precision))
   {
     if (!isLeaf())
     {
       // first check a child containing node
       gp_XYZ mid = (getBox().CornerMin() + getBox().CornerMax()) / 2.;
-      int nodeChild  = getChildIndex( node->X(), node->Y(), node->Z(), mid );
+      int nodeChild  = getChildIndex( node.X(), node.Y(), node.Z(), mid );
       if ( ((SMESH_OctreeNode*) myChildren[nodeChild])->NodesAround(node, dist2Nodes, precision))
         return true;
       
@@ -213,7 +215,7 @@ bool SMESH_OctreeNode::NodesAround(const SMDS_MeshNode *              node,
     else if ( NbNodes() > 0 )
     {
       double minDist = precision * precision;
-      gp_Pnt p1 ( node->X(), node->Y(), node->Z() );
+      gp_Pnt p1 ( node.X(), node.Y(), node.Z() );
       set<const SMDS_MeshNode*>::iterator nIt = myNodes.begin();
       for ( ; nIt != myNodes.end(); ++nIt )
       {
@@ -320,7 +322,8 @@ void SMESH_OctreeNode::FindCoincidentNodes (const SMDS_MeshNode * Node,
                                             list<const SMDS_MeshNode*>* Result,
                                             const double precision)
 {
-  bool isInsideBool = isInside(Node,precision);
+  gp_XYZ p(Node->X(), Node->Y(), Node->Z());
+  bool isInsideBool = isInside(p, precision);
 
   if (isInsideBool)
   {
@@ -386,8 +389,7 @@ void SMESH_OctreeNode::UpdateByMoveNode( const SMDS_MeshNode* node, const gp_Pnt
     set<const SMDS_MeshNode*>::iterator pNode = myNodes.find( node );
     bool nodeInMe = ( pNode != myNodes.end() );
 
-    SMDS_MeshNode pointNode( toPnt.X(), toPnt.Y(), toPnt.Z() );
-    bool pointInMe = isInside( &pointNode, 1e-10 );
+    bool pointInMe = isInside( toPnt.Coord(), 1e-10 );
 
     if ( pointInMe != nodeInMe )
     {

@@ -112,10 +112,10 @@ SMDS_ElemIteratorPtr SMDS_LinearEdge::elementsIterator(SMDSAbs_ElementType type)
 
 bool operator<(const SMDS_LinearEdge & e1, const SMDS_LinearEdge & e2)
 {
-  int id11 = e1.myNodes[0]->GetID();
-  int id21 = e2.myNodes[0]->GetID();
-  int id12 = e1.myNodes[1]->GetID();
-  int id22 = e2.myNodes[1]->GetID();
+  int id11 = e1.myNodes[0]->getVtkId();
+  int id21 = e2.myNodes[0]->getVtkId();
+  int id12 = e1.myNodes[1]->getVtkId();
+  int id22 = e2.myNodes[1]->getVtkId();
   int tmp;
 
   if (id11 >= id12)

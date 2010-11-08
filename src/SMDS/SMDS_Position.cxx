@@ -26,6 +26,7 @@
 //  Module : SMESH
 //
 #include "SMDS_Position.hxx"
+#include "utilities.h"
 
 //=======================================================================
 //function : SMDS_Position
@@ -34,6 +35,7 @@
 
 SMDS_Position::SMDS_Position(int aShapeId) :myShapeId(aShapeId)
 {
+  //MESSAGE("########################## SMDS_Position " << myShapeId);
 }
 
 //=======================================================================
@@ -43,6 +45,7 @@ SMDS_Position::SMDS_Position(int aShapeId) :myShapeId(aShapeId)
 
 void SMDS_Position::SetShapeId(int aShapeId)
 {
+  //MESSAGE("############################## SetShapeId "<< aShapeId);
         myShapeId = aShapeId;
 }
 
@@ -53,6 +56,7 @@ void SMDS_Position::SetShapeId(int aShapeId)
 
 int SMDS_Position::GetShapeId() const
 {
+  //MESSAGE("################################# GetShapeId " <<  myShapeId);
         return myShapeId;
 }
 

@@ -14,20 +14,17 @@ public:
   virtual ~SMDS_MeshCell();
 
   virtual bool ChangeNodes(const SMDS_MeshNode* nodes[], const int nbNodes)= 0;
-
-  inline void setVtkId(int vtkId)
-  {
-    myVtkID = vtkId;
-  }
-
-  inline int getVtkId() const
-  {
-    return myVtkID;
-  }
+  virtual bool vtkOrder(const SMDS_MeshNode* nodes[], const int nbNodes) {return true; };
 
   static int nbCells;
+
 protected:
-  int myVtkID;
+  inline void exchange(const SMDS_MeshNode* nodes[],int a, int b)
+  {
+    const SMDS_MeshNode* noda = nodes[a];
+    nodes[a] = nodes[b];
+    nodes[b] = noda;
+  }
 };
 
 #endif

@@ -131,8 +131,8 @@ SMDS_ElemIteratorPtr SMDS_Mesh0DElement::elementsIterator (SMDSAbs_ElementType t
 //=======================================================================
 bool operator< (const SMDS_Mesh0DElement & e1, const SMDS_Mesh0DElement & e2)
 {
-  int id1 = e1.myNode->GetID();
-  int id2 = e2.myNode->GetID();
+  int id1 = e1.myNode->getVtkId();
+  int id2 = e2.myNode->getVtkId();
 
   return (id1 < id2);
 }

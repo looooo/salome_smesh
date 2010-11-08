@@ -158,7 +158,7 @@ Driver_Mesh::Status DriverUNV_W_SMDS_Mesh::Perform()
           TElementLab aLabel = anElem->GetID();
 
           int aNbNodes = anElem->NbNodes();
-          MESSAGE("aNbNodes="<<aNbNodes);
+          //MESSAGE("aNbNodes="<<aNbNodes);
           SMDS_ElemIteratorPtr aNodesIter;
           aNodesIter = anElem->nodesIteratorToUNV();
           if ( anElem->IsPoly() ) {

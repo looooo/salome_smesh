@@ -49,6 +49,7 @@ SMDS_VolumeOfNodes::SMDS_VolumeOfNodes(
                 const SMDS_MeshNode * node7,
                 const SMDS_MeshNode * node8)
 {
+  //MESSAGE("***************************************************** SMDS_VolumeOfNodes");
         myNbNodes = 8;
         myNodes = new const SMDS_MeshNode* [myNbNodes];
         myNodes[0]=node1;
@@ -67,6 +68,7 @@ SMDS_VolumeOfNodes::SMDS_VolumeOfNodes(
                 const SMDS_MeshNode * node3,
                 const SMDS_MeshNode * node4)
 {
+  //MESSAGE("***************************************************** SMDS_VolumeOfNodes");
         myNbNodes = 4;
         myNodes = new const SMDS_MeshNode* [myNbNodes];
         myNodes[0]=node1;
@@ -82,6 +84,7 @@ SMDS_VolumeOfNodes::SMDS_VolumeOfNodes(
                 const SMDS_MeshNode * node4,
                 const SMDS_MeshNode * node5)
 {
+  //MESSAGE("***************************************************** SMDS_VolumeOfNodes");
         myNbNodes = 5;
         myNodes = new const SMDS_MeshNode* [myNbNodes];
         myNodes[0]=node1;
@@ -99,6 +102,7 @@ SMDS_VolumeOfNodes::SMDS_VolumeOfNodes(
                 const SMDS_MeshNode * node5,
                 const SMDS_MeshNode * node6)
 {
+  //MESSAGE("***************************************************** SMDS_VolumeOfNodes");
         myNbNodes = 6;
         myNodes = new const SMDS_MeshNode* [myNbNodes];
         myNodes[0]=node1;

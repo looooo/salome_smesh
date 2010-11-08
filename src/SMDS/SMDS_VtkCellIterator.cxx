@@ -90,7 +90,7 @@ bool SMDS_VtkCellIterator::more()
 const SMDS_MeshElement* SMDS_VtkCellIterator::next()
 {
   vtkIdType id = _vtkIdList->GetId(_index++);
-  return _mesh->FindNode(id);
+  return _mesh->FindNodeVtk(id);
 }
 
 SMDS_VtkCellIteratorToUNV::SMDS_VtkCellIteratorToUNV(SMDS_Mesh* mesh, int vtkCellId, SMDSAbs_EntityType aType) :

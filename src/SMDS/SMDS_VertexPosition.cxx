@@ -39,6 +39,7 @@ using namespace std;
 SMDS_VertexPosition:: SMDS_VertexPosition(const int aVertexId)
         :SMDS_Position(aVertexId)
 {
+  //MESSAGE("*********************************************** SMDS_VertexPosition " << aVertexId);
 }
 
 //=======================================================================
@@ -49,12 +50,13 @@ SMDS_VertexPosition:: SMDS_VertexPosition(const int aVertexId)
 const double *SMDS_VertexPosition::Coords() const
 {
         const static double origin[]={0,0,0};
-        MESSAGE("SMDS_VertexPosition::Coords not implemented");
+        //MESSAGE("######################### SMDS_VertexPosition::Coords not implemented");
         return origin;
 }
 
 
 SMDS_TypeOfPosition SMDS_VertexPosition::GetTypeOfPosition() const
 {
+  //MESSAGE("################################################# GetTypeOfPosition");
         return SMDS_TOP_VERTEX;
 }

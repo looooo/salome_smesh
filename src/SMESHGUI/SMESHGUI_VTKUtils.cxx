@@ -121,7 +121,7 @@ namespace SMESH
       TVisualObjCont::iterator anIter = VISUAL_OBJ_CONT.find(aKey);
       if(anIter != VISUAL_OBJ_CONT.end()) {
         // for unknown reason, object destructor is not called, so clear object manually
-        anIter->second->GetUnstructuredGrid()->SetCells(0,0,0);
+        anIter->second->GetUnstructuredGrid()->SetCells(0,0,0,0,0);
         anIter->second->GetUnstructuredGrid()->SetPoints(0);
       }
       VISUAL_OBJ_CONT.erase(aKey);
@@ -163,7 +163,7 @@ namespace SMESH
     TVisualObjCont::iterator anIter = VISUAL_OBJ_CONT.begin();
     for ( ; anIter != VISUAL_OBJ_CONT.end(); ++anIter ) {
       // for unknown reason, object destructor is not called, so clear object manually
-      anIter->second->GetUnstructuredGrid()->SetCells(0,0,0);
+      anIter->second->GetUnstructuredGrid()->SetCells(0,0,0,0,0);
       anIter->second->GetUnstructuredGrid()->SetPoints(0);
     }
     VISUAL_OBJ_CONT.clear();
@@ -208,7 +208,7 @@ namespace SMESH
       int curId = anIter->first.first;
       if ( curId == studyID ) {
         // for unknown reason, object destructor is not called, so clear object manually
-        anIter->second->GetUnstructuredGrid()->SetCells(0,0,0);
+        anIter->second->GetUnstructuredGrid()->SetCells(0,0,0,0,0);
         anIter->second->GetUnstructuredGrid()->SetPoints(0);
         VISUAL_OBJ_CONT.erase( anIter-- );  // dercement occures before erase()
       }

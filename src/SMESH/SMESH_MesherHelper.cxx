@@ -651,6 +651,8 @@ bool SMESH_MesherHelper::CheckNodeU(const TopoDS_Edge&   E,
 {
   if ( force || !myOkNodePosShapes.count( n->GetPosition()->GetShapeId() ))
   {
+    double toldis = tol;
+    // TODO if (toldis < 5.e-5) toldis = 5.e-5; // nodes coordinates are stored in float format
     // check that u is correct
     TopLoc_Location loc; double f,l;
     Handle(Geom_Curve) curve = BRep_Tool::Curve( E,loc,f,l );
@@ -666,7 +668,7 @@ bool SMESH_MesherHelper::CheckNodeU(const TopoDS_Edge&   E,
     {
       gp_Pnt nodePnt = SMESH_MeshEditor::TNodeXYZ( n );
       if ( !loc.IsIdentity() ) nodePnt.Transform( loc.Transformation().Inverted() );
-      if ( nodePnt.Distance( curve->Value( u )) > tol )
+      if ( nodePnt.Distance( curve->Value( u )) > toldis )
       {
         // u incorrect, project the node to the curve
         GeomAPI_ProjectPointOnCurve projector( nodePnt, curve, f, l );
@@ -676,9 +678,10 @@ bool SMESH_MesherHelper::CheckNodeU(const TopoDS_Edge&   E,
           return false;
         }
         Quantity_Parameter U = projector.LowerDistanceParameter();
-        if ( nodePnt.Distance( curve->Value( U )) > tol )
+        if ( nodePnt.Distance( curve->Value( U )) > toldis )
         {
           MESSAGE( "SMESH_MesherHelper::CheckNodeU(), invalid projection" );
+          MESSAGE("distance " << nodePnt.Distance(curve->Value( U )) << " " << toldis);
           return false;
         }
         u = double( U );

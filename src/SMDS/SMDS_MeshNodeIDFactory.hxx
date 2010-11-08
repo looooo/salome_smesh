@@ -46,6 +46,7 @@ public:
   int GetMinID() const;
   SMDS_ElemIteratorPtr elementsIterator() const;
   virtual void Clear();
+  virtual void emptyPool(int maxId);
 
 protected:
   void updateMinMax() const;

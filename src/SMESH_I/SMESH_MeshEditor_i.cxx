@@ -1984,6 +1984,7 @@ SMESH_MeshEditor_i::extrusionAlongPath(const SMESH::long_array &   theIDsOfEleme
                                        SMESH::SMESH_MeshEditor::Extrusion_Error & theError,
                                        const SMDSAbs_ElementType   theElementType)
 {
+  MESSAGE("extrusionAlongPath");
   initData();
 
   if ( thePathMesh->_is_nil() || thePathShape->_is_nil() ) {
@@ -2150,6 +2151,7 @@ SMESH_MeshEditor_i::ExtrusionAlongPath(const SMESH::long_array &   theIDsOfEleme
                                        CORBA::Boolean              theHasRefPoint,
                                        const SMESH::PointStruct &  theRefPoint)
 {
+  MESSAGE("ExtrusionAlongPath");
   if ( !myPreviewMode ) {
     TPythonDump() << "error = " << this << ".ExtrusionAlongPath( "
                   << theIDsOfElements << ", "

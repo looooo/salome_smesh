@@ -65,18 +65,20 @@ SMDS_MeshNode::SMDS_MeshNode(int id, int meshId, int shapeId, double x, double y
 
 void SMDS_MeshNode::init(int id, int meshId, int shapeId, double x, double y, double z)
 {
+  myVtkID = id -1;
+  assert(myVtkID >= 0);
   myID = id;
   myMeshId = meshId;
   myShapeId = shapeId;
   myIdInShape = -1;
-  //MESSAGE("Node " << myID << " (" << x << ", " << y << ", " << z << ")");
+  //MESSAGE("Node " << myID << " " << myVtkID << " (" << x << ", " << y << ", " << z << ")");
   SMDS_Mesh* mesh = SMDS_Mesh::_meshList[myMeshId];
   vtkUnstructuredGrid * grid = mesh->getGrid();
   vtkPoints *points = grid->GetPoints();
-  points->InsertPoint(myID, x, y, z);
+  points->InsertPoint(myVtkID, x, y, z);
   vtkCellLinks *cellLinks = grid->GetCellLinks();
-  if (myID >=cellLinks->Size)
-	  cellLinks->Resize(myID+SMDS_Mesh::chunkSize);
+  if (myVtkID >=cellLinks->Size)
+	  cellLinks->Resize(myVtkID+SMDS_Mesh::chunkSize);
 }
 
 SMDS_MeshNode::~SMDS_MeshNode()
@@ -94,7 +96,7 @@ void SMDS_MeshNode::RemoveInverseElement(const SMDS_MeshElement * parent)
     //MESSAGE("RemoveInverseElement " << myID << " " << parent->GetID());
     const SMDS_MeshCell* cell = dynamic_cast<const SMDS_MeshCell*>(parent);
     MYASSERT(cell);
-    SMDS_Mesh::_meshList[myMeshId]->getGrid()->RemoveReferenceToCell(myID, cell->getVtkId());
+    SMDS_Mesh::_meshList[myMeshId]->getGrid()->RemoveReferenceToCell(myVtkID, cell->getVtkId());
 }
 
 //=======================================================================
@@ -193,7 +195,7 @@ public:
 SMDS_ElemIteratorPtr SMDS_MeshNode::
         GetInverseElementIterator(SMDSAbs_ElementType type) const
 {
-    vtkCellLinks::Link l = SMDS_Mesh::_meshList[myMeshId]->getGrid()->GetCellLinks()->GetLink(myID);
+    vtkCellLinks::Link l = SMDS_Mesh::_meshList[myMeshId]->getGrid()->GetCellLinks()->GetLink(myVtkID);
     //MESSAGE("myID " << myID << " ncells " << l.ncells);
     return SMDS_ElemIteratorPtr(new SMDS_MeshNode_MyInvIterator(SMDS_Mesh::_meshList[myMeshId], l.cells, l.ncells, type));
 }
@@ -253,7 +255,7 @@ SMDS_ElemIteratorPtr SMDS_MeshNode::
     return SMDS_MeshElement::elementsIterator(SMDSAbs_Node); 
   else
   {
-    vtkCellLinks::Link l = SMDS_Mesh::_meshList[myMeshId]->getGrid()->GetCellLinks()->GetLink(myID);
+    vtkCellLinks::Link l = SMDS_Mesh::_meshList[myMeshId]->getGrid()->GetCellLinks()->GetLink(myVtkID);
     return SMDS_ElemIteratorPtr(new SMDS_MeshNode_MyIterator(SMDS_Mesh::_meshList[myMeshId], l.cells, l.ncells, type));
   }
 }
@@ -266,7 +268,7 @@ int SMDS_MeshNode::NbNodes() const
 
 double* SMDS_MeshNode::getCoord() const
 {
-  return SMDS_Mesh::_meshList[myMeshId]->getGrid()->GetPoint(myID);
+  return SMDS_Mesh::_meshList[myMeshId]->getGrid()->GetPoint(myVtkID);
 }
 
 double SMDS_MeshNode::X() const
@@ -291,7 +293,7 @@ double SMDS_MeshNode::Z() const
 void SMDS_MeshNode::setXYZ(double x, double y, double z)
 {
   vtkPoints *points = SMDS_Mesh::_meshList[myMeshId]->getGrid()->GetPoints();
-  points->InsertPoint(myID, x, y, z);
+  points->InsertPoint(myVtkID, x, y, z);
 }
 
 SMDSAbs_ElementType SMDS_MeshNode::GetType() const
@@ -312,7 +314,7 @@ void SMDS_MeshNode::AddInverseElement(const SMDS_MeshElement* ME)
 {
     const SMDS_MeshCell *cell = dynamic_cast<const SMDS_MeshCell*>(ME);
     assert(cell);
-    SMDS_Mesh::_meshList[myMeshId]->getGrid()->AddReferenceToCell(myID, cell->getVtkId());
+    SMDS_Mesh::_meshList[myMeshId]->getGrid()->AddReferenceToCell(myVtkID, cell->getVtkId());
 }
 
 //=======================================================================
@@ -321,12 +323,12 @@ void SMDS_MeshNode::AddInverseElement(const SMDS_MeshElement* ME)
 //=======================================================================
 void SMDS_MeshNode::ClearInverseElements()
 {
-  SMDS_Mesh::_meshList[myMeshId]->getGrid()->ResizeCellList(myID, 0);
+  SMDS_Mesh::_meshList[myMeshId]->getGrid()->ResizeCellList(myVtkID, 0);
 }
 
 bool SMDS_MeshNode::emptyInverseElements()
 {
-  vtkCellLinks::Link l = SMDS_Mesh::_meshList[myMeshId]->getGrid()->GetCellLinks()->GetLink(myID);
+  vtkCellLinks::Link l = SMDS_Mesh::_meshList[myMeshId]->getGrid()->GetCellLinks()->GetLink(myVtkID);
   return (l.ncells == 0);
 }
 
@@ -338,7 +340,7 @@ bool SMDS_MeshNode::emptyInverseElements()
 
 int SMDS_MeshNode::NbInverseElements(SMDSAbs_ElementType type) const
 {
-  vtkCellLinks::Link l = SMDS_Mesh::_meshList[myMeshId]->getGrid()->GetCellLinks()->GetLink(myID);
+  vtkCellLinks::Link l = SMDS_Mesh::_meshList[myMeshId]->getGrid()->GetCellLinks()->GetLink(myVtkID);
 
   if ( type == SMDSAbs_All )
     return l.ncells;
@@ -347,7 +349,7 @@ int SMDS_MeshNode::NbInverseElements(SMDSAbs_ElementType type) const
   SMDS_Mesh *mesh = SMDS_Mesh::_meshList[myMeshId];
   for (int i=0; i<l.ncells; i++)
         {
-           const SMDS_MeshElement* elem = mesh->FindNode(l.cells[i]);
+           const SMDS_MeshElement* elem = mesh->FindElement(mesh->fromVtkToSmds(l.cells[i]));
            if (elem->GetType() == type)
                 nb++;
         }
@@ -359,7 +361,7 @@ int SMDS_MeshNode::NbInverseElements(SMDSAbs_ElementType type) const
 ///////////////////////////////////////////////////////////////////////////////
 bool operator<(const SMDS_MeshNode& e1, const SMDS_MeshNode& e2)
 {
-        return e1.GetID()<e2.GetID();
+        return e1.getVtkId()<e2.getVtkId();
         /*if(e1.myX<e2.myX) return true;
         else if(e1.myX==e2.myX)
         {

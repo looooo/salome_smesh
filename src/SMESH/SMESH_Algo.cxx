@@ -435,6 +435,7 @@ bool SMESH_Algo::GetSortedNodesOnEdge(const SMESHDS_Mesh*                   theM
       const SMDS_EdgePosition* epos =
         static_cast<const SMDS_EdgePosition*>(node->GetPosition());
       theNodes.insert( make_pair( epos->GetUParameter(), node ));
+      //MESSAGE("U " << epos->GetUParameter() << " ID " << node->GetID());
       ++nbNodes;
     }
   }
@@ -443,6 +444,7 @@ bool SMESH_Algo::GetSortedNodesOnEdge(const SMESHDS_Mesh*                   theM
   TopExp::Vertices(theEdge, v1, v2);
   const SMDS_MeshNode* n1 = VertexNode( v1, (SMESHDS_Mesh*) theMesh );
   const SMDS_MeshNode* n2 = VertexNode( v2, (SMESHDS_Mesh*) theMesh );
+  //MESSAGE("Vertices ID " << n1->GetID() << " " << n2->GetID());
   Standard_Real f, l;
   BRep_Tool::Range(theEdge, f, l);
   if ( v1.Orientation() != TopAbs_FORWARD )

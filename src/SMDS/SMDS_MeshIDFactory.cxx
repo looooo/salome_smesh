@@ -36,7 +36,7 @@ using namespace std;
 //purpose  : 
 //=======================================================================
 
-SMDS_MeshIDFactory::SMDS_MeshIDFactory():myMaxID(-1), myMesh(0)
+SMDS_MeshIDFactory::SMDS_MeshIDFactory():myMaxID(0), myMesh(0)
 {
 }
 
@@ -64,7 +64,7 @@ int SMDS_MeshIDFactory::GetFreeID()
 //=======================================================================
 void SMDS_MeshIDFactory::ReleaseID(const int ID)
 {
-  if ( ID >= 0 )
+  if ( ID > 0 )
   {
     if ( ID < myMaxID )
     {
@@ -91,7 +91,7 @@ void SMDS_MeshIDFactory::ReleaseID(const int ID)
 
 void SMDS_MeshIDFactory::Clear()
 {
-	myMaxID = -1;
+	myMaxID = 0;
 	myPoolOfID.clear();
 }
 
@@ -107,8 +107,8 @@ SMDS_Mesh* SMDS_MeshIDFactory::GetMesh()
 
 void SMDS_MeshIDFactory::emptyPool(int maxId)
 {
-	MESSAGE("SMDS_MeshIDFactory::emptyPool " << myMaxID << " --> " << maxId-1);
-	myMaxID = maxId-1;
+	MESSAGE("SMDS_MeshIDFactory::emptyPool " << myMaxID << " --> " << maxId);
+	myMaxID = maxId;
 	myPoolOfID.clear();
 }
 

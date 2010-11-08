@@ -182,14 +182,6 @@ SMDS_ElemIteratorPtr SMDS_MeshElement::interlacedNodesElemIterator() const
   return SMDS_ElemIteratorPtr((SMDS_ElemIterator*) NULL);
 }
 
-///////////////////////////////////////////////////////////////////////////////
-///Return the ID of the element
-///////////////////////////////////////////////////////////////////////////////
-int SMDS_MeshElement::GetID() const
-{
-        return myID;
-}
-
 bool operator<(const SMDS_MeshElement& e1, const SMDS_MeshElement& e2)
 {
         if(e1.GetType()!=e2.GetType()) return false;

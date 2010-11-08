@@ -17,7 +17,8 @@ public:
 #ifdef VTK_HAVE_POLYHEDRON
   void initPoly(std::vector<vtkIdType> nodeIds, std::vector<int> nbNodesPerFace, SMDS_Mesh* mesh);
 #endif
-  bool ChangeNodes(const SMDS_MeshNode* nodes[], const int nbNodes);
+  virtual bool ChangeNodes(const SMDS_MeshNode* nodes[], const int nbNodes);
+  virtual bool vtkOrder(const SMDS_MeshNode* nodes[], const int nbNodes);
 
   void Print(std::ostream & OS) const;
   int NbFaces() const;
@@ -36,6 +37,7 @@ public:
   virtual const SMDS_MeshNode* GetNode(const int ind) const;
   virtual bool IsQuadratic() const;
   virtual bool IsPoly() const;
+  virtual bool IsMediumNode(const SMDS_MeshNode* node) const;
   static void gravityCenter(SMDS_UnstructuredGrid* grid,
                             vtkIdType *nodeIds,
                             int nbNodes,

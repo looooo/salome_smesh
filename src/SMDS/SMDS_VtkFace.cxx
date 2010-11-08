@@ -47,6 +47,7 @@ void SMDS_VtkFace::init(std::vector<vtkIdType> nodeIds, SMDS_Mesh* mesh)
       break;
   }
   myVtkID = grid->InsertNextLinkedCell(aType, nodeIds.size(), &nodeIds[0]);
+  //MESSAGE("SMDS_VtkFace::init myVtkID " << myVtkID);
 }
 
 void SMDS_VtkFace::initPoly(std::vector<vtkIdType> nodeIds, SMDS_Mesh* mesh)
@@ -70,7 +71,7 @@ bool SMDS_VtkFace::ChangeNodes(const SMDS_MeshNode* nodes[], const int nbNodes)
     }
   for (int i = 0; i < nbNodes; i++)
     {
-      pts[i] = nodes[i]->GetID();
+      pts[i] = nodes[i]->getVtkId();
     }
   return true;
 }
@@ -148,6 +149,43 @@ bool SMDS_VtkFace::IsPoly() const
   vtkUnstructuredGrid* grid = SMDS_Mesh::_meshList[myMeshId]->getGrid();
   vtkIdType aVtkType = grid->GetCellType(this->myVtkID);
   return (aVtkType == VTK_POLYGON);
+}
+
+bool SMDS_VtkFace::IsMediumNode(const SMDS_MeshNode* node) const
+{
+  vtkUnstructuredGrid* grid = SMDS_Mesh::_meshList[myMeshId]->getGrid();
+  vtkIdType aVtkType = grid->GetCellType(this->myVtkID);
+  int rankFirstMedium = 0;
+  switch (aVtkType)
+  {
+    case VTK_QUADRATIC_TRIANGLE:
+      rankFirstMedium = 3; // medium nodes are of rank 3,4,5
+      break;
+    case VTK_QUADRATIC_QUAD:
+      rankFirstMedium = 4; // medium nodes are of rank 4,5,6,7
+      break;
+    default:
+      return false;
+  }
+  vtkIdType npts = 0;
+  vtkIdType* pts = 0;
+  grid->GetCellPoints(myVtkID, npts, pts);
+  vtkIdType nodeId = node->getVtkId();
+  for (int rank = 0; rank < npts; rank++)
+    {
+      if (pts[rank] == nodeId)
+        {
+          if (rank < rankFirstMedium)
+            return false;
+          else
+            return true;
+        }
+    }
+  //throw SALOME_Exception(LOCALIZED("node does not belong to this element"));
+  MESSAGE("======================================================");
+  MESSAGE("= IsMediumNode: node does not belong to this element =");
+  MESSAGE("======================================================");
+  return false;
 }
 
 SMDSAbs_EntityType SMDS_VtkFace::GetEntityType() const

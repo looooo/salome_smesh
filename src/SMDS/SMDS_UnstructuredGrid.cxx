@@ -205,12 +205,10 @@ void SMDS_UnstructuredGrid::compactGrid(std::vector<int>& idNodesOldToNew, int n
 
   vtkUnsignedCharArray *newTypes = vtkUnsignedCharArray::New();
   newTypes->Initialize();
-  //newTypes->Allocate(oldCellSize);
   newTypes->SetNumberOfValues(newCellSize);
 
   vtkIdTypeArray *newLocations = vtkIdTypeArray::New();
   newLocations->Initialize();
-  //newLocations->Allocate(oldCellSize);
   newLocations->SetNumberOfValues(newCellSize);
 
   startHole = 0;
@@ -251,7 +249,6 @@ void SMDS_UnstructuredGrid::compactGrid(std::vector<int>& idNodesOldToNew, int n
               startBloc = i;
               compactState = lookBlocEnd;
               holes += endHole - startHole;
-              //alreadyCopied = startBloc -holes;
             }
           break;
         case lookBlocEnd:
@@ -324,7 +321,8 @@ void SMDS_UnstructuredGrid::copyNodes(vtkPoints *newPoints, std::vector<int>& id
     {
       memcpy(target, source, 3 * sizeof(float) * nbPoints);
       for (int j = start; j < end; j++)
-        idNodesOldToNew[j] = alreadyCopied++;
+        idNodesOldToNew[j] = alreadyCopied++; // old vtkId --> new vtkId
+        //idNodesOldToNew[alreadyCopied++] = idNodesOldToNew[j]; // new vtkId --> old SMDS id
     }
 }
 
@@ -337,7 +335,7 @@ void SMDS_UnstructuredGrid::copyBloc(vtkUnsignedCharArray *newTypes, std::vector
   for (int j = start; j < end; j++)
     {
       newTypes->SetValue(alreadyCopied, this->Types->GetValue(j));
-      idCellsOldToNew[j] = alreadyCopied;
+      idCellsOldToNew[j] = alreadyCopied; // old vtkId --> new vtkId
       vtkIdType oldLoc = this->Locations->GetValue(j);
       vtkIdType nbpts;
       vtkIdType *oldPtsCell = 0;

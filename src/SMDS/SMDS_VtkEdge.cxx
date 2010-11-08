@@ -32,6 +32,7 @@ void SMDS_VtkEdge::init(std::vector<vtkIdType> nodeIds, SMDS_Mesh* mesh)
   if (nodeIds.size() == 3)
     aType = VTK_QUADRATIC_EDGE;
   myVtkID = grid->InsertNextLinkedCell(aType, nodeIds.size(), &nodeIds[0]);
+  //MESSAGE("SMDS_VtkEdge::init myVtkID " << myVtkID);
 }
 
 bool SMDS_VtkEdge::ChangeNodes(const SMDS_MeshNode * node1, const SMDS_MeshNode * node2)
@@ -53,7 +54,7 @@ bool SMDS_VtkEdge::ChangeNodes(const SMDS_MeshNode* nodes[], const int nbNodes)
     }
   for (int i = 0; i < nbNodes; i++)
     {
-      pts[i] = nodes[i]->GetID();
+      pts[i] = nodes[i]->getVtkId();
     }
   return true;
 }
@@ -64,7 +65,7 @@ bool SMDS_VtkEdge::IsMediumNode(const SMDS_MeshNode* node) const
   vtkIdType npts = 0;
   vtkIdType* pts = 0;
   grid->GetCellPoints(myVtkID, npts, pts);
-  return ((npts == 3) && (node->GetID() == pts[2]));
+  return ((npts == 3) && (node->getVtkId() == pts[2]));
 }
 
 void SMDS_VtkEdge::Print(std::ostream & OS) const

@@ -145,8 +145,8 @@ SMDS_Mesh::SMDS_Mesh()
 
   myNodes.clear();
   myCells.clear();
-  myIDElements.clear();
-  myVtkIndex.clear();
+  myCellIdSmdsToVtk.clear();
+  myCellIdVtkToSmds.clear();
   myGrid = SMDS_UnstructuredGrid::New();
   myGrid->setSMDS_mesh(this);
   myGrid->Initialize();
@@ -207,15 +207,19 @@ SMDS_MeshNode * SMDS_Mesh::AddNodeWithID(double x, double y, double z, int ID)
   // find the MeshNode corresponding to ID
   const SMDS_MeshElement *node = myNodeIDFactory->MeshElement(ID);
   if(!node){
-    //if ( myNodes.Extent() % CHECKMEMORY_INTERVAL == 0 ) CheckMemory();
-    //SMDS_MeshNode * node=new SMDS_MeshNode(ID, myMeshId, -1, x, y, z);
+    // TODO ID < 1
+    if (ID <= 0)
+      {
+        MESSAGE("=============>  Bad Node Id: " << ID);
+        ID = myNodeIDFactory->GetFreeID();
+      }
     myNodeIDFactory->adjustMaxId(ID);
     SMDS_MeshNode * node = myNodePool->getNew();
     node->init(ID, myMeshId, -1, x, y, z);
     if (ID >= myNodes.size())
     {
         myNodes.resize(ID+SMDS_Mesh::chunkSize, 0);
-        //MESSAGE(" ------------------ myNodes resize " << ID << " --> " << ID+SMDS_Mesh::chunkSize);
+        MESSAGE(" ------------------ myNodes resize " << ID << " --> " << ID+SMDS_Mesh::chunkSize);
     }
     myNodes[ID] = node;
     myNodeIDFactory->BindID(ID,node);
@@ -315,8 +319,8 @@ SMDS_MeshEdge* SMDS_Mesh::AddEdgeWithID(const SMDS_MeshNode * n1,
   // --- retreive nodes ID
   vector<vtkIdType> nodeIds;
   nodeIds.clear();
-  nodeIds.push_back(n1->getId());
-  nodeIds.push_back(n2->getId());
+  nodeIds.push_back(n1->getVtkId());
+  nodeIds.push_back(n2->getVtkId());
 
   SMDS_VtkEdge *edgevtk = myEdgePool->getNew();
   edgevtk->init(nodeIds, this);
@@ -598,10 +602,10 @@ SMDS_MeshVolume* SMDS_Mesh::AddVolumeWithID(const SMDS_MeshNode * n1,
     // --- retrieve nodes ID
     vector<vtkIdType> nodeIds;
     nodeIds.clear();
-    nodeIds.push_back(n1->getId());
-    nodeIds.push_back(n3->getId()); // order SMDS-->VTK
-    nodeIds.push_back(n2->getId());
-    nodeIds.push_back(n4->getId());
+    nodeIds.push_back(n1->getVtkId());
+    nodeIds.push_back(n3->getVtkId()); // order SMDS-->VTK
+    nodeIds.push_back(n2->getVtkId());
+    nodeIds.push_back(n4->getVtkId());
 
     SMDS_VtkVolume *volvtk = myVolumePool->getNew();
     volvtk->init(nodeIds, this);
@@ -705,11 +709,11 @@ SMDS_MeshVolume* SMDS_Mesh::AddVolumeWithID(const SMDS_MeshNode * n1,
     // --- retrieve nodes ID
     vector<vtkIdType> nodeIds;
     nodeIds.clear();
-    nodeIds.push_back(n1->getId());
-    nodeIds.push_back(n4->getId());
-    nodeIds.push_back(n3->getId());
-    nodeIds.push_back(n2->getId());
-    nodeIds.push_back(n5->getId());
+    nodeIds.push_back(n1->getVtkId());
+    nodeIds.push_back(n4->getVtkId());
+    nodeIds.push_back(n3->getVtkId());
+    nodeIds.push_back(n2->getVtkId());
+    nodeIds.push_back(n5->getVtkId());
 
     SMDS_VtkVolume *volvtk = myVolumePool->getNew();
     volvtk->init(nodeIds, this);
@@ -818,12 +822,12 @@ SMDS_MeshVolume* SMDS_Mesh::AddVolumeWithID(const SMDS_MeshNode * n1,
     // --- retrieve nodes ID
     vector<vtkIdType> nodeIds;
     nodeIds.clear();
-    nodeIds.push_back(n1->getId());
-    nodeIds.push_back(n2->getId());
-    nodeIds.push_back(n3->getId());
-    nodeIds.push_back(n4->getId());
-    nodeIds.push_back(n5->getId());
-    nodeIds.push_back(n6->getId());
+    nodeIds.push_back(n1->getVtkId());
+    nodeIds.push_back(n2->getVtkId());
+    nodeIds.push_back(n3->getVtkId());
+    nodeIds.push_back(n4->getVtkId());
+    nodeIds.push_back(n5->getVtkId());
+    nodeIds.push_back(n6->getVtkId());
 
     SMDS_VtkVolume *volvtk = myVolumePool->getNew();
     volvtk->init(nodeIds, this);
@@ -944,14 +948,14 @@ SMDS_MeshVolume* SMDS_Mesh::AddVolumeWithID(const SMDS_MeshNode * n1,
     // --- retrieve nodes ID
     vector<vtkIdType> nodeIds;
     nodeIds.clear();
-    nodeIds.push_back(n1->getId());
-    nodeIds.push_back(n4->getId());
-    nodeIds.push_back(n3->getId());
-    nodeIds.push_back(n2->getId());
-    nodeIds.push_back(n5->getId());
-    nodeIds.push_back(n8->getId());
-    nodeIds.push_back(n7->getId());
-    nodeIds.push_back(n6->getId());
+    nodeIds.push_back(n1->getVtkId());
+    nodeIds.push_back(n4->getVtkId());
+    nodeIds.push_back(n3->getVtkId());
+    nodeIds.push_back(n2->getVtkId());
+    nodeIds.push_back(n5->getVtkId());
+    nodeIds.push_back(n8->getVtkId());
+    nodeIds.push_back(n7->getVtkId());
+    nodeIds.push_back(n6->getVtkId());
 
     SMDS_VtkVolume *volvtk = myVolumePool->getNew();
     volvtk->init(nodeIds, this);
@@ -1158,7 +1162,7 @@ SMDS_MeshFace* SMDS_Mesh::AddPolygonalFaceWithID
     nodeIds.clear();
     vector<const SMDS_MeshNode*>::iterator it = nodes.begin();
     for ( ; it != nodes.end(); ++it)
-      nodeIds.push_back((*it)->getId());
+      nodeIds.push_back((*it)->getVtkId());
 
     SMDS_VtkFace *facevtk = myFacePool->getNew();
     facevtk->initPoly(nodeIds, this);
@@ -1253,7 +1257,7 @@ SMDS_MeshVolume* SMDS_Mesh::AddPolyhedralVolumeWithID
       nodeIds.clear();
       vector<const SMDS_MeshNode*>::iterator it = nodes.begin();
       for (; it != nodes.end(); ++it)
-        nodeIds.push_back((*it)->getId());
+        nodeIds.push_back((*it)->getVtkId());
 
       SMDS_VtkVolume *volvtk = myVolumePool->getNew();
       volvtk->initPoly(nodeIds, quantities, this);
@@ -1307,9 +1311,9 @@ SMDS_MeshVolume* SMDS_Mesh::AddPolyhedralVolume
 bool SMDS_Mesh::registerElement(int ID, SMDS_MeshElement* element)
 {
   //MESSAGE("registerElement " << ID);
-  if ((ID < myIDElements.size()) && myIDElements[ID] >= 0) // --- already bound
+  if ((ID < myCellIdSmdsToVtk.size()) && myCellIdSmdsToVtk[ID] >= 0) // --- already bound
   {
-    MESSAGE(" --------------------------------- already bound "<< ID << " " << myIDElements[ID]);
+    MESSAGE(" --------------------------------- already bound "<< ID << " " << myCellIdSmdsToVtk[ID]);
     return false;
   }
 
@@ -1322,32 +1326,32 @@ bool SMDS_Mesh::registerElement(int ID, SMDS_MeshElement* element)
   if (vtkId == -1)
     vtkId = myElementIDFactory->SetInVtkGrid(element);
   
-  if (ID >= myIDElements.size()) // --- resize local vector
+  if (ID >= myCellIdSmdsToVtk.size()) // --- resize local vector
   {
-    MESSAGE(" ------------------- resize myIDElements " << ID << " --> " << ID + SMDS_Mesh::chunkSize);
-    myIDElements.resize(ID + SMDS_Mesh::chunkSize, -1); // fill new elements with -1
+    MESSAGE(" ------------------- resize myCellIdSmdsToVtk " << ID << " --> " << ID + SMDS_Mesh::chunkSize);
+    myCellIdSmdsToVtk.resize(ID + SMDS_Mesh::chunkSize, -1); // fill new elements with -1
   }
 
-  myIDElements[ID] = vtkId;
+  myCellIdSmdsToVtk[ID] = vtkId;
   //MESSAGE("smds:" << ID << " vtk:" << vtkId );
 
-  if (vtkId >= myVtkIndex.size()) // --- resize local vector
+  if (vtkId >= myCellIdVtkToSmds.size()) // --- resize local vector
   {
-    MESSAGE(" --------------------- resize myVtkIndex " << vtkId << " --> " << vtkId + SMDS_Mesh::chunkSize);
-    myVtkIndex.resize(vtkId + SMDS_Mesh::chunkSize, -1);
+    MESSAGE(" --------------------- resize myCellIdVtkToSmds " << vtkId << " --> " << vtkId + SMDS_Mesh::chunkSize);
+    myCellIdVtkToSmds.resize(vtkId + SMDS_Mesh::chunkSize, -1);
   }
-  myVtkIndex[vtkId] = ID;
+  myCellIdVtkToSmds[vtkId] = ID;
 
   myElementIDFactory->updateMinMax(ID);
   return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-/// Return the node whose ID is 'ID'.
+/// Return the node whose SMDS ID is 'ID'.
 ///////////////////////////////////////////////////////////////////////////////
 const SMDS_MeshNode * SMDS_Mesh::FindNode(int ID) const
 {
-  if (ID < 0 || ID >= myNodes.size())
+  if (ID < 1 || ID >= myNodes.size())
   {
     MESSAGE("------------------------------------------------------------------------- ");
     MESSAGE("----------------------------------- bad ID " << ID << " " << myNodes.size());
@@ -1355,6 +1359,22 @@ const SMDS_MeshNode * SMDS_Mesh::FindNode(int ID) const
     return 0;
   }
   return (const SMDS_MeshNode *)myNodes[ID];
+}
+
+///////////////////////////////////////////////////////////////////////////////
+/// Return the node whose VTK ID is 'vtkId'.
+///////////////////////////////////////////////////////////////////////////////
+const SMDS_MeshNode * SMDS_Mesh::FindNodeVtk(int vtkId) const
+{
+  // TODO if needed use mesh->nodeIdFromVtkToSmds
+  if (vtkId < 0 || vtkId >= (myNodes.size() -1))
+  {
+    MESSAGE("------------------------------------------------------------------------- ");
+    MESSAGE("---------------------------- bad VTK ID " << vtkId << " " << myNodes.size());
+    MESSAGE("------------------------------------------------------------------------- ");
+    return 0;
+  }
+  return (const SMDS_MeshNode *)myNodes[vtkId+1];
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1387,9 +1407,9 @@ SMDS_MeshFace * SMDS_Mesh::createTriangle(const SMDS_MeshNode * node1,
     // --- retrieve nodes ID
     vector<vtkIdType> nodeIds;
     nodeIds.clear();
-    nodeIds.push_back(node1->getId());
-    nodeIds.push_back(node2->getId());
-    nodeIds.push_back(node3->getId());
+    nodeIds.push_back(node1->getVtkId());
+    nodeIds.push_back(node2->getVtkId());
+    nodeIds.push_back(node3->getVtkId());
 
     SMDS_MeshFace * face = 0;
     SMDS_VtkFace *facevtk = myFacePool->getNew();
@@ -1441,10 +1461,10 @@ SMDS_MeshFace * SMDS_Mesh::createQuadrangle(const SMDS_MeshNode * node1,
     // --- retrieve nodes ID
     vector<vtkIdType> nodeIds;
     nodeIds.clear();
-    nodeIds.push_back(node1->getId());
-    nodeIds.push_back(node2->getId());
-    nodeIds.push_back(node3->getId());
-    nodeIds.push_back(node4->getId());
+    nodeIds.push_back(node1->getVtkId());
+    nodeIds.push_back(node2->getVtkId());
+    nodeIds.push_back(node3->getVtkId());
+    nodeIds.push_back(node4->getVtkId());
 
     SMDS_MeshFace * face = 0;
     SMDS_VtkFace *facevtk = myFacePool->getNew();
@@ -1561,13 +1581,16 @@ bool SMDS_Mesh::ChangeElementNodes(const SMDS_MeshElement * element,
   set<const SMDS_MeshElement*> oldNodes;
   SMDS_ElemIteratorPtr itn = element->nodesIterator();
   while(itn->more())
-    oldNodes.insert(  itn->next() );
+    oldNodes.insert(itn->next());
 
   // change nodes
   bool Ok = false;
   SMDS_MeshCell* cell = dynamic_cast<SMDS_MeshCell*>((SMDS_MeshElement*) element);
   if (cell)
-    Ok = cell->ChangeNodes(nodes, nbnodes);
+    {
+      Ok = cell->vtkOrder(nodes, nbnodes);
+      Ok = cell->ChangeNodes(nodes, nbnodes);
+    }
 
   if ( Ok ) { // update InverseElements
 
@@ -1752,8 +1775,8 @@ SMDS_MeshEdge* SMDS_Mesh::FindEdgeOrCreate(const SMDS_MeshNode * node1,
     adjustmyCellsCapacity(ID);
     vector<vtkIdType> nodeIds;
     nodeIds.clear();
-    nodeIds.push_back(node1->getId());
-    nodeIds.push_back(node2->getId());
+    nodeIds.push_back(node1->getVtkId());
+    nodeIds.push_back(node2->getVtkId());
 
     SMDS_VtkEdge *edgevtk = myEdgePool->getNew();
     edgevtk->init(nodeIds, this);
@@ -2045,7 +2068,7 @@ const SMDS_MeshFace* SMDS_Mesh::FindFace(const SMDS_MeshNode *node1,
 
 const SMDS_MeshElement* SMDS_Mesh::FindElement(int IDelem) const
 {
-  if ((IDelem < 0) || IDelem >= myCells.size())
+  if ((IDelem <= 0) || IDelem >= myCells.size())
   {
     MESSAGE("--------------------------------------------------------------------------------- ");
     MESSAGE("----------------------------------- bad IDelem " << IDelem << " " << myCells.size());
@@ -2348,6 +2371,7 @@ SMDS_Mesh::~SMDS_Mesh()
 
 void SMDS_Mesh::Clear()
 {
+  MESSAGE("SMDS_Mesh::Clear");
   if (myParent!=NULL)
     {
     SMDS_ElemIteratorPtr eIt = elementsIterator();
@@ -2387,6 +2411,8 @@ void SMDS_Mesh::Clear()
       }
     }
   myCells.clear();
+  myCellIdVtkToSmds.clear();
+  myCellIdSmdsToVtk.clear();
 
   SMDS_NodeIteratorPtr itn = nodesIterator();
   while (itn->more())
@@ -2514,6 +2540,13 @@ struct MYElem_Map_Iterator: public FATHER
   {
       _ctr = 0;
       _type = typ;
+      while (_ctr < _map.size()) // go to the first valid element
+      {
+          if (_map[_ctr])
+            if ( (_type == SMDSAbs_All) || (_map[_ctr]->GetType() == _type))
+              break;
+          _ctr++;
+      }
   }
 
 bool more()
@@ -2831,7 +2864,7 @@ void SMDS_Mesh::RemoveElement(const SMDS_MeshElement *        elem,
                               list<const SMDS_MeshElement *>& removedNodes,
                               bool                            removenodes)
 {
-  //MESSAGE("SMDS_Mesh::RemoveElement " << elem->GetID() << " " << removenodes);
+  //MESSAGE("SMDS_Mesh::RemoveElement " << elem->getVtkId() << " " << removenodes);
   // get finite elements built on elem
   set<const SMDS_MeshElement*> * s1;
   if (elem->GetType() == SMDSAbs_0DElement || elem->GetType() == SMDSAbs_Edge && !hasConstructionEdges()
@@ -2984,6 +3017,7 @@ void SMDS_Mesh::RemoveFreeElement(const SMDS_MeshElement * elem)
   SMDSAbs_ElementType aType = elem->GetType();
   SMDS_MeshElement* todest = (SMDS_MeshElement*)(elem);
   if (aType == SMDSAbs_Node) {
+    //MESSAGE("Remove free node " << elemId);
     // only free node can be removed by this method
     const SMDS_MeshNode* n = static_cast<SMDS_MeshNode*>(todest);
     SMDS_ElemIteratorPtr itFe = n->GetInverseElementIterator();
@@ -2998,6 +3032,7 @@ void SMDS_Mesh::RemoveFreeElement(const SMDS_MeshElement * elem)
       // this methods is only for meshes without descendants
       return;
 
+    //MESSAGE("Remove free element " << elemId);
     int vtkid = this->fromSmdsToVtk(elemId);
 
     // Remove element from <InverseElements> of its nodes
@@ -3221,9 +3256,9 @@ SMDS_MeshEdge* SMDS_Mesh::AddEdgeWithID(const SMDS_MeshNode * n1,
   // --- retrieve nodes ID
   vector<vtkIdType> nodeIds;
   nodeIds.clear();
-  nodeIds.push_back(n1->getId());
-  nodeIds.push_back(n2->getId());
-  nodeIds.push_back(n12->getId());
+  nodeIds.push_back(n1->getVtkId());
+  nodeIds.push_back(n2->getVtkId());
+  nodeIds.push_back(n12->getVtkId());
 
   SMDS_MeshEdge * edge = 0;
   SMDS_VtkEdge *edgevtk = myEdgePool->getNew();
@@ -3302,12 +3337,12 @@ SMDS_MeshFace* SMDS_Mesh::AddFaceWithID(const SMDS_MeshNode * n1,
     // --- retrieve nodes ID
     vector<vtkIdType> nodeIds;
     nodeIds.clear();
-    nodeIds.push_back(n1->getId());
-    nodeIds.push_back(n2->getId());
-    nodeIds.push_back(n3->getId());
-    nodeIds.push_back(n12->getId());
-    nodeIds.push_back(n23->getId());
-    nodeIds.push_back(n31->getId());
+    nodeIds.push_back(n1->getVtkId());
+    nodeIds.push_back(n2->getVtkId());
+    nodeIds.push_back(n3->getVtkId());
+    nodeIds.push_back(n12->getVtkId());
+    nodeIds.push_back(n23->getVtkId());
+    nodeIds.push_back(n31->getVtkId());
 
     SMDS_MeshFace * face = 0;
     SMDS_VtkFace *facevtk = myFacePool->getNew();
@@ -3392,14 +3427,14 @@ SMDS_MeshFace* SMDS_Mesh::AddFaceWithID(const SMDS_MeshNode * n1,
     // --- retrieve nodes ID
     vector<vtkIdType> nodeIds;
     nodeIds.clear();
-    nodeIds.push_back(n1->getId());
-    nodeIds.push_back(n2->getId());
-    nodeIds.push_back(n3->getId());
-    nodeIds.push_back(n4->getId());
-    nodeIds.push_back(n12->getId());
-    nodeIds.push_back(n23->getId());
-    nodeIds.push_back(n34->getId());
-    nodeIds.push_back(n41->getId());
+    nodeIds.push_back(n1->getVtkId());
+    nodeIds.push_back(n2->getVtkId());
+    nodeIds.push_back(n3->getVtkId());
+    nodeIds.push_back(n4->getVtkId());
+    nodeIds.push_back(n12->getVtkId());
+    nodeIds.push_back(n23->getVtkId());
+    nodeIds.push_back(n34->getVtkId());
+    nodeIds.push_back(n41->getVtkId());
 
     SMDS_MeshFace * face = 0;
     SMDS_VtkFace *facevtk = myFacePool->getNew();
@@ -3493,18 +3528,18 @@ SMDS_MeshVolume* SMDS_Mesh::AddVolumeWithID(const SMDS_MeshNode * n1,
   // --- retrieve nodes ID
   vector<vtkIdType> nodeIds;
   nodeIds.clear();
-  nodeIds.push_back(n1->getId());
-  nodeIds.push_back(n3->getId());
-  nodeIds.push_back(n2->getId());
-  nodeIds.push_back(n4->getId());
+  nodeIds.push_back(n1->getVtkId());
+  nodeIds.push_back(n3->getVtkId());
+  nodeIds.push_back(n2->getVtkId());
+  nodeIds.push_back(n4->getVtkId());
 
-  nodeIds.push_back(n31->getId());
-  nodeIds.push_back(n23->getId());
-  nodeIds.push_back(n12->getId());
+  nodeIds.push_back(n31->getVtkId());
+  nodeIds.push_back(n23->getVtkId());
+  nodeIds.push_back(n12->getVtkId());
 
-  nodeIds.push_back(n14->getId());
-  nodeIds.push_back(n34->getId());
-  nodeIds.push_back(n24->getId());
+  nodeIds.push_back(n14->getVtkId());
+  nodeIds.push_back(n34->getVtkId());
+  nodeIds.push_back(n24->getVtkId());
 
   SMDS_VtkVolume *volvtk = myVolumePool->getNew();
   volvtk->init(nodeIds, this);
@@ -3606,21 +3641,21 @@ SMDS_MeshVolume* SMDS_Mesh::AddVolumeWithID(const SMDS_MeshNode * n1,
   // --- retrieve nodes ID
   vector<vtkIdType> nodeIds;
   nodeIds.clear();
-  nodeIds.push_back(n1->getId());
-  nodeIds.push_back(n4->getId());
-  nodeIds.push_back(n3->getId());
-  nodeIds.push_back(n2->getId());
-  nodeIds.push_back(n5->getId());
+  nodeIds.push_back(n1->getVtkId());
+  nodeIds.push_back(n4->getVtkId());
+  nodeIds.push_back(n3->getVtkId());
+  nodeIds.push_back(n2->getVtkId());
+  nodeIds.push_back(n5->getVtkId());
 
-  nodeIds.push_back(n41->getId());
-  nodeIds.push_back(n34->getId());
-  nodeIds.push_back(n23->getId());
-  nodeIds.push_back(n12->getId());
+  nodeIds.push_back(n41->getVtkId());
+  nodeIds.push_back(n34->getVtkId());
+  nodeIds.push_back(n23->getVtkId());
+  nodeIds.push_back(n12->getVtkId());
 
-  nodeIds.push_back(n15->getId());
-  nodeIds.push_back(n45->getId());
-  nodeIds.push_back(n35->getId());
-  nodeIds.push_back(n25->getId());
+  nodeIds.push_back(n15->getVtkId());
+  nodeIds.push_back(n45->getVtkId());
+  nodeIds.push_back(n35->getVtkId());
+  nodeIds.push_back(n25->getVtkId());
 
   SMDS_VtkVolume *volvtk = myVolumePool->getNew();
   volvtk->init(nodeIds, this);
@@ -3730,25 +3765,25 @@ SMDS_MeshVolume* SMDS_Mesh::AddVolumeWithID(const SMDS_MeshNode * n1,
   // --- retrieve nodes ID
   vector<vtkIdType> nodeIds;
   nodeIds.clear();
-  nodeIds.push_back(n1->getId());
-  nodeIds.push_back(n2->getId());
-  nodeIds.push_back(n3->getId());
+  nodeIds.push_back(n1->getVtkId());
+  nodeIds.push_back(n2->getVtkId());
+  nodeIds.push_back(n3->getVtkId());
 
-  nodeIds.push_back(n4->getId());
-  nodeIds.push_back(n5->getId());
-  nodeIds.push_back(n6->getId());
+  nodeIds.push_back(n4->getVtkId());
+  nodeIds.push_back(n5->getVtkId());
+  nodeIds.push_back(n6->getVtkId());
 
-  nodeIds.push_back(n12->getId());
-  nodeIds.push_back(n23->getId());
-  nodeIds.push_back(n31->getId());
+  nodeIds.push_back(n12->getVtkId());
+  nodeIds.push_back(n23->getVtkId());
+  nodeIds.push_back(n31->getVtkId());
 
-  nodeIds.push_back(n45->getId());
-  nodeIds.push_back(n56->getId());
-  nodeIds.push_back(n64->getId());
+  nodeIds.push_back(n45->getVtkId());
+  nodeIds.push_back(n56->getVtkId());
+  nodeIds.push_back(n64->getVtkId());
 
-  nodeIds.push_back(n14->getId());
-  nodeIds.push_back(n25->getId());
-  nodeIds.push_back(n36->getId());
+  nodeIds.push_back(n14->getVtkId());
+  nodeIds.push_back(n25->getVtkId());
+  nodeIds.push_back(n36->getVtkId());
 
   SMDS_VtkVolume *volvtk = myVolumePool->getNew();
   volvtk->init(nodeIds, this);
@@ -3873,30 +3908,30 @@ SMDS_MeshVolume* SMDS_Mesh::AddVolumeWithID(const SMDS_MeshNode * n1,
   // --- retrieve nodes ID
   vector<vtkIdType> nodeIds;
   nodeIds.clear();
-  nodeIds.push_back(n1->getId());
-  nodeIds.push_back(n4->getId());
-  nodeIds.push_back(n3->getId());
-  nodeIds.push_back(n2->getId());
+  nodeIds.push_back(n1->getVtkId());
+  nodeIds.push_back(n4->getVtkId());
+  nodeIds.push_back(n3->getVtkId());
+  nodeIds.push_back(n2->getVtkId());
 
-  nodeIds.push_back(n5->getId());
-  nodeIds.push_back(n8->getId());
-  nodeIds.push_back(n7->getId());
-  nodeIds.push_back(n6->getId());
+  nodeIds.push_back(n5->getVtkId());
+  nodeIds.push_back(n8->getVtkId());
+  nodeIds.push_back(n7->getVtkId());
+  nodeIds.push_back(n6->getVtkId());
 
-  nodeIds.push_back(n41->getId());
-  nodeIds.push_back(n34->getId());
-  nodeIds.push_back(n23->getId());
-  nodeIds.push_back(n12->getId());
+  nodeIds.push_back(n41->getVtkId());
+  nodeIds.push_back(n34->getVtkId());
+  nodeIds.push_back(n23->getVtkId());
+  nodeIds.push_back(n12->getVtkId());
 
-  nodeIds.push_back(n85->getId());
-  nodeIds.push_back(n78->getId());
-  nodeIds.push_back(n67->getId());
-  nodeIds.push_back(n56->getId());
+  nodeIds.push_back(n85->getVtkId());
+  nodeIds.push_back(n78->getVtkId());
+  nodeIds.push_back(n67->getVtkId());
+  nodeIds.push_back(n56->getVtkId());
 
-  nodeIds.push_back(n15->getId());
-  nodeIds.push_back(n48->getId());
-  nodeIds.push_back(n37->getId());
-  nodeIds.push_back(n26->getId());
+  nodeIds.push_back(n15->getVtkId());
+  nodeIds.push_back(n48->getVtkId());
+  nodeIds.push_back(n37->getVtkId());
+  nodeIds.push_back(n26->getVtkId());
 
   SMDS_VtkVolume *volvtk = myVolumePool->getNew();
   volvtk->init(nodeIds, this);
@@ -3934,9 +3969,9 @@ void SMDS_Mesh::updateNodeMinMax()
 
 void SMDS_Mesh::incrementNodesCapacity(int nbNodes)
 {
-  int val = myIDElements.size();
-  MESSAGE(" ------------------- resize myIDElements " << val << " --> " << val + nbNodes);
-  myIDElements.resize(val + nbNodes, -1); // fill new elements with -1
+  int val = myCellIdSmdsToVtk.size();
+  MESSAGE(" ------------------- resize myCellIdSmdsToVtk " << val << " --> " << val + nbNodes);
+  myCellIdSmdsToVtk.resize(val + nbNodes, -1); // fill new elements with -1
   val = myNodes.size();
   MESSAGE(" ------------------- resize myNodes " << val << " --> " << val + nbNodes);
   myNodes.resize(val +nbNodes, 0);
@@ -3944,9 +3979,9 @@ void SMDS_Mesh::incrementNodesCapacity(int nbNodes)
 
 void SMDS_Mesh::incrementCellsCapacity(int nbCells)
 {
-  int val = myVtkIndex.size();
-  MESSAGE(" ------------------- resize myVtkIndex " << val << " --> " << val + nbCells);
-  myVtkIndex.resize(val + nbCells, -1); // fill new elements with -1
+  int val = myCellIdVtkToSmds.size();
+  MESSAGE(" ------------------- resize myCellIdVtkToSmds " << val << " --> " << val + nbCells);
+  myCellIdVtkToSmds.resize(val + nbCells, -1); // fill new elements with -1
   val = myCells.size();
   MESSAGE(" ------------------- resize myCells " << val << " --> " << val + nbCells);
   myNodes.resize(val +nbCells, 0);
@@ -3954,7 +3989,7 @@ void SMDS_Mesh::incrementCellsCapacity(int nbCells)
 
 void SMDS_Mesh::adjustStructure()
 {
-  myGrid->GetPoints()->GetData()->SetNumberOfTuples(myNodeIDFactory->GetMaxID()+1);
+  myGrid->GetPoints()->GetData()->SetNumberOfTuples(myNodeIDFactory->GetMaxID());
 }
 
 void SMDS_Mesh::dumpGrid(string ficdump)
@@ -4011,4 +4046,18 @@ void SMDS_Mesh::dumpGrid(string ficdump)
 void SMDS_Mesh::compactMesh()
 {
   MESSAGE("SMDS_Mesh::compactMesh do nothing!");
+}
+
+int SMDS_Mesh::fromVtkToSmds(int vtkid)
+{
+  if (vtkid >= 0 && vtkid < myCellIdVtkToSmds.size())
+    return myCellIdVtkToSmds[vtkid];
+  throw SALOME_Exception(LOCALIZED ("vtk id out of bounds"));
+}
+
+int SMDS_Mesh::fromSmdsToVtk(int smdsid)
+{
+  if (smdsid >= 0 && smdsid < myCellIdSmdsToVtk.size())
+    return myCellIdSmdsToVtk[smdsid];
+  throw SALOME_Exception(LOCALIZED ("smds id out of bounds"));
 }

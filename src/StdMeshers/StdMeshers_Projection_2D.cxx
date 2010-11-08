@@ -374,6 +374,7 @@ namespace {
                       SMESH_Mesh *                      srcMesh,
                       const TAssocTool::TShapeShapeMap& shape2ShapeMap)
   {
+    MESSAGE("projectPartner");
     const double tol = 1e-6;
 
     gp_Trsf trsf; // transformation to get location of target nodes from source ones
@@ -412,6 +413,7 @@ namespace {
             {
               gp_Vec p0p1( srcPP[0], srcPP[1] ), p0p( srcPP[0], p );
               pOK = !p0p1.IsParallel( p0p, tol );
+              // TODO angle pOK = !p0p1.IsParallel( p0p, 3.14/6 );
               break;
             }
           }
@@ -544,6 +546,7 @@ namespace {
           // create a new node
           gp_Pnt tgtP = gp_Pnt(srcNode->X(),srcNode->Y(),srcNode->Z()).Transformed( trsf );
           srcN_tgtN->second = helper.AddNode( tgtP.X(), tgtP.Y(), tgtP.Z() );
+          //MESSAGE(tgtP.X() << " " << tgtP.Y() << " " <<  tgtP.Z());
         }
         tgtFaceNodes.push_back( srcN_tgtN->second );
       }
@@ -566,6 +569,7 @@ namespace {
 
 bool StdMeshers_Projection_2D::Compute(SMESH_Mesh& theMesh, const TopoDS_Shape& theShape)
 {
+  MESSAGE("Projection_2D Compute");
   if ( !_sourceHypo )
     return false;
 

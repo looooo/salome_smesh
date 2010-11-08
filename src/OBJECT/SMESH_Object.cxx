@@ -156,7 +156,7 @@ vtkIdType SMESH_VisualObjDef::GetNodeObjId( int theVTKID )
 		TMapOfIds::const_iterator i = myVTK2SMDSNodes.find(theVTKID);
 		return i == myVTK2SMDSNodes.end() ? -1 : i->second;
 	}
-  return theVTKID;
+  return this->GetMesh()->FindNodeVtk(theVTKID)->GetID();
 }
 
 vtkIdType SMESH_VisualObjDef::GetNodeVTKId( int theObjID )
@@ -166,7 +166,7 @@ vtkIdType SMESH_VisualObjDef::GetNodeVTKId( int theObjID )
 		TMapOfIds::const_iterator i = mySMDS2VTKNodes.find(theObjID);
     return i == mySMDS2VTKNodes.end() ? -1 : i->second;
 	}
-  return theObjID;
+  return this->GetMesh()->FindNode(theObjID)->getVtkId();
 }
 
 vtkIdType SMESH_VisualObjDef::GetElemObjId( int theVTKID )
@@ -256,7 +256,7 @@ void SMESH_VisualObjDef::buildPrs(bool buildGrid)
   		myVTK2SMDSElems.clear();
 
   		myGrid->SetPoints( 0 );
-  		myGrid->SetCells( 0, 0, 0 );
+  		myGrid->SetCells( 0, 0, 0, 0, 0 );
   		throw;
   	}
   }
@@ -288,7 +288,7 @@ void SMESH_VisualObjDef::buildNodePrs()
   myGrid->SetPoints( aPoints );
   aPoints->Delete();
 
-  myGrid->SetCells( 0, 0, 0 );
+  myGrid->SetCells( 0, 0, 0, 0, 0 );
 }
 
 //=================================================================================
@@ -612,8 +612,9 @@ SMESH_MeshObj::~SMESH_MeshObj()
 bool SMESH_MeshObj::Update( int theIsClear )
 {
   // Update SMDS_Mesh on client part
-	//MESSAGE("SMESH_MeshObj::Update " << this);
+  MESSAGE("SMESH_MeshObj::Update " << this);
   if ( myClient.Update(theIsClear) || GetUnstructuredGrid()->GetNumberOfPoints()==0) {
+    MESSAGE("buildPrs");
     buildPrs();  // Fill unstructured grid
     return true;
   }

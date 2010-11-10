@@ -860,6 +860,7 @@ void SMESHGUI_MeshOp::existingHyps( const int theDim,
           if ( !aHypVar->_is_nil() )
           {
             HypothesisData* aData = SMESH::GetHypothesisData( aHypVar->GetName() );
+            if ( !aData) continue;
             if ( ( theDim == -1 || aData->Dim.contains( theDim ) ) &&
                  ( isCompatible ( theAlgoData, aData, theHypType )) &&
                  ( isAux == aData->IsAux ))

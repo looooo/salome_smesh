@@ -186,7 +186,6 @@ char* StdMeshers_ImportSource2D_i::SaveTo()
   }
 
   myBaseImpl->SaveTo( os );
-  cout << "SaveTo() " << os.str() << endl;
 
   return CORBA::string_dup( os.str().c_str() );
 }
@@ -248,7 +247,6 @@ void StdMeshers_ImportSource2D_i::UpdateAsMeshesRestored()
     if ( SMESH_GroupBase_i* gp_i = SMESH::DownCast<SMESH_GroupBase_i*>( group ))
       smesh_groups.push_back( gp_i->GetSmeshGroup() );
   }
-  cout << "UpdateAsMeshesRestored(): " << smesh_groups.size() << endl;
   GetImpl()->RestoreGroups(smesh_groups);
 }
 

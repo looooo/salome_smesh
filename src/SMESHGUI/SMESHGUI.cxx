@@ -770,47 +770,47 @@
     if ( selected.Extent() == 1 ) {
       Handle(SALOME_InteractiveObject) anIO = selected.First();
       if ( anIO->hasEntry() ) {
-	SMESH_Actor* anActor = SMESH::FindActorByEntry( anIO->getEntry() );
-	if ( anActor && anActor->GetScalarBarActor() && anActor->GetControlMode() != SMESH_Actor::eNone ) {
-	  vtkScalarBarActor* aScalarBarActor = anActor->GetScalarBarActor();
-	  SMESH::Controls::FunctorPtr aFunctor = anActor->GetFunctor();
-	  if ( aScalarBarActor && aFunctor ) {
-	    SMESH::Controls::NumericalFunctor* aNumFun = dynamic_cast<SMESH::Controls::NumericalFunctor*>( aFunctor.get() );
-	    if ( aNumFun ) {
-	      int nbRanges = aScalarBarActor->GetMaximumNumberOfColors();
-	      std::vector<int>    nbEvents;
-	      std::vector<double> funValues;
-	      aNumFun->GetHistogram( nbRanges, nbEvents, funValues );
-	      QString anInitialPath = "";
-	      if ( SUIT_FileDlg::getLastVisitedPath().isEmpty() )
-		anInitialPath = QDir::currentPath();
-	      QString aMeshName = anIO->getName();
-	      QStringList filter;
-	      filter.append( QObject::tr( "TEXT_FILES_FILTER" ) + " (*.txt)" );
-	      filter.append( QObject::tr( "ALL_FILES_FILTER" ) + " (*)" );
-	      QString aFilename = anInitialPath + "/" + aMeshName + "_" + 
-		functorToString( aFunctor ).toLower().simplified().replace( QRegExp( " |-" ), "_" ) + ".txt";
-	      aFilename = SUIT_FileDlg::getFileName( SMESHGUI::desktop(),
-						     aFilename,
-						     filter,
-						     QObject::tr( "SMESH_SAVE_DISTRIBUTION" ),
-						     false );
-	      if ( !aFilename.isEmpty() ) {
-		QFile f( aFilename );
-		if ( f.open( QFile::WriteOnly | QFile::Truncate ) ) {
-		  QTextStream out( &f );
-		  out << "# Mesh: " << aMeshName << endl;
-		  out << "# Control: " << functorToString( aFunctor ) << endl;
-		  out << "#" << endl;
-		  out.setFieldWidth( 10 );
-		  for ( int i = 0; i < qMin( nbEvents.size(), funValues.size()-1 ); i++ )
-		    out << funValues[i] << "\t" << funValues[i+1] << "\t" << nbEvents[i] << endl;
-		  f.close();
-		}
-	      }
-	    }
-	  }
-	}
+        SMESH_Actor* anActor = SMESH::FindActorByEntry( anIO->getEntry() );
+        if ( anActor && anActor->GetScalarBarActor() && anActor->GetControlMode() != SMESH_Actor::eNone ) {
+          vtkScalarBarActor* aScalarBarActor = anActor->GetScalarBarActor();
+          SMESH::Controls::FunctorPtr aFunctor = anActor->GetFunctor();
+          if ( aScalarBarActor && aFunctor ) {
+            SMESH::Controls::NumericalFunctor* aNumFun = dynamic_cast<SMESH::Controls::NumericalFunctor*>( aFunctor.get() );
+            if ( aNumFun ) {
+              int nbRanges = aScalarBarActor->GetMaximumNumberOfColors();
+              std::vector<int>    nbEvents;
+              std::vector<double> funValues;
+              aNumFun->GetHistogram( nbRanges, nbEvents, funValues );
+              QString anInitialPath = "";
+              if ( SUIT_FileDlg::getLastVisitedPath().isEmpty() )
+                anInitialPath = QDir::currentPath();
+              QString aMeshName = anIO->getName();
+              QStringList filter;
+              filter.append( QObject::tr( "TEXT_FILES_FILTER" ) + " (*.txt)" );
+              filter.append( QObject::tr( "ALL_FILES_FILTER" ) + " (*)" );
+              QString aFilename = anInitialPath + "/" + aMeshName + "_" + 
+                functorToString( aFunctor ).toLower().simplified().replace( QRegExp( " |-" ), "_" ) + ".txt";
+              aFilename = SUIT_FileDlg::getFileName( SMESHGUI::desktop(),
+                                                     aFilename,
+                                                     filter,
+                                                     QObject::tr( "SMESH_SAVE_DISTRIBUTION" ),
+                                                     false );
+              if ( !aFilename.isEmpty() ) {
+                QFile f( aFilename );
+                if ( f.open( QFile::WriteOnly | QFile::Truncate ) ) {
+                  QTextStream out( &f );
+                  out << "# Mesh: " << aMeshName << endl;
+                  out << "# Control: " << functorToString( aFunctor ) << endl;
+                  out << "#" << endl;
+                  out.setFieldWidth( 10 );
+                  for ( int i = 0; i < qMin( nbEvents.size(), funValues.size()-1 ); i++ )
+                    out << funValues[i] << "\t" << funValues[i+1] << "\t" << nbEvents[i] << endl;
+                  f.close();
+                }
+              }
+            }
+          }
+        }
       }
     }
   }
@@ -2387,14 +2387,14 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
       if ( selected.Extent() > 1 ) { // a dlg for each IO
         SALOME_ListIteratorOfListIO It( selected );
         for ( ; It.More(); It.Next() ) {
-	  SMESHGUI_MeshInfoDlg* dlg = new SMESHGUI_MeshInfoDlg( SMESHGUI::desktop(), page );
-	  dlg->showInfo( It.Value() ); 
-	  dlg->show();
-	}
+          SMESHGUI_MeshInfoDlg* dlg = new SMESHGUI_MeshInfoDlg( SMESHGUI::desktop(), page );
+          dlg->showInfo( It.Value() ); 
+          dlg->show();
+        }
       }
       else {
-	SMESHGUI_MeshInfoDlg* dlg = new SMESHGUI_MeshInfoDlg( SMESHGUI::desktop(), page );
-	dlg->show();
+        SMESHGUI_MeshInfoDlg* dlg = new SMESHGUI_MeshInfoDlg( SMESHGUI::desktop(), page );
+        dlg->show();
       }
       break;
     }

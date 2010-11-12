@@ -89,9 +89,16 @@ SMESH_MesherHelper::SMESH_MesherHelper(SMESH_Mesh& theMesh)
 
 SMESH_MesherHelper::~SMESH_MesherHelper()
 {
-  TID2Projector::iterator i_proj = myFace2Projector.begin();
-  for ( ; i_proj != myFace2Projector.end(); ++i_proj )
-    delete i_proj->second;
+  {
+    TID2ProjectorOnSurf::iterator i_proj = myFace2Projector.begin();
+    for ( ; i_proj != myFace2Projector.end(); ++i_proj )
+      delete i_proj->second;
+  }
+  {
+    TID2ProjectorOnCurve::iterator i_proj = myEdge2Projector.begin();
+    for ( ; i_proj != myEdge2Projector.end(); ++i_proj )
+      delete i_proj->second;
+  }
 }
 
 //=======================================================================
@@ -517,8 +524,8 @@ GeomAPI_ProjectPointOnSurf& SMESH_MesherHelper::GetProjector(const TopoDS_Face& 
 {
   Handle(Geom_Surface) surface = BRep_Tool::Surface( F,loc );
   int faceID = GetMeshDS()->ShapeToIndex( F );
-  TID2Projector& i2proj = const_cast< TID2Projector&>( myFace2Projector );
-  TID2Projector::iterator i_proj = i2proj.find( faceID );
+  TID2ProjectorOnSurf& i2proj = const_cast< TID2ProjectorOnSurf&>( myFace2Projector );
+  TID2ProjectorOnSurf::iterator i_proj = i2proj.find( faceID );
   if ( i_proj == i2proj.end() )
   {
     if ( tol == 0 ) tol = BRep_Tool::Tolerance( F );
@@ -672,13 +679,23 @@ bool SMESH_MesherHelper::CheckNodeU(const TopoDS_Edge&   E,
       if ( dist > tol )
       {
         // u incorrect, project the node to the curve
-        GeomAPI_ProjectPointOnCurve projector( nodePnt, curve, f, l );
-        if ( projector.NbPoints() < 1 )
+        int edgeID = GetMeshDS()->ShapeToIndex( E );
+        TID2ProjectorOnCurve& i2proj = const_cast< TID2ProjectorOnCurve&>( myEdge2Projector );
+        TID2ProjectorOnCurve::iterator i_proj =
+          i2proj.insert( make_pair( edgeID, (GeomAPI_ProjectPointOnCurve*) 0 )).first;
+        if ( !i_proj->second  )
+        {
+          i_proj->second = new GeomAPI_ProjectPointOnCurve();
+          i_proj->second->Init( curve, f, l );
+        }
+        GeomAPI_ProjectPointOnCurve* projector = i_proj->second;
+        projector->Perform( nodePnt );
+        if ( projector->NbPoints() < 1 )
         {
           MESSAGE( "SMESH_MesherHelper::CheckNodeU() failed to project" );
           return false;
         }
-        Quantity_Parameter U = projector.LowerDistanceParameter();
+        Quantity_Parameter U = projector->LowerDistanceParameter();
         u = double( U );
         dist = nodePnt.Distance( curve->Value( U ));
         if ( distance ) *distance = dist;
@@ -1519,6 +1536,26 @@ bool SMESH_MesherHelper::IsSubShape( const TopoDS_Shape& shape, SMESH_Mesh* aMes
     aMesh->GetMeshDS()->ShapeToIndex( shape ) ||
     // PAL16202
     shape.ShapeType() == TopAbs_COMPOUND && aMesh->GetMeshDS()->IsGroupOfSubShapes( shape );
+}
+
+//================================================================================
+/*!
+ * \brief Return maximal tolerance of shape
+ */
+//================================================================================
+
+double SMESH_MesherHelper::MaxTolerance( const TopoDS_Shape& shape )
+{
+  double tol = Precision::Confusion();
+  TopExp_Explorer exp;
+  for ( exp.Init( shape, TopAbs_FACE ); exp.More(); exp.Next() )
+    tol = Max( tol, BRep_Tool::Tolerance( TopoDS::Face( exp.Current())));
+  for ( exp.Init( shape, TopAbs_EDGE ); exp.More(); exp.Next() )
+    tol = Max( tol, BRep_Tool::Tolerance( TopoDS::Edge( exp.Current())));
+  for ( exp.Init( shape, TopAbs_VERTEX ); exp.More(); exp.Next() )
+    tol = Max( tol, BRep_Tool::Tolerance( TopoDS::Vertex( exp.Current())));
+
+  return tol;
 }
 
 //=======================================================================

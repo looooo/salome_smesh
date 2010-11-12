@@ -247,7 +247,6 @@ module SMESH
      */
     long_array  Evaluate(in SMESH_Mesh        theMesh, 
 			 in GEOM::GEOM_Object theSubObject)
-      //inout long_array     theNbElems)
       raises ( SALOME::SALOME_Exception );
 
     /*!

@@ -1172,6 +1172,24 @@ class Mesh:
         else:
             return Mesh_Segment(self, geom)
 
+    ## Creates 1D algorithm importing segments conatined in groups of other mesh.
+    #  If the optional \a geom parameter is not set, this algorithm is global.
+    #  Otherwise, this algorithm defines a submesh based on \a geom subshape.
+    #  @param geom If defined the subshape is to be meshed
+    #  @return an instance of Mesh_UseExistingElements class
+    #  @ingroup l3_algos_basic
+    def UseExisting1DElements(self, geom=0):
+        return Mesh_UseExistingElements(1,self, geom)
+
+    ## Creates 2D algorithm importing faces conatined in groups of other mesh.
+    #  If the optional \a geom parameter is not set, this algorithm is global.
+    #  Otherwise, this algorithm defines a submesh based on \a geom subshape.
+    #  @param geom If defined the subshape is to be meshed
+    #  @return an instance of Mesh_UseExistingElements class
+    #  @ingroup l3_algos_basic
+    def UseExisting2DElements(self, geom=0):
+        return Mesh_UseExistingElements(2,self, geom)
+
     ## Enables creation of nodes and segments usable by 2D algoritms.
     #  The added nodes and segments must be bound to edges and vertices by
     #  SetNodeOnVertex(), SetNodeOnEdge() and SetMeshElementOnShape()
@@ -1303,7 +1321,9 @@ class Mesh:
         return Mesh_RadialPrism3D(self,  geom)
 
     ## Evaluates size of prospective mesh on a shape
-    #  @return True or False
+    #  @return a list where i-th element is a number of elements of i-th SMESH.EntityType
+    #  To know predicted number of e.g. edges, inquire it this way
+    #  Evaluate()[ EnumToLong( Entity_Edge )]
     def Evaluate(self, geom=0):
         if geom == 0 or not isinstance(geom, geompyDC.GEOM._objref_GEOM_Object):
             if self.geom == 0:
@@ -5647,6 +5667,73 @@ class Mesh_RadialQuadrangle1D2D(Mesh_Algorithm):
         hyp = self.OwnHypothesis("AutomaticLength")
         hyp.SetFineness( fineness )
         return hyp
+
+
+# Public class: Mesh_UseExistingElements
+# --------------------------------------
+## Defines a Radial Quadrangle 1D2D algorithm
+#  @ingroup l3_algos_basic
+#
+class Mesh_UseExistingElements(Mesh_Algorithm):
+
+    def __init__(self, dim, mesh, geom=0):
+        if dim == 1:
+            self.Create(mesh, geom, "Import_1D")
+        else:
+            self.Create(mesh, geom, "Import_1D2D")
+        return
+
+    ## Defines "Source edges" hypothesis, specifying groups of edges to import
+    #  @param groups list of groups of edges
+    #  @param toCopyMesh if True, the whole mesh \a groups belong to is imported
+    #  @param toCopyGroups if True, all groups of the mesh \a groups belong to are imported
+    #  @param UseExisting if ==true - searches for the existing hypothesis created with
+    #                     the same parameters, else (default) - creates a new one
+    def SourceEdges(self, groups, toCopyMesh=False, toCopyGroups=False, UseExisting=False):
+        if self.algo.GetName() == "Import_2D":
+            raise ValueError, "algoritm dimension mismatch"
+        hyp = self.Hypothesis("ImportSource1D", [groups, toCopyMesh, toCopyGroups],
+                              UseExisting=UseExisting, CompareMethod=self._compareHyp)
+        hyp.SetSourceEdges(groups)
+        hyp.SetCopySourceMesh(toCopyMesh, toCopyGroups)
+        return hyp
+
+    ## Defines "Source faces" hypothesis, specifying groups of faces to import
+    #  @param groups list of groups of faces
+    #  @param toCopyMesh if True, the whole mesh \a groups belong to is imported
+    #  @param toCopyGroups if True, all groups of the mesh \a groups belong to are imported
+    #  @param UseExisting if ==true - searches for the existing hypothesis created with
+    #                     the same parameters, else (default) - creates a new one
+    def SourceFaces(self, groups, toCopyMesh=False, toCopyGroups=False, UseExisting=False):
+        if self.algo.GetName() == "Import_1D":
+            raise ValueError, "algoritm dimension mismatch"
+        hyp = self.Hypothesis("ImportSource2D", [groups, toCopyMesh, toCopyGroups],
+                              UseExisting=UseExisting, CompareMethod=self._compareHyp)
+        hyp.SetSourceFaces(groups)
+        hyp.SetCopySourceMesh(toCopyMesh, toCopyGroups)
+        return hyp
+
+    def _compareHyp(self,hyp,args):
+        if hasattr( hyp, "GetSourceEdges"):
+            entries = hyp.GetSourceEdges()
+        else:
+            entries = hyp.GetSourceFaces()
+        groups = args[0]
+        toCopyMesh,toCopyGroups = hyp.GetCopySourceMesh()
+        if len(entries)==len(groups) and toCopyMesh==args[1] and toCopyGroups==args[2]:
+            entries2 = []
+            study = self.mesh.smeshpyD.GetCurrentStudy()
+            if study:
+                for g in groups:
+                    ior  = salome.orb.object_to_string(g)
+                    sobj = study.FindObjectIOR(ior)
+                    if sobj: entries2.append( sobj.GetID() )
+                    pass
+                pass
+            entries.sort()
+            entries2.sort()
+            return entries == entries2
+        return False
 
 
 # Private class: Mesh_UseExisting

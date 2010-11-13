@@ -370,19 +370,26 @@ namespace // INTERNAL STUFF
       }
       else
       {
-        if ( subMesh->GetAlgoState() != SMESH_subMesh::HYP_OK )
+        SMESH_Gen* gen = subMesh->GetFather()->GetGen();
+        SMESH_Algo* algo = gen->GetAlgo(*subMesh->GetFather(),subMesh->GetSubShape() );
+
+        if ( subMesh->GetAlgoState() != SMESH_subMesh::HYP_OK ||
+             strncmp( "Import", algo->GetName(), 6 ) != 0 )
+        {
           // treate removal of Import algo from subMesh
           removeSubmesh( subMesh, (_ListenerData*) data );
-
+        }
         else if ( subMesh->IsEmpty() )
+        {
           // treate modification of ImportSource hypothesis
           clearSubmesh( subMesh, (_ListenerData*) data );
-
+        }
         else if ( SMESH_subMesh::CHECK_COMPUTE_STATE == event &&
                   SMESH_subMesh::COMPUTE_EVENT       == eventType )
         {
           // check compute state of all submeshes impoting from same src mesh;
-          // this is to take into account 1D computed submeshes hidden by 2D import algo
+          // this is to take into account 1D computed submeshes hidden by 2D import algo;
+          // else source mesh is not copied as _subM.size != _computedSubM.size()
           list< _ImportData > &  dList = _tgtMesh2ImportData[ subMesh->GetFather() ];
           list< _ImportData >::iterator d = dList.begin();
           for ( ; d != dList.end(); ++d )
@@ -726,7 +733,7 @@ void StdMeshers_Import_1D::importMesh(const SMESH_Mesh*          srcMesh,
       (*e2eIt).second = newElem;
   }
   // copy free nodes
-  if ( tgtSubMesh->NbNodes() < srcMeshDS->NbNodes() )
+  if ( srcMeshDS->NbNodes() > n2n->size() )
   {
     SMDS_NodeIteratorPtr nIt = srcMeshDS->nodesIterator();
     while( nIt->more() )
@@ -736,6 +743,7 @@ void StdMeshers_Import_1D::importMesh(const SMESH_Mesh*          srcMesh,
       {
         const SMDS_MeshNode* newNode = tgtMeshDS->AddNode( node->X(), node->Y(), node->Z());
         n2n->insert( make_pair( node, newNode ));
+        tgtSubMesh->AddNode( newNode );
       }
     }
   }

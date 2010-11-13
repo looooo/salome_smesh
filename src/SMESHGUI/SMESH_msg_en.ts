@@ -636,6 +636,10 @@
         <translation>Export Distribution...</translation>
     </message>
     <message>
+        <source>MEN_SHOW_DISTRIBUTION</source>
+        <translation>Show Distribution</translation>
+    </message>
+    <message>
         <source>MEN_REVOLUTION</source>
         <translation>Revolution</translation>
     </message>
@@ -1842,6 +1846,14 @@ add the exported data to its contents?</translation>
         <translation>Origin &amp;&amp; Size</translation>
     </message>
     <message>
+        <source>SMESH_DISTRIBUTION_SCALARBAR</source>
+        <translation>Distribution</translation>
+    </message>
+    <message>
+        <source>SMESH_SHOW_DISTRIBUTION_SCALARBAR</source>
+        <translation>Show Distribution</translation>
+    </message>
+    <message>
         <source>SMESH_PRECISION</source>
         <translation>Precision</translation>
     </message>
@@ -2085,6 +2097,22 @@ add the exported data to its contents?</translation>
     <message>
         <source>SMESH_VERTICAL</source>
         <translation>Vertical</translation>
+    </message>    
+    <message>
+        <source>SMESH_DISTRIBUTION_COLORING_TYPE</source>
+        <translation>Coloring Type</translation>
+    </message>
+    <message>
+        <source>SMESH_MONOCOLOR</source>
+        <translation>Monocolor</translation>
+    </message>
+    <message>
+        <source>SMESH_DISTRIBUTION_COLOR</source>
+        <translation>Distribution color:</translation>
+    </message>
+    <message>
+        <source>SMESH_MULTICOLOR</source>
+        <translation>Multicolor</translation>
     </message>
     <message>
         <source>SMESH_VISU_PROBLEM</source>
@@ -2575,6 +2603,10 @@ Consider saving your work before application crash</translation>
     <message>
         <source>STB_SAVE_DISTRIBUTION</source>
         <translation>Save distribution to the file</translation>
+    </message>
+        <message>
+        <source>STB_SHOW_DISTRIBUTION</source>
+        <translation>Show Distribution</translation>
     </message>
     <message>
         <source>STB_REVOLUTION</source>
@@ -3107,6 +3139,10 @@ Consider saving your work before application crash</translation>
     <message>
         <source>TOP_SAVE_DISTRIBUTION</source>
         <translation>Export distribution</translation>
+    </message>
+    <message>
+        <source>TOP_SHOW_DISTRIBUTION</source>
+        <translation>Show Distribution</translation>
     </message>
     <message>
         <source>TOP_REVOLUTION</source>

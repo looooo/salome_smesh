@@ -59,24 +59,20 @@ class vtkPolyDataMapper;
 class vtkUnstructuredGrid;
 class vtkMergeFilter;
 class vtkPolyData;
-
 class vtkMapper;
 class vtkActor2D;
 class vtkMaskPoints;
 class vtkLabeledDataMapper;
 class vtkSelectVisiblePoints;
-
-class vtkScalarBarActor;
 class vtkLookupTable;
-
 class vtkPlane;
 class vtkImplicitBoolean;
-
 class vtkTimeStamp;
 
 class VTKViewer_CellCenters;
 
 class SMESH_DeviceActor;
+class SMESH_ScalarBarActor;
 
 
 class SMESH_ActorDef : public SMESH_Actor
@@ -187,7 +183,7 @@ class SMESH_ActorDef : public SMESH_Actor
   virtual eControl GetControlMode(){ return myControlMode;}
   virtual SMESH::Controls::FunctorPtr GetFunctor() { return myFunctor; }
 
-  virtual vtkScalarBarActor* GetScalarBarActor(){ return myScalarBarActor;}
+  virtual SMESH_ScalarBarActor* GetScalarBarActor(){ return myScalarBarActor;}
 
   virtual void RemoveAllClippingPlanes();
   virtual vtkIdType GetNumberOfClippingPlanes();
@@ -216,7 +212,7 @@ class SMESH_ActorDef : public SMESH_Actor
   TVisualObjPtr myVisualObj;
   vtkTimeStamp* myTimeStamp;
 
-  vtkScalarBarActor* myScalarBarActor;
+  SMESH_ScalarBarActor* myScalarBarActor;
   vtkLookupTable* myLookupTable;
 
   vtkProperty* mySurfaceProp;

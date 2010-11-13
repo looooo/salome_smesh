@@ -61,6 +61,8 @@ public:
 
   virtual QString         quadratic2DMode(int ) const;
 
+  virtual bool            isDistributionVisible(int ) const;
+
   // parameters got from actor return nothing if an actor is not visible
   virtual QList<QVariant> elemTypes( int ) const;
   virtual QList<QVariant> labeledTypes( int ) const;

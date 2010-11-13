@@ -35,7 +35,7 @@
 
 class vtkUnstructuredGrid;
 
-class vtkScalarBarActor;
+class SMESH_ScalarBarActor;
 
 class vtkPlane;
 class vtkImplicitBoolean;
@@ -128,7 +128,7 @@ class SMESHOBJECT_EXPORT SMESH_Actor: public SALOME_Actor
   virtual eControl GetControlMode() = 0;
   virtual SMESH::Controls::FunctorPtr GetFunctor() = 0;
 
-  virtual vtkScalarBarActor* GetScalarBarActor() = 0;
+  virtual SMESH_ScalarBarActor* GetScalarBarActor() = 0;
 
   virtual void RemoveAllClippingPlanes() = 0; 
   virtual vtkIdType GetNumberOfClippingPlanes() = 0; 

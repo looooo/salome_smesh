@@ -85,6 +85,7 @@
 
 #include <SMESH_Client.hxx>
 #include <SMESH_Actor.h>
+#include <SMESH_ScalarBarActor.h>
 #include <SMESH_TypeFilter.hxx>
 #include "SMESH_ControlsDef.hxx"
 
@@ -134,7 +135,6 @@
 #include <boost/shared_ptr.hpp>
 
 // VTK includes
-#include <vtkScalarBarActor.h>
 #include <vtkCamera.h>
 #include <vtkRenderer.h>
 #include <vtkPlane.h>
@@ -772,7 +772,7 @@
       if ( anIO->hasEntry() ) {
         SMESH_Actor* anActor = SMESH::FindActorByEntry( anIO->getEntry() );
         if ( anActor && anActor->GetScalarBarActor() && anActor->GetControlMode() != SMESH_Actor::eNone ) {
-          vtkScalarBarActor* aScalarBarActor = anActor->GetScalarBarActor();
+          SMESH_ScalarBarActor* aScalarBarActor = anActor->GetScalarBarActor();
           SMESH::Controls::FunctorPtr aFunctor = anActor->GetFunctor();
           if ( aScalarBarActor && aFunctor ) {
             SMESH::Controls::NumericalFunctor* aNumFun = dynamic_cast<SMESH::Controls::NumericalFunctor*>( aFunctor.get() );
@@ -811,6 +811,24 @@
             }
           }
         }
+      }
+    }
+  }
+
+  void ShowDistribution() {
+    LightApp_SelectionMgr* aSel = SMESHGUI::selectionMgr();
+    SALOME_ListIO selected;
+    if ( aSel )
+      aSel->selectedObjects( selected );
+    
+    if ( selected.Extent() == 1 ) {
+      Handle(SALOME_InteractiveObject) anIO = selected.First();
+      if ( anIO->hasEntry() ) {
+	SMESH_Actor* anActor = SMESH::FindActorByEntry( anIO->getEntry() );
+	if ( anActor && anActor->GetScalarBarActor() && anActor->GetControlMode() != SMESH_Actor::eNone ) {
+	  SMESH_ScalarBarActor *aScalarBarActor = anActor->GetScalarBarActor();
+	  aScalarBarActor->SetDistributionVisibility(!aScalarBarActor->GetDistributionVisibility());
+	}
       }
     }
   }
@@ -1795,6 +1813,13 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
     {
       // dump control distribution data to the text file
       ::SaveDistribution();
+      break;
+    }
+
+  case 203:
+    {
+      // show/ distribution
+      ::ShowDistribution();
       break;
     }
 
@@ -3219,6 +3244,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   createSMESHAction(  200, "RESET" );
   createSMESHAction(  201, "SCALAR_BAR_PROP" );
   createSMESHAction(  202, "SAVE_DISTRIBUTION" );
+  createSMESHAction(  203, "SHOW_DISTRIBUTION","",0, true );
   createSMESHAction(  211, "WIRE",           "ICON_WIRE", 0, true );
   createSMESHAction(  212, "SHADE",          "ICON_SHADE", 0, true );
   createSMESHAction(  213, "SHRINK",         "ICON_SHRINK", 0, true );
@@ -3822,6 +3848,11 @@ void SMESHGUI::initialize( CAM_Application* app )
   popupMgr()->insert( action( 202 ), anId, -1 ); // SAVE_DISTRIBUTION
   popupMgr()->setRule( action( 202 ), aMeshInVTK + "&& isNumFunctor", QtxPopupMgr::VisibleRule );
 
+  popupMgr()->insert( action( 203 ), anId, -1 ); // SHOW_DISTRIBUTION
+  popupMgr()->setRule( action( 203 ), aMeshInVTK + "&& isNumFunctor", QtxPopupMgr::VisibleRule );
+  popupMgr()->setRule( action( 203 ), aMeshInVTK + "&& isNumFunctor && isDistributionVisible", QtxPopupMgr::ToggleRule);
+
+
   popupMgr()->insert( separator(), -1, -1 );
 
   //-------------------------------------------------
@@ -4353,6 +4384,18 @@ void SMESHGUI::createPreferences()
   setPreferenceProperty( hh, "min", 0.0 );
   setPreferenceProperty( hh, "max", 1.0 );
   setPreferenceProperty( hh, "step", 0.1 );
+  
+  int distributionGr = addPreference( tr( "SMESH_DISTRIBUTION_SCALARBAR" ), sbarTab, LightApp_Preferences::Auto, "SMESH", "distribution_visibility" );
+  int coloringType = addPreference( tr( "SMESH_DISTRIBUTION_COLORING_TYPE" ), distributionGr, LightApp_Preferences::Selector, "SMESH", "distribution_coloring_type" );
+  setPreferenceProperty( distributionGr, "columns", 3 );
+  QStringList types;
+  types.append( tr( "SMESH_MONOCOLOR" ) ); 
+  types.append( tr( "SMESH_MULTICOLOR" ) );
+  indices.clear(); indices.append( 0 ); indices.append( 1 );
+  setPreferenceProperty( coloringType, "strings", types );
+  setPreferenceProperty( coloringType, "indexes", indices );
+  addPreference( tr( "SMESH_DISTRIBUTION_COLOR" ), distributionGr, LightApp_Preferences::Color, "SMESH", "distribution_color" );
+
 }
 
 void SMESHGUI::preferencesChanged( const QString& sect, const QString& name )

@@ -30,6 +30,7 @@
 #include "SMESH_DeviceActor.h"
 #include "SMESH_ObjectDef.h"
 #include "SMESH_ControlsDef.hxx"
+#include "SMESH_ScalarBarActor.h"
 #include "VTKViewer_CellCenters.h"
 #include "VTKViewer_ExtractUnstructuredGrid.h"
 #include "VTKViewer_FramedTextActor.h"
@@ -64,7 +65,6 @@
 #include <vtkLabeledDataMapper.h>
 #include <vtkSelectVisiblePoints.h>
 
-#include <vtkScalarBarActor.h>
 #include <vtkLookupTable.h>
 
 #include <vtkMath.h>
@@ -371,7 +371,7 @@ SMESH_ActorDef::SMESH_ActorDef()
   //Controls - Aspect Ratio: incorrect colors of the best and worst values
   myLookupTable->SetHueRange(0.667,0.0);
 
-  myScalarBarActor = vtkScalarBarActor::New();
+  myScalarBarActor = SMESH_ScalarBarActor::New();
   myScalarBarActor->SetVisibility(false);
   myScalarBarActor->SetLookupTable(myLookupTable);
 
@@ -1939,6 +1939,21 @@ void SMESH_ActorDef::UpdateScalarBar()
   if( mgr->hasValue( "SMESH", "scalar_bar_num_colors" ) )
     anIntVal = mgr->integerValue( "SMESH", "scalar_bar_num_colors", anIntVal );
   myScalarBarActor->SetMaximumNumberOfColors( anIntVal == 0 ? 64 : anIntVal );
+
+  bool distributionVisibility = mgr->booleanValue("SMESH","distribution_visibility");
+  myScalarBarActor->SetDistributionVisibility(distributionVisibility);
+
+  int coloringType = mgr->integerValue("SMESH", "distribution_coloring_type", 0);
+  myScalarBarActor->SetDistributionColoringType(coloringType);
+  
+  QColor distributionColor = mgr->colorValue("SMESH", "distribution_color",
+					     QColor(255, 255, 255));
+  double rgb[3];
+  rgb[0]= distributionColor.red()/255.;
+  rgb[1]= distributionColor.green()/255.;
+  rgb[2]= distributionColor.blue()/255.;
+  myScalarBarActor->SetDistributionColor(rgb);
+
   
 }
 

@@ -34,6 +34,7 @@
 
 #include <SMESH_Type.h>
 #include <SMESH_Actor.h>
+#include <SMESH_ScalarBarActor.h>
 
 // SALOME GUI includes
 #include <SalomeApp_Study.h>
@@ -123,6 +124,7 @@ QVariant SMESHGUI_Selection::parameter( const int ind, const QString& p ) const
   else if ( p=="facesOrientationMode" ) val = QVariant( facesOrientationMode( ind ) );
   else if ( p=="groupType" )     val = QVariant( groupType( ind ) );
   else if ( p=="quadratic2DMode") val =  QVariant(quadratic2DMode(ind));
+  else if ( p=="isDistributionVisible") val = QVariant(isDistributionVisible(ind));
 
   if( val.isValid() )
     return val;
@@ -216,6 +218,16 @@ QString SMESHGUI_Selection::quadratic2DMode( int ind ) const
   }
   return "Unknown";
 }
+
+//=======================================================================
+//function : isDistributionVisible
+//purpose  : Visible/Invisible distribution of the ScalarBar Actor
+//=======================================================================
+
+bool SMESHGUI_Selection::isDistributionVisible(int ind) const {
+  SMESH_Actor* actor = getActor( ind );
+  return (actor && actor->GetScalarBarActor() && actor->GetScalarBarActor()->GetDistributionVisibility());
+} 
 
 //=======================================================================
 //function : shrinkMode
@@ -622,4 +634,3 @@ QString SMESHGUI_Selection::groupType( int ind ) const
   }
   return type;
 }
-

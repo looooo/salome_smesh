@@ -48,6 +48,12 @@
 
 #include "utilities.h"
 
+#include <Standard_Version.hxx>
+#ifdef OCC_VERSION_SERVICEPACK
+#define OCC_VERSION_LARGE (OCC_VERSION_MAJOR << 24 | OCC_VERSION_MINOR << 16 | OCC_VERSION_MAINTENANCE << 8 | OCC_VERSION_SERVICEPACK)
+#else
+#define OCC_VERSION_LARGE (OCC_VERSION_MAJOR << 24 | OCC_VERSION_MINOR << 16 | OCC_VERSION_MAINTENANCE << 8)
+#endif
 #include <BRepAdaptor_Surface.hxx>
 #include <BRepClass3d_SolidClassifier.hxx>
 #include <BRep_Tool.hxx>
@@ -92,6 +98,12 @@
 #include <limits>
 
 #define cast2Node(elem) static_cast<const SMDS_MeshNode*>( elem )
+
+#ifdef OCC_VERSION_SERVICEPACK
+#define OCC_VERSION_LARGE (OCC_VERSION_MAJOR << 24 | OCC_VERSION_MINOR << 16 | OCC_VERSION_MAINTENANCE << 8 | OCC_VERSION_SERVICEPACK)
+#else
+#define OCC_VERSION_LARGE (OCC_VERSION_MAJOR << 24 | OCC_VERSION_MINOR << 16 | OCC_VERSION_MAINTENANCE << 8)
+#endif
 
 using namespace std;
 using namespace SMESH::Controls;
@@ -2761,10 +2773,17 @@ static bool getClosestUV (Extrema_GenExtPS& projector,
   if ( projector.IsDone() ) {
     double u, v, minVal = DBL_MAX;
     for ( int i = projector.NbExt(); i > 0; i-- )
+#if OCC_VERSION_LARGE >= 0x06030100
+      if ( Sqrt(projector.SquareDistance( i )) < minVal ) {
+        minVal = Sqrt(projector.SquareDistance( i ));
+        projector.Point( i ).Parameter( u, v );
+      }
+#else
       if ( projector.Value( i ) < minVal ) {
         minVal = projector.Value( i );
         projector.Point( i ).Parameter( u, v );
       }
+#endif
     result.SetCoord( u, v );
     return true;
   }
@@ -9981,7 +10000,11 @@ namespace {
       _extremum.Perform(aPnt);
       if ( _extremum.IsDone() )
         for ( int iSol = 1; iSol <= _extremum.NbExt() && _state == TopAbs_OUT; ++iSol)
+#if OCC_VERSION_LARGE >= 0x06030100
+          _state = ( Sqrt(_extremum.SquareDistance(iSol)) <= theTol ? TopAbs_IN : TopAbs_OUT );
+#else
           _state = ( _extremum.Value(iSol) <= theTol ? TopAbs_IN : TopAbs_OUT );
+#endif
     }
     TopAbs_State State() const
     {

@@ -26,6 +26,12 @@
 //
 #include "SMESH_Pattern.hxx"
 
+#include <Standard_Version.hxx>
+#ifdef OCC_VERSION_SERVICEPACK
+#define OCC_VERSION_LARGE (OCC_VERSION_MAJOR << 24 | OCC_VERSION_MINOR << 16 | OCC_VERSION_MAINTENANCE << 8 | OCC_VERSION_SERVICEPACK)
+#else
+#define OCC_VERSION_LARGE (OCC_VERSION_MAJOR << 24 | OCC_VERSION_MINOR << 16 | OCC_VERSION_MAINTENANCE << 8)
+#endif
 #include <BRepAdaptor_Curve.hxx>
 #include <BRepTools.hxx>
 #include <BRepTools_WireExplorer.hxx>
@@ -443,10 +449,17 @@ static gp_XY project (const SMDS_MeshNode* theNode,
   }
   double u, v, minVal = DBL_MAX;
   for ( int i = theProjectorPS.NbExt(); i > 0; i-- )
+#if OCC_VERSION_LARGE >= 0x06030100
+    if ( Sqrt(theProjectorPS.SquareDistance( i )) < minVal ) {
+      minVal = Sqrt(theProjectorPS.SquareDistance( i ));
+      theProjectorPS.Point( i ).Parameter( u, v );
+    }
+#else
     if ( theProjectorPS.Value( i ) < minVal ) {
       minVal = theProjectorPS.Value( i );
       theProjectorPS.Point( i ).Parameter( u, v );
     }
+#endif
   return gp_XY( u, v );
 }
 

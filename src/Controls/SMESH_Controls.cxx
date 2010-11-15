@@ -1875,7 +1875,62 @@ SMDSAbs_ElementType BadOrientedVolume::GetType() const
   return SMDSAbs_Volume;
 }
 
+/*
+  Class       : BareBorderVolume
+*/
 
+bool BareBorderVolume::IsSatisfy(long theElementId )
+{
+  SMDS_VolumeTool  myTool;
+  if ( myTool.Set( myMesh->FindElement(theElementId)))
+  {
+    for ( int iF = 0; iF < myTool.NbFaces(); ++iF )
+      if ( myTool.IsFreeFace( iF ))
+      {
+        const SMDS_MeshNode** n = myTool.GetFaceNodes(iF);
+        vector< const SMDS_MeshNode*> nodes( n, n+myTool.NbFaceNodes(iF));
+        if ( !myMesh->FindElement( nodes, SMDSAbs_Face, /*Nomedium=*/false))
+          return true;
+      }
+  }
+  return false;
+}
+
+/*
+  Class       : BareBorderFace
+*/
+
+bool BareBorderFace::IsSatisfy(long theElementId )
+{
+  if ( const SMDS_MeshElement* face = myMesh->FindElement(theElementId))
+    if ( face->GetType() == SMDSAbs_Face )
+    {
+      int nbN = face->NbCornerNodes();
+      for ( int i = 0; i < nbN; ++i )
+      {
+        // check if a link is shared by another face
+        const SMDS_MeshNode* n1 = face->GetNode( i );
+        const SMDS_MeshNode* n2 = face->GetNode( (i+1)%nbN );
+        SMDS_ElemIteratorPtr fIt = n1->GetInverseElementIterator( SMDSAbs_Face );
+        bool isShared = false;
+        while ( !isShared && fIt->more() )
+        {
+          const SMDS_MeshElement* f = fIt->next();
+          isShared = ( f != face && f->GetNodeIndex(n2) != -1 );
+        }
+        if ( !isShared )
+        {
+          myLinkNodes.resize( 2 + face->IsQuadratic());
+          myLinkNodes[0] = n1;
+          myLinkNodes[1] = n2;
+          if ( face->IsQuadratic() )
+            myLinkNodes[2] = face->GetNode( i+nbN );
+          return !myMesh->FindElement( myLinkNodes, SMDSAbs_Edge, /*noMedium=*/false);
+        }
+      }
+    }
+  return false;
+}
 
 /*
   Class       : FreeBorders

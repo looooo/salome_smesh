@@ -373,11 +373,41 @@ namespace SMESH{
       virtual void SetMesh( const SMDS_Mesh* theMesh );
       virtual bool IsSatisfy( long theElementId );
       virtual SMDSAbs_ElementType GetType() const;
-            
+
     protected:
       const SMDS_Mesh* myMesh;
     };
-   
+
+    /*
+      BareBorderVolume
+    */
+    class SMESHCONTROLS_EXPORT BareBorderVolume: public Predicate
+    {
+    public:
+      BareBorderVolume():myMesh(0) {}
+      virtual void SetMesh( const SMDS_Mesh* theMesh ) { myMesh = theMesh; }
+      virtual SMDSAbs_ElementType GetType() const      { return SMDSAbs_Volume; }
+      virtual bool IsSatisfy( long theElementId );
+    protected:
+      const SMDS_Mesh* myMesh;
+    };
+    typedef boost::shared_ptr<BareBorderVolume> BareBorderVolumePtr;
+
+    /*
+      BareBorderFace
+    */
+    class SMESHCONTROLS_EXPORT BareBorderFace: public Predicate
+    {
+    public:
+      BareBorderFace():myMesh(0) {}
+      virtual void SetMesh( const SMDS_Mesh* theMesh ) { myMesh = theMesh; }
+      virtual SMDSAbs_ElementType GetType() const      { return SMDSAbs_Face; }
+      virtual bool IsSatisfy( long theElementId );
+    protected:
+      const SMDS_Mesh* myMesh;
+      std::vector< const SMDS_MeshNode* > myLinkNodes;
+    };
+    typedef boost::shared_ptr<BareBorderFace> BareBorderFacePtr;
 
     /*
       Class       : FreeEdges
@@ -399,7 +429,7 @@ namespace SMESH{
       };
       typedef std::set<Border> TBorders;
       void GetBoreders(TBorders& theBorders);
-      
+
     protected:
       const SMDS_Mesh* myMesh;
     };

@@ -35,7 +35,7 @@
 
 using namespace std;
 
-SMDS_MeshElement::SMDS_MeshElement(int ID):myID(ID), myMeshId(-1), myShapeId(-1), myIdInShape(-1)
+SMDS_MeshElement::SMDS_MeshElement(int ID):myID(ID), myMeshId(-1), myShapeId(0), myIdInShape(-1)
 {
 }
 

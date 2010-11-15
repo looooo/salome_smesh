@@ -65,6 +65,7 @@ bool SMDS_VtkEdge::IsMediumNode(const SMDS_MeshNode* node) const
   vtkIdType npts = 0;
   vtkIdType* pts = 0;
   grid->GetCellPoints(myVtkID, npts, pts);
+  //MESSAGE("IsMediumNode " << npts  << " " << (node->getVtkId() == pts[npts-1]));
   return ((npts == 3) && (node->getVtkId() == pts[2]));
 }
 

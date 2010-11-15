@@ -33,31 +33,9 @@
 //purpose  : 
 //=======================================================================
 
-SMDS_Position::SMDS_Position(int aShapeId) :myShapeId(aShapeId)
+SMDS_Position::SMDS_Position()
 {
-  //MESSAGE("########################## SMDS_Position " << myShapeId);
-}
-
-//=======================================================================
-//function : SetShapeId
-//purpose  : 
-//=======================================================================
-
-void SMDS_Position::SetShapeId(int aShapeId)
-{
-  //MESSAGE("############################## SetShapeId "<< aShapeId);
-        myShapeId = aShapeId;
-}
-
-//=======================================================================
-//function : GetShapeId
-//purpose  : 
-//=======================================================================
-
-int SMDS_Position::GetShapeId() const
-{
-  //MESSAGE("################################# GetShapeId " <<  myShapeId);
-        return myShapeId;
+  //MESSAGE("########################## SMDS_Position ");
 }
 
 //=======================================================================

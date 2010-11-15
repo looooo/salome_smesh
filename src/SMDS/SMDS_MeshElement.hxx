@@ -92,6 +92,8 @@ public:
   friend SMDS_EXPORT bool SMDS_MeshElementIDFactory::BindID(int ID,SMDS_MeshElement* elem);
   friend class SMDS_Mesh;
   friend class SMESHDS_Mesh;
+  friend class SMESHDS_SubMesh;
+  friend class SMDS_MeshElementIDFactory;
 
   // ===========================
   //  Access to nodes by index
@@ -137,41 +139,28 @@ public:
    */
   int GetNodeIndex( const SMDS_MeshNode* node ) const;
 
-  //inline int getId() const {return myID; };
   inline ShortType getMeshId() const {return myMeshId; };
   inline ShortType getshapeId() const {return myShapeId; };
-  inline void setShapeId(ShortType shapeId) {myShapeId = shapeId; };
   inline int getIdInShape() const { return myIdInShape; };
-  inline void setIdInShape(int id) { myIdInShape = id; };
-
-  inline void setVtkId(int vtkId)
-  {
-    myVtkID = vtkId;
-  }
-
-  inline int getVtkId() const
-  {
-    return myVtkID;
-  }
+  inline int getVtkId() const { return myVtkID; };
 
 protected:
   inline void setId(int id) {myID = id; };
+  inline void setShapeId(ShortType shapeId) {myShapeId = shapeId; };
+  inline void setIdInShape(int id) { myIdInShape = id; };
+  inline void setVtkId(int vtkId) { myVtkID = vtkId; };
   SMDS_MeshElement(int ID=-1);
-  SMDS_MeshElement(int id, ShortType meshId, ShortType shapeId=-1);
+  SMDS_MeshElement(int id, ShortType meshId, ShortType shapeId = 0);
   virtual void Print(std::ostream & OS) const;
 
   //! Element index in vector SMDS_Mesh::myNodes or SMDS_Mesh::myCells
   int myID;
-
-  // index in vtkUnstructuredGrid
+  //! index in vtkUnstructuredGrid
   int myVtkID;
-
   //! SMDS_Mesh identification in SMESH
   ShortType myMeshId;
-
-  //! SubShape and SubMesh identification in SMESHDS (not in use?)
+  //! SubShape and SubMesh identification in SMESHDS
   ShortType myShapeId;
-
   //! Element index in SMESHDS_SubMesh vector
   int myIdInShape;
 };

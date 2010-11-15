@@ -57,8 +57,11 @@
 
 class SMDS_EXPORT SMDS_Mesh:public SMDS_MeshObject{
 public:
+  friend class SMDS_MeshIDFactory;
+  friend class SMDS_MeshNodeIDFactory;
   friend class SMDS_MeshElementIDFactory;
   friend class SMDS_MeshVolumeVtkNodes;
+  friend class SMDS_MeshNode;
 
   SMDS_Mesh();
   
@@ -568,6 +571,8 @@ public:
   typedef std::vector<SMDS_MeshCell *> SetOfCells;
 
   void updateNodeMinMax();
+  void updateBoundingBox();
+  double getMaxDim();
   int fromVtkToSmds(int vtkid);
   int fromSmdsToVtk(int smdsid);
 
@@ -614,6 +619,16 @@ protected:
       myCells.resize(ID+SMDS_Mesh::chunkSize,0);
   };
 
+  inline void adjustBoundingBox(double x, double y, double z)
+  {
+    if (x > xmax) xmax = x;
+    else if (x < xmin) xmin = x;
+    if (y > ymax) ymax = y;
+    else if (y < ymin) ymin = y;
+    if (z > zmax) zmax = z;
+    else if (z < zmin) zmin = z;
+  };
+
   // Fields PRIVATE
 
   //! index of this SMDS_mesh in the static vector<SMDS_Mesh*> _meshList
@@ -654,6 +669,16 @@ protected:
   bool myHasConstructionEdges;
   bool myHasConstructionFaces;
   bool myHasInverseElements;
+
+  bool myModified;     // any add remove or change of node or cell
+  bool myRemovedNodes;
+  bool myChangedNodes;
+  double xmin;
+  double xmax;
+  double ymin;
+  double ymax;
+  double zmin;
+  double zmax;
 };
 
 

@@ -165,6 +165,7 @@ bool SMDS_VtkFace::IsMediumNode(const SMDS_MeshNode* node) const
       rankFirstMedium = 4; // medium nodes are of rank 4,5,6,7
       break;
     default:
+      //MESSAGE("wrong element type " << aVtkType);
       return false;
   }
   vtkIdType npts = 0;
@@ -175,6 +176,7 @@ bool SMDS_VtkFace::IsMediumNode(const SMDS_MeshNode* node) const
     {
       if (pts[rank] == nodeId)
         {
+          //MESSAGE("rank " << rank << " is medium node " << (rank < rankFirstMedium));
           if (rank < rankFirstMedium)
             return false;
           else

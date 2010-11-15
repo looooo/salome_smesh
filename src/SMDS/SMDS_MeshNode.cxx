@@ -49,7 +49,7 @@ int SMDS_MeshNode::nbNodes =0;
 //purpose  : 
 //=======================================================================
 SMDS_MeshNode::SMDS_MeshNode() :
-  SMDS_MeshElement(-1, -1, -1),
+  SMDS_MeshElement(-1, -1, 0),
   myPosition(SMDS_SpacePosition::originSpacePosition())
 {
   nbNodes++;
@@ -265,7 +265,6 @@ int SMDS_MeshNode::NbNodes() const
         return 1;
 }
 
-
 double* SMDS_MeshNode::getCoord() const
 {
   return SMDS_Mesh::_meshList[myMeshId]->getGrid()->GetPoint(myVtkID);
@@ -292,8 +291,12 @@ double SMDS_MeshNode::Z() const
 //* resize the vtkPoints structure every SMDS_Mesh::chunkSize points
 void SMDS_MeshNode::setXYZ(double x, double y, double z)
 {
-  vtkPoints *points = SMDS_Mesh::_meshList[myMeshId]->getGrid()->GetPoints();
+  SMDS_Mesh *mesh = SMDS_Mesh::_meshList[myMeshId];
+  vtkPoints *points = mesh->getGrid()->GetPoints();
   points->InsertPoint(myVtkID, x, y, z);
+  mesh->adjustBoundingBox(x, y, z);
+  mesh->myChangedNodes = true;
+  mesh->myModified = true;
 }
 
 SMDSAbs_ElementType SMDS_MeshNode::GetType() const

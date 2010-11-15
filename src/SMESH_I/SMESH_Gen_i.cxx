@@ -4004,7 +4004,6 @@ bool SMESH_Gen_i::Load( SALOMEDS::SComponent_ptr theComponent,
                 // add
                 if ( isNode ) {
                   SMDS_PositionPtr pos = aPositionCreator.MakePosition( smType[ smID ]);
-                  pos->SetShapeId( smID );
                   SMDS_MeshNode* node = const_cast<SMDS_MeshNode*>( static_cast<const SMDS_MeshNode*>( elem ));
                   node->SetPosition( pos );
                   sm->AddNode( node );

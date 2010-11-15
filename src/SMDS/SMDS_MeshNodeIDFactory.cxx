@@ -75,6 +75,7 @@ SMDS_MeshElement* SMDS_MeshNodeIDFactory::MeshElement(int ID)
 void SMDS_MeshNodeIDFactory::ReleaseID(const int ID)
 {
   SMDS_MeshIDFactory::ReleaseID(ID);
+  myMesh->myRemovedNodes = true;
   if (ID == myMax)
     myMax = 0; // --- force updateMinMax
   if (ID == myMin)

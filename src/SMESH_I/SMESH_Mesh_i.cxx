@@ -2985,7 +2985,7 @@ SMESH::NodePosition* SMESH_Mesh_i::GetNodePosition(CORBA::Long NodeID)
   {
     if ( SMDS_PositionPtr pos = aNode->GetPosition() )
     {
-      aNodePosition->shapeID = pos->GetShapeId();
+      aNodePosition->shapeID = aNode->getshapeId();
       switch ( pos->GetTypeOfPosition() ) {
       case SMDS_TOP_EDGE:
         aNodePosition->shapeType = GEOM::EDGE;
@@ -3033,11 +3033,7 @@ CORBA::Long SMESH_Mesh_i::GetShapeID(const CORBA::Long id)
   // try to find node
   const SMDS_MeshNode* aNode = aSMESHDS_Mesh->FindNode(id);
   if(aNode) {
-    SMDS_PositionPtr pos = aNode->GetPosition();
-    if(!pos)
-      return -1;
-    else
-      return pos->GetShapeId();
+    return aNode->getshapeId();
   }
 
   return -1;

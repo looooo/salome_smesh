@@ -36,7 +36,6 @@ class SMDS_EXPORT SMDS_SpacePosition:public SMDS_Position
 
 public:
   SMDS_SpacePosition(double x=0, double y=0, double z=0);
-  const virtual double * Coords() const;
   virtual inline SMDS_TypeOfPosition GetTypeOfPosition() const;
   static SMDS_PositionPtr originSpacePosition();
 private:

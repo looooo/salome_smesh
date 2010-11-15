@@ -75,13 +75,14 @@ void SMDS_VtkVolume::initPoly(std::vector<vtkIdType> nodeIds, std::vector<int> n
     {
       int nf = nbNodesPerFace[i];
       ptIds.push_back(nf);
-      double a[3];
-      double b[3];
-      double c[3];
-      grid->GetPoints()->GetPoint(nodeIds[k], a);
-      grid->GetPoints()->GetPoint(nodeIds[k + 1], b);
-      grid->GetPoints()->GetPoint(nodeIds[k + 2], c);
-      bool isFaceForward = this->isForward(a, b, c, center);
+//      double a[3];
+//      double b[3];
+//      double c[3];
+//      grid->GetPoints()->GetPoint(nodeIds[k], a);
+//      grid->GetPoints()->GetPoint(nodeIds[k + 1], b);
+//      grid->GetPoints()->GetPoint(nodeIds[k + 2], c);
+//      bool isFaceForward = this->isForward(a, b, c, center);
+      bool isFaceForward = true;
       //MESSAGE("isFaceForward " << i << " " << isFaceForward);
       vtkIdType *facePts = &nodeIds[k];
       if (isFaceForward)

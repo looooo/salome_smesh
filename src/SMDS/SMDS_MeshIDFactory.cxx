@@ -87,6 +87,7 @@ void SMDS_MeshIDFactory::ReleaseID(const int ID)
       }
     }
   }
+  myMesh->myModified = true;
 }
 
 void SMDS_MeshIDFactory::Clear()

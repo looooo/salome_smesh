@@ -258,7 +258,7 @@ bool SMESH_Algo::IsReversedSubMesh (const TopoDS_Face&  theFace,
           fPos = dynamic_cast< const SMDS_FacePosition* >( pos );
         }
         else if ( pos->GetTypeOfPosition() == SMDS_TOP_VERTEX ) {
-          vID = pos->GetShapeId();
+          vID = node->getshapeId();
         }
       }
       if ( fPos || ( !normalOK && vID )) {

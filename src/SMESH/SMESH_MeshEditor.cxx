@@ -278,7 +278,7 @@ bool SMESH_MeshEditor::Remove (const list< int >& theIDs,
     if ( isNodes ) {
       const SMDS_MeshNode* node = cast2Node( elem );
       if ( node->GetPosition()->GetTypeOfPosition() == SMDS_TOP_VERTEX )
-        if ( int aShapeID = node->GetPosition()->GetShapeId() )
+        if ( int aShapeID = node->getshapeId() )
           if ( SMESH_subMesh * sm = GetMesh()->GetSubMeshContaining( aShapeID ) )
             smmap.insert( sm );
     }
@@ -331,22 +331,21 @@ int SMESH_MeshEditor::FindShape (const SMDS_MeshElement * theElem)
   if ( aMesh->ShapeToMesh().IsNull() )
     return 0;
 
-  if ( theElem->GetType() == SMDSAbs_Node ) {
-    const SMDS_PositionPtr& aPosition =
-      static_cast<const SMDS_MeshNode*>( theElem )->GetPosition();
-    if ( aPosition )
-      return aPosition->GetShapeId();
-    else
-      return 0;
-  }
+  if ( theElem->GetType() == SMDSAbs_Node )
+    {
+      int aShapeID = theElem->getshapeId();
+      if (aShapeID <= 0)
+        return 0;
+      else
+        return aShapeID;
+    }
 
   TopoDS_Shape aShape; // the shape a node is on
   SMDS_ElemIteratorPtr nodeIt = theElem->nodesIterator();
   while ( nodeIt->more() ) {
     const SMDS_MeshNode* node = static_cast<const SMDS_MeshNode*>( nodeIt->next() );
-    const SMDS_PositionPtr& aPosition = node->GetPosition();
-    if ( aPosition ) {
-      int aShapeID = aPosition->GetShapeId();
+    int aShapeID = node->getshapeId();
+    if (aShapeID > 0) {
       SMESHDS_SubMesh * sm = aMesh->MeshElements( aShapeID );
       if ( sm ) {
         if ( sm->Contains( theElem ))
@@ -2920,7 +2919,7 @@ void SMESH_MeshEditor::Smooth (TIDSortedElemSet &          theElems,
           break;
         }
         case SMDS_TOP_EDGE: {
-          TopoDS_Shape S = aMesh->IndexToShape( pos->GetShapeId() );
+          TopoDS_Shape S = aMesh->IndexToShape( node->getshapeId() );
           Handle(Geom2d_Curve) pcurve;
           if ( !S.IsNull() && S.ShapeType() == TopAbs_EDGE )
             pcurve = BRep_Tool::CurveOnSurface( TopoDS::Edge( S ), face, f,l );
@@ -2931,7 +2930,7 @@ void SMESH_MeshEditor::Smooth (TIDSortedElemSet &          theElems,
           break;
         }
         case SMDS_TOP_VERTEX: {
-          TopoDS_Shape S = aMesh->IndexToShape( pos->GetShapeId() );
+          TopoDS_Shape S = aMesh->IndexToShape( node->getshapeId() );
           if ( !S.IsNull() && S.ShapeType() == TopAbs_VERTEX )
             uv = BRep_Tool::Parameters( TopoDS::Vertex( S ), face ).XY();
           break;
@@ -3194,7 +3193,7 @@ void SMESH_MeshEditor::Smooth (TIDSortedElemSet &          theElems,
       if ( node_uv != uvMap.end() ) {
         gp_XY* uv = node_uv->second;
         node->SetPosition
-          ( SMDS_PositionPtr( new SMDS_FacePosition( *fId, uv->X(), uv->Y() )));
+          ( SMDS_PositionPtr( new SMDS_FacePosition( uv->X(), uv->Y() )));
       }
     }
 
@@ -3291,6 +3290,7 @@ void SMESH_MeshEditor::sweepElement(const SMDS_MeshElement*               elem,
                                     const int                             nbSteps,
                                     SMESH_SequenceOfElemPtr&              srcElements)
 {
+  MESSAGE("sweepElement " << nbSteps);
   SMESHDS_Mesh* aMesh = GetMeshDS();
 
   // Loop on elem nodes:
@@ -4287,6 +4287,7 @@ SMESH_MeshEditor::ExtrusionSweep (TIDSortedElemSet &  theElems,
                                   const int           theFlags,
                                   const double        theTolerance)
 {
+  MESSAGE("ExtrusionSweep " << theMakeGroups << " " << theFlags << " " << theTolerance);
   myLastCreatedElems.Clear();
   myLastCreatedNodes.Clear();
 
@@ -9230,9 +9231,9 @@ int SMESH_MeshEditor::removeQuadElem(SMESHDS_SubMesh *    theSm,
       for ( ; nIt != mediumNodes.end(); ++nIt ) {
         const SMDS_MeshNode* n = *nIt;
         if ( n->NbInverseElements() == 0 ) {
-          if ( n->GetPosition()->GetShapeId() != theShapeID )
+          if ( n->getshapeId() != theShapeID )
             meshDS->RemoveFreeNode( n, meshDS->MeshElements
-                                    ( n->GetPosition()->GetShapeId() ));
+                                    ( n->getshapeId() ));
           else
             meshDS->RemoveFreeNode( n, theSm );
         }

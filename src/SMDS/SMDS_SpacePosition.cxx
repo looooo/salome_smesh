@@ -30,15 +30,8 @@
 
 SMDS_SpacePosition* SMDS_SpacePosition::_originPosition = new SMDS_SpacePosition();
 
-SMDS_SpacePosition::SMDS_SpacePosition(double x, double y, double z):
-  SMDS_Position(0)
+SMDS_SpacePosition::SMDS_SpacePosition(double x, double y, double z)
 {
-}
-
-const double* SMDS_SpacePosition::Coords() const
-{
-  static double origin[]={0,0,0};
-  return origin;
 }
 
 SMDS_TypeOfPosition SMDS_SpacePosition::GetTypeOfPosition() const

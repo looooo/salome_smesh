@@ -87,7 +87,7 @@ void SMESHDS_Mesh::ShapeToMesh(const TopoDS_Shape & S)
       if ( !i_sub->second->IsComplexSubmesh() ) {
         SMDS_NodeIteratorPtr nIt = i_sub->second->GetNodes();
         while ( nIt->more() )
-          nIt->next()->GetPosition()->SetShapeId( 0 );
+          i_sub->second->RemoveNode(nIt->next(), false);
       }
     }
     // - sub-meshes
@@ -729,7 +729,7 @@ void SMESHDS_Mesh::RemoveNode(const SMDS_MeshNode * n)
   {
     SMESHDS_SubMesh* subMesh=0;
     map<int,SMESHDS_SubMesh*>::iterator SubIt =
-      myShapeIndexToSubMesh.find( n->GetPosition()->GetShapeId() );
+      myShapeIndexToSubMesh.find( n->getshapeId() );
     if ( SubIt != myShapeIndexToSubMesh.end() )
       subMesh = SubIt->second;
     else
@@ -919,7 +919,7 @@ SMESHDS_SubMesh* SMESHDS_Mesh::getSubmesh( const int Index )
   if ( Index != myCurSubID ) {
     map<int,SMESHDS_SubMesh*>::iterator it = myShapeIndexToSubMesh.find( Index );
     if ( it == myShapeIndexToSubMesh.end() )
-      it = myShapeIndexToSubMesh.insert( make_pair(Index, new SMESHDS_SubMesh() )).first;
+      it = myShapeIndexToSubMesh.insert( make_pair(Index, new SMESHDS_SubMesh(this, Index) )).first;
     myCurSubMesh = it->second;
     myCurSubID = Index;
     myCurSubShape.Nullify(); // myCurSubShape no more corresponds to submesh
@@ -947,22 +947,6 @@ bool SMESHDS_Mesh::add(const SMDS_MeshElement* elem, SMESHDS_SubMesh* subMesh )
   return false;
 }
 
-namespace {
-
-  //================================================================================
-  /*!
-   * \brief Creates a node position in volume
-   */
-  //================================================================================
-
-  inline SMDS_PositionPtr volumePosition(int volId)
-  {
-    SMDS_SpacePosition* pos = new SMDS_SpacePosition();
-    pos->SetShapeId( volId );
-    return SMDS_PositionPtr(pos);
-  }
-}
-
 //=======================================================================
 //function : SetNodeOnVolume
 //purpose  : 
@@ -971,8 +955,9 @@ void SMESHDS_Mesh::SetNodeInVolume(SMDS_MeshNode *      aNode,
                                    const TopoDS_Shell & S)
 {
   if ( add( aNode, getSubmesh(S) ))
-    aNode->SetPosition ( volumePosition( myCurSubID ));
+    aNode->SetPosition ( SMDS_SpacePosition::originSpacePosition() );
 }
+
 //=======================================================================
 //function : SetNodeOnVolume
 //purpose  : 
@@ -981,7 +966,7 @@ void SMESHDS_Mesh::SetNodeInVolume(SMDS_MeshNode *      aNode,
                                    const TopoDS_Solid & S)
 {
   if ( add( aNode, getSubmesh(S) ))
-    aNode->SetPosition ( volumePosition( myCurSubID ));
+    aNode->SetPosition ( SMDS_SpacePosition::originSpacePosition() );
 }
 
 //=======================================================================
@@ -994,7 +979,7 @@ void SMESHDS_Mesh::SetNodeOnFace(SMDS_MeshNode *     aNode,
                                  double              v)
 {
   if ( add( aNode, getSubmesh(S) ))
-    aNode->SetPosition(SMDS_PositionPtr(new SMDS_FacePosition(myCurSubID, u, v)));
+    aNode->SetPosition(SMDS_PositionPtr(new SMDS_FacePosition( u, v)));
 }
 
 //=======================================================================
@@ -1006,7 +991,7 @@ void SMESHDS_Mesh::SetNodeOnEdge(SMDS_MeshNode *     aNode,
                                  double              u)
 {
   if ( add( aNode, getSubmesh(S) ))
-    aNode->SetPosition(SMDS_PositionPtr(new SMDS_EdgePosition(myCurSubID, u)));
+    aNode->SetPosition(SMDS_PositionPtr(new SMDS_EdgePosition(u)));
 }
 
 //=======================================================================
@@ -1017,7 +1002,7 @@ void SMESHDS_Mesh::SetNodeOnVertex(SMDS_MeshNode *       aNode,
                                    const TopoDS_Vertex & S)
 {
   if ( add( aNode, getSubmesh(S) ))
-    aNode->SetPosition(SMDS_PositionPtr(new SMDS_VertexPosition(myCurSubID)));
+    aNode->SetPosition(SMDS_PositionPtr(new SMDS_VertexPosition()));
 }
 
 //=======================================================================
@@ -1026,12 +1011,13 @@ void SMESHDS_Mesh::SetNodeOnVertex(SMDS_MeshNode *       aNode,
 //=======================================================================
 void SMESHDS_Mesh::UnSetNodeOnShape(const SMDS_MeshNode* aNode)
 {
-  if ( aNode && aNode->GetPosition() ) {
-    map<int,SMESHDS_SubMesh*>::iterator it =
-      myShapeIndexToSubMesh.find( aNode->GetPosition()->GetShapeId() );
-    if ( it != myShapeIndexToSubMesh.end() )
-      it->second->RemoveNode( aNode, /*deleted=*/false );
-  }
+  int shapeId = aNode->getshapeId();
+  if (shapeId >= 0)
+    {
+      map<int, SMESHDS_SubMesh*>::iterator it = myShapeIndexToSubMesh.find(shapeId);
+      if (it != myShapeIndexToSubMesh.end())
+        it->second->RemoveNode(aNode, /*deleted=*/false);
+    }
 }
 
 //=======================================================================
@@ -1193,7 +1179,7 @@ SMESHDS_SubMesh * SMESHDS_Mesh::NewSubMesh(int Index)
   TShapeIndexToSubMesh::iterator anIter = myShapeIndexToSubMesh.find(Index);
   if (anIter == myShapeIndexToSubMesh.end())
   {
-    SM = new SMESHDS_SubMesh();
+    SM = new SMESHDS_SubMesh(this, Index);
     myShapeIndexToSubMesh[Index]=SM;
   }
   else
@@ -1274,8 +1260,9 @@ int SMESHDS_Mesh::ShapeToIndex(const TopoDS_Shape & S) const
 //=======================================================================
 void SMESHDS_Mesh::SetNodeInVolume(const SMDS_MeshNode* aNode, int Index)
 {
+  //add(aNode, getSubmesh(Index));
   if ( add( aNode, getSubmesh( Index )))
-    ((SMDS_MeshNode*) aNode)->SetPosition( volumePosition( Index ));
+    ((SMDS_MeshNode*) aNode)->SetPosition( SMDS_SpacePosition::originSpacePosition());
 }
 
 //=======================================================================
@@ -1286,7 +1273,7 @@ void SMESHDS_Mesh::SetNodeOnFace(SMDS_MeshNode* aNode, int Index, double u, doub
 {
   //Set Position on Node
   if ( add( aNode, getSubmesh( Index )))
-    aNode->SetPosition(SMDS_PositionPtr(new SMDS_FacePosition(Index, u, v)));
+    aNode->SetPosition(SMDS_PositionPtr(new SMDS_FacePosition( u, v)));
 }
 
 //=======================================================================
@@ -1299,7 +1286,7 @@ void SMESHDS_Mesh::SetNodeOnEdge(SMDS_MeshNode* aNode,
 {
   //Set Position on Node
   if ( add( aNode, getSubmesh( Index )))
-    aNode->SetPosition(SMDS_PositionPtr(new SMDS_EdgePosition(Index, u)));
+    aNode->SetPosition(SMDS_PositionPtr(new SMDS_EdgePosition(u)));
 }
 
 //=======================================================================
@@ -1310,7 +1297,7 @@ void SMESHDS_Mesh::SetNodeOnVertex(SMDS_MeshNode* aNode, int Index)
 {
   //Set Position on Node
   if ( add( aNode, getSubmesh( Index )))
-    aNode->SetPosition(SMDS_PositionPtr(new SMDS_VertexPosition(Index)));
+    aNode->SetPosition(SMDS_PositionPtr(new SMDS_VertexPosition()));
 }
 
 //=======================================================================
@@ -1940,13 +1927,13 @@ void SMESHDS_Mesh::compactMesh()
 
   this->myScript->SetModified(true); // notify GUI client for buildPrs when update
 
-  // ---TODO: myNodes, myElements in submeshes
+  // --- compact list myNodes and myElements in submeshes
 
-  //    map<int,SMESHDS_SubMesh*>::iterator it = myShapeIndexToSubMesh.begin();
-  //    for(; it != myShapeIndexToSubMesh.end(); ++it)
-  //    {
-  //    	(*it).second->compactList(idNodesOldToNew, newNodeSize, idCellsOldToNew, newCellSize);
-  //    }
+  map<int,SMESHDS_SubMesh*>::iterator it = myShapeIndexToSubMesh.begin();
+  for(; it != myShapeIndexToSubMesh.end(); ++it)
+    {
+      (*it).second->compactList();
+    }
 
 }
 

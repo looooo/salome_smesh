@@ -41,7 +41,6 @@ public:
   friend class SMDS_Mesh;
   friend class ObjectPool<SMDS_MeshNode>;
 
-  double* getCoord() const;
   void Print(std::ostream & OS) const;
   double X() const;
   double Y() const;
@@ -63,12 +62,6 @@ public:
   bool emptyInverseElements();
   void setXYZ(double x, double y, double z);
 
-  /*!
-   * \brief Return node by its index
-   * \param ind - node index
-   * \retval const SMDS_MeshNode* - the node
-   */
-  //virtual const SMDS_MeshNode* GetNode(const int) const { return this; }
   static int nbNodes;
 
 protected:
@@ -77,6 +70,7 @@ protected:
   virtual ~SMDS_MeshNode();
   void init(int id, int meshId, int shapeId = -1, double x=0, double y=0, double z=0);
   inline void setVtkId(int vtkId) { myVtkID = vtkId; };
+  double* getCoord() const;
 
   SMDS_ElemIteratorPtr
   elementsIterator(SMDSAbs_ElementType type) const;

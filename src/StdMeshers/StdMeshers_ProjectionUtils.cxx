@@ -1645,7 +1645,7 @@ FindMatchingNodesOnFaces( const TopoDS_Face&     face1,
         const SMDS_MeshElement* f = ( iF ? f2 : f1 );
         for ( int i = 0; !notSeamNode[ iF ] && i < f->NbNodes(); ++i ) {
           const SMDS_MeshNode* node = f->GetNode( i );
-          if ( !helper->IsSeamShape( node->GetPosition()->GetShapeId() ))
+          if ( !helper->IsSeamShape( node->getshapeId() ))
             notSeamNode[ iF ] = node;
         }
       }

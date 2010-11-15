@@ -125,7 +125,9 @@ SMDS_Mesh::SMDS_Mesh()
          myHasConstructionEdges(false), myHasConstructionFaces(false),
          myHasInverseElements(true),
          myNodeMin(0), myNodeMax(0),
-         myNodePool(0), myEdgePool(0), myFacePool(0), myVolumePool(0)
+         myNodePool(0), myEdgePool(0), myFacePool(0), myVolumePool(0),
+         myModified(false), myRemovedNodes(false), myChangedNodes(false),
+         xmin(0), xmax(0), ymin(0), ymax(0), zmin(0), zmax(0)
 {
   myMeshId = _meshList.size();         // --- index of the mesh to push back in the vector
   MESSAGE("myMeshId=" << myMeshId);
@@ -215,7 +217,7 @@ SMDS_MeshNode * SMDS_Mesh::AddNodeWithID(double x, double y, double z, int ID)
       }
     myNodeIDFactory->adjustMaxId(ID);
     SMDS_MeshNode * node = myNodePool->getNew();
-    node->init(ID, myMeshId, -1, x, y, z);
+    node->init(ID, myMeshId, 0, x, y, z);
     if (ID >= myNodes.size())
     {
         myNodes.resize(ID+SMDS_Mesh::chunkSize, 0);
@@ -224,6 +226,8 @@ SMDS_MeshNode * SMDS_Mesh::AddNodeWithID(double x, double y, double z, int ID)
     myNodes[ID] = node;
     myNodeIDFactory->BindID(ID,node);
     myInfo.myNbNodes++;
+    myModified = true;
+    this->adjustBoundingBox(x, y, z);
     return node;
   }else
     return NULL;
@@ -2426,6 +2430,13 @@ void SMDS_Mesh::Clear()
   while(itc!=myChildren.end())
     (*itc)->Clear();
 
+  myModified = false;
+  myRemovedNodes = false;
+  myChangedNodes = false;
+  xmin = 0; xmax = 0;
+  ymin = 0; ymax = 0;
+  zmin = 0; zmax = 0;
+
   myInfo.Clear();
 
   myGrid->Initialize();
@@ -4060,4 +4071,37 @@ int SMDS_Mesh::fromSmdsToVtk(int smdsid)
   if (smdsid >= 0 && smdsid < myCellIdSmdsToVtk.size())
     return myCellIdSmdsToVtk[smdsid];
   throw SALOME_Exception(LOCALIZED ("smds id out of bounds"));
+}
+
+void SMDS_Mesh::updateBoundingBox()
+{
+  xmin = 0; xmax = 0;
+  ymin = 0; ymax = 0;
+  zmin = 0; zmax = 0;
+  vtkPoints *points = myGrid->GetPoints();
+  int myNodesSize = this->myNodes.size();
+  for (int i = 0; i < myNodesSize; i++)
+    {
+      if (SMDS_MeshNode *n = myNodes[i])
+        {
+          double coords[3];
+          points->GetPoint(n->myVtkID, coords);
+          if (coords[0] < xmin) xmin = coords[0];
+          else if (coords[0] > xmax) xmax = coords[0];
+          if (coords[1] < ymin) ymin = coords[1];
+          else if (coords[1] > ymax) ymax = coords[1];
+          if (coords[2] < zmin) zmin = coords[2];
+          else if (coords[2] > zmax) zmax = coords[2];
+        }
+    }
+}
+
+double SMDS_Mesh::getMaxDim()
+{
+  double dmax = 1.e-3;
+  if ((xmax - xmin) > dmax) dmax = xmax -xmin;
+  if ((ymax - ymin) > dmax) dmax = ymax -ymin;
+  if ((zmax - zmin) > dmax) dmax = zmax -zmin;
+  MESSAGE("getMaxDim " << dmax);
+  return dmax;
 }

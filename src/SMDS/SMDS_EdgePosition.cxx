@@ -36,22 +36,9 @@ using namespace std;
 //purpose  : 
 //=======================================================================
 
-SMDS_EdgePosition::SMDS_EdgePosition(const int aEdgeId,
-        const double aUParam):SMDS_Position(aEdgeId), myUParameter(aUParam)
+SMDS_EdgePosition::SMDS_EdgePosition(const double aUParam): myUParameter(aUParam)
 {
-  //MESSAGE("********************************* SMDS_EdgePosition "<< aEdgeId << " " << myUParameter);
-}
-
-//=======================================================================
-//function : Coords
-//purpose  : 
-//=======================================================================
-
-const double *SMDS_EdgePosition::Coords() const
-{
-        static double origin[]={0,0,0};
-        MESSAGE("SMDS_EdgePosition::Coords not implemented");
-        return origin;
+  //MESSAGE("********************************* SMDS_EdgePosition " << myUParameter);
 }
 
 /**

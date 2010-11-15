@@ -37,10 +37,12 @@ class SMESHDS_SubMesh;
 typedef SMDS_Iterator<const SMESHDS_SubMesh*> SMESHDS_SubMeshIterator;
 typedef boost::shared_ptr< SMESHDS_SubMeshIterator > SMESHDS_SubMeshIteratorPtr;
 
+class SMESHDS_Mesh;
+
 class SMESHDS_EXPORT SMESHDS_SubMesh
 {
  public:
-  SMESHDS_SubMesh();
+  SMESHDS_SubMesh(SMESHDS_Mesh *parent, int index);
 
   bool IsComplexSubmesh() const { return !mySubMeshes.empty(); }
 
@@ -69,13 +71,16 @@ class SMESHDS_EXPORT SMESHDS_SubMesh
   int getSize();
   void compactList();
 
- private:
+  inline SMESHDS_Mesh *getParent() {return myParent; };
 
+ private:
+  SMESHDS_Mesh * myParent;
   std::vector<const SMDS_MeshElement*> myElements;
   std::vector<const SMDS_MeshNode*> myNodes;
 
   int myUnusedIdNodes;
   int myUnusedIdElements;
+  int myIndex;
 
   std::set<const SMESHDS_SubMesh*> mySubMeshes;
 };

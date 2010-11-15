@@ -1170,6 +1170,8 @@ void SMESHGUI_FilterTable::SetCriterion (const int                       theRow,
       theCriterion.Type != SMESH::FT_FreeNodes &&
       theCriterion.Type != SMESH::FT_FreeFaces &&
       theCriterion.Type != SMESH::FT_BadOrientedVolume &&
+      theCriterion.Type != SMESH::FT_BareBorderFace &&
+      theCriterion.Type != SMESH::FT_BareBorderVolume &&
       theCriterion.Type != SMESH::FT_LinearOrQuadratic)
     aTable->item( theRow, 2 )->setText(QString("%1").arg(theCriterion.Threshold, 0, 'g', 15));
   else
@@ -1324,11 +1326,13 @@ void SMESHGUI_FilterTable::updateAdditionalWidget()
 
   ComboItem* anItem = ((ComboItem*)aTable->item(aRow, 0));
   int aCriterion = GetCriterionType(aRow);
-  bool toEnable = ((ComboItem*)aTable->item(aRow, 1))->value() == SMESH::FT_EqualTo &&
-                  aCriterion != SMESH::FT_RangeOfIds &&
-                  aCriterion != SMESH::FT_FreeEdges &&
-                  aCriterion != SMESH::FT_FreeFaces &&
-                  aCriterion != SMESH::FT_BadOrientedVolume;
+  bool toEnable = (((ComboItem*)aTable->item(aRow, 1))->value() == SMESH::FT_EqualTo &&
+                   aCriterion != SMESH::FT_RangeOfIds &&
+                   aCriterion != SMESH::FT_FreeEdges &&
+                   aCriterion != SMESH::FT_FreeFaces &&
+                   aCriterion != SMESH::FT_BadOrientedVolume &&
+                   aCriterion != SMESH::FT_BareBorderFace &&
+                   aCriterion != SMESH::FT_BareBorderVolume);
 
   if (!myAddWidgets.contains(anItem))
   {
@@ -1504,9 +1508,11 @@ void SMESHGUI_FilterTable::onCriterionChanged (const int row, const int col, con
 
   if (aType == SMESH::NODE && aCriterionType == SMESH::FT_FreeNodes ||
       aType == SMESH::EDGE && aCriterionType == SMESH::FT_FreeBorders ||
-      aType == SMESH::FACE && (aCriterionType == SMESH::FT_FreeEdges ||
+      aType == SMESH::FACE && (aCriterionType == SMESH::FT_BareBorderFace ||
+                               aCriterionType == SMESH::FT_FreeEdges ||
                                aCriterionType == SMESH::FT_FreeFaces) ||
-      aType == SMESH::VOLUME && aCriterionType == SMESH::FT_BadOrientedVolume ||
+      aType == SMESH::VOLUME && (aCriterionType == SMESH::FT_BadOrientedVolume ||
+                                 aCriterionType == SMESH::FT_BareBorderVolume) ||
       aCriterionType == SMESH::FT_LinearOrQuadratic ||
       aCriterionType == SMESH::FT_GroupColor ||
       aCriterionType == SMESH::FT_ElemGeomType)
@@ -1789,6 +1795,7 @@ const QMap<int, QString>& SMESHGUI_FilterTable::getCriteria (const int theType) 
       aCriteria[ SMESH::FT_Length2D           ] = tr("LENGTH2D");
       aCriteria[ SMESH::FT_MultiConnection2D  ] = tr("MULTI2D_BORDERS");
       aCriteria[ SMESH::FT_FreeFaces          ] = tr("FREE_FACES");
+      aCriteria[ SMESH::FT_BareBorderFace     ] = tr("BARE_BORDER_FACE");
       aCriteria[ SMESH::FT_LinearOrQuadratic  ] = tr("LINEAR");
       aCriteria[ SMESH::FT_GroupColor         ] = tr("GROUP_COLOR");
       aCriteria[ SMESH::FT_ElemGeomType       ] = tr("GEOM_TYPE");
@@ -1805,6 +1812,7 @@ const QMap<int, QString>& SMESHGUI_FilterTable::getCriteria (const int theType) 
       aCriteria[ SMESH::FT_BelongToGeom       ] = tr("BELONG_TO_GEOM");
       aCriteria[ SMESH::FT_LyingOnGeom        ] = tr("LYING_ON_GEOM");
       aCriteria[ SMESH::FT_BadOrientedVolume  ] = tr("BAD_ORIENTED_VOLUME");
+      aCriteria[ SMESH::FT_BareBorderVolume   ] = tr("BARE_BORDER_VOLUME");
       aCriteria[ SMESH::FT_Volume3D           ] = tr("VOLUME_3D");
       aCriteria[ SMESH::FT_MaxElementLength3D ] = tr("MAX_ELEMENT_LENGTH_3D");
       aCriteria[ SMESH::FT_LinearOrQuadratic  ] = tr("LINEAR");

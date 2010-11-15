@@ -153,8 +153,8 @@ bool StdMeshers_Import_1D2D::Compute(SMESH_Mesh & theMesh, const TopoDS_Shape & 
   const bool toCheckOri = (helper.NbAncestors( geomFace, theMesh, TopAbs_SOLID ) == 1 );
 
   Handle(Geom_Surface) surface = BRep_Tool::Surface( geomFace );
-  if ( helper.GetSubShapeOri( tgtMesh->ShapeToMesh(), geomFace) == TopAbs_REVERSED )
-    surface->UReverse();
+  const bool reverse = 
+    ( helper.GetSubShapeOri( tgtMesh->ShapeToMesh(), geomFace) == TopAbs_REVERSED );
   gp_Pnt p; gp_Vec du, dv;
 
   set<int> subShapeIDs;
@@ -262,7 +262,7 @@ bool StdMeshers_Import_1D2D::Compute(SMESH_Mesh & theMesh, const TopoDS_Shape & 
         {
           uv = helper.GetNodeUV( geomFace, newNodes[++iNode] );
           surface->D1( uv.X(),uv.Y(), p, du,dv );
-          geomNorm = du ^ dv;
+          geomNorm = reverse ? dv^du : du^dv;
         }
         while ( geomNorm.SquareMagnitude() < 1e-6 && iNode+1 < face->NbCornerNodes());
 
@@ -457,6 +457,25 @@ bool StdMeshers_Import_1D2D::Compute(SMESH_Mesh & theMesh, const TopoDS_Shape & 
   // notify sub-meshes of edges on computation
   for ( unsigned iE = 0; iE < edges.size(); ++iE )
     theMesh.GetSubMesh( edges[iE] )->ComputeStateEngine(SMESH_subMesh::CHECK_COMPUTE_STATE);
+
+  SMESH_subMesh* sm = theMesh.GetSubMesh(theShape);
+  SMESH_subMeshIteratorPtr smIt = sm->getDependsOnIterator(true,false);
+  cout << endl << string(80,'=') << endl
+       << "Compute( face " << tgtMesh->ShapeToIndex(theShape) << endl;
+  while ( smIt->more() )
+  {
+    sm = smIt->next();
+    TopAbs::Print(sm->GetSubShape().ShapeType(), cout);
+    cout << " " << sm->GetId() << endl << " Elems:";
+    SMDS_ElemIteratorPtr eIt = sm->GetSubMeshDS()->GetElements();
+    while ( eIt->more() )
+      cout << " " << eIt->next()->GetID();
+    cout << endl << " Nodes:";
+    SMDS_NodeIteratorPtr nIt = sm->GetSubMeshDS()->GetNodes();
+    while ( nIt->more() )
+      cout << " " << nIt->next()->GetID();
+    cout << endl;
+  }
 
   // ============
   // Copy meshes

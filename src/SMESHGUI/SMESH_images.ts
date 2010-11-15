@@ -458,6 +458,14 @@
             <translation>mesh_volume_3d.png</translation>
         </message>
         <message>
+            <source>ICON_BARE_BORDER_VOLUME</source>
+            <translation>bare_border_volume.png</translation>
+        </message>
+        <message>
+            <source>ICON_BARE_BORDER_FACE</source>
+            <translation>bare_border_face.png</translation>
+        </message>
+        <message>
             <source>ICON_WARP</source>
             <translation>mesh_wrap.png</translation>
         </message>

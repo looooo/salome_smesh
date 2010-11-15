@@ -501,7 +501,10 @@ SMESH_DeviceActor
 
   using namespace SMESH::Controls;
   if ( dynamic_cast<FreeBorders*>(theFunctor.get()) ||
-       dynamic_cast<FreeFaces*>(theFunctor.get()) ) {
+       dynamic_cast<FreeFaces*>(theFunctor.get())   ||
+       dynamic_cast<BareBorderVolume*>(theFunctor.get())||
+       dynamic_cast<BareBorderFace*>(theFunctor.get()))
+  {
     Predicate* aFreePredicate = dynamic_cast<Predicate*>(theFunctor.get());
     myExtractUnstructuredGrid->SetModeOfChanging(VTKViewer_ExtractUnstructuredGrid::eAdding);
     vtkUnstructuredGrid* aGrid = myVisualObj->GetUnstructuredGrid();
@@ -514,7 +517,9 @@ SMESH_DeviceActor
     if(!myExtractUnstructuredGrid->IsCellsRegistered())
       myExtractUnstructuredGrid->RegisterCell(-1);
     SetUnstructuredGrid(myVisualObj->GetUnstructuredGrid());
-  }else if(FreeEdges* aFreeEdges = dynamic_cast<FreeEdges*>(theFunctor.get())){
+  }
+  else if(FreeEdges* aFreeEdges = dynamic_cast<FreeEdges*>(theFunctor.get()))
+  {
     SMESH::Controls::FreeEdges::TBorders aBorders;
     aFreeEdges->GetBoreders(aBorders);
     vtkUnstructuredGrid* aDataSet = vtkUnstructuredGrid::New();
@@ -561,7 +566,9 @@ SMESH_DeviceActor
 
     SetUnstructuredGrid(aDataSet);
     aDataSet->Delete();
-  }else if(FreeNodes* aFreeNodes = dynamic_cast<FreeNodes*>(theFunctor.get())){
+  }
+  else if(FreeNodes* aFreeNodes = dynamic_cast<FreeNodes*>(theFunctor.get()))
+  {
     myExtractUnstructuredGrid->SetModeOfChanging(VTKViewer_ExtractUnstructuredGrid::eAdding);
     vtkIdType aNbNodes = myVisualObj->GetNbEntities(SMDSAbs_Node);
     for( vtkIdType i = 0; i < aNbNodes; i++ ){

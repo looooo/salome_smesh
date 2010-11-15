@@ -392,6 +392,14 @@
         <translation>Find Element by Point</translation>
     </message>
     <message>
+        <source>MEN_BARE_BORDER_VOLUME</source>
+        <translation>Volumes with bare border</translation>
+    </message>
+    <message>
+        <source>MEN_BARE_BORDER_FACE</source>
+        <translation>Faces with bare border</translation>
+    </message>
+    <message>
         <source>MEN_FREE_BORDER</source>
         <translation>Free Borders</translation>
     </message>
@@ -2425,6 +2433,14 @@ Consider saving your work before application crash</translation>
         <translation>Faces</translation>
     </message>
     <message>
+        <source>STB_BARE_BORDER_VOLUME</source>
+        <translation>Volumes with bare border</translation>
+    </message>
+    <message>
+        <source>STB_BARE_BORDER_FACE</source>
+        <translation>Faces with bare border</translation>
+    </message>
+    <message>
         <source>STB_FREE_BORDER</source>
         <translation>Free Borders</translation>
     </message>
@@ -2959,6 +2975,14 @@ Consider saving your work before application crash</translation>
     <message>
         <source>TOP_FACES</source>
         <translation>Faces</translation>
+    </message>
+    <message>
+        <source>TOP_BARE_BORDER_VOLUME</source>
+        <translation>Volumes with bare border</translation>
+    </message>
+    <message>
+        <source>TOP_BARE_BORDER_FACE</source>
+        <translation>Faces with bare border</translation>
     </message>
     <message>
         <source>TOP_FREE_BORDER</source>
@@ -4298,6 +4322,14 @@ Please check input data and try again</translation>
     <message>
         <source>BAD_ORIENTED_VOLUME</source>
         <translation>Bad oriented volume</translation>
+    </message>
+    <message>
+        <source>BARE_BORDER_VOLUME</source>
+        <translation>Volumes with bare border</translation>
+    </message>
+    <message>
+        <source>BARE_BORDER_FACE</source>
+        <translation>Faces with bare border</translation>
     </message>
     <message>
         <source>BELONG_TO_CYLINDER</source>

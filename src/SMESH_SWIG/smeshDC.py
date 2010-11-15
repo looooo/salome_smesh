@@ -794,7 +794,8 @@ class smeshDC(SMESH._objref_SMESH_Gen):
                 return None
             pass
         elif CritType in [FT_FreeBorders, FT_FreeEdges, FT_BadOrientedVolume, FT_FreeNodes,
-                          FT_FreeFaces, FT_LinearOrQuadratic]:
+                          FT_FreeFaces, FT_LinearOrQuadratic,
+                          FT_BareBorderFace, FT_BareBorderVolume]:
             # At this point the treshold is unnecessary
             if aTreshold ==  FT_LogicalNOT:
                 aCriterion.UnaryOp = self.EnumToLong(FT_LogicalNOT)

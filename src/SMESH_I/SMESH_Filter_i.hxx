@@ -44,6 +44,7 @@ class SMESHDS_Mesh;
 namespace SMESH
 {
 
+  // ================================================================================
   namespace Controls
   {
 
@@ -123,8 +124,10 @@ namespace SMESH
       Controls::ElementsOnShapePtr    myElementsOnShapePtr; // only if myIsSubshape == false
     };
     typedef boost::shared_ptr<LyingOnGeom> LyingOnGeomPtr;
-  }
-  
+
+  } // namespace Controls
+
+  // ================================================================================
   /*
     FUNCTORS
   */
@@ -384,6 +387,32 @@ namespace SMESH
   {
   public:
     BadOrientedVolume_i();
+    FunctorType                     GetFunctorType();
+  };
+  
+  /*
+    Class       : BareBorderVolume_i
+    Description : Verify whether a mesh volume is incorrectly oriented from
+    the point of view of MED convention
+  */
+  class SMESH_I_EXPORT BareBorderVolume_i: public virtual POA_SMESH::BareBorderVolume,
+                                           public virtual Predicate_i
+  {
+  public:
+    BareBorderVolume_i();
+    FunctorType                     GetFunctorType();
+  };
+  
+  /*
+    Class       : BareBorderFace_i
+    Description : Verify whether a mesh volume is incorrectly oriented from
+    the point of view of MED convention
+  */
+  class SMESH_I_EXPORT BareBorderFace_i: public virtual POA_SMESH::BareBorderFace,
+                                           public virtual Predicate_i
+  {
+  public:
+    BareBorderFace_i();
     FunctorType                     GetFunctorType();
   };
   
@@ -935,6 +964,8 @@ namespace SMESH
     RangeOfIds_ptr            CreateRangeOfIds();
     
     BadOrientedVolume_ptr     CreateBadOrientedVolume();
+    BareBorderFace_ptr        CreateBareBorderFace();
+    BareBorderVolume_ptr      CreateBareBorderVolume();
     LinearOrQuadratic_ptr     CreateLinearOrQuadratic();
     
     GroupColor_ptr            CreateGroupColor();

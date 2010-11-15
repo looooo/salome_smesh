@@ -291,6 +291,8 @@ namespace SMESH
       case FT_LyingOnGeom:      myStream<< "aLyingOnGeom";      break;
       case FT_RangeOfIds:       myStream<< "aRangeOfIds";       break;
       case FT_BadOrientedVolume:myStream<< "aBadOrientedVolume";break;
+      case FT_BareBorderVolume: myStream<< "aBareBorderVolume"; break;
+      case FT_BareBorderFace:   myStream<< "aBareBorderFace";   break;
       case FT_LinearOrQuadratic:myStream<< "aLinearOrQuadratic";break;
       case FT_GroupColor:       myStream<< "aGroupColor";       break;
       case FT_ElemGeomType:     myStream<< "anElemGeomType";    break;

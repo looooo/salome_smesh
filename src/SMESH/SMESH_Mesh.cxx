@@ -267,7 +267,7 @@ void SMESH_Mesh::Clear()
   // update compute state of submeshes
   if ( SMESH_subMesh *sm = GetSubMeshContaining( GetShapeToMesh() ) ) {
     SMESH_subMeshIteratorPtr smIt = sm->getDependsOnIterator(/*includeSelf=*/true,
-                                                             /*complexShapeFirst=*/false);
+                                                             /*complexShapeFirst=*/true);
     while ( smIt->more() ) {
       sm = smIt->next();
       sm->ComputeStateEngine( SMESH_subMesh::CHECK_COMPUTE_STATE );

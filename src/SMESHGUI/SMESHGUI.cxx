@@ -42,6 +42,7 @@
 #include "SMESHGUI_FilterDlg.h"
 #include "SMESHGUI_FilterLibraryDlg.h"
 #include "SMESHGUI_FindElemByPointDlg.h"
+#include "SMESHGUI_GEOMGenUtils.h"
 #include "SMESHGUI_GroupDlg.h"
 #include "SMESHGUI_GroupOnShapeDlg.h"
 #include "SMESHGUI_GroupOpDlg.h"
@@ -5452,4 +5453,33 @@ void SMESHGUI::onHypothesisEdit( int result )
   if( result == 1 )
     SMESHGUI::Modified();
   updateObjBrowser( true );
+}
+
+/*!
+ * \brief Virtual public slot
+ *
+ * This method updates visibility state
+ * Redefined to make visible geometry objects
+ */
+void SMESHGUI::initVisibilityState( SUIT_DataObject* theObject )
+{
+  // in fact, here we assume that all geometry objects presentable
+  LightApp_DataObject* anObj = dynamic_cast<LightApp_DataObject*>(theObject);
+  if (!anObj)
+    return;
+
+  SalomeApp_Application* app =
+    dynamic_cast< SalomeApp_Application* >( SUIT_Session::session()->activeApplication() );
+  if( !app )
+    return;
+
+  SalomeApp_Study* appStudy = dynamic_cast<SalomeApp_Study*>( app->activeStudy() );
+  if( !appStudy )
+    return;
+
+  _PTR(Study) aStudy = appStudy->studyDS();
+  _PTR(SObject) aSObject( aStudy->FindObjectID( anObj->entry().toLatin1().data() ) );
+  SMESH::SMESH_IDSource_var anID = SMESH::SMESH_IDSource::_narrow( SMESH::SObjectToObject( aSObject ));
+  if ( !anID->_is_nil() && anObj->visibilityState() == SUIT_DataObject::Unpresentable )
+    anObj->setVisibilityState( SUIT_DataObject::Hidden );
 }

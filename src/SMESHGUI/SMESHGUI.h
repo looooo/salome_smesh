@@ -50,6 +50,7 @@ class vtkObject;
 class QDialog;
 
 class SUIT_Desktop;
+class SUIT_DataObject;
 class SUIT_Study;
 class SUIT_ViewWindow;
 class SUIT_ResourceMgr;
@@ -190,6 +191,8 @@ protected:
                                                  unsigned long theEvent,
                                                  void* theClientData, 
                                                  void* theCallData );
+
+  virtual void                    initVisibilityState( SUIT_DataObject* );
 
 private:
   void                            OnEditDelete();

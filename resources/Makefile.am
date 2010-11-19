@@ -104,6 +104,8 @@ dist_salomeres_DATA = \
 	mesh_volume_3d.png \
 	bare_border_volume.png \
 	bare_border_face.png \
+	over_constrained_volume.png \
+	over_constrained_face.png \
 	mesh_wireframe.png \
 	mesh_points.png \
 	mesh_wrap.png \

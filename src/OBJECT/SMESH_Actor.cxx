@@ -779,6 +779,10 @@ SetControlMode(eControl theMode,
       myFunctor.reset(new SMESH::Controls::BareBorderFace());
       myControlActor = my2DActor;
       break;
+    case eOverConstrainedFace:
+      myFunctor.reset(new SMESH::Controls::OverConstrainedFace());
+      myControlActor = my2DActor;
+      break;
     case eMultiConnection:
       myFunctor.reset(new SMESH::Controls::MultiConnection());
       myControlActor = my1DActor;
@@ -849,6 +853,12 @@ SetControlMode(eControl theMode,
       myControlActor = my3DActor;
       break;
     }
+    case eOverConstrainedVolume:
+    {
+      myFunctor.reset(new SMESH::Controls::OverConstrainedVolume());
+      myControlActor = my3DActor;
+      break;
+    }
     case eMinimumAngle:
     {
       SMESH::Controls::MinimumAngle* aControl = new SMESH::Controls::MinimumAngle();
@@ -890,20 +900,22 @@ SetControlMode(eControl theMode,
         my1DExtActor->SetExtControlMode(myFunctor);
         break;
       case eFreeFaces:
-        my2DExtActor->SetExtControlMode(myFunctor);
-        break;
       case eBareBorderFace:
+      case eOverConstrainedFace:
         my2DExtActor->SetExtControlMode(myFunctor);
         break;
       case eBareBorderVolume:
+      case eOverConstrainedVolume:
         my3DExtActor->SetExtControlMode(myFunctor);
         break;
       case eLength2D:
       case eMultiConnection2D:
         my1DExtActor->SetExtControlMode(myFunctor,myScalarBarActor,myLookupTable);
+        UpdateDistribution();
         break;
       default:
         myControlActor->SetControlMode(myFunctor,myScalarBarActor,myLookupTable);
+        UpdateDistribution();
       }
     }
 
@@ -1268,9 +1280,11 @@ void SMESH_ActorDef::SetVisibility(int theMode, bool theIsUpdateRepersentation){
         break;
       case eFreeFaces:
       case eBareBorderFace:
+      case eOverConstrainedFace:
         my2DExtActor->VisibilityOn();
         break;
       case eBareBorderVolume:
+      case eOverConstrainedVolume:
         my3DExtActor->VisibilityOn();
         break;
       case eLength2D:
@@ -1998,7 +2012,7 @@ void SMESH_ActorDef::UpdateScalarBar()
   myScalarBarActor->SetDistributionColoringType(coloringType);
   
   QColor distributionColor = mgr->colorValue("SMESH", "distribution_color",
-					     QColor(255, 255, 255));
+                                             QColor(255, 255, 255));
   double rgb[3];
   rgb[0]= distributionColor.red()/255.;
   rgb[1]= distributionColor.green()/255.;
@@ -2006,6 +2020,25 @@ void SMESH_ActorDef::UpdateScalarBar()
   myScalarBarActor->SetDistributionColor(rgb);
 
   
+}
+
+void SMESH_ActorDef::UpdateDistribution()
+{
+  if(SMESH::Controls::NumericalFunctor* fun =
+     dynamic_cast<SMESH::Controls::NumericalFunctor*>(myFunctor.get()))
+  {
+    int nbIntervals = myScalarBarActor->GetMaximumNumberOfColors();
+    std::vector<int> nbEvents;
+    std::vector<double> funValues;
+    SMESH_VisualObjDef::TEntityList elems;
+    if ( ! dynamic_cast<SMESH_MeshObj*>(myVisualObj.get()))
+      dynamic_cast<SMESH_VisualObjDef*>(myVisualObj.get())->GetEntities( fun->GetType(), elems );
+    std::vector<int> elemIds;
+    for ( SMESH_VisualObjDef::TEntityList::iterator e = elems.begin(); e != elems.end(); ++e)
+      elemIds.push_back( (*e)->GetID());
+    fun->GetHistogram(nbIntervals, nbEvents, funValues, elemIds);
+    myScalarBarActor->SetDistribution(nbEvents);
+  }
 }
 
 void SMESH_ActorDef::SetQuadratic2DRepresentation(EQuadratic2DRepresentation theMode)

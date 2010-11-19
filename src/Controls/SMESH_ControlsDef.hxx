@@ -127,9 +127,10 @@ namespace SMESH{
       virtual void SetMesh( const SMDS_Mesh* theMesh );
       virtual double GetValue( long theElementId );
       virtual double GetValue(const TSequenceOfXYZ& thePoints) { return -1.0;};
-      void GetHistogram(int                  nbIntervals,
-                        std::vector<int>&    nbEvents,
-                        std::vector<double>& funValues);
+      void GetHistogram(int                   nbIntervals,
+                        std::vector<int>&     nbEvents,
+                        std::vector<double>&  funValues,
+                        const std::vector<int>& elements);
       virtual SMDSAbs_ElementType GetType() const = 0;
       virtual double GetBadRate( double Value, int nbNodes ) const = 0;
       long  GetPrecision() const;
@@ -408,6 +409,37 @@ namespace SMESH{
       std::vector< const SMDS_MeshNode* > myLinkNodes;
     };
     typedef boost::shared_ptr<BareBorderFace> BareBorderFacePtr;
+
+    /*
+      OverConstrainedVolume
+    */
+    class SMESHCONTROLS_EXPORT OverConstrainedVolume: public Predicate
+    {
+    public:
+      OverConstrainedVolume():myMesh(0) {}
+      virtual void SetMesh( const SMDS_Mesh* theMesh ) { myMesh = theMesh; }
+      virtual SMDSAbs_ElementType GetType() const      { return SMDSAbs_Volume; }
+      virtual bool IsSatisfy( long theElementId );
+    protected:
+      const SMDS_Mesh* myMesh;
+    };
+    typedef boost::shared_ptr<OverConstrainedVolume> OverConstrainedVolumePtr;
+
+    /*
+      OverConstrainedFace
+    */
+    class SMESHCONTROLS_EXPORT OverConstrainedFace: public Predicate
+    {
+    public:
+      OverConstrainedFace():myMesh(0) {}
+      virtual void SetMesh( const SMDS_Mesh* theMesh ) { myMesh = theMesh; }
+      virtual SMDSAbs_ElementType GetType() const      { return SMDSAbs_Face; }
+      virtual bool IsSatisfy( long theElementId );
+    protected:
+      const SMDS_Mesh* myMesh;
+      std::vector< const SMDS_MeshNode* > myLinkNodes;
+    };
+    typedef boost::shared_ptr<OverConstrainedFace> OverConstrainedFacePtr;
 
     /*
       Class       : FreeEdges

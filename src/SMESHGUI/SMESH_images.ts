@@ -466,6 +466,14 @@
             <translation>bare_border_face.png</translation>
         </message>
         <message>
+            <source>ICON_OVER_CONSTRAINED_VOLUME</source>
+            <translation>over_constrained_volume.png</translation>
+        </message>
+        <message>
+            <source>ICON_OVER_CONSTRAINED_FACE</source>
+            <translation>over_constrained_face.png</translation>
+        </message>
+        <message>
             <source>ICON_WARP</source>
             <translation>mesh_wrap.png</translation>
         </message>

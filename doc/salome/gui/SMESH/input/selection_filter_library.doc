@@ -149,6 +149,10 @@ one element of mesh only. See also a
 <b>Faces with bare border</b> selects 2D mesh elements having a free border without an edge on it.
 See also \ref bare_border_faces_page "Bare border faces quality control".
 </li><li>
+<b>Over-constrained faces</b> selects 2D mesh elements having only one border shared 
+with other 2D elements.
+See also \ref over_constrained_faces_page "Over-constrained faces quality control".
+</li><li>
 <b>Borders at Multi-Connections 2D</b> selects cells consisting of edges belonging to
 several elements of mesh. The number of mesh elements should be more, less or equal
 (within a given <b>Tolerance</b>) to the predefined <b>Threshold Value</b>.
@@ -184,6 +188,10 @@ diagonals with a value of length, which is more, less or equal
 </li><li>
 <b>Bad oriented volume</b> selects mesh volumes, which are incorrectly oriented from
 the point of view of MED convention.
+</li><li>
+<b>Over-constrained volumes</b> selects mesh volumes having only one border shared 
+with other volumes.
+See also \ref over_constrained_volumes_page "Over-constrained volumes quality control".
 </li><li>
 <b>Volumes with bare border</b> selects 3D mesh elements having a free border without a face on it.
 See also \ref bare_border_volumes_page "Bare border volumes quality control".

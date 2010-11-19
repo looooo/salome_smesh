@@ -1172,6 +1172,8 @@ void SMESHGUI_FilterTable::SetCriterion (const int                       theRow,
       theCriterion.Type != SMESH::FT_BadOrientedVolume &&
       theCriterion.Type != SMESH::FT_BareBorderFace &&
       theCriterion.Type != SMESH::FT_BareBorderVolume &&
+      theCriterion.Type != SMESH::FT_OverConstrainedFace &&
+      theCriterion.Type != SMESH::FT_OverConstrainedVolume &&
       theCriterion.Type != SMESH::FT_LinearOrQuadratic)
     aTable->item( theRow, 2 )->setText(QString("%1").arg(theCriterion.Threshold, 0, 'g', 15));
   else
@@ -1332,7 +1334,9 @@ void SMESHGUI_FilterTable::updateAdditionalWidget()
                    aCriterion != SMESH::FT_FreeFaces &&
                    aCriterion != SMESH::FT_BadOrientedVolume &&
                    aCriterion != SMESH::FT_BareBorderFace &&
-                   aCriterion != SMESH::FT_BareBorderVolume);
+                   aCriterion != SMESH::FT_BareBorderVolume &&
+                   aCriterion != SMESH::FT_OverConstrainedFace &&
+                   aCriterion != SMESH::FT_OverConstrainedVolume);
 
   if (!myAddWidgets.contains(anItem))
   {
@@ -1509,9 +1513,11 @@ void SMESHGUI_FilterTable::onCriterionChanged (const int row, const int col, con
   if (aType == SMESH::NODE && aCriterionType == SMESH::FT_FreeNodes ||
       aType == SMESH::EDGE && aCriterionType == SMESH::FT_FreeBorders ||
       aType == SMESH::FACE && (aCriterionType == SMESH::FT_BareBorderFace ||
+                               aCriterionType == SMESH::FT_OverConstrainedFace ||
                                aCriterionType == SMESH::FT_FreeEdges ||
                                aCriterionType == SMESH::FT_FreeFaces) ||
       aType == SMESH::VOLUME && (aCriterionType == SMESH::FT_BadOrientedVolume ||
+                                 aCriterionType == SMESH::FT_OverConstrainedVolume ||
                                  aCriterionType == SMESH::FT_BareBorderVolume) ||
       aCriterionType == SMESH::FT_LinearOrQuadratic ||
       aCriterionType == SMESH::FT_GroupColor ||
@@ -1796,6 +1802,7 @@ const QMap<int, QString>& SMESHGUI_FilterTable::getCriteria (const int theType) 
       aCriteria[ SMESH::FT_MultiConnection2D  ] = tr("MULTI2D_BORDERS");
       aCriteria[ SMESH::FT_FreeFaces          ] = tr("FREE_FACES");
       aCriteria[ SMESH::FT_BareBorderFace     ] = tr("BARE_BORDER_FACE");
+      aCriteria[ SMESH::FT_OverConstrainedFace] = tr("OVER_CONSTRAINED_FACE");
       aCriteria[ SMESH::FT_LinearOrQuadratic  ] = tr("LINEAR");
       aCriteria[ SMESH::FT_GroupColor         ] = tr("GROUP_COLOR");
       aCriteria[ SMESH::FT_ElemGeomType       ] = tr("GEOM_TYPE");
@@ -1807,17 +1814,18 @@ const QMap<int, QString>& SMESHGUI_FilterTable::getCriteria (const int theType) 
     static QMap<int, QString> aCriteria;
     if (aCriteria.isEmpty())
     {
-      aCriteria[ SMESH::FT_AspectRatio3D      ] = tr("ASPECT_RATIO_3D");
-      aCriteria[ SMESH::FT_RangeOfIds         ] = tr("RANGE_OF_IDS");
-      aCriteria[ SMESH::FT_BelongToGeom       ] = tr("BELONG_TO_GEOM");
-      aCriteria[ SMESH::FT_LyingOnGeom        ] = tr("LYING_ON_GEOM");
-      aCriteria[ SMESH::FT_BadOrientedVolume  ] = tr("BAD_ORIENTED_VOLUME");
-      aCriteria[ SMESH::FT_BareBorderVolume   ] = tr("BARE_BORDER_VOLUME");
-      aCriteria[ SMESH::FT_Volume3D           ] = tr("VOLUME_3D");
-      aCriteria[ SMESH::FT_MaxElementLength3D ] = tr("MAX_ELEMENT_LENGTH_3D");
-      aCriteria[ SMESH::FT_LinearOrQuadratic  ] = tr("LINEAR");
-      aCriteria[ SMESH::FT_GroupColor         ] = tr("GROUP_COLOR");
-      aCriteria[ SMESH::FT_ElemGeomType       ] = tr("GEOM_TYPE");
+      aCriteria[ SMESH::FT_AspectRatio3D        ] = tr("ASPECT_RATIO_3D");
+      aCriteria[ SMESH::FT_RangeOfIds           ] = tr("RANGE_OF_IDS");
+      aCriteria[ SMESH::FT_BelongToGeom         ] = tr("BELONG_TO_GEOM");
+      aCriteria[ SMESH::FT_LyingOnGeom          ] = tr("LYING_ON_GEOM");
+      aCriteria[ SMESH::FT_BadOrientedVolume    ] = tr("BAD_ORIENTED_VOLUME");
+      aCriteria[ SMESH::FT_BareBorderVolume     ] = tr("BARE_BORDER_VOLUME");
+      aCriteria[ SMESH::FT_OverConstrainedVolume] = tr("OVER_CONSTRAINED_VOLUME");
+      aCriteria[ SMESH::FT_Volume3D             ] = tr("VOLUME_3D");
+      aCriteria[ SMESH::FT_MaxElementLength3D   ] = tr("MAX_ELEMENT_LENGTH_3D");
+      aCriteria[ SMESH::FT_LinearOrQuadratic    ] = tr("LINEAR");
+      aCriteria[ SMESH::FT_GroupColor           ] = tr("GROUP_COLOR");
+      aCriteria[ SMESH::FT_ElemGeomType         ] = tr("GEOM_TYPE");
     }
     return aCriteria;
   }

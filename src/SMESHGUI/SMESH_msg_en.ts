@@ -400,6 +400,14 @@
         <translation>Faces with bare border</translation>
     </message>
     <message>
+        <source>MEN_OVER_CONSTRAINED_VOLUME</source>
+        <translation>Over-constrained volumes</translation>
+    </message>
+    <message>
+        <source>MEN_OVER_CONSTRAINED_FACE</source>
+        <translation>Over-constrained faces</translation>
+    </message>
+    <message>
         <source>MEN_FREE_BORDER</source>
         <translation>Free Borders</translation>
     </message>
@@ -2441,6 +2449,14 @@ Consider saving your work before application crash</translation>
         <translation>Faces with bare border</translation>
     </message>
     <message>
+        <source>STB_OVER_CONSTRAINED_VOLUME</source>
+        <translation>Over-constrained volumes</translation>
+    </message>
+    <message>
+        <source>STB_OVER_CONSTRAINED_FACE</source>
+        <translation>Over-constrained faces</translation>
+    </message>
+    <message>
         <source>STB_FREE_BORDER</source>
         <translation>Free Borders</translation>
     </message>
@@ -2983,6 +2999,14 @@ Consider saving your work before application crash</translation>
     <message>
         <source>TOP_BARE_BORDER_FACE</source>
         <translation>Faces with bare border</translation>
+    </message>
+    <message>
+        <source>TOP_OVER_CONSTRAINED_VOLUME</source>
+        <translation>Over-constrained volumes</translation>
+    </message>
+    <message>
+        <source>TOP_OVER_CONSTRAINED_FACE</source>
+        <translation>Over-constrained faces</translation>
     </message>
     <message>
         <source>TOP_FREE_BORDER</source>
@@ -4330,6 +4354,14 @@ Please check input data and try again</translation>
     <message>
         <source>BARE_BORDER_FACE</source>
         <translation>Faces with bare border</translation>
+    </message>
+    <message>
+        <source>OVER_CONSTRAINED_VOLUME</source>
+        <translation>Over-constrained volumes</translation>
+    </message>
+    <message>
+        <source>OVER_CONSTRAINED_FACE</source>
+        <translation>Over-constrained faces</translation>
     </message>
     <message>
         <source>BELONG_TO_CYLINDER</source>

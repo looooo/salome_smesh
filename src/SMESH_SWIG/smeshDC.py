@@ -795,7 +795,8 @@ class smeshDC(SMESH._objref_SMESH_Gen):
             pass
         elif CritType in [FT_FreeBorders, FT_FreeEdges, FT_BadOrientedVolume, FT_FreeNodes,
                           FT_FreeFaces, FT_LinearOrQuadratic,
-                          FT_BareBorderFace, FT_BareBorderVolume]:
+                          FT_BareBorderFace, FT_BareBorderVolume,
+                          FT_OverConstrainedFace, FT_OverConstrainedVolume]:
             # At this point the treshold is unnecessary
             if aTreshold ==  FT_LogicalNOT:
                 aCriterion.UnaryOp = self.EnumToLong(FT_LogicalNOT)
@@ -3168,7 +3169,7 @@ class Mesh:
 
     ## Generates new elements by extrusion of the elements with given ids
     #  @param IDsOfElements the list of elements ids for extrusion
-    #  @param StepVector vector, defining the direction and value of extrusion
+    #  @param StepVector vector or DirStruct, defining the direction and value of extrusion
     #  @param NbOfSteps the number of steps
     #  @param MakeGroups forces the generation of new groups from existing ones
     #  @return the list of created groups (SMESH_GroupBase) if MakeGroups=True, empty list otherwise

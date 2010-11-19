@@ -66,6 +66,8 @@ module SMESH
     FT_BadOrientedVolume,
     FT_BareBorderVolume,
     FT_BareBorderFace,
+    FT_OverConstrainedVolume,
+    FT_OverConstrainedFace,
     FT_LinearOrQuadratic,
     FT_GroupColor,
     FT_ElemGeomType,
@@ -168,7 +170,7 @@ module SMESH
   interface BadOrientedVolume: Predicate {};
 
   /*!
-   * Logical functor (predicate) "Volumes with bare border" and "Faces with bare border".
+   * Logical functor (predicate) "Volumes with bare border".
    * Verify whether a mesh volume has a free facet without a mesh face on it
    */
   interface BareBorderVolume: Predicate {};
@@ -178,6 +180,17 @@ module SMESH
    * and without a mesh edge on it
    */
   interface BareBorderFace: Predicate {};
+
+  /*!
+   * Logical functor (predicate) "Over-constrained Volume"
+   * Verify whether a mesh volume has only one facet shared with other volumes
+   */
+  interface OverConstrainedVolume: Predicate {};
+  /*!
+   * Logical functor (predicate) "Over-constrained Face".
+   * Verify whether a mesh face has only one border shared with other faces
+   */
+  interface OverConstrainedFace: Predicate {};
 
   /*!
    * Logical functor (predicate) "Belong To Geometry".
@@ -508,6 +521,8 @@ module SMESH
     BadOrientedVolume CreateBadOrientedVolume();
     BareBorderVolume  CreateBareBorderVolume();
     BareBorderFace    CreateBareBorderFace();
+    OverConstrainedVolume CreateOverConstrainedVolume();
+    OverConstrainedFace   CreateOverConstrainedFace();
     LinearOrQuadratic CreateLinearOrQuadratic();
 
     GroupColor        CreateGroupColor();

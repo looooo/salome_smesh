@@ -418,7 +418,7 @@ SMESHGUI_Preferences_ScalarBarDlg::SMESHGUI_Preferences_ScalarBarDlg( SMESHGUI* 
   }
   
   QColor distributionColor = mgr->colorValue("SMESH", "distribution_color",
-					     QColor(255, 255, 255));
+                                             QColor(255, 255, 255));
   myMonoColorBtn->setColor(distributionColor);
   
   
@@ -509,18 +509,8 @@ bool SMESHGUI_Preferences_ScalarBarDlg::onApply()
   myScalarBarActor->SetLabelTextProperty( aLabelsTextPrp );
 
   myScalarBarActor->SetNumberOfLabels( myLabelsSpin->value() );
-  if( myColorsSpin->value() != myScalarBarActor->GetMaximumNumberOfColors() ) {
-    myScalarBarActor->SetMaximumNumberOfColors( myColorsSpin->value() );
-    SMESH::Controls::FunctorPtr fn = myActor->GetFunctor();       
-    SMESH::Controls::NumericalFunctor* aNumericalFunctor = dynamic_cast<SMESH::Controls::NumericalFunctor*>(fn.get());
-    if( aNumericalFunctor ) {
-      int nbIntervals = myColorsSpin->value();
-      std::vector<int> nbEvents;
-      std::vector<double> funValues;
-      aNumericalFunctor->GetHistogram(nbIntervals, nbEvents, funValues);
-      myScalarBarActor->SetDistribution(nbEvents);
-    }
-  }
+  if( myColorsSpin->value() != myScalarBarActor->GetMaximumNumberOfColors() )
+    myActor->UpdateDistribution();
 
   if ( myHorizRadioBtn->isChecked() )
     myScalarBarActor->SetOrientationToHorizontal();
@@ -655,17 +645,17 @@ void SMESHGUI_Preferences_ScalarBarDlg::onSelectionChanged()
         myIniH = myScalarBarActor->GetHeight();
         setOriginAndSize( myIniX, myIniY, myIniW, myIniH );
 
-	myDistributionGrp->setChecked((bool)myScalarBarActor->GetDistributionVisibility());
-	int coloringType = myScalarBarActor->GetDistributionColoringType();
-	myScalarBarActor->GetDistributionColor( aTColor );
-	myMonoColorBtn->setColor( QColor( (int)( aTColor[0]*255 ), (int)( aTColor[1]*255 ), (int)( aTColor[2]*255 ) ) );
-	if ( coloringType == SMESH_MONOCOLOR_TYPE ) {
-	  myDMonoColor->setChecked(true);
-	  onDistributionChanged(myDistribColorGrp->id(myDMonoColor));	 
-	} else {
-	  myDMultiColor->setChecked(true);
-	  onDistributionChanged(myDistribColorGrp->id(myDMultiColor));
-	}
+        myDistributionGrp->setChecked((bool)myScalarBarActor->GetDistributionVisibility());
+        int coloringType = myScalarBarActor->GetDistributionColoringType();
+        myScalarBarActor->GetDistributionColor( aTColor );
+        myMonoColorBtn->setColor( QColor( (int)( aTColor[0]*255 ), (int)( aTColor[1]*255 ), (int)( aTColor[2]*255 ) ) );
+        if ( coloringType == SMESH_MONOCOLOR_TYPE ) {
+          myDMonoColor->setChecked(true);
+          onDistributionChanged(myDistribColorGrp->id(myDMonoColor));    
+        } else {
+          myDMultiColor->setChecked(true);
+          onDistributionChanged(myDistribColorGrp->id(myDMultiColor));
+        }
         myRangeGrp->setEnabled( true );
         myFontGrp->setEnabled( true );
         myLabColorGrp->setEnabled( true );

@@ -762,6 +762,10 @@
       type = QObject::tr( "BARE_BORDER_VOLUME" );
     else if ( dynamic_cast< SMESH::Controls::BareBorderFace* >( f.get() ) )
       type = QObject::tr( "BARE_BORDER_FACE" );
+    else if ( dynamic_cast< SMESH::Controls::OverConstrainedVolume* >( f.get() ) )
+      type = QObject::tr( "OVER_CONSTRAINED_VOLUME" );
+    else if ( dynamic_cast< SMESH::Controls::OverConstrainedFace* >( f.get() ) )
+      type = QObject::tr( "OVER_CONSTRAINED_FACE" );
     return type;
   }
 
@@ -782,10 +786,23 @@
           if ( aScalarBarActor && aFunctor ) {
             SMESH::Controls::NumericalFunctor* aNumFun = dynamic_cast<SMESH::Controls::NumericalFunctor*>( aFunctor.get() );
             if ( aNumFun ) {
+              std::vector<int> elements;
+              SMESH::SMESH_Mesh_var mesh = SMESH::IObjectToInterface<SMESH::SMESH_Mesh>(anIO);
+              if ( mesh->_is_nil() ) {
+                SMESH::SMESH_IDSource_var idSource =
+                  SMESH::IObjectToInterface<SMESH::SMESH_IDSource>(anIO);
+                if ( !idSource->_is_nil() )
+                {
+                  SMESH::long_array_var ids = idSource->GetIDs();
+                  elements.resize( ids->length() );
+                  for ( unsigned i = 0; i < elements.size(); ++i )
+                    elements[i] = ids[i];
+                }
+              }
               int nbRanges = aScalarBarActor->GetMaximumNumberOfColors();
               std::vector<int>    nbEvents;
               std::vector<double> funValues;
-              aNumFun->GetHistogram( nbRanges, nbEvents, funValues );
+              aNumFun->GetHistogram( nbRanges, nbEvents, funValues, elements );
               QString anInitialPath = "";
               if ( SUIT_FileDlg::getLastVisitedPath().isEmpty() )
                 anInitialPath = QDir::currentPath();
@@ -829,11 +846,11 @@
     if ( selected.Extent() == 1 ) {
       Handle(SALOME_InteractiveObject) anIO = selected.First();
       if ( anIO->hasEntry() ) {
-	SMESH_Actor* anActor = SMESH::FindActorByEntry( anIO->getEntry() );
-	if ( anActor && anActor->GetScalarBarActor() && anActor->GetControlMode() != SMESH_Actor::eNone ) {
-	  SMESH_ScalarBarActor *aScalarBarActor = anActor->GetScalarBarActor();
-	  aScalarBarActor->SetDistributionVisibility(!aScalarBarActor->GetDistributionVisibility());
-	}
+        SMESH_Actor* anActor = SMESH::FindActorByEntry( anIO->getEntry() );
+        if ( anActor && anActor->GetScalarBarActor() && anActor->GetControlMode() != SMESH_Actor::eNone ) {
+          SMESH_ScalarBarActor *aScalarBarActor = anActor->GetScalarBarActor();
+          aScalarBarActor->SetDistributionVisibility(!aScalarBarActor->GetDistributionVisibility());
+        }
       }
     }
   }
@@ -1186,6 +1203,12 @@
             break;
           case 6025:
             aControl = SMESH_Actor::eBareBorderFace;
+            break;
+          case 6026:
+            aControl = SMESH_Actor::eOverConstrainedVolume;
+            break;
+          case 6027:
+            aControl = SMESH_Actor::eOverConstrainedFace;
             break;
           }
           anActor->SetControlMode(aControl);
@@ -2964,6 +2987,8 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
   case 6023:
   case 6024:
   case 6025:
+  case 6026:
+  case 6027:
     if ( vtkwnd ) {
 
       LightApp_SelectionMgr* mgr = selectionMgr();
@@ -3207,6 +3232,8 @@ void SMESHGUI::initialize( CAM_Application* app )
   createSMESHAction( 6023, "MAX_ELEMENT_LENGTH_3D", "ICON_MAX_ELEMENT_LENGTH_3D", 0, true );
   createSMESHAction( 6024, "BARE_BORDER_VOLUME","ICON_BARE_BORDER_VOLUME", 0, true );
   createSMESHAction( 6025, "BARE_BORDER_FACE","ICON_BARE_BORDER_FACE", 0, true );
+  createSMESHAction( 6026, "OVER_CONSTRAINED_VOLUME","ICON_OVER_CONSTRAINED_VOLUME", 0, true );
+  createSMESHAction( 6027, "OVER_CONSTRAINED_FACE","ICON_OVER_CONSTRAINED_FACE", 0, true );
   createSMESHAction( 6003, "FREE_BORDER",     "ICON_FREE_EDGE_2D",  0, true );
   createSMESHAction( 6004, "CONNECTION",      "ICON_CONNECTION",    0, true );
   createSMESHAction( 6005, "FREE_NODE",       "ICON_FREE_NODE",     0, true );
@@ -3379,6 +3406,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   createMenu( 6004, edgeId, -1 );
   createMenu( 6021, faceId, -1 );
   createMenu( 6025, faceId, -1 );
+  createMenu( 6027, faceId, -1 );
   createMenu( 6018, faceId, -1 );
   createMenu( 6019, faceId, -1 );
   createMenu( 6011, faceId, -1 );
@@ -3392,6 +3420,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   createMenu( 6009, volumeId, -1 );
   createMenu( 6023, volumeId, -1 );
   createMenu( 6024, volumeId, -1 );
+  createMenu( 6026, volumeId, -1 );
 
   createMenu( 4000, addId, -1 );
   createMenu( 4009, addId, -1 );
@@ -3486,6 +3515,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   createTool( separator(), ctrlTb );
   createTool( 6021, ctrlTb );
   createTool( 6025, ctrlTb );
+  createTool( 6027, ctrlTb );
   createTool( 6018, ctrlTb );
   createTool( 6019, ctrlTb );
   createTool( 6011, ctrlTb );
@@ -3500,6 +3530,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   createTool( 6009, ctrlTb );
   createTool( 6023, ctrlTb );
   createTool( 6024, ctrlTb );
+  createTool( 6026, ctrlTb );
   createTool( separator(), ctrlTb );
 
   createTool( 4000, addRemTb );
@@ -3847,6 +3878,10 @@ void SMESHGUI::initialize( CAM_Application* app )
   popupMgr()->setRule( action( 6025 ), aMeshInVtkHasFaces, QtxPopupMgr::VisibleRule );
   popupMgr()->setRule( action( 6025 ), "controlMode = 'eBareBorderFace'", QtxPopupMgr::ToggleRule );
 
+  popupMgr()->insert ( action( 6027 ), aSubId, -1 ); // OVER_CONSTRAINED_FACE
+  popupMgr()->setRule( action( 6027 ), aMeshInVtkHasFaces, QtxPopupMgr::VisibleRule );
+  popupMgr()->setRule( action( 6027 ), "controlMode = 'eOverConstrainedFace'", QtxPopupMgr::ToggleRule );
+
   aSubId = popupMgr()->insert( tr( "MEN_VOLUME_CTRL" ), anId, -1 ); // VOLUME CONTROLS
 
   popupMgr()->insert ( action( 6017 ), aSubId, -1 ); // ASPECT_3D
@@ -3864,6 +3899,10 @@ void SMESHGUI::initialize( CAM_Application* app )
   popupMgr()->insert ( action( 6024 ), aSubId, -1 ); // BARE_BORDER_VOLUME
   popupMgr()->setRule( action( 6024 ), aMeshInVtkHasVolumes, QtxPopupMgr::VisibleRule );
   popupMgr()->setRule( action( 6024 ), "controlMode = 'eBareBorderVolume'", QtxPopupMgr::ToggleRule );
+
+  popupMgr()->insert ( action( 6026 ), aSubId, -1 ); // OVER_CONSTRAINED_VOLUME
+  popupMgr()->setRule( action( 6026 ), aMeshInVtkHasVolumes, QtxPopupMgr::VisibleRule );
+  popupMgr()->setRule( action( 6026 ), "controlMode = 'eOverConstrainedVolume'", QtxPopupMgr::ToggleRule );
 
   popupMgr()->insert( separator(), anId, -1 );
 

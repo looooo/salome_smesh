@@ -310,12 +310,6 @@ SMESH_DeviceActor
         double aValue = aNumericalFunctor->GetValue(anObjId);
         aScalars->SetValue(i,aValue);
       }
-      int nbIntervals = theScalarBarActor->GetMaximumNumberOfColors();
-      std::vector<int> nbEvents;
-      std::vector<double> funValues;
-      aNumericalFunctor->GetHistogram(nbIntervals, nbEvents, funValues);
-      theScalarBarActor->SetDistribution(nbEvents);
-
     }else if(Predicate* aPredicate = dynamic_cast<Predicate*>(theFunctor.get())){
       for(vtkIdType i = 0; i < aNbCells; i++){
         vtkIdType anId = myExtractUnstructuredGrid->GetInputId(i);
@@ -475,16 +469,6 @@ SMESH_DeviceActor
       myMergeFilter->SetScalars(aDataSet);
       aDataSet->Delete();
     }
-    
-    //Set Distribution 
-    if(NumericalFunctor* aNumericalFunctor = dynamic_cast<NumericalFunctor*>(theFunctor.get())){
-      int nbIntervals = theScalarBarActor->GetMaximumNumberOfColors();
-      std::vector<int> nbEvents;
-      std::vector<double> funValues;
-      aNumericalFunctor->GetHistogram(nbIntervals, nbEvents, funValues);
-      theScalarBarActor->SetDistribution(nbEvents);
-    }
-    
   }
   GetMapper()->SetScalarVisibility(anIsInitialized);
   theScalarBarActor->SetVisibility(anIsInitialized);
@@ -500,10 +484,12 @@ SMESH_DeviceActor
   myVisualObj->UpdateFunctor(theFunctor);
 
   using namespace SMESH::Controls;
-  if ( dynamic_cast<FreeBorders*>(theFunctor.get()) ||
-       dynamic_cast<FreeFaces*>(theFunctor.get())   ||
-       dynamic_cast<BareBorderVolume*>(theFunctor.get())||
-       dynamic_cast<BareBorderFace*>(theFunctor.get()))
+  if ( dynamic_cast<FreeBorders          *>(theFunctor.get()) ||
+       dynamic_cast<FreeFaces            *>(theFunctor.get()) ||
+       dynamic_cast<BareBorderVolume     *>(theFunctor.get()) ||
+       dynamic_cast<BareBorderFace       *>(theFunctor.get()) ||
+       dynamic_cast<OverConstrainedVolume*>(theFunctor.get()) ||
+       dynamic_cast<OverConstrainedFace  *>(theFunctor.get()))
   {
     Predicate* aFreePredicate = dynamic_cast<Predicate*>(theFunctor.get());
     myExtractUnstructuredGrid->SetModeOfChanging(VTKViewer_ExtractUnstructuredGrid::eAdding);

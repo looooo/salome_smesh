@@ -127,10 +127,11 @@ namespace SMESH{
       virtual void SetMesh( const SMDS_Mesh* theMesh );
       virtual double GetValue( long theElementId );
       virtual double GetValue(const TSequenceOfXYZ& thePoints) { return -1.0;};
-      void GetHistogram(int                   nbIntervals,
-                        std::vector<int>&     nbEvents,
-                        std::vector<double>&  funValues,
-                        const std::vector<int>& elements);
+      void GetHistogram(int                     nbIntervals,
+                        std::vector<int>&       nbEvents,
+                        std::vector<double>&    funValues,
+                        const std::vector<int>& elements,
+                        const double*           minmax=0);
       virtual SMDSAbs_ElementType GetType() const = 0;
       virtual double GetBadRate( double Value, int nbNodes ) const = 0;
       long  GetPrecision() const;

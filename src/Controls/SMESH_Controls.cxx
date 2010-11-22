@@ -284,13 +284,15 @@ double NumericalFunctor::GetValue( long theId )
  *  \param nbEvents - number of mesh elements having values within i-th interval
  *  \param funValues - boundaries of intervals
  *  \param elements - elements to check vulue of; empty list means "of all"
+ *  \param minmax - boundaries of diapason of values to divide into intervals
  */
 //================================================================================
 
 void NumericalFunctor::GetHistogram(int                  nbIntervals,
                                     std::vector<int>&    nbEvents,
                                     std::vector<double>& funValues,
-                                    const vector<int>&   elements)
+                                    const vector<int>&   elements,
+                                    const double*        minmax)
 {
   if ( nbIntervals < 1 ||
        !myMesh ||
@@ -314,9 +316,17 @@ void NumericalFunctor::GetHistogram(int                  nbIntervals,
       values.insert( GetValue( *id ));
   }
 
+  if ( minmax )
+  {
+    funValues[0] = minmax[0];
+    funValues[nbIntervals] = minmax[1];
+  }
+  else
+  {
+    funValues[0] = *values.begin();
+    funValues[nbIntervals] = *values.rbegin();
+  }
   // case nbIntervals == 1
-  funValues[0] = *values.begin();
-  funValues[nbIntervals] = *values.rbegin();
   if ( nbIntervals == 1 )
   {
     nbEvents[0] = values.size();
@@ -334,15 +344,21 @@ void NumericalFunctor::GetHistogram(int                  nbIntervals,
   std::multiset< double >::iterator min = values.begin(), max;
   for ( int i = 0; i < nbIntervals; ++i )
   {
+    // find end value of i-th interval
     double r = (i+1) / double( nbIntervals );
     funValues[i+1] = funValues.front() * (1-r) + funValues.back() * r;
+
+    // count values in the i-th interval if there are any
     if ( min != values.end() && *min <= funValues[i+1] )
     {
-      max = values.upper_bound( funValues[i+1] ); // greater than funValues[i+1], or end()
+      // find the first value out of the interval
+      max = values.upper_bound( funValues[i+1] ); // max is greater than funValues[i+1], or end()
       nbEvents[i] = std::distance( min, max );
       min = max;
     }
   }
+  // add values larger than minmax[1]
+  nbEvents.back() += std::distance( min, values.end() );
 }
 
 //=======================================================================

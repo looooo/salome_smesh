@@ -509,8 +509,6 @@ bool SMESHGUI_Preferences_ScalarBarDlg::onApply()
   myScalarBarActor->SetLabelTextProperty( aLabelsTextPrp );
 
   myScalarBarActor->SetNumberOfLabels( myLabelsSpin->value() );
-  if( myColorsSpin->value() != myScalarBarActor->GetMaximumNumberOfColors() )
-    myActor->UpdateDistribution();
 
   if ( myHorizRadioBtn->isChecked() )
     myScalarBarActor->SetOrientationToHorizontal();
@@ -540,9 +538,16 @@ bool SMESHGUI_Preferences_ScalarBarDlg::onApply()
   double aMax = myMaxEdit->text().toDouble();
   vtkLookupTable* myLookupTable =
     static_cast<vtkLookupTable*>(myScalarBarActor->GetLookupTable());
+  double oldMinMax[2] = { myLookupTable->GetRange()[0], myLookupTable->GetRange()[1] };
+  bool rangeChanges = ( fabs( oldMinMax[0] - aMin ) + fabs( oldMinMax[1] - aMax ) >
+                        0.001 * ( aMax-aMin + oldMinMax[1]-oldMinMax[0] ));
   myLookupTable->SetRange( aMin, aMax );
   myLookupTable->SetNumberOfTableValues(myColorsSpin->value());
   myLookupTable->Build();
+
+  if( myColorsSpin->value() != myScalarBarActor->GetMaximumNumberOfColors() || rangeChanges)
+    myActor->UpdateDistribution();
+
   SMESH::RepaintCurrentView();
   return true;
 }

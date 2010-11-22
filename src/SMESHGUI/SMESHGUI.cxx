@@ -140,6 +140,7 @@
 #include <vtkRenderer.h>
 #include <vtkPlane.h>
 #include <vtkCallbackCommand.h>
+#include <vtkLookupTable.h>
 
 // SALOME KERNEL includes
 #include <SALOMEDS_Study.hxx>
@@ -799,10 +800,13 @@
                     elements[i] = ids[i];
                 }
               }
-              int nbRanges = aScalarBarActor->GetMaximumNumberOfColors();
+              int nbIntervals = aScalarBarActor->GetMaximumNumberOfColors();
+              vtkLookupTable* lookupTable =
+                static_cast<vtkLookupTable*>(aScalarBarActor->GetLookupTable());
+              double * minmax = lookupTable->GetRange();
               std::vector<int>    nbEvents;
               std::vector<double> funValues;
-              aNumFun->GetHistogram( nbRanges, nbEvents, funValues, elements );
+              aNumFun->GetHistogram( nbIntervals, nbEvents, funValues, elements, minmax );
               QString anInitialPath = "";
               if ( SUIT_FileDlg::getLastVisitedPath().isEmpty() )
                 anInitialPath = QDir::currentPath();

@@ -2036,7 +2036,9 @@ void SMESH_ActorDef::UpdateDistribution()
     std::vector<int> elemIds;
     for ( SMESH_VisualObjDef::TEntityList::iterator e = elems.begin(); e != elems.end(); ++e)
       elemIds.push_back( (*e)->GetID());
-    fun->GetHistogram(nbIntervals, nbEvents, funValues, elemIds);
+    vtkLookupTable* lookupTable = static_cast<vtkLookupTable*>(myScalarBarActor->GetLookupTable());
+    double * range = lookupTable->GetRange();
+    fun->GetHistogram(nbIntervals, nbEvents, funValues, elemIds, range);
     myScalarBarActor->SetDistribution(nbEvents);
   }
 }

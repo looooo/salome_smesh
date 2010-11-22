@@ -38,7 +38,7 @@ class SMDS_EXPORT SMDS_MeshIDFactory:public SMDS_MeshObject
 {
 public:
   int  GetFreeID();
-  virtual void ReleaseID(int ID);
+  virtual void ReleaseID(int ID, int vtkId = -1);
   virtual void Clear();
 
   void SetMesh(SMDS_Mesh *mesh);

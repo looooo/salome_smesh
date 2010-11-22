@@ -126,7 +126,7 @@ SMDS_Mesh::SMDS_Mesh()
          myHasInverseElements(true),
          myNodeMin(0), myNodeMax(0),
          myNodePool(0), myEdgePool(0), myFacePool(0), myVolumePool(0),
-         myModified(false), myRemovedNodes(false), myChangedNodes(false),
+         myModified(false), myModifTime(0), myCompactTime(0),
          xmin(0), xmax(0), ymin(0), ymax(0), zmin(0), zmax(0)
 {
   myMeshId = _meshList.size();         // --- index of the mesh to push back in the vector
@@ -147,7 +147,7 @@ SMDS_Mesh::SMDS_Mesh()
 
   myNodes.clear();
   myCells.clear();
-  myCellIdSmdsToVtk.clear();
+  //myCellIdSmdsToVtk.clear();
   myCellIdVtkToSmds.clear();
   myGrid = SMDS_UnstructuredGrid::New();
   myGrid->setSMDS_mesh(this);
@@ -158,6 +158,7 @@ SMDS_Mesh::SMDS_Mesh()
   myGrid->SetPoints( points );
   points->Delete();
   myGrid->BuildLinks();
+  this->Modified();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1309,15 +1310,74 @@ SMDS_MeshVolume* SMDS_Mesh::AddPolyhedralVolume
   return v;
 }
 
+SMDS_MeshVolume* SMDS_Mesh::AddVolumeFromVtkIds(const std::vector<int>& vtkNodeIds)
+{
+  int ID = myElementIDFactory->GetFreeID();
+  SMDS_MeshVolume * v = SMDS_Mesh::AddVolumeFromVtkIdsWithID(vtkNodeIds, ID);
+  if (v == NULL) myElementIDFactory->ReleaseID(ID);
+  return v;
+}
+
+SMDS_MeshVolume* SMDS_Mesh::AddVolumeFromVtkIdsWithID(const std::vector<int>& vtkNodeIds, const int ID)
+{
+  SMDS_VtkVolume *volvtk = myVolumePool->getNew();
+  volvtk->init(vtkNodeIds, this);
+  if (!this->registerElement(ID,volvtk))
+    {
+      this->myGrid->GetCellTypesArray()->SetValue(volvtk->getVtkId(), VTK_EMPTY_CELL);
+      myVolumePool->destroy(volvtk);
+      return 0;
+    }
+  adjustmyCellsCapacity(ID);
+  myCells[ID] = volvtk;
+  vtkIdType aVtkType = volvtk->GetVtkType();
+  switch (aVtkType)
+  {
+    case VTK_TETRA:
+      myInfo.myNbTetras++;
+      break;
+    case VTK_PYRAMID:
+      myInfo.myNbPyramids++;
+      break;
+    case VTK_WEDGE:
+      myInfo.myNbPrisms++;
+      break;
+    case VTK_HEXAHEDRON:
+      myInfo.myNbHexas++;
+      break;
+    case VTK_QUADRATIC_TETRA:
+      myInfo.myNbQuadTetras++;
+      break;
+    case VTK_QUADRATIC_PYRAMID:
+      myInfo.myNbQuadPyramids++;
+      break;
+    case VTK_QUADRATIC_WEDGE:
+      myInfo.myNbQuadPrisms++;
+      break;
+    case VTK_QUADRATIC_HEXAHEDRON:
+      myInfo.myNbQuadHexas++;
+      break;
+#ifdef VTK_HAVE_POLYHEDRON
+    case VTK_POLYHEDRON:
+      myInfo.myNbPolyhedrons++;
+      break;
+#endif
+    default:
+      myInfo.myNbPolyhedrons++;
+      break;
+  }
+  return volvtk;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 /// Registers element with the given ID, maintains inverse connections
 ///////////////////////////////////////////////////////////////////////////////
 bool SMDS_Mesh::registerElement(int ID, SMDS_MeshElement* element)
 {
   //MESSAGE("registerElement " << ID);
-  if ((ID < myCellIdSmdsToVtk.size()) && myCellIdSmdsToVtk[ID] >= 0) // --- already bound
+  if ((ID >=0) && (ID < myCells.size()) && myCells[ID]) // --- already bound
   {
-    MESSAGE(" --------------------------------- already bound "<< ID << " " << myCellIdSmdsToVtk[ID]);
+    MESSAGE(" ------------------ already bound "<< ID << " " << myCells[ID]->getVtkId());
     return false;
   }
 
@@ -1330,14 +1390,14 @@ bool SMDS_Mesh::registerElement(int ID, SMDS_MeshElement* element)
   if (vtkId == -1)
     vtkId = myElementIDFactory->SetInVtkGrid(element);
   
-  if (ID >= myCellIdSmdsToVtk.size()) // --- resize local vector
-  {
-    MESSAGE(" ------------------- resize myCellIdSmdsToVtk " << ID << " --> " << ID + SMDS_Mesh::chunkSize);
-    myCellIdSmdsToVtk.resize(ID + SMDS_Mesh::chunkSize, -1); // fill new elements with -1
-  }
-
-  myCellIdSmdsToVtk[ID] = vtkId;
-  //MESSAGE("smds:" << ID << " vtk:" << vtkId );
+//  if (ID >= myCellIdSmdsToVtk.size()) // --- resize local vector
+//  {
+//    MESSAGE(" ------------------- resize myCellIdSmdsToVtk " << ID << " --> " << ID + SMDS_Mesh::chunkSize);
+//    myCellIdSmdsToVtk.resize(ID + SMDS_Mesh::chunkSize, -1); // fill new elements with -1
+//  }
+//
+//  myCellIdSmdsToVtk[ID] = vtkId;
+//  //MESSAGE("smds:" << ID << " vtk:" << vtkId );
 
   if (vtkId >= myCellIdVtkToSmds.size()) // --- resize local vector
   {
@@ -2328,10 +2388,16 @@ SMDS_Mesh::~SMDS_Mesh()
   {
     SMDS_ElemIteratorPtr eIt = elementsIterator();
     while ( eIt->more() )
-      myElementIDFactory->ReleaseID(eIt->next()->GetID());
+      {
+        const SMDS_MeshElement *elem = eIt->next();
+        myElementIDFactory->ReleaseID(elem->GetID(), elem->getVtkId());
+      }
     SMDS_NodeIteratorPtr itn = nodesIterator();
     while (itn->more())
-      myNodeIDFactory->ReleaseID(itn->next()->GetID());
+      {
+        const SMDS_MeshNode *node = itn->next();
+        myNodeIDFactory->ReleaseID(node->GetID(), node->getVtkId());
+      }
   }
 
 //   SetOfNodes::Iterator itn(myNodes);
@@ -2380,10 +2446,16 @@ void SMDS_Mesh::Clear()
     {
     SMDS_ElemIteratorPtr eIt = elementsIterator();
     while ( eIt->more() )
-      myElementIDFactory->ReleaseID(eIt->next()->GetID());
+      {
+        const SMDS_MeshElement *elem = eIt->next();
+        myElementIDFactory->ReleaseID(elem->GetID(), elem->getVtkId());
+      }
     SMDS_NodeIteratorPtr itn = nodesIterator();
     while (itn->more())
-      myNodeIDFactory->ReleaseID(itn->next()->GetID());
+      {
+        const SMDS_MeshNode *node = itn->next();
+        myNodeIDFactory->ReleaseID(node->GetID(), node->getVtkId());
+      }
     }
   else
     {
@@ -2416,7 +2488,7 @@ void SMDS_Mesh::Clear()
     }
   myCells.clear();
   myCellIdVtkToSmds.clear();
-  myCellIdSmdsToVtk.clear();
+  //myCellIdSmdsToVtk.clear();
 
   SMDS_NodeIteratorPtr itn = nodesIterator();
   while (itn->more())
@@ -2431,8 +2503,6 @@ void SMDS_Mesh::Clear()
     (*itc)->Clear();
 
   myModified = false;
-  myRemovedNodes = false;
-  myChangedNodes = false;
   xmin = 0; xmax = 0;
   ymin = 0; ymax = 0;
   zmin = 0; zmax = 0;
@@ -2923,7 +2993,7 @@ void SMDS_Mesh::RemoveElement(const SMDS_MeshElement *        elem,
           n->RemoveInverseElement((*it));
         }
       int IdToRemove = (*it)->GetID();
-      int vtkid = this->fromSmdsToVtk(IdToRemove);
+      int vtkid = (*it)->getVtkId();
       //MESSAGE("elem Id to remove " << IdToRemove << " vtkid " << vtkid <<
       //        " vtktype " << (*it)->GetVtkType() << " type " << (*it)->GetType());
       switch ((*it)->GetType())
@@ -2939,7 +3009,7 @@ void SMDS_Mesh::RemoveElement(const SMDS_MeshElement *        elem,
               myInfo.remove(*it);
             }
           removedElems.push_back((*it));
-          myElementIDFactory->ReleaseID(IdToRemove);
+          myElementIDFactory->ReleaseID(IdToRemove, vtkid);
           delete (*it);
           break;
         case SMDSAbs_Edge:
@@ -2949,7 +3019,7 @@ void SMDS_Mesh::RemoveElement(const SMDS_MeshElement *        elem,
               myInfo.RemoveEdge(*it);
             }
           removedElems.push_back((*it));
-          myElementIDFactory->ReleaseID(IdToRemove);
+          myElementIDFactory->ReleaseID(IdToRemove, vtkid);
           if (const SMDS_VtkEdge* vtkElem = dynamic_cast<const SMDS_VtkEdge*>(*it))
             myEdgePool->destroy((SMDS_VtkEdge*) vtkElem);
           else
@@ -2962,7 +3032,7 @@ void SMDS_Mesh::RemoveElement(const SMDS_MeshElement *        elem,
               myInfo.RemoveFace(*it);
             }
           removedElems.push_back((*it));
-          myElementIDFactory->ReleaseID(IdToRemove);
+          myElementIDFactory->ReleaseID(IdToRemove, vtkid);
           if (const SMDS_VtkFace* vtkElem = dynamic_cast<const SMDS_VtkFace*>(*it))
             myFacePool->destroy((SMDS_VtkFace*) vtkElem);
           else
@@ -2975,7 +3045,7 @@ void SMDS_Mesh::RemoveElement(const SMDS_MeshElement *        elem,
               myInfo.RemoveVolume(*it);
             }
           removedElems.push_back((*it));
-          myElementIDFactory->ReleaseID(IdToRemove);
+          myElementIDFactory->ReleaseID(IdToRemove, vtkid);
           if (const SMDS_VtkVolume* vtkElem = dynamic_cast<const SMDS_VtkVolume*>(*it))
             myVolumePool->destroy((SMDS_VtkVolume*) vtkElem);
           else
@@ -3003,7 +3073,7 @@ void SMDS_Mesh::RemoveElement(const SMDS_MeshElement *        elem,
               myNodes[IdToRemove] = 0;
               myInfo.myNbNodes--;
             }
-          myNodeIDFactory->ReleaseID((*it)->GetID());
+          myNodeIDFactory->ReleaseID((*it)->GetID(), (*it)->getVtkId());
           removedNodes.push_back((*it));
           if (const SMDS_MeshNode* vtkElem = dynamic_cast<const SMDS_MeshNode*>(*it))
             myNodePool->destroy((SMDS_MeshNode*) vtkElem);
@@ -3024,6 +3094,7 @@ void SMDS_Mesh::RemoveElement(const SMDS_MeshElement *        elem,
 void SMDS_Mesh::RemoveFreeElement(const SMDS_MeshElement * elem)
 {
   int elemId = elem->GetID();
+  int vtkId = elem->getVtkId();
   //MESSAGE("SMDS_Mesh::RemoveFreeElement " << elemId);
   SMDSAbs_ElementType aType = elem->GetType();
   SMDS_MeshElement* todest = (SMDS_MeshElement*)(elem);
@@ -3036,7 +3107,7 @@ void SMDS_Mesh::RemoveFreeElement(const SMDS_MeshElement * elem)
       myNodes[elemId] = 0;
       myInfo.myNbNodes--;
       myNodePool->destroy(static_cast<SMDS_MeshNode*>(todest));
-      myNodeIDFactory->ReleaseID(elemId);
+      myNodeIDFactory->ReleaseID(elemId, vtkId);
     }
   } else {
     if (hasConstructionEdges() || hasConstructionFaces())
@@ -3044,8 +3115,6 @@ void SMDS_Mesh::RemoveFreeElement(const SMDS_MeshElement * elem)
       return;
 
     //MESSAGE("Remove free element " << elemId);
-    int vtkid = this->fromSmdsToVtk(elemId);
-
     // Remove element from <InverseElements> of its nodes
     SMDS_ElemIteratorPtr itn = elem->nodesIterator();
     while (itn->more()) {
@@ -3079,9 +3148,9 @@ void SMDS_Mesh::RemoveFreeElement(const SMDS_MeshElement * elem)
     default:
       break;
     }
-    myElementIDFactory->ReleaseID(elemId);
+    myElementIDFactory->ReleaseID(elemId, vtkId);
 
-    this->myGrid->GetCellTypesArray()->SetValue(vtkid, VTK_EMPTY_CELL);
+    this->myGrid->GetCellTypesArray()->SetValue(vtkId, VTK_EMPTY_CELL);
     // --- to do: keep vtkid in a list of reusable cells
   }
 }
@@ -3980,10 +4049,10 @@ void SMDS_Mesh::updateNodeMinMax()
 
 void SMDS_Mesh::incrementNodesCapacity(int nbNodes)
 {
-  int val = myCellIdSmdsToVtk.size();
-  MESSAGE(" ------------------- resize myCellIdSmdsToVtk " << val << " --> " << val + nbNodes);
-  myCellIdSmdsToVtk.resize(val + nbNodes, -1); // fill new elements with -1
-  val = myNodes.size();
+//  int val = myCellIdSmdsToVtk.size();
+//  MESSAGE(" ------------------- resize myCellIdSmdsToVtk " << val << " --> " << val + nbNodes);
+//  myCellIdSmdsToVtk.resize(val + nbNodes, -1); // fill new elements with -1
+  int val = myNodes.size();
   MESSAGE(" ------------------- resize myNodes " << val << " --> " << val + nbNodes);
   myNodes.resize(val +nbNodes, 0);
 }
@@ -4066,13 +4135,6 @@ int SMDS_Mesh::fromVtkToSmds(int vtkid)
   throw SALOME_Exception(LOCALIZED ("vtk id out of bounds"));
 }
 
-int SMDS_Mesh::fromSmdsToVtk(int smdsid)
-{
-  if (smdsid >= 0 && smdsid < myCellIdSmdsToVtk.size())
-    return myCellIdSmdsToVtk[smdsid];
-  throw SALOME_Exception(LOCALIZED ("smds id out of bounds"));
-}
-
 void SMDS_Mesh::updateBoundingBox()
 {
   xmin = 0; xmax = 0;
@@ -4104,4 +4166,32 @@ double SMDS_Mesh::getMaxDim()
   if ((zmax - zmin) > dmax) dmax = zmax -zmin;
   MESSAGE("getMaxDim " << dmax);
   return dmax;
+}
+
+//! modification that needs compact structure and redraw
+void SMDS_Mesh::Modified()
+{
+  if (this->myModified)
+    {
+      this->myModifTime++;
+      MESSAGE("modified");
+      myModified = false;
+    }
+}
+
+//! get last modification timeStamp
+unsigned long SMDS_Mesh::GetMTime()
+{
+  return this->myModifTime;
+}
+
+bool SMDS_Mesh::isCompacted()
+{
+  if (this->myModifTime > this->myCompactTime)
+    {
+      MESSAGE(" *** isCompacted " << myCompactTime << " < " << myModifTime);
+      this->myCompactTime = this->myModifTime;
+      return false;
+    }
+  return true;
 }

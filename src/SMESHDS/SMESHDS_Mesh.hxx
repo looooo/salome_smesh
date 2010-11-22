@@ -399,7 +399,7 @@ public:
                              std::vector<const SMDS_MeshNode*> nodes,
                              std::vector<int>                  quantities);
   bool ModifyCellNodes(int smdsVolId, std::map<int,int> localClonedNodeIds);
-  bool extrudeVolumeFromFace(int smdsVolId, std::map<int,int> localClonedNodeIds);
+  bool extrudeVolumeFromFace(int vtkVolId, std::map<int,int>& localClonedNodeIds);
   void Renumber (const bool isNodes, const int startID=1, const int deltaID=1);
 
   void SetNodeInVolume(SMDS_MeshNode * aNode, const TopoDS_Shell & S);

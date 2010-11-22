@@ -186,7 +186,8 @@ vtkIdType SMESH_VisualObjDef::GetElemVTKId( int theObjID )
 		TMapOfIds::const_iterator i = mySMDS2VTKElems.find(theObjID);
 		return i == mySMDS2VTKElems.end() ? -1 : i->second;
 	}
-  return this->GetMesh()->fromSmdsToVtk(theObjID);
+  return this->GetMesh()->FindElement(theObjID)->getVtkId();
+  //return this->GetMesh()->fromSmdsToVtk(theObjID);
 }
 
 //=================================================================================
@@ -263,6 +264,11 @@ void SMESH_VisualObjDef::buildPrs(bool buildGrid)
   else
   {
   	myLocalGrid = false;
+  	if (!GetMesh()->isCompacted())
+  	  {
+  	    MESSAGE("*** buildPrs ==> compactMesh!");
+  	    GetMesh()->compactMesh();
+  	  }
   	vtkUnstructuredGrid *theGrid = GetMesh()->getGrid();
   	myGrid->ShallowCopy(theGrid);
   	//MESSAGE(myGrid->GetReferenceCount());

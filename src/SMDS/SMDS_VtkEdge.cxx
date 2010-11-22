@@ -32,12 +32,14 @@ void SMDS_VtkEdge::init(std::vector<vtkIdType> nodeIds, SMDS_Mesh* mesh)
   if (nodeIds.size() == 3)
     aType = VTK_QUADRATIC_EDGE;
   myVtkID = grid->InsertNextLinkedCell(aType, nodeIds.size(), &nodeIds[0]);
+  mesh->setMyModified();
   //MESSAGE("SMDS_VtkEdge::init myVtkID " << myVtkID);
 }
 
 bool SMDS_VtkEdge::ChangeNodes(const SMDS_MeshNode * node1, const SMDS_MeshNode * node2)
 {
   const SMDS_MeshNode* nodes[] = { node1, node2 };
+  SMDS_Mesh::_meshList[myMeshId]->setMyModified();
   return ChangeNodes(nodes, 2);
 }
 
@@ -56,6 +58,7 @@ bool SMDS_VtkEdge::ChangeNodes(const SMDS_MeshNode* nodes[], const int nbNodes)
     {
       pts[i] = nodes[i]->getVtkId();
     }
+  SMDS_Mesh::_meshList[myMeshId]->setMyModified();
   return true;
 }
 

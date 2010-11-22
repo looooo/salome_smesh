@@ -444,6 +444,11 @@ public:
                            (std::vector<const SMDS_MeshNode*> nodes,
                             std::vector<int>                  quantities);
 
+  virtual SMDS_MeshVolume* AddVolumeFromVtkIds(const std::vector<int>& vtkNodeIds);
+
+  virtual SMDS_MeshVolume* AddVolumeFromVtkIdsWithID(const std::vector<int>& vtkNodeIds,
+                                                     const int ID);
+
   virtual void RemoveElement(const SMDS_MeshElement *        elem,
                              std::list<const SMDS_MeshElement *>& removedElems,
                              std::list<const SMDS_MeshElement *>& removedNodes,
@@ -574,13 +579,19 @@ public:
   void updateBoundingBox();
   double getMaxDim();
   int fromVtkToSmds(int vtkid);
-  int fromSmdsToVtk(int smdsid);
 
   void incrementNodesCapacity(int nbNodes);
   void incrementCellsCapacity(int nbCells);
   void adjustStructure();
   void dumpGrid(string ficdump="dumpGrid");
   static int chunkSize;
+
+  //! low level modification: add, change or remove node or element
+  inline void setMyModified() { this->myModified = true; };
+
+  void Modified();
+  unsigned long GetMTime();
+  bool isCompacted();
 
 protected:
   SMDS_Mesh(SMDS_Mesh * parent);
@@ -652,7 +663,7 @@ protected:
   SetOfCells             myCells;
 
   //! for cells only: index = ID for SMDS users, value = ID in vtkUnstructuredGrid
-  std::vector<int>       myCellIdSmdsToVtk;
+  //std::vector<int>       myCellIdSmdsToVtk;
 
   //! for cells only: index = ID in vtkUnstructuredGrid, value = ID for SMDS users
   std::vector<int>       myCellIdVtkToSmds;
@@ -663,6 +674,9 @@ protected:
   SMDS_MeshElementIDFactory *myElementIDFactory;
   SMDS_MeshInfo          myInfo;
 
+  //! use a counter to keep track of modifications
+  unsigned long myModifTime, myCompactTime;
+
   int myNodeMin;
   int myNodeMax;
 
@@ -670,9 +684,9 @@ protected:
   bool myHasConstructionFaces;
   bool myHasInverseElements;
 
-  bool myModified;     // any add remove or change of node or cell
-  bool myRemovedNodes;
-  bool myChangedNodes;
+  //! any add, remove or change of node or cell
+  bool myModified;
+
   double xmin;
   double xmax;
   double ymin;

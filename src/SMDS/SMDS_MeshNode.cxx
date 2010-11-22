@@ -295,8 +295,7 @@ void SMDS_MeshNode::setXYZ(double x, double y, double z)
   vtkPoints *points = mesh->getGrid()->GetPoints();
   points->InsertPoint(myVtkID, x, y, z);
   mesh->adjustBoundingBox(x, y, z);
-  mesh->myChangedNodes = true;
-  mesh->myModified = true;
+  mesh->setMyModified();
 }
 
 SMDSAbs_ElementType SMDS_MeshNode::GetType() const

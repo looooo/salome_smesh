@@ -90,7 +90,7 @@ bool SMESHDS_SubMesh::RemoveElement(const SMDS_MeshElement * ME, bool isElemDele
           myUnusedIdElements++;
           return true;
         }
-      MESSAGE("Try to remove an already deleted element from a submesh ");
+      //MESSAGE("Try to remove an already deleted element from a submesh ");
       return false;
     }
   MESSAGE("Try to remove an element from a complex submesh ");
@@ -118,7 +118,7 @@ void SMESHDS_SubMesh::AddNode(const SMDS_MeshNode * N)
       node->setIdInShape(myNodes.size());
       myNodes.push_back(N);
     }
-  MESSAGE("try to add node in a complex submesh " << N->GetID());
+  //MESSAGE("try to add node in a complex submesh " << N->GetID());
 }
 
 //=======================================================================
@@ -144,7 +144,7 @@ bool SMESHDS_SubMesh::RemoveNode(const SMDS_MeshNode * N, bool isNodeDeleted)
           myUnusedIdNodes++;
           return true;
         }
-      MESSAGE("Try to remove an already deleted node from a submesh");
+      //MESSAGE("Try to remove an already deleted node from a submesh");
       return false;
     }
   MESSAGE("Try to remove a node from a complex submesh");

@@ -120,7 +120,7 @@ bool SMDS_MeshElementIDFactory::BindID(int ID, SMDS_MeshElement * elem)
 //=======================================================================
 SMDS_MeshElement* SMDS_MeshElementIDFactory::MeshElement(int ID)
 {
-  if ((ID<1) || (ID>myMax) || (myMesh->myCellIdSmdsToVtk[ID]<0))
+  if ((ID<1) || (ID>=myMesh->myCells.size()))
     return NULL;
   const SMDS_MeshElement* elem = GetMesh()->FindElement(ID);
   return (SMDS_MeshElement*)(elem);
@@ -130,19 +130,19 @@ SMDS_MeshElement* SMDS_MeshElementIDFactory::MeshElement(int ID)
 //function : ReleaseID
 //purpose  : 
 //=======================================================================
-void SMDS_MeshElementIDFactory::ReleaseID(const int ID)
+void SMDS_MeshElementIDFactory::ReleaseID(int ID, int vtkId)
 {
-  if (ID < 1)
+  if (ID < 1) // TODO check case ID == O
     {
-      //MESSAGE("~~~~~~~~~~~~~~ SMDS_MeshElementIDFactory::ReleaseID ID = " << ID);
+      MESSAGE("~~~~~~~~~~~~~~ SMDS_MeshElementIDFactory::ReleaseID ID = " << ID);
       return;
     }
-  int vtkId = myMesh->myCellIdSmdsToVtk[ID];
   //MESSAGE("~~~~~~~~~~~~~~ SMDS_MeshElementIDFactory::ReleaseID smdsId vtkId " << ID << " " << vtkId);
-  if (ID >=0)
+  if (vtkId >= 0)
     {
-      myMesh->myCellIdSmdsToVtk[ID] = -1;
+      assert(vtkId < myMesh->myCellIdVtkToSmds.size());
       myMesh->myCellIdVtkToSmds[vtkId] = -1;
+      myMesh->setMyModified();
     }
   SMDS_MeshIDFactory::ReleaseID(ID);
   if (ID == myMax)
@@ -160,12 +160,17 @@ void SMDS_MeshElementIDFactory::updateMinMax() const
 {
   myMin = IntegerLast();
   myMax = 0;
-  for (int i=0; i<myMesh->myCellIdSmdsToVtk.size(); i++)
-      if (int id=myMesh->myCellIdSmdsToVtk[i] >=0)
-      {
-        if (id > myMax) myMax = id;
-        if (id < myMin) myMin = id;
-      }
+  for (int i = 0; i < myMesh->myCells.size(); i++)
+    {
+      if (myMesh->myCells[i])
+        {
+          int id = myMesh->myCells[i]->GetID();
+          if (id > myMax)
+            myMax = id;
+          if (id < myMin)
+            myMin = id;
+        }
+    }
   if (myMin == IntegerLast())
     myMin = 0;
 }
@@ -182,7 +187,8 @@ SMDS_ElemIteratorPtr SMDS_MeshElementIDFactory::elementsIterator() const
 
 void SMDS_MeshElementIDFactory::Clear()
 {
-  myMesh->myCellIdSmdsToVtk.clear();
+  //myMesh->myCellIdSmdsToVtk.clear();
+  myMesh->myCellIdVtkToSmds.clear();
   myMin = myMax = 0;
   SMDS_MeshIDFactory::Clear();
 }

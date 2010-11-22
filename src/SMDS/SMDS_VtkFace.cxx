@@ -47,6 +47,7 @@ void SMDS_VtkFace::init(std::vector<vtkIdType> nodeIds, SMDS_Mesh* mesh)
       break;
   }
   myVtkID = grid->InsertNextLinkedCell(aType, nodeIds.size(), &nodeIds[0]);
+  mesh->setMyModified();
   //MESSAGE("SMDS_VtkFace::init myVtkID " << myVtkID);
 }
 
@@ -56,6 +57,7 @@ void SMDS_VtkFace::initPoly(std::vector<vtkIdType> nodeIds, SMDS_Mesh* mesh)
   myIdInShape = -1;
   myMeshId = mesh->getMeshId();
   myVtkID = grid->InsertNextLinkedCell(VTK_POLYGON, nodeIds.size(), &nodeIds[0]);
+  mesh->setMyModified();
 }
 
 bool SMDS_VtkFace::ChangeNodes(const SMDS_MeshNode* nodes[], const int nbNodes)
@@ -73,6 +75,7 @@ bool SMDS_VtkFace::ChangeNodes(const SMDS_MeshNode* nodes[], const int nbNodes)
     {
       pts[i] = nodes[i]->getVtkId();
     }
+  SMDS_Mesh::_meshList[myMeshId]->setMyModified();
   return true;
 }
 

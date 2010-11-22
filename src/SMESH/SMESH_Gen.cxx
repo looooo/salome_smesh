@@ -159,6 +159,7 @@ bool SMESH_Gen::Compute(SMESH_Mesh &          aMesh,
       else if ( aShapesId )
         aShapesId->insert( smToCompute->GetId() );
     }
+    //aMesh.GetMeshDS()->Modified();
     return ret;
   }
   else
@@ -277,6 +278,7 @@ bool SMESH_Gen::Compute(SMESH_Mesh &          aMesh,
 
   SMESHDS_Mesh *myMesh = aMesh.GetMeshDS();
   myMesh->adjustStructure();
+  MESSAGE("*** compactMesh after compute");
   myMesh->compactMesh();
   //myMesh->adjustStructure();
   list<int> listind = myMesh->SubMeshIndices();
@@ -291,6 +293,7 @@ bool SMESH_Gen::Compute(SMESH_Mesh &          aMesh,
   MESSAGE("Number of node objects " << SMDS_MeshNode::nbNodes);
   MESSAGE("Number of cell objects " << SMDS_MeshCell::nbCells);
   //myMesh->dumpGrid();
+  //aMesh.GetMeshDS()->Modified();
   return ret;
 }
 

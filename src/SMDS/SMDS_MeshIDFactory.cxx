@@ -62,7 +62,7 @@ int SMDS_MeshIDFactory::GetFreeID()
 //function : ReleaseID
 //purpose  : 
 //=======================================================================
-void SMDS_MeshIDFactory::ReleaseID(const int ID)
+void SMDS_MeshIDFactory::ReleaseID(int ID, int vtkId)
 {
   if ( ID > 0 )
   {
@@ -87,7 +87,6 @@ void SMDS_MeshIDFactory::ReleaseID(const int ID)
       }
     }
   }
-  myMesh->myModified = true;
 }
 
 void SMDS_MeshIDFactory::Clear()

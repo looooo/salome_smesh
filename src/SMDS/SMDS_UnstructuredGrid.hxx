@@ -22,7 +22,7 @@
   #define VTK_MAXTYPE VTK_QUADRATIC_PYRAMID
 #endif
 
-#define NBMAXNEIGHBORS 10
+#define NBMAXNEIGHBORS 100
 
 // allow very huge polyhedrons in tests
 #define NBMAXNODESINCELL 5000

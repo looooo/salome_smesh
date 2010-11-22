@@ -313,11 +313,12 @@ SMESH_MeshEditor_i::RemoveElements(const SMESH::long_array & IDsOfElements)
   // Update Python script
   TPythonDump() << "isDone = " << this << ".RemoveElements( " << IDsOfElements << " )";
 
+  // Remove Elements
+  bool ret = anEditor.Remove( IdList, false );
+  myMesh->GetMeshDS()->Modified();
   if ( IDsOfElements.length() )
     myMesh->SetIsModified( true ); // issue 0020693
-
-  // Remove Elements
-  return anEditor.Remove( IdList, false );
+  return ret;
 }
 
 //=============================================================================
@@ -338,10 +339,11 @@ CORBA::Boolean SMESH_MeshEditor_i::RemoveNodes(const SMESH::long_array & IDsOfNo
   // Update Python script
   TPythonDump() << "isDone = " << this << ".RemoveNodes( " << IDsOfNodes << " )";
 
+  bool ret = anEditor.Remove( IdList, true );
+  myMesh->GetMeshDS()->Modified();
   if ( IDsOfNodes.length() )
     myMesh->SetIsModified( true ); // issue 0020693
-
-  return anEditor.Remove( IdList, true );
+  return ret;
 }
 
 //=============================================================================
@@ -361,8 +363,8 @@ CORBA::Long SMESH_MeshEditor_i::AddNode(CORBA::Double x,
   TPythonDump() << "nodeID = " << this << ".AddNode( "
                 << x << ", " << y << ", " << z << " )";
 
+  myMesh->GetMeshDS()->Modified();
   myMesh->SetIsModified( true ); // issue 0020693
-
   return N->GetID();
 }
 
@@ -381,6 +383,7 @@ CORBA::Long SMESH_MeshEditor_i::Add0DElement(CORBA::Long IDOfNode)
   // Update Python script
   TPythonDump() << "elem0d = " << this << ".Add0DElement( " << IDOfNode <<" )";
 
+  myMesh->GetMeshDS()->Modified();
   myMesh->SetIsModified( true ); // issue 0020693
 
   if (elem)
@@ -423,6 +426,7 @@ CORBA::Long SMESH_MeshEditor_i::AddEdge(const SMESH::long_array & IDsOfNodes)
                   <<n1<<", "<<n2<<", "<<n12<<" ])";
   }
 
+  myMesh->GetMeshDS()->Modified();
   if(elem)
     return myMesh->SetIsModified( true ), elem->GetID();
 
@@ -471,6 +475,7 @@ CORBA::Long SMESH_MeshEditor_i::AddFace(const SMESH::long_array & IDsOfNodes)
   // Update Python script
   TPythonDump() << "faceID = " << this << ".AddFace( " << IDsOfNodes << " )";
 
+  myMesh->GetMeshDS()->Modified();
   if(elem)
     return myMesh->SetIsModified( true ), elem->GetID();
 
@@ -496,6 +501,7 @@ CORBA::Long SMESH_MeshEditor_i::AddPolygonalFace (const SMESH::long_array & IDsO
   // Update Python script
   TPythonDump() <<"faceID = "<<this<<".AddPolygonalFace( "<<IDsOfNodes<<" )";
 
+  myMesh->GetMeshDS()->Modified();
   return elem ? ( myMesh->SetIsModified( true ), elem->GetID()) : 0;
 }
 
@@ -539,6 +545,7 @@ CORBA::Long SMESH_MeshEditor_i::AddVolume(const SMESH::long_array & IDsOfNodes)
   // Update Python script
   TPythonDump() << "volID = " << this << ".AddVolume( " << IDsOfNodes << " )";
 
+  myMesh->GetMeshDS()->Modified();
   if(elem)
     return myMesh->SetIsModified( true ), elem->GetID();
 
@@ -574,6 +581,7 @@ CORBA::Long SMESH_MeshEditor_i::AddPolyhedralVolume (const SMESH::long_array & I
   // Update Python script
   TPythonDump() << "volID = " << this << ".AddPolyhedralVolume( "
                 << IDsOfNodes << ", " << Quantities << " )";
+  myMesh->GetMeshDS()->Modified();
 
   return elem ? ( myMesh->SetIsModified( true ), elem->GetID()) : 0;
 }
@@ -606,6 +614,7 @@ CORBA::Long SMESH_MeshEditor_i::AddPolyhedralVolumeByFaces (const SMESH::long_ar
   // Update Python script
   TPythonDump() << "volID = " << this << ".AddPolyhedralVolumeByFaces( "
                 << IdsOfFaces << " )";
+  myMesh->GetMeshDS()->Modified();
 
   return elem ? ( myMesh->SetIsModified( true ), elem->GetID()) : 0;
 }
@@ -726,7 +735,6 @@ void SMESH_MeshEditor_i::SetNodeOnFace(CORBA::Long NodeID, CORBA::Long FaceID,
   }
 
   mesh->SetNodeOnFace( node, FaceID, u, v );
-
   myMesh->SetIsModified( true );
 }
 
@@ -817,10 +825,12 @@ CORBA::Boolean SMESH_MeshEditor_i::InverseDiag(CORBA::Long NodeID1,
   TPythonDump() << "isDone = " << this << ".InverseDiag( "
                 << NodeID1 << ", " << NodeID2 << " )";
 
-  myMesh->SetIsModified( true );
 
   ::SMESH_MeshEditor aMeshEditor( myMesh );
-  return aMeshEditor.InverseDiag ( n1, n2 );
+  int ret =  aMeshEditor.InverseDiag ( n1, n2 );
+  myMesh->GetMeshDS()->Modified();
+  myMesh->SetIsModified( true );
+  return ret;
 }
 
 //=============================================================================
@@ -847,6 +857,7 @@ CORBA::Boolean SMESH_MeshEditor_i::DeleteDiag(CORBA::Long NodeID1,
 
   bool stat = aMeshEditor.DeleteDiag ( n1, n2 );
 
+  myMesh->GetMeshDS()->Modified();
   if ( stat )
     myMesh->SetIsModified( true ); // issue 0020693
     
@@ -876,6 +887,7 @@ CORBA::Boolean SMESH_MeshEditor_i::Reorient(const SMESH::long_array & IDsOfEleme
   // Update Python script
   TPythonDump() << "isDone = " << this << ".Reorient( " << IDsOfElements << " )";
 
+  myMesh->GetMeshDS()->Modified();
   if ( IDsOfElements.length() )
     myMesh->SetIsModified( true ); // issue 0020693
 
@@ -962,6 +974,7 @@ CORBA::Boolean SMESH_MeshEditor_i::TriToQuad (const SMESH::long_array &   IDsOfE
   ::SMESH_MeshEditor anEditor( myMesh );
 
   bool stat = anEditor.TriToQuad( faces, aCrit, MaxAngle );
+  myMesh->GetMeshDS()->Modified();
   if ( stat )
     myMesh->SetIsModified( true ); // issue 0020693
 
@@ -1025,6 +1038,7 @@ CORBA::Boolean SMESH_MeshEditor_i::QuadToTri (const SMESH::long_array &   IDsOfE
 
   ::SMESH_MeshEditor anEditor( myMesh );
   CORBA::Boolean stat = anEditor.QuadToTri( faces, aCrit );
+  myMesh->GetMeshDS()->Modified();
   if ( stat )
     myMesh->SetIsModified( true ); // issue 0020693
 
@@ -1079,6 +1093,7 @@ CORBA::Boolean SMESH_MeshEditor_i::SplitQuad (const SMESH::long_array & IDsOfEle
 
   ::SMESH_MeshEditor anEditor( myMesh );
   CORBA::Boolean stat = anEditor.QuadToTri( faces, Diag13 );
+  myMesh->GetMeshDS()->Modified();
   if ( stat )
     myMesh->SetIsModified( true ); // issue 0020693
 
@@ -1155,6 +1170,7 @@ void SMESH_MeshEditor_i::SplitVolumesIntoTetra (SMESH::SMESH_IDSource_ptr elems,
   
   ::SMESH_MeshEditor anEditor (myMesh);
   anEditor.SplitVolumesIntoTetra( elemSet, int( methodFlags ));
+  myMesh->GetMeshDS()->Modified();
 
   storeResult(anEditor);
 
@@ -1269,6 +1285,7 @@ SMESH_MeshEditor_i::smooth(const SMESH::long_array &              IDsOfElements,
   anEditor.Smooth(elements, fixedNodes, method,
                   MaxNbOfIterations, MaxAspectRatio, IsParametric );
 
+  myMesh->GetMeshDS()->Modified();
   myMesh->SetIsModified( true ); // issue 0020693
 
   storeResult(anEditor);
@@ -1408,6 +1425,7 @@ SMESH_MeshEditor_i::rotationSweep(const SMESH::long_array & theIDsOfElements,
       anEditor.RotationSweep (*workElements, Ax1, theAngleInRadians,
                               theNbOfSteps, theTolerance, theMakeGroups, makeWalls);
   storeResult(anEditor);
+  myMesh->GetMeshDS()->Modified();
 
   //  myMesh->SetIsModified( true ); -- it does not influence Compute()
 
@@ -1686,6 +1704,7 @@ SMESH_MeshEditor_i::extrusionSweep(const SMESH::long_array & theIDsOfElements,
     ::SMESH_MeshEditor::PGroupIDs groupIds =
         anEditor.ExtrusionSweep (elements, stepVec, theNbOfSteps, aHystory, theMakeGroups);
 
+    myMesh->GetMeshDS()->Modified();
     storeResult(anEditor);
 
     return theMakeGroups ? getGroups(groupIds.get()) : 0;
@@ -2024,6 +2043,7 @@ SMESH_MeshEditor_i::extrusionAlongPath(const SMESH::long_array &   theIDsOfEleme
       anEditor.ExtrusionAlongTrack( elements, aSubMesh, nodeStart,
                                     theHasAngles, angles, false,
                                     theHasRefPoint, refPnt, theMakeGroups );
+  myMesh->GetMeshDS()->Modified();
   storeResult(anEditor);
   theError = convExtrError( error );
 
@@ -2090,6 +2110,7 @@ SMESH_MeshEditor_i::extrusionAlongPathX(const SMESH::long_array &  IDsOfElements
     error = anEditor.ExtrusionAlongTrack( elements, &(aMeshImp->GetImpl()), aNodeStart,
                                           HasAngles, angles, LinearVariation,
                                           HasRefPoint, refPnt, MakeGroups );
+    myMesh->GetMeshDS()->Modified();
   }
   else {
     SMESH_subMesh_i* aSubMeshImp = SMESH::DownCast<SMESH_subMesh_i*>( Path );
@@ -2108,6 +2129,7 @@ SMESH_MeshEditor_i::extrusionAlongPathX(const SMESH::long_array &  IDsOfElements
       error = anEditor.ExtrusionAlongTrack( elements, aSubMesh, aNodeStart,
                                             HasAngles, angles, LinearVariation,
                                             HasRefPoint, refPnt, MakeGroups );
+      myMesh->GetMeshDS()->Modified();
     }
     else {
       SMESH_Group_i* aGroupImp = SMESH::DownCast<SMESH_Group_i*>( Path );
@@ -2766,7 +2788,10 @@ SMESH_MeshEditor_i::mirror(const SMESH::long_array &           theIDsOfElements,
   if(theCopy)
     storeResult(anEditor);
   else
-    myMesh->SetIsModified( true );
+    {
+      myMesh->GetMeshDS()->Modified();
+      myMesh->SetIsModified( true );
+    }
 
   return theMakeGroups ? getGroups(groupIds.get()) : 0;
 }
@@ -2975,7 +3000,10 @@ SMESH_MeshEditor_i::translate(const SMESH::long_array & theIDsOfElements,
   if(theCopy)
     storeResult(anEditor);
   else
-    myMesh->SetIsModified( true );
+    {
+      myMesh->GetMeshDS()->Modified();
+      myMesh->SetIsModified( true );
+    }
 
   return theMakeGroups ? getGroups(groupIds.get()) : 0;
 }
@@ -3183,7 +3211,10 @@ SMESH_MeshEditor_i::rotate(const SMESH::long_array & theIDsOfElements,
   if(theCopy) 
     storeResult(anEditor);
   else
-    myMesh->SetIsModified( true );
+    {
+      myMesh->GetMeshDS()->Modified();
+      myMesh->SetIsModified( true );
+    }
 
   return theMakeGroups ? getGroups(groupIds.get()) : 0;
 }
@@ -3406,8 +3437,10 @@ SMESH_MeshEditor_i::scale(const SMESH::long_array &  theIDsOfElements,
   if(theCopy)
     storeResult(anEditor);
   else
-    myMesh->SetIsModified( true );
-
+    {
+      myMesh->GetMeshDS()->Modified();
+      myMesh->SetIsModified( true );
+    }
   return theMakeGroups ? getGroups(groupIds.get()) : 0;
 }
 
@@ -3633,7 +3666,7 @@ void SMESH_MeshEditor_i::MergeNodes (const SMESH::array_of_long_array& GroupsOfN
   anEditor.MergeNodes( aListOfListOfNodes );
 
   aTPythonDump <<  "])";
-
+  myMesh->GetMeshDS()->Modified();
   myMesh->SetIsModified( true );
 }
 
@@ -3715,7 +3748,7 @@ void SMESH_MeshEditor_i::MergeElements(const SMESH::array_of_long_array& GroupsO
 
   ::SMESH_MeshEditor anEditor( myMesh );
   anEditor.MergeElements(aListOfListOfElementsID);
-
+  myMesh->GetMeshDS()->Modified();
   myMesh->SetIsModified( true );
 
   aTPythonDump << "] )";
@@ -3764,7 +3797,7 @@ CORBA::Boolean SMESH_MeshEditor_i::MoveNode(CORBA::Long   NodeID,
   // Update Python script
   TPythonDump() << "isDone = " << this << ".MoveNode( "
                 << NodeID << ", " << x << ", " << y << ", " << z << " )";
-
+  myMesh->GetMeshDS()->Modified();
   myMesh->SetIsModified( true );
 
   return true;
@@ -3862,6 +3895,7 @@ CORBA::Long SMESH_MeshEditor_i::MoveClosestNodeToPoint(CORBA::Double x,
                   << ".MoveClosestNodeToPoint( "<< x << ", " << y << ", " << z
                   << ", " << nodeID << " )";
 
+    myMesh->GetMeshDS()->Modified();
     myMesh->SetIsModified( true );
   }
 
@@ -4007,6 +4041,7 @@ SMESH_MeshEditor_i::SewFreeBorders(CORBA::Long FirstNodeID1,
 
   storeResult(anEditor);
 
+  myMesh->GetMeshDS()->Modified();
   myMesh->SetIsModified( true );
 
   return error;
@@ -4064,6 +4099,7 @@ SMESH_MeshEditor_i::SewConformFreeBorders(CORBA::Long FirstNodeID1,
 
   storeResult(anEditor);
 
+  myMesh->GetMeshDS()->Modified();
   myMesh->SetIsModified( true );
 
   return error;
@@ -4126,6 +4162,7 @@ SMESH_MeshEditor_i::SewBorderToSide(CORBA::Long FirstNodeIDOnFreeBorder,
 
   storeResult(anEditor);
 
+  myMesh->GetMeshDS()->Modified();
   myMesh->SetIsModified( true );
 
   return error;
@@ -4183,6 +4220,7 @@ SMESH_MeshEditor_i::SewSideElements(const SMESH::long_array& IDsOfSide1Elements,
 
   storeResult(anEditor);
 
+  myMesh->GetMeshDS()->Modified();
   myMesh->SetIsModified( true );
 
   return error;
@@ -4221,6 +4259,7 @@ CORBA::Boolean SMESH_MeshEditor_i::ChangeElemNodes(CORBA::Long ide,
 
   bool res = GetMeshDS()->ChangeElementNodes( elem, & aNodes[0], nbn1+1 );
 
+  myMesh->GetMeshDS()->Modified();
   if ( res )
     myMesh->SetIsModified( true );
 
@@ -4372,6 +4411,7 @@ void SMESH_MeshEditor_i::ConvertToQuadratic(CORBA::Boolean theForce3d)
   ::SMESH_MeshEditor anEditor( myMesh );
   anEditor.ConvertToQuadratic(theForce3d);
   TPythonDump() << this << ".ConvertToQuadratic( " << theForce3d << " )";
+  myMesh->GetMeshDS()->Modified();
   myMesh->SetIsModified( true );
 }
 
@@ -4385,6 +4425,7 @@ CORBA::Boolean SMESH_MeshEditor_i::ConvertFromQuadratic()
   ::SMESH_MeshEditor anEditor( myMesh );
   CORBA::Boolean isDone = anEditor.ConvertFromQuadratic();
   TPythonDump() << this << ".ConvertFromQuadratic()";
+  myMesh->GetMeshDS()->Modified();
   if ( isDone )
     myMesh->SetIsModified( true );
   return isDone;
@@ -4449,6 +4490,7 @@ CORBA::Boolean SMESH_MeshEditor_i::DoubleNodes( const SMESH::long_array& theNode
 
   bool aResult = aMeshEditor.DoubleNodes( aListOfNodes, aListOfElems );
 
+  myMesh->GetMeshDS()->Modified();
   storeResult( aMeshEditor) ;
   if ( aResult )
     myMesh->SetIsModified( true );
@@ -4563,6 +4605,7 @@ CORBA::Boolean SMESH_MeshEditor_i::DoubleNodeGroups(
 
   storeResult( aMeshEditor) ;
 
+  myMesh->GetMeshDS()->Modified();
   if ( aResult )
     myMesh->SetIsModified( true );
 
@@ -4601,6 +4644,7 @@ CORBA::Boolean SMESH_MeshEditor_i::DoubleNodeElem( const SMESH::long_array& theE
 
   storeResult( aMeshEditor) ;
 
+  myMesh->GetMeshDS()->Modified();
   if ( aResult )
     myMesh->SetIsModified( true );
 
@@ -4644,6 +4688,7 @@ CORBA::Boolean SMESH_MeshEditor_i::DoubleNodeElemInRegion
 
   storeResult( aMeshEditor) ;
 
+  myMesh->GetMeshDS()->Modified();
   if ( aResult )
     myMesh->SetIsModified( true );
 
@@ -4698,6 +4743,7 @@ CORBA::Boolean SMESH_MeshEditor_i::DoubleNodeElemGroup(SMESH::SMESH_GroupBase_pt
 
   storeResult( aMeshEditor) ;
 
+  myMesh->GetMeshDS()->Modified();
   if ( aResult )
     myMesh->SetIsModified( true );
 
@@ -4743,6 +4789,7 @@ CORBA::Boolean SMESH_MeshEditor_i::DoubleNodeElemGroupInRegion(
 
   storeResult( aMeshEditor) ;
 
+  myMesh->GetMeshDS()->Modified();
   if ( aResult )
     myMesh->SetIsModified( true );
 
@@ -4800,6 +4847,7 @@ CORBA::Boolean SMESH_MeshEditor_i::DoubleNodeElemGroups(const SMESH::ListOfGroup
 
   storeResult( aMeshEditor) ;
 
+  myMesh->GetMeshDS()->Modified();
   if ( aResult )
     myMesh->SetIsModified( true );
 
@@ -4842,6 +4890,7 @@ SMESH_MeshEditor_i::DoubleNodeElemGroupsInRegion(const SMESH::ListOfGroups& theE
 
   storeResult( aMeshEditor) ;
 
+  myMesh->GetMeshDS()->Modified();
   if ( aResult )
     myMesh->SetIsModified( true );
 
@@ -4866,6 +4915,7 @@ CORBA::Boolean SMESH_MeshEditor_i::Make2DMeshFrom3D()
   ::SMESH_MeshEditor aMeshEditor( myMesh );
   bool aResult = aMeshEditor.Make2DMeshFrom3D();
   storeResult( aMeshEditor) ;
+  myMesh->GetMeshDS()->Modified();
   
   TPythonDump() << "isDone = " << this << ".Make2DMeshFrom3D()";
   return aResult;
@@ -4912,6 +4962,7 @@ CORBA::Boolean SMESH_MeshEditor_i::DoubleNodesOnGroupBoundaries( const SMESH::Li
   bool aResult = aMeshEditor.DoubleNodesOnGroupBoundaries( domains, createJointElems );
 
   storeResult( aMeshEditor) ;
+  myMesh->GetMeshDS()->Modified();
 
   // Update Python script
   TPythonDump() << "isDone = " << this << ".DoubleNodesOnGroupBoundaries( " << &theDomains

@@ -215,7 +215,6 @@ SMESH::point_array* SMESH_Pattern_i::ApplyToFace(GEOM::GEOM_Object_ptr theFace,
       (*xyzIt)->Coord( p.x, p.y, p.z );
     }
   }
-
   // Update Python script
   TPythonDump() << "pattern.ApplyToFace( " << theFace << ", "
                 << theVertexOnKeyPoint1 << ", " << theReverse << " )";
@@ -388,6 +387,7 @@ CORBA::Boolean SMESH_Pattern_i::MakeMesh (SMESH::SMESH_Mesh_ptr theMesh,
   addErrorCode( "MakeMesh" );
 
   return myPattern.MakeMesh( aMesh, CreatePolygons, CreatePolyedrs );
+  aMesh->GetMeshDS()->Modified();
 }
 
 //=======================================================================

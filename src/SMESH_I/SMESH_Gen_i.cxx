@@ -903,6 +903,7 @@ SMESH::SMESH_Mesh_ptr SMESH_Gen_i::CreateMeshesFromUNV( const char* theFileName 
   // Dump creation of groups
   aServant->GetGroups();
 
+  aServant->GetImpl().GetMeshDS()->Modified();
   return aMesh._retn();
 }
 
@@ -976,6 +977,7 @@ SMESH::mesh_array* SMESH_Gen_i::CreateMeshesFromMED( const char* theFileName,
         theStatus = status1;
 
       aResult[i++] = SMESH::SMESH_Mesh::_duplicate( mesh );
+      meshServant->GetImpl().GetMeshDS()->Modified();
     }
     aStudyBuilder->CommitCommand();
   }
@@ -1022,6 +1024,7 @@ SMESH::SMESH_Mesh_ptr SMESH_Gen_i::CreateMeshesFromSTL( const char* theFileName 
   SMESH_Mesh_i* aServant = dynamic_cast<SMESH_Mesh_i*>( GetServant( aMesh ).in() );
   ASSERT( aServant );
   aServant->ImportSTLFile( theFileName );
+  aServant->GetImpl().GetMeshDS()->Modified();
   return aMesh._retn();
 }
 
@@ -1435,7 +1438,9 @@ CORBA::Boolean SMESH_Gen_i::Compute( SMESH::SMESH_Mesh_ptr theMesh,
         myLocShape = SMESH_Mesh::PseudoShape();
       // call implementation compute
       ::SMESH_Mesh& myLocMesh = meshServant->GetImpl();
-      return myGen.Compute( myLocMesh, myLocShape);
+      bool ret = myGen.Compute( myLocMesh, myLocShape);
+      myLocMesh.GetMeshDS()->Modified();
+      return ret;
     }
   }
   catch ( std::bad_alloc ) {
@@ -1924,11 +1929,12 @@ SMESH_Gen_i::ConcatenateCommon(const SMESH::mesh_array& theMeshesArray,
   // create mesh
   SMESH::SMESH_Mesh_var aNewMesh = CreateEmptyMesh();
   
+  SMESHDS_Mesh* aNewMeshDS = 0;
   if ( !aNewMesh->_is_nil() ) {
     SMESH_Mesh_i* aNewImpl = dynamic_cast<SMESH_Mesh_i*>( GetServant( aNewMesh ).in() );
     if ( aNewImpl ) {
       ::SMESH_Mesh& aLocMesh = aNewImpl->GetImpl();
-      SMESHDS_Mesh* aNewMeshDS = aLocMesh.GetMeshDS();
+      aNewMeshDS = aLocMesh.GetMeshDS();
 
       TGroupsMap aGroupsMap;
       TListOfNewGroups aListOfNewGroups;
@@ -2204,7 +2210,8 @@ SMESH_Gen_i::ConcatenateCommon(const SMESH::mesh_array& theMeshesArray,
     SALOMEDS::AttributePixMap_var aPixmap = SALOMEDS::AttributePixMap::_narrow(anAttr);
     aPixmap->SetPixMap("ICON_SMESH_TREE_MESH");
   }
-
+  if (aNewMeshDS)
+    aNewMeshDS->Modified();
   return aNewMesh._retn();
 }
 

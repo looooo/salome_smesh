@@ -740,19 +740,10 @@ const SMDS_MeshNode* SMESH_MesherHelper::GetMediumNode(const SMDS_MeshNode* n1,
   const SMDS_PositionPtr Pos1 = n1->GetPosition();
   const SMDS_PositionPtr Pos2 = n2->GetPosition();
 
-  bool onGeom = true;
-  if ((Pos1->GetTypeOfPosition() != SMDS_TOP_FACE) &&
-      (Pos1->GetTypeOfPosition() != SMDS_TOP_EDGE))
-    onGeom = false;
-  if ((Pos2->GetTypeOfPosition() != SMDS_TOP_FACE) &&
-      (Pos2->GetTypeOfPosition() != SMDS_TOP_EDGE))
-    onGeom = false;
-
   TopoDS_Edge E; double u [2];
   TopoDS_Face F; gp_XY  uv[2];
   bool uvOK[2] = { false, false };
 
-  if (onGeom) {
   if( myShape.IsNull() )
   {
     if( Pos1->GetTypeOfPosition()==SMDS_TOP_FACE ) {
@@ -843,7 +834,6 @@ const SMDS_MeshNode* SMESH_MesherHelper::GetMediumNode(const SMDS_MeshNode* n1,
       }
     }
   }
-  } // onGeom
 
   // 3d variant
   double x = ( n1->X() + n2->X() )/2.;
@@ -851,7 +841,6 @@ const SMDS_MeshNode* SMESH_MesherHelper::GetMediumNode(const SMDS_MeshNode* n1,
   double z = ( n1->Z() + n2->Z() )/2.;
   n12 = meshDS->AddNode(x,y,z);
 
-  if (onGeom) {
   if ( !F.IsNull() )
   {
     gp_XY UV = ( uv[0] + uv[1] ) / 2.;
@@ -868,7 +857,6 @@ const SMDS_MeshNode* SMESH_MesherHelper::GetMediumNode(const SMDS_MeshNode* n1,
   {
     meshDS->SetNodeInVolume(n12, myShapeID);
   }
-  } // onGeom
 
   myTLinkNodeMap.insert( make_pair( link, n12 ));
   return n12;

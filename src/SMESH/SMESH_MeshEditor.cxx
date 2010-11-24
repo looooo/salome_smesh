@@ -7298,6 +7298,7 @@ void SMESH_MeshEditor::MergeNodes (TListOfListOfNodes & theGroupsOfNodes)
       }
 
       // Regular elements
+      // TODO not all the possible cases are solved. Find something more generic?
       switch ( nbNodes ) {
       case 2: ///////////////////////////////////// EDGE
         isOk = false; break;
@@ -7675,14 +7676,14 @@ void SMESH_MeshEditor::MergeNodes (TListOfListOfNodes & theGroupsOfNodes)
         //MESSAGE("Change regular element or polygon " << elemId);
         SMDSAbs_ElementType etyp = elem->GetType();
         uniqueNodes.resize(nbUniqueNodes);
-        aMesh->RemoveElement(elem);
-        SMDS_MeshElement* newElem = this->AddElement(uniqueNodes, etyp, false, elemId);
+        SMDS_MeshElement* newElem = this->AddElement(uniqueNodes, etyp, false);
         if (newElem)
           {
             myLastCreatedElems.Append(newElem);
             if ( aShapeId )
               aMesh->SetMeshElementOnShape( newElem, aShapeId );
           }
+        aMesh->RemoveElement(elem);
       }
     }
     else {
@@ -7693,10 +7694,10 @@ void SMESH_MeshEditor::MergeNodes (TListOfListOfNodes & theGroupsOfNodes)
 
   } // loop on elements
 
-  // Remove equal nodes and bad elements
+  // Remove bad elements, then equal nodes (order important)
 
-  Remove( rmNodeIds, true );
   Remove( rmElemIds, false );
+  Remove( rmNodeIds, true );
 
 }
 

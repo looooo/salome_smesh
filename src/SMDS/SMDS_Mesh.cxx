@@ -1389,15 +1389,6 @@ bool SMDS_Mesh::registerElement(int ID, SMDS_MeshElement* element)
   int vtkId = cell->getVtkId();  
   if (vtkId == -1)
     vtkId = myElementIDFactory->SetInVtkGrid(element);
-  
-//  if (ID >= myCellIdSmdsToVtk.size()) // --- resize local vector
-//  {
-//    MESSAGE(" ------------------- resize myCellIdSmdsToVtk " << ID << " --> " << ID + SMDS_Mesh::chunkSize);
-//    myCellIdSmdsToVtk.resize(ID + SMDS_Mesh::chunkSize, -1); // fill new elements with -1
-//  }
-//
-//  myCellIdSmdsToVtk[ID] = vtkId;
-//  //MESSAGE("smds:" << ID << " vtk:" << vtkId );
 
   if (vtkId >= myCellIdVtkToSmds.size()) // --- resize local vector
   {
@@ -3095,7 +3086,7 @@ void SMDS_Mesh::RemoveFreeElement(const SMDS_MeshElement * elem)
 {
   int elemId = elem->GetID();
   int vtkId = elem->getVtkId();
-  //MESSAGE("SMDS_Mesh::RemoveFreeElement " << elemId);
+  //MESSAGE("RemoveFreeElement " << elemId);
   SMDSAbs_ElementType aType = elem->GetType();
   SMDS_MeshElement* todest = (SMDS_MeshElement*)(elem);
   if (aType == SMDSAbs_Node) {

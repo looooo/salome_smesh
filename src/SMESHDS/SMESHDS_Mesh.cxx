@@ -801,7 +801,7 @@ void SMESHDS_Mesh::RemoveElement(const SMDS_MeshElement * elt)
     for ( ; !subMesh && SubIt != myShapeIndexToSubMesh.end(); SubIt++ )
       if (!SubIt->second->IsComplexSubmesh() && SubIt->second->Contains( elt ))
         subMesh = SubIt->second;
-
+    //MESSAGE("subMesh " << elt->getshapeId());
     RemoveFreeElement( elt, subMesh, true);
     return;
   }

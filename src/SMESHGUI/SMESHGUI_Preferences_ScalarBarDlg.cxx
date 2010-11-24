@@ -541,11 +541,17 @@ bool SMESHGUI_Preferences_ScalarBarDlg::onApply()
   double oldMinMax[2] = { myLookupTable->GetRange()[0], myLookupTable->GetRange()[1] };
   bool rangeChanges = ( fabs( oldMinMax[0] - aMin ) + fabs( oldMinMax[1] - aMax ) >
                         0.001 * ( aMax-aMin + oldMinMax[1]-oldMinMax[0] ));
+  
+  bool nbColorsChanged = (myColorsSpin->value() != myScalarBarActor->GetMaximumNumberOfColors());
+  if(nbColorsChanged)
+    myScalarBarActor->SetMaximumNumberOfColors(myColorsSpin->value());
+  
+
   myLookupTable->SetRange( aMin, aMax );
   myLookupTable->SetNumberOfTableValues(myColorsSpin->value());
   myLookupTable->Build();
 
-  if( myColorsSpin->value() != myScalarBarActor->GetMaximumNumberOfColors() || rangeChanges)
+  if( nbColorsChanged || rangeChanges)
     myActor->UpdateDistribution();
 
   SMESH::RepaintCurrentView();

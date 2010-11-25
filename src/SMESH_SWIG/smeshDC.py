@@ -4284,8 +4284,11 @@ class Mesh_Algorithm:
                 pass
             self.mesh.smeshpyD.SetName(hypo, hyp + a)
             pass
+        geomName=""
+        if self.geom:
+            geomName = GetName(self.geom)
         status = self.mesh.mesh.AddHypothesis(self.geom, hypo)
-        TreatHypoStatus( status, GetName(hypo), GetName(self.geom), 0 )
+        TreatHypoStatus( status, GetName(hypo), geomName, 0 )
         return hypo
 
     ## Returns entry of the shape to mesh in the study
@@ -4823,20 +4826,31 @@ class Mesh_Triangle(Mesh_Algorithm):
         self.Parameters().SetOptionValue(optionName,level)
 
     ## Sets QuadAllowed flag.
-    #  Only for algoType == NETGEN || NETGEN_2D || BLSURF
+    #  Only for algoType == NETGEN(NETGEN_1D2D) || NETGEN_2D || BLSURF
     #  @ingroup l3_hypos_netgen l3_hypos_blsurf
     def SetQuadAllowed(self, toAllow=True):
         if self.algoType == NETGEN_2D:
-            if toAllow: # add QuadranglePreference
-                self.Hypothesis("QuadranglePreference", UseExisting=1, CompareMethod=self.CompareEqualHyp)
-            else:       # remove QuadranglePreference
+            if not self.params:
+                # use simple hyps
+                hasSimpleHyps = False
+                simpleHyps = ["QuadranglePreference","LengthFromEdges","MaxElementArea"]
                 for hyp in self.mesh.GetHypothesisList( self.geom ):
-                    if hyp.GetName() == "QuadranglePreference":
-                        self.mesh.RemoveHypothesis( self.geom, hyp )
+                    if hyp.GetName() in simpleHyps:
+                        hasSimpleHyps = True
+                        if hyp.GetName() == "QuadranglePreference":
+                            if not toAllow: # remove QuadranglePreference
+                                self.mesh.RemoveHypothesis( self.geom, hyp )
+                                pass
+                            return
                         pass
                     pass
+                if hasSimpleHyps:
+                    if toAllow: # add QuadranglePreference
+                        self.Hypothesis("QuadranglePreference", UseExisting=1, CompareMethod=self.CompareEqualHyp)
+                        pass
+                    return
                 pass
-            return
+            pass
         if self.Parameters():
             self.params.SetQuadAllowed(toAllow)
             return
@@ -4845,30 +4859,25 @@ class Mesh_Triangle(Mesh_Algorithm):
     #
     #  @ingroup l3_hypos_netgen
     def Parameters(self, which=SOLE):
-        if self.params:
-            return self.params
-        if self.algoType == NETGEN:
-            if which == SIMPLE:
-                self.params = self.Hypothesis("NETGEN_SimpleParameters_2D", [],
+        if not self.params:
+            if self.algoType == NETGEN:
+                if which == SIMPLE:
+                    self.params = self.Hypothesis("NETGEN_SimpleParameters_2D", [],
+                                                  "libNETGENEngine.so", UseExisting=0)
+                else:
+                    self.params = self.Hypothesis("NETGEN_Parameters_2D", [],
+                                                  "libNETGENEngine.so", UseExisting=0)
+            elif self.algoType == MEFISTO:
+                print "Mefisto algo support no multi-parameter hypothesis"
+            elif self.algoType == NETGEN_2D:
+                self.params = self.Hypothesis("NETGEN_Parameters_2D_ONLY", [],
                                               "libNETGENEngine.so", UseExisting=0)
+            elif self.algoType == BLSURF:
+                self.params = self.Hypothesis("BLSURF_Parameters", [],
+                                              "libBLSURFEngine.so", UseExisting=0)
             else:
-                self.params = self.Hypothesis("NETGEN_Parameters_2D", [],
-                                              "libNETGENEngine.so", UseExisting=0)
-            return self.params
-        elif self.algoType == MEFISTO:
-            print "Mefisto algo support no multi-parameter hypothesis"
-            return None
-        elif self.algoType == NETGEN_2D:
-            print "NETGEN_2D_ONLY algo support no multi-parameter hypothesis"
-            print "NETGEN_2D_ONLY uses 'MaxElementArea' and 'LengthFromEdges' ones"
-            return None
-        elif self.algoType == BLSURF:
-            self.params = self.Hypothesis("BLSURF_Parameters", [],
-                                          "libBLSURFEngine.so", UseExisting=0)
-            return self.params
-        else:
-            print "Mesh_Triangle with algo type %s does not have such a parameter, check algo type"%self.algoType
-        return None
+                print "Mesh_Triangle with algo type %s does not have such a parameter, check algo type"%self.algoType
+        return self.params
 
     ## Sets MaxSize
     #
@@ -5057,33 +5066,34 @@ class Mesh_Tetrahedron(Mesh_Algorithm):
     #
     #  @ingroup l3_hypos_netgen
     def Parameters(self, which=SOLE):
-        if self.params:
-            return self.params
+        if not self.params:
 
-        if self.algoType == FULL_NETGEN:
-            if which == SIMPLE:
-                self.params = self.Hypothesis("NETGEN_SimpleParameters_3D", [],
+            if self.algoType == FULL_NETGEN:
+                if which == SIMPLE:
+                    self.params = self.Hypothesis("NETGEN_SimpleParameters_3D", [],
+                                                  "libNETGENEngine.so", UseExisting=0)
+                else:
+                    self.params = self.Hypothesis("NETGEN_Parameters", [],
+                                                  "libNETGENEngine.so", UseExisting=0)
+
+            if self.algoType == NETGEN:
+                self.params = self.Hypothesis("NETGEN_Parameters_3D", [],
                                               "libNETGENEngine.so", UseExisting=0)
+
+            elif self.algoType == GHS3D:
+                self.params = self.Hypothesis("GHS3D_Parameters", [],
+                                              "libGHS3DEngine.so", UseExisting=0)
+
+            elif self.algoType == GHS3DPRL:
+                self.params = self.Hypothesis("GHS3DPRL_Parameters", [],
+                                              "libGHS3DPRLEngine.so", UseExisting=0)
             else:
-                self.params = self.Hypothesis("NETGEN_Parameters", [],
-                                              "libNETGENEngine.so", UseExisting=0)
-            return self.params
+                print "Algo supports no multi-parameter hypothesis"
 
-        if self.algoType == GHS3D:
-            self.params = self.Hypothesis("GHS3D_Parameters", [],
-                                          "libGHS3DEngine.so", UseExisting=0)
-            return self.params
-
-        if self.algoType == GHS3DPRL:
-            self.params = self.Hypothesis("GHS3DPRL_Parameters", [],
-                                          "libGHS3DPRLEngine.so", UseExisting=0)
-            return self.params
-
-        print "Algo supports no multi-parameter hypothesis"
-        return None
+        return self.params
 
     ## Sets MaxSize
-    #  Parameter of FULL_NETGEN
+    #  Parameter of FULL_NETGEN and NETGEN
     #  @ingroup l3_hypos_netgen
     def SetMaxSize(self, theSize):
         self.Parameters().SetMaxSize(theSize)
@@ -5095,7 +5105,7 @@ class Mesh_Tetrahedron(Mesh_Algorithm):
         self.Parameters().SetSecondOrder(theVal)
 
     ## Sets Optimize flag
-    #  Parameter of FULL_NETGEN
+    #  Parameter of FULL_NETGEN and NETGEN
     #  @ingroup l3_hypos_netgen
     def SetOptimize(self, theVal):
         self.Parameters().SetOptimize(theVal)

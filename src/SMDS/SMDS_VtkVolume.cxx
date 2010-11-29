@@ -60,7 +60,7 @@ void SMDS_VtkVolume::init(std::vector<vtkIdType> nodeIds, SMDS_Mesh* mesh)
   //MESSAGE("SMDS_VtkVolume::init myVtkID " << myVtkID);
 }
 
-#ifdef VTK_HAVE_POLYHEDRON
+//#ifdef VTK_HAVE_POLYHEDRON
 void SMDS_VtkVolume::initPoly(std::vector<vtkIdType> nodeIds, std::vector<int> nbNodesPerFace, SMDS_Mesh* mesh)
 {
   MESSAGE("SMDS_VtkVolume::initPoly");
@@ -97,7 +97,7 @@ void SMDS_VtkVolume::initPoly(std::vector<vtkIdType> nodeIds, std::vector<int> n
   myVtkID = grid->InsertNextLinkedCell(VTK_POLYHEDRON, nbFaces, &ptIds[0]);
   mesh->setMyModified();
 }
-#endif
+//#endif
 
 bool SMDS_VtkVolume::ChangeNodes(const SMDS_MeshNode* nodes[], const int nbNodes)
 {
@@ -522,11 +522,11 @@ SMDSAbs_EntityType SMDS_VtkVolume::GetEntityType() const
     case VTK_QUADRATIC_HEXAHEDRON:
       aType = SMDSEntity_Quad_Hexa;
       break;
-#ifdef VTK_HAVE_POLYHEDRON
+//#ifdef VTK_HAVE_POLYHEDRON
     case VTK_POLYHEDRON:
       aType = SMDSEntity_Polyhedra;
       break;
-#endif
+//#endif
     default:
       aType = SMDSEntity_Polyhedra;
       break;

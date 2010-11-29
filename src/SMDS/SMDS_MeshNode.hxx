@@ -56,10 +56,6 @@ public:
   friend bool operator<(const SMDS_MeshNode& e1, const SMDS_MeshNode& e2);
 
   void SetPosition(const SMDS_PositionPtr& aPos);
-  void AddInverseElement(const SMDS_MeshElement * ME);
-  void RemoveInverseElement(const SMDS_MeshElement * parent);
-  void ClearInverseElements();
-  bool emptyInverseElements();
   void setXYZ(double x, double y, double z);
 
   static int nbNodes;
@@ -71,6 +67,10 @@ protected:
   void init(int id, int meshId, int shapeId = -1, double x=0, double y=0, double z=0);
   inline void setVtkId(int vtkId) { myVtkID = vtkId; };
   double* getCoord() const;
+  void AddInverseElement(const SMDS_MeshElement * ME);
+  void RemoveInverseElement(const SMDS_MeshElement * parent);
+  void ClearInverseElements();
+  bool emptyInverseElements();
 
   SMDS_ElemIteratorPtr
   elementsIterator(SMDSAbs_ElementType type) const;

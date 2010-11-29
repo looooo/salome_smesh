@@ -151,10 +151,11 @@ public:
     myMesh(mesh), myCells(cells), myNcells(ncells), myType(type), iter(0)
   {
     //MESSAGE("SMDS_MeshNode_MyInvIterator : ncells " << myNcells);
-    if (type == SMDSAbs_All)
-      return;
     cellList.clear();
-    for (int i = 0; i < ncells; i++)
+    if (type == SMDSAbs_All)
+      for (int i = 0; i < ncells; i++)
+        cellList.push_back(cells[i]);
+    else for (int i = 0; i < ncells; i++)
       {
         int vtkId = cells[i];
         int smdsId = myMesh->fromVtkToSmds(vtkId);

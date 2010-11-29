@@ -200,7 +200,7 @@ bool SMESH_Gen::Compute(SMESH_Mesh &          aMesh,
     }
     
     // ------------------------------------------------------------
-    // sort list of meshes according to mesh order
+    // sort list of submeshes according to mesh order
     // ------------------------------------------------------------
     aMesh.SortByMeshOrder( smWithAlgoSupportingSubmeshes );
 

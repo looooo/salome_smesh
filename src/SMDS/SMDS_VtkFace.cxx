@@ -218,32 +218,45 @@ SMDSAbs_EntityType SMDS_VtkFace::GetEntityType() const
   return aType;
 }
 
-  vtkIdType SMDS_VtkFace::GetVtkType() const
-  {
-    vtkUnstructuredGrid* grid = SMDS_Mesh::_meshList[myMeshId]->getGrid();
-    vtkIdType aVtkType = grid->GetCellType(this->myVtkID);
-    return aVtkType;
-  }
+vtkIdType SMDS_VtkFace::GetVtkType() const
+{
+  vtkUnstructuredGrid* grid = SMDS_Mesh::_meshList[myMeshId]->getGrid();
+  vtkIdType aVtkType = grid->GetCellType(this->myVtkID);
+  return aVtkType;
+}
 
-  SMDS_ElemIteratorPtr SMDS_VtkFace::elementsIterator(SMDSAbs_ElementType type) const
+SMDS_ElemIteratorPtr SMDS_VtkFace::elementsIterator(SMDSAbs_ElementType type) const
+{
+  switch (type)
   {
-    switch (type)
-    {
-      case SMDSAbs_Node:
-        return SMDS_ElemIteratorPtr(new SMDS_VtkCellIterator(SMDS_Mesh::_meshList[myMeshId], myVtkID, GetEntityType()));
-      default:
-        MESSAGE("ERROR : Iterator not implemented")
-        ;
-        return SMDS_ElemIteratorPtr((SMDS_ElemIterator*) NULL);
-    }
+    case SMDSAbs_Node:
+      return SMDS_ElemIteratorPtr(new SMDS_VtkCellIterator(SMDS_Mesh::_meshList[myMeshId], myVtkID, GetEntityType()));
+    default:
+      MESSAGE("ERROR : Iterator not implemented")
+      ;
+      return SMDS_ElemIteratorPtr((SMDS_ElemIterator*) NULL);
   }
+}
 
-  SMDS_ElemIteratorPtr SMDS_VtkFace::nodesIteratorToUNV() const
-  {
-    return SMDS_ElemIteratorPtr(new SMDS_VtkCellIteratorToUNV(SMDS_Mesh::_meshList[myMeshId], myVtkID, GetEntityType()));
-  }
+SMDS_ElemIteratorPtr SMDS_VtkFace::nodesIteratorToUNV() const
+{
+  return SMDS_ElemIteratorPtr(new SMDS_VtkCellIteratorToUNV(SMDS_Mesh::_meshList[myMeshId], myVtkID, GetEntityType()));
+}
 
-  SMDS_ElemIteratorPtr SMDS_VtkFace::interlacedNodesElemIterator() const
-  {
-    return SMDS_ElemIteratorPtr(new SMDS_VtkCellIteratorToUNV(SMDS_Mesh::_meshList[myMeshId], myVtkID, GetEntityType()));
-  }
+SMDS_ElemIteratorPtr SMDS_VtkFace::interlacedNodesElemIterator() const
+{
+  return SMDS_ElemIteratorPtr(new SMDS_VtkCellIteratorToUNV(SMDS_Mesh::_meshList[myMeshId], myVtkID, GetEntityType()));
+}
+
+//! change only the first node, used for temporary triangles in quadrangle to triangle adaptor
+void SMDS_VtkFace::ChangeApex(const SMDS_MeshNode* node)
+{
+  vtkUnstructuredGrid* grid = SMDS_Mesh::_meshList[myMeshId]->getGrid();
+  vtkIdType npts = 0;
+  vtkIdType* pts = 0;
+  grid->GetCellPoints(myVtkID, npts, pts);
+  grid->RemoveReferenceToCell(pts[0], myVtkID);
+  pts[0] = node->getVtkId();
+  grid->AddReferenceToCell(pts[0], myVtkID);
+  SMDS_Mesh::_meshList[myMeshId]->setMyModified();
+}

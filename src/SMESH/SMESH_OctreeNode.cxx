@@ -29,7 +29,6 @@
 //
 #include "SMESH_OctreeNode.hxx"
 
-#include "SMDS_MeshNode.hxx"
 #include "SMDS_SetIterator.hxx"
 #include <gp_Pnt.hxx>
 
@@ -44,7 +43,7 @@ using namespace std;
  * \param minBoxSize - Minimal size of the Octree Box
  */
 //================================================================
-SMESH_OctreeNode::SMESH_OctreeNode (const set<const SMDS_MeshNode*> & theNodes, const int maxLevel,
+SMESH_OctreeNode::SMESH_OctreeNode (const TIDSortedNodeSet & theNodes, const int maxLevel,
                                     const int maxNbNodes , const double minBoxSize )
   :SMESH_Octree( new SMESH_Octree::Limit( maxLevel,minBoxSize)),
   myMaxNbNodes(maxNbNodes),
@@ -86,7 +85,7 @@ SMESH_Octree* SMESH_OctreeNode::allocateOctreeChild() const
 Bnd_B3d* SMESH_OctreeNode::buildRootBox()
 {
   Bnd_B3d* box = new Bnd_B3d;
-  set<const SMDS_MeshNode*>::iterator it = myNodes.begin();
+  TIDSortedNodeSet::iterator it = myNodes.begin();
   for (; it != myNodes.end(); it++) {
     const SMDS_MeshNode* n1 = *it;
     gp_XYZ p1( n1->X(), n1->Y(), n1->Z() );
@@ -109,7 +108,6 @@ Bnd_B3d* SMESH_OctreeNode::buildRootBox()
 
 const bool SMESH_OctreeNode::isInside (const gp_XYZ& p, const double precision)
 {
-  //gp_XYZ p (Node->X(),Node->Y(),Node->Z());
   if (precision <= 0.)
     return !(getBox().IsOut(p));
   Bnd_B3d BoxWithPrecision = getBox();
@@ -129,7 +127,7 @@ void SMESH_OctreeNode::buildChildrenData()
   gp_XYZ max = getBox().CornerMax();
   gp_XYZ mid = (min + max)/2.;
 
-  set<const SMDS_MeshNode*>::iterator it = myNodes.begin();
+  TIDSortedNodeSet::iterator it = myNodes.begin();
   while (it != myNodes.end())
   {
     const SMDS_MeshNode* n1 = *it;
@@ -245,7 +243,7 @@ bool SMESH_OctreeNode::NodesAround(const gp_XYZ &node,
  * \param maxNbNodes - maximum Nodes in a Leaf of the SMESH_OctreeNode constructed, default value is 5
  */
 //=============================
-void SMESH_OctreeNode::FindCoincidentNodes (set<const SMDS_MeshNode*>& theSetOfNodes,
+void SMESH_OctreeNode::FindCoincidentNodes (TIDSortedNodeSet& theSetOfNodes,
                                             list< list< const SMDS_MeshNode*> >* theGroupsOfNodes,
                                             const double theTolerance,
                                             const int maxLevel,
@@ -265,11 +263,11 @@ void SMESH_OctreeNode::FindCoincidentNodes (set<const SMDS_MeshNode*>& theSetOfN
  * \param theGroupsOfNodes - list of nodes closed to each other returned
  */
 //=============================
-void SMESH_OctreeNode::FindCoincidentNodes ( set<const SMDS_MeshNode*>* theSetOfNodes,
+void SMESH_OctreeNode::FindCoincidentNodes ( TIDSortedNodeSet* theSetOfNodes,
                                              const double               theTolerance,
                                              list< list< const SMDS_MeshNode*> >* theGroupsOfNodes)
 {
-  set<const SMDS_MeshNode*>::iterator it1 = theSetOfNodes->begin();
+  TIDSortedNodeSet::iterator it1 = theSetOfNodes->begin();
   list<const SMDS_MeshNode*>::iterator it2;
 
   while (it1 != theSetOfNodes->end())
@@ -318,7 +316,7 @@ void SMESH_OctreeNode::FindCoincidentNodes ( set<const SMDS_MeshNode*>* theSetOf
  */
 //======================================================================================
 void SMESH_OctreeNode::FindCoincidentNodes (const SMDS_MeshNode * Node,
-                                            set<const SMDS_MeshNode*>* SetOfNodes,
+                                            TIDSortedNodeSet* SetOfNodes,
                                             list<const SMDS_MeshNode*>* Result,
                                             const double precision)
 {
@@ -332,8 +330,8 @@ void SMESH_OctreeNode::FindCoincidentNodes (const SMDS_MeshNode * Node,
     {
       gp_Pnt p1 (Node->X(), Node->Y(), Node->Z());
 
-      set<const SMDS_MeshNode*> myNodesCopy = myNodes;
-      set<const SMDS_MeshNode*>::iterator it = myNodesCopy.begin();
+      TIDSortedNodeSet myNodesCopy = myNodes;
+      TIDSortedNodeSet::iterator it = myNodesCopy.begin();
       double tol2 = precision * precision;
       bool squareBool;
 
@@ -386,7 +384,7 @@ void SMESH_OctreeNode::UpdateByMoveNode( const SMDS_MeshNode* node, const gp_Pnt
 {
   if ( isLeaf() )
   {
-    set<const SMDS_MeshNode*>::iterator pNode = myNodes.find( node );
+    TIDSortedNodeSet::iterator pNode = myNodes.find( node );
     bool nodeInMe = ( pNode != myNodes.end() );
 
     bool pointInMe = isInside( toPnt.Coord(), 1e-10 );
@@ -432,6 +430,6 @@ SMESH_OctreeNodeIteratorPtr SMESH_OctreeNode::GetChildrenIterator()
 SMDS_NodeIteratorPtr SMESH_OctreeNode::GetNodeIterator()
 {
   return SMDS_NodeIteratorPtr
-    ( new SMDS_SetIterator< SMDS_pNode, set< SMDS_pNode >::const_iterator >
+    ( new SMDS_SetIterator< SMDS_pNode, TIDSortedNodeSet::const_iterator >
       ( myNodes.begin(), myNodes.size() ? myNodes.end() : myNodes.begin()));
 }

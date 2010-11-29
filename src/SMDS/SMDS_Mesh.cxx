@@ -1161,7 +1161,7 @@ SMDS_MeshFace* SMDS_Mesh::AddPolygonalFaceWithID
     }
   else
     {
-#ifdef VTK_HAVE_POLYHEDRON
+//#ifdef VTK_HAVE_POLYHEDRON
     MESSAGE("AddPolygonalFaceWithID vtk " << ID);
     vector<vtkIdType> nodeIds;
     nodeIds.clear();
@@ -1178,25 +1178,25 @@ SMDS_MeshFace* SMDS_Mesh::AddPolygonalFaceWithID
         return 0;
       }
     face = facevtk;
-#else
-    MESSAGE("AddPolygonalFaceWithID smds " << ID);
-     for ( int i = 0; i < nodes.size(); ++i )
-      if ( !nodes[ i ] ) return 0;
-      face = new SMDS_PolygonalFaceOfNodes(nodes);
-#endif
+//#else
+//    MESSAGE("AddPolygonalFaceWithID smds " << ID);
+//     for ( int i = 0; i < nodes.size(); ++i )
+//      if ( !nodes[ i ] ) return 0;
+//      face = new SMDS_PolygonalFaceOfNodes(nodes);
+//#endif
       adjustmyCellsCapacity(ID);
       myCells[ID] = face;
       myInfo.myNbPolygons++;
     }
 
-#ifndef VTK_HAVE_POLYHEDRON
-  if (!registerElement(ID, face))
-    {
-      registerElement(myElementIDFactory->GetFreeID(), face);
-      //RemoveElement(face, false);
-      //face = NULL;
-    }
-#endif
+//#ifndef VTK_HAVE_POLYHEDRON
+//  if (!registerElement(ID, face))
+//    {
+//      registerElement(myElementIDFactory->GetFreeID(), face);
+//      //RemoveElement(face, false);
+//      //face = NULL;
+//    }
+//#endif
  return face;
 }
 
@@ -1256,7 +1256,7 @@ SMDS_MeshVolume* SMDS_Mesh::AddPolyhedralVolumeWithID
     }
   else
     {
-#ifdef VTK_HAVE_POLYHEDRON
+//#ifdef VTK_HAVE_POLYHEDRON
       MESSAGE("AddPolyhedralVolumeWithID vtk " << ID);
       vector<vtkIdType> nodeIds;
       nodeIds.clear();
@@ -1273,25 +1273,25 @@ SMDS_MeshVolume* SMDS_Mesh::AddPolyhedralVolumeWithID
           return 0;
         }
       volume = volvtk;
-#else
-      MESSAGE("AddPolyhedralVolumeWithID smds " << ID);
-      for ( int i = 0; i < nodes.size(); ++i )
-      if ( !nodes[ i ] ) return 0;
-      volume = new SMDS_PolyhedralVolumeOfNodes(nodes, quantities);
-#endif
+//#else
+//      MESSAGE("AddPolyhedralVolumeWithID smds " << ID);
+//      for ( int i = 0; i < nodes.size(); ++i )
+//      if ( !nodes[ i ] ) return 0;
+//      volume = new SMDS_PolyhedralVolumeOfNodes(nodes, quantities);
+//#endif
       adjustmyCellsCapacity(ID);
       myCells[ID] = volume;
       myInfo.myNbPolyhedrons++;
     }
 
-#ifndef VTK_HAVE_POLYHEDRON
-  if (!registerElement(ID, volume))
-    {
-      registerElement(myElementIDFactory->GetFreeID(), volume);
-      //RemoveElement(volume, false);
-      //volume = NULL;
-    }
-#endif
+//#ifndef VTK_HAVE_POLYHEDRON
+//  if (!registerElement(ID, volume))
+//    {
+//      registerElement(myElementIDFactory->GetFreeID(), volume);
+//      //RemoveElement(volume, false);
+//      //volume = NULL;
+//    }
+//#endif
   return volume;
 }
 
@@ -1357,11 +1357,11 @@ SMDS_MeshVolume* SMDS_Mesh::AddVolumeFromVtkIdsWithID(const std::vector<int>& vt
     case VTK_QUADRATIC_HEXAHEDRON:
       myInfo.myNbQuadHexas++;
       break;
-#ifdef VTK_HAVE_POLYHEDRON
+//#ifdef VTK_HAVE_POLYHEDRON
     case VTK_POLYHEDRON:
       myInfo.myNbPolyhedrons++;
       break;
-#endif
+//#endif
     default:
       myInfo.myNbPolyhedrons++;
       break;
@@ -2651,12 +2651,18 @@ bool more()
   class IdSortedIterator : public SMDS_Iterator<ELEM>
   {
     const SMDS_MeshElementIDFactory& myIDFact;
-    int                              myID, myMaxID;
+    int                              myID, myMaxID, myNbFound, myTotalNb;
+    SMDSAbs_ElementType              myType;
     ELEM                             myElem;
 
   public:
-    IdSortedIterator(const SMDS_MeshElementIDFactory& fact)
-      :myIDFact( fact ), myID(1), myMaxID( myIDFact.GetMaxID() ), myElem(0)
+    IdSortedIterator(const SMDS_MeshElementIDFactory& fact,
+                     const SMDSAbs_ElementType        type, // SMDSAbs_All NOT allowed!!! 
+                     const int                        totalNb)
+      :myIDFact( fact ),
+       myID(1), myMaxID( myIDFact.GetMaxID() ),myNbFound(0), myTotalNb( totalNb ),
+       myType( type ),
+       myElem(0)
     {
       next();
     }
@@ -2667,8 +2673,14 @@ bool more()
     ELEM next()
     {
       ELEM current = myElem;
-      for ( myElem = 0; myID <= myMaxID && !myElem; ++myID )
-        myElem = (ELEM) myIDFact.MeshElement( myID );
+
+      for ( myElem = 0;  !myElem && myNbFound < myTotalNb && myID <= myMaxID; ++myID )
+        if ((myElem = (ELEM) myIDFact.MeshElement( myID ))
+            && myElem->GetType() != myType )
+          myElem = 0;
+
+      myNbFound += bool(myElem);
+
       return current;
     }
   };
@@ -2682,55 +2694,92 @@ SMDS_NodeIteratorPtr SMDS_Mesh::nodesIterator(bool idInceasingOrder) const
 {
   typedef MYNode_Map_Iterator
     < SetOfNodes, const SMDS_MeshNode*, SMDS_NodeIterator > TIterator;
-  typedef IdSortedIterator< const SMDS_MeshNode* >          TSortedIterator;
-/*  return ( idInceasingOrder ?
-           SMDS_NodeIteratorPtr( new TSortedIterator( *myNodeIDFactory )) :
-           SMDS_NodeIteratorPtr( new TIterator(myNodes)));*/
-  return ( SMDS_NodeIteratorPtr( new TIterator(myNodes)));
+  return SMDS_NodeIteratorPtr( new TIterator(myNodes)); // naturally always sorted by ID
+
+//  typedef IdSortedIterator< const SMDS_MeshNode* >          TSortedIterator;
+//  return ( idInceasingOrder ?
+//           SMDS_NodeIteratorPtr( new TSortedIterator( *myNodeIDFactory, SMDSAbs_Node, NbNodes())) :
+//           SMDS_NodeIteratorPtr( new TIterator(myNodes)));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///Return an iterator on 0D elements of the current mesh.
 ///////////////////////////////////////////////////////////////////////////////
 
-SMDS_0DElementIteratorPtr SMDS_Mesh::elements0dIterator() const
+SMDS_0DElementIteratorPtr SMDS_Mesh::elements0dIterator(bool idInceasingOrder) const
 {
   typedef MYElem_Map_Iterator
     < SetOfCells, const SMDS_Mesh0DElement*, SMDS_0DElementIterator > TIterator;
-  return SMDS_0DElementIteratorPtr(new TIterator(myCells, SMDSAbs_0DElement));
+  return SMDS_0DElementIteratorPtr(new TIterator(myCells, SMDSAbs_0DElement)); // naturally always sorted by ID
+
+//  typedef MYNCollection_Map_Iterator
+//    < SetOf0DElements, const SMDS_Mesh0DElement*, SMDS_0DElementIterator > TIterator;
+//  typedef IdSortedIterator< const SMDS_Mesh0DElement* >                    TSortedIterator;
+//  return ( idInceasingOrder ?
+//           SMDS_0DElementIteratorPtr( new TSortedIterator( *myElementIDFactory,
+//                                                           SMDSAbs_0DElement,
+//                                                           Nb0DElements() )) :
+//           SMDS_0DElementIteratorPtr( new TIterator(my0DElements)));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///Return an iterator on edges of the current mesh.
 ///////////////////////////////////////////////////////////////////////////////
 
-SMDS_EdgeIteratorPtr SMDS_Mesh::edgesIterator() const
+SMDS_EdgeIteratorPtr SMDS_Mesh::edgesIterator(bool idInceasingOrder) const
 {
   typedef MYElem_Map_Iterator
     < SetOfCells, const SMDS_MeshEdge*, SMDS_EdgeIterator > TIterator;
-  return SMDS_EdgeIteratorPtr(new TIterator(myCells, SMDSAbs_Edge));
+  return SMDS_EdgeIteratorPtr(new TIterator(myCells, SMDSAbs_Edge)); // naturally always sorted by ID
+
+//  typedef MYNCollection_Map_Iterator
+//    < SetOfEdges, const SMDS_MeshEdge*, SMDS_EdgeIterator > TIterator;
+//  typedef IdSortedIterator< const SMDS_MeshEdge* >          TSortedIterator;
+//  return ( idInceasingOrder ?
+//           SMDS_EdgeIteratorPtr( new TSortedIterator( *myElementIDFactory,
+//                                                      SMDSAbs_Edge,
+//                                                      NbEdges() )) :
+//           SMDS_EdgeIteratorPtr(new TIterator(myEdges)));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///Return an iterator on faces of the current mesh.
 ///////////////////////////////////////////////////////////////////////////////
 
-SMDS_FaceIteratorPtr SMDS_Mesh::facesIterator() const
+SMDS_FaceIteratorPtr SMDS_Mesh::facesIterator(bool idInceasingOrder) const
 {
   typedef MYElem_Map_Iterator
     < SetOfCells, const SMDS_MeshFace*, SMDS_FaceIterator > TIterator;
-  return SMDS_FaceIteratorPtr(new TIterator(myCells, SMDSAbs_Face));
+  return SMDS_FaceIteratorPtr(new TIterator(myCells, SMDSAbs_Face)); // naturally always sorted by ID
+
+//  typedef MYNCollection_Map_Iterator
+//    < SetOfFaces, const SMDS_MeshFace*, SMDS_FaceIterator > TIterator;
+//  typedef IdSortedIterator< const SMDS_MeshFace* >          TSortedIterator;
+//  return ( idInceasingOrder ?
+//           SMDS_FaceIteratorPtr( new TSortedIterator( *myElementIDFactory,
+//                                                      SMDSAbs_Face,
+//                                                      NbFaces() )) :
+//           SMDS_FaceIteratorPtr(new TIterator(myFaces)));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 ///Return an iterator on volumes of the current mesh.
 ///////////////////////////////////////////////////////////////////////////////
 
-SMDS_VolumeIteratorPtr SMDS_Mesh::volumesIterator() const
+SMDS_VolumeIteratorPtr SMDS_Mesh::volumesIterator(bool idInceasingOrder) const
 {
   typedef MYElem_Map_Iterator
     < SetOfCells, const SMDS_MeshVolume*, SMDS_VolumeIterator > TIterator;
-  return SMDS_VolumeIteratorPtr(new TIterator(myCells, SMDSAbs_Volume));
+  return SMDS_VolumeIteratorPtr(new TIterator(myCells, SMDSAbs_Volume)); // naturally always sorted by ID
+
+  //  typedef MYNCollection_Map_Iterator
+//    < SetOfVolumes, const SMDS_MeshVolume*, SMDS_VolumeIterator > TIterator;
+//  typedef IdSortedIterator< const SMDS_MeshVolume* >              TSortedIterator;
+//  return ( idInceasingOrder ?
+//           SMDS_VolumeIteratorPtr( new TSortedIterator( *myElementIDFactory,
+//                                                        SMDSAbs_Volume,
+//                                                        NbVolumes() )) :
+//           SMDS_VolumeIteratorPtr(new TIterator(myVolumes)));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

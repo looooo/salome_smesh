@@ -60,7 +60,7 @@ vtkPoints* SMDS_UnstructuredGrid::GetPoints()
   return this->Points;
 }
 
-#ifdef VTK_HAVE_POLYHEDRON
+//#ifdef VTK_HAVE_POLYHEDRON
 int SMDS_UnstructuredGrid::InsertNextLinkedCell(int type, int npts, vtkIdType *pts)
 {
   if (type != VTK_POLYHEDRON)
@@ -96,7 +96,7 @@ int SMDS_UnstructuredGrid::InsertNextLinkedCell(int type, int npts, vtkIdType *p
 
   return cellid;
 }
-#endif
+//#endif
 
 void SMDS_UnstructuredGrid::setSMDS_mesh(SMDS_Mesh *mesh)
 {
@@ -284,7 +284,7 @@ void SMDS_UnstructuredGrid::compactGrid(std::vector<int>& idNodesOldToNew, int n
       this->SetPoints(newPoints);
       MESSAGE("NumberOfPoints: " << this->GetNumberOfPoints());
     }
-#ifdef VTK_HAVE_POLYHEDRON
+//#ifdef VTK_HAVE_POLYHEDRON
   // TODO compact faces for Polyhedrons
   // refaire completement faces et faceLocation
   // pour chaque cell, recup oldCellId, oldFacesId, recopie dans newFaces de la faceStream
@@ -301,9 +301,9 @@ void SMDS_UnstructuredGrid::compactGrid(std::vector<int>& idNodesOldToNew, int n
   if (this->FaceLocations) this->FaceLocations->Register(this);
   if (this->Faces) this->Faces->Register(this);
   this->SetCells(newTypes, newLocations, newConnectivity, FaceLocations, Faces);
-#else
-  this->SetCells(newTypes, newLocations, newConnectivity);
-#endif
+//#else
+//  this->SetCells(newTypes, newLocations, newConnectivity);
+//#endif
   newTypes->Delete();
   newLocations->Delete();
   newConnectivity->Delete();

@@ -34,8 +34,8 @@ salomeinclude_HEADERS = \
 	SMESH_DeviceActor.h \
 	SMESH_PreviewActorsCollection.h \
 	SMESH_ExtractGeometry.h \
-	SMESH_FaceOrientationFilter.h
-#	SMESH_vtkPVUpdateSuppressor.h
+	SMESH_FaceOrientationFilter.h \
+	SMESH_ScalarBarActor.h
 
 # Libraries targets
 
@@ -47,8 +47,8 @@ dist_libSMESHObject_la_SOURCES = \
 	SMESH_PreviewActorsCollection.cxx \
 	SMESH_ExtractGeometry.cxx \
 	SMESH_ActorUtils.cxx \
-	SMESH_FaceOrientationFilter.cxx
-#	SMESH_vtkPVUpdateSuppressor.cxx
+	SMESH_FaceOrientationFilter.cxx \
+	SMESH_ScalarBarActor.cxx
 
 libSMESHObject_la_CPPFLAGS = \
         $(QT_INCLUDES) \

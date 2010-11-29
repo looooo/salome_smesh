@@ -386,8 +386,16 @@ CORBA::Boolean SMESH_Pattern_i::MakeMesh (SMESH::SMESH_Mesh_ptr theMesh,
                 << CreatePolygons << ", " << CreatePolyedrs << " )";
   addErrorCode( "MakeMesh" );
 
-  return myPattern.MakeMesh( aMesh, CreatePolygons, CreatePolyedrs );
-  aMesh->GetMeshDS()->Modified();
+  int nb = aMesh->NbNodes() + aMesh->NbEdges() + aMesh->NbFaces() + aMesh->NbVolumes();
+
+  bool res = myPattern.MakeMesh( aMesh, CreatePolygons, CreatePolyedrs );
+
+  if ( nb > 0 && nb != aMesh->NbNodes() + aMesh->NbEdges() + aMesh->NbFaces() + aMesh->NbVolumes())
+    {
+      aMesh->SetIsModified(true);
+      aMesh->GetMeshDS()->Modified();
+    }
+  return res;
 }
 
 //=======================================================================

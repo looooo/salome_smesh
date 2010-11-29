@@ -14,9 +14,9 @@ public:
   SMDS_VtkVolume(std::vector<vtkIdType> nodeIds, SMDS_Mesh* mesh);
   ~SMDS_VtkVolume();
   void init(std::vector<vtkIdType> nodeIds, SMDS_Mesh* mesh);
-#ifdef VTK_HAVE_POLYHEDRON
+//#ifdef VTK_HAVE_POLYHEDRON
   void initPoly(std::vector<vtkIdType> nodeIds, std::vector<int> nbNodesPerFace, SMDS_Mesh* mesh);
-#endif
+//#endif
   virtual bool ChangeNodes(const SMDS_MeshNode* nodes[], const int nbNodes);
   virtual bool vtkOrder(const SMDS_MeshNode* nodes[], const int nbNodes);
 

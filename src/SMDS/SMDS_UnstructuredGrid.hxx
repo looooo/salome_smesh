@@ -15,12 +15,12 @@
 #include <set>
 #include <map>
 
-#define VTK_HAVE_POLYHEDRON
-#ifdef VTK_HAVE_POLYHEDRON
+//#define VTK_HAVE_POLYHEDRON
+//#ifdef VTK_HAVE_POLYHEDRON
   #define VTK_MAXTYPE VTK_POLYHEDRON
-#else
-  #define VTK_MAXTYPE VTK_QUADRATIC_PYRAMID
-#endif
+//#else
+//  #define VTK_MAXTYPE VTK_QUADRATIC_PYRAMID
+//#endif
 
 #define NBMAXNEIGHBORS 100
 
@@ -42,9 +42,9 @@ public:
   virtual void UpdateInformation();
   virtual vtkPoints *GetPoints();
 
-#ifdef VTK_HAVE_POLYHEDRON
+//#ifdef VTK_HAVE_POLYHEDRON
   int InsertNextLinkedCell(int type, int npts, vtkIdType *pts);
-#endif
+//#endif
 
   int CellIdToDownId(int vtkCellId);
   void setCellIdToDownId(int vtkCellId, int downId);

@@ -75,6 +75,6 @@ SMESHClientBin_CPPFLAGS = \
 	$(libSMESHClient_la_CPPFLAGS)
 
 SMESHClientBin_LDADD = \
-	$(libSMESHClient_la_LDFLAGS)
+	$(libSMESHClient_la_LDFLAGS) @CORBA_LIBS@
 
 

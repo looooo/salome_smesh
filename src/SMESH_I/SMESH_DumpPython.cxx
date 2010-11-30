@@ -232,7 +232,10 @@ namespace SMESH
     if(!aSObject->_is_nil() || CORBA::is_nil( theArg ))
       return *this << aSObject;
     SMESH::long_array_var anElementsId = theArg->GetIDs();
-    return *this << anElementsId;
+    SMESH::SMESH_Mesh_var mesh = theArg->GetMesh();
+    SMESH::array_of_ElementType_var types =  theArg->GetTypes();
+    SMESH::ElementType type = types->length() ? types[0] : SMESH::ALL;
+    return *this << mesh << ".GetIDSource(" << anElementsId << ", " << type << ")";
   }
 
   TPythonDump& 

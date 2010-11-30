@@ -54,6 +54,10 @@
             <translation>mesh_build_compound.png</translation>
         </message>
         <message>
+            <source>ICON_COPY_MESH</source>
+            <translation>copy_mesh.png</translation>
+        </message>
+        <message>
             <source>ICON_COMPUTE</source>
             <translation>mesh_compute.png</translation>
         </message>
@@ -108,6 +112,10 @@
         <message>
             <source>ICON_DLG_BUILD_COMPOUND_MESH</source>
             <translation>mesh_build_compound.png</translation>
+        </message>
+        <message>
+            <source>ICON_DLG_COPY_MESH</source>
+            <translation>copy_mesh.png</translation>
         </message>
         <message>
             <source>ICON_DLG_ELEM0D</source>

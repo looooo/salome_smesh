@@ -172,6 +172,7 @@ dist_salomeres_DATA = \
 	mesh_tree_hypo_projection_3d.png \
 	mesh_tree_hypo_projection_2d.png \
 	mesh_build_compound.png \
+	copy_mesh.png \
 	mesh_node_to_point.png \
 	mesh_tree_mesh_partial.png \
 	mesh_extractGroup.png \

@@ -75,6 +75,7 @@
 #include "SMESHGUI_TransparencyDlg.h"
 //#include "SMESHGUI_WhatIsDlg.h"
 #include "SMESHGUI_DuplicateNodesDlg.h"
+#include "SMESHGUI_CopyMeshDlg.h"
 
 #include "SMESHGUI_Utils.h"
 #include "SMESHGUI_MeshUtils.h"
@@ -2040,6 +2041,13 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
   case 704: // Edit mesh/sub-mesh
     startOperation( theCommandID );
     break;
+  case 705: // copy mesh
+    {
+      if (checkLock(aStudy)) break;
+      EmitSignalDeactivateDialog();
+      ( new SMESHGUI_CopyMeshDlg( this ) )->show();
+    }
+    break;
   case 710: // Build compound mesh
     {
       if (checkLock(aStudy)) break;
@@ -3209,6 +3217,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   createSMESHAction(  702, "CREATE_MESH",     "ICON_DLG_INIT_MESH" );
   createSMESHAction(  703, "CREATE_SUBMESH",  "ICON_DLG_ADD_SUBMESH" );
   createSMESHAction(  704, "EDIT_MESHSUBMESH","ICON_DLG_EDIT_MESH" );
+  createSMESHAction(  705, "COPY_MESH",       "ICON_COPY_MESH" );
   createSMESHAction(  710, "BUILD_COMPOUND",  "ICON_BUILD_COMPOUND" );
   createSMESHAction(  711, "PRECOMPUTE",      "ICON_PRECOMPUTE" );
   createSMESHAction(  712, "EVALUATE",        "ICON_COMPUTE" );
@@ -3377,6 +3386,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   createMenu( 703, meshId, -1 );
   createMenu( 704, meshId, -1 );
   createMenu( 710, meshId, -1 );
+  createMenu( 705, meshId, -1 );
   createMenu( separator(), meshId, -1 );
   createMenu( 701, meshId, -1 );
   createMenu( 711, meshId, -1 );
@@ -3492,6 +3502,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   createTool( 703, meshTb );
   createTool( 704, meshTb );
   createTool( 710, meshTb );
+  createTool( 705, meshTb );
   createTool( separator(), meshTb );
   createTool( 701, meshTb );
   createTool( 711, meshTb );

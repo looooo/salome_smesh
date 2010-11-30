@@ -188,6 +188,10 @@
         <translation>Build Compound</translation>
     </message>
     <message>
+        <source>MEN_COPY_MESH</source>
+        <translation>Copy Mesh</translation>
+    </message>
+    <message>
         <source>MEN_CLIP</source>
         <translation>Clipping</translation>
     </message>
@@ -1051,6 +1055,14 @@ Please enter correct values and try again</translation>
     <message>
         <source>SMESH_BUILD_COMPOUND_TITLE</source>
         <translation>Create a Compound</translation>
+    </message>
+    <message>
+        <source>SMESH_COPY_MESH_TITLE</source>
+        <translation>Copy Mesh</translation>
+    </message>
+    <message>
+        <source>SMESH_KEEP_IDS</source>
+        <translation>Preserve IDs of elements</translation>
     </message>
     <message>
         <source>SMESH_BUT_ADD</source>
@@ -2281,6 +2293,10 @@ Consider saving your work before application crash</translation>
         <translation>Build Compound Mesh</translation>
     </message>
     <message>
+        <source>STB_COPY_MESH</source>
+        <translation>Copy Mesh</translation>
+    </message>
+    <message>
         <source>STB_CLIP</source>
         <translation>Clipping</translation>
     </message>
@@ -2831,6 +2847,10 @@ Consider saving your work before application crash</translation>
     <message>
         <source>TOP_BUILD_COMPOUND</source>
         <translation>Build Compound Mesh</translation>
+    </message>
+    <message>
+        <source>TOP_COPY_MESH</source>
+        <translation>Copy Mesh</translation>
     </message>
     <message>
         <source>TOP_CLIP</source>
@@ -5810,6 +5830,21 @@ It is impossible to read point coordinates from file</translation>
     <message>
         <source>DISTANCE</source>
         <translation>Distance</translation>
+    </message>
+</context>
+<context>
+    <name>SMESHGUI_CopyMeshDlg</name>
+    <message>
+        <source>OBJECT_NAME</source>
+        <translation>Source Object</translation>
+    </message>
+    <message>
+        <source>ELEM_IDS</source>
+        <translation>Source Element IDs</translation>
+    </message>
+    <message>
+        <source>NEW_NAME</source>
+        <translation>New Mesh Name</translation>
     </message>
 </context>
 <context>

@@ -659,27 +659,6 @@ class smeshDC(SMESH._objref_SMESH_Gen):
         aMesh = Mesh(self, self.geompyD, aSmeshMesh)
         return aMesh
 
-    ## From SMESH_Gen interface
-    #  @return the list of integer values
-    #  @ingroup l1_auxiliary
-    def GetSubShapesId( self, theMainObject, theListOfSubObjects ):
-        return SMESH._objref_SMESH_Gen.GetSubShapesId(self,theMainObject, theListOfSubObjects)
-
-    ## From SMESH_Gen interface. Creates a pattern
-    #  @return an instance of SMESH_Pattern
-    #
-    #  <a href="../tui_modifying_meshes_page.html#tui_pattern_mapping">Example of Patterns usage</a>
-    #  @ingroup l2_modif_patterns
-    def GetPattern(self):
-        return SMESH._objref_SMESH_Gen.GetPattern(self)
-
-    ## Sets number of segments per diagonal of boundary box of geometry by which
-    #  default segment length of appropriate 1D hypotheses is defined.
-    #  Default value is 10
-    #  @ingroup l1_auxiliary
-    def SetBoundaryBoxSegmentation(self, nbSegments):
-        SMESH._objref_SMESH_Gen.SetBoundaryBoxSegmentation(self,nbSegments)
-
     ## Concatenate the given meshes into one mesh.
     #  @return an instance of Mesh class
     #  @param meshes the meshes to combine into one mesh
@@ -702,6 +681,41 @@ class smeshDC(SMESH._objref_SMESH_Gen):
         aSmeshMesh.SetParameters(Parameters)
         aMesh = Mesh(self, self.geompyD, aSmeshMesh)
         return aMesh
+
+    ## Create a mesh by copying a part of another mesh.
+    #  @param meshPart a part of mesh to copy, either a Mesh, a sub-mesh or a group;
+    #                  to copy nodes or elements not contained in any mesh object,
+    #                  pass result of Mesh.GetIDSource( list_of_ids, type ) as meshPart
+    #  @param meshName a name of the new mesh
+    #  @param toCopyGroups to create in the new mesh groups the copied elements belongs to
+    #  @param toKeepIDs to preserve IDs of the copied elements or not
+    #  @return an instance of Mesh class
+    def CopyMesh( self, meshPart, meshName, toCopyGroups=False, toKeepIDs=False):
+        if (isinstance( meshPart, Mesh )):
+            meshPart = meshPart.GetMesh()
+        mesh = SMESH._objref_SMESH_Gen.CopyMesh( self,meshPart,meshName,toCopyGroups,toKeepIDs )
+        return Mesh(self, self.geompyD, mesh)
+
+    ## From SMESH_Gen interface
+    #  @return the list of integer values
+    #  @ingroup l1_auxiliary
+    def GetSubShapesId( self, theMainObject, theListOfSubObjects ):
+        return SMESH._objref_SMESH_Gen.GetSubShapesId(self,theMainObject, theListOfSubObjects)
+
+    ## From SMESH_Gen interface. Creates a pattern
+    #  @return an instance of SMESH_Pattern
+    #
+    #  <a href="../tui_modifying_meshes_page.html#tui_pattern_mapping">Example of Patterns usage</a>
+    #  @ingroup l2_modif_patterns
+    def GetPattern(self):
+        return SMESH._objref_SMESH_Gen.GetPattern(self)
+
+    ## Sets number of segments per diagonal of boundary box of geometry by which
+    #  default segment length of appropriate 1D hypotheses is defined.
+    #  Default value is 10
+    #  @ingroup l1_auxiliary
+    def SetBoundaryBoxSegmentation(self, nbSegments):
+        SMESH._objref_SMESH_Gen.SetBoundaryBoxSegmentation(self,nbSegments)
 
     # Filtering. Auxiliary functions:
     # ------------------------------
@@ -731,6 +745,8 @@ class smeshDC(SMESH._objref_SMESH_Gen):
     #  @param UnaryOp  FT_LogicalNOT or FT_Undefined
     #  @param BinaryOp a binary logical operation FT_LogicalAND, FT_LogicalOR or
     #                  FT_Undefined (must be for the last criterion of all criteria)
+    #  @param Tolerance the tolerance used by FT_BelongToGeom, FT_BelongToSurface,
+    #         FT_LyingOnGeom, FT_CoplanarFaces criteria
     #  @return SMESH.Filter.Criterion
     #  @ingroup l1_controls
     def GetCriterion(self,elementType,
@@ -738,10 +754,12 @@ class smeshDC(SMESH._objref_SMESH_Gen):
                      Compare = FT_EqualTo,
                      Treshold="",
                      UnaryOp=FT_Undefined,
-                     BinaryOp=FT_Undefined):
+                     BinaryOp=FT_Undefined,
+                     Tolerance=1e-07):
         aCriterion = self.GetEmptyCriterion()
         aCriterion.TypeOfElement = elementType
         aCriterion.Type = self.EnumToLong(CritType)
+        aCriterion.Tolerance = Tolerance
 
         aTreshold = Treshold
 
@@ -831,14 +849,17 @@ class smeshDC(SMESH._objref_SMESH_Gen):
     #  @param Compare  belongs to {FT_LessThan, FT_MoreThan, FT_EqualTo}
     #  @param Treshold the threshold value (range of id ids as string, shape, numeric)
     #  @param UnaryOp  FT_LogicalNOT or FT_Undefined
+    #  @param Tolerance the tolerance used by FT_BelongToGeom, FT_BelongToSurface,
+    #         FT_LyingOnGeom, FT_CoplanarFaces criteria
     #  @return SMESH_Filter
     #  @ingroup l1_controls
     def GetFilter(self,elementType,
                   CritType=FT_Undefined,
                   Compare=FT_EqualTo,
                   Treshold="",
-                  UnaryOp=FT_Undefined):
-        aCriterion = self.GetCriterion(elementType, CritType, Compare, Treshold, UnaryOp, FT_Undefined)
+                  UnaryOp=FT_Undefined,
+                  Tolerance=1e-07):
+        aCriterion = self.GetCriterion(elementType, CritType, Compare, Treshold, UnaryOp, FT_Undefined,Tolerance)
         aFilterMgr = self.CreateFilterManager()
         aFilter = aFilterMgr.CreateFilter()
         aCriteria = []
@@ -1730,6 +1751,8 @@ class Mesh:
     #  @param Compare belongs to {FT_LessThan, FT_MoreThan, FT_EqualTo}
     #  @param Treshold the threshold value (range of id ids as string, shape, numeric)
     #  @param UnaryOp FT_LogicalNOT or FT_Undefined
+    #  @param Tolerance the tolerance used by FT_BelongToGeom, FT_BelongToSurface,
+    #         FT_LyingOnGeom, FT_CoplanarFaces criteria
     #  @return SMESH_Group
     #  @ingroup l2_grps_create
     def MakeGroup(self,
@@ -1738,8 +1761,9 @@ class Mesh:
                   CritType=FT_Undefined,
                   Compare=FT_EqualTo,
                   Treshold="",
-                  UnaryOp=FT_Undefined):
-        aCriterion = self.smeshpyD.GetCriterion(elementType, CritType, Compare, Treshold, UnaryOp, FT_Undefined)
+                  UnaryOp=FT_Undefined,
+                  Tolerance=1e-07):
+        aCriterion = self.smeshpyD.GetCriterion(elementType, CritType, Compare, Treshold, UnaryOp, FT_Undefined,Tolerance)
         group = self.MakeGroupByCriterion(groupName, aCriterion)
         return group
 
@@ -1953,6 +1977,13 @@ class Mesh:
     #  @ingroup l1_modifying
     def GetMeshEditor(self):
         return self.mesh.GetMeshEditor()
+
+    ## Wrap a list of IDs of elements or nodes into SMESH_IDSource which
+    #  can be passed as argument to accepting mesh, group or sub-mesh
+    #  @return an instance of SMESH_IDSource
+    #  @ingroup l1_auxiliary
+    def GetIDSource(self, ids, elemType):
+        return self.GetMeshEditor().MakeIDSource(ids, elemType)
 
     ## Gets MED Mesh
     #  @return an instance of SALOME_MED::MESH
@@ -3656,7 +3687,7 @@ class Mesh:
         if ( isinstance( theObject, Mesh )):
             theObject = theObject.GetMesh()
         if ( isinstance( theObject, list )):
-            theObject = self.editor.MakeIDSource(theObject, SMESH.ALL)
+            theObject = self.GetIDSource(theObject, SMESH.ALL)
 
         thePoint, Parameters = ParsePointStruct(thePoint)
         self.mesh.SetParameters(Parameters)
@@ -3677,7 +3708,7 @@ class Mesh:
         if (isinstance(theObject, Mesh)):
             theObject = theObject.GetMesh()
         if ( isinstance( theObject, list )):
-            theObject = self.editor.MakeIDSource(theObject,SMESH.ALL)
+            theObject = self.GetIDSource(theObject,SMESH.ALL)
 
         mesh = self.editor.ScaleMakeMesh(theObject, thePoint, theScaleFact,
                                          MakeGroups, NewMeshName)
@@ -3811,7 +3842,7 @@ class Mesh:
         if not isinstance( ExceptSubMeshOrGroups, list):
             ExceptSubMeshOrGroups = [ ExceptSubMeshOrGroups ]
         if ExceptSubMeshOrGroups and isinstance( ExceptSubMeshOrGroups[0], int):
-            ExceptSubMeshOrGroups = [ self.editor.MakeIDSource( ExceptSubMeshOrGroups, SMESH.NODE)]
+            ExceptSubMeshOrGroups = [ self.GetIDSource( ExceptSubMeshOrGroups, SMESH.NODE)]
         return self.editor.FindCoincidentNodesOnPartBut(SubMeshOrGroup, Tolerance,ExceptSubMeshOrGroups)
 
     ## Merges nodes

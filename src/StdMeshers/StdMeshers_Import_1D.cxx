@@ -139,6 +139,25 @@ namespace // INTERNAL STUFF
   };
   //================================================================================
   /*!
+   * \brief Comparator of sub-meshes
+   */
+  struct _SubLess
+  {
+    bool operator()(const SMESH_subMesh* sm1, const SMESH_subMesh* sm2 ) const
+    {
+      if ( sm1 == sm2 ) return false;
+      if ( !sm1 || !sm2 ) return sm1 < sm2;
+      const TopoDS_Shape& s1 = sm1->GetSubShape();
+      const TopoDS_Shape& s2 = sm2->GetSubShape();
+      TopAbs_ShapeEnum t1 = s1.IsNull() ? TopAbs_SHAPE : s1.ShapeType();
+      TopAbs_ShapeEnum t2 = s2.IsNull() ? TopAbs_SHAPE : s2.ShapeType();
+      if ( t1 == t2)
+        return (sm1 < sm2);
+      return t1 < t2; // to have: face < edge
+    }
+  };
+  //================================================================================
+  /*!
    * \brief Container of data dedicated to one source mesh
    */
   struct _ImportData
@@ -147,10 +166,10 @@ namespace // INTERNAL STUFF
     StdMeshers_Import_1D::TNodeNodeMap _n2n;
     StdMeshers_Import_1D::TElemElemMap _e2e;
 
-    set< SMESH_subMesh*> _subM; // submeshes relating to this srcMesh
-    set< SMESH_subMesh*> _copyMeshSubM; // submeshes requesting mesh copying
-    set< SMESH_subMesh*> _copyGroupSubM; // submeshes requesting mesh copying
-    set< SMESH_subMesh*> _computedSubM;
+    set< SMESH_subMesh*, _SubLess > _subM; // submeshes relating to this srcMesh
+    set< SMESH_subMesh*, _SubLess > _copyMeshSubM; // submeshes requesting mesh copying
+    set< SMESH_subMesh*, _SubLess > _copyGroupSubM; // submeshes requesting mesh copying
+    set< SMESH_subMesh*, _SubLess > _computedSubM;
 
     SMESHDS_SubMesh*     _importMeshSubDS; // submesh storing a copy of _srcMesh
     int                  _importMeshSubID; // id of _importMeshSubDS
@@ -197,10 +216,30 @@ namespace // INTERNAL STUFF
       if ( toCopyGroups ) _copyGroupSubM.insert( sm );
       else                _copyGroupSubM.erase( sm );
     }
+    void addComputed( SMESH_subMesh* sm )
+    {
+      SMESH_subMeshIteratorPtr smIt = sm->getDependsOnIterator(/*includeSelf=*/true,
+                                                               /*complexShapeFirst=*/true);
+      while ( smIt->more() )
+      {
+        sm = smIt->next();
+        switch ( sm->GetSubShape().ShapeType() )
+        {
+        case TopAbs_EDGE:
+        case TopAbs_FACE:
+          _subM.insert( sm );
+          if ( !sm->IsEmpty() )
+            _computedSubM.insert( sm );
+        case TopAbs_VERTEX:
+          break;
+        default:;
+        }
+      }
+    }
   };
   //================================================================================
   /*!
-   * Listener notified on events of an imported submesh
+   * Listener notified on events relating to imported submesh
    */
   class _Listener : public SMESH_subMeshEventListener
   {
@@ -213,229 +252,248 @@ namespace // INTERNAL STUFF
     // return poiter to a static listener
     static _Listener* get() { static _Listener theListener; return &theListener; }
 
-    //--------------------------------------------------------------------------------
-    /*!
-     * \brief Find or create ImportData for given meshes
-     */
-    static _ImportData* getImportData(const SMESH_Mesh* srcMesh,
-                                       SMESH_Mesh*       tgtMesh)
-    {
-      list< _ImportData >& dList = get()->_tgtMesh2ImportData[tgtMesh];
-      list< _ImportData >::iterator d = dList.begin();
-      for ( ; d != dList.end(); ++d )
-        if ( d->_srcMesh == srcMesh )
-          return &*d;
-      dList.push_back(_ImportData(srcMesh));
-      return &dList.back();
-    }
+    static _ImportData* getImportData(const SMESH_Mesh* srcMesh, SMESH_Mesh* tgtMesh);
 
-    //--------------------------------------------------------------------------------
-    /*!
-     * \brief Remember an imported mesh and groups 
-     *  \param smDS - submesh DS holding the imported mesh
-     *  \param sm - submesh computed by Import algo
-     *  \param srcMeshDS - source mesh
-     *  \param srcHyp - ImportSource hypothesis
-     */
-    static _ImportData* storeImportSubmesh(SMESH_subMesh*                   importSub,
-                                           const SMESH_Mesh*                srcMesh,
-                                           const StdMeshers_ImportSource1D* srcHyp)
-    {
-      // set listener to hear events of the submesh computed by "Import" algo
-      importSub->SetEventListener( get(), new _ListenerData(srcHyp), importSub );
+    static void storeImportSubmesh(SMESH_subMesh*                   importSub,
+                                   const SMESH_Mesh*                srcMesh,
+                                   const StdMeshers_ImportSource1D* srcHyp);
 
-      // set a listener to hear events of the source mesh
-      SMESH_subMesh* smToNotify = importSub;
-      SMESH_subMesh* smToListen = srcMesh->GetSubMeshContaining(1);
-      SMESH_subMeshEventListenerData* data = new _ListenerData(srcHyp, LISTEN_SRC_MESH);
-      data->mySubMeshes.push_back( smToNotify );
-      importSub->SetEventListener( get(), data, smToListen );
+    virtual void ProcessEvent(const int                       event,
+                              const int                       eventType,
+                              SMESH_subMesh*                  subMesh,
+                              SMESH_subMeshEventListenerData* data,
+                              const SMESH_Hypothesis*         hyp);
+    void removeSubmesh( SMESH_subMesh* sm, _ListenerData* data );
+    void clearSubmesh ( SMESH_subMesh* sm, _ListenerData* data, bool clearAllSub );
 
-      // remeber the submesh
-      _ImportData* iData = _Listener::getImportData( srcMesh, importSub->GetFather());
-      iData->_subM.insert( importSub );
-      iData->trackHypParams( importSub, srcHyp );
-      if ( !importSub->IsEmpty() )
-        iData->_computedSubM.insert( importSub );
-      if ( !iData->_copyMeshSubM.empty() && iData->_importMeshSubID < 1 )
-      {
-        SMESH_Mesh* tgtMesh = importSub->GetFather();
-        iData->_importMeshSubID = getSubmeshIDForCopiedMesh( srcMesh->GetMeshDS(),tgtMesh);
-        iData->_importMeshSubDS = tgtMesh->GetMeshDS()->NewSubMesh( iData->_importMeshSubID );
-      }
-      if ( !importSub->IsEmpty() )
-        iData->_computedSubM.insert( importSub );
-
-      return iData;
-    }
-    //--------------------------------------------------------------------------------
-    /*!
-     * \brief mark sm as missing src hyp with valid groups
-     */
+    // mark sm as missing src hyp with valid groups
     static void waitHypModification(SMESH_subMesh* sm)
     {
       sm->SetEventListener
         (get(), SMESH_subMeshEventListenerData::MakeData( sm, WAIT_HYP_MODIF ), sm);
     }
+  };
+  //--------------------------------------------------------------------------------
+  /*!
+   * \brief Find or create ImportData for given meshes
+   */
+  _ImportData* _Listener::getImportData(const SMESH_Mesh* srcMesh,
+                                        SMESH_Mesh*       tgtMesh)
+  {
+    list< _ImportData >& dList = get()->_tgtMesh2ImportData[tgtMesh];
+    list< _ImportData >::iterator d = dList.begin();
+    for ( ; d != dList.end(); ++d )
+      if ( d->_srcMesh == srcMesh )
+        return &*d;
+    dList.push_back(_ImportData(srcMesh));
+    return &dList.back();
+  }
 
-    //--------------------------------------------------------------------------------
-    /*!
-     * \brief Remove imported mesh and/or groups as soon as no more imported submeshes
-     *               remain computed
-     *  \param sm - submesh loosing Import algo
-     *  \param data - data holding imported groups
-     */
-    void removeSubmesh( SMESH_subMesh* sm, _ListenerData* data )
+  //--------------------------------------------------------------------------------
+  /*!
+   * \brief Remember an imported sub-mesh and set needed even listeners
+   *  \param importSub - submesh computed by Import algo
+   *  \param srcMesh - source mesh
+   *  \param srcHyp - ImportSource hypothesis
+   */
+  void _Listener::storeImportSubmesh(SMESH_subMesh*                   importSub,
+                                     const SMESH_Mesh*                srcMesh,
+                                     const StdMeshers_ImportSource1D* srcHyp)
+  {
+    // set listener to hear events of the submesh computed by "Import" algo
+    importSub->SetEventListener( get(), new _ListenerData(srcHyp), importSub );
+
+    // set a listener to hear events of the source mesh
+    SMESH_subMesh* smToNotify = importSub;
+    SMESH_subMesh* smToListen = srcMesh->GetSubMeshContaining(1);
+    SMESH_subMeshEventListenerData* data = new _ListenerData(srcHyp, LISTEN_SRC_MESH);
+    data->mySubMeshes.push_back( smToNotify );
+    importSub->SetEventListener( get(), data, smToListen );
+
+    // remeber the submesh importSub and its sub-submeshes
+    _ImportData* iData = _Listener::getImportData( srcMesh, importSub->GetFather());
+    iData->trackHypParams( importSub, srcHyp );
+    iData->addComputed( importSub );
+    if ( !iData->_copyMeshSubM.empty() && iData->_importMeshSubID < 1 )
     {
-      list< _ImportData > &  dList = _tgtMesh2ImportData[ sm->GetFather() ];
-      list< _ImportData >::iterator d = dList.begin();
-      for ( ; d != dList.end(); ++d )
-        if ( (*d)._subM.erase( sm ))
+      SMESH_Mesh* tgtMesh = importSub->GetFather();
+      iData->_importMeshSubID = getSubmeshIDForCopiedMesh( srcMesh->GetMeshDS(),tgtMesh);
+      iData->_importMeshSubDS = tgtMesh->GetMeshDS()->NewSubMesh( iData->_importMeshSubID );
+    }
+  }
+  //--------------------------------------------------------------------------------
+  /*!
+   * \brief Remove imported mesh and/or groups if needed
+   *  \param sm - submesh loosing Import algo
+   *  \param data - data holding imported groups
+   */
+  void _Listener::removeSubmesh( SMESH_subMesh* sm, _ListenerData* data )
+  {
+    list< _ImportData > &  dList = _tgtMesh2ImportData[ sm->GetFather() ];
+    list< _ImportData >::iterator d = dList.begin();
+    for ( ; d != dList.end(); ++d )
+      if ( (*d)._subM.erase( sm ))
+      {
+        d->_computedSubM.erase( sm );
+        bool rmMesh   = d->_copyMeshSubM.erase( sm ) && d->_copyMeshSubM.empty();
+        bool rmGroups = (d->_copyGroupSubM.erase( sm ) && d->_copyGroupSubM.empty()) || rmMesh;
+        if ( rmMesh )
+          d->removeImportedMesh( sm->GetFather()->GetMeshDS() );
+        if ( rmGroups && data )
+          d->removeGroups( sm, data->_srcHyp );
+      }
+  }
+  //--------------------------------------------------------------------------------
+  /*!
+   * \brief Clear submeshes and remove imported mesh and/or groups if necessary
+   *  \param sm - cleared submesh
+   *  \param data - data holding imported groups
+   */
+  void _Listener::clearSubmesh(SMESH_subMesh* sm, _ListenerData* data, bool clearAllSub)
+  {
+    list< _ImportData > &  dList = _tgtMesh2ImportData[ sm->GetFather() ];
+    list< _ImportData >::iterator d = dList.begin();
+    for ( ; d != dList.end(); ++d )
+    {
+      if ( !d->_subM.count( sm )) continue;
+      if ( (*d)._computedSubM.erase( sm ) )
+      {
+        bool copyMesh = !d->_copyMeshSubM.empty();
+        if ( copyMesh || clearAllSub )
         {
-          d->_computedSubM.erase( sm );
-          bool rmMesh   = d->_copyMeshSubM.erase( sm ) && d->_copyMeshSubM.empty();
-          bool rmGroups = (d->_copyGroupSubM.erase( sm ) && d->_copyGroupSubM.empty()) || rmMesh;
-          if ( rmMesh )
-            d->removeImportedMesh( sm->GetFather()->GetMeshDS() );
-          if ( rmGroups && data )
+          // remove imported mesh and groups
+          d->removeImportedMesh( sm->GetFather()->GetMeshDS() );
+
+          if ( data )
             d->removeGroups( sm, data->_srcHyp );
-        }
-    }
-    //--------------------------------------------------------------------------------
-    /*!
-     * \brief Remove imported mesh and/or groups and
-     * clear all submeshes with common source mesh
-     *  \param sm - cleared submesh
-     *  \param data - data holding imported groups
-     */
-    void clearSubmesh( SMESH_subMesh* sm, _ListenerData* data )
-    {
-      list< _ImportData > &  dList = _tgtMesh2ImportData[ sm->GetFather() ];
-      list< _ImportData >::iterator d = dList.begin();
-      for ( ; d != dList.end(); ++d )
-      {
-        if ( !d->_subM.count( sm )) continue;
-        if ( (*d)._computedSubM.erase( sm ) )
-        {
-          bool copyMesh = !d->_copyMeshSubM.empty();
-          if ( copyMesh )
+
+          // clear the rest submeshes
+          if ( !d->_computedSubM.empty() )
           {
-            // remove imported mesh and groups
-            d->removeImportedMesh( sm->GetFather()->GetMeshDS() );
-
-            if ( data )
-              d->removeGroups( sm, data->_srcHyp );
-
-            // clear submeshes
-            if ( !d->_computedSubM.empty() )
+            set< SMESH_subMesh*, _SubLess> subs;
+            subs.swap( d->_computedSubM ); // avoid recursion via events
+            while ( !subs.empty() )
             {
-              set< SMESH_subMesh*> subs;
-              subs.swap( d->_computedSubM ); // avoid recursion via events
-              while ( !subs.empty() )
-              {
-                SMESH_subMesh* subM = *subs.begin(); subs.erase( subs.begin() );
-                _ListenerData* hypData = (_ListenerData*) subM->GetEventListenerData( get() );
-                if ( hypData )
-                  d->removeGroups( sm, hypData->_srcHyp );
-                
-                subM->ComputeStateEngine( SMESH_subMesh::CLEAN );
-              }
+              SMESH_subMesh* subM = *subs.begin(); subs.erase( subs.begin() );
+              _ListenerData* hypData = (_ListenerData*) subM->GetEventListenerData( get() );
+              if ( hypData )
+                d->removeGroups( sm, hypData->_srcHyp );
+
+              subM->ComputeStateEngine( SMESH_subMesh::CLEAN );
+              if ( subM->GetSubShape().ShapeType() == TopAbs_FACE )
+                subM->ComputeSubMeshStateEngine( SMESH_subMesh::CLEAN );
             }
           }
-          else
-          {
-            sm->ComputeStateEngine( SMESH_subMesh::CLEAN );
-          }
         }
-        if ( data )
-          d->trackHypParams( sm, data->_srcHyp );
-        d->_n2n.clear();
-        d->_e2e.clear();
+        sm->ComputeStateEngine( SMESH_subMesh::CLEAN );
+        if ( sm->GetSubShape().ShapeType() == TopAbs_FACE )
+          sm->ComputeSubMeshStateEngine( SMESH_subMesh::CLEAN );
       }
+      if ( data )
+        d->trackHypParams( sm, data->_srcHyp );
+      d->_n2n.clear();
+      d->_e2e.clear();
     }
-    //--------------------------------------------------------------------------------
-    /*!
-     * \brief Remove imported mesh and/or groups
-     */
-    virtual void ProcessEvent(const int                       event,
-                              const int                       eventType,
-                              SMESH_subMesh*                  subMesh,
-                              SMESH_subMeshEventListenerData* data,
-                              const SMESH_Hypothesis*         /*hyp*/)
+  }
+  //--------------------------------------------------------------------------------
+  /*!
+   * \brief Remove imported mesh and/or groups
+   */
+  void _Listener::ProcessEvent(const int                       event,
+                               const int                       eventType,
+                               SMESH_subMesh*                  subMesh,
+                               SMESH_subMeshEventListenerData* data,
+                               const SMESH_Hypothesis*         /*hyp*/)
+  {
+    if ( data && data->myType == WAIT_HYP_MODIF )
     {
-      if ( data && data->myType == WAIT_HYP_MODIF )
+      // event of Import submesh
+      if ( SMESH_subMesh::MODIF_HYP  == event &&
+           SMESH_subMesh::ALGO_EVENT == eventType )
       {
-        // event of Import submesh
-        if ( SMESH_subMesh::MODIF_HYP  == event &&
-             SMESH_subMesh::ALGO_EVENT == eventType )
-        {
-          SMESH_Gen* gen = subMesh->GetFather()->GetGen();
-          if ( SMESH_Algo* algo = gen->GetAlgo(*subMesh->GetFather(), subMesh->GetSubShape()))
-            algo->SetEventListener( subMesh );
-        }
+        // re-call SetEventListener() to take into account valid parameters
+        // of ImportSource hypothesis
+        SMESH_Gen* gen = subMesh->GetFather()->GetGen();
+        if ( SMESH_Algo* algo = gen->GetAlgo(*subMesh->GetFather(), subMesh->GetSubShape()))
+          algo->SetEventListener( subMesh );
       }
-      else if ( data && data->myType == LISTEN_SRC_MESH )
+    }
+    else if ( data && data->myType == LISTEN_SRC_MESH )
+    {
+      // event of source mesh
+      if ( SMESH_subMesh::COMPUTE_EVENT == eventType )
       {
-        // event of source mesh
-        if ( SMESH_subMesh::COMPUTE_EVENT == eventType )
-        {
-          switch ( event ) {
-          case SMESH_subMesh::CLEAN:
-            clearSubmesh( data->mySubMeshes.front(), (_ListenerData*) data );
-            break;
-          case SMESH_subMesh::COMPUTE:
-            if ( subMesh->GetComputeState() == SMESH_subMesh::COMPUTE_OK )
-              data->mySubMeshes.front()->ComputeStateEngine( SMESH_subMesh::SUBMESH_COMPUTED );
-            break;
-          default:;
-          }
-        }
-      }
-      else // event of Import submesh
-      {
-        bool removeImport = false;
-        if ( subMesh->GetAlgoState() != SMESH_subMesh::HYP_OK )
-        {
-          removeImport = true;
-        }
-        else if ( SMESH_subMesh::REMOVE_ALGO == event ||
-                  SMESH_subMesh::REMOVE_FATHER_ALGO == event )
-        {
-          SMESH_Gen* gen = subMesh->GetFather()->GetGen();
-          SMESH_Algo* algo = gen->GetAlgo(*subMesh->GetFather(),subMesh->GetSubShape() );
-          removeImport = ( strncmp( "Import", algo->GetName(), 6 ) != 0 );
-        }
-
-        if ( removeImport )
-        {
-          // treate removal of Import algo from subMesh
-          removeSubmesh( subMesh, (_ListenerData*) data );
-        }
-        else if ( subMesh->IsEmpty() )
-        {
-          // treate modification of ImportSource hypothesis
-          clearSubmesh( subMesh, (_ListenerData*) data );
-        }
-        else if ( SMESH_subMesh::CHECK_COMPUTE_STATE == event &&
-                  SMESH_subMesh::COMPUTE_EVENT       == eventType )
-        {
-          // check compute state of all submeshes impoting from same src mesh;
-          // this is to take into account 1D computed submeshes hidden by 2D import algo;
-          // else source mesh is not copied as _subM.size != _computedSubM.size()
-          list< _ImportData > &  dList = _tgtMesh2ImportData[ subMesh->GetFather() ];
-          list< _ImportData >::iterator d = dList.begin();
-          for ( ; d != dList.end(); ++d )
-            if ( d->_subM.count( subMesh ))
+        switch ( event ) {
+        case SMESH_subMesh::CLEAN:
+          // source mesh cleaned -> clean target mesh
+          clearSubmesh( data->mySubMeshes.front(), (_ListenerData*) data, /*all=*/true );
+          break;
+        case SMESH_subMesh::SUBMESH_COMPUTED: {
+          // source mesh computed -> reset FAILED state of Import submeshes to
+          // READY_TO_COMPUTE
+          SMESH_Mesh* srcMesh = subMesh->GetFather();
+          if ( srcMesh->NbEdges() > 0 || srcMesh->NbFaces() > 0 )
+          {
+            SMESH_Mesh* m = data->mySubMeshes.front()->GetFather();
+            if ( SMESH_subMesh* sm1 = m->GetSubMeshContaining(1))
             {
-              set<SMESH_subMesh*>::iterator smIt = d->_subM.begin();
-              for( ; smIt != d->_subM.end(); ++smIt )
-                if ( (*smIt)->IsMeshComputed() )
-                  d->_computedSubM.insert( *smIt);
+              sm1->ComputeStateEngine(SMESH_subMesh::SUBMESH_COMPUTED );
+              sm1->ComputeSubMeshStateEngine( SMESH_subMesh::SUBMESH_COMPUTED );
             }
+          }
+          break;
+        }
+        default:;
         }
       }
     }
-  }; // class _Listener
+    else // event of Import submesh
+    {
+      // find out what happens: import hyp modified or removed
+      bool removeImport = false, modifHyp = false;
+      if ( SMESH_subMesh::ALGO_EVENT == eventType )
+        modifHyp = true;
+      if ( subMesh->GetAlgoState() != SMESH_subMesh::HYP_OK )
+      {
+        removeImport = true;
+      }
+      else if ( SMESH_subMesh::REMOVE_ALGO == event ||
+                SMESH_subMesh::REMOVE_FATHER_ALGO == event )
+      {
+        SMESH_Gen* gen = subMesh->GetFather()->GetGen();
+        SMESH_Algo* algo = gen->GetAlgo(*subMesh->GetFather(),subMesh->GetSubShape() );
+        removeImport = ( strncmp( "Import", algo->GetName(), 6 ) != 0 );
+      }
+
+      if ( removeImport )
+      {
+        // treate removal of Import algo from subMesh
+        removeSubmesh( subMesh, (_ListenerData*) data );
+      }
+      else if ( modifHyp )
+      {
+        // treate modification of ImportSource hypothesis
+        clearSubmesh( subMesh, (_ListenerData*) data, /*all=*/false );
+      }
+      else if ( SMESH_subMesh::CHECK_COMPUTE_STATE == event &&
+                SMESH_subMesh::COMPUTE_EVENT       == eventType )
+      {
+        // check compute state of all submeshes impoting from same src mesh;
+        // this is to take into account 1D computed submeshes hidden by 2D import algo;
+        // else source mesh is not copied as _subM.size != _computedSubM.size()
+        list< _ImportData > &  dList = _tgtMesh2ImportData[ subMesh->GetFather() ];
+        list< _ImportData >::iterator d = dList.begin();
+        for ( ; d != dList.end(); ++d )
+          if ( d->_subM.count( subMesh ))
+          {
+            set<SMESH_subMesh*>::iterator smIt = d->_subM.begin();
+            for( ; smIt != d->_subM.end(); ++smIt )
+              if ( (*smIt)->IsMeshComputed() )
+                d->_computedSubM.insert( *smIt);
+          }
+      }
+    }
+  }
 
   //================================================================================
   /*!
@@ -527,7 +585,7 @@ namespace // INTERNAL STUFF
     _ImportData* iData = _Listener::getImportData(srcMesh,tgtMesh);
 
     SMESH_subMesh* importedSM = tgtMesh->GetSubMesh( tgtShape );
-    iData->_computedSubM.insert( importedSM );
+    iData->addComputed( importedSM );
     if ( iData->_computedSubM.size() != iData->_subM.size() )
       return 0; // not all submeshes computed yet
 
@@ -829,17 +887,6 @@ void StdMeshers_Import_1D::importMesh(const SMESH_Mesh*          srcMesh,
   n2n->clear();
   e2e->clear();
 
-  {
-  cout << "IMPORT SubMesh " << endl << " Elems:";
-  SMDS_ElemIteratorPtr eIt = tgtSubMesh->GetElements();
-  while ( eIt->more() )
-    cout << " " << eIt->next()->GetID();
-  cout << endl << " Nodes:";
-  SMDS_NodeIteratorPtr nIt = tgtSubMesh->GetNodes();
-  while ( nIt->more() )
-    cout << " " << nIt->next()->GetID();
-  cout << endl;
-  }
   // Remember created groups in order to remove them as soon as the srcHyp is
   // modified or something other similar happens. Store them in a hypothesis
   // as it stores its values anyway

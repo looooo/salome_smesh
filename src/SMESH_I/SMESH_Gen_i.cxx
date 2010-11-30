@@ -2330,9 +2330,6 @@ SMESH::SMESH_Mesh_ptr SMESH_Gen_i::CopyMesh(SMESH::SMESH_IDSource_ptr meshPart,
   int nbNewGroups = 0;
   if ( toCopyGroups )
   {
-    SMESH::ElementType* typesBeg = & srcElemTypes[0];
-    SMESH::ElementType* typesEnd = typesBeg+srcElemTypes->length(); 
-
     SMESH_Mesh::GroupIteratorPtr gIt = srcMesh_i->GetImpl().GetGroups();
     while ( gIt->more() )
     {
@@ -2342,7 +2339,7 @@ SMESH::SMESH_Mesh_ptr SMESH_Gen_i::CopyMesh(SMESH::SMESH_IDSource_ptr meshPart,
       // Check group type. We copy nodal groups containing nodes of copied element
       SMDSAbs_ElementType groupType = groupDS->GetType();
       if ( groupType != SMDSAbs_Node &&
-           std::find( typesBeg, typesEnd, groupType ) == typesEnd )
+           newMeshDS->GetMeshInfo().NbElements( groupType ) == 0 )
         continue; // group type differs from types of meshPart
 
       // Find copied elements in the group
@@ -2399,6 +2396,7 @@ SMESH::SMESH_Mesh_ptr SMESH_Gen_i::CopyMesh(SMESH::SMESH_IDSource_ptr meshPart,
 
   *pyDump << newMesh << " = " << this
           << ".CopyMesh( " << meshPart << ", "
+          << "'" << meshName << "', "
           << toCopyGroups << ", "
           << toKeepIDs << ")";
 

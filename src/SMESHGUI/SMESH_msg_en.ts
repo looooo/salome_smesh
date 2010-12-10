@@ -1967,15 +1967,15 @@ add the exported data to its contents?</translation>
         </message>
         <message>
             <source>SMESH_TRANSPARENCY_OPAQUE</source>
-            <translation>---> Opaque</translation>
+            <translation>Opaque &lt;---</translation>
         </message>
         <message>
             <source>SMESH_TRANSPARENCY_TITLE</source>
-            <translation>Change Transparency</translation>
+            <translation>Transparency</translation>
         </message>
         <message>
             <source>SMESH_TRANSPARENCY_TRANSPARENT</source>
-            <translation>Transparent &lt;---</translation>
+            <translation>---> Transparent</translation>
         </message>
         <message>
             <source>SMESH_TRIANGLE</source>

@@ -104,7 +104,7 @@ public:
    * \retval TopoDS_Shape - found support shape
    */
   static TopoDS_Shape GetSubShapeByNode(const SMDS_MeshNode* node,
-                                        SMESHDS_Mesh*        meshDS);
+                                        const SMESHDS_Mesh*  meshDS);
 
   /*!
    * \brief Return a valid node index, fixing the given one if necessary
@@ -301,16 +301,19 @@ public:
   /*!
    * \brief Check and fix node UV on a face
    *  \param force - check even if checks of other nodes on this face passed OK
+   *  \param distXYZ - returns result distance and point coordinates
    *  \retval bool - false if UV is bad and could not be fixed
    */
   bool CheckNodeUV(const TopoDS_Face&   F,
                    const SMDS_MeshNode* n,
                    gp_XY&               uv,
                    const double         tol,
-                   const bool           force=false) const;
+                   const bool           force=false,
+                   double               distXYZ[4]=0) const;
   /*!
    * \brief Check and fix node U on an edge
    *  \param force - check even if checks of other nodes on this edge passed OK
+   *  \param distXYZ - returns result distance and point coordinates
    *  \retval bool - false if U is bad and could not be fixed
    */
   bool CheckNodeU(const TopoDS_Edge&   E,
@@ -318,7 +321,7 @@ public:
                   double&              u,
                   const double         tol,
                   const bool           force=false,
-                  double*              distance=0) const;
+                  double               distXYZ[4]=0) const;
   /*!
    * \brief Return middle UV taking in account surface period
    */

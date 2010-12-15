@@ -291,7 +291,7 @@ bool SMESH_MesherHelper::IsMedium(const SMDS_MeshNode*      node,
 //=======================================================================
 
 TopoDS_Shape SMESH_MesherHelper::GetSubShapeByNode(const SMDS_MeshNode* node,
-                                                   SMESHDS_Mesh*        meshDS)
+                                                   const SMESHDS_Mesh*  meshDS)
 {
   int shapeID = node->GetPosition()->GetShapeId();
   if ( 0 < shapeID && shapeID <= meshDS->MaxShapeIndex() )
@@ -500,7 +500,8 @@ bool SMESH_MesherHelper::CheckNodeUV(const TopoDS_Face&   F,
                                      const SMDS_MeshNode* n,
                                      gp_XY&               uv,
                                      const double         tol,
-                                     const bool           force) const
+                                     const bool           force,
+                                     double               distXYZ[4]) const
 {
   int shapeID = n->GetPosition()->GetShapeId();
   if ( force || toCheckPosOnShape( shapeID ))
@@ -508,13 +509,18 @@ bool SMESH_MesherHelper::CheckNodeUV(const TopoDS_Face&   F,
     // check that uv is correct
     TopLoc_Location loc;
     Handle(Geom_Surface) surface = BRep_Tool::Surface( F,loc );
-    gp_Pnt nodePnt = XYZ( n );
+    gp_Pnt nodePnt = XYZ( n ), surfPnt(0,0,0);
+    double dist = 0;
     if ( !loc.IsIdentity() ) nodePnt.Transform( loc.Transformation().Inverted() );
-    if ( Precision::IsInfinite( uv.X() ) ||
-         Precision::IsInfinite( uv.Y() ) ||
-         nodePnt.Distance( surface->Value( uv.X(), uv.Y() )) > tol )
+    bool infinit = ( Precision::IsInfinite( uv.X() ) || Precision::IsInfinite( uv.Y() ));
+    if ( infinit ||
+         (dist = nodePnt.Distance( surfPnt = surface->Value( uv.X(), uv.Y() ))) > tol )
     {
       setPosOnShapeValidity( shapeID, false );
+      if ( !infinit && distXYZ ) {
+        distXYZ[0] = dist;
+        distXYZ[1] = surfPnt.X(); distXYZ[2] = surfPnt.Y(); distXYZ[3]=surfPnt.Z();
+      }
       // uv incorrect, project the node to surface
       GeomAPI_ProjectPointOnSurf& projector = GetProjector( F, loc, tol );
       projector.Perform( nodePnt );
@@ -526,7 +532,13 @@ bool SMESH_MesherHelper::CheckNodeUV(const TopoDS_Face&   F,
       Quantity_Parameter U,V;
       projector.LowerDistanceParameters(U,V);
       uv.SetCoord( U,V );
-      if ( nodePnt.Distance( surface->Value( U, V )) > tol )
+      surfPnt = surface->Value( U, V );
+      dist = nodePnt.Distance( surfPnt );
+      if ( distXYZ ) {
+        distXYZ[0] = dist;
+        distXYZ[1] = surfPnt.X(); distXYZ[2] = surfPnt.Y(); distXYZ[3]=surfPnt.Z();
+      }
+      if ( dist > tol )
       {
         MESSAGE( "SMESH_MesherHelper::CheckNodeUV(), invalid projection" );
         return false;
@@ -686,7 +698,7 @@ bool SMESH_MesherHelper::CheckNodeU(const TopoDS_Edge&   E,
                                     double&              u,
                                     const double         tol,
                                     const bool           force,
-                                    double*              distance) const
+                                    double               distXYZ[4]) const
 {
   int shapeID = n->GetPosition()->GetShapeId();
   if ( force || toCheckPosOnShape( shapeID ))
@@ -706,8 +718,12 @@ bool SMESH_MesherHelper::CheckNodeU(const TopoDS_Edge&   E,
     {
       gp_Pnt nodePnt = SMESH_MeshEditor::TNodeXYZ( n );
       if ( !loc.IsIdentity() ) nodePnt.Transform( loc.Transformation().Inverted() );
-      double dist = nodePnt.Distance( curve->Value( u ));
-      if ( distance ) *distance = dist;
+      gp_Pnt curvPnt = curve->Value( u );
+      double dist = nodePnt.Distance( curvPnt );
+      if ( distXYZ ) {
+        distXYZ[0] = dist;
+        distXYZ[1] = curvPnt.X(); distXYZ[2] = curvPnt.Y(); distXYZ[3]=curvPnt.Z();
+      }
       if ( dist > tol )
       {
         setPosOnShapeValidity( shapeID, false );
@@ -730,8 +746,12 @@ bool SMESH_MesherHelper::CheckNodeU(const TopoDS_Edge&   E,
         }
         Quantity_Parameter U = projector->LowerDistanceParameter();
         u = double( U );
-        dist = nodePnt.Distance( curve->Value( U ));
-        if ( distance ) *distance = dist;
+        curvPnt = curve->Value( u );
+        dist = nodePnt.Distance( curvPnt );
+        if ( distXYZ ) {
+          distXYZ[0] = dist;
+          distXYZ[1] = curvPnt.X(); distXYZ[2] = curvPnt.Y(); distXYZ[3]=curvPnt.Z();
+        }
         if ( dist > tol )
         {
           MESSAGE( "SMESH_MesherHelper::CheckNodeU(), invalid projection" );
@@ -935,7 +955,7 @@ const SMDS_MeshNode* SMESH_MesherHelper::getMediumNodeOnComposedWire(const SMDS_
   // To find position on edge and 3D position for n12,
   // project <middle> to 2 edges and select projection most close to <middle>
 
-  double u = 0, distMiddleProj = Precision::Infinite();
+  double u = 0, distMiddleProj = Precision::Infinite(), distXYZ[4];
   int iOkEdge = 0;
   TopoDS_Edge edges[2];
   for ( int is2nd = 0; is2nd < 2; ++is2nd )
@@ -949,11 +969,11 @@ const SMDS_MeshNode* SMESH_MesherHelper::getMediumNodeOnComposedWire(const SMDS_
     // project to get U of projection and distance from middle to projection
     TopoDS_Edge edge = edges[ is2nd ] = TopoDS::Edge( shape );
     double node2MiddleDist = middle.Distance( XYZ(n) );
-    double foundU = GetNodeU( edge, n ), foundDist = node2MiddleDist;
-    CheckNodeU( edge, n12, foundU, 2*BRep_Tool::Tolerance(edge), /*force=*/true, &foundDist );
-    if ( foundDist < node2MiddleDist )
+    double foundU = GetNodeU( edge, n );
+    CheckNodeU( edge, n12, foundU, 2*BRep_Tool::Tolerance(edge), /*force=*/true, distXYZ );
+    if ( distXYZ[0] < node2MiddleDist )
     {
-      distMiddleProj = foundDist;
+      distMiddleProj = distXYZ[0];
       u = foundU;
       iOkEdge = is2nd;
     }
@@ -2919,10 +2939,14 @@ struct TAncestorsIterator : public SMDS_Iterator<const TopoDS_Shape*>
 {
   TopTools_ListIteratorOfListOfShape _ancIter;
   TopAbs_ShapeEnum                   _type;
+  TopTools_MapOfShape                _encountered;
   TAncestorsIterator( const TopTools_ListOfShape& ancestors, TopAbs_ShapeEnum type)
     : _ancIter( ancestors ), _type( type )
   {
-    if ( _ancIter.More() && _ancIter.Value().ShapeType() != _type ) next();
+    if ( _ancIter.More() ) {
+      if ( _ancIter.Value().ShapeType() != _type ) next();
+      else _encountered.Add( _ancIter.Value() );
+    }
   }
   virtual bool more()
   {
@@ -2933,7 +2957,7 @@ struct TAncestorsIterator : public SMDS_Iterator<const TopoDS_Shape*>
     const TopoDS_Shape* s = _ancIter.More() ? & _ancIter.Value() : 0;
     if ( _ancIter.More() )
       for ( _ancIter.Next();  _ancIter.More(); _ancIter.Next())
-        if ( _ancIter.Value().ShapeType() == _type )
+        if ( _ancIter.Value().ShapeType() == _type && _encountered.Add( _ancIter.Value() ))
           break;
     return s;
   }

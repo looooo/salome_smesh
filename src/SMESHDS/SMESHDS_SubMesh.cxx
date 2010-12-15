@@ -33,6 +33,16 @@
 
 using namespace std;
 
+//================================================================================
+/*!
+ * \brief Destructor
+ */
+//================================================================================
+
+SMESHDS_SubMesh::~SMESHDS_SubMesh()
+{
+}
+
 //=======================================================================
 //function : AddElement
 //purpose  : 
@@ -282,6 +292,16 @@ void SMESHDS_SubMesh::AddSubMesh( const SMESHDS_SubMesh* theSubMesh )
 bool SMESHDS_SubMesh::RemoveSubMesh( const SMESHDS_SubMesh* theSubMesh )
 {
   return mySubMeshes.erase( theSubMesh );
+}
+
+//=======================================================================
+//function : RemoveAllSubmeshes
+//purpose  : 
+//=======================================================================
+
+void SMESHDS_SubMesh::RemoveAllSubmeshes()
+{
+  mySubMeshes.clear();
 }
 
 //=======================================================================

@@ -60,6 +60,11 @@ public:
   operator++()
   { _value = _piterator->more() ? VALUE( _piterator->next()) : 0; return *this; }
 
+  //  Step to the next one
+  _Self
+  operator++(int)
+  { _Self res = *this; _value = _piterator->more() ? VALUE( _piterator->next()) : 0; return res; }
+
   // Test of end
   bool
   operator!=(const _Self& __x) const

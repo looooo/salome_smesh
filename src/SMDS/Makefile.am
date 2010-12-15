@@ -61,7 +61,8 @@ salomeinclude_HEADERS = \
 	SMDS_SetIterator.hxx \
 	SMESH_SMDS.hxx \
 	SMDS_MeshInfo.hxx \
-	SMDS_StdIterator.hxx
+	SMDS_StdIterator.hxx \
+	SMDS_IteratorOnIterators.hxx
 
 
 # Libraries targets

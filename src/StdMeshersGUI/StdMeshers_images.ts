@@ -58,6 +58,10 @@
             <translation>mesh_hypo_length.png</translation>
         </message>
         <message>
+            <source>ICON_DLG_VISCOUS_LAYERS</source>
+            <translation>mesh_hypo_viscous_layers.png</translation>
+        </message>
+        <message>
             <source>ICON_DLG_MAX_ELEMENT_AREA</source>
             <translation>mesh_hypo_area.png</translation>
         </message>

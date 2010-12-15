@@ -140,11 +140,19 @@
         <translation>Max Length</translation>
     </message>
     <message>
+        <source>SMESH_VISCOUS_LAYERS_HYPOTHESIS</source>
+        <translation>Viscous Layers</translation>
+    </message>
+    <message>
         <source>SMESH_USE_PREESTIMATED_LENGTH</source>
         <translation>Use preestimated length</translation>
     </message>
     <message>
         <source>SMESH_MAX_LENGTH_TITLE</source>
+        <translation>Hypothesis Construction</translation>
+    </message>
+    <message>
+        <source>SMESH_VISCOUS_LAYERS_TITLE</source>
         <translation>Hypothesis Construction</translation>
     </message>
     <message>
@@ -190,6 +198,18 @@
     <message>
         <source>SMESH_NO_CONV</source>
         <translation>No conversion</translation>
+    </message>
+    <message>
+        <source>SMESH_TOTAL_THICKNESS</source>
+        <translation>Total thickness</translation>
+    </message>
+    <message>
+        <source>SMESH_STRETCH_FACTOR</source>
+        <translation>Stretch factor</translation>
+    </message>
+    <message>
+        <source>SMESH_FACES_WO_LAYERS</source>
+        <translation>Faces without layers</translation>
     </message>
     <message>
         <source>SMESH_NUMBER_OF_LAYERS</source>

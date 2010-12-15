@@ -80,6 +80,7 @@ struct SMESH_subMeshEventListenerData
                                          // on the one storing this data
 public:
   SMESH_subMeshEventListenerData(bool isDeletable):myIsDeletable(isDeletable) {}
+  virtual ~SMESH_subMeshEventListenerData() {}
   bool IsDeletable() const { return myIsDeletable; }
 
   /*!

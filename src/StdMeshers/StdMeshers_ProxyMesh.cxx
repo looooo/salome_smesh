@@ -222,7 +222,7 @@ SMDS_ElemIteratorPtr StdMeshers_ProxyMesh::GetFaces(const TopoDS_Shape& shape) c
   for ( ; fExp.More(); fExp.Next() )
     if ( const SMESHDS_SubMesh* sm = GetSubMesh( fExp.Current()))
       _subContainer.AddSubMesh( sm );
-  return _subContainer.GetElements();
+  return _subContainer.SMESHDS_SubMesh::GetElements();
 }
 
 //================================================================================

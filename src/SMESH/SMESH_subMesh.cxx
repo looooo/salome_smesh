@@ -2067,8 +2067,6 @@ EventListenerData* SMESH_subMesh::GetEventListenerData(EventListener* listener) 
  * \brief Notify stored event listeners on the occured event
  * \param event - algo_event or compute_event itself
  * \param eventType - algo_event or compute_event
- * \param subMesh - the submesh where the event occures
- * \param data - listener data stored in the subMesh
  * \param hyp - hypothesis, if eventType is algo_event
  */
 //================================================================================
@@ -2079,7 +2077,12 @@ void SMESH_subMesh::NotifyListenersOnEvent( const int         event,
 {
   map< EventListener*, EventListenerData* >::iterator l_d = myEventListeners.begin();
   for ( ; l_d != myEventListeners.end(); ++l_d )
-    l_d->first->ProcessEvent( event, eventType, this, l_d->second, hyp );
+    if ( ! (*l_d).first->myIsBusy )
+    {
+      l_d->first->myIsBusy = true;
+      l_d->first->ProcessEvent( event, eventType, this, l_d->second, hyp );
+      l_d->first->myIsBusy = false;
+    }
 }
 
 //================================================================================

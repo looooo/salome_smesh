@@ -1293,7 +1293,7 @@ bool _ViscousBuilder::smoothAndCheck(_SolidData& data, int nbSteps)
   int step = 0, badNb = 0; moved = true;
   while (( ++step <= 5 && moved ) || improved )
   {
-    dumpFunction(SMESH_Comment("smooth")<<data._index<<"_step"<<step); // debug
+    dumpFunction(SMESH_Comment("smooth")<<data._index<<"_step"<<nbSteps<<"_"<<step); // debug
     int oldBadNb = badNb;
     badNb = 0;
     moved = false;
@@ -1310,8 +1310,8 @@ bool _ViscousBuilder::smoothAndCheck(_SolidData& data, int nbSteps)
   // checked elements are either temporary faces or faces on surfaces w/o the layers
 
   SMESH_MeshEditor editor( _mesh );
-  SMESH_ElementSearcher* searcher =
-    editor.GetElementSearcher( data._proxyMesh->GetFaces( data._solid ));
+  auto_ptr<SMESH_ElementSearcher> searcher
+    ( editor.GetElementSearcher( data._proxyMesh->GetFaces( data._solid )) );
 
   vector< const SMDS_MeshElement* > suspectFaces;
   for ( unsigned i = 0; i < data._edges.size(); ++i )
@@ -1529,31 +1529,54 @@ bool _LayerEdge::SegTriaInter( const gp_Ax1&        lastSegment,
   /* if determinant is near zero, ray lies in plane of triangle */
   double det = edge1 * pvec;
 
-  if (det < EPSILON)
-    return false;
+  if (det > -EPSILON && det < EPSILON)
+    return 0;
+  double inv_det = 1.0 / det;
 
   /* calculate distance from vert0 to ray origin */
   gp_XYZ tvec = orig - vert0;
 
   /* calculate U parameter and test bounds */
-  double u = tvec * pvec;
-  if (u < 0.0 || u > det)
+  double u = ( tvec * pvec ) * inv_det;
+  if (u < 0.0 || u > 1.0)
     return 0;
 
   /* prepare to test V parameter */
   gp_XYZ qvec = tvec ^ edge1;
 
   /* calculate V parameter and test bounds */
-  double v = dir * qvec;
-  if (v < 0.0 || u + v > det)
+  double v = (dir * qvec) * inv_det;
+  if ( v < 0.0 || u + v > 1.0 )
     return 0;
 
-  /* calculate t, scale parameters, ray intersects triangle */
-  double t = edge2 * qvec;
-  double inv_det = 1.0 / det;
-  t *= inv_det;
-  //u *= inv_det;
-  //v *= inv_det;
+  /* calculate t, ray intersects triangle */
+  double t = (edge2 * qvec) * inv_det;
+
+  //   if (det < EPSILON)
+  //     return false;
+
+  //   /* calculate distance from vert0 to ray origin */
+  //   gp_XYZ tvec = orig - vert0;
+
+  //   /* calculate U parameter and test bounds */
+  //   double u = tvec * pvec;
+  //   if (u < 0.0 || u > det)
+//     return 0;
+
+//   /* prepare to test V parameter */
+//   gp_XYZ qvec = tvec ^ edge1;
+
+//   /* calculate V parameter and test bounds */
+//   double v = dir * qvec;
+//   if (v < 0.0 || u + v > det)
+//     return 0;
+
+//   /* calculate t, scale parameters, ray intersects triangle */
+//   double t = edge2 * qvec;
+//   double inv_det = 1.0 / det;
+//   t *= inv_det;
+//   //u *= inv_det;
+//   //v *= inv_det;
 
   bool intersection = t < _len;
   if ( intersection )

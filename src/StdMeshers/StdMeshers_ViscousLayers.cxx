@@ -49,6 +49,7 @@
 #include <TopExp.hxx>
 #include <TopExp_Explorer.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
+#include <TopTools_MapOfShape.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Face.hxx>
@@ -238,8 +239,8 @@ namespace VISCOUS
 
     // face or edge w/o layer along or near which _LayerEdge is inflated
     TopoDS_Shape        _sWOL;
-    // simplices connected to _nodes[0]; for smoothing and quality check
-    // of _LayerEdge's based on the FACE
+    // simplices connected to the source node (_nodes[0]);
+    // used for smoothing and quality check of _LayerEdge's based on the FACE
     vector<_Simplex>    _simplices;
     // data for smoothing of _LayerEdge's based on the EDGE
     _2NearEdges*        _2neibors;
@@ -259,6 +260,7 @@ namespace VISCOUS
                        const SMDS_MeshNode* n2 ) const;
     gp_Ax1 LastSegment() const;
     bool IsOnEdge() const { return _2neibors; }
+    void Copy( const _LayerEdge& other, SMESH_MesherHelper& helper );
   };
   //--------------------------------------------------------------------------------
 
@@ -280,14 +282,17 @@ namespace VISCOUS
 
     TNode2Edge                      _n2eMap;
     // edges of _n2eMap. We keep same data in two containers because
-    // iteration over the map is 5 time longer that over the vector
+    // iteration over the map is 5 time longer than over the vector
     vector< _LayerEdge* >           _edges;
 
-    // key: an id of shape (edge or vertex) shared by a FACE with
+    // key: an id of shape (EDGE or VERTEX) shared by a FACE with
     // layers and a FACE w/o layers
     // value: the shape (FACE or EDGE) to shrink mesh on.
     // _LayerEdge's basing on nodes on key shape are inflated along the value shape
     map< TGeomID, TopoDS_Shape >     _shrinkShape2Shape;
+
+    // FACE's WOL, srink on which is forbiden due to algo on the adjacent SOLID
+    set< TGeomID >                   _noShrinkFaces;
 
     // end index in _edges of _LayerEdge's based on EDGE (map key) to
     // FACE (maybe NULL) they are inflated along
@@ -347,6 +352,7 @@ namespace VISCOUS
     bool prepareEdgeToShrink( _LayerEdge& edge, const TopoDS_Face& F,
                               SMESH_MesherHelper& helper,
                               const SMESHDS_SubMesh* faceSubMesh );
+    bool addBoundaryElements();
 
     bool error( const string& text, _SolidData* data );
     SMESHDS_Mesh* getMeshDS() { return _mesh->GetMeshDS(); }
@@ -375,9 +381,10 @@ namespace VISCOUS
     void AddEdge( const _LayerEdge* e, SMESH_MesherHelper& helper );
     void Compute(bool set3D, SMESH_MesherHelper& helper);
     void RestoreParams();
-    void SwapSrcTgt(SMESHDS_Mesh* mesh);
+    void SwapSrcTgtNodes(SMESHDS_Mesh* mesh);
   };
-}
+
+} // namespace VISCOUS
 
 //================================================================================
 // StdMeshers_ViscousLayers hypothesis
@@ -536,26 +543,27 @@ namespace
     return ( norm ^ du ).XYZ();
   }
   //--------------------------------------------------------------------------------
-  // DEBUG. Dump intermediate nodes positions into a python script
+  // DEBUG. Dump intermediate node positions into a python script
 #define __PY_DUMP
 #ifdef __PY_DUMP
   ofstream* py;
-  void initPyDump()
-  {
-    const char* fname = "/tmp/viscous.py";
-    cout << "execfile('"<<fname<<"')"<<endl;
-    py = new ofstream(fname);
-    *py << "from smesh import *" << endl
-        << "meshSO = GetCurrentStudy().FindObjectID('0:1:2:3')" << endl
-        << "mesh = Mesh( meshSO.GetObject()._narrow( SMESH.SMESH_Mesh ))"<<endl;
-  }
+  struct PyDump {
+    PyDump() {
+      const char* fname = "/tmp/viscous.py";
+      cout << "execfile('"<<fname<<"')"<<endl;
+      py = new ofstream(fname);
+      *py << "from smesh import *" << endl
+          << "meshSO = GetCurrentStudy().FindObjectID('0:1:2:3')" << endl
+          << "mesh = Mesh( meshSO.GetObject()._narrow( SMESH.SMESH_Mesh ))"<<endl;
+    }
+    ~PyDump() { delete py; py=0; }
+  };
   void dumpFunction(const string& fun) { *py<< "def "<<fun<<"():" <<endl; cout<<fun<<"()"<<endl;}
-  void dumpFunctionEnd() { *py << "  return"<< endl; }
-  void dumpMove(const SMDS_MeshNode* n ) {
-    *py<<"  mesh.MoveNode( "<<n->GetID()<< ", "<< n->X()<< ", "<<n->Y()<<", "<< n->Z()<< ") "<<endl;
-  }
+  void dumpMove(const SMDS_MeshNode* n){ *py<< "  mesh.MoveNode( "<<n->GetID()<< ", "<< n->X()
+                                            << ", "<<n->Y()<<", "<< n->Z()<< ") "<<endl; }
+  void dumpFunctionEnd()               { *py<< "  return"<< endl; }
 #else
-  void initPyDump() {}
+  struct PyDump {};
   void dumpFunction(const string& fun ){}
   void dumpFunctionEnd() {}
   void dumpMove(const SMDS_MeshNode* n ){}
@@ -622,9 +630,7 @@ void _ViscousBuilder::RestoreListeners()
 SMESH_ComputeErrorPtr _ViscousBuilder::Compute(SMESH_Mesh&         theMesh,
                                                const TopoDS_Shape& theShape)
 {
-#ifdef __PY_DUMP
-  initPyDump();
-#endif
+  PyDump debugDump;
   // TODO: set priority of solids during Gen::Compute()
 
   _mesh = & theMesh;
@@ -638,30 +644,29 @@ SMESH_ComputeErrorPtr _ViscousBuilder::Compute(SMESH_Mesh&         theMesh,
     return SMESH_ComputeErrorPtr(); // everything already computed
 
   // TODO: ignore already computed SOLIDs 
-  findSolidsWithLayers();
-  if ( _error->IsOK() )
-    findFacesWithLayers();
+  if ( !findSolidsWithLayers())
+    return _error;
+
+  if ( !findFacesWithLayers() )
+    return _error;
 
   for ( unsigned i = 0; i < _sdVec.size(); ++i )
   {
     if ( ! makeLayer(_sdVec[i]) )
-      break;
+      return _error;
     
     if ( ! inflate(_sdVec[i]) ) {
       makeGroupOfLE();
-      break;
+      return _error;
     }
     if ( ! refine(_sdVec[i]) )
-      break;
+      return _error;
   }
-  if ( _error->IsOK() )
-    shrink();
+  if ( !shrink() )
+    return _error;
 
-  //addBoundaryElements() // TODO:
+  addBoundaryElements();
   
-#ifdef __PY_DUMP
-  delete py; py = 0;
-#endif
   return _error;
 }
 
@@ -751,11 +756,10 @@ bool _ViscousBuilder::findFacesWithLayers()
   }
 
   // Find faces to shrink mesh on (solution 2 in issue 0020832);
-  // we use solution 1 for shared faces w/o layers since there is no generic way
-  // to know whether after shrinking 2D mesh remains valid for other 3D algo
   TopTools_IndexedMapOfShape shapes;
   for ( unsigned i = 0; i < _sdVec.size(); ++i )
   {
+    shapes.Clear();
     TopExp::MapShapes(_sdVec[i]._solid, TopAbs_EDGE, shapes);
     for ( int iE = 1; iE <= shapes.Extent(); ++iE )
     {
@@ -775,44 +779,93 @@ bool _ViscousBuilder::findFacesWithLayers()
       for ( int j = 0; j < 2; ++j )
         ignore[j] = _ignoreShapeIds.count ( getMeshDS()->ShapeToIndex( FF[j] ));
       if ( ignore[0] == ignore[1] ) continue; // nothing interesting
-      // check if a face w/o layers (WOL) is shared
-      if ( !ignore[0] ) std::swap( FF[0], FF[1] ); // set face WOL to FF[0]
-//       bool shareWOL = ( helper.NbAncestors( FF[0], *_mesh, TopAbs_SOLID ) > 1 );
-//       if ( shareWOL )
+      TopoDS_Shape fWOL = FF[ ignore[0] ? 0 : 1 ];
+      // add edge to maps
+      TGeomID edgeInd = getMeshDS()->ShapeToIndex( edge );
+      _sdVec[i]._shrinkShape2Shape.insert( make_pair( edgeInd, fWOL ));
+    }
+  }
+  // Exclude from _shrinkShape2Shape FACE's that can't be shrinked since
+  // the algo of the SOLID sharing the FACE does not support it
+  set< string > notSupportAlgos; notSupportAlgos.insert("Hexa_3D");
+  for ( unsigned i = 0; i < _sdVec.size(); ++i )
+  {
+    TopTools_MapOfShape noShrinkVertices;
+    map< TGeomID, TopoDS_Shape >::iterator e2f = _sdVec[i]._shrinkShape2Shape.begin();
+    for ( ; e2f != _sdVec[i]._shrinkShape2Shape.end(); ++e2f )
+    {
+      const TopoDS_Shape& fWOL = e2f->second;
+      TGeomID           edgeID = e2f->first;
+      bool notShrinkFace = false;
+      PShapeIteratorPtr soIt = helper.GetAncestors(fWOL, *_mesh, TopAbs_SOLID);
+      while ( soIt->more())
       {
-        // add edge to maps
-        TGeomID edgeInd = getMeshDS()->ShapeToIndex( edge );
-        _sdVec[i]._shrinkShape2Shape.insert( make_pair( edgeInd, FF[0] ));
+        const TopoDS_Shape* solid = soIt->next();
+        if ( _sdVec[i]._solid.IsSame( *solid )) continue;
+        SMESH_Algo* algo = _mesh->GetGen()->GetAlgo( *_mesh, *solid );
+        if ( !algo || !notSupportAlgos.count( algo->GetName() )) continue;
+        notShrinkFace = true;
+        for ( unsigned j = 0; j < _sdVec.size(); ++j )
+        {
+          if ( _sdVec[j]._solid.IsSame( *solid ) )
+            if ( _sdVec[j]._shrinkShape2Shape.count( edgeID ))
+              notShrinkFace = false;
+        }
+      }
+      if ( notShrinkFace )
+      {
+        _sdVec[i]._noShrinkFaces.insert( getMeshDS()->ShapeToIndex( fWOL ));
+        for ( TopExp_Explorer vExp( fWOL, TopAbs_VERTEX ); vExp.More(); vExp.Next() )
+          noShrinkVertices.Add( vExp.Current() );
       }
     }
+    // erase from _shrinkShape2Shape all srink EDGE's of a SOLID connected
+    // to the found not shrinked fWOL's
+    e2f = _sdVec[i]._shrinkShape2Shape.begin();
+    for ( ; e2f != _sdVec[i]._shrinkShape2Shape.end(); )
+    {
+      TGeomID edgeID = e2f->first;
+      TopoDS_Vertex VV[2];
+      TopExp::Vertices( TopoDS::Edge( getMeshDS()->IndexToShape( edgeID )),VV[0],VV[1]);
+      if ( noShrinkVertices.Contains( VV[0] ) || noShrinkVertices.Contains( VV[1] ))
+        _sdVec[i]._shrinkShape2Shape.erase( e2f++ );
+      else
+        e2f++;
+    }
+  }
+      
+  // Find the SHAPE along which to inflate _LayerEdge based on VERTEX
 
-    // Find shapes along which to inflate _LayerEdge on vertex
-
+  for ( unsigned i = 0; i < _sdVec.size(); ++i )
+  {
     shapes.Clear();
     TopExp::MapShapes(_sdVec[i]._solid, TopAbs_VERTEX, shapes);
     for ( int iV = 1; iV <= shapes.Extent(); ++iV )
     {
       const TopoDS_Shape& vertex = shapes(iV);
       // find faces WOL sharing the vertex
-      vector< TopoDS_Shape > faces;
+      vector< TopoDS_Shape > facesWOL;
       int totalNbFaces = 0;
       PShapeIteratorPtr fIt = helper.GetAncestors(vertex, *_mesh, TopAbs_FACE);
       while ( fIt->more())
       {
         const TopoDS_Shape* f = fIt->next();
-        totalNbFaces++;
-        if ( helper.IsSubShape( *f, _sdVec[i]._solid) &&
-             _ignoreShapeIds.count ( getMeshDS()->ShapeToIndex( *f )))
-          faces.push_back( *f );
+        const int         fID = getMeshDS()->ShapeToIndex( *f );
+        if ( helper.IsSubShape( *f, _sdVec[i]._solid ) )
+        {
+          totalNbFaces++;
+          if ( _ignoreShapeIds.count ( fID ) && ! _sdVec[i]._noShrinkFaces.count( fID ))
+            facesWOL.push_back( *f );
+        }
       }
-      if ( faces.size() == totalNbFaces || faces.empty() )
-        continue; // not layers at this vertex or no WOL
+      if ( facesWOL.size() == totalNbFaces || facesWOL.empty() )
+        continue; // no layers at this vertex or no WOL
       TGeomID vInd = getMeshDS()->ShapeToIndex( vertex );
-      switch ( faces.size() )
+      switch ( facesWOL.size() )
       {
       case 1:
         {
-          _sdVec[i]._shrinkShape2Shape.insert( make_pair( vInd, faces[0] )); break;
+          _sdVec[i]._shrinkShape2Shape.insert( make_pair( vInd, facesWOL[0] )); break;
         }
       case 2:
         {
@@ -821,9 +874,8 @@ bool _ViscousBuilder::findFacesWithLayers()
           while ( eIt->more())
           {
             const TopoDS_Shape* e = eIt->next();
-            if ( helper.IsSubShape( *e, faces[0]) &&
-                 helper.IsSubShape( *e, faces[1]) &&
-                 helper.IsSubShape( vertex, *e ))
+            if ( helper.IsSubShape( *e, facesWOL[0]) &&
+                 helper.IsSubShape( *e, facesWOL[1]))
             {
               _sdVec[i]._shrinkShape2Shape.insert( make_pair( vInd, *e )); break;
             }
@@ -835,7 +887,6 @@ bool _ViscousBuilder::findFacesWithLayers()
       }
     }
   }
-  // TODO: treat cases with solution 1.
 
   return true;
 }
@@ -850,7 +901,7 @@ bool _ViscousBuilder::makeLayer(_SolidData& data)
 {
   // get all sub-shapes to make layers on
   set<TGeomID> subIds, faceIds;
-  set<TGeomID>::iterator id;
+  subIds = data._noShrinkFaces;
   TopExp_Explorer exp( data._solid, TopAbs_FACE );
   for ( ; exp.More(); exp.Next() )
     if ( ! _ignoreShapeIds.count( getMeshDS()->ShapeToIndex( exp.Current() )))
@@ -863,7 +914,7 @@ bool _ViscousBuilder::makeLayer(_SolidData& data)
         subIds.insert( subIt->next()->GetId() );
     }
 
-  // make a map to find new nodes on sub-shapes shared with other solid
+  // make a map to find new nodes on sub-shapes shared with other SOLID
   map< TGeomID, TNode2Edge* > s2neMap;
   map< TGeomID, TNode2Edge* >::iterator s2ne;
   map< TGeomID, TopoDS_Shape >::iterator s2s = data._shrinkShape2Shape.begin();
@@ -874,7 +925,8 @@ bool _ViscousBuilder::makeLayer(_SolidData& data)
     {
       if ( _sdVec[i]._index == data._index ) continue;
       map< TGeomID, TopoDS_Shape >::iterator s2s2 = _sdVec[i]._shrinkShape2Shape.find( shapeInd );
-      if ( *s2s == *s2s2 && !_sdVec[i]._n2eMap.empty() )
+      if ( s2s2 != _sdVec[i]._shrinkShape2Shape.end() &&
+           *s2s == *s2s2 && !_sdVec[i]._n2eMap.empty() )
       {
         s2neMap.insert( make_pair( shapeInd, &_sdVec[i]._n2eMap ));
         break;
@@ -931,14 +983,7 @@ bool _ViscousBuilder::makeLayer(_SolidData& data)
                ( n2e2 = (*s2ne).second->find( n )) != s2ne->second->end())
           {
             _LayerEdge* foundEdge = (*n2e2).second;
-            edge->_nodes    = foundEdge->_nodes;
-            edge->_normal   = foundEdge->_normal;
-            edge->_len      = 0;
-            edge->_cosin    = foundEdge->_cosin;
-            edge->_sWOL     = foundEdge->_sWOL;
-            edge->_2neibors = foundEdge->_2neibors;
-            if ( foundEdge->_2neibors )
-              edge->_2neibors = new _2NearEdges( *foundEdge->_2neibors );
+            edge->Copy( *foundEdge, helper );
             // location of the last node is modified but we can restore
             // it by node position on _sWOL stored by the node
             const_cast< SMDS_MeshNode* >
@@ -1019,20 +1064,23 @@ bool _ViscousBuilder::makeLayer(_SolidData& data)
   }
 
   // Set target nodes into _Simplex and _2NearEdges
+  TNode2Edge::iterator n2e;
   for ( unsigned i = 0; i < data._edges.size(); ++i )
   {
     if ( data._edges[i]->IsOnEdge())
       for ( int j = 0; j < 2; ++j )
       {
         const SMDS_MeshNode* & n = data._edges[i]->_2neibors->_nodes[j];
-        n = data._n2eMap[ n ]->_nodes.back();
+        if (( n2e = data._n2eMap.find( n )) == data._n2eMap.end() )
+          break; // edge is shared by two _SolidData's
+        n = (*n2e).second->_nodes.back();
       }
     else
       for ( unsigned j = 0; j < data._edges[i]->_simplices.size(); ++j )
       {
         _Simplex& s = data._edges[i]->_simplices[j];
-        s._nPrev = data._n2eMap[ s._nPrev ]->_nodes.back();
         s._nNext = data._n2eMap[ s._nNext ]->_nodes.back();
+        s._nPrev = data._n2eMap[ s._nPrev ]->_nodes.back();
       }
   }
 
@@ -1246,6 +1294,36 @@ bool _ViscousBuilder::setEdgeData(_LayerEdge&         edge,
 
 //================================================================================
 /*!
+ * \brief Copy data from a _LayerEdge of other SOLID and based on the same node;
+ * this and other _LayerEdge's are inflated along a FACE or an EDGE
+ */
+//================================================================================
+
+void _LayerEdge::Copy( const _LayerEdge& other, SMESH_MesherHelper& helper )
+{
+  _nodes    = other._nodes;
+  _normal   = other._normal;
+  _len      = 0;
+  _cosin    = other._cosin;
+  _sWOL     = other._sWOL;
+  _2neibors = other._2neibors;
+  if ( other._2neibors )
+    _2neibors = new _2NearEdges( *other._2neibors );
+
+  if ( _sWOL.ShapeType() == TopAbs_EDGE )
+  {
+    double u = helper.GetNodeU( TopoDS::Edge( _sWOL ), _nodes[0] );
+    _pos.push_back( gp_XYZ( u, 0, 0));
+  }
+  else // TopAbs_FACE
+  {
+    gp_XY uv = helper.GetNodeUV( TopoDS::Face( _sWOL ), _nodes[0]);
+    _pos.push_back( gp_XYZ( uv.X(), uv.Y(), 0));
+  }
+}
+
+//================================================================================
+/*!
  * \brief Fills a vector<_Simplex > 
  */
 //================================================================================
@@ -1359,7 +1437,7 @@ bool _ViscousBuilder::inflate(_SolidData& data)
     if ( !smoothAndCheck( data, nbSteps ))
     {
       if ( nbSteps == 0 )
-        return error("Viscous builder failed at the very first inflation step", &data);
+        return error("failed at the very first inflation step", &data);
 
       for ( unsigned i = 0; i < data._edges.size(); ++i )
         data._edges[i]->InvalidateStep( nbSteps+1 );
@@ -1450,7 +1528,8 @@ bool _ViscousBuilder::smoothAndCheck(_SolidData& data, int nbSteps)
     for ( unsigned j = 0 ; j < suspectFaces.size(); ++j )
     {
       const SMDS_MeshElement* face = suspectFaces[j];
-      if ( face->GetNodeIndex( edge._nodes.back() ) >= 0 )
+      if ( face->GetNodeIndex( edge._nodes.back() ) >= 0 ||
+           face->GetNodeIndex( edge._nodes[0]     ) >= 0 )
         continue; // face sharing _LayerEdge node
       const int nbNodes = face->NbCornerNodes();
       bool intFound = false;
@@ -1730,7 +1809,7 @@ bool _LayerEdge::SegTriaInter( const gp_Ax1&        lastSegment,
   if ( intersection )
   {
     gp_XYZ intP( orig + dir * t );
-    cout << "src node " << _nodes.back()->GetID() << ", intersection with face "
+    cout << "tgt node " << _nodes.back()->GetID() << ", intersection with face "
          << n0->GetID() << " " << n1->GetID() << " " << n2->GetID() << endl
          << " at point " << intP.X() << ", " << intP.Y() << ", " << intP.Z() << endl;
   }
@@ -2049,6 +2128,7 @@ bool _ViscousBuilder::shrink()
     // ===========================
 
     // Collect nodes to smooth as src nodes are not yet replaced by tgt ones
+    // and thus all nodes on FACE connected to 2d elements are to be smoothed
     vector < const SMDS_MeshNode* > smoothNodes;
     {
       SMDS_NodeIteratorPtr nIt = smDS->GetNodes();
@@ -2143,7 +2223,7 @@ bool _ViscousBuilder::shrink()
           _Shrinker1D& srinker = e2shrMap[ edgeIndex ];
           eShri1D.insert( & srinker );
           srinker.AddEdge( edge, helper );
-          // restore params of nodes on EGDE if the EDGE has been  already
+          // restore params of nodes on EGDE if the EDGE has been already
           // srinked while srinking another FACE
           srinker.RestoreParams();
         }
@@ -2205,7 +2285,7 @@ bool _ViscousBuilder::shrink()
     {
       dumpFunction(SMESH_Comment("shrinkFace")<<f2sd->first<<"_st"<<++smooStep); // debug
       for ( unsigned i = 0; i < nodesToSmooth.size(); ++i )
-        nodesToSmooth[i].Smooth( badNb,surface,helper,refSign,/*set3D=*/st==0 );
+        nodesToSmooth[i].Smooth( badNb,surface,helper,refSign,/*set3D=*/st==1 );
       dumpFunctionEnd();
     }
     // Set event listener to clear FACE sub-mesh together with SOLID sub-mesh
@@ -2218,7 +2298,7 @@ bool _ViscousBuilder::shrink()
 
   map< int, _Shrinker1D >::iterator e2shr = e2shrMap.begin();
   for ( ; e2shr != e2shrMap.end(); ++e2shr )
-    e2shr->second.SwapSrcTgt( getMeshDS() );
+    e2shr->second.SwapSrcTgtNodes( getMeshDS() );
 
   return true;
 }
@@ -2707,7 +2787,7 @@ void _Shrinker1D::RestoreParams()
  */
 //================================================================================
 
-void _Shrinker1D::SwapSrcTgt( SMESHDS_Mesh* mesh )
+void _Shrinker1D::SwapSrcTgtNodes( SMESHDS_Mesh* mesh )
 {
   const SMDS_MeshNode* nodes[3];
   for ( int i = 0; i < 2; ++i )
@@ -2733,4 +2813,120 @@ void _Shrinker1D::SwapSrcTgt( SMESHDS_Mesh* mesh )
       mesh->ChangeElementNodes( e, nodes, e->NbNodes() );
     }
   }
+}
+
+//================================================================================
+/*!
+ * \brief Creates 2D and 1D elements on boundaries of new prisms
+ */
+//================================================================================
+
+bool _ViscousBuilder::addBoundaryElements()
+{
+  SMESH_MesherHelper helper( *_mesh );
+
+  for ( unsigned i = 0; i < _sdVec.size(); ++i )
+  {
+    _SolidData& data = _sdVec[i];
+    TopTools_IndexedMapOfShape geomEdges;
+    TopExp::MapShapes( data._solid, TopAbs_EDGE, geomEdges );
+    for ( int iE = 1; iE <= geomEdges.Extent(); ++iE )
+    {
+      const TopoDS_Edge& E = TopoDS::Edge( geomEdges(iE));
+
+      // Get _LayerEdge's based on E
+
+      map< double, const SMDS_MeshNode* > u2nodes;
+      if ( !SMESH_Algo::GetSortedNodesOnEdge( getMeshDS(), E, /*ignoreMedium=*/false, u2nodes))
+        continue;
+
+      vector< _LayerEdge* > ledges; ledges.reserve( u2nodes.size() );
+      TNode2Edge & n2eMap = data._n2eMap;
+      map< double, const SMDS_MeshNode* >::iterator u2n = u2nodes.begin();
+      {
+        //check if 2D elements are needed on E
+        TNode2Edge::iterator n2e = n2eMap.find( u2n->second );
+        if ( n2e == n2eMap.end() ) continue; // no layers on vertex
+        ledges.push_back( n2e->second );
+        u2n++;
+        if (( n2e = n2eMap.find( u2n->second )) == n2eMap.end() )
+          continue; // no layers on E
+        ledges.push_back( n2eMap[ u2n->second ]);
+
+        const SMDS_MeshNode* tgtN0 = ledges[0]->_nodes.back();
+        const SMDS_MeshNode* tgtN1 = ledges[1]->_nodes.back();
+        int nbSharedPyram = 0;
+        SMDS_ElemIteratorPtr vIt = tgtN0->GetInverseElementIterator(SMDSAbs_Volume);
+        while ( vIt->more() )
+        {
+          const SMDS_MeshElement* v = vIt->next();
+          nbSharedPyram += int( v->GetNodeIndex( tgtN1 ) >= 0 );
+        }
+        if ( nbSharedPyram > 1 )
+          continue; // not free border of the pyramid
+
+        if ( getMeshDS()->FindFace( ledges[0]->_nodes[0], ledges[0]->_nodes[1],
+                                    ledges[1]->_nodes[0], ledges[1]->_nodes[1]))
+          continue; // faces already created
+      }
+      for ( ++u2n; u2n != u2nodes.end(); ++u2n )
+        ledges.push_back( n2eMap[ u2n->second ]);
+
+      // Find out orientation and type of face to create
+
+      bool reverse = false, tria = false, isOnFace;
+      
+      map< TGeomID, TopoDS_Shape >::iterator e2f =
+        data._shrinkShape2Shape.find( getMeshDS()->ShapeToIndex( E ));
+      TopoDS_Shape F;
+      if ( isOnFace = ( e2f != data._shrinkShape2Shape.end() ))
+      {
+        F = e2f->second.Oriented( TopAbs_FORWARD );
+        reverse = ( helper.GetSubShapeOri( F, E ) == TopAbs_REVERSED );
+        if ( helper.GetSubShapeOri( data._solid, F ) == TopAbs_REVERSED )
+          reverse = !reverse;
+      }
+      else
+      {
+        // find FACE with layers sharing E
+        PShapeIteratorPtr fIt = helper.GetAncestors( E, *_mesh, TopAbs_FACE );
+        while ( fIt->more() && F.IsNull() )
+        {
+          const TopoDS_Shape* pF = fIt->next();
+          if ( helper.IsSubShape( *pF, data._solid) &&
+               !_ignoreShapeIds.count( e2f->first ))
+            F = *pF;
+        }
+        
+        tria = true;
+      }
+      // Find the sub-mesh to add new faces
+      SMESHDS_SubMesh* sm = 0;
+      if ( isOnFace )
+        sm = getMeshDS()->MeshElements( F );
+      else
+        sm = data._proxyMesh->getFaceData( TopoDS::Face(F), /*create=*/true );
+      if ( !sm )
+        return error("error in addBoundaryElements()", &data);
+
+      // Make faces
+      const int dj1 = reverse ? 0 : 1;
+      const int dj2 = reverse ? 1 : 0;
+      vector<SMDS_MeshElement*> newFaces;
+      newFaces.reserve(( ledges.size() - 1 ) * (ledges[0]->_nodes.size() - 1 ));
+      for ( unsigned j = 1; j < ledges.size(); ++j )
+      {
+        vector< const SMDS_MeshNode*>&  nn1 = ledges[j-dj1]->_nodes;
+        vector< const SMDS_MeshNode*>&  nn2 = ledges[j-dj2]->_nodes;
+        if ( isOnFace )
+          for ( unsigned z = 1; z < nn1.size(); ++z )
+            sm->AddElement( getMeshDS()->AddFace( nn1[z-1], nn2[z-1], nn2[z], nn1[z] ));
+        else
+          for ( unsigned z = 1; z < nn1.size(); ++z )
+            sm->AddElement( new SMDS_FaceOfNodes( nn1[z-1], nn2[z-1], nn2[z], nn1[z]));
+      }
+    }
+  }
+
+  return true;
 }

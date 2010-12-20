@@ -44,7 +44,8 @@ StdMeshers_ProxyMesh::StdMeshers_ProxyMesh():_mesh(0)
  */
 //================================================================================
 
-StdMeshers_ProxyMesh::StdMeshers_ProxyMesh(vector<StdMeshers_ProxyMesh::Ptr>& components)
+StdMeshers_ProxyMesh::StdMeshers_ProxyMesh(vector<StdMeshers_ProxyMesh::Ptr>& components):
+  _mesh(0)
 {
   if ( components.empty() ) return;
 

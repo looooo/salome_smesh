@@ -1721,7 +1721,7 @@ bool StdMeshers_PrismAsBlock::IsForwardEdge(SMESHDS_Mesh*           meshDS,
                                             const int               sideFaceID)
 {
   bool isForward = false;
-  if ( TAssocTool::IsClosedEdge( bottomEdge ))
+  if ( SMESH_MesherHelper::IsClosedEdge( bottomEdge ))
   {
     isForward = ( bottomEdge.Orientation() == TopAbs_FORWARD );
   }

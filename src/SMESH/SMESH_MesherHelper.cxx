@@ -1618,6 +1618,22 @@ double SMESH_MesherHelper::MaxTolerance( const TopoDS_Shape& shape )
   return tol;
 }
 
+
+//================================================================================
+/*!
+ * \brief Check if the first and last vertices of an edge are the same
+ * \param anEdge - the edge to check
+ * \retval bool - true if same
+ */
+//================================================================================
+
+bool SMESH_MesherHelper::IsClosedEdge( const TopoDS_Edge& anEdge )
+{
+  if ( anEdge.Orientation() >= TopAbs_INTERNAL )
+    return IsClosedEdge( TopoDS::Edge( anEdge.Oriented( TopAbs_FORWARD )));
+  return TopExp::FirstVertex( anEdge ).IsSame( TopExp::LastVertex( anEdge ));
+}
+
 //=======================================================================
 //function : IsQuadraticMesh
 //purpose  : Check mesh without geometry for: if all elements on this shape are quadratic,

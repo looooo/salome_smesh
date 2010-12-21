@@ -143,6 +143,8 @@ public:
 
   static double MaxTolerance( const TopoDS_Shape& shape );
 
+  static bool IsClosedEdge( const TopoDS_Edge& anEdge );
+
 
 public:
   // ---------- PUBLIC INSTANCE METHODS ----------

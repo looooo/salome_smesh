@@ -557,6 +557,8 @@ QString SMESHGUI_GenericHypothesisCreator::helpPage() const
     aHelpFileName = "segments_around_vertex_algo_page.html";
   else if ( aHypType == "QuadrangleParams")
     aHelpFileName = "a2d_meshing_hypo_page.html#hypo_quad_params_anchor";
+  else if ( aHypType == "ImportSource1D" || aHypType == "ImportSource2D")
+    aHelpFileName = "import_algos_page.html";
   return aHelpFileName;
 }
 

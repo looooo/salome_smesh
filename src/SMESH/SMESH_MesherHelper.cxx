@@ -518,6 +518,7 @@ bool SMESH_MesherHelper::CheckNodeUV(const TopoDS_Face&   F,
     {
       setPosOnShapeValidity( shapeID, false );
       if ( !infinit && distXYZ ) {
+        surfPnt.Transform( loc );
         distXYZ[0] = dist;
         distXYZ[1] = surfPnt.X(); distXYZ[2] = surfPnt.Y(); distXYZ[3]=surfPnt.Z();
       }
@@ -535,6 +536,7 @@ bool SMESH_MesherHelper::CheckNodeUV(const TopoDS_Face&   F,
       surfPnt = surface->Value( U, V );
       dist = nodePnt.Distance( surfPnt );
       if ( distXYZ ) {
+        surfPnt.Transform( loc );
         distXYZ[0] = dist;
         distXYZ[1] = surfPnt.X(); distXYZ[2] = surfPnt.Y(); distXYZ[3]=surfPnt.Z();
       }
@@ -721,6 +723,7 @@ bool SMESH_MesherHelper::CheckNodeU(const TopoDS_Edge&   E,
       gp_Pnt curvPnt = curve->Value( u );
       double dist = nodePnt.Distance( curvPnt );
       if ( distXYZ ) {
+        curvPnt.Transform( loc );
         distXYZ[0] = dist;
         distXYZ[1] = curvPnt.X(); distXYZ[2] = curvPnt.Y(); distXYZ[3]=curvPnt.Z();
       }
@@ -749,6 +752,7 @@ bool SMESH_MesherHelper::CheckNodeU(const TopoDS_Edge&   E,
         curvPnt = curve->Value( u );
         dist = nodePnt.Distance( curvPnt );
         if ( distXYZ ) {
+          curvPnt.Transform( loc );
           distXYZ[0] = dist;
           distXYZ[1] = curvPnt.X(); distXYZ[2] = curvPnt.Y(); distXYZ[3]=curvPnt.Z();
         }

@@ -1425,6 +1425,7 @@ void SMESHGUI_FilterTable::onCriterionChanged (const int row, const int col, con
     if (aCompareItem->count() > 0)
       aCompareItem->clear();
     aTable->setEditable(false, row, 1);
+    aTable->item(row, 2)->setText( QString("") );
     aTable->setEditable(aCriterionType == SMESH::FT_GroupColor ||
                         aCriterionType == SMESH::FT_ElemGeomType, row, 2);
     aTable->blockSignals( isSignalsBlocked );
@@ -3031,9 +3032,10 @@ void SMESHGUI_FilterDlg::updateSelection()
   mySelectionMgr->clearFilters();
 
   int aRow, aCol;
-
+  
+  bool isCurrentCell = myTable->CurrentCell(aRow, aCol);
   int aCriterionType = myTable->GetCriterionType(aRow);
-  if (myTable->CurrentCell(aRow, aCol) &&
+  if ( isCurrentCell &&
       (aCriterionType == SMESH::FT_BelongToGeom ||
        aCriterionType == SMESH::FT_BelongToPlane ||
        aCriterionType == SMESH::FT_BelongToCylinder ||

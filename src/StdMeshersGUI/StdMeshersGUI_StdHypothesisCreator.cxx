@@ -675,7 +675,7 @@ QString StdMeshersGUI_StdHypothesisCreator::storeParams() const
       /*  */ h->SetParameters(aVariablesList.join(":").toLatin1().constData());
       h->SetNumberLayers  ( params[1].myValue.toInt() );
       /*  */ h->SetParameters(aVariablesList.join(":").toLatin1().constData());
-      h->SetStretchFactor ( params[2].myValue.toInt() );
+      h->SetStretchFactor ( params[2].myValue.toDouble() );
       /*  */ h->SetParameters(aVariablesList.join(":").toLatin1().constData());
       
       if ( StdMeshersGUI_SubShapeSelectorWdg* idsWg = 

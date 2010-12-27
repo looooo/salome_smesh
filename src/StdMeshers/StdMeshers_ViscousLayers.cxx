@@ -2051,105 +2051,105 @@ bool _ViscousBuilder::updateNormals( _SolidData&         data,
   // 1) Find intersections
   double dist;
   const SMDS_MeshElement* face;
-  typedef pair< _LayerEdge*, list<const TmpMeshFaceOnEdge* > > TEdgeWithIntFaces;
-  vector< TEdgeWithIntFaces > edgesWithIntFaces(1);
+  map< _LayerEdge*, set< _LayerEdge* > > edge2CloseEdge;
 
   const double eps = data._epsilon * data._epsilon;
   for ( unsigned i = 0; i < data._edges.size(); ++i )
   {
     _LayerEdge* edge = data._edges[i];
     if ( !edge->IsOnEdge() || !edge->_sWOL.IsNull() ) continue;
-    if ( data._edges[i]->FindIntersection( *searcher, dist, eps, &face ))
+    if ( edge->FindIntersection( *searcher, dist, eps, &face ))
     {
-      TEdgeWithIntFaces&  e2ff = edgesWithIntFaces.back();
-      e2ff.first = data._edges[i];
-      e2ff.second.push_back( (const TmpMeshFaceOnEdge*) face );
-      edgesWithIntFaces.push_back( TEdgeWithIntFaces() );
+      const TmpMeshFaceOnEdge* f = (const TmpMeshFaceOnEdge*) face;
+      set< _LayerEdge* > & ee = edge2CloseEdge[ edge ];
+      ee.insert( f->_le1 );
+      ee.insert( f->_le2 );
+      edge2CloseEdge[ f->_le1 ].insert( edge );
+      edge2CloseEdge[ f->_le2 ].insert( edge );
     }
   }
 
-  // Set _LayerEdge._normal to average direction of the edge and faces
-  set< _LayerEdge* > leToUpdate;
-  for ( unsigned i = 0; i < edgesWithIntFaces.size()-1; ++i )
-  {
-    TEdgeWithIntFaces&  e2ff = edgesWithIntFaces[i];
-    _LayerEdge*         edge = e2ff.first;
-    leToUpdate.insert( edge );
-    list<const TmpMeshFaceOnEdge*>::iterator f = e2ff.second.begin();
-    gp_XYZ facesDir(0,0,0);
-    //double avgCosin = 0;
-    int nbFaces = 0;
-    for ( ; f != e2ff.second.end(); ++f, ++nbFaces )
-    {
-      const TmpMeshFaceOnEdge* face = *f;
-      leToUpdate.insert( face->_le1 );
-      leToUpdate.insert( face->_le2 );
-      SMESH_MeshEditor::TNodeXYZ src1( face->_le1->_nodes[0] );
-      SMESH_MeshEditor::TNodeXYZ tgt1( face->_le1->_nodes.back() );
-      SMESH_MeshEditor::TNodeXYZ src2( face->_le2->_nodes[0] );
-      SMESH_MeshEditor::TNodeXYZ tgt2( face->_le2->_nodes.back() );
-      facesDir += tgt1 - src1;
-      facesDir += tgt2 - src2;
-      //avgCosin += face->_le1->_cosin;
-      //avgCosin += face->_le2->_cosin;
-    }
-    //avgCosin /= 2 * nbFaces;
-    facesDir /= 2 * nbFaces;
-    facesDir.Normalize();
+  // Set _LayerEdge._normal
 
-    SMESH_MeshEditor::TNodeXYZ src1( edge->_nodes[0]);
-    SMESH_MeshEditor::TNodeXYZ tgt1( edge->_nodes.back());
-    gp_XYZ edgeDir = tgt1 - src1;
-    edgeDir.Normalize();
-
-    gp_XYZ newNorm = 0.5 * ( facesDir + edgeDir );
-    newNorm.Normalize();
-
-    edge->_normal = newNorm;
-    //edge->_cosin  = avgCosin;
-    for ( f = e2ff.second.begin(); f != e2ff.second.end(); ++f )
-    {
-      const TmpMeshFaceOnEdge* face = *f;
-      face->_le1->_normal = newNorm;
-      face->_le2->_normal = newNorm;
-//       face->_le1->_cosin  = avgCosin;
-//       face->_le2->_cosin  = avgCosin;
-    }
-  }
-
-  // Set XYZ of target nodes of updated _LayerEdge's
-  
-  if ( !leToUpdate.empty() )
+  if ( !edge2CloseEdge.empty() )
   {
     dumpFunction(SMESH_Comment("updateNormals")<<data._index);
 
-    set< _LayerEdge* >::iterator leIt = leToUpdate.begin();
-    const SMDS_MeshNode *n1, *n2;
-    bool ok;
-    for ( ; leIt != leToUpdate.end(); ++leIt )
+    map< _LayerEdge*, set< _LayerEdge* > >::iterator e2ee = edge2CloseEdge.begin();
+    for ( ; e2ee != edge2CloseEdge.end(); ++e2ee )
     {
-      _LayerEdge* edge = *leIt;
-      if ( !findNeiborsOnEdge( edge, n1, n2, data ))
-        continue;
-      // update _curvature and _plnNorm
-      edge->SetDataByNeighbors( n1, n2, helper );
-      // update _cosin
+      _LayerEdge* edge1       = e2ee->first;
+      _LayerEdge* edge2       = 0;
+      set< _LayerEdge* >& ee  = e2ee->second;
+
+      // find EDGEs the edges reside
+      TopoDS_Edge E1, E2;
+      TopoDS_Shape S = helper.GetSubShapeByNode( edge1->_nodes[0], getMeshDS() );
+      if ( S.ShapeType() != TopAbs_EDGE )
+        continue; // TODO: find EDGE by VERTEX
+      E1 = TopoDS::Edge( S );
+      set< _LayerEdge* >::iterator eIt = ee.begin();
+      while ( E2.IsNull() && eIt != ee.end())
       {
-        TopoDS_Edge E = TopoDS::Edge( helper.GetSubShapeByNode( edge->_nodes[0], getMeshDS()));
-        TopoDS_Face F;
-        PShapeIteratorPtr fIt = helper.GetAncestors(E, *_mesh, TopAbs_FACE);
-        while ( fIt->more() && F.IsNull())
-        {
-          const TopoDS_Shape* f = fIt->next();
-          if ( helper.IsSubShape( *f, data._solid))
-            F = TopoDS::Face( *f );
-        }
-        gp_Vec inFaceDir = getFaceDir( F, E, edge->_nodes[0], helper, ok);
-        double angle = inFaceDir.Angle( edge->_normal ); // [0,PI]
-        edge->_cosin = cos( angle );
+        _LayerEdge* e2 = *eIt++;
+        TopoDS_Shape S = helper.GetSubShapeByNode( e2->_nodes[0], getMeshDS() );
+        if ( S.ShapeType() == TopAbs_EDGE )
+          E2 = TopoDS::Edge( S ), edge2 = e2;
       }
-      edge->_len = 0;
-      edge->SetNewLength( data._stepSize, helper );
+      if ( E2.IsNull() ) continue; // TODO: find EDGE by VERTEX
+
+      // find 3 FACEs sharing 2 EDGEs
+
+      TopoDS_Face FF1[2], FF2[2];
+      PShapeIteratorPtr fIt = helper.GetAncestors(E1, *_mesh, TopAbs_FACE);
+      while ( fIt->more() && FF1[1].IsNull())
+      {
+        const TopoDS_Face *F = (const TopoDS_Face*) fIt->next();
+        if ( helper.IsSubShape( *F, data._solid))
+          FF1[ FF1[0].IsNull() ? 0 : 1 ] = *F;
+      }
+      fIt = helper.GetAncestors(E2, *_mesh, TopAbs_FACE);
+      while ( fIt->more() && FF2[1].IsNull())
+      {
+        const TopoDS_Face *F = (const TopoDS_Face*) fIt->next();
+        if ( helper.IsSubShape( *F, data._solid))
+          FF2[ FF2[0].IsNull() ? 0 : 1 ] = *F;
+      }
+      // exclude a FACE common to E1 and E2 (put it at [1] in FF* )
+      if ( FF1[0].IsSame( FF2[0]) || FF1[0].IsSame( FF2[1]))
+        std::swap( FF1[0], FF1[1] );
+      if ( FF2[0].IsSame( FF1[0]) )
+        std::swap( FF2[0], FF2[1] );
+      if ( FF1[0].IsNull() || FF2[0].IsNull() )
+        continue;
+
+//       // get a new normal for edge1
+      bool ok;
+      gp_Vec dir1 = getFaceDir( FF1[0], E1, edge1->_nodes[0], helper, ok );
+//       gp_Vec dir2 = getFaceDir( FF2[0], E2, edge2->_nodes[0], helper, ok2 );
+//       double wgt1 = ( edge1->_cosin + 1 ) / ( edge1->_cosin + edge2->_cosin + 2 );
+//       double wgt2 = ( edge2->_cosin + 1 ) / ( edge1->_cosin + edge2->_cosin + 2 );
+//       gp_Vec newNorm = wgt1 * dir1 + wgt2 * dir2;
+//       newNorm.Normalize();
+
+      double wgt1 = ( edge1->_cosin + 1 ) / ( edge1->_cosin + edge2->_cosin + 2 );
+      double wgt2 = ( edge2->_cosin + 1 ) / ( edge1->_cosin + edge2->_cosin + 2 );
+      gp_Vec newNorm = wgt1 * edge1->_normal + wgt2 * edge2->_normal;
+      newNorm.Normalize();
+
+      edge1->_normal = newNorm.XYZ();
+
+      // update edge1 data depending on _normal
+      const SMDS_MeshNode *n1, *n2;
+      if ( !findNeiborsOnEdge( edge1, n1, n2, data ))
+        continue;
+      edge1->SetDataByNeighbors( n1, n2, helper );
+      double angle = dir1.Angle( edge1->_normal ); // [0,PI]
+      edge1->_cosin = cos( angle );
+
+      // set new XYZ of target node
+      edge1->_len = 0;
+      edge1->SetNewLength( data._stepSize, helper );
     }
     dumpFunctionEnd();
   }

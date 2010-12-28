@@ -230,7 +230,7 @@ namespace VISCOUS
         c = new _Curvature;
         c->_r = avgDist * avgDist / avgNormProj;
         c->_k = avgDist * avgDist / c->_r / c->_r;
-        c->_k *= ( c->_r < 0 ? 1/1.2 : 1.2 ); // not to be too restrictive
+        c->_k *= ( c->_r < 0 ? 1/1.1 : 1.1 ); // not to be too restrictive
       }
       return c;
     }
@@ -1841,10 +1841,10 @@ bool _ViscousBuilder::inflate(_SolidData& data)
     data._epsilon = data._stepSize * 1e-7;
 
 #ifdef __myDEBUG
-  cout << "geomSize = " << geomSize << ", stepSize = " << data._stepSize << endl;
+  cout << "-- geomSize = " << geomSize << ", stepSize = " << data._stepSize << endl;
 #endif
 
-  double avgThick = 0, curThick = 0, distToIntersection;
+  double avgThick = 0, curThick = 0, distToIntersection = Precision::Infinite();
   int nbSteps = 0, nbRepeats = 0;
   while ( 1.01 * avgThick < tgtThick )
   {
@@ -1889,11 +1889,14 @@ bool _ViscousBuilder::inflate(_SolidData& data)
     for ( unsigned i = 0; i < data._edges.size(); ++i )
       avgThick += data._edges[i]->_len;
     avgThick /= data._edges.size();
+#ifdef __myDEBUG
+    cout << "-- Thickness " << avgThick << " reached" << endl;
+#endif
 
     if ( distToIntersection < avgThick*1.5 )
     {
 #ifdef __myDEBUG
-      cout << "Stop inflation since distToIntersection( "<<distToIntersection<<" ) < avgThick( "
+      cout << "-- Stop inflation since distToIntersection( "<<distToIntersection<<" ) < avgThick( "
            << avgThick << " ) * 1.5" << endl;
 #endif
       break;

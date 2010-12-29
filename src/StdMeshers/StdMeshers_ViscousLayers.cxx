@@ -1174,8 +1174,8 @@ bool _ViscousBuilder::makeLayer(_SolidData& data)
     if ( data._edges[i]->IsOnEdge())
       for ( int j = 0; j < 2; ++j )
       {
-        //if ( !data._edges[i]->_2neibors )
-        //break; // _LayerEdge is shared by two _SolidData's
+        if ( data._edges[i]->_nodes.back()->NbInverseElements(SMDSAbs_Volume) > 0 )
+          break; // _LayerEdge is shared by two _SolidData's
         const SMDS_MeshNode* & n = data._edges[i]->_2neibors->_nodes[j];
         if (( n2e = data._n2eMap.find( n )) == data._n2eMap.end() )
           return error("_LayerEdge not found by src node", &data);
@@ -2927,8 +2927,8 @@ bool _ViscousBuilder::refine(_SolidData& data)
 
 bool _ViscousBuilder::shrink()
 {
-  // make map of (ids of faces to shrink mesh on) to (_SolidData containing _LayerEdge's
-  // inflated along face or edge)
+  // make map of (ids of FACEs to shrink mesh on) to (_SolidData containing _LayerEdge's
+  // inflated along FACE or EDGE)
   map< TGeomID, _SolidData* > f2sdMap;
   for ( unsigned i = 0 ; i < _sdVec.size(); ++i )
   {
@@ -2960,6 +2960,16 @@ bool _ViscousBuilder::shrink()
 
     helper.SetSubShape(F);
 
+    // Put mesh faces on the shrinked FACE to the proxy sub-mesh to avoid
+    // usage of mesh faces made in addBoundaryElements() by the 3D algo or
+    // by StdMeshers_QuadToTriaAdaptor
+    {
+      StdMeshers_ProxyMesh::SubMesh* proxySub =
+        data._proxyMesh->getFaceSubM( F, /*create=*/true);
+      SMDS_ElemIteratorPtr fIt = smDS->GetElements();
+      while ( fIt->more() )
+        proxySub->AddElement( fIt->next() );
+    }
     // ===========================
     // Prepare data for shrinking
     // ===========================

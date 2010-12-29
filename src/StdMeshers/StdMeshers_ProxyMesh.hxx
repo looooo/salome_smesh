@@ -65,10 +65,18 @@ public:
     virtual SMDS_ElemIteratorPtr GetElements() const;
     virtual void Clear();
 
+    template< class ITERATOR >
+    void ChangeElements( ITERATOR it, ITERATOR end )
+    {
+      // change SubMesh contents without deleting tmp faces
+      // for which the caller is responsible
+      _elements.clear();
+      while ( it != end ) _elements.push_back( *it++ );
+    }
     SubMesh():_n2n(0) {}
     ~SubMesh() { Clear(); }
 
-  protected:
+  private:
     std::vector<const SMDS_MeshElement *> _elements;
     TN2NMap*                              _n2n;
     friend class StdMeshers_ProxyMesh;
@@ -78,6 +86,7 @@ public:
 
   StdMeshers_ProxyMesh();
   StdMeshers_ProxyMesh(std::vector<StdMeshers_ProxyMesh::Ptr>& components);
+  StdMeshers_ProxyMesh(const SMESH_Mesh& mesh) { _mesh = &mesh; }
   virtual ~StdMeshers_ProxyMesh();
 
   // Returns the submesh of a face; it can be a proxy sub-mesh
@@ -106,7 +115,9 @@ public:
 
   void setMesh(const SMESH_Mesh& mesh) { _mesh = &mesh; }
 
-  const SMESHDS_Mesh* getMeshDS() const;
+  const SMESH_Mesh* getMesh() const { return _mesh; }
+
+  SMESHDS_Mesh* getMeshDS() const;
 
   int shapeIndex(const TopoDS_Shape& shape) const;
 
@@ -114,11 +125,27 @@ public:
   SubMesh* findProxySubMesh(int shapeIndex=0) const;
 
   // returns a proxy sub-mesh; it is created if not yet exists
-  SubMesh* getProxySubMesh(int shapeIndex=0);
+  SubMesh* getProxySubMesh(int shapeIndex);
 
   // returns a proxy sub-mesh; it is created if not yet exists
   SubMesh* getProxySubMesh(const TopoDS_Shape& shape=TopoDS_Shape());
 
+  // move proxy sub-mesh from other proxy mesh to this, returns true if sub-mesh found
+  bool takeProxySubMesh( const TopoDS_Shape& shape, StdMeshers_ProxyMesh* proxyMesh );
+
+  // move tmp elements residing the _mesh from other proxy mesh to this
+  void takeTmpElemsInMesh( StdMeshers_ProxyMesh* proxyMesh );
+
+  // removes tmp faces from the _mesh
+  void removeTmpElement( const SMDS_MeshElement* face );
+
+  // stores tmp element residing the _mesh
+  void storeTmpElement( const SMDS_MeshElement* face );
+
+  // types of elements needed to implement NbFaces() and GetFaces();
+  // if _allowedTypes is empty, only elements from _subMeshes are returned,
+  // else elements of _mesh filtered using allowedTypes are additionally returned
+  std::vector< SMDSAbs_EntityType> _allowedTypes;
 
  private:
 
@@ -127,10 +154,8 @@ public:
   // proxy sub-meshes; index in vector == shapeIndex(shape)
   std::vector< SubMesh* > _subMeshes;
 
-  // types of elements needed to implement NbFaces() and GetFaces();
-  // if _allowedTypes is empty, only elements from _subMeshes are returned,
-  // else elements of _mesh filtered using allowedTypes are additionally returned
-  std::vector< SMDSAbs_EntityType> _allowedTypes;
+  // tmp elements residing the _mesh, to be deleted at destruction
+  std::set< const SMDS_MeshElement* > _elemsInMesh;
 
   // Complex submesh used to iterate over elements in other sub-meshes
   mutable SubMesh _subContainer;

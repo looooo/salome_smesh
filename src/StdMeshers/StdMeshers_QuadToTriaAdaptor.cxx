@@ -44,61 +44,13 @@
 
 using namespace std;
 
-enum EQuadNature { NOT_QUAD, QUAD, DEGEN_QUAD };
+enum EQuadNature { NOT_QUAD, QUAD, DEGEN_QUAD, PYRAM_APEX = 4, TRIA_APEX = 0 };
 
 // std-like iterator used to get coordinates of nodes of mesh element
 typedef SMDS_StdIterator< SMESH_MeshEditor::TNodeXYZ, SMDS_ElemIteratorPtr > TXyzIterator;
 
 namespace
 {
-  const int Q2TAbs_TmpTriangle = SMDSEntity_Last + 1;
-
-  //================================================================================
-  /*!
-   * \brief Temporary face. It's key feature is that it adds itself to an apex node
-   * as inverse element, so that tmp triangles of a piramid can be easily found
-   */
-  //================================================================================
-
-  class STDMESHERS_EXPORT Q2TAdaptor_Triangle : public SMDS_MeshFace
-  {
-    const SMDS_MeshNode* _nodes[3];
-  public:
-    Q2TAdaptor_Triangle(const SMDS_MeshNode* apexNode,
-                        const SMDS_MeshNode* node2,
-                        const SMDS_MeshNode* node3)
-    {
-      _nodes[0]=0; ChangeApex(apexNode);
-      _nodes[1]=node2;
-      _nodes[2]=node3;
-    }
-    ~Q2TAdaptor_Triangle() { MarkAsRemoved(); }
-    void ChangeApex(const SMDS_MeshNode* node)
-    {
-      MarkAsRemoved();
-      _nodes[0]=node;
-      const_cast<SMDS_MeshNode*>(node)->AddInverseElement(this);
-    }
-    void MarkAsRemoved()
-    {
-      if ( _nodes[0] )
-        const_cast<SMDS_MeshNode*>(_nodes[0])->RemoveInverseElement(this), _nodes[0] = 0;
-    }
-    bool IsRemoved() const { return !_nodes[0]; }
-    virtual int NbNodes() const { return 3; }
-    virtual const SMDS_MeshNode* GetNode(const int ind) const { return _nodes[ind]; }
-    virtual SMDSAbs_EntityType   GetEntityType() const
-    {
-      return SMDSAbs_EntityType( Q2TAbs_TmpTriangle );
-    }
-    virtual SMDS_ElemIteratorPtr elementsIterator(SMDSAbs_ElementType type) const
-    {
-      if ( type == SMDSAbs_Node )
-        return SMDS_ElemIteratorPtr( new SMDS_NodeArrayElemIterator( _nodes, _nodes+3 ));
-      throw SALOME_Exception(LOCALIZED("Not implemented"));
-    }
-  };
-
   //================================================================================
   /*!
    * \brief Return true if two nodes of triangles are equal
@@ -111,75 +63,6 @@ namespace
       ( F1->GetNode(1)==F2->GetNode(2) && F1->GetNode(2)==F2->GetNode(1) ) ||
       ( F1->GetNode(1)==F2->GetNode(1) && F1->GetNode(2)==F2->GetNode(2) );
   }
-
-  //================================================================================
-  /*!
-   * \brief Merge the two pyramids (i.e. fuse their apex) and others already merged with them
-   */
-  //================================================================================
-
-  void MergePiramids( const SMDS_MeshElement*     PrmI,
-                      const SMDS_MeshElement*     PrmJ,
-                      SMESHDS_Mesh*               meshDS,
-                      set<const SMDS_MeshNode*> & nodesToMove)
-  {
-    const SMDS_MeshNode* Nrem = PrmJ->GetNode(4); // node to remove
-    int nbJ = Nrem->NbInverseElements( SMDSAbs_Volume );
-    SMESH_MeshEditor::TNodeXYZ Pj( Nrem );
-
-    // an apex node to make common to all merged pyramids
-    SMDS_MeshNode* CommonNode = const_cast<SMDS_MeshNode*>(PrmI->GetNode(4));
-    if ( CommonNode == Nrem ) return; // already merged
-    int nbI = CommonNode->NbInverseElements( SMDSAbs_Volume );
-    SMESH_MeshEditor::TNodeXYZ Pi( CommonNode );
-    gp_XYZ Pnew = ( nbI*Pi + nbJ*Pj ) / (nbI+nbJ);
-    CommonNode->setXYZ( Pnew.X(), Pnew.Y(), Pnew.Z() );
-
-    nodesToMove.insert( CommonNode );
-    nodesToMove.erase ( Nrem );
-
-    // find and remove coincided faces of merged pyramids
-    SMDS_ElemIteratorPtr triItI = CommonNode->GetInverseElementIterator(SMDSAbs_Face);
-    while ( triItI->more() )
-    {
-      const SMDS_MeshElement* FI = triItI->next();
-      const SMDS_MeshElement* FJEqual = 0;
-      SMDS_ElemIteratorPtr triItJ = Nrem->GetInverseElementIterator(SMDSAbs_Face);
-      while ( !FJEqual && triItJ->more() )
-      {
-        const SMDS_MeshElement* FJ = triItJ->next();
-        if ( EqualTriangles( FJ, FI ))
-          FJEqual = FJ;
-      }
-      if ( FJEqual )
-      {
-        ((Q2TAdaptor_Triangle*) FI)->MarkAsRemoved();
-        ((Q2TAdaptor_Triangle*) FJEqual)->MarkAsRemoved();
-      }
-    }
-
-    // set the common apex node to pyramids and triangles merged with J
-    SMDS_ElemIteratorPtr itJ = Nrem->GetInverseElementIterator();
-    while ( itJ->more() )
-    {
-      const SMDS_MeshElement* elem = itJ->next();
-      if ( elem->GetType() == SMDSAbs_Volume ) // pyramid
-      {
-        vector< const SMDS_MeshNode* > nodes( elem->begin_nodes(), elem->end_nodes() );
-        nodes[4] = CommonNode;
-        meshDS->ChangeElementNodes( elem, &nodes[0], nodes.size());
-      }
-      else if ( elem->GetEntityType() == Q2TAbs_TmpTriangle ) // tmp triangle
-      {
-        ((Q2TAdaptor_Triangle*) elem )->ChangeApex( CommonNode );
-      }
-    }
-    ASSERT( Nrem->NbInverseElements() == 0 );
-    meshDS->RemoveFreeNode( Nrem,
-                            meshDS->MeshElements( Nrem->GetPosition()->GetShapeId()),
-                            /*fromGroups=*/false);
-  }
-
   //================================================================================
   /*!
    * \brief Return true if two adjacent pyramids are too close one to another
@@ -286,43 +169,109 @@ namespace
 
     return tooClose;
   }
+}
 
-  //================================================================================
-  /*!
-   * \brief Merges adjacent pyramids
-   */
-  //================================================================================
+//================================================================================
+/*!
+ * \brief Merge the two pyramids (i.e. fuse their apex) and others already merged with them
+ */
+//================================================================================
 
-  void MergeAdjacent(const SMDS_MeshElement*    PrmI,
-                     SMESH_Mesh&                mesh,
-                     set<const SMDS_MeshNode*>& nodesToMove)
+void StdMeshers_QuadToTriaAdaptor::MergePiramids( const SMDS_MeshElement*     PrmI,
+                                                  const SMDS_MeshElement*     PrmJ,
+                                                  set<const SMDS_MeshNode*> & nodesToMove)
+{
+  const SMDS_MeshNode* Nrem = PrmJ->GetNode(4); // node to remove
+  int nbJ = Nrem->NbInverseElements( SMDSAbs_Volume );
+  SMESH_MeshEditor::TNodeXYZ Pj( Nrem );
+
+  // an apex node to make common to all merged pyramids
+  SMDS_MeshNode* CommonNode = const_cast<SMDS_MeshNode*>(PrmI->GetNode(4));
+  if ( CommonNode == Nrem ) return; // already merged
+  int nbI = CommonNode->NbInverseElements( SMDSAbs_Volume );
+  SMESH_MeshEditor::TNodeXYZ Pi( CommonNode );
+  gp_XYZ Pnew = ( nbI*Pi + nbJ*Pj ) / (nbI+nbJ);
+  CommonNode->setXYZ( Pnew.X(), Pnew.Y(), Pnew.Z() );
+
+  nodesToMove.insert( CommonNode );
+  nodesToMove.erase ( Nrem );
+
+  typedef SMDS_StdIterator< const SMDS_MeshElement*, SMDS_ElemIteratorPtr > TStdElemIterator;
+  TStdElemIterator itEnd;
+
+  // find and remove coincided faces of merged pyramids
+  vector< const SMDS_MeshElement* > inverseElems
+    // copy inverse elements to avoid iteration on changing conainer 
+    ( TStdElemIterator( CommonNode->GetInverseElementIterator(SMDSAbs_Face)), itEnd);
+  for ( unsigned i = 0; i < inverseElems.size(); ++i )
   {
-    TIDSortedElemSet adjacentPyrams, mergedPyrams;
-    for(int k=0; k<4; k++) // loop on 4 base nodes of PrmI
+    const SMDS_MeshElement* FI = inverseElems[i];
+    const SMDS_MeshElement* FJEqual = 0;
+    SMDS_ElemIteratorPtr triItJ = Nrem->GetInverseElementIterator(SMDSAbs_Face);
+    while ( !FJEqual && triItJ->more() )
     {
-      const SMDS_MeshNode* n = PrmI->GetNode(k);
-      SMDS_ElemIteratorPtr vIt = n->GetInverseElementIterator( SMDSAbs_Volume );
-      while ( vIt->more() )
+      const SMDS_MeshElement* FJ = triItJ->next();
+      if ( EqualTriangles( FJ, FI ))
+        FJEqual = FJ;
+    }
+    if ( FJEqual )
+    {
+      removeTmpElement( FI );
+      removeTmpElement( FJEqual );
+      myRemovedTrias.insert( FI );
+      myRemovedTrias.insert( FJEqual );
+    }
+  }
+
+  // set the common apex node to pyramids and triangles merged with J
+  inverseElems.assign( TStdElemIterator( Nrem->GetInverseElementIterator()), itEnd );
+  for ( unsigned i = 0; i < inverseElems.size(); ++i )
+  {
+    const SMDS_MeshElement* elem = inverseElems[i];
+    vector< const SMDS_MeshNode* > nodes( elem->begin_nodes(), elem->end_nodes() );
+    nodes[ elem->GetType() == SMDSAbs_Volume ? PYRAM_APEX : TRIA_APEX ] = CommonNode;
+    getMeshDS()->ChangeElementNodes( elem, &nodes[0], nodes.size());
+  }
+  ASSERT( Nrem->NbInverseElements() == 0 );
+  getMeshDS()->RemoveFreeNode( Nrem,
+                               getMeshDS()->MeshElements( Nrem->GetPosition()->GetShapeId()),
+                               /*fromGroups=*/false);
+}
+
+//================================================================================
+/*!
+ * \brief Merges adjacent pyramids
+ */
+//================================================================================
+
+void StdMeshers_QuadToTriaAdaptor::MergeAdjacent(const SMDS_MeshElement*    PrmI,
+                                                 set<const SMDS_MeshNode*>& nodesToMove)
+{
+  TIDSortedElemSet adjacentPyrams;
+  bool mergedPyrams = false;
+  for(int k=0; k<4; k++) // loop on 4 base nodes of PrmI
+  {
+    const SMDS_MeshNode* n = PrmI->GetNode(k);
+    SMDS_ElemIteratorPtr vIt = n->GetInverseElementIterator( SMDSAbs_Volume );
+    while ( vIt->more() )
+    {
+      const SMDS_MeshElement* PrmJ = vIt->next();
+      if ( PrmJ->NbCornerNodes() != 5 || !adjacentPyrams.insert( PrmJ ).second  )
+        continue;
+      if ( PrmI != PrmJ && TooCloseAdjacent( PrmI, PrmJ, getMesh()->HasShapeToMesh() ))
       {
-        const SMDS_MeshElement* PrmJ = vIt->next();
-        if ( PrmJ->NbCornerNodes() != 5 || !adjacentPyrams.insert( PrmJ ).second  )
-          continue;
-        if ( PrmI != PrmJ && TooCloseAdjacent( PrmI, PrmJ, mesh.HasShapeToMesh() ))
-        {
-          MergePiramids( PrmI, PrmJ, mesh.GetMeshDS(), nodesToMove );
-          mergedPyrams.insert( PrmJ );
-        }
+        MergePiramids( PrmI, PrmJ, nodesToMove );
+        mergedPyrams = true;
+        // container of inverse elements can change
+        vIt = n->GetInverseElementIterator( SMDSAbs_Volume );
       }
     }
-    if ( !mergedPyrams.empty() )
-    {
-      TIDSortedElemSet::iterator prm;
-//       for (prm = mergedPyrams.begin(); prm != mergedPyrams.end(); ++prm)
-//         MergeAdjacent( *prm, mesh, nodesToMove );
-
-      for (prm = adjacentPyrams.begin(); prm != adjacentPyrams.end(); ++prm)
-        MergeAdjacent( *prm, mesh, nodesToMove );
-    }
+  }
+  if ( mergedPyrams )
+  {
+    TIDSortedElemSet::iterator prm;
+    for (prm = adjacentPyrams.begin(); prm != adjacentPyrams.end(); ++prm)
+      MergeAdjacent( *prm, nodesToMove );
   }
 }
 
@@ -333,7 +282,7 @@ namespace
 //================================================================================
 
 StdMeshers_QuadToTriaAdaptor::StdMeshers_QuadToTriaAdaptor():
-  myElemSearcher(0), myNbTriangles(0)
+  myElemSearcher(0)//, myNbTriangles(0)
 {
 }
 
@@ -345,17 +294,7 @@ StdMeshers_QuadToTriaAdaptor::StdMeshers_QuadToTriaAdaptor():
 
 StdMeshers_QuadToTriaAdaptor::~StdMeshers_QuadToTriaAdaptor()
 {
-  // delete temporary faces
-  TQuad2Trias::iterator f_f = myResMap.begin(), ffEnd = myResMap.end();
-  for ( ; f_f != ffEnd; ++f_f )
-  {
-    TTriaList& fList = f_f->second;
-    TTriaList::iterator f = fList.begin(), fEnd = fList.end();
-    for ( ; f != fEnd; ++f )
-      delete *f;
-  }
-  myResMap.clear();
-
+  // temporary faces are deleted by ~StdMeshers_ProxyMesh()
   if ( myElemSearcher ) delete myElemSearcher;
   myElemSearcher=0;
 }
@@ -582,7 +521,7 @@ int StdMeshers_QuadToTriaAdaptor::Preparation(const SMDS_MeshElement*       face
 {
   if( face->NbCornerNodes() != 4 )
   {
-    myNbTriangles += int( face->NbCornerNodes() == 3 );
+    //myNbTriangles += int( face->NbCornerNodes() == 3 );
     return NOT_QUAD;
   }
 
@@ -694,22 +633,38 @@ int StdMeshers_QuadToTriaAdaptor::Preparation(const SMDS_MeshElement*       face
 //purpose  : 
 //=======================================================================
 
-bool StdMeshers_QuadToTriaAdaptor::Compute(SMESH_Mesh& aMesh, const TopoDS_Shape& aShape)
+bool StdMeshers_QuadToTriaAdaptor::Compute(SMESH_Mesh&           aMesh,
+                                           const TopoDS_Shape&   aShape,
+                                           StdMeshers_ProxyMesh* aProxyMesh)
 {
-  myResMap.clear();
-  myPyramids.clear();
-  myNbTriangles = 0;
-  myShape = aShape;
+  StdMeshers_ProxyMesh::setMesh( aMesh );
+  //myResMap.clear();
+  vector<const SMDS_MeshElement*> myPyramids;
+  //myNbTriangles = 0;
+  //myShape = aShape;
 
   SMESHDS_Mesh * meshDS = aMesh.GetMeshDS();
   SMESH_MesherHelper helper(aMesh);
   helper.IsQuadraticSubMesh(aShape);
   helper.SetElementsOnShape( true );
 
+  if ( myElemSearcher ) delete myElemSearcher;
+  if ( aProxyMesh )
+    myElemSearcher = SMESH_MeshEditor(&aMesh).GetElementSearcher( aProxyMesh->GetFaces(aShape));
+  else
+    myElemSearcher = SMESH_MeshEditor(&aMesh).GetElementSearcher();
+
+  const SMESHDS_SubMesh * aSubMeshDSFace;
+
   for (TopExp_Explorer exp(aShape,TopAbs_FACE);exp.More();exp.Next())
   {
     const TopoDS_Shape& aShapeFace = exp.Current();
-    const SMESHDS_SubMesh * aSubMeshDSFace = meshDS->MeshElements( aShapeFace );
+    if ( aProxyMesh )
+      aSubMeshDSFace = aProxyMesh->GetSubMesh( aShapeFace );
+    else
+      aSubMeshDSFace = meshDS->MeshElements( aShapeFace );
+    vector<const SMDS_MeshElement*> trias, quads;
+    bool hasNewTrias = false;
     if ( aSubMeshDSFace )
     {
       bool isRev = SMESH_Algo::IsReversedSubMesh( TopoDS::Face(aShapeFace), meshDS );
@@ -725,88 +680,123 @@ bool StdMeshers_QuadToTriaAdaptor::Compute(SMESH_Mesh& aMesh, const TopoDS_Shape
         vector<const SMDS_MeshNode*> FNodes(5);
         gp_Pnt PC;
         gp_Vec VNorm;
-        int stat =  Preparation(face, PN, VN, FNodes, PC, VNorm);
-        if(stat==0)
-          continue;
-
-        if(stat==2)
+        int stat = Preparation(face, PN, VN, FNodes, PC, VNorm);
+        switch ( stat )
         {
-          // degenerate face
-          // add triangles to result map
-          SMDS_MeshFace* NewFace;
-          if(!isRev)
-            NewFace = new Q2TAdaptor_Triangle( FNodes[0], FNodes[1], FNodes[2] );
-          else
-            NewFace = new Q2TAdaptor_Triangle( FNodes[0], FNodes[2], FNodes[1] );
-          TTriaList aList( 1, NewFace );
-          myResMap.insert(make_pair(face,aList));
-          continue;
-        }
+        case NOT_QUAD:
 
-        if(!isRev) VNorm.Reverse();
-        double xc = 0., yc = 0., zc = 0.;
-        int i = 1;
-        for(; i<=4; i++) {
-          gp_Pnt Pbest;
-          if(!isRev)
-            Pbest = FindBestPoint(PN->Value(i), PN->Value(i+1), PC, VN->Value(i).Reversed());
-          else
-            Pbest = FindBestPoint(PN->Value(i), PN->Value(i+1), PC, VN->Value(i));
-          xc += Pbest.X();
-          yc += Pbest.Y();
-          zc += Pbest.Z();
-        }
-        gp_Pnt PCbest(xc/4., yc/4., zc/4.);
+          trias.push_back( face );
+          break;
 
-        // check PCbest
-        double height = PCbest.Distance(PC);
-        if(height<1.e-6) {
-          // create new PCbest using a bit shift along VNorm
-          PCbest = PC.XYZ() + VNorm.XYZ() * 0.001;
-        }
-        else {
-          // check possible intersection with other faces
-          gp_Pnt Pint;
-          bool check = CheckIntersection(PCbest, PC, Pint, aMesh, aShape, face);
-          if(check) {
-            //cout<<"--PC("<<PC.X()<<","<<PC.Y()<<","<<PC.Z()<<")"<<endl;
-            //cout<<"  PCbest("<<PCbest.X()<<","<<PCbest.Y()<<","<<PCbest.Z()<<")"<<endl;
-            double dist = PC.Distance(Pint)/3.;
-            gp_Dir aDir(gp_Vec(PC,PCbest));
-            PCbest = PC.XYZ() + aDir.XYZ() * dist;
+        case DEGEN_QUAD:
+          {
+            // degenerate face
+            // add triangles to result map
+            SMDS_MeshFace* NewFace;
+            if(!isRev)
+              NewFace = meshDS->AddFace( FNodes[0], FNodes[1], FNodes[2] );
+            else
+              NewFace = meshDS->AddFace( FNodes[0], FNodes[2], FNodes[1] );
+            storeTmpElement( NewFace );
+            trias.push_back ( NewFace );
+            quads.push_back( face );
+            hasNewTrias = true;
+            break;
           }
-          else {
-            gp_Vec VB(PC,PCbest);
-            gp_Pnt PCbestTmp = PC.XYZ() + VB.XYZ() * 3.0;
-            check = CheckIntersection(PCbestTmp, PC, Pint, aMesh, aShape, face);
-            if(check) {
-              double dist = PC.Distance(Pint)/3.;
-              if(dist<height) {
+
+        case QUAD:
+          {
+            if(!isRev) VNorm.Reverse();
+            double xc = 0., yc = 0., zc = 0.;
+            int i = 1;
+            for(; i<=4; i++) {
+              gp_Pnt Pbest;
+              if(!isRev)
+                Pbest = FindBestPoint(PN->Value(i), PN->Value(i+1), PC, VN->Value(i).Reversed());
+              else
+                Pbest = FindBestPoint(PN->Value(i), PN->Value(i+1), PC, VN->Value(i));
+              xc += Pbest.X();
+              yc += Pbest.Y();
+              zc += Pbest.Z();
+            }
+            gp_Pnt PCbest(xc/4., yc/4., zc/4.);
+
+            // check PCbest
+            double height = PCbest.Distance(PC);
+            if(height<1.e-6) {
+              // create new PCbest using a bit shift along VNorm
+              PCbest = PC.XYZ() + VNorm.XYZ() * 0.001;
+            }
+            else {
+              // check possible intersection with other faces
+              gp_Pnt Pint;
+              bool check = CheckIntersection(PCbest, PC, Pint, aMesh, aShape, face);
+              if(check) {
+                //cout<<"--PC("<<PC.X()<<","<<PC.Y()<<","<<PC.Z()<<")"<<endl;
+                //cout<<"  PCbest("<<PCbest.X()<<","<<PCbest.Y()<<","<<PCbest.Z()<<")"<<endl;
+                double dist = PC.Distance(Pint)/3.;
                 gp_Dir aDir(gp_Vec(PC,PCbest));
                 PCbest = PC.XYZ() + aDir.XYZ() * dist;
               }
+              else {
+                gp_Vec VB(PC,PCbest);
+                gp_Pnt PCbestTmp = PC.XYZ() + VB.XYZ() * 3.0;
+                check = CheckIntersection(PCbestTmp, PC, Pint, aMesh, aShape, face);
+                if(check) {
+                  double dist = PC.Distance(Pint)/3.;
+                  if(dist<height) {
+                    gp_Dir aDir(gp_Vec(PC,PCbest));
+                    PCbest = PC.XYZ() + aDir.XYZ() * dist;
+                  }
+                }
+              }
             }
-          }
+            // create node for PCbest
+            SMDS_MeshNode* NewNode = helper.AddNode( PCbest.X(), PCbest.Y(), PCbest.Z() );
+
+            // add triangles to result map
+            for(i=0; i<4; i++)
+            {
+              trias.push_back ( meshDS->AddFace( NewNode, FNodes[i], FNodes[i+1] ));
+              storeTmpElement( trias.back() );
+            }
+            // create a pyramid
+            if ( isRev ) swap( FNodes[1], FNodes[3]);
+            SMDS_MeshVolume* aPyram =
+              helper.AddVolume( FNodes[0], FNodes[1], FNodes[2], FNodes[3], NewNode );
+            myPyramids.push_back(aPyram);
+
+            quads.push_back( face );
+            hasNewTrias = true;
+            break;
+
+          } // case QUAD:
+
+        } // switch ( stat )
+
+        bool sourceSubMeshIsProxy = false;
+        if ( aProxyMesh )
+        {
+          // move proxy sub-mesh from other proxy mesh to this
+          sourceSubMeshIsProxy = takeProxySubMesh( aShapeFace, aProxyMesh );
+          // move tmp elements added in mesh
+          takeTmpElemsInMesh( aProxyMesh );
         }
-        // create node for PCbest
-        SMDS_MeshNode* NewNode = helper.AddNode( PCbest.X(), PCbest.Y(), PCbest.Z() );
+        if ( hasNewTrias )
+        {
+          StdMeshers_ProxyMesh::SubMesh* prxSubMesh = getProxySubMesh( aShapeFace );
+          prxSubMesh->ChangeElements( trias.begin(), trias.end() );
 
-        // add triangles to result map
-        TTriaList& triaList = myResMap.insert( make_pair( face, TTriaList() ))->second;
-        for(i=0; i<4; i++)
-          triaList.push_back( new Q2TAdaptor_Triangle( NewNode, FNodes[i], FNodes[i+1] ));
-
-        // create a pyramid
-        if ( isRev ) swap( FNodes[1], FNodes[3]);
-        SMDS_MeshVolume* aPyram =
-          helper.AddVolume( FNodes[0], FNodes[1], FNodes[2], FNodes[3], NewNode );
-        myPyramids.push_back(aPyram);
-
+          // delete tmp quadrangles removed from aProxyMesh
+          if ( sourceSubMeshIsProxy )
+            for ( unsigned i = 0; i < quads.size(); ++i )
+              removeTmpElement( quads[i] );
+        }
       } // end loop on elements on a face submesh
     }
   } // end for(TopExp_Explorer exp(aShape,TopAbs_FACE);exp.More();exp.Next()) {
 
-  return Compute2ndPart(aMesh);
+  return Compute2ndPart(aMesh, myPyramids);
 }
 
 //================================================================================
@@ -817,8 +807,13 @@ bool StdMeshers_QuadToTriaAdaptor::Compute(SMESH_Mesh& aMesh, const TopoDS_Shape
 
 bool StdMeshers_QuadToTriaAdaptor::Compute(SMESH_Mesh& aMesh)
 {
-  myResMap.clear();
-  myPyramids.clear();
+  StdMeshers_ProxyMesh::setMesh( aMesh );
+  StdMeshers_ProxyMesh::_allowedTypes.push_back( SMDSEntity_Triangle );
+  StdMeshers_ProxyMesh::_allowedTypes.push_back( SMDSEntity_Quad_Triangle );
+  if ( aMesh.NbQuadrangles() < 1 )
+    return false;
+
+  vector<const SMDS_MeshElement*> myPyramids;
   SMESH_MesherHelper helper(aMesh);
   helper.IsQuadraticSubMesh(aMesh.GetShapeToMesh());
   helper.SetElementsOnShape( true );
@@ -828,13 +823,13 @@ bool StdMeshers_QuadToTriaAdaptor::Compute(SMESH_Mesh& aMesh)
   SMESH_ElementSearcher* searcher = const_cast<SMESH_ElementSearcher*>(myElemSearcher);
 
   SMESHDS_Mesh * meshDS = aMesh.GetMeshDS();
+  StdMeshers_ProxyMesh::SubMesh* prxSubMesh = getProxySubMesh();
 
   SMDS_FaceIteratorPtr fIt = meshDS->facesIterator(/*idInceasingOrder=*/true);
   while( fIt->more()) 
   {
     const SMDS_MeshElement* face = fIt->next();
     if ( !face ) continue;
-    //cout<<endl<<"================= face->GetID() = "<<face->GetID()<<endl;
     // retrieve needed information about a face
     Handle(TColgp_HArray1OfPnt) PN = new TColgp_HArray1OfPnt(1,5);
     Handle(TColgp_HArray1OfVec) VN = new TColgp_HArray1OfVec(1,4);
@@ -851,11 +846,10 @@ bool StdMeshers_QuadToTriaAdaptor::Compute(SMESH_Mesh& aMesh)
     if ( what == DEGEN_QUAD )
     {
       // degenerate face
-      // add triangles to result map
-      TTriaList aList;
+      // add a triangle to the proxy mesh
       SMDS_MeshFace* NewFace;
-      // check orientation
 
+      // check orientation
       double tmp = PN->Value(1).Distance(PN->Value(2)) + PN->Value(2).Distance(PN->Value(3));
       // far points in VNorm direction
       gp_Pnt Ptmp1 = PC.XYZ() + VNorm.XYZ() * tmp * 1.e6;
@@ -916,13 +910,15 @@ bool StdMeshers_QuadToTriaAdaptor::Compute(SMESH_Mesh& aMesh)
         }
       }
       if(!IsRev)
-        NewFace = new Q2TAdaptor_Triangle( FNodes[0], FNodes[1], FNodes[2] );
+        NewFace = meshDS->AddFace( FNodes[0], FNodes[1], FNodes[2] );
       else
-        NewFace = new Q2TAdaptor_Triangle( FNodes[0], FNodes[2], FNodes[1] );
-      aList.push_back(NewFace);
-      myResMap.insert(make_pair(face,aList));
+        NewFace = meshDS->AddFace( FNodes[0], FNodes[2], FNodes[1] );
+      storeTmpElement( NewFace );
+      prxSubMesh->AddElement( NewFace );
       continue;
     }
+
+    // Case of non-degenerated quadrangle 
 
     // Find pyramid peak
 
@@ -940,7 +936,6 @@ bool StdMeshers_QuadToTriaAdaptor::Compute(SMESH_Mesh& aMesh)
       PCbest = PC.XYZ() + VNorm.XYZ() * 0.001;
       height = PC.Distance(PCbest);
     }
-    //cout<<"  PCbest("<<PCbest.X()<<","<<PCbest.Y()<<","<<PCbest.Z()<<")"<<endl;
 
     // Restrict pyramid height by intersection with other faces
     gp_Vec tmpDir(PC,PCbest); tmpDir.Normalize();
@@ -992,14 +987,14 @@ bool StdMeshers_QuadToTriaAdaptor::Compute(SMESH_Mesh& aMesh)
       SMDS_MeshNode* NewNode = helper.AddNode( PCbest.X(), PCbest.Y(), PCbest.Z() );
 
       // add triangles to result map
-      TTriaList& aList = myResMap.insert( make_pair( face, TTriaList()))->second;
       for(i=0; i<4; i++) {
         SMDS_MeshFace* NewFace;
         if(isRev)
-          NewFace = new Q2TAdaptor_Triangle( NewNode, FNodes[i], FNodes[i+1] );
+          NewFace = meshDS->AddFace( NewNode, FNodes[i], FNodes[i+1] );
         else
-          NewFace = new Q2TAdaptor_Triangle( NewNode, FNodes[i+1], FNodes[i] );
-        aList.push_back(NewFace);
+          NewFace = meshDS->AddFace( NewNode, FNodes[i+1], FNodes[i] );
+        storeTmpElement( NewFace );
+        prxSubMesh->AddElement( NewFace );
       }
       // create a pyramid
       SMDS_MeshVolume* aPyram;
@@ -1011,7 +1006,7 @@ bool StdMeshers_QuadToTriaAdaptor::Compute(SMESH_Mesh& aMesh)
     }
   } // end loop on all faces
 
-  return Compute2ndPart(aMesh);
+  return Compute2ndPart(aMesh, myPyramids);
 }
 
 //================================================================================
@@ -1020,7 +1015,8 @@ bool StdMeshers_QuadToTriaAdaptor::Compute(SMESH_Mesh& aMesh)
  */
 //================================================================================
 
-bool StdMeshers_QuadToTriaAdaptor::Compute2ndPart(SMESH_Mesh& aMesh)
+bool StdMeshers_QuadToTriaAdaptor::Compute2ndPart(SMESH_Mesh&                            aMesh,
+                                                  const vector<const SMDS_MeshElement*>& myPyramids)
 {
   if(myPyramids.empty())
     return true;
@@ -1039,7 +1035,7 @@ bool StdMeshers_QuadToTriaAdaptor::Compute2ndPart(SMESH_Mesh& aMesh)
   for ( i = 0; i <  myPyramids.size(); ++i )
   {
     const SMDS_MeshElement* PrmI = myPyramids[i];
-    MergeAdjacent( PrmI, aMesh, nodesToMove );
+    MergeAdjacent( PrmI, nodesToMove );
   }
 
   // iterate on all pyramids
@@ -1116,7 +1112,7 @@ bool StdMeshers_QuadToTriaAdaptor::Compute2ndPart(SMESH_Mesh& aMesh)
           if(nbc>0)
           {
             // Merge the two pyramids and others already merged with them
-            MergePiramids( PrmI, PrmJ, meshDS, nodesToMove );
+            MergePiramids( PrmI, PrmJ, nodesToMove );
           }
           else { // nbc==0
 
@@ -1149,8 +1145,8 @@ bool StdMeshers_QuadToTriaAdaptor::Compute2ndPart(SMESH_Mesh& aMesh)
             nodesToMove.insert( aNode2 );
           }
           // fix intersections that could appear after apex movement
-          MergeAdjacent( PrmI, aMesh, nodesToMove );
-          MergeAdjacent( PrmJ, aMesh, nodesToMove );
+          MergeAdjacent( PrmI, nodesToMove );
+          MergeAdjacent( PrmJ, nodesToMove );
 
         } // end if(hasInt)
       } // loop on suspectPyrams
@@ -1165,26 +1161,28 @@ bool StdMeshers_QuadToTriaAdaptor::Compute2ndPart(SMESH_Mesh& aMesh)
       meshDS->MoveNode( *n, (*n)->X(), (*n)->Y(), (*n)->Z() );
   }
 
-  // rebind triangles of pyramids sharing the same base quadrangle to the first
-  // entrance of the base quadrangle
-  TQuad2Trias::iterator q2t = myResMap.begin(), q2tPrev = q2t;
-  for ( ++q2t; q2t != myResMap.end(); ++q2t, ++q2tPrev )
+  // erase removed triangles from the proxy mesh
+  if ( !myRemovedTrias.empty() )
   {
-    if ( q2t->first == q2tPrev->first )
-      q2tPrev->second.splice( q2tPrev->second.end(), q2t->second );
-  }
-  // delete removed triangles and count resulting nb of triangles
-  for ( q2t = myResMap.begin(); q2t != myResMap.end(); ++q2t )
-  {
-    TTriaList & trias = q2t->second;
-    for ( TTriaList::iterator tri = trias.begin(); tri != trias.end(); )
-      if ( ((const Q2TAdaptor_Triangle*) *tri)->IsRemoved() )
-        delete *tri, trias.erase( tri++ );
-      else
-        tri++, myNbTriangles++;
+    for ( int i = 0; i <= meshDS->MaxShapeIndex(); ++i )
+      if ( StdMeshers_ProxyMesh::SubMesh* sm = findProxySubMesh(i))
+      {
+        vector<const SMDS_MeshElement *> faces;
+        faces.reserve( sm->NbElements() );
+        SMDS_ElemIteratorPtr fIt = sm->GetElements();
+        while ( fIt->more() )
+        {
+          const SMDS_MeshElement* tria = fIt->next();
+          set<const SMDS_MeshElement*>::iterator rmTria = myRemovedTrias.find( tria );
+          if ( rmTria != myRemovedTrias.end() )
+            myRemovedTrias.erase( rmTria );
+          else
+            faces.push_back( tria );
+        }
+        sm->ChangeElements( faces.begin(), faces.end() );
+      }
   }
 
-  myPyramids.clear(); // no more needed
   myDegNodes.clear();
 
   delete myElemSearcher;
@@ -1199,8 +1197,8 @@ bool StdMeshers_QuadToTriaAdaptor::Compute2ndPart(SMESH_Mesh& aMesh)
  */
 //================================================================================
 
-const list<const SMDS_MeshFace* >* StdMeshers_QuadToTriaAdaptor::GetTriangles (const SMDS_MeshElement* aQuad)
-{
-  TQuad2Trias::iterator it = myResMap.find(aQuad);
-  return ( it != myResMap.end() ?  & it->second : 0 );
-}
+// const list<const SMDS_MeshFace* >* StdMeshers_QuadToTriaAdaptor::GetTriangles (const SMDS_MeshElement* aQuad)
+// {
+//   TQuad2Trias::iterator it = myResMap.find(aQuad);
+//   return ( it != myResMap.end() ?  & it->second : 0 );
+// }

@@ -27,7 +27,8 @@
 #include "SMESH_MesherHelper.hxx"
 
 #include <TopTools_ListIteratorOfListOfShape.hxx>
-#include <TopExp_Explorer.hxx>
+#include <TopExp.hxx>
+#include <TopTools_IndexedMapOfShape.hxx>
 
 //================================================================================
 /*!
@@ -52,6 +53,9 @@ StdMeshers_ProxyMesh::StdMeshers_ProxyMesh(vector<StdMeshers_ProxyMesh::Ptr>& co
   for ( unsigned i = 0; i < components.size(); ++i )
   {
     StdMeshers_ProxyMesh* m = components[i].get();
+    if ( !m ) continue;
+
+    takeTmpElemsInMesh( m );
 
     if ( !_mesh ) _mesh = m->_mesh;
     if ( _allowedTypes.empty() ) _allowedTypes = m->_allowedTypes;
@@ -69,6 +73,7 @@ StdMeshers_ProxyMesh::StdMeshers_ProxyMesh(vector<StdMeshers_ProxyMesh::Ptr>& co
         elems.insert( m->_subMeshes[j]->_elements.begin(),
                       m->_subMeshes[j]->_elements.end());
         _subMeshes[j]->_elements.assign( elems.begin(), elems.end() );
+        m->_subMeshes[j]->_elements.clear();
 
         if ( !_subMeshes[j]->_n2n )
           _subMeshes[j]->_n2n = m->_subMeshes[j]->_n2n, m->_subMeshes[j]->_n2n = 0;
@@ -88,7 +93,7 @@ StdMeshers_ProxyMesh::StdMeshers_ProxyMesh(vector<StdMeshers_ProxyMesh::Ptr>& co
 
 //================================================================================
 /*!
- * \brief Destructor deletes proxy submeshes
+ * \brief Destructor deletes proxy submeshes and tmp elemens
  */
 //================================================================================
 
@@ -97,6 +102,11 @@ StdMeshers_ProxyMesh::~StdMeshers_ProxyMesh()
   for ( unsigned i = 0; i < _subMeshes.size(); ++i )
     delete _subMeshes[i];
   _subMeshes.clear();
+
+  set< const SMDS_MeshElement* >::iterator i = _elemsInMesh.begin();
+  for ( ; i != _elemsInMesh.end(); ++i )
+    getMeshDS()->RemoveFreeElement( *i, 0 );
+  _elemsInMesh.clear();
 }
 
 //================================================================================
@@ -186,6 +196,7 @@ namespace
                         const SMDS_ElemIteratorPtr&        elemIterator)
       :_iter(elemIterator), _curElem(0), _okTypes(okTypes)
     {
+      next();
     }
     virtual bool more()
     {
@@ -198,7 +209,7 @@ namespace
       while ( _iter->more() && !_curElem )
       {
         _curElem = _iter->next();
-        if ( find( _okTypes.begin(), _okTypes.end(), _curElem->GetEntityType()) != _okTypes.end())
+        if ( find( _okTypes.begin(), _okTypes.end(), _curElem->GetEntityType()) == _okTypes.end())
           _curElem = 0;
       }
       return res;
@@ -219,10 +230,12 @@ SMDS_ElemIteratorPtr StdMeshers_ProxyMesh::GetFaces(const TopoDS_Shape& shape) c
 
   _subContainer.RemoveAllSubmeshes();
 
-  TopExp_Explorer fExp( shape, TopAbs_FACE );
-  for ( ; fExp.More(); fExp.Next() )
-    if ( const SMESHDS_SubMesh* sm = GetSubMesh( fExp.Current()))
+  TopTools_IndexedMapOfShape FF;
+  TopExp::MapShapes( shape, TopAbs_FACE, FF );
+  for ( int i = 1; i <= FF.Extent(); ++i )
+    if ( const SMESHDS_SubMesh* sm = GetSubMesh( FF(i)))
       _subContainer.AddSubMesh( sm );
+
   return _subContainer.SMESHDS_SubMesh::GetElements();
 }
 
@@ -247,7 +260,7 @@ SMDS_ElemIteratorPtr StdMeshers_ProxyMesh::GetFaces() const
     return getMeshDS()->elementsIterator(SMDSAbs_Face);
 
   // if _allowedTypes is empty, only elements from _subMeshes are returned,...
-  SMDS_ElemIteratorPtr proxyIter = _subContainer.GetElements();
+  SMDS_ElemIteratorPtr proxyIter = _subContainer.SMESHDS_SubMesh::GetElements();
   if ( _allowedTypes.empty() || NbFaces() == _mesh->NbFaces() )
     return proxyIter;
 
@@ -271,7 +284,38 @@ SMDS_ElemIteratorPtr StdMeshers_ProxyMesh::GetFaces() const
 
 int StdMeshers_ProxyMesh::NbFaces() const
 {
-  // TODO
+  int nb = 0;
+  if ( _mesh->HasShapeToMesh() )
+  {
+    TopTools_IndexedMapOfShape FF;
+    TopExp::MapShapes( _mesh->GetShapeToMesh(), TopAbs_FACE, FF );
+    for ( int i = 1; i <= FF.Extent(); ++i )
+      if ( const SMESHDS_SubMesh* sm = GetSubMesh( FF(i)))
+        nb += sm->NbElements();
+  }
+  else
+  {
+    if ( _subMeshes.empty() )
+      return getMeshDS()->NbFaces();
+
+    for ( unsigned i = 0; i < _subMeshes.size(); ++i )
+      if ( _subMeshes[i] )
+        nb += _subMeshes[i]->NbElements();
+
+    // if _allowedTypes is empty, only elements from _subMeshes are returned,
+    // else elements filtered using allowedTypes are additionally returned
+    if ( !_allowedTypes.empty() )
+    {
+      for ( int t = SMDSEntity_Triangle; t <= SMDSEntity_Quad_Quadrangle; ++t )
+      {
+        bool allowed =
+          ( find( _allowedTypes.begin(), _allowedTypes.end(), t ) != _allowedTypes.end() );
+        if ( allowed )
+          nb += getMeshDS()->GetMeshInfo().NbEntities( SMDSAbs_EntityType( t ));
+      }
+    }
+  }
+  return nb;
 }
 
 //================================================================================
@@ -317,9 +361,83 @@ StdMeshers_ProxyMesh::SubMesh* StdMeshers_ProxyMesh::findProxySubMesh(int shapeI
  */
 //================================================================================
 
-const SMESHDS_Mesh* StdMeshers_ProxyMesh::getMeshDS() const
+SMESHDS_Mesh* StdMeshers_ProxyMesh::getMeshDS() const
 {
-  return _mesh ? _mesh->GetMeshDS() : 0;
+  return (SMESHDS_Mesh*)( _mesh ? _mesh->GetMeshDS() : 0 );
+}
+
+//================================================================================
+/*!
+ * \brief Move proxy sub-mesh from other proxy mesh to this, returns true if sub-mesh found
+ */
+//================================================================================
+
+bool StdMeshers_ProxyMesh::takeProxySubMesh( const TopoDS_Shape&   shape,
+                                             StdMeshers_ProxyMesh* proxyMesh )
+{
+  if ( proxyMesh && proxyMesh->_mesh == _mesh )
+  {
+    int iS = shapeIndex( shape );
+    if ( SubMesh* sm = proxyMesh->findProxySubMesh( iS ))
+    {
+      if ( iS >= int(_subMeshes.size()) )
+        _subMeshes.resize( iS + 1, 0 );
+      _subMeshes[iS] = sm;
+      proxyMesh->_subMeshes[iS] = 0;
+      return true;
+    }
+  }
+  return false;
+}
+
+//================================================================================
+/*!
+ * \brief Move tmp elements residing the _mesh from other proxy mesh to this
+ */
+//================================================================================
+
+void StdMeshers_ProxyMesh::takeTmpElemsInMesh( StdMeshers_ProxyMesh* proxyMesh )
+{
+  if ( proxyMesh )
+  {
+    _elemsInMesh.insert( proxyMesh->_elemsInMesh.begin(),
+                         proxyMesh->_elemsInMesh.end());
+    proxyMesh->_elemsInMesh.clear();
+  }
+}
+
+//================================================================================
+/*!
+ * \brief Removes tmp faces from the _mesh
+ */
+//================================================================================
+
+void StdMeshers_ProxyMesh::removeTmpElement( const SMDS_MeshElement* face )
+{
+  if ( face && face->GetID() > 0 )
+  {
+    set< const SMDS_MeshElement* >::iterator i =  _elemsInMesh.find( face );
+    if ( i != _elemsInMesh.end() )
+    {
+      getMeshDS()->RemoveFreeElement( face, 0 );
+      _elemsInMesh.erase( i );
+    }
+  }
+  else
+  {
+    delete face;
+  }
+}
+
+//================================================================================
+/*!
+ * \brief Stores tmp element residing the _mesh
+ */
+//================================================================================
+
+void StdMeshers_ProxyMesh::storeTmpElement( const SMDS_MeshElement* face )
+{
+  _elemsInMesh.insert( face );
 }
 
 //================================================================================
@@ -345,7 +463,7 @@ const SMDS_MeshNode* StdMeshers_ProxyMesh::SubMesh::GetProxyNode( const SMDS_Mes
 void StdMeshers_ProxyMesh::SubMesh::Clear()
 {
   for ( unsigned i = 0; i < _elements.size(); ++i )
-    if ( _elements[i]->GetID() > 0 )
+    if ( _elements[i]->GetID() < 0 )
       delete _elements[i];
   _elements.clear();
 }
@@ -383,3 +501,4 @@ void StdMeshers_ProxyMesh::SubMesh::AddElement(const SMDS_MeshElement * e)
 {
   _elements.push_back( e );
 }
+

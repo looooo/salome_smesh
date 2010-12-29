@@ -70,6 +70,11 @@ public:
   operator!=(const _Self& __x) const
   { return !_EqualVALUE( _value, __x._value); }
 
+  // Test of equality
+  bool
+  operator==(const _Self& __x) const
+  { return _EqualVALUE( _value, __x._value); }
+
 };
 
 #endif

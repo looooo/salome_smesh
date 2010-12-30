@@ -956,10 +956,6 @@ Please enter correct values and try again</translation>
             <translation>&amp;Apply</translation>
         </message>
         <message>
-            <source>SMESH_BUT_CANCEL</source>
-            <translation>&amp;Cancel</translation>
-        </message>
-        <message>
             <source>SMESH_BUT_CLOSE</source>
             <translation>&amp;Close</translation>
         </message>

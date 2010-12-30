@@ -442,6 +442,17 @@ void StdMeshers_ProxyMesh::storeTmpElement( const SMDS_MeshElement* face )
 
 //================================================================================
 /*!
+ * \brief Return true if the element is a temporary one
+ */
+//================================================================================
+
+bool StdMeshers_ProxyMesh::IsTemporary(const SMDS_MeshElement* elem ) const
+{
+  return ( elem->GetID() < 1 ) || _elemsInMesh.count( elem );
+}
+
+//================================================================================
+/*!
  * \brief Return a proxy node or an input node
  */
 //================================================================================

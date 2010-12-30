@@ -108,6 +108,7 @@ public:
   // Return total nb of faces taking into account substitutions
   int NbFaces() const;
 
+  bool IsTemporary(const SMDS_MeshElement* elem ) const;
 
   //--------------------------------------------------------------------------------
   // Interface for descendants

@@ -638,10 +638,12 @@ bool StdMeshers_QuadToTriaAdaptor::Compute(SMESH_Mesh&           aMesh,
                                            StdMeshers_ProxyMesh* aProxyMesh)
 {
   StdMeshers_ProxyMesh::setMesh( aMesh );
-  //myResMap.clear();
+
+  if ( aShape.ShapeType() != TopAbs_SOLID &&
+       aShape.ShapeType() != TopAbs_SHELL )
+    return false;
+
   vector<const SMDS_MeshElement*> myPyramids;
-  //myNbTriangles = 0;
-  //myShape = aShape;
 
   SMESHDS_Mesh * meshDS = aMesh.GetMeshDS();
   SMESH_MesherHelper helper(aMesh);
@@ -655,6 +657,11 @@ bool StdMeshers_QuadToTriaAdaptor::Compute(SMESH_Mesh&           aMesh,
     myElemSearcher = SMESH_MeshEditor(&aMesh).GetElementSearcher();
 
   const SMESHDS_SubMesh * aSubMeshDSFace;
+  Handle(TColgp_HArray1OfPnt) PN = new TColgp_HArray1OfPnt(1,5);
+  Handle(TColgp_HArray1OfVec) VN = new TColgp_HArray1OfVec(1,4);
+  vector<const SMDS_MeshNode*> FNodes(5);
+  gp_Pnt PC;
+  gp_Vec VNorm;
 
   for (TopExp_Explorer exp(aShape,TopAbs_FACE);exp.More();exp.Next())
   {
@@ -663,23 +670,21 @@ bool StdMeshers_QuadToTriaAdaptor::Compute(SMESH_Mesh&           aMesh,
       aSubMeshDSFace = aProxyMesh->GetSubMesh( aShapeFace );
     else
       aSubMeshDSFace = meshDS->MeshElements( aShapeFace );
+
     vector<const SMDS_MeshElement*> trias, quads;
     bool hasNewTrias = false;
+
     if ( aSubMeshDSFace )
     {
-      bool isRev = SMESH_Algo::IsReversedSubMesh( TopoDS::Face(aShapeFace), meshDS );
+      bool isRev = false;
+      if ( helper.NbAncestors( aShapeFace, aMesh, aShape.ShapeType() ) > 1 )
+        isRev = SMESH_Algo::IsReversedSubMesh( TopoDS::Face(aShapeFace), meshDS );
 
       SMDS_ElemIteratorPtr iteratorElem = aSubMeshDSFace->GetElements();
       while ( iteratorElem->more() ) // loop on elements on a geometrical face
       {
         const SMDS_MeshElement* face = iteratorElem->next();
-        //cout<<endl<<"================= face->GetID() = "<<face->GetID()<<endl;
-        // preparation step using face info
-        Handle(TColgp_HArray1OfPnt) PN = new TColgp_HArray1OfPnt(1,5);
-        Handle(TColgp_HArray1OfVec) VN = new TColgp_HArray1OfVec(1,4);
-        vector<const SMDS_MeshNode*> FNodes(5);
-        gp_Pnt PC;
-        gp_Vec VNorm;
+        // preparation step to get face info
         int stat = Preparation(face, PN, VN, FNodes, PC, VNorm);
         switch ( stat )
         {
@@ -773,26 +778,26 @@ bool StdMeshers_QuadToTriaAdaptor::Compute(SMESH_Mesh&           aMesh,
           } // case QUAD:
 
         } // switch ( stat )
-
-        bool sourceSubMeshIsProxy = false;
-        if ( aProxyMesh )
-        {
-          // move proxy sub-mesh from other proxy mesh to this
-          sourceSubMeshIsProxy = takeProxySubMesh( aShapeFace, aProxyMesh );
-          // move tmp elements added in mesh
-          takeTmpElemsInMesh( aProxyMesh );
-        }
-        if ( hasNewTrias )
-        {
-          StdMeshers_ProxyMesh::SubMesh* prxSubMesh = getProxySubMesh( aShapeFace );
-          prxSubMesh->ChangeElements( trias.begin(), trias.end() );
-
-          // delete tmp quadrangles removed from aProxyMesh
-          if ( sourceSubMeshIsProxy )
-            for ( unsigned i = 0; i < quads.size(); ++i )
-              removeTmpElement( quads[i] );
-        }
       } // end loop on elements on a face submesh
+
+      bool sourceSubMeshIsProxy = false;
+      if ( aProxyMesh )
+      {
+        // move proxy sub-mesh from other proxy mesh to this
+        sourceSubMeshIsProxy = takeProxySubMesh( aShapeFace, aProxyMesh );
+        // move tmp elements added in mesh
+        takeTmpElemsInMesh( aProxyMesh );
+      }
+      if ( hasNewTrias )
+      {
+        StdMeshers_ProxyMesh::SubMesh* prxSubMesh = getProxySubMesh( aShapeFace );
+        prxSubMesh->ChangeElements( trias.begin(), trias.end() );
+
+        // delete tmp quadrangles removed from aProxyMesh
+        if ( sourceSubMeshIsProxy )
+          for ( unsigned i = 0; i < quads.size(); ++i )
+            removeTmpElement( quads[i] );
+      }
     }
   } // end for(TopExp_Explorer exp(aShape,TopAbs_FACE);exp.More();exp.Next()) {
 

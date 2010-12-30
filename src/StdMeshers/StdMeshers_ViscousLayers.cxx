@@ -2933,10 +2933,26 @@ bool _ViscousBuilder::shrink()
   for ( unsigned i = 0 ; i < _sdVec.size(); ++i )
   {
     _SolidData& data = _sdVec[i];
+    TopTools_MapOfShape FFMap;
     map< TGeomID, TopoDS_Shape >::iterator s2s = data._shrinkShape2Shape.begin();
     for (; s2s != data._shrinkShape2Shape.end(); ++s2s )
       if ( s2s->second.ShapeType() == TopAbs_FACE )
+      {
         f2sdMap.insert( make_pair( getMeshDS()->ShapeToIndex( s2s->second ), &data ));
+
+        if ( FFMap.Add( (*s2s).second ))
+          // Put mesh faces on the shrinked FACE to the proxy sub-mesh to avoid
+          // usage of mesh faces made in addBoundaryElements() by the 3D algo or
+          // by StdMeshers_QuadToTriaAdaptor
+          if ( SMESHDS_SubMesh* smDS = getMeshDS()->MeshElements( s2s->second ))
+          {
+            StdMeshers_ProxyMesh::SubMesh* proxySub =
+              data._proxyMesh->getFaceSubM( TopoDS::Face( s2s->second ), /*create=*/true);
+            SMDS_ElemIteratorPtr fIt = smDS->GetElements();
+            while ( fIt->more() )
+              proxySub->AddElement( fIt->next() );
+          }
+      }
   }
 
   SMESH_MesherHelper helper( *_mesh );
@@ -2960,16 +2976,6 @@ bool _ViscousBuilder::shrink()
 
     helper.SetSubShape(F);
 
-    // Put mesh faces on the shrinked FACE to the proxy sub-mesh to avoid
-    // usage of mesh faces made in addBoundaryElements() by the 3D algo or
-    // by StdMeshers_QuadToTriaAdaptor
-    {
-      StdMeshers_ProxyMesh::SubMesh* proxySub =
-        data._proxyMesh->getFaceSubM( F, /*create=*/true);
-      SMDS_ElemIteratorPtr fIt = smDS->GetElements();
-      while ( fIt->more() )
-        proxySub->AddElement( fIt->next() );
-    }
     // ===========================
     // Prepare data for shrinking
     // ===========================

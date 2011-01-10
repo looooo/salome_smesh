@@ -30,6 +30,7 @@
 #include "SMDS_EdgePosition.hxx"
 #include "SMDS_VolumeTool.hxx"
 #include "SMESH_subMesh.hxx"
+#include "SMESH_ProxyMesh.hxx"
 
 #include <BRepAdaptor_Surface.hxx>
 #include <BRepTools.hxx>
@@ -1463,9 +1464,24 @@ SMESH_MesherHelper::AddPolyhedralVolume (const std::vector<const SMDS_MeshNode*>
 bool SMESH_MesherHelper::LoadNodeColumns(TParam2ColumnMap & theParam2ColumnMap,
                                          const TopoDS_Face& theFace,
                                          const TopoDS_Edge& theBaseEdge,
-                                         SMESHDS_Mesh*      theMesh)
+                                         SMESHDS_Mesh*      theMesh,
+                                         SMESH_ProxyMesh*   theProxyMesh)
 {
-  SMESHDS_SubMesh* faceSubMesh = theMesh->MeshElements( theFace );
+  const SMESHDS_SubMesh* faceSubMesh = 0;
+  if ( theProxyMesh )
+  {
+    faceSubMesh = theProxyMesh->GetSubMesh( theFace );
+    if ( !faceSubMesh ||
+         faceSubMesh->NbElements() == 0 ||
+         theProxyMesh->IsTemporary( faceSubMesh->GetElements()->next() ))
+    {
+      // can use a proxy sub-mesh with not temporary elements only
+      faceSubMesh = 0;
+      theProxyMesh = 0;
+    }
+  }
+  if ( !faceSubMesh )
+    faceSubMesh = theMesh->MeshElements( theFace );
   if ( !faceSubMesh || faceSubMesh->NbElements() == 0 )
     return false;
 
@@ -1486,12 +1502,21 @@ bool SMESH_MesherHelper::LoadNodeColumns(TParam2ColumnMap & theParam2ColumnMap,
     nCol.resize( nbRows );
     nCol[0] = u_n->second;
   }
+  TParam2ColumnMap::iterator par_nVec_2, par_nVec_1 = theParam2ColumnMap.begin();
+  if ( theProxyMesh )
+  {
+    for ( ; par_nVec_1 != theParam2ColumnMap.end(); ++par_nVec_1 )
+    {
+      const SMDS_MeshNode* & n = par_nVec_1->second[0];
+      n = theProxyMesh->GetProxyNode( n );
+    }
+  }
 
   // fill theParam2ColumnMap column by column by passing from nodes on
   // theBaseEdge up via mesh faces on theFace
 
-  TParam2ColumnMap::iterator par_nVec_2 = theParam2ColumnMap.begin();
-  TParam2ColumnMap::iterator par_nVec_1 = par_nVec_2++;
+  par_nVec_2 = theParam2ColumnMap.begin();
+  par_nVec_1 = par_nVec_2++;
   TIDSortedElemSet emptySet, avoidSet;
   for ( ; par_nVec_2 != theParam2ColumnMap.end(); ++par_nVec_1, ++par_nVec_2 )
   {
@@ -1522,7 +1547,7 @@ bool SMESH_MesherHelper::LoadNodeColumns(TParam2ColumnMap & theParam2ColumnMap,
     if ( iRow + 1 < nbRows ) // compact if necessary
       nCol1.resize( iRow + 1 ), nCol2.resize( iRow + 1 );
   }
-  return true;
+  return theParam2ColumnMap.size() > 1 && theParam2ColumnMap.begin()->second.size() > 1;
 }
 
 //=======================================================================

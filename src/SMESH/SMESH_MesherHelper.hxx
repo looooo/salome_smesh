@@ -43,6 +43,7 @@
 
 class GeomAPI_ProjectPointOnSurf;
 class GeomAPI_ProjectPointOnCurve;
+class SMESH_ProxyMesh;
 
 typedef std::map<SMESH_TLink, const SMDS_MeshNode*>           TLinkNodeMap;
 typedef std::map<SMESH_TLink, const SMDS_MeshNode*>::iterator ItTLinkNode;
@@ -96,7 +97,8 @@ public:
   static bool LoadNodeColumns(TParam2ColumnMap & theParam2ColumnMap,
                               const TopoDS_Face& theFace,
                               const TopoDS_Edge& theBaseEdge,
-                              SMESHDS_Mesh*      theMesh);
+                              SMESHDS_Mesh*      theMesh,
+                              SMESH_ProxyMesh*   theProxyMesh=0);
   /*!
    * \brief Return support shape of a node
    * \param node - the node

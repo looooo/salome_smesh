@@ -230,11 +230,11 @@ void StdMeshers_QuadToTriaAdaptor::MergePiramids( const SMDS_MeshElement*     Pr
     const SMDS_MeshElement* elem = inverseElems[i];
     vector< const SMDS_MeshNode* > nodes( elem->begin_nodes(), elem->end_nodes() );
     nodes[ elem->GetType() == SMDSAbs_Volume ? PYRAM_APEX : TRIA_APEX ] = CommonNode;
-    getMeshDS()->ChangeElementNodes( elem, &nodes[0], nodes.size());
+    GetMeshDS()->ChangeElementNodes( elem, &nodes[0], nodes.size());
   }
   ASSERT( Nrem->NbInverseElements() == 0 );
-  getMeshDS()->RemoveFreeNode( Nrem,
-                               getMeshDS()->MeshElements( Nrem->GetPosition()->GetShapeId()),
+  GetMeshDS()->RemoveFreeNode( Nrem,
+                               GetMeshDS()->MeshElements( Nrem->GetPosition()->GetShapeId()),
                                /*fromGroups=*/false);
 }
 
@@ -258,7 +258,7 @@ void StdMeshers_QuadToTriaAdaptor::MergeAdjacent(const SMDS_MeshElement*    PrmI
       const SMDS_MeshElement* PrmJ = vIt->next();
       if ( PrmJ->NbCornerNodes() != 5 || !adjacentPyrams.insert( PrmJ ).second  )
         continue;
-      if ( PrmI != PrmJ && TooCloseAdjacent( PrmI, PrmJ, getMesh()->HasShapeToMesh() ))
+      if ( PrmI != PrmJ && TooCloseAdjacent( PrmI, PrmJ, GetMesh()->HasShapeToMesh() ))
       {
         MergePiramids( PrmI, PrmJ, nodesToMove );
         mergedPyrams = true;
@@ -294,7 +294,7 @@ StdMeshers_QuadToTriaAdaptor::StdMeshers_QuadToTriaAdaptor():
 
 StdMeshers_QuadToTriaAdaptor::~StdMeshers_QuadToTriaAdaptor()
 {
-  // temporary faces are deleted by ~StdMeshers_ProxyMesh()
+  // temporary faces are deleted by ~SMESH_ProxyMesh()
   if ( myElemSearcher ) delete myElemSearcher;
   myElemSearcher=0;
 }
@@ -635,9 +635,9 @@ int StdMeshers_QuadToTriaAdaptor::Preparation(const SMDS_MeshElement*       face
 
 bool StdMeshers_QuadToTriaAdaptor::Compute(SMESH_Mesh&           aMesh,
                                            const TopoDS_Shape&   aShape,
-                                           StdMeshers_ProxyMesh* aProxyMesh)
+                                           SMESH_ProxyMesh* aProxyMesh)
 {
-  StdMeshers_ProxyMesh::setMesh( aMesh );
+  SMESH_ProxyMesh::setMesh( aMesh );
 
   if ( aShape.ShapeType() != TopAbs_SOLID &&
        aShape.ShapeType() != TopAbs_SHELL )
@@ -790,7 +790,7 @@ bool StdMeshers_QuadToTriaAdaptor::Compute(SMESH_Mesh&           aMesh,
       }
       if ( hasNewTrias )
       {
-        StdMeshers_ProxyMesh::SubMesh* prxSubMesh = getProxySubMesh( aShapeFace );
+        SMESH_ProxyMesh::SubMesh* prxSubMesh = getProxySubMesh( aShapeFace );
         prxSubMesh->ChangeElements( trias.begin(), trias.end() );
 
         // delete tmp quadrangles removed from aProxyMesh
@@ -812,9 +812,9 @@ bool StdMeshers_QuadToTriaAdaptor::Compute(SMESH_Mesh&           aMesh,
 
 bool StdMeshers_QuadToTriaAdaptor::Compute(SMESH_Mesh& aMesh)
 {
-  StdMeshers_ProxyMesh::setMesh( aMesh );
-  StdMeshers_ProxyMesh::_allowedTypes.push_back( SMDSEntity_Triangle );
-  StdMeshers_ProxyMesh::_allowedTypes.push_back( SMDSEntity_Quad_Triangle );
+  SMESH_ProxyMesh::setMesh( aMesh );
+  SMESH_ProxyMesh::_allowedTypes.push_back( SMDSEntity_Triangle );
+  SMESH_ProxyMesh::_allowedTypes.push_back( SMDSEntity_Quad_Triangle );
   if ( aMesh.NbQuadrangles() < 1 )
     return false;
 
@@ -828,7 +828,7 @@ bool StdMeshers_QuadToTriaAdaptor::Compute(SMESH_Mesh& aMesh)
   SMESH_ElementSearcher* searcher = const_cast<SMESH_ElementSearcher*>(myElemSearcher);
 
   SMESHDS_Mesh * meshDS = aMesh.GetMeshDS();
-  StdMeshers_ProxyMesh::SubMesh* prxSubMesh = getProxySubMesh();
+  SMESH_ProxyMesh::SubMesh* prxSubMesh = getProxySubMesh();
 
   SMDS_FaceIteratorPtr fIt = meshDS->facesIterator(/*idInceasingOrder=*/true);
   while( fIt->more()) 
@@ -1170,7 +1170,7 @@ bool StdMeshers_QuadToTriaAdaptor::Compute2ndPart(SMESH_Mesh&                   
   if ( !myRemovedTrias.empty() )
   {
     for ( int i = 0; i <= meshDS->MaxShapeIndex(); ++i )
-      if ( StdMeshers_ProxyMesh::SubMesh* sm = findProxySubMesh(i))
+      if ( SMESH_ProxyMesh::SubMesh* sm = findProxySubMesh(i))
       {
         vector<const SMDS_MeshElement *> faces;
         faces.reserve( sm->NbElements() );

@@ -27,7 +27,7 @@
 #include "SMESH_StdMeshers.hxx"
 
 #include "SMESH_Hypothesis.hxx"
-#include "StdMeshers_ProxyMesh.hxx"
+#include "SMESH_ProxyMesh.hxx"
 
 #include <vector>
 
@@ -56,9 +56,10 @@ public:
   double GetStretchFactor() const { return _stretchFactor; }
 
   // Computes temporary 2D mesh to be used by 3D algorithm.
-  // Return StdMeshers_ProxyMesh for each SOLID in theShape
-  StdMeshers_ProxyMesh::Ptr Compute(SMESH_Mesh&         theMesh,
-                                    const TopoDS_Shape& theShape) const;
+  // Return SMESH_ProxyMesh for each SOLID in theShape
+  SMESH_ProxyMesh::Ptr Compute(SMESH_Mesh&         theMesh,
+                               const TopoDS_Shape& theShape,
+                               const bool          toMakeN2NMap=false) const;
 
   virtual std::ostream & SaveTo(std::ostream & save);
   virtual std::istream & LoadFrom(std::istream & load);

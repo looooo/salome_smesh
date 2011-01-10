@@ -26,7 +26,7 @@
 
 #include "SMESH_StdMeshers.hxx"
 
-#include "StdMeshers_ProxyMesh.hxx"
+#include "SMESH_ProxyMesh.hxx"
 
 class SMESH_Mesh;
 class SMESH_ElementSearcher;
@@ -48,16 +48,16 @@ class gp_Vec;
 /*!
  * \brief "Transforms" quadrilateral faces into triangular ones by creation of pyramids
  */
-class STDMESHERS_EXPORT StdMeshers_QuadToTriaAdaptor : public StdMeshers_ProxyMesh
+class STDMESHERS_EXPORT StdMeshers_QuadToTriaAdaptor : public SMESH_ProxyMesh
 {
 public:
   StdMeshers_QuadToTriaAdaptor();
 
   ~StdMeshers_QuadToTriaAdaptor();
 
-  bool Compute(SMESH_Mesh&           aMesh,
-               const TopoDS_Shape&   aShape,
-               StdMeshers_ProxyMesh* aProxyMesh=0);
+  bool Compute(SMESH_Mesh&         aMesh,
+               const TopoDS_Shape& aShape,
+               SMESH_ProxyMesh*    aProxyMesh=0);
 
   bool Compute(SMESH_Mesh& aMesh);
 

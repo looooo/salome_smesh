@@ -76,8 +76,7 @@ salomeinclude_HEADERS = \
 	StdMeshers_ImportSource.hxx \
 	StdMeshers_Import_1D.hxx \
 	StdMeshers_Import_1D2D.hxx \
-	StdMeshers_ViscousLayers.hxx \
-	StdMeshers_ProxyMesh.hxx
+	StdMeshers_ViscousLayers.hxx
 
 # Libraries targets
 
@@ -132,8 +131,7 @@ dist_libStdMeshers_la_SOURCES = \
 	StdMeshers_ImportSource.cxx \
 	StdMeshers_Import_1D.cxx \
 	StdMeshers_Import_1D2D.cxx \
-	StdMeshers_ViscousLayers.cxx \
-	StdMeshers_ProxyMesh.cxx
+	StdMeshers_ViscousLayers.cxx
 
 # additionnal information to compil and link file
 libStdMeshers_la_CPPFLAGS = \

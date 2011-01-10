@@ -17,14 +17,14 @@
 //  See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 //
 
-// File      : StdMeshers_ProxyMesh.hxx
+// File      : SMESH_ProxyMesh.hxx
 // Created   : Thu Dec  2 10:05:35 2010
 // Author    : Edward AGAPOV (eap)
 
-#ifndef __StdMeshers_ProxyMesh_HXX__
-#define __StdMeshers_ProxyMesh_HXX__
+#ifndef __SMESH_ProxyMesh_HXX__
+#define __SMESH_ProxyMesh_HXX__
 
-#include "SMESH_StdMeshers.hxx"
+#include "SMESH_SMESH.hxx"
 
 #include "SMDS_MeshElement.hxx"
 #include "SMESHDS_SubMesh.hxx"
@@ -42,11 +42,11 @@ class SMESH_Mesh;
 /*!
  * \brief Container of mesh faces substituting other faces in the input mesh of 3D algorithm
  */
-class STDMESHERS_EXPORT StdMeshers_ProxyMesh
+class SMESH_EXPORT SMESH_ProxyMesh
 {
 public:
 
-  typedef boost::shared_ptr<StdMeshers_ProxyMesh> Ptr;
+  typedef boost::shared_ptr<SMESH_ProxyMesh> Ptr;
 
   typedef std::map<const SMDS_MeshNode*, const SMDS_MeshNode*, TIDCompare > TN2NMap;
 
@@ -64,6 +64,7 @@ public:
     virtual int NbElements() const;
     virtual SMDS_ElemIteratorPtr GetElements() const;
     virtual void Clear();
+    virtual bool Contains(const SMDS_MeshElement * ME) const;
 
     template< class ITERATOR >
     void ChangeElements( ITERATOR it, ITERATOR end )
@@ -79,15 +80,15 @@ public:
   private:
     std::vector<const SMDS_MeshElement *> _elements;
     TN2NMap*                              _n2n;
-    friend class StdMeshers_ProxyMesh;
+    friend class SMESH_ProxyMesh;
   };
   //--------------------------------------------------------------------------------
   // Public interface
 
-  StdMeshers_ProxyMesh();
-  StdMeshers_ProxyMesh(std::vector<StdMeshers_ProxyMesh::Ptr>& components);
-  StdMeshers_ProxyMesh(const SMESH_Mesh& mesh) { _mesh = &mesh; }
-  virtual ~StdMeshers_ProxyMesh();
+  SMESH_ProxyMesh();
+  SMESH_ProxyMesh(std::vector<SMESH_ProxyMesh::Ptr>& components);
+  SMESH_ProxyMesh(const SMESH_Mesh& mesh) { _mesh = &mesh; }
+  virtual ~SMESH_ProxyMesh();
 
   // Returns the submesh of a face; it can be a proxy sub-mesh
   const SMESHDS_SubMesh* GetSubMesh(const TopoDS_Shape& face) const;
@@ -110,15 +111,17 @@ public:
 
   bool IsTemporary(const SMDS_MeshElement* elem ) const;
 
+
+
+  const SMESH_Mesh* GetMesh() const { return _mesh; }
+
+  SMESHDS_Mesh* GetMeshDS() const;
+
   //--------------------------------------------------------------------------------
   // Interface for descendants
  protected:
 
   void setMesh(const SMESH_Mesh& mesh) { _mesh = &mesh; }
-
-  const SMESH_Mesh* getMesh() const { return _mesh; }
-
-  SMESHDS_Mesh* getMeshDS() const;
 
   int shapeIndex(const TopoDS_Shape& shape) const;
 
@@ -132,16 +135,21 @@ public:
   SubMesh* getProxySubMesh(const TopoDS_Shape& shape=TopoDS_Shape());
 
   // move proxy sub-mesh from other proxy mesh to this, returns true if sub-mesh found
-  bool takeProxySubMesh( const TopoDS_Shape& shape, StdMeshers_ProxyMesh* proxyMesh );
+  bool takeProxySubMesh( const TopoDS_Shape& shape, SMESH_ProxyMesh* proxyMesh );
 
   // move tmp elements residing the _mesh from other proxy mesh to this
-  void takeTmpElemsInMesh( StdMeshers_ProxyMesh* proxyMesh );
+  void takeTmpElemsInMesh( SMESH_ProxyMesh* proxyMesh );
 
   // removes tmp faces from the _mesh
   void removeTmpElement( const SMDS_MeshElement* face );
 
   // stores tmp element residing the _mesh
   void storeTmpElement( const SMDS_MeshElement* face );
+
+  // store node-node correspondence
+  void setNode2Node(const SMDS_MeshNode* srcNode,
+                    const SMDS_MeshNode* proxyNode,
+                    const SubMesh*       subMesh);
 
   // types of elements needed to implement NbFaces() and GetFaces();
   // if _allowedTypes is empty, only elements from _subMeshes are returned,

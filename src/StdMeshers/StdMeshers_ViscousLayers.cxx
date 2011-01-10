@@ -38,7 +38,7 @@
 #include "SMESH_MesherHelper.hxx"
 #include "SMESH_subMesh.hxx"
 #include "SMESH_subMeshEventListener.hxx"
-#include "StdMeshers_ProxyMesh.hxx"
+#include "SMESH_ProxyMesh.hxx"
 
 #include "utilities.h"
 
@@ -76,22 +76,31 @@ namespace VISCOUS
   enum UIndex { U_TGT = 1, U_SRC, LEN_TGT };
 
   /*!
-   * \brief StdMeshers_ProxyMesh computed by _ViscousBuilder for a solid.
+   * \brief SMESH_ProxyMesh computed by _ViscousBuilder for a solid.
    * It is stored in a SMESH_subMesh of the SOLID as SMESH_subMeshEventListenerData
    */
-  struct _MeshOfSolid : public StdMeshers_ProxyMesh,
+  struct _MeshOfSolid : public SMESH_ProxyMesh,
                         public SMESH_subMeshEventListenerData
   {
-    _MeshOfSolid( SMESH_Mesh* mesh):SMESH_subMeshEventListenerData( /*isDeletable=*/true)
+    bool _n2nMapComputed;
+
+    _MeshOfSolid( SMESH_Mesh* mesh)
+      :SMESH_subMeshEventListenerData( /*isDeletable=*/true),_n2nMapComputed(false)
     {
-      StdMeshers_ProxyMesh::setMesh( *mesh );
+      SMESH_ProxyMesh::setMesh( *mesh );
     }
 
     // returns submesh for a geom face
-    StdMeshers_ProxyMesh::SubMesh* getFaceSubM(const TopoDS_Face& F, bool create=false)
+    SMESH_ProxyMesh::SubMesh* getFaceSubM(const TopoDS_Face& F, bool create=false)
     {
-      TGeomID i = StdMeshers_ProxyMesh::shapeIndex(F);
-      return create ? StdMeshers_ProxyMesh::getProxySubMesh(i) : findProxySubMesh(i);
+      TGeomID i = SMESH_ProxyMesh::shapeIndex(F);
+      return create ? SMESH_ProxyMesh::getProxySubMesh(i) : findProxySubMesh(i);
+    }
+    void setNode2Node(const SMDS_MeshNode*                 srcNode,
+                      const SMDS_MeshNode*                 proxyNode,
+                      const SMESH_ProxyMesh::SubMesh* subMesh)
+    {
+      SMESH_ProxyMesh::setNode2Node( srcNode,proxyNode,subMesh);
     }
   };
   //--------------------------------------------------------------------------------
@@ -152,7 +161,7 @@ namespace VISCOUS
     {
       if ( SMESH_subMesh::COMPUTE_EVENT == eventType )
       {
-        // delete StdMeshers_ProxyMesh containing temporary faces
+        // delete SMESH_ProxyMesh containing temporary faces
         subMesh->DeleteEventListener( this );
       }
     }
@@ -165,7 +174,11 @@ namespace VISCOUS
       SMESH_subMesh* sm = mesh->GetSubMesh(solid);
       _MeshOfSolid* data = (_MeshOfSolid*) sm->GetEventListenerData( Get() );
       if ( !data && toCreate )
-        ( data = new _MeshOfSolid(mesh)), sm->SetEventListener( Get(), data, sm );
+      {
+        data = new _MeshOfSolid(mesh);
+        data->mySubMeshes.push_back( sm ); // to find SOLID by _MeshOfSolid
+        sm->SetEventListener( Get(), data, sm );
+      }
       return data;
     }
     // Removes proxy mesh of the solid
@@ -381,10 +394,14 @@ namespace VISCOUS
   public:
     _ViscousBuilder();
     // does it's job
-    SMESH_ComputeErrorPtr Compute(SMESH_Mesh& mesh, const TopoDS_Shape& theShape);
+    SMESH_ComputeErrorPtr Compute(SMESH_Mesh&         mesh,
+                                  const TopoDS_Shape& shape);
 
     // restore event listeners used to clear an inferior dim sub-mesh modified by viscous layers
     void RestoreListeners();
+
+    // computes SMESH_ProxyMesh::SubMesh::_n2n;
+    bool MakeN2NMap( _MeshOfSolid* pm );
 
   private:
 
@@ -416,7 +433,7 @@ namespace VISCOUS
                               const SMESHDS_SubMesh* faceSubMesh );
     bool addBoundaryElements();
 
-    bool error( const string& text, _SolidData* data );
+    bool error( const string& text, int solidID=-1 );
     SMESHDS_Mesh* getMeshDS() { return _mesh->GetMeshDS(); }
 
     // debug
@@ -511,24 +528,29 @@ void StdMeshers_ViscousLayers::SetStretchFactor(double factor)
   if ( _stretchFactor != factor )
     _stretchFactor = factor, NotifySubMeshesHypothesisModification();
 } // --------------------------------------------------------------------------------
-StdMeshers_ProxyMesh::Ptr StdMeshers_ViscousLayers::Compute(SMESH_Mesh&         theMesh,
-                                                            const TopoDS_Shape& theShape) const
+SMESH_ProxyMesh::Ptr
+StdMeshers_ViscousLayers::Compute(SMESH_Mesh&         theMesh,
+                                  const TopoDS_Shape& theShape,
+                                  const bool          toMakeN2NMap) const
 {
   using namespace VISCOUS;
   _ViscousBuilder bulder;
   SMESH_ComputeErrorPtr err = bulder.Compute( theMesh, theShape );
   if ( err && !err->IsOK() )
-    return StdMeshers_ProxyMesh::Ptr();
+    return SMESH_ProxyMesh::Ptr();
 
-  vector<StdMeshers_ProxyMesh::Ptr> components;
+  vector<SMESH_ProxyMesh::Ptr> components;
   TopExp_Explorer exp( theShape, TopAbs_SOLID );
   for ( ; exp.More(); exp.Next() )
   {
     if ( _MeshOfSolid* pm =
          _ViscousListener::GetSolidMesh( &theMesh, exp.Current(), /*toCreate=*/false))
     {
-      components.push_back( StdMeshers_ProxyMesh::Ptr( pm ));
-      pm->myIsDeletable  =false; // it will de deleted by boost::shared_ptr
+      if ( toMakeN2NMap && !pm->_n2nMapComputed )
+        if ( !bulder.MakeN2NMap( pm ))
+          return SMESH_ProxyMesh::Ptr();
+      components.push_back( SMESH_ProxyMesh::Ptr( pm ));
+      pm->myIsDeletable = false; // it will de deleted by boost::shared_ptr
     }
     _ViscousListener::RemoveSolidMesh ( &theMesh, exp.Current() );
   }
@@ -538,9 +560,9 @@ StdMeshers_ProxyMesh::Ptr StdMeshers_ViscousLayers::Compute(SMESH_Mesh&         
 
   case 1: return components[0];
 
-  default: return StdMeshers_ProxyMesh::Ptr( new StdMeshers_ProxyMesh( components ));
+  default: return SMESH_ProxyMesh::Ptr( new SMESH_ProxyMesh( components ));
   }
-  return StdMeshers_ProxyMesh::Ptr();
+  return SMESH_ProxyMesh::Ptr();
 } // --------------------------------------------------------------------------------
 std::ostream & StdMeshers_ViscousLayers::SaveTo(std::ostream & save)
 {
@@ -727,17 +749,17 @@ _ViscousBuilder::_ViscousBuilder()
  */
 //================================================================================
 
-bool _ViscousBuilder::error(const string& text, _SolidData* data )
+bool _ViscousBuilder::error(const string& text, int solidId )
 {
   _error->myName    = COMPERR_ALGO_FAILED;
   _error->myComment = string("Viscous layers builder: ") + text;
   if ( _mesh )
   {
-    if ( !data && !_sdVec.empty() )
-      data = & _sdVec[0];
-    if ( data )
+    SMESH_subMesh* sm = _mesh->GetSubMeshContaining( solidId );
+    if ( !sm && !_sdVec.empty() )
+      sm = _mesh->GetSubMeshContaining( _sdVec[0]._index );
+    if ( sm && sm->GetSubShape().ShapeType() == TopAbs_SOLID )
     {
-      SMESH_subMesh* sm = _mesh->GetSubMesh( data->_solid );
       SMESH_ComputeErrorPtr& smError = sm->GetComputeError();
       if ( smError && smError->myAlgo )
         _error->myAlgo = smError->myAlgo;
@@ -763,6 +785,45 @@ void _ViscousBuilder::RestoreListeners()
 
 //================================================================================
 /*!
+ * \brief computes SMESH_ProxyMesh::SubMesh::_n2n
+ */
+//================================================================================
+
+bool _ViscousBuilder::MakeN2NMap( _MeshOfSolid* pm )
+{
+  SMESH_subMesh* solidSM = pm->mySubMeshes.front();
+  TopExp_Explorer fExp( solidSM->GetSubShape(), TopAbs_FACE );
+  for ( ; fExp.More(); fExp.Next() )
+  {
+    SMESHDS_SubMesh* srcSmDS = pm->GetMeshDS()->MeshElements( fExp.Current() );
+    const SMESH_ProxyMesh::SubMesh* prxSmDS = pm->GetProxySubMesh( fExp.Current() );
+
+    if ( !srcSmDS || !prxSmDS || !srcSmDS->NbElements() || !prxSmDS->NbElements() )
+      continue;
+    if ( srcSmDS->GetElements()->next() == prxSmDS->GetElements()->next())
+      continue;
+
+    if ( srcSmDS->NbElements() != prxSmDS->NbElements() )
+      return error( "Different nb elements in a source and a proxy sub-mesh", solidSM->GetId());
+
+    SMDS_ElemIteratorPtr srcIt = srcSmDS->GetElements();
+    SMDS_ElemIteratorPtr prxIt = prxSmDS->GetElements();
+    while( prxIt->more() )
+    {
+      const SMDS_MeshElement* fSrc = srcIt->next();
+      const SMDS_MeshElement* fPrx = prxIt->next();
+      if ( fSrc->NbNodes() != fPrx->NbNodes())
+        return error( "Different elements in a source and a proxy sub-mesh", solidSM->GetId());
+      for ( int i = 0 ; i < fPrx->NbNodes(); ++i )
+        pm->setNode2Node( fSrc->GetNode(i), fPrx->GetNode(i), prxSmDS );
+    }
+  }
+  pm->_n2nMapComputed = true;
+  return true;
+}
+
+//================================================================================
+/*!
  * \brief Does its job
  */
 //================================================================================
@@ -770,7 +831,6 @@ void _ViscousBuilder::RestoreListeners()
 SMESH_ComputeErrorPtr _ViscousBuilder::Compute(SMESH_Mesh&         theMesh,
                                                const TopoDS_Shape& theShape)
 {
-  PyDump debugDump;
   // TODO: set priority of solids during Gen::Compute()
 
   _mesh = & theMesh;
@@ -778,10 +838,12 @@ SMESH_ComputeErrorPtr _ViscousBuilder::Compute(SMESH_Mesh&         theMesh,
   // check if proxy mesh already computed
   TopExp_Explorer exp( theShape, TopAbs_SOLID );
   if ( !exp.More() )
-    return error("No SOLID's in theShape", 0), _error;
+    return error("No SOLID's in theShape"), _error;
 
   if ( _ViscousListener::GetSolidMesh( _mesh, exp.Current(), /*toCreate=*/false))
     return SMESH_ComputeErrorPtr(); // everything already computed
+
+  PyDump debugDump;
 
   // TODO: ignore already computed SOLIDs 
   if ( !findSolidsWithLayers())
@@ -843,7 +905,7 @@ bool _ViscousBuilder::findSolidsWithLayers()
                                                                 allSolids(i),
                                                                 /*toCreate=*/true);
       _sdVec.push_back( _SolidData( allSolids(i), viscHyp, proxyMesh ));
-      _sdVec.back()._index = _sdVec.size()-1; // debug
+      _sdVec.back()._index = getMeshDS()->ShapeToIndex( allSolids(i));
     }
   }
   if ( _sdVec.empty() )
@@ -1024,7 +1086,7 @@ bool _ViscousBuilder::findFacesWithLayers()
           break;
         }
       default:
-        return error("Not yet supported case", &_sdVec[i]);
+        return error("Not yet supported case", _sdVec[i]._index);
       }
     }
   }
@@ -1096,10 +1158,10 @@ bool _ViscousBuilder::makeLayer(_SolidData& data)
   for ( set<TGeomID>::iterator id = faceIds.begin(); id != faceIds.end(); ++id )
   {
     SMESHDS_SubMesh* smDS = getMeshDS()->MeshElements( *id );
-    if ( !smDS ) return error(SMESH_Comment("Not meshed face ") << *id, &data );
+    if ( !smDS ) return error(SMESH_Comment("Not meshed face ") << *id, data._index );
 
     const TopoDS_Face& F = TopoDS::Face( getMeshDS()->IndexToShape( *id ));
-    StdMeshers_ProxyMesh::SubMesh* proxySub =
+    SMESH_ProxyMesh::SubMesh* proxySub =
       data._proxyMesh->getFaceSubM( F, /*create=*/true);
 
     SMDS_ElemIteratorPtr eIt = smDS->GetElements();
@@ -1178,7 +1240,7 @@ bool _ViscousBuilder::makeLayer(_SolidData& data)
           break; // _LayerEdge is shared by two _SolidData's
         const SMDS_MeshNode* & n = data._edges[i]->_2neibors->_nodes[j];
         if (( n2e = data._n2eMap.find( n )) == data._n2eMap.end() )
-          return error("_LayerEdge not found by src node", &data);
+          return error("_LayerEdge not found by src node", data._index);
         n = (*n2e).second->_nodes.back();
         data._edges[i]->_2neibors->_edges[j] = n2e->second;
       }
@@ -1467,7 +1529,7 @@ bool _ViscousBuilder::setEdgeData(_LayerEdge&         edge,
       edge._normal += geomNorm.XYZ();
     }
     if ( totalNbFaces == 0 )
-      return error(SMESH_Comment("Can't get normal to node ") << node->GetID(), &data);
+      return error(SMESH_Comment("Can't get normal to node ") << node->GetID(), data._index);
 
     edge._normal /= totalNbFaces;
 
@@ -1493,13 +1555,13 @@ bool _ViscousBuilder::setEdgeData(_LayerEdge&         edge,
       break;
     }
     default:
-      return error(SMESH_Comment("Invalid shape position of node ")<<node,&data);
+      return error(SMESH_Comment("Invalid shape position of node ")<<node, data._index);
     }
   }
 
   double normSize = edge._normal.SquareModulus();
   if ( normSize < numeric_limits<double>::min() )
-    return error(SMESH_Comment("Bad normal at node ")<< node->GetID(), &data );
+    return error(SMESH_Comment("Bad normal at node ")<< node->GetID(), data._index );
 
   edge._normal /= sqrt( normSize );
 
@@ -1590,7 +1652,7 @@ bool _ViscousBuilder::findNeiborsOnEdge(const _LayerEdge*     edge,
     
     edgeSM = getMeshDS()->MeshElements( shapeInd );
     if ( !edgeSM || edgeSM->NbElements() == 0 )
-      return error(SMESH_Comment("Not meshed EDGE ") << shapeInd, &data);
+      return error(SMESH_Comment("Not meshed EDGE ") << shapeInd, data._index);
   }
   int iN = 0;
   n2 = 0;
@@ -1612,7 +1674,7 @@ bool _ViscousBuilder::findNeiborsOnEdge(const _LayerEdge*     edge,
     ( iN++ ? n2 : n1 ) = nNeibor;
   }
   if ( !n2 )
-    return error(SMESH_Comment("Wrongly meshed EDGE ") << shapeInd, &data);
+    return error(SMESH_Comment("Wrongly meshed EDGE ") << shapeInd, data._index);
   return true;
 }
 
@@ -1909,7 +1971,7 @@ bool _ViscousBuilder::inflate(_SolidData& data)
   }
 
   if (nbSteps == 0 )
-    return error("failed at the very first inflation step", &data);
+    return error("failed at the very first inflation step", data._index);
 
   return true;
 }
@@ -2087,7 +2149,7 @@ bool _ViscousBuilder::updateNormals( _SolidData&         data,
 //             neiborEdge = data._edges[i-di];
 //         }
 //         if ( !neiborEdge )
-//           return error("updateNormals(): neighbor _LayerEdge not found", &data);
+//           return error("updateNormals(): neighbor _LayerEdge not found", data._index);
         _LayerEdge* neiborEdge = edge->_2neibors->_edges[j];
 
         TmpMeshFaceOnEdge* f = new TmpMeshFaceOnEdge( edge, neiborEdge, --_tmpFaceID );
@@ -2876,6 +2938,8 @@ bool _ViscousBuilder::refine(_SolidData& data)
 
   // TODO: make quadratic prisms and polyhedrons(?)
 
+  helper.SetElementsOnShape(true);
+
   TopExp_Explorer exp( data._solid, TopAbs_FACE );
   for ( ; exp.More(); exp.Next() )
   {
@@ -2912,7 +2976,7 @@ bool _ViscousBuilder::refine(_SolidData& data)
                             (*nnVec[2])[iZ],   (*nnVec[3])[iZ]);
         break;
       default:
-        return error("Not supported type of element", &data);
+        return error("Not supported type of element", data._index);
       }
     }
   }
@@ -2946,7 +3010,7 @@ bool _ViscousBuilder::shrink()
           // by StdMeshers_QuadToTriaAdaptor
           if ( SMESHDS_SubMesh* smDS = getMeshDS()->MeshElements( s2s->second ))
           {
-            StdMeshers_ProxyMesh::SubMesh* proxySub =
+            SMESH_ProxyMesh::SubMesh* proxySub =
               data._proxyMesh->getFaceSubM( TopoDS::Face( s2s->second ), /*create=*/true);
             SMDS_ElemIteratorPtr fIt = smDS->GetElements();
             while ( fIt->more() )
@@ -3132,7 +3196,7 @@ bool _ViscousBuilder::shrink()
         dumpFunctionEnd();
       }
       if ( badNb > 0 )
-        return error(SMESH_Comment("Can't shrink 2D mesh on face ") << f2sd->first, 0 );
+        return error(SMESH_Comment("Can't shrink 2D mesh on face ") << f2sd->first );
     }
     // No wrongly shaped faces remain; final smooth. Set node XYZ
     for ( int st = 3; st; --st )
@@ -3240,7 +3304,7 @@ bool _ViscousBuilder::prepareEdgeToShrink( _LayerEdge&            edge,
     TopoDS_Edge E = TopoDS::Edge( edge._sWOL);
     SMESHDS_SubMesh* edgeSM = getMeshDS()->MeshElements( E );
     if ( !edgeSM || edgeSM->NbElements() == 0 )
-      return error(SMESH_Comment("Not meshed EDGE ") << getMeshDS()->ShapeToIndex( E ), 0);
+      return error(SMESH_Comment("Not meshed EDGE ") << getMeshDS()->ShapeToIndex( E ));
 
     const SMDS_MeshNode* n2 = 0;
     SMDS_ElemIteratorPtr eIt = srcNode->GetInverseElementIterator(SMDSAbs_Edge);
@@ -3252,7 +3316,7 @@ bool _ViscousBuilder::prepareEdgeToShrink( _LayerEdge&            edge,
       if ( n2 == srcNode ) n2 = e->GetNode( 1 );
     }
     if ( !n2 )
-      return error(SMESH_Comment("Wrongly meshed EDGE ") << getMeshDS()->ShapeToIndex( E ), 0);
+      return error(SMESH_Comment("Wrongly meshed EDGE ") << getMeshDS()->ShapeToIndex( E ));
 
     double uSrc = helper.GetNodeU( E, srcNode, n2 );
     double uTgt = helper.GetNodeU( E, tgtNode, srcNode );
@@ -3768,7 +3832,7 @@ bool _ViscousBuilder::addBoundaryElements()
       else
         sm = data._proxyMesh->getFaceSubM( TopoDS::Face(F), /*create=*/true );
       if ( !sm )
-        return error("error in addBoundaryElements()", &data);
+        return error("error in addBoundaryElements()", data._index);
 
       // Make faces
       const int dj1 = reverse ? 0 : 1;

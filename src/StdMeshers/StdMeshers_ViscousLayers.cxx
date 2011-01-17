@@ -64,7 +64,7 @@
 #include <string>
 #include <math.h>
 
-#define __myDEBUG
+//#define __myDEBUG
 
 using namespace std;
 
@@ -722,10 +722,11 @@ namespace
   void dumpFunctionEnd()
   { *py<< "  return"<< endl; }
 #else
-  struct PyDump {};
+  struct PyDump { PyDump() {} };
   void dumpFunction(const string& fun ){}
   void dumpFunctionEnd() {}
   void dumpMove(const SMDS_MeshNode* n ){}
+  void dumpCmd(const string& txt){}
 #endif
 }
 

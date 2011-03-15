@@ -482,7 +482,7 @@ SALOME_MED::FAMILY_ptr SMESH_subMesh_i::GetFamily()
   throw (SALOME::SALOME_Exception)
 {
   Unexpect aCatch(SALOME_SalomeException);
-  SALOME_MED::MESH_var MEDMesh = GetFather()->GetMEDMesh();
+  SALOME_MED::GMESH_var MEDMesh = GetFather()->GetMEDMesh();
 
   SALOME_MED::Family_array_var families = 
     MEDMesh->getFamilies(SALOME_MED::MED_NODE);

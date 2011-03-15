@@ -82,13 +82,18 @@ public:
   void setProtocol(SALOME::TypeOfCommunication typ) {}
   void release() {}
   SALOME::SenderDouble_ptr getSenderForCoordinates(SALOME_MED::medModeSwitch) {return SALOME::SenderDouble::_nil();}
-  SALOME::SenderInt_ptr getSenderForConnectivity(SALOME_MED::medModeSwitch, 
-                                                 SALOME_MED::medConnectivity, 
+  SALOME::SenderInt_ptr getSenderForConnectivity(SALOME_MED::medConnectivity, 
                                                  SALOME_MED::medEntityMesh, 
                                                  SALOME_MED::medGeometryElement) 
   {
     return SALOME::SenderInt::_nil();
-  }
+  }  
+  SALOME::SenderInt_ptr getSenderForConnectivityIndex(SALOME_MED::medConnectivity,
+                                                      SALOME_MED::medEntityMesh,
+                                                      SALOME_MED::medGeometryElement)
+  {
+    return SALOME::SenderInt::_nil();
+  }  
   SALOME::SenderInt_ptr getSenderForPolygonsConnectivity(SALOME_MED::medConnectivity, SALOME_MED::medEntityMesh) {return SALOME::SenderInt::_nil();}
   SALOME::SenderInt_ptr getSenderForPolygonsConnectivityIndex(SALOME_MED::medConnectivity, SALOME_MED::medEntityMesh) {return SALOME::SenderInt::_nil();}
   SALOME::SenderInt_ptr getSenderForPolyhedronConnectivity(SALOME_MED::medConnectivity) {return SALOME::SenderInt::_nil();}
@@ -142,6 +147,12 @@ public:
   SALOME_TYPES::ListOfLong *
   getConnectivity(SALOME_MED::medModeSwitch typeSwitch,
                   SALOME_MED::medConnectivity mode,
+                  SALOME_MED::medEntityMesh entity,
+                  SALOME_MED::medGeometryElement geomElement)
+    throw(SALOME::SALOME_Exception);
+  
+  SALOME_TYPES::ListOfLong *
+  getConnectivity(SALOME_MED::medConnectivity mode,
                   SALOME_MED::medEntityMesh entity,
                   SALOME_MED::medGeometryElement geomElement)
     throw(SALOME::SALOME_Exception);
@@ -222,7 +233,7 @@ public:
   
   // Others
   void addInStudy(SALOMEDS::Study_ptr myStudy,
-                  SALOME_MED::MESH_ptr myIor) 
+                  SALOME_MED::GMESH_ptr myIor) 
     throw(SALOME::SALOME_Exception);
   CORBA::Long addDriver(SALOME_MED::medDriverTypes driverType,
                         const char *fileName, const char *meshName)
@@ -236,12 +247,14 @@ public:
   CORBA::Long getCorbaIndex() 
     throw(SALOME::SALOME_Exception);
   
-  SALOME_MED::MESH::meshInfos * getMeshGlobal()
+  SALOME_MED::GMESH::meshInfos * getMeshGlobal()
     throw (SALOME::SALOME_Exception);
   
-  bool areEquals(SALOME_MED::MESH_ptr other) { return false;};
+  bool areEquals(SALOME_MED::GMESH_ptr other) { return false;};
   
-  SALOME_MED::MESH::coordinateInfos * getCoordGlobal()
+  SALOME_MED::MESH_ptr convertInMESH() throw (SALOME::SALOME_Exception);
+  
+  SALOME_MED::GMESH::coordinateInfos * getCoordGlobal()
     throw (SALOME::SALOME_Exception);
   
   SALOME_MED::MESH::connectivityInfos *

@@ -542,6 +542,22 @@ SMESH_MEDMesh_i::getConnectivity(SALOME_MED::medModeSwitch typeSwitch,
  */
 //=============================================================================
 SALOME_TYPES::ListOfLong *
+SMESH_MEDMesh_i::getConnectivity(SALOME_MED::medConnectivity mode,
+                                 SALOME_MED::medEntityMesh entity,
+                                 SALOME_MED::medGeometryElement geomElement)
+  throw(SALOME::SALOME_Exception)
+{
+  MESSAGE("Pas Implemente dans SMESH");
+  THROW_SALOME_CORBA_EXCEPTION("Unimplemented Method", SALOME::BAD_PARAM);
+  return 0;
+}
+
+//=============================================================================
+/*!
+ * CORBA: Accessor for connectivities
+ */
+//=============================================================================
+SALOME_TYPES::ListOfLong *
 SMESH_MEDMesh_i::getConnectivityIndex(SALOME_MED::medConnectivity mode,
                                       SALOME_MED::medEntityMesh entity)
   throw(SALOME::SALOME_Exception)

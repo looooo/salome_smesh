@@ -510,8 +510,7 @@ CORBA::Long SMESH_MEDMesh_i::getNumberOfElements(SALOME_MED::
  */
 //=============================================================================
 SALOME_TYPES::ListOfLong *
-SMESH_MEDMesh_i::getConnectivity(SALOME_MED::medModeSwitch typeSwitch,
-                                 SALOME_MED::medConnectivity mode,
+SMESH_MEDMesh_i::getConnectivity(SALOME_MED::medConnectivity mode,
                                  SALOME_MED::medEntityMesh entity,
                                  SALOME_MED::medGeometryElement geomElement)
   throw(SALOME::SALOME_Exception)
@@ -521,8 +520,8 @@ SMESH_MEDMesh_i::getConnectivity(SALOME_MED::medModeSwitch typeSwitch,
                                  SALOME::INTERNAL_ERROR);
   if (mode != SALOME_MED::MED_NODAL)
     THROW_SALOME_CORBA_EXCEPTION("Not Implemented", SALOME::BAD_PARAM);
-  if (typeSwitch == SALOME_MED::MED_NO_INTERLACE)
-    THROW_SALOME_CORBA_EXCEPTION("Not Yet Implemented", SALOME::BAD_PARAM);
+  /*if (typeSwitch == SALOME_MED::MED_NO_INTERLACE)
+    THROW_SALOME_CORBA_EXCEPTION("Not Yet Implemented", SALOME::BAD_PARAM);*/
   if (!_compte)
     calculeNbElts();
 
@@ -534,22 +533,6 @@ SMESH_MEDMesh_i::getConnectivity(SALOME_MED::medModeSwitch typeSwitch,
   int index = _mapIndToSeqElts[geomElement];
 
   return _seq_elemId[index]._retn();
-}
-
-//=============================================================================
-/*!
- * CORBA: Accessor for connectivities
- */
-//=============================================================================
-SALOME_TYPES::ListOfLong *
-SMESH_MEDMesh_i::getConnectivity(SALOME_MED::medConnectivity mode,
-                                 SALOME_MED::medEntityMesh entity,
-                                 SALOME_MED::medGeometryElement geomElement)
-  throw(SALOME::SALOME_Exception)
-{
-  MESSAGE("Pas Implemente dans SMESH");
-  THROW_SALOME_CORBA_EXCEPTION("Unimplemented Method", SALOME::BAD_PARAM);
-  return 0;
 }
 
 //=============================================================================

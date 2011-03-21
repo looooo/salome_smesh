@@ -145,13 +145,6 @@ public:
     throw(SALOME::SALOME_Exception);
   
   SALOME_TYPES::ListOfLong *
-  getConnectivity(SALOME_MED::medModeSwitch typeSwitch,
-                  SALOME_MED::medConnectivity mode,
-                  SALOME_MED::medEntityMesh entity,
-                  SALOME_MED::medGeometryElement geomElement)
-    throw(SALOME::SALOME_Exception);
-  
-  SALOME_TYPES::ListOfLong *
   getConnectivity(SALOME_MED::medConnectivity mode,
                   SALOME_MED::medEntityMesh entity,
                   SALOME_MED::medGeometryElement geomElement)

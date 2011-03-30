@@ -411,6 +411,7 @@ public:
 
   virtual Engines::TMPFile* DumpPython(CORBA::Object_ptr theStudy,
                                        CORBA::Boolean isPublished,
+				       CORBA::Boolean isMulti,
                                        CORBA::Boolean& isValidScript);
 
   void AddToPythonScript (int theStudyID, const TCollection_AsciiString& theString);

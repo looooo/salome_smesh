@@ -488,6 +488,7 @@ namespace SMESH
 //=======================================================================
 Engines::TMPFile* SMESH_Gen_i::DumpPython (CORBA::Object_ptr theStudy,
                                            CORBA::Boolean isPublished,
+					   CORBA::Boolean isMulti,
                                            CORBA::Boolean& isValidScript)
 {
   SALOMEDS::Study_var aStudy = SALOMEDS::Study::_narrow(theStudy);

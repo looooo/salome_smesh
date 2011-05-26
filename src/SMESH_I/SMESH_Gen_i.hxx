@@ -462,6 +462,7 @@ public:
   static long GetEdgeGroupsTag();
   static long GetFaceGroupsTag();
   static long GetVolumeGroupsTag();
+  static long Get0DElementsGroupsTag();
 
   // publishing methods
   SALOMEDS::SComponent_ptr PublishComponent(SALOMEDS::Study_ptr theStudy);

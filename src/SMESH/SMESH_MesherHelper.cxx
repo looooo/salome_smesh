@@ -3302,3 +3302,4 @@ void SMESH_MesherHelper::FixQuadraticElements(bool volumeOnly)
     }
   }
 }
+

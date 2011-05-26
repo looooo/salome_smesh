@@ -3139,7 +3139,7 @@ SALOMEDS::TMPFile* SMESH_Gen_i::Save( SALOMEDS::SComponent_ptr theComponent,
 
             // groups root sub-branch
             SALOMEDS::SObject_var myGroupsBranch;
-            for ( int i = GetNodeGroupsTag(); i <= GetVolumeGroupsTag(); i++ ) {
+            for ( int i = GetNodeGroupsTag(); i <= Get0DElementsGroupsTag(); i++ ) {
               found = gotBranch->FindSubObject( i, myGroupsBranch );
               if ( found ) {
                 char name_group[ 30 ];
@@ -3151,6 +3151,8 @@ SALOMEDS::TMPFile* SMESH_Gen_i::Save( SALOMEDS::SComponent_ptr theComponent,
                   strcpy( name_group, "Groups of Faces" );
                 else if ( i == GetVolumeGroupsTag() )
                   strcpy( name_group, "Groups of Volumes" );
+                else if ( i == Get0DElementsGroupsTag() )
+                  strcpy( name_group, "Groups of 0D Elements" );
 
                 aGroup = new HDFgroup( name_group, aTopGroup );
                 aGroup->CreateOnDisk();
@@ -3980,7 +3982,8 @@ bool SMESH_Gen_i::Load( SALOMEDS::SComponent_ptr theComponent,
         }
       }
 
-      // try to get applied algorithms
+      // Try to get applied ALGORITHMS (mesh is not cleared by algo addition because
+      // nodes and elements are not yet put into sub-meshes)
       if ( aTopGroup->ExistInternalObject( "Applied Algorithms" ) ) {
         aGroup = new HDFgroup( "Applied Algorithms", aTopGroup );
         aGroup->OpenOnDisk();
@@ -4128,21 +4131,6 @@ bool SMESH_Gen_i::Load( SALOMEDS::SComponent_ptr theComponent,
               if ( aSubMesh->_is_nil() )
                 continue;
 
-              // VSR: Get submesh data from MED convertor
-              //                  int anInternalSubmeshId = aSubMesh->GetId(); // this is not a persistent ID, it's an internal one computed from sub-shape
-              //                  if (myNewMeshImpl->_mapSubMesh.find(anInternalSubmeshId) != myNewMeshImpl->_mapSubMesh.end()) {
-              //                    if(MYDEBUG) MESSAGE("VSR - SMESH_Gen_i::Load(): loading from MED file submesh with ID = " <<
-              //                            subid << " for subshape # " << anInternalSubmeshId);
-              //                    SMESHDS_SubMesh* aSubMeshDS =
-              //                      myNewMeshImpl->_mapSubMesh[anInternalSubmeshId]->CreateSubMeshDS();
-              //                    if ( !aSubMeshDS ) {
-              //                      if(MYDEBUG) MESSAGE("VSR - SMESH_Gen_i::Load(): FAILED to create a submesh for subshape # " <<
-              //                              anInternalSubmeshId << " in current mesh!");
-              //                    }
-              //                    else
-              //                      myReader.GetSubMesh( aSubMeshDS, subid );
-              //                  }
-
               // try to get applied algorithms
               if ( aSubGroup->ExistInternalObject( "Applied Algorithms" ) ) {
                 // open "applied algorithms" HDF group
@@ -4162,8 +4150,6 @@ bool SMESH_Gen_i::Load( SALOMEDS::SComponent_ptr theComponent,
                     aDataset->ReadFromDisk( refFromFile );
                     aDataset->CloseOnDisk();
 
-                    //SALOMEDS::SObject_var hypSO = myCurrentStudy->FindObjectID( refFromFile );
-                    //CORBA::Object_var hypObject = SObjectToObject( hypSO );
                     int id = atoi( refFromFile );
                     string anIOR = myStudyContext->getIORbyOldId( id );
                     if ( !anIOR.empty() ) {
@@ -4199,8 +4185,6 @@ bool SMESH_Gen_i::Load( SALOMEDS::SComponent_ptr theComponent,
                     aDataset->ReadFromDisk( refFromFile );
                     aDataset->CloseOnDisk();
 
-                    //SALOMEDS::SObject_var hypSO = myCurrentStudy->FindObjectID( refFromFile );
-                    //CORBA::Object_var hypObject = SObjectToObject( hypSO );
                     int id = atoi( refFromFile );
                     string anIOR = myStudyContext->getIORbyOldId( id );
                     if ( !anIOR.empty() ) {
@@ -4228,11 +4212,11 @@ bool SMESH_Gen_i::Load( SALOMEDS::SComponent_ptr theComponent,
 
       if(hasData) {
 
-        // Read sub-meshes from MED
-        // -------------------------
+        // Read sub-meshes
+        // ----------------
         if(MYDEBUG) MESSAGE("Create all sub-meshes");
         bool submeshesInFamilies = ( ! aTopGroup->ExistInternalObject( "Submeshes" ));
-        if ( submeshesInFamilies )
+        if ( submeshesInFamilies ) // from MED
         {
           // old way working before fix of PAL 12992
           myReader.CreateAllSubMeshes();
@@ -4431,7 +4415,7 @@ bool SMESH_Gen_i::Load( SALOMEDS::SComponent_ptr theComponent,
       } // if ( hasData )
 
       // try to get groups
-      for ( int ii = GetNodeGroupsTag(); ii <= GetVolumeGroupsTag(); ii++ ) {
+      for ( int ii = GetNodeGroupsTag(); ii <= Get0DElementsGroupsTag(); ii++ ) {
         char name_group[ 30 ];
         if ( ii == GetNodeGroupsTag() )
           strcpy( name_group, "Groups of Nodes" );
@@ -4441,6 +4425,8 @@ bool SMESH_Gen_i::Load( SALOMEDS::SComponent_ptr theComponent,
           strcpy( name_group, "Groups of Faces" );
         else if ( ii == GetVolumeGroupsTag() )
           strcpy( name_group, "Groups of Volumes" );
+        else if ( ii == Get0DElementsGroupsTag() )
+          strcpy( name_group, "Groups of 0D Elements" );
 
         if ( aTopGroup->ExistInternalObject( name_group ) ) {
           aGroup = new HDFgroup( name_group, aTopGroup );

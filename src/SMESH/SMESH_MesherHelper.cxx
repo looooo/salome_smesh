@@ -40,7 +40,7 @@
 #include <GeomAPI_ProjectPointOnCurve.hxx>
 #include <GeomAPI_ProjectPointOnSurf.hxx>
 #include <Geom_Curve.hxx>
-//#include <Geom_RectangularTrimmedSurface.hxx>
+#include <Geom_RectangularTrimmedSurface.hxx>
 #include <Geom_Surface.hxx>
 #include <ShapeAnalysis.hxx>
 #include <TopExp.hxx>
@@ -735,7 +735,14 @@ gp_XY SMESH_MesherHelper::GetMiddleUV(const Handle(Geom_Surface)& surface,
                                       const gp_XY&                p1,
                                       const gp_XY&                p2)
 {
-  return applyIn2D( surface, p1, p2, & AverageUV );
+  // NOTE:
+  // the proper place of getting basic surface seems to be in applyIn2D()
+  // but we put it here to decrease a risk of regressions just before releasing a version
+  Handle(Geom_Surface) surf = surface;
+  while ( !surf.IsNull() && surf->IsKind(STANDARD_TYPE(Geom_RectangularTrimmedSurface )))
+    surf = Handle(Geom_RectangularTrimmedSurface)::DownCast( surf )->BasisSurface();
+
+  return applyIn2D( surf, p1, p2, & AverageUV );
 }
 
 //=======================================================================

@@ -2445,6 +2445,8 @@ SMESH::SMESH_Mesh_ptr SMESH_Gen_i::CopyMesh(SMESH::SMESH_IDSource_ptr meshPart,
     }
   }
 
+  newMeshDS->Modified();
+
   *pyDump << newMesh << " = " << this
           << ".CopyMesh( " << meshPart << ", "
           << "'" << meshName << "', "

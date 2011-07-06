@@ -61,6 +61,14 @@
 #include <TopoDS_Shape.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
 
+//To avoid replacing of the min from std by windows macros defined in the WinDef.h 
+#ifdef WIN32
+	#define MIN(a,b) (std::min)(a,b)
+#else
+	#define MIN(a,b) std::min(a,b)
+#endif
+
+
 using namespace SMESH;
 using namespace SMESH::Controls;
 
@@ -604,7 +612,7 @@ SMESH::Histogram* NumericalFunctor_i::GetHistogram(CORBA::Short nbIntervals)
   std::vector<int> elements;
   myNumericalFunctorPtr->GetHistogram(nbIntervals,nbEvents,funValues,elements);
 
-  nbIntervals = CORBA::Short( std::min( nbEvents.size(), funValues.size() - 1));
+  nbIntervals = CORBA::Short(MIN( nbEvents.size(), funValues.size() - 1));
   SMESH::Histogram_var histogram = new SMESH::Histogram;
   if ( nbIntervals > 0 )
   {

@@ -3319,6 +3319,8 @@ SALOMEDS::TMPFile* SMESH_Gen_i::Save( SALOMEDS::SComponent_ptr theComponent,
                   delete[] smIDs;
                 }
 
+                aGroup->CloseOnDisk();
+
                 // Store node positions on sub-shapes (SMDS_Position):
                 // ----------------------------------------------------
 

@@ -222,6 +222,11 @@ public:
                  int theVersion = 0) 
     throw(SALOME_Exception);
 
+  void ExportSAUV(const char *file, 
+                  const char* theMeshName = NULL, 
+                  bool theAutoGroups = true)
+    throw(SALOME_Exception);
+
   void ExportDAT(const char *file) throw(SALOME_Exception);
   void ExportUNV(const char *file) throw(SALOME_Exception);
   void ExportSTL(const char *file, const bool isascii) throw(SALOME_Exception);

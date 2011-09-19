@@ -207,11 +207,16 @@ public:
    */
   char* GetVersionString(SMESH::MED_VERSION version, CORBA::Short nbDigits);
 
+  const char* PrepareMeshNameAndGroups( const char* file, CORBA::Boolean overwrite );
+
   void ExportToMEDX( const char* file, CORBA::Boolean auto_groups, SMESH::MED_VERSION theVersion, CORBA::Boolean overwrite )
     throw (SALOME::SALOME_Exception);
   void ExportToMED( const char* file, CORBA::Boolean auto_groups, SMESH::MED_VERSION theVersion )
     throw (SALOME::SALOME_Exception);
   void ExportMED( const char* file, CORBA::Boolean auto_groups )
+    throw (SALOME::SALOME_Exception);
+
+  void ExportSAUV( const char* file, CORBA::Boolean auto_groups )
     throw (SALOME::SALOME_Exception);
 
   void ExportDAT( const char* file )

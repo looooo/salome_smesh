@@ -197,6 +197,10 @@
     else if ( theCommandID == 111 ) {
       filter.append( QObject::tr( "DAT_FILES_FILTER" ) + " (*.dat)" );
     }
+    else if ( theCommandID == 115 ) {
+      filter.append( QObject::tr( "SAUV files (*.sauv*)" ) );
+      filter.append( QObject::tr( "All files (*)" ) );
+    }
     else if ( theCommandID == 140 ) {
       filter.append( QObject::tr( "STL_ASCII_FILES_FILTER" ) + " (*.stl)" );
     }
@@ -243,6 +247,17 @@
               // MED format
               SMESH::DriverMED_ReadStatus res;
               aMeshes = theComponentMesh->CreateMeshesFromMED( filename.toLatin1().constData(), res );
+              if ( res != SMESH::DRS_OK ) {
+                errors.append( QString( "%1 :\n\t%2" ).arg( filename ).
+                               arg( QObject::tr( QString( "SMESH_DRS_%1" ).arg( res ).toLatin1().data() ) ) );
+              }
+              break;
+            }
+          case 115:
+            {
+              // SAUV format
+              SMESH::DriverMED_ReadStatus res;
+              aMeshes = theComponentMesh->CreateMeshesFromSAUV( filename.toLatin1().constData(), res );
               if ( res != SMESH::DRS_OK ) {
                 errors.append( QString( "%1 :\n\t%2" ).arg( filename ).
                                arg( QObject::tr( QString( "SMESH_DRS_%1" ).arg( res ).toLatin1().data() ) ) );
@@ -376,6 +391,8 @@
     switch ( theCommandID ) {
     case 125:
     case 122:
+    case 142:
+    case 143:
       {
         for( aMeshIter = aMeshList.begin(); aMeshIter != aMeshList.end(); aMeshIter++ ) {
           SMESH::SMESH_Mesh_var aMeshItem = (*aMeshIter).first;
@@ -390,11 +407,26 @@
               return;
           }
         }
-        // PAL18696
-        //QString v21 (aMesh->GetVersionString(SMESH::MED_V2_1, 2));
-        QString v22 (aMesh->GetVersionString(SMESH::MED_V2_2, 2));
-        //aFilterMap.insert( QObject::tr( "MED_VX_FILES_FILTER" ).arg( v21 ) + " (*.med)", SMESH::MED_V2_1 );
-        aFilterMap.insert( QObject::tr( "MED_VX_FILES_FILTER" ).arg( v22 ) + " (*.med)", SMESH::MED_V2_2 );
+	switch ( theCommandID ) {
+        case 125:
+        case 122:
+          {
+            // PAL18696
+            QString v21 (aMesh->GetVersionString(SMESH::MED_V2_1, 2));
+            QString v22 (aMesh->GetVersionString(SMESH::MED_V2_2, 2));
+            aFilterMap.insert( QString("MED ") +  v21 + " (*.med)", SMESH::MED_V2_1 );
+            aFilterMap.insert( QString("MED ") +  v22 + " (*.med)", SMESH::MED_V2_2 );
+          }
+          break;
+	case 142:
+	case 143:
+	  {
+	    aFilterMap.insert("All files (*)", SMESH::MED_V2_1 );
+	    aFilterMap.insert("SAUV files (*.sauv)", SMESH::MED_V2_2 );
+	    aFilterMap.insert("SAUV files (*.sauve)", SMESH::MED_V2_1 );
+	  }
+	  break;
+        }
       }
       break;
     case 124:
@@ -463,7 +495,7 @@
     if ( SUIT_FileDlg::getLastVisitedPath().isEmpty() )
       anInitialPath = QDir::currentPath();
 
-    if ( theCommandID != 122 && theCommandID != 125 && theCommandID != 141) {
+    if ( theCommandID != 122 && theCommandID != 125 && theCommandID != 141 && theCommandID != 142 && theCommandID != 143) {
       if ( anInitialPath.isEmpty() ) anInitialPath = SUIT_FileDlg::getLastVisitedPath();
       aFilename = SUIT_FileDlg::getFileName(SMESHGUI::desktop(), anInitialPath + QString("/") + aMeshName,
                                             aFilter, aTitle, false);
@@ -616,6 +648,15 @@
               SMESH::SMESH_Mesh_var aMeshItem = (*aMeshIter).first;
               if( !aMeshItem->_is_nil() )
                 aMeshItem->ExportToMEDX( aFilename.toLatin1().data(), toCreateGroups, aFormat, toOverwrite && aMeshIndex == 0 );
+            }
+          }
+          break;
+        case 142:
+        case 143: {
+            for( aMeshIter = aMeshList.begin(); aMeshIter != aMeshList.end(); aMeshIter++ ) {
+              SMESH::SMESH_Mesh_var aMeshItem = (*aMeshIter).first;
+              if( !aMeshItem->_is_nil() )
+                aMeshItem->ExportSAUV( aFilename.toLatin1().data(), toCreateGroups );
             }
           }
           break;
@@ -1880,6 +1921,7 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
   case 113:                                     // IMPORT
   case 112:
   case 111:
+  case 115:
   case 140:
     {
       if(checkLock(aStudy)) break;
@@ -1913,6 +1955,8 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
   case 125:
   case 126:
   case 141:
+  case 142:
+  case 143:
     {
       ::ExportMeshToFile(theCommandID);
       break;
@@ -3260,14 +3304,17 @@ void SMESHGUI::initialize( CAM_Application* app )
   createSMESHAction(  112, "UNV", "", (Qt::CTRL+Qt::Key_U) );
   createSMESHAction(  113, "MED", "", (Qt::CTRL+Qt::Key_M) );
   createSMESHAction(  114, "NUM" );
+  createSMESHAction(  115, "SAUV" );
   createSMESHAction(  121, "DAT" );
   createSMESHAction(  122, "MED" );
   createSMESHAction(  123, "UNV" );
   createSMESHAction(  140, "STL" );
+  createSMESHAction(  142, "SAUV" );
   createSMESHAction(  124, "EXPORT_DAT" );
   createSMESHAction(  125, "EXPORT_MED" );
   createSMESHAction(  126, "EXPORT_UNV" );
   createSMESHAction(  141, "EXPORT_STL" );
+  createSMESHAction(  143, "EXPORT_SAUV" );
   createSMESHAction(  150, "FILE_INFO" );
   createSMESHAction(   33, "DELETE",          "ICON_DELETE", Qt::Key_Delete );
   createSMESHAction( 5105, "SEL_FILTER_LIB" );
@@ -3430,12 +3477,14 @@ void SMESHGUI::initialize( CAM_Application* app )
   createMenu( 111, importId, -1 );
   createMenu( 112, importId, -1 );
   createMenu( 113, importId, -1 );
+  createMenu( 115, importId, -1 );
   createMenu( 140, importId, -1 );
 
   createMenu( 121, exportId, -1 );
   createMenu( 122, exportId, -1 );
   createMenu( 123, exportId, -1 );
   createMenu( 141, exportId, -1 ); // export to stl STL
+  createMenu( 142, exportId, -1 );
 
   createMenu( separator(), fileId, 10 );
 
@@ -3738,6 +3787,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   createPopupItem( 125, OB, mesh, multiple_non_empty );   // EXPORT_MED
   createPopupItem( 126, OB, mesh, only_one_non_empty );   // EXPORT_UNV
   createPopupItem( 141, OB, mesh, only_one_non_empty );   // EXPORT_STL
+  createPopupItem( 143, OB, mesh, only_one_non_empty );   // EXPORT_SAUV
   //createPopupItem( 33, OB, subMesh + " " + group );       // DELETE
   createPopupItem(  33, OB, mesh_group + " " + hyp_alg ); // DELETE
   popupMgr()->insert( separator(), -1, 0 );

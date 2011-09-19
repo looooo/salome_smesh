@@ -230,6 +230,11 @@ public:
                                           SMESH::DriverMED_ReadStatus& theStatus )
     throw ( SALOME::SALOME_Exception );
 
+  //  Create mesh(es) and import data from MED file
+  SMESH::mesh_array* CreateMeshesFromSAUV( const char* theFileName,
+                                           SMESH::DriverMED_ReadStatus& theStatus )
+    throw ( SALOME::SALOME_Exception );
+
   //  Create mesh(es) and import data from STL file
   SMESH::SMESH_Mesh_ptr CreateMeshesFromSTL( const char* theFileName )
     throw ( SALOME::SALOME_Exception );
@@ -544,6 +549,11 @@ private:
     throw ( SALOME::SALOME_Exception );
 
   static void loadGeomData( SALOMEDS::SComponent_ptr theCompRoot );
+
+  SMESH::mesh_array* CreateMeshesFromMEDorSAUV( const char* theFileName,
+                                                SMESH::DriverMED_ReadStatus& theStatus,
+                                                const char* theCommandNameForPython,
+                                                const char* theFileNameForPython);
 
 private:
   static GEOM::GEOM_Gen_var      myGeomGen;

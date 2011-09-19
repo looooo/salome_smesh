@@ -1144,6 +1144,44 @@ void SMESH_Mesh::ExportMED(const char *file,
   myWriter.Perform();
 }
 
+void SMESH_Mesh::ExportSAUV(const char *file, 
+                            const char* theMeshName, 
+                            bool theAutoGroups)
+  throw(SALOME_Exception)
+{
+  std::string medfilename(file);
+  medfilename += ".med";
+  std::string cmd;
+#ifdef WNT
+  cmd = "%PYTHONBIN% ";
+#else
+  cmd = "python ";
+#endif
+  cmd += "-c \"";
+  cmd += "from medutilities import my_remove ; my_remove(r'" + medfilename + "')";
+  cmd += "\"";
+  system(cmd.c_str());
+  ExportMED(medfilename.c_str(), theMeshName, theAutoGroups, 1);
+#ifdef WNT
+  cmd = "%PYTHONBIN% ";
+#else
+  cmd = "python ";
+#endif
+  cmd += "-c \"";
+  cmd += "from medutilities import convert ; convert(r'" + medfilename + "', 'MED', 'GIBI', 1, r'" + file + "')";
+  cmd += "\"";
+  system(cmd.c_str());
+#ifdef WNT
+  cmd = "%PYTHONBIN% ";
+#else
+  cmd = "python ";
+#endif
+  cmd += "-c \"";
+  cmd += "from medutilities import my_remove ; my_remove(r'" + medfilename + "')";
+  cmd += "\"";
+  system(cmd.c_str());
+}
+
 void SMESH_Mesh::ExportDAT(const char *file) throw(SALOME_Exception)
 {
   Unexpect aCatch(SalomeException);

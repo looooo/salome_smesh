@@ -677,6 +677,17 @@ class smeshDC(SMESH._objref_SMESH_Gen):
             aMeshes.append(aMesh)
         return aMeshes, aStatus
 
+    ## Creates a Mesh object(s) importing data from the given SAUV file
+    #  @return a list of Mesh class instances
+    #  @ingroup l2_impexp
+    def CreateMeshesFromSAUV( self,theFileName ):
+        aSmeshMeshes, aStatus = SMESH._objref_SMESH_Gen.CreateMeshesFromSAUV(self,theFileName)
+        aMeshes = []
+        for iMesh in range(len(aSmeshMeshes)) :
+            aMesh = Mesh(self, self.geompyD, aSmeshMeshes[iMesh])
+            aMeshes.append(aMesh)
+        return aMeshes, aStatus
+
     ## Creates a Mesh object importing data from the given STL file
     #  @return an instance of Mesh class
     #  @ingroup l2_impexp
@@ -1684,6 +1695,15 @@ class Mesh:
     #  @ingroup l2_impexp
     def ExportMED(self, f, auto_groups=0, version=MED_V2_2, overwrite=1):
         self.mesh.ExportToMEDX(f, auto_groups, version, overwrite)
+
+    ## Exports the mesh in a file in SAUV format
+    #  @param f is the file name
+    #  @param auto_groups boolean parameter for creating/not creating
+    #  the groups Group_On_All_Nodes, Group_On_All_Faces, ... ;
+    #  the typical use is auto_groups=false.
+    #  @ingroup l2_impexp
+    def ExportSAUV(self, f, auto_groups=0):
+        self.mesh.ExportSAUV(f, auto_groups)
 
     ## Exports the mesh in a file in DAT format
     #  @param f the file name

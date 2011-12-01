@@ -772,7 +772,7 @@ namespace
       //const double maxAngle = 5 * Standard_PI180;
       if ( !isConvex )
       {
-        cout << "Concave FACE " << helper.GetMeshDS()->ShapeToIndex( F ) << endl;
+        //cout << "Concave FACE " << helper.GetMeshDS()->ShapeToIndex( F ) << endl;
         return true;
         // map< double, const SMDS_MeshNode* > u2nodes;
         // if ( !SMESH_Algo::GetSortedNodesOnEdge( helper.GetMeshDS(), E,
@@ -811,10 +811,12 @@ namespace
           << "meshSO = GetCurrentStudy().FindObjectID('0:1:2:3')" << endl
           << "mesh = Mesh( meshSO.GetObject() )"<<endl;
     }
-    ~PyDump() {
-      *py << "mesh.MakeGroup('Prisms of viscous layers',VOLUME,FT_ElemGeomType,'=',Geom_PENTA)"
-          <<endl; delete py; py=0;
+    void Finish() {
+      if (py)
+        *py << "mesh.MakeGroup('Viscous Prisms',VOLUME,FT_ElemGeomType,'=',Geom_PENTA)"<<endl;
+      delete py; py=0;
     }
+    ~PyDump() { Finish(); }
   };
 #define dumpFunction(f) { _dumpFunction(f, __LINE__);}
 #define dumpMove(n)     { _dumpMove(n, __LINE__);}
@@ -833,12 +835,12 @@ namespace
       for ( int i=1; i < f->NbNodes(); ++i ) *py << f->GetNode(i-1)->GetID()<<", ";
       *py << f->GetNode( f->NbNodes()-1 )->GetID() << " ])"<< endl; }}
 #else
-  struct PyDump { };
-#define dumpFunction(f)
+  struct PyDump { void Finish() {} };
+#define dumpFunction(f) f
 #define dumpMove(n)
 #define dumpCmd(txt)
 #define dumpFunctionEnd()
-#define dumpChangeNodes()
+#define dumpChangeNodes(f)
 #endif
 }
 
@@ -982,6 +984,7 @@ SMESH_ComputeErrorPtr _ViscousBuilder::Compute(SMESH_Mesh&         theMesh,
   addBoundaryElements();
 
   makeGroupOfLE(); // debug
+  debugDump.Finish();
 
   return _error;
 }
@@ -3944,7 +3947,7 @@ void _ViscousBuilder::fixBadFaces(const TopoDS_Face& F, SMESH_MesherHelper& help
     }
     else
     {
-      involvedFaces.erase( trias[bestCouple].first );
+      involvedFaces.erase( badTrias[iTia] );
     }
   }
   if ( triaCouples.empty() )

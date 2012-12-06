@@ -288,6 +288,9 @@ SMESH_Gen_i::SMESH_Gen_i( CORBA::ORB_ptr            orb,
   myIsHistoricalPythonDump = true;
   myToForgetMeshDataOnHypModif = false;
 
+  myImportedStudyChanged = true;
+  myImportedStudyId      = 0;
+
   // set it in standalone mode only
   //OSD::SetSignal( true );
 
@@ -4937,7 +4940,7 @@ Engines::ListOfData* SMESH_Gen_i::getModifiedData(CORBA::Long studyId)
 {
   Engines::ListOfData_var aResult = new Engines::ListOfData;
   
-  if (!myImportedStudyChanged) {
+  if (myImportStudyId == 0 || !myImportedStudyChanged) {
     MESSAGE("Study is not changed")
     return aResult._retn();
   }

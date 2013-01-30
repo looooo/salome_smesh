@@ -66,7 +66,7 @@ SMESHGUI_MeshEditPreview::SMESHGUI_MeshEditPreview(SVTK_ViewWindow* theViewWindo
 
   // Create and display actor
   vtkDataSetMapper* aMapper = vtkDataSetMapper::New();
-  aMapper->SetInput( myGrid );
+  aMapper->SetInputData( myGrid );
 
   myPreviewActor = SALOME_Actor::New();
   myPreviewActor->SetInfinitive(true);

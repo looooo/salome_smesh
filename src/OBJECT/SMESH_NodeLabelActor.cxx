@@ -50,16 +50,16 @@ SMESH_NodeLabelActor::SMESH_NodeLabelActor() {
   myPointsNumDataSet = vtkUnstructuredGrid::New();
 
   myPtsMaskPoints = vtkMaskPoints::New();
-  myPtsMaskPoints->SetInput(myPointsNumDataSet);
+  myPtsMaskPoints->SetInputData(myPointsNumDataSet);
   myPtsMaskPoints->SetOnRatio(1);
 
   myPtsSelectVisiblePoints = vtkSelectVisiblePoints::New();
-  myPtsSelectVisiblePoints->SetInput(myPtsMaskPoints->GetOutput());
+  myPtsSelectVisiblePoints->SetInputConnection(myPtsMaskPoints->GetOutputPort());
   myPtsSelectVisiblePoints->SelectInvisibleOff();
   myPtsSelectVisiblePoints->SetTolerance(0.1);
     
   myPtsLabeledDataMapper = vtkLabeledDataMapper::New();
-  myPtsLabeledDataMapper->SetInput(myPtsSelectVisiblePoints->GetOutput());
+  myPtsLabeledDataMapper->SetInputConnection(myPtsSelectVisiblePoints->GetOutputPort());
   myPtsLabeledDataMapper->SetLabelFormat("%d");
   myPtsLabeledDataMapper->SetLabelModeToLabelScalars();
     
@@ -156,7 +156,7 @@ void SMESH_NodeLabelActor::SetPointsLabeled(bool theIsPointsLabeled) {
     }
     
     aDataSet->GetPointData()->SetScalars( anArray );
-    myPtsMaskPoints->SetInput( aDataSet );
+    myPtsMaskPoints->SetInputData( aDataSet );
     myPointLabels->SetVisibility( GetVisibility() );
     anArray->Delete();
   }

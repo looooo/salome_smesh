@@ -173,7 +173,7 @@ namespace SMESH
 
       // Create and display actor
       myMapper = vtkDataSetMapper::New();
-      myMapper->SetInput( aGrid );
+      myMapper->SetInputData( aGrid );
       aGrid->Delete();
 
       myPreviewActor = SALOME_Actor::New();

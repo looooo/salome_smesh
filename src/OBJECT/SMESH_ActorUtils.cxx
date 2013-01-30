@@ -90,7 +90,7 @@ namespace SMESH
   {
     vtkXMLUnstructuredGridWriter* aWriter = vtkXMLUnstructuredGridWriter::New();
     aWriter->SetFileName(theFileName);
-    aWriter->SetInput(theGrid);
+    aWriter->SetInputData(theGrid);
     aWriter->SetDataModeToAscii();
     if(theGrid->GetNumberOfCells()){
       aWriter->Write();

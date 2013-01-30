@@ -1281,7 +1281,7 @@ vtkUnstructuredGrid* SMESH_ActorDef::GetUnstructuredGrid(){
 
 bool SMESH_ActorDef::IsInfinitive(){
   vtkDataSet *aDataSet = myPickableActor->GetUnstructuredGrid();
-  aDataSet->Update();
+  //aDataSet->Update(); // OUV_PORTING_VTK6: seems to be useless
   myIsInfinite = aDataSet->GetNumberOfCells() == 0 ||
     ( aDataSet->GetNumberOfCells() == 1 && 
     aDataSet->GetCell(0)->GetCellType() == VTK_VERTEX );

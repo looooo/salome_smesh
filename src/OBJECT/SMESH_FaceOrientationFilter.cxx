@@ -61,10 +61,10 @@ SMESH_FaceOrientationFilter::SMESH_FaceOrientationFilter()
   myFacePolyData = vtkPolyData::New();
 
   myFaceCenters = VTKViewer_CellCenters::New();
-  myFaceCenters->SetInput(myFacePolyData);
+  myFaceCenters->SetInputData(myFacePolyData);
 
   myFaceMaskPoints = vtkMaskPoints::New();
-  myFaceMaskPoints->SetInput(myFaceCenters->GetOutput());
+  myFaceMaskPoints->SetInputConnection(myFaceCenters->GetOutputPort());
   myFaceMaskPoints->SetOnRatio(1);
 
   myGlyphSource = vtkGlyphSource2D::New();
@@ -73,11 +73,14 @@ SMESH_FaceOrientationFilter::SMESH_FaceOrientationFilter()
   myGlyphSource->SetCenter(0.5, 0.0, 0.0);
 
   myBaseGlyph = vtkGlyph3D::New();
-  myBaseGlyph->SetInput(myFaceMaskPoints->GetOutput());
+  myBaseGlyph->SetInputConnection(myFaceMaskPoints->GetOutputPort());
   myBaseGlyph->SetVectorModeToUseVector();
   myBaseGlyph->SetScaleModeToDataScalingOff();
   myBaseGlyph->SetColorModeToColorByScalar();
-  myBaseGlyph->SetSource(my3dVectors ? myArrowPolyData : myGlyphSource->GetOutput());
+  if( my3dVectors )
+    myBaseGlyph->SetSourceData(myArrowPolyData);
+  else
+    myBaseGlyph->SetSourceConnection(myGlyphSource->GetOutputPort());
 }
 
 SMESH_FaceOrientationFilter::~SMESH_FaceOrientationFilter()
@@ -99,7 +102,10 @@ void SMESH_FaceOrientationFilter::SetOrientationScale( vtkFloatingPointType theS
 void SMESH_FaceOrientationFilter::Set3dVectors( bool theState )
 {
   my3dVectors = theState;
-  myBaseGlyph->SetSource(my3dVectors ? myArrowPolyData : myGlyphSource->GetOutput());
+  if( my3dVectors )
+    myBaseGlyph->SetSourceData(myArrowPolyData);
+  else
+    myBaseGlyph->SetSourceConnection(myGlyphSource->GetOutputPort());
   Modified();
 }
 

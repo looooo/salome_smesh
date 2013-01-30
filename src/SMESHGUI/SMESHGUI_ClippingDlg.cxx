@@ -132,7 +132,7 @@ void SMESH::OrientedPlane::Init()
 
   // Create and display actor
   myMapper = vtkDataSetMapper::New();
-  myMapper->SetInput(myPlaneSource->GetOutput());
+  myMapper->SetInputData(myPlaneSource->GetOutput());
 
   myActor = SALOME_Actor::New();
   myActor->VisibilityOff();

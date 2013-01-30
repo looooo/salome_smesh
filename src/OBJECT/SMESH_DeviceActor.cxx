@@ -125,7 +125,7 @@ SMESH_DeviceActor
   myFaceOrientationFilter = SMESH_FaceOrientationFilter::New();
 
   myFaceOrientationDataMapper = vtkPolyDataMapper::New();
-  myFaceOrientationDataMapper->SetInput(myFaceOrientationFilter->GetOutput());
+  myFaceOrientationDataMapper->SetInputConnection(myFaceOrientationFilter->GetOutputPort());
 
   myFaceOrientation = vtkActor::New();
   myFaceOrientation->SetMapper(myFaceOrientationDataMapper);
@@ -208,9 +208,9 @@ SMESH_DeviceActor
 {
   int anId = 0;
   if(theIsImplicitFunctionUsed)
-    myPassFilter[ anId ]->SetInput( myExtractGeometry->GetOutput() );
+    myPassFilter[ anId ]->SetInputConnection( myExtractGeometry->GetOutputPort() );
   else
-    myPassFilter[ anId ]->SetInput( myMergeFilter->GetOutput() );
+    myPassFilter[ anId ]->SetInputConnection( myMergeFilter->GetOutputPort() );
     
   myIsImplicitFunctionUsed = theIsImplicitFunctionUsed;
   SetStoreClippingMapping(myStoreClippingMapping);
@@ -225,32 +225,33 @@ SMESH_DeviceActor
     //myIsShrinkable = theGrid->GetNumberOfCells() > 10;
     myIsShrinkable = true;
 
-    myExtractUnstructuredGrid->SetInput(theGrid);
+    myExtractUnstructuredGrid->SetInputData(theGrid);
 
-    myMergeFilter->SetGeometry(myExtractUnstructuredGrid->GetOutput());
+    myMergeFilter->SetGeometryConnection(myExtractUnstructuredGrid->GetOutputPort());
 
-    myExtractGeometry->SetInput(myMergeFilter->GetOutput());
+    myExtractGeometry->SetInputConnection(myMergeFilter->GetOutputPort());
 
     int anId = 0;
     SetImplicitFunctionUsed(myIsImplicitFunctionUsed);
-    myPassFilter[ anId + 1]->SetInput( myPassFilter[ anId ]->GetOutput() );
+    myPassFilter[ anId + 1]->SetInputConnection( myPassFilter[ anId ]->GetOutputPort() );
     
     anId++; // 1
-    myTransformFilter->SetInput( myPassFilter[ anId ]->GetOutput() );
+    myTransformFilter->SetInputConnection( myPassFilter[ anId ]->GetOutputPort() );
 
     anId++; // 2
-    myPassFilter[ anId ]->SetInput( myTransformFilter->GetOutput() );
-    myPassFilter[ anId + 1 ]->SetInput( myPassFilter[ anId ]->GetOutput() );
+    myPassFilter[ anId ]->SetInputConnection( myTransformFilter->GetOutputPort() );
+    myPassFilter[ anId + 1 ]->SetInputConnection( myPassFilter[ anId ]->GetOutputPort() );
 
     anId++; // 3
-    myGeomFilter->SetInput( myPassFilter[ anId ]->GetOutput() );
+    myGeomFilter->SetInputConnection( myPassFilter[ anId ]->GetOutputPort() );
 
     anId++; // 4
-    myPassFilter[ anId ]->SetInput( myGeomFilter->GetOutput() ); 
-    myPassFilter[ anId + 1 ]->SetInput( myPassFilter[ anId ]->GetOutput() );
+    myPassFilter[ anId ]->SetInputConnection( myGeomFilter->GetOutputPort() ); 
+    myPassFilter[ anId + 1 ]->SetInputConnection( myPassFilter[ anId ]->GetOutputPort() );
 
     anId++; // 5
-    myMapper->SetInput( myPassFilter[ anId ]->GetPolyDataOutput() );
+    // OUV_PORTING_VTK6: to check
+    myMapper->SetInputConnection( myPassFilter[ anId ]->GetOutputPort() );
 
     vtkLODActor::SetMapper( myMapper );
     Modified();
@@ -322,7 +323,7 @@ SMESH_DeviceActor
     theLookupTable->SetNumberOfTableValues(theScalarBarActor->GetMaximumNumberOfColors());
     theLookupTable->Build();
     
-    myMergeFilter->SetScalars(aDataSet);
+    myMergeFilter->SetScalarsData(aDataSet);
     aDataSet->Delete();
   }
   GetMapper()->SetScalarVisibility(anIsInitialized);
@@ -402,7 +403,7 @@ SMESH_DeviceActor
       theLookupTable->SetRange(aScalars->GetRange());
       theLookupTable->Build();
       
-      myMergeFilter->SetScalars(aDataSet);
+      myMergeFilter->SetScalarsData(aDataSet);
       aDataSet->Delete();
     }
     else if (MultiConnection2D* aMultiConnection2D = dynamic_cast<MultiConnection2D*>(theFunctor.get())){
@@ -462,7 +463,7 @@ SMESH_DeviceActor
       theLookupTable->SetRange(aScalars->GetRange());
       theLookupTable->Build();
       
-      myMergeFilter->SetScalars(aDataSet);
+      myMergeFilter->SetScalarsData(aDataSet);
       aDataSet->Delete();
     }
   }
@@ -600,10 +601,10 @@ SMESH_DeviceActor
 ::SetShrink() 
 {
   if ( !myIsShrinkable ) return;
-  if ( vtkDataSet* aDataSet = myPassFilter[ 0 ]->GetOutput() )
+  if ( vtkAlgorithmOutput* aDataSet = myPassFilter[ 0 ]->GetOutputPort() )
   {
-    myShrinkFilter->SetInput( aDataSet );
-    myPassFilter[ 1 ]->SetInput( myShrinkFilter->GetOutput() );
+    myShrinkFilter->SetInputConnection( aDataSet );
+    myPassFilter[ 1 ]->SetInputConnection( myShrinkFilter->GetOutputPort() );
     myIsShrunk = true;
   }
 }
@@ -613,9 +614,9 @@ SMESH_DeviceActor
 ::UnShrink() 
 {
   if ( !myIsShrunk ) return;
-  if ( vtkDataSet* aDataSet = myPassFilter[ 0 ]->GetOutput() )
+  if ( vtkAlgorithmOutput* aDataSet = myPassFilter[ 0 ]->GetOutputPort() )
   {    
-    myPassFilter[ 1 ]->SetInput( aDataSet );
+    myPassFilter[ 1 ]->SetInputConnection( aDataSet );
     myPassFilter[ 1 ]->Modified();
     myIsShrunk = false;
     Modified();
@@ -627,11 +628,11 @@ void
 SMESH_DeviceActor
 ::SetFacesOriented(bool theIsFacesOriented) 
 {
-  if ( vtkDataSet* aDataSet = myTransformFilter->GetOutput() )
+  if ( vtkAlgorithmOutput* aDataSet = myTransformFilter->GetOutputPort() )
   {
     myIsFacesOriented = theIsFacesOriented;
     if( theIsFacesOriented )
-      myFaceOrientationFilter->SetInput( aDataSet );
+      myFaceOrientationFilter->SetInputConnection( aDataSet );
     UpdateFaceOrientation();
   }
 }

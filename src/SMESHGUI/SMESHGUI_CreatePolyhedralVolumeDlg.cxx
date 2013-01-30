@@ -106,7 +106,7 @@ namespace SMESH
   
       // Create and display actor
       myMapper = vtkDataSetMapper::New();
-      myMapper->SetInput( myGrid );
+      myMapper->SetInputData( myGrid );
 
       myPreviewActor = SALOME_Actor::New();
       myPreviewActor->PickableOff();

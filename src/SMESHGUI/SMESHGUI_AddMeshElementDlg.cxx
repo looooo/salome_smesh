@@ -120,7 +120,7 @@ namespace SMESH
       myPreviewActor->VisibilityOff();
       myPreviewActor->SetMapper(myMapper);
 
-      vtkFloatingPointType anRGB[3];
+      double anRGB[3];
       vtkProperty* aProp = vtkProperty::New();
       GetColor( "SMESH", "fill_color", anRGB[0], anRGB[1], anRGB[2], QColor( 0, 170, 255 ) );
       aProp->SetColor( anRGB[0], anRGB[1], anRGB[2] );

@@ -42,7 +42,6 @@
 
 #define PI   3.14159265359
 
-vtkCxxRevisionMacro(SMESH_FaceOrientationFilter, "$Revision$");
 vtkStandardNewMacro(SMESH_FaceOrientationFilter);
 
 /*!
@@ -93,7 +92,7 @@ SMESH_FaceOrientationFilter::~SMESH_FaceOrientationFilter()
   myBaseGlyph->Delete();
 }
 
-void SMESH_FaceOrientationFilter::SetOrientationScale( vtkFloatingPointType theScale )
+void SMESH_FaceOrientationFilter::SetOrientationScale( double theScale )
 {
   myOrientationScale = theScale;
   Modified();

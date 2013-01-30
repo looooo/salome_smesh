@@ -112,7 +112,7 @@ SMESH_NodeLabelActor::~SMESH_NodeLabelActor() {
 
 void SMESH_NodeLabelActor::SetFontProperties( SMESH::LabelFont family, int size, 
                                               bool bold, bool italic, bool shadow,
-                                              vtkFloatingPointType r, vtkFloatingPointType g, vtkFloatingPointType b )
+                                              double r, double g, double b )
 {
   switch ( family ) {
   case SMESH::FntArial:

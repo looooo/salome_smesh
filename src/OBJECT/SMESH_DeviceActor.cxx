@@ -119,7 +119,7 @@ SMESH_DeviceActor
   // Orientation of faces
   myIsFacesOriented = false;
 
-  vtkFloatingPointType anRGB[3] = { 1, 1, 1 };
+  double anRGB[3] = { 1, 1, 1 };
   SMESH::GetColor( "SMESH", "orientation_color", anRGB[0], anRGB[1], anRGB[2], QColor( 255, 255, 255 ) );
 
   myFaceOrientationFilter = SMESH_FaceOrientationFilter::New();
@@ -639,26 +639,26 @@ SMESH_DeviceActor
 
 void
 SMESH_DeviceActor
-::SetFacesOrientationColor(vtkFloatingPointType r,vtkFloatingPointType g,vtkFloatingPointType b)
+::SetFacesOrientationColor(double r,double g,double b)
 {
   myFaceOrientation->GetProperty()->SetColor( r, g, b );
 }
 
 void
 SMESH_DeviceActor
-::GetFacesOrientationColor(vtkFloatingPointType& r,vtkFloatingPointType& g,vtkFloatingPointType& b)
+::GetFacesOrientationColor(double& r,double& g,double& b)
 {
   myFaceOrientation->GetProperty()->GetColor( r, g, b );
 }
 
 void
 SMESH_DeviceActor
-::SetFacesOrientationScale(vtkFloatingPointType theScale)
+::SetFacesOrientationScale(double theScale)
 {
   myFaceOrientationFilter->SetOrientationScale( theScale );
 }
 
-vtkFloatingPointType
+double
 SMESH_DeviceActor
 ::GetFacesOrientationScale()
 {
@@ -781,13 +781,13 @@ SMESH_DeviceActor
   return aRetID;
 }
 
-vtkFloatingPointType* 
+double* 
 SMESH_DeviceActor
 ::GetNodeCoord(int theObjID)
 {
   vtkDataSet* aDataSet = myMergeFilter->GetOutput();
   vtkIdType anID = myVisualObj->GetNodeVTKId(theObjID);
-  vtkFloatingPointType* aCoord = (anID >=0) ? aDataSet->GetPoint(anID) : NULL;
+  double* aCoord = (anID >=0) ? aDataSet->GetPoint(anID) : NULL;
   if(MYDEBUG) MESSAGE("GetNodeCoord - theObjID = "<<theObjID<<"; anID = "<<anID);
   return aCoord;
 }
@@ -830,7 +830,7 @@ SMESH_DeviceActor
 }
 
 
-vtkFloatingPointType 
+double 
 SMESH_DeviceActor
 ::GetShrinkFactor()
 {
@@ -839,7 +839,7 @@ SMESH_DeviceActor
 
 void
 SMESH_DeviceActor
-::SetShrinkFactor(vtkFloatingPointType theValue)
+::SetShrinkFactor(double theValue)
 {
   theValue = theValue > 0.1? theValue: 0.8;
   myShrinkFilter->SetShrinkFactor(theValue);
@@ -862,13 +862,13 @@ SMESH_DeviceActor
 ::Render(vtkRenderer *ren, vtkMapper* m)
 {
   int aResolveCoincidentTopology = vtkMapper::GetResolveCoincidentTopology();
-  vtkFloatingPointType aStoredFactor, aStoredUnit; 
+  double aStoredFactor, aStoredUnit; 
   vtkMapper::GetResolveCoincidentTopologyPolygonOffsetParameters(aStoredFactor,aStoredUnit);
 
   vtkMapper::SetResolveCoincidentTopologyToPolygonOffset();
-  vtkFloatingPointType aFactor = myPolygonOffsetFactor, aUnits = myPolygonOffsetUnits;
+  double aFactor = myPolygonOffsetFactor, aUnits = myPolygonOffsetUnits;
   if(myIsHighlited){
-    static vtkFloatingPointType EPS = .01;
+    static double EPS = .01;
     aUnits *= (1.0-EPS);
   }
   vtkMapper::SetResolveCoincidentTopologyPolygonOffsetParameters(aFactor,aUnits);
@@ -881,8 +881,8 @@ SMESH_DeviceActor
 
 void
 SMESH_DeviceActor
-::SetPolygonOffsetParameters(vtkFloatingPointType factor, 
-                             vtkFloatingPointType units)
+::SetPolygonOffsetParameters(double factor, 
+                             double units)
 {
   myPolygonOffsetFactor = factor;
   myPolygonOffsetUnits = units;
@@ -904,14 +904,14 @@ bool SMESH_DeviceActor::GetQuadraticArcMode(){
 /*!
  * Set Max angle for representation 2D quadratic element as arked polygon
  */
-void SMESH_DeviceActor::SetQuadraticArcAngle(vtkFloatingPointType theMaxAngle){
+void SMESH_DeviceActor::SetQuadraticArcAngle(double theMaxAngle){
   myGeomFilter->SetQuadraticArcAngle(theMaxAngle);
 }
 
 /*!
  * Return Max angle of the representation 2D quadratic element as arked polygon
  */
-vtkFloatingPointType SMESH_DeviceActor::GetQuadraticArcAngle(){
+double SMESH_DeviceActor::GetQuadraticArcAngle(){
   return myGeomFilter->GetQuadraticArcAngle();
 }
 

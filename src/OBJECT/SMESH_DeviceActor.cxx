@@ -250,7 +250,6 @@ SMESH_DeviceActor
     myPassFilter[ anId + 1 ]->SetInputConnection( myPassFilter[ anId ]->GetOutputPort() );
 
     anId++; // 5
-    // OUV_PORTING_VTK6: to check
     myMapper->SetInputConnection( myPassFilter[ anId ]->GetOutputPort() );
 
     vtkLODActor::SetMapper( myMapper );

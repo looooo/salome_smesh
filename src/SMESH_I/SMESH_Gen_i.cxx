@@ -4950,6 +4950,9 @@ Engines::ListOfData* SMESH_Gen_i::getModifiedData(CORBA::Long studyId)
   SALOMEDS::Study_var aStudy = aStudyManager->GetStudyByID(studyId);
   SetCurrentStudy(aStudy);
   SALOMEDS::SComponent_var aComponent = aStudy->FindComponent("SMESH");
+  
+  if (CORBA::is_nil(aComponent))
+    return aResult._retn();
 
   std::string aFullPath(Kernel_Utils::GetTmpFileName());
   aFullPath += ".med";

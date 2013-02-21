@@ -105,6 +105,7 @@ void SMESH::OrientedPlane::ShallowCopy(SMESH::OrientedPlane* theOrientedPlane)
   myPlaneSource->SetOrigin(theOrientedPlane->myPlaneSource->GetOrigin());
   myPlaneSource->SetPoint1(theOrientedPlane->myPlaneSource->GetPoint1());
   myPlaneSource->SetPoint2(theOrientedPlane->myPlaneSource->GetPoint2());
+  myPlaneSource->Update();
 }
 
 SMESH::OrientedPlane::OrientedPlane(SVTK_ViewWindow* theViewWindow):
@@ -132,7 +133,7 @@ void SMESH::OrientedPlane::Init()
 
   // Create and display actor
   myMapper = vtkDataSetMapper::New();
-  myMapper->SetInputData(myPlaneSource->GetOutput());
+  myMapper->SetInputConnection(myPlaneSource->GetOutputPort());
 
   myActor = SALOME_Actor::New();
   myActor->VisibilityOff();
@@ -325,6 +326,7 @@ SMESH::OrientedPlane* SMESHGUI_ClippingDlg::AddPlane (SMESH::TActorList         
   aPlaneSource->SetOrigin(aPnt0[0],aPnt0[1],aPnt0[2]);
   aPlaneSource->SetPoint1(aPnt1[0],aPnt1[1],aPnt1[2]);
   aPlaneSource->SetPoint2(aPnt2[0],aPnt2[1],aPnt2[2]);
+  aPlaneSource->Update();
 
   SMESH::TActorList::iterator anIter = theActorList.begin();
   for ( ; anIter != theActorList.end(); anIter++ )
@@ -1010,6 +1012,7 @@ void SMESHGUI_ClippingDlg::SetCurrentPlaneParam()
     aPlaneSource->SetOrigin(aPnt0[0],aPnt0[1],aPnt0[2]);
     aPlaneSource->SetPoint1(aPnt1[0],aPnt1[1],aPnt1[2]);
     aPlaneSource->SetPoint2(aPnt2[0],aPnt2[1],aPnt2[2]);
+    aPlaneSource->Update();
   }
 
   if(AutoApplyCheckBox->isChecked())

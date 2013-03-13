@@ -277,7 +277,7 @@ def AssureGeomPublished(mesh, geom, name=''):
 
 ## Return the first vertex of a geometrical edge by ignoring orientation
 def FirstVertexOnCurve(edge):
-    vv = geomBuilder.SubShapeAll( edge, geomBuilder.ShapeType["VERTEX"])
+    vv = geomBuilder.SubShapeAll( edge, geomBuilder.geomBuilder.ShapeType["VERTEX"])
     if not vv:
         raise TypeError, "Given object has no vertices"
     if len( vv ) == 1: return vv[0]
@@ -303,6 +303,9 @@ smeshInst = None
 engine = None
 doLcc = False
 
+## This class allows to create, load or manipulate meshes
+#  It has a set of methods to create load or copy meshes, to combine several meshes.
+#  It also has methods to get infos on meshes.
 class smeshBuilder(object, SMESH._objref_SMESH_Gen):
 
     def __new__(cls):
@@ -409,7 +412,7 @@ class smeshBuilder(object, SMESH._objref_SMESH_Gen):
     #  @return SMESH.DirStruct
     #  @ingroup l1_auxiliary
     def GetDirStruct(self,theVector):
-        vertices = self.geompyD.SubShapeAll( theVector, geomBuilder.ShapeType["VERTEX"] )
+        vertices = self.geompyD.SubShapeAll( theVector, geomBuilder.geomBuilder.ShapeType["VERTEX"] )
         if(len(vertices) != 2):
             print "Error: vector object is incorrect."
             return None
@@ -432,10 +435,10 @@ class smeshBuilder(object, SMESH._objref_SMESH_Gen):
     #  @return SMESH.AxisStruct
     #  @ingroup l1_auxiliary
     def GetAxisStruct(self,theObj):
-        edges = self.geompyD.SubShapeAll( theObj, geomBuilder.ShapeType["EDGE"] )
+        edges = self.geompyD.SubShapeAll( theObj, geomBuilder.geomBuilder.ShapeType["EDGE"] )
         if len(edges) > 1:
-            vertex1, vertex2 = self.geompyD.SubShapeAll( edges[0], geomBuilder.ShapeType["VERTEX"] )
-            vertex3, vertex4 = self.geompyD.SubShapeAll( edges[1], geomBuilder.ShapeType["VERTEX"] )
+            vertex1, vertex2 = self.geompyD.SubShapeAll( edges[0], geomBuilder.geomBuilder.ShapeType["VERTEX"] )
+            vertex3, vertex4 = self.geompyD.SubShapeAll( edges[1], geomBuilder.geomBuilder.ShapeType["VERTEX"] )
             vertex1 = self.geompyD.PointCoordinates(vertex1)
             vertex2 = self.geompyD.PointCoordinates(vertex2)
             vertex3 = self.geompyD.PointCoordinates(vertex3)
@@ -446,7 +449,7 @@ class smeshBuilder(object, SMESH._objref_SMESH_Gen):
             axis = AxisStruct(vertex1[0], vertex1[1], vertex1[2], normal[0], normal[1], normal[2])
             return axis
         elif len(edges) == 1:
-            vertex1, vertex2 = self.geompyD.SubShapeAll( edges[0], geomBuilder.ShapeType["VERTEX"] )
+            vertex1, vertex2 = self.geompyD.SubShapeAll( edges[0], geomBuilder.geomBuilder.ShapeType["VERTEX"] )
             p1 = self.geompyD.PointCoordinates( vertex1 )
             p2 = self.geompyD.PointCoordinates( vertex2 )
             axis = AxisStruct(p1[0], p1[1], p1[2], p2[0]-p1[0], p2[1]-p1[1], p2[2]-p1[2])
@@ -1003,8 +1006,37 @@ import omniORB
 #Registering the new proxy for SMESH_Gen
 omniORB.registerObjref(SMESH._objref_SMESH_Gen._NP_RepositoryId, smeshBuilder)
 
+## Create a new smeshBuilder instance.The smeshBuilder class provides the Python
+#  interface to create or load meshes.
+#
+#  Typical use is:
+#  \code
+#    import salome
+#    salome.salome_init()
+#    from salome.smesh import smeshBuilder
+#    smesh = smeshBuilder.New(theStudy)
+#  \endcode
+#  @param  study     SALOME study, generally obtained by salome.myStudy.
+#  @param  instance  CORBA proxy of SMESH Engine. If None, the default Engine is used.
+#  @return smeshBuilder instance
 
 def New( study, instance=None):
+    """
+    Create a new smeshBuilder instance.The smeshBuilder class provides the Python
+    interface to create or load meshes.
+
+    Typical use is:
+        import salome
+        salome.salome_init()
+        from salome.smesh import smeshBuilder
+        smesh = smeshBuilder.New(theStudy)
+
+    Parameters:
+        study     SALOME study, generally obtained by salome.myStudy.
+        instance  CORBA proxy of SMESH Engine. If None, the default Engine is used.
+    Returns:
+        smeshBuilder instance
+    """
     global engine
     global smeshInst
     global doLcc
@@ -1173,7 +1205,7 @@ class Mesh:
     #  @ingroup l1_auxiliary
     def MeshDimension(self):
         if self.mesh.HasShapeToMesh():
-            shells = self.geompyD.SubShapeAllIDs( self.geom, geomBuilder.ShapeType["SOLID"] )
+            shells = self.geompyD.SubShapeAllIDs( self.geom, self.geompyD.ShapeType["SOLID"] )
             if len( shells ) > 0 :
                 return 3
             elif self.geompyD.NumberOfFaces( self.geom ) > 0 :
@@ -1636,7 +1668,7 @@ class Mesh:
         elif tgeo == "SOLID" or tgeo == "COMPSOLID":
             typ = VOLUME
         elif tgeo == "COMPOUND":
-            sub = self.geompyD.SubShapeAll( shape, geomBuilder.ShapeType["SHAPE"])
+            sub = self.geompyD.SubShapeAll( shape, self.geompyD.ShapeType["SHAPE"])
             if not sub:
                 raise ValueError,"_groupTypeFromShape(): empty geometric group or compound '%s'" % GetName(shape)
             return self._groupTypeFromShape( sub[0] )

@@ -35,7 +35,6 @@ from salome import *
 import geompy
 import SMESH, SALOMEDS
 from salome.smesh import smeshBuilder
-#from smeshBuilder import *
 
 # retrieve SMESH engine in try/except block
 # to avoid problems in some cases, e.g. when generating documentation

@@ -881,9 +881,9 @@ TCollection_AsciiString SMESH_Gen_i::DumpPython_impl
 
   // Dump trace of restored study
   if (theSavedTrace.Length() > 0) {
-    // For the convertion of IDL API calls -> smesh.py API, "smesh" standing for SMESH_Gen
+    // For the convertion of IDL API calls -> smeshBuilder.py API, "smesh" standing for SMESH_Gen
     // was replaces with "smeshgen" (==TPythonDump::SMESHGenName()).
-    // Change "smesh" -> "smeshgen" in the trace saved before passage to smesh.py API
+    // Change "smesh" -> "smeshgen" in the trace saved before passage to smeshBuilder.py API
     bool isNewVersion =
       theSavedTrace.Location( anOldGen + ".", 1, theSavedTrace.Length() );
     if ( !isNewVersion ) {
@@ -911,7 +911,7 @@ TCollection_AsciiString SMESH_Gen_i::DumpPython_impl
     aScript += helper + "\n" + aNewLines;
   }
 
-  // Convert IDL API calls into smesh.py API.
+  // Convert IDL API calls into smeshBuilder.py API.
   // Some objects are wrapped with python classes and
   // Resource_DataMapOfAsciiStringAsciiString holds methods returning wrapped objects
   Resource_DataMapOfAsciiStringAsciiString anEntry2AccessorMethod;
@@ -1020,7 +1020,7 @@ TCollection_AsciiString SMESH_Gen_i::DumpPython_impl
   for (int ir = 1; ir <= seqRemoved.Length(); ir++) {
     anUpdatedScript += "\n\tSO = theStudy.FindObjectIOR(theStudy.ConvertObjectToIOR(";
     anUpdatedScript += seqRemoved.Value(ir);
-    // for object wrapped by class of smesh.py
+    // for object wrapped by class of smeshBuilder.py
     anEntry = theObjectNames( seqRemoved.Value(ir) );
     if ( anEntry2AccessorMethod.IsBound( anEntry ) )
       anUpdatedScript += helper + "." + anEntry2AccessorMethod( anEntry );

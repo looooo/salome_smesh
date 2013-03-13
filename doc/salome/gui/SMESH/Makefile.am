@@ -34,16 +34,7 @@ guidoc_DATA = images/head.png
 DOC_PYTHONPATH=$(prefix)/bin/salome:$(prefix)/lib/python$(PYTHON_VERSION)/site-packages/salome:$(MED_ROOT_DIR)/lib/python$(PYTHON_VERSION)/site-packages/salome:$(GEOM_ROOT_DIR)/bin/salome:$(GEOM_ROOT_DIR)/lib/python$(PYTHON_VERSION)/site-packages/salome:$(KERNEL_ROOT_DIR)/bin/salome:$(KERNEL_ROOT_DIR)/lib/python$(PYTHON_VERSION)/site-packages/salome:$(OMNIORB_ROOT)/lib/python$(PYTHON_VERSION)/site-packages:$(OMNIORB_ROOT)/lib64/python$(PYTHON_VERSION)/site-packages
 DOC_SMESH_MeshersList=StdMeshers
 
-# to have smesh.py in the documentation instead of smeshDC.py
-# we create dummy smesh.py from the smeshDC.py
-smesh.py: ../../../../src/SMESH_SWIG/smeshDC.py
-	@awk '/^class Mesh:/ { mesh_found=1 } // { if (mesh_found) {print $$0; next} } /^ +(def|#)/ { match( $$0, /^ +/); print substr( $$0, 1+RLENGTH ); next } /^class smeshDC/ { next } //' \
-	  $< > $@
-
-tmp/smesh.py: $(top_srcdir)/src/SMESH_SWIG/StdMeshersDC.py $(srcdir)/collect_mesh_methods.py
-	@mkdir -p tmp && PYTHONPATH=$(DOC_PYTHONPATH):${PYTHONPATH} SMESH_MeshersList=$(DOC_SMESH_MeshersList) $(PYTHON) $(srcdir)/collect_mesh_methods.py -o $@ StdMeshers
-
-usr_docs: doxyfile_py doxyfile smesh.py tmp/smesh.py
+usr_docs: doxyfile_py doxyfile
 	@$(DOXYGEN) doxyfile_py ;						\
 	$(DOXYGEN) doxyfile
 

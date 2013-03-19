@@ -37,6 +37,7 @@
 #include <list>
 #include <map>
 #include <vector>
+#include <set>
 
 #include <SALOMEconfig.h>
 #include CORBA_CLIENT_HEADER(SALOMEDS)

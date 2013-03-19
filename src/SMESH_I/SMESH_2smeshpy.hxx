@@ -122,7 +122,7 @@ public:
   bool IsEmpty() const { return myString.IsEmpty(); }
   _AString GetIndentation();
   const _AString & GetResultValue();
-  const int GetNbResultValues();
+  int GetNbResultValues();
   _AString GetResultValue(int res);
   const _AString & GetObject();
   const _AString & GetMethod();
@@ -222,6 +222,7 @@ class _pyGen: public _pyObject
 public:
   _pyGen(Resource_DataMapOfAsciiStringAsciiString& theEntry2AccessorMethod,
          Resource_DataMapOfAsciiStringAsciiString& theObjectNames,
+         std::set< TCollection_AsciiString >&      theRemovedObjIDs,
          SALOMEDS::Study_ptr&                      theStudy,
          const bool                                theToKeepAllCommands);
   Handle(_pyCommand) AddCommand( const _AString& theCommand );
@@ -247,6 +248,7 @@ public:
 
   bool IsGeomObject(const _pyID& theObjID) const;
   bool IsNotPublished(const _pyID& theObjID) const;
+  void ObjectCreationRemoved(const _pyID& theObjID);
   bool IsToKeepAllCommands() const { return myToKeepAllCommands; }
   void AddExportedMesh(const _AString& file, const ExportedMeshData& mesh )
   { myFile2ExportedMesh[ file ] = mesh; }
@@ -274,6 +276,7 @@ private:
   int                                      myNbCommands;
   Resource_DataMapOfAsciiStringAsciiString& myID2AccessorMethod;
   Resource_DataMapOfAsciiStringAsciiString& myObjectNames;
+  std::set< TCollection_AsciiString >&      myRemovedObjIDs;
   Handle(_pyCommand)                       myLastCommand;
   int                                      myNbFilters;
   bool                                     myToKeepAllCommands;

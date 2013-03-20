@@ -32,8 +32,8 @@ import SMESH
 #
 #  For each meshing algorithm, a python class inheriting from class %Mesh_Algorithm
 #  should be defined. This descendant class should have two attributes defining the way
-#  it is created by class Mesh (see e.g. class @ref StdMeshersDC.StdMeshersDC_Segment "StdMeshersDC_Segment"
-#  in StdMeshersDC package):
+#  it is created by class Mesh (see e.g. class @ref StdMeshersBuilder.StdMeshersBuilder_Segment "StdMeshersBuilder_Segment"
+#  in StdMeshersBuilder package):
 #  - @c meshMethod attribute defines name of method of class smesh.Mesh by calling which the
 #    python class of algorithm is created; this method is dynamically added to the smesh.Mesh class
 #    in runtime. For example, if in @c class MyPlugin_Algorithm this attribute is defined as

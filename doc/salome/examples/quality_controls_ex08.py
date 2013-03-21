@@ -20,7 +20,7 @@ face = geompy.SubShapeAllSorted( box, geompy.ShapeType["FACE"])[0]
 geompy.addToStudy( box, "box" )
 geompy.addToStudyInFather( box, face, "face" )
 
-mesh = Mesh(box)
+mesh = smesh.Mesh(box)
 mesh.AutomaticHexahedralization();
 
 # remove half of mesh faces from the smallest face
@@ -29,5 +29,5 @@ faceToRemove = faceFaces[: len(faceFaces)/2]
 mesh.RemoveElements( faceToRemove )
 
 # make a group of volumes missing the removed faces
-bareGroup = mesh.MakeGroup("bare volumes", VOLUME, FT_BareBorderVolume)
+bareGroup = mesh.MakeGroup("bare volumes", SMESH.VOLUME, SMESH.FT_BareBorderVolume)
 assert(bareGroup.Size() == len( faceToRemove))

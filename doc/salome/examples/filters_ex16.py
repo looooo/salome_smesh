@@ -14,18 +14,18 @@ import salome_notebook
 
 # make a mesh on a box
 box = geompy.MakeBoxDXDYDZ(100,100,100)
-mesh = Mesh( box, "Box" )
+mesh = smesh.Mesh( box, "Box" )
 mesh.Segment().NumberOfSegments(10)
 mesh.Quadrangle()
 mesh.Hexahedron()
 mesh.Compute()
 # copy all elements with translation and Merge nodes
-mesh.TranslateObject( mesh, MakeDirStruct( 10,0,0), Copy=True )
+mesh.TranslateObject( mesh, smesh.MakeDirStruct( 10,0,0), Copy=True )
 mesh.MergeNodes( mesh.FindCoincidentNodes(1e-7) )
 # create filters to find equal elements
-equalEdgesFilter   = GetFilter(SMESH.EDGE, SMESH.FT_EqualEdges)
-equalFacesFilter   = GetFilter(SMESH.FACE, SMESH.FT_EqualFaces)
-equalVolumesFilter = GetFilter(SMESH.VOLUME, SMESH.FT_EqualVolumes)
+equalEdgesFilter   = smesh.GetFilter(SMESH.EDGE, SMESH.FT_EqualEdges)
+equalFacesFilter   = smesh.GetFilter(SMESH.FACE, SMESH.FT_EqualFaces)
+equalVolumesFilter = smesh.GetFilter(SMESH.VOLUME, SMESH.FT_EqualVolumes)
 # get equal elements
 print "Number of equal edges:",   len( mesh.GetIdsFromFilter( equalEdgesFilter ))
 print "Number of equal faces:",   len( mesh.GetIdsFromFilter( equalFacesFilter ))

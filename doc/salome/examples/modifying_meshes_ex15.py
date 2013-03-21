@@ -13,16 +13,16 @@ smesh =  smeshBuilder.New(salome.myStudy)
 import salome_notebook
 
 
-box = MakeBoxDXDYDZ(200, 200, 200)
+box = geompy.MakeBoxDXDYDZ(200, 200, 200)
 
-mesh = Mesh( box )
+mesh = smesh.Mesh( box )
 mesh.Segment().AutomaticLength(0.1)
 mesh.Quadrangle()
 mesh.Compute()
 
 # find node at (0,0,0)
 node000 = None
-for vId in SubShapeAllIDs( box, ShapeType["VERTEX"]):
+for vId in geompy.SubShapeAllIDs( box, geompy.ShapeType["VERTEX"]):
     if node000: break
     nodeIds = mesh.GetSubMeshNodesId( vId, True )
     for node in nodeIds:

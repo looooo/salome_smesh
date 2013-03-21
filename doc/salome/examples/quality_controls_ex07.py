@@ -22,8 +22,8 @@ mesh.Quadrangle()
 mesh.Compute()
 
 # remove 2 faces
-allFaces = mesh.GetElementsByType(FACE)
+allFaces = mesh.GetElementsByType(SMESH.FACE)
 mesh.RemoveElements( allFaces[0:2])
 
-bareGroup = mesh.MakeGroup("bare faces", FACE, FT_BareBorderFace)
+bareGroup = mesh.MakeGroup("bare faces", SMESH.FACE, SMESH.FT_BareBorderFace)
 assert(bareGroup.Size() == 3)

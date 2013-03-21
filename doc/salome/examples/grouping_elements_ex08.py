@@ -1,6 +1,7 @@
 # Creating groups of entities from existing groups of superior dimensions
 
 import SMESH_mechanic
+import SMESH
 
 smesh  = SMESH_mechanic.smesh
 mesh   = SMESH_mechanic.mesh

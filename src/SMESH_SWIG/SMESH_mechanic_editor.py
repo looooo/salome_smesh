@@ -207,7 +207,7 @@ vector = SMESH.DirStruct(point)
 mesh.ExtrusionSweepObject(GroupTriToQuad, vector, 5)
 
 #4 mirror object
-mesh.Mirror([], SMESH.AxisStruct(0, 0, 0, 0, 0, 0), SMESH.POINT, 0)
+mesh.Mirror([], SMESH.AxisStruct(0, 0, 0, 0, 0, 0), smesh.POINT, 0)
 
 #5 mesh translation
 point = SMESH.PointStruct(10, 10, 10)
@@ -222,7 +222,7 @@ mesh.Rotate([], axisXYZ, angle180, 0)
 #7 group smoothing
 FacesSmooth = [864, 933, 941, 950, 1005, 1013]
 GroupSmooth = mesh.MakeGroupByIds("Group of faces (smooth)", SMESH.FACE, FacesSmooth)
-mesh.SmoothObject(GroupSmooth, [], 20, 2, SMESH.CENTROIDAL_SMOOTH)
+mesh.SmoothObject(GroupSmooth, [], 20, 2, smesh.CENTROIDAL_SMOOTH)
 
 #8 rotation sweep object
 FacesRotate = [492, 493, 502, 503]

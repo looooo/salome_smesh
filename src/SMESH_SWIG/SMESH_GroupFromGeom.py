@@ -44,7 +44,7 @@ geompy.AddObject(aGeomGroup2, 10)
 geompy.addToStudy(aGeomGroup1, "Group on Faces")
 geompy.addToStudy(aGeomGroup2, "Group on Edges")
 
-aSmeshGroup1 = mesh.GroupOnGeom(aGeomGroup1, "SMESHGroup1", smesh.FACE)
-aSmeshGroup2 = mesh.GroupOnGeom(aGeomGroup2, "SMESHGroup2", smesh.EDGE)
+aSmeshGroup1 = mesh.GroupOnGeom(aGeomGroup1, "SMESHGroup1", SMESH.FACE)
+aSmeshGroup2 = mesh.GroupOnGeom(aGeomGroup2, "SMESHGroup2", SMESH.EDGE)
 
 salome.sg.updateObjBrowser(1);

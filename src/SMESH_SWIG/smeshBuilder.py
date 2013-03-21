@@ -96,23 +96,6 @@ import os
 ## @addtogroup l1_auxiliary
 ## @{
 
-# MirrorType enumeration
-POINT = SMESH_MeshEditor.POINT
-AXIS =  SMESH_MeshEditor.AXIS
-PLANE = SMESH_MeshEditor.PLANE
-
-# Smooth_Method enumeration
-LAPLACIAN_SMOOTH = SMESH_MeshEditor.LAPLACIAN_SMOOTH
-CENTROIDAL_SMOOTH = SMESH_MeshEditor.CENTROIDAL_SMOOTH
-
-PrecisionConfusion = 1e-07
-
-# TopAbs_State enumeration
-[TopAbs_IN, TopAbs_OUT, TopAbs_ON, TopAbs_UNKNOWN] = range(4)
-
-# Methods of splitting a hexahedron into tetrahedra
-Hex_5Tet, Hex_6Tet, Hex_24Tet = 1, 2, 3
-
 ## Converts an angle from degrees to radians
 def DegreesToRadians(AngleInDegrees):
     from math import pi
@@ -172,8 +155,8 @@ def __initAxisStruct(ax,*args):
     pass
 SMESH.AxisStruct.__init__ = __initAxisStruct
 
-
-def IsEqual(val1, val2, tol=PrecisionConfusion):
+smeshPrecisionConfusion = 1.e-07
+def IsEqual(val1, val2, tol=smeshPrecisionConfusion):
     if abs(val1 - val2) < tol:
         return True
     return False
@@ -307,6 +290,23 @@ doLcc = False
 #  It has a set of methods to create load or copy meshes, to combine several meshes.
 #  It also has methods to get infos on meshes.
 class smeshBuilder(object, SMESH._objref_SMESH_Gen):
+
+    # MirrorType enumeration
+    POINT = SMESH_MeshEditor.POINT
+    AXIS =  SMESH_MeshEditor.AXIS
+    PLANE = SMESH_MeshEditor.PLANE
+
+    # Smooth_Method enumeration
+    LAPLACIAN_SMOOTH = SMESH_MeshEditor.LAPLACIAN_SMOOTH
+    CENTROIDAL_SMOOTH = SMESH_MeshEditor.CENTROIDAL_SMOOTH
+
+    PrecisionConfusion = smeshPrecisionConfusion
+
+    # TopAbs_State enumeration
+    [TopAbs_IN, TopAbs_OUT, TopAbs_ON, TopAbs_UNKNOWN] = range(4)
+
+    # Methods of splitting a hexahedron into tetrahedra
+    Hex_5Tet, Hex_6Tet, Hex_24Tet = 1, 2, 3
 
     def __new__(cls):
         global engine
@@ -2891,7 +2891,7 @@ class Mesh:
     #  @param method  flags passing splitting method: Hex_5Tet, Hex_6Tet, Hex_24Tet
     #         Hex_5Tet - split the hexahedron into 5 tetrahedrons, etc
     #  @ingroup l2_modif_cutquadr
-    def SplitVolumesIntoTetra(self, elemIDs, method=Hex_5Tet ):
+    def SplitVolumesIntoTetra(self, elemIDs, method=smeshBuilder.Hex_5Tet ):
         if isinstance( elemIDs, Mesh ):
             elemIDs = elemIDs.GetMesh()
         if ( isinstance( elemIDs, list )):

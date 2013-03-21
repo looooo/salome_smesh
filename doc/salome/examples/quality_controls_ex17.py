@@ -1,6 +1,7 @@
 # Warping
 
 import SMESH_mechanic
+import SMESH
 
 smesh  = SMESH_mechanic.smesh
 mesh   = SMESH_mechanic.mesh

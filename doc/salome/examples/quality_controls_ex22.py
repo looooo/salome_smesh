@@ -1,6 +1,7 @@
 # Element Diameter 3D
 
 import SMESH_mechanic_tetra
+import SMESH
 
 smesh  = SMESH_mechanic_tetra.smesh
 mesh   = SMESH_mechanic_tetra.mesh

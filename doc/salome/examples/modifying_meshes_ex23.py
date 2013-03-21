@@ -96,7 +96,7 @@ Edge_Circle_mesh   = Mesh1D(Edge_Circle  , 8, "Edge_Circle")
 # ExtrusionAlongPath
 # IDsOfElements, PathMesh, PathShape, NodeStart,
 # HasAngles, Angles, HasRefPoint, RefPoint
-refPoint = smesh.PointStruct(0, 0, 0)
+refPoint = SMESH.PointStruct(0, 0, 0)
 a10 = 10.0*math.pi/180.0
 a45 = 45.0*math.pi/180.0
 

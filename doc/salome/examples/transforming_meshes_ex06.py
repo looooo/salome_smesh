@@ -51,7 +51,7 @@ circlemesh.Compute()
 
 # extrusion of the mesh
 trias.ExtrusionAlongPath([], circlemesh, circle,
-                         1, 0, [], 0, smesh.PointStruct(0, 0, 0))
+                         1, 0, [], 0, SMESH.PointStruct(0, 0, 0))
 
 # merge nodes
 print "Number of nodes before MergeNodes:", 

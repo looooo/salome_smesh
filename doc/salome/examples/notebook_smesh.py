@@ -42,6 +42,6 @@ algo3D.MaxElementVolume("MaxElementVolume")
 ret = tetra.Compute()
 
 # translate the mesh
-point = smesh.PointStruct("Offset", 0., 0.)
-vector = smesh.DirStruct(point) 
+point = SMESH.PointStruct("Offset", 0., 0.)
+vector = SMESH.DirStruct(point)
 tetra.TranslateObject(tetra, vector, 0)

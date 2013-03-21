@@ -9,7 +9,7 @@ salome = SMESH_mechanic_tetra.salome
 # Criterion : ASPECT RATIO 3D > 4.5
 ar_margin = 4.5
 
-aFilter = smesh.GetFilter(smesh.VOLUME, smesh.FT_AspectRatio3D, smesh.FT_MoreThan, ar_margin)
+aFilter = smesh.GetFilter(SMESH.VOLUME, SMESH.FT_AspectRatio3D, SMESH.FT_MoreThan, ar_margin)
 
 anIds = mesh.GetIdsFromFilter(aFilter) 
 
@@ -24,7 +24,7 @@ for i in range(len(anIds)):
 print ""
 
 # create a group
-aGroup = mesh.CreateEmptyGroup(smesh.VOLUME, "Aspect Ratio 3D > " + `ar_margin`)
+aGroup = mesh.CreateEmptyGroup(SMESH.VOLUME, "Aspect Ratio 3D > " + `ar_margin`)
 
 aGroup.Add(anIds)
 

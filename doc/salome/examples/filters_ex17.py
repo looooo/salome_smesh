@@ -1,6 +1,17 @@
 # Double nodes
 
-from smesh import *
+
+import salome
+salome.salome_init()
+import GEOM
+from salome.geom import geomBuilder
+geompy = geomBuilder.New(salome.myStudy)
+
+import SMESH, SALOMEDS
+from salome.smesh import smeshBuilder
+smesh =  smeshBuilder.New(salome.myStudy)
+import salome_notebook
+
 # make a mesh on a box
 box = geompy.MakeBoxDXDYDZ(100,100,100)
 mesh = Mesh( box, "Box" )

@@ -9,7 +9,7 @@ salome = SMESH_mechanic.salome
 # Criterion : WARP ANGLE > 1e-15
 wa_margin = 1e-15
 
-aFilter = smesh.GetFilter(smesh.FACE, smesh.FT_Warping, smesh.FT_MoreThan, wa_margin)
+aFilter = smesh.GetFilter(SMESH.FACE, SMESH.FT_Warping, SMESH.FT_MoreThan, wa_margin)
 
 anIds = mesh.GetIdsFromFilter(aFilter) 
 
@@ -24,7 +24,7 @@ for i in range(len(anIds)):
 print ""
 
 # create a group
-aGroup = mesh.CreateEmptyGroup(smesh.FACE, "Warp > " + `wa_margin`)
+aGroup = mesh.CreateEmptyGroup(SMESH.FACE, "Warp > " + `wa_margin`)
 
 aGroup.Add(anIds)
 

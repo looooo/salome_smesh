@@ -19,7 +19,7 @@ idbox = geompy.addToStudy(box, "box")
 mesh = smesh.Mesh(box, "Mesh_free_nodes")
 algo = mesh.Segment()
 algo.NumberOfSegments(10)
-algo = mesh.Triangle(smesh.MEFISTO)
+algo = mesh.Triangle(smeshBuilder.MEFISTO)
 algo.MaxElementArea(150.)
 mesh.Compute() 
 

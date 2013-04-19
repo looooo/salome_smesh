@@ -40,7 +40,7 @@ class MonYamsPlugDialog(Ui_YamsPlugDialog,QWidget):
         self.MeshIn="" 
         self.num=1
 
-#	Ces parametres ne sont pas remis à rien par le clean
+        #Ces parametres ne sont pas remis à rien par le clean
         self.paramsFile= os.path.abspath(os.path.join(os.environ['HOME'],'.yams.dat'))
         self.LE_ParamsFile.setText(self.paramsFile)
         self.LE_MeshFile.setText("")
@@ -66,7 +66,7 @@ class MonYamsPlugDialog(Ui_YamsPlugDialog,QWidget):
         except Exception:
           QMessageBox.warning( self, "Help unavailable", str(maDoc) + " not found")
         command="xdg-open "+maDoc+";"
-	subprocess.call(command, shell=True)
+        subprocess.call(command, shell=True) #
 
 
   def PBOKPressed(self):

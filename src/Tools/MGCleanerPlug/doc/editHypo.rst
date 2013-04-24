@@ -1,23 +1,23 @@
 .. _hypothesis-label:
 
 ===========================
-How to save Yams Parameters 
+How to save MG-Cleaner Parameters 
 ===========================
 
-As Yams hypothesis are not meshing hypothesis for Salome (but hypothesis for yams), parameters
-are stored in a special file. Default file is $HOME/.yams.dat. It is strongly recommended that you
+As MG-Cleaner hypothesis are not meshing hypothesis for Salome (but hypothesis for MG-Cleaner), parameters
+are stored in a special file. Default file is $HOME/.MGCleaner.dat. It is strongly recommended that you
 change this name if you want to preserve the way you obtain a mesh : This file is never cleaned.
 All sets of parameters are logged in it.
 
 
 - To save the current setting, click on "Save Params" pushbutton. 
-- A set of parameters is automatically written in the .yams.dat file when you run computation.  
+- A set of parameters is automatically written in the .MGCleaner.dat file when you run computation.  
 - Restoring the default settings can be done by pushing "Default Params". 
 - "Loading Params" will reload the last set of parameters
 
 
 
-**example of .yams.dat**
+**example of .MGCleaner.dat**
 
 
 .. code-block:: python
@@ -40,7 +40,7 @@ All sets of parameters are logged in it.
    
    
    
-   # Params for Hypothese : anHypo_Yams_0
+   # Params for Hypothese : anHypo_MGCleaner_0
    # Params for mesh : Mesh_1
    Optimisation ='Quality improvement Only (0)'
    Units ='Relative'

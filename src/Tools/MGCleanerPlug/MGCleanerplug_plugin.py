@@ -20,7 +20,7 @@
 # if you already have plugins defined in a salome_plugins.py file, add this file at the end.
 # if not, copy this file as ${HOME}/Plugins/smesh_plugins.py or ${APPLI}/Plugins/smesh_plugins.py
 
-def YamsLct(context):
+def MGCleanerLct(context):
   # get context study, studyId, salomeGui
   study = context.study
   studyId = context.studyId
@@ -35,10 +35,10 @@ def YamsLct(context):
   from PyQt4.QtGui import QMessageBox
   
   try :
-      os.environ['DISTENE_LICENCE_FILE_FOR_YAMS']
+      os.environ['DISTENE_LICENCE_FILE_FOR_MGCLEANER']
   except:
-      QMessageBox.warning(None,"Products","Distene's products Yams are not installed")
+      QMessageBox.warning(None,"Products","Distene's products MeshGemCleaner are not installed")
       return
-  import monYamsPlugDialog
-  window=monYamsPlugDialog.getDialog() 
+  import MGCleanerMonPlugDialog
+  window=MGCleanerMonPlugDialog.getDialog() 
   window.show()

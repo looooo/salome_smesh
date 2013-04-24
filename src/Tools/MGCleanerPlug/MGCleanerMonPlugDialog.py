@@ -22,13 +22,13 @@
 # Modules Eficas
 
 import os, subprocess
-from YamsPlugDialog import Ui_YamsPlugDialog
-from monViewText import MonViewText
+from MGCleanerPlugDialog import Ui_MGCleanerPlugDialog
+from MGCleanerMonViewText import MGCleanerMonViewText
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 
 
-class MonYamsPlugDialog(Ui_YamsPlugDialog,QWidget):
+class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
   """
   """
   def __init__(self):
@@ -46,7 +46,7 @@ class MonYamsPlugDialog(Ui_YamsPlugDialog,QWidget):
         # iconfolder=os.path.dirname(os.path.abspath(__file__))
 
         iconfolder=os.environ['SMESH_ROOT_DIR']+'/share/salome/resources/smesh'
-        #print "monYamsPlugDialog iconfolder",iconfolder
+        #print "MGCleanerMonPlugDialog iconfolder",iconfolder
         icon = QIcon()
         icon.addFile(os.path.join(iconfolder,"select1.png"))
         self.PB_MeshSmesh.setIcon(icon)
@@ -55,7 +55,7 @@ class MonYamsPlugDialog(Ui_YamsPlugDialog,QWidget):
         self.PB_ParamsFileExplorer.setIcon(icon)
 
         #Ces parametres ne sont pas remis à rien par le clean
-        self.paramsFile= os.path.abspath(os.path.join(os.environ['HOME'],'.yams.dat'))
+        self.paramsFile= os.path.abspath(os.path.join(os.environ['HOME'],'.MGCleaner.dat'))
         self.LE_ParamsFile.setText(self.paramsFile)
         self.LE_MeshFile.setText("")
         self.LE_MeshSmesh.setText("")
@@ -79,7 +79,7 @@ class MonYamsPlugDialog(Ui_YamsPlugDialog,QWidget):
           mydir=os.environ['SMESH_ROOT_DIR']
         except Exception:
           QMessageBox.warning( self, "Help unavailable $SMESH_ROOT_DIR not found")
-        maDoc=mydir+"/share/doc/salome/gui/SMESH/yams/_downloads/YamsWhitePaper_3.2.pdf"
+        maDoc=mydir+"/share/doc/salome/gui/SMESH/MGCleaner/_downloads/mg-cleaner_user_manual.pdf"
         command="xdg-open "+maDoc+";"
         subprocess.call(command, shell=True)
 
@@ -87,7 +87,7 @@ class MonYamsPlugDialog(Ui_YamsPlugDialog,QWidget):
   def PBOKPressed(self):
         if not(self.PrepareLigneCommande()) : return
         self.PBSavePressed(NomHypo=True)
-        maFenetre=MonViewText(self,self.commande)
+        maFenetre=MGCleanerMonViewText(self,self.commande)
         if os.path.isfile(self.fichierOut) :self.enregistreResultat()
 
   def enregistreResultat(self):
@@ -99,7 +99,7 @@ class MonYamsPlugDialog(Ui_YamsPlugDialog,QWidget):
         maStudy=studyedit.getActiveStudy()
         smesh.SetCurrentStudy(maStudy)
         (outputMesh, status) = smesh.CreateMeshesFromGMF(self.fichierOut)
-        meshname = 'yams'+str(self.num)
+        meshname = 'MGCleaner'+str(self.num)
         smesh.SetName(outputMesh.GetMesh(), meshname)
         outputMesh.Compute()
 
@@ -112,7 +112,7 @@ class MonYamsPlugDialog(Ui_YamsPlugDialog,QWidget):
         monStudyBuilder.NewCommand();
         newStudyIter=monStudyBuilder.NewObject(HypReMeshEntry)
         aNameAttrib=monStudyBuilder.FindOrCreateAttribute(newStudyIter,"AttributeName")
-        hypoName = 'anHypo_Yams_'+str(self.num)
+        hypoName = 'anHypo_MGCleaner_'+str(self.num)
         aNameAttrib.SetValue(hypoName)
         aCommentAttrib=monStudyBuilder.FindOrCreateAttribute(newStudyIter,"AttributeComment")
         aCommentAttrib.SetValue(str(self.commande))
@@ -125,7 +125,7 @@ class MonYamsPlugDialog(Ui_YamsPlugDialog,QWidget):
         return True
 
   def PBSavePressed(self,NomHypo=False):
-        if NomHypo : text = '# Params for Hypothese : anHypo_Yams_'+str(self.num - 1)+"\n"
+        if NomHypo : text = '# Params for Hypothese : anHypo_MGCleaner_'+str(self.num - 1)+"\n"
         else :       text = '# Save intermediate params \n' 
         text += "# Params for mesh : " +  self.LE_MeshSmesh.text() +'\n'
         for RB in self.GBOptim.findChildren(QRadioButton,):
@@ -247,12 +247,27 @@ class MonYamsPlugDialog(Ui_YamsPlugDialog,QWidget):
       self.LE_MeshSmesh.setText(myName)
 
   def prepareFichier(self):
-      self.fichierIn="/tmp/PourYam_"+str(self.num)+".mesh"
+      self.fichierIn="/tmp/PourMGCleaner_"+str(self.num)+".mesh"
       import SMESH
       self.__selectedMesh.ExportGMF(self.__selectedMesh,self.fichierIn, True)
 
   def PrepareLigneCommande(self):
-      self.commande="yams "
+      """
+      #use doc examples of mg-cleaner:
+      ls -al /data/tmplgls/salome/prerequis/install/COMMON_64/MeshGems-1.0/bin
+      source /data/tmplgls/salome/prerequis/install/LICENSE/dlim8.var.sh
+      export PATH=/data/tmplgls/salome/prerequis/install/COMMON_64/MeshGems-1.0/bin/Linux_64:$PATH
+      cp -r /data/tmplgls/salome/prerequis/install/COMMON_64/MeshGems-1.0/examples .
+      cd examples
+      mg-cleaner.exe --help
+      mg-cleaner.exe --in case7.mesh --out case7-test.mesh --check
+      mg-cleaner.exe case7.mesh case7-fix.mesh --fix
+      mg-cleaner.exe --in Porsche.mesh --out Porsche-test.mesh --check
+      mg-cleaner.exe --in Porsche.mesh --out Porschefix.mesh --fix
+      mg-cleaner.exe --in Porsche.mesh --out PorscheNewfix.mesh --fix --resolution_length 0.03
+      """
+
+      self.commande="mg-cleaner.exe "
       verbosity=str(self.SP_Verbosity.value())
       self.commande+="-v "+verbosity
       for obj in self.mesRB.children():
@@ -293,6 +308,12 @@ class MonYamsPlugDialog(Ui_YamsPlugDialog,QWidget):
       if self.SP_Memory.value()!=0 : self.commande+=' -m %d'%self.SP_Memory.value()
 
       self.commande+=" "+self.fichierIn
+      
+      #for the moment
+      deb=os.path.splitext(self.fichierIn)     
+      self.fichierOut=deb[0]+'_fix.mesh'
+      self.commande="mg-cleaner.exe --in " + self.fichierIn + " --out " + self.fichierOut + " --fix" 
+      
       return True
 
   def clean(self):
@@ -325,7 +346,7 @@ def getDialog():
     """
     global __dialog
     if __dialog is None:
-        __dialog = MonYamsPlugDialog()
+        __dialog = MGCleanerMonPlugDialog()
     #else :
     #   __dialog.clean()
     return __dialog

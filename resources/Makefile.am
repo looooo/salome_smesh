@@ -25,7 +25,7 @@
 include $(top_srcdir)/adm_local/unix/make_common_starter.am
 
 dist_salomeres_DATA = \
-	delete.png  \
+  delete.png  \
 	mesh_add_sub.png \
 	mesh_algo_hexa.png \
 	mesh_algo_mefisto.png \
@@ -156,6 +156,7 @@ dist_salomeres_DATA = \
 	mesh_merge_nodes.png \
 	mesh_merge_elements.png \
 	select1.png \
+	open.png \
 	StdMeshers.xml \
 	mesh_pattern.png \
 	mesh_pentahedron.png \
@@ -193,9 +194,9 @@ dist_salomeres_DATA = \
 	mesh_extractGroup.png \
 	mesh_precompute.png \
 	mesh_2d_from_3d.png \
-        mesh_free_faces.png \
-        scale.png \
-        scale_along_axes.png \
+  mesh_free_faces.png \
+  scale.png \
+  scale_along_axes.png \
 	split_into_tetra.png \
 	mesh_duplicate_nodes.png \
 	mesh_duplicate_nodes_with_elem.png \

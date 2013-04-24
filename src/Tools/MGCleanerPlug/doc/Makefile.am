@@ -3,7 +3,7 @@
 
 include $(top_srcdir)/adm_local/unix/make_common_starter.am
 
-yamsdocdir=$(docdir)/gui/SMESH/yams
+MGCleanerdocdir=$(docdir)/gui/SMESH/MGCleaner
 
 RSTFILES = lct.rst \
 	   index.rst \
@@ -20,7 +20,7 @@ SOURCEDIR     = $(srcdir)
 SPHINXBUILD   = sphinx-build
 PAPER         =
 BUILDDIR      = _build
-CONF_FILE_DIR = $(top_builddir)/src/Tools/YamsPlug/doc
+CONF_FILE_DIR = $(top_builddir)/src/Tools/MGCleanerPlug/doc
 
 # Internal variables.
 PAPEROPT_a4     = -D latex_paper_size=a4
@@ -49,10 +49,10 @@ help:
 	@echo "  doctest    to run all doctests embedded in the documentation (if enabled)"
 
 install-data-local: $(BUILDDIR)/html/index.html
-	-test -z $(yamsdocdir) || mkdir -p $(yamsdocdir) && cp -rf $(BUILDDIR)/html/* $(yamsdocdir) ;
+	-test -z $(MGCleanerdocdir) || mkdir -p $(MGCleanerdocdir) && cp -rf $(BUILDDIR)/html/* $(MGCleanerdocdir) ;
 
 uninstall-local:
-	-test -d $(yamsdocdir) && chmod -R +w $(yamsdocdir) && rm -rf $(yamsdocdir)/*
+	-test -d $(MGCleanerdocdir) && chmod -R +w $(MGCleanerdocdir) && rm -rf $(MGCleanerdocdir)/*
 
 clean-local:
 	-rm -rf $(BUILDDIR)/*

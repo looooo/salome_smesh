@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>YamsPlugDialog</class>
- <widget class="QWidget" name="YamsPlugDialog">
+ <class>MGCleanerPlugDialog</class>
+ <widget class="QWidget" name="MGCleanerPlugDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Yams : Remeshing tool</string>
+   <string>MGCleaner : Remeshing tool</string>
   </property>
   <property name="sizeGripEnabled" stdset="0">
    <bool>false</bool>
@@ -333,8 +333,8 @@ p, li { white-space: pre-wrap; }
         <rect>
          <x>410</x>
          <y>420</y>
-         <width>351</width>
-         <height>71</height>
+         <width>350</width>
+         <height>70</height>
         </rect>
        </property>
        <property name="toolTip">
@@ -601,7 +601,7 @@ or add vertices (refines) to change the mesh.</string>
         </rect>
        </property>
        <property name="title">
-        <string>You can control :</string>
+        <string>You can control </string>
        </property>
        <widget class="QDoubleSpinBox" name="SP_Geomapp">
         <property name="geometry">
@@ -657,7 +657,7 @@ p, li { white-space: pre-wrap; }
 &lt;tr&gt;
 &lt;td style=&quot;border: none;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Geometrical approximation :  Maximum angle allowed between a face and a curve &lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;(not separated by a ridge).&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;(not separated by a ridge).&lt;/span&gt;)&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;/p&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
        </widget>
@@ -901,7 +901,7 @@ New created vertices  are saved in the .mesh file under keyword section Vertices
         </rect>
        </property>
        <property name="title">
-        <string>Yams Generic Options</string>
+        <string>MGCleaner Generic Options</string>
        </property>
        <widget class="QWidget" name="layoutWidget">
         <property name="geometry">
@@ -1038,7 +1038,7 @@ exceeds the machine capabilities, the tool will stop because of insufficient mem
          </rect>
         </property>
         <property name="text">
-         <string>File used to save Yams Params :</string>
+         <string>File used to save MGCleaner Params :</string>
         </property>
        </widget>
        <widget class="QPushButton" name="PB_ParamsFileExplorer">

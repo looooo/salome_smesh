@@ -28,9 +28,9 @@ from PyQt4.QtCore import *
 
 # Import des panels
 
-from ViewText import Ui_ViewExe
+from MGCleanerViewText import Ui_ViewExe
 
-class MonViewText(Ui_ViewExe,QDialog):
+class MGCleanerMonViewText(Ui_ViewExe,QDialog):
     """
     Classe permettant la visualisation de texte
     """
@@ -50,30 +50,30 @@ class MonViewText(Ui_ViewExe,QDialog):
         # fonctionne hors Salome mais pas dans Salome ???
         cmds=''
         try :
-          LICENCE_FILE=os.environ["DISTENE_LICENCE_FILE_FOR_YAMS"]
+          LICENCE_FILE=os.environ["DISTENE_LICENCE_FILE_FOR_MGCLEANER"]
         except:
           LICENCE_FILE=''
         try :
-          PATH=os.environ["DISTENE_PATH_FOR_YAMS"]
+          PATH=os.environ["DISTENE_PATH_FOR_MGCLEANER"]
         except:
           PATH=''
         if LICENCE_FILE != '': 
           cmds+='source '+LICENCE_FILE+'\n'
         else:
-          cmds+="# $DISTENE_LICENCE_FILE_FOR_YAMS NOT SET\n"
+          cmds+="# $DISTENE_LICENCE_FILE_FOR_MGCLEANER NOT SET\n"
         if PATH != '': 
           cmds+='export PATH='+PATH+':$PATH\n'
         else:
-          cmds+="# $DISTENE_PATH_FOR_YAMS NOT SET\n"
+          cmds+="# $DISTENE_PATH_FOR_MGCLEANER NOT SET\n"
         #cmds+='env\n'
         cmds+=txt+'\n'
         pid=self.monExe.pid()
-        nomFichier='/tmp/Yams_'+str(pid)+'.sh'
+        nomFichier='/tmp/MGCleaner_'+str(pid)+'.sh'
         f=open(nomFichier,'w')
         f.write(cmds)
         f.close()
 
-        maBidouille='sh  ' + nomFichier
+        maBidouille='sh ' + nomFichier
         self.monExe.start(maBidouille)
         self.monExe.closeWriteChannel()
         self.show()

@@ -59,7 +59,7 @@
             <source>ICON_DLG_NUMBER_OF_LAYERS</source>
             <translation>mesh_hypo_layer_distribution.png</translation>
         </message>
-	<message>
+        <message>
             <source>ICON_DLG_NUMBER_OF_LAYERS_2D</source>
             <translation>mesh_hypo_layer_distribution.png</translation>
         </message>
@@ -100,14 +100,18 @@
             <translation>select1.png</translation>
         </message>
         <message>
+            <source>ICON_FILE_OPEN</source>
+            <translation>open.png</translation>
+        </message>
+        <message>
             <source>ICON_SMESH_TREE_ALGO_CompositeSegment_1D</source>
             <translation>mesh_tree_algo_regular.png</translation>
         </message>
-	<message>
+        <message>
             <source>ICON_SMESH_TREE_ALGO_UseExisting_2D</source>
             <translation>mesh_tree_algo_existing_2D.png</translation>
         </message>
-	<message>
+        <message>
             <source>ICON_SMESH_TREE_ALGO_UseExisting_1D</source>
             <translation>mesh_tree_algo_regular.png</translation>
         </message>
@@ -135,11 +139,11 @@
             <source>ICON_SMESH_TREE_ALGO_Quadrangle_2D</source>
             <translation>mesh_tree_algo_quad.png</translation>
         </message>
-	<message>
+        <message>
             <source>ICON_SMESH_TREE_ALGO_RadialQuadrangle_1D2D</source>
             <translation>mesh_tree_algo_radial_quadrangle_1D2D.png</translation>
         </message>
-	<message>
+        <message>
             <source>ICON_SMESH_TREE_ALGO_Prism_3D</source>
             <translation>mesh_tree_algo_prism.png</translation>
         </message>

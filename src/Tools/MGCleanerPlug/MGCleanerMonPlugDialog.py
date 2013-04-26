@@ -59,7 +59,7 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
         self.LE_ParamsFile.setText(self.paramsFile)
         self.LE_MeshFile.setText("")
         self.LE_MeshSmesh.setText("")
-        
+        self.resize(800, 500)
         self.clean()
 
   def connecterSignaux(self) :
@@ -75,7 +75,12 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
         self.connect(self.LE_MeshFile,SIGNAL("returnPressed()"),self.meshFileNameChanged)
         self.connect(self.LE_ParamsFile,SIGNAL("returnPressed()"),self.paramsFileNameChanged)
 
-
+        #QtCore.QObject.connect(self.checkBox, QtCore.SIGNAL('stateChanged(int)'), self.change) 
+        self.connect(self.CB_FillHoles,SIGNAL("stateChanged(int)"),self.SP_minHoleSize.setEnabled)
+        self.connect(self.CB_computedToleranceDisplacement,SIGNAL("stateChanged(int)"),self.SP_toleranceDisplacement.setDisabled)
+        self.connect(self.CB_computedResolutionLength,SIGNAL("stateChanged(int)"),self.SP_resolutionLength.setDisabled)
+        self.connect(self.CB_computedOverlapDistance,SIGNAL("stateChanged(int)"),self.SP_overlapDistance.setDisabled)
+        
   def PBHelpPressed(self):
         try :
           mydir=os.environ['SMESH_ROOT_DIR']
@@ -87,10 +92,10 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
 
 
   def PBOKPressed(self):
-        if not(self.PrepareLigneCommande()) : return
+        if not(self.PrepareLigneCommande()): return
         self.PBSavePressed(NomHypo=True)
         maFenetre=MGCleanerMonViewText(self,self.commande)
-        if os.path.isfile(self.fichierOut) :self.enregistreResultat()
+        if os.path.isfile(self.fichierOut): self.enregistreResultat()
 
   def enregistreResultat(self):
         import smesh
@@ -127,9 +132,13 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
         return True
 
   def PBSavePressed(self,NomHypo=False):
-        if NomHypo : text = '# Params for Hypothese : anHypo_MGCleaner_'+str(self.num - 1)+"\n"
-        else :       text = '# Save intermediate params \n' 
+        if NomHypo: 
+          text = '# Params for Hypothese : anHypo_MGCleaner_'+str(self.num - 1)+"\n"
+        else:
+          text = '# Save intermediate params \n' 
         text += "# Params for mesh : " +  self.LE_MeshSmesh.text() +'\n'
+        
+        """
         for RB in self.GBOptim.findChildren(QRadioButton,):
             if RB.isChecked()==True:
                text+="Optimisation ='"+RB.text()+"'\n"
@@ -138,7 +147,6 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
             if RB.isChecked()==True:
                text+="Units ='"+RB.text()+"'\n"
         text+='Chordal_Tolerance_Deviation='+str(self.SP_Tolerance.value())+'\n'
-
         text+='Ridge_Detection=' + str(self.CB_Ridge.isChecked())+'\n'
         text+='Split_Edge='      + str(self.CB_SplitEdge.isChecked())+'\n'
         text+='Point_Smoothing=' + str(self.CB_Point.isChecked())+'\n'
@@ -147,33 +155,31 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
         text+='Maximum_Size='             + str(self.SP_MaxSize.value())  +'\n'
         text+='Minimum_Size='             + str(self.SP_MaxSize.value())  +'\n'
         text+='Mesh_Gradation='           + str(self.SP_Gradation.value())+'\n'
-
         text+='Verbosity='                + str(self.SP_Verbosity.value())+'\n'
-        text+='Memory='                   + str(self.SP_Memory.value())+'\n'
         text+='\n\n'
-
-        try :
+        """
+        try:
            f=open(self.paramsFile,'a')
-        except :
-           QMessageBox.warning( self, "File", "Unable to open "+self.paramsFile)
+        except:
+           QMessageBox.warning(self, "File", "Unable to open "+self.paramsFile)
            return
-        try :
+        try:
            f.write(text)
-        except :
-           QMessageBox.warning( self, "File", "Unable to write "+self.paramsFile)
+        except:
+           QMessageBox.warning(self, "File", "Unable to write "+self.paramsFile)
            return
         f.close()
 
   def PBLoadPressed(self):
-        try :
+        try:
            f=open(self.paramsFile,'r')
         except :
-           QMessageBox.warning( self, "File", "Unable to open "+self.paramsFile)
+           QMessageBox.warning(self, "File", "Unable to open "+self.paramsFile)
            return
-        try :
+        try:
            text=f.read()
         except :
-           QMessageBox.warning( self, "File", "Unable to read "+self.paramsFile)
+           QMessageBox.warning(self, "File", "Unable to read "+self.paramsFile)
            return
         f.close()
         d={}
@@ -183,7 +189,7 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
                RB.setChecked(True)
                break
         for RB in self.GBUnit.findChildren(QRadioButton,):
-            if d['Units']== RB.text():
+            if d['Units']==RB.text():
                RB.setChecked(True)
                break
         self.SP_Tolerance.setValue(d['Chordal_Tolerance_Deviation'])
@@ -217,7 +223,6 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
           infile = fd.selectedFiles()[0]
           self.LE_ParamsFile.setText(infile)
           self.paramsFile=infile.toLatin1()
-
 
   def meshFileNameChanged(self):
       self.fichierIn=self.LE_MeshFile.text()
@@ -268,61 +273,54 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
       mg-cleaner.exe --in Porsche.mesh --out Porschefix.mesh --fix
       mg-cleaner.exe --in Porsche.mesh --out PorscheNewfix.mesh --fix --resolution_length 0.03
       """
-
-      self.commande="mg-cleaner.exe "
-      verbosity=str(self.SP_Verbosity.value())
-      self.commande+="-v "+verbosity
-      for obj in self.mesRB.children():
-          try :
-           if obj.isChecked():
-              self.style=obj.objectName().remove(0,3)
-              self.style.replace("_","-")
-              break
-          except :
-              pass
-      self.commande+=" -O "+self.style.toLatin1()
+      
+      #self.commande="mg-cleaner.exe --in " + self.fichierIn + " --out " + self.fichierOut + " --fix2pass" 
+      #return True
       if self.fichierIn=="" and self.MeshIn=="" :
-         QMessageBox.critical(self, "Mesh", "select an input mesh")
-         return False
+        QMessageBox.critical(self, "Mesh", "select an input mesh")
+        return False
       if self.MeshIn!="" : self.prepareFichier()
       if not (os.path.isfile(self.fichierIn)):
-         QMessageBox.critical(self, "File", "unable to read GMF Mesh in "+str(self.fichierIn))
-         return False
-
+        QMessageBox.critical(self, "File", "unable to read GMF Mesh in "+str(self.fichierIn))
+        return False
+     
+      self.commande="mg-cleaner.exe"
+      verbosity=str(self.SP_Verbosity.value())
+      self.commande+=" --verbose " + verbosity
+      self.commande+=" --in " + self.fichierIn
       deb=os.path.splitext(self.fichierIn)
-      self.fichierOut=deb[0]+'.d.meshb'
-
-      if self.RB_Absolute.isChecked()==True :
-         self.commande+=' -Dabsolute'
-      else :
-         self.commande+=' -Drelative'
-      self.commande+=',tolerance=%f'%self.SP_Tolerance.value()
-      if self.CB_Ridge.isChecked()==False : self.commande+=',nr'
-      if self.CB_Point.isChecked()==False : self.commande+=',ns'
-      if self.SP_Geomapp.value()!=0.04 : self.commande+=',geomapp=%f'%self.SP_Geomapp.value()
-      if self.SP_Ridge.value()!=45.0 : self.commande+=',ridge=%f'%self.SP_Ridge.value()
-      if self.SP_MaxSize.value()!=100 : self.commande+=',maxsize=%f'%self.SP_MaxSize.value()
-      if self.SP_MinSize.value()!=5 : self.commande+=',minsize=%f'%self.SP_MinSize.value()
-      if self.SP_Gradation.value()!=1.3 : self.commande+=',gradation=%f'%self.SP_MaxSize.value()
-      if self.CB_SplitEdge.isChecked()==True : self.commande+=',splitedge=1'
-
-      if self.SP_Verbosity.value()!=3 : self.commande+=' -v %d'%self.SP_Verbosity.value()
-      if self.SP_Memory.value()!=0 : self.commande+=' -m %d'%self.SP_Memory.value()
-
-      self.commande+=" "+self.fichierIn
-      
-      #for the moment
-      deb=os.path.splitext(self.fichierIn)     
-      self.fichierOut=deb[0]+'_fix.mesh'
-      self.commande="mg-cleaner.exe --in " + self.fichierIn + " --out " + self.fichierOut + " --fix" 
-      
+      self.fichierOut=deb[0] + "_fix.mesh"
+      self.commande+=" --out "+self.fichierOut
+      if self.RB_Fix1.isChecked():
+        self.commande+=" --fix1pass"
+      else:
+        if self.RB_Fix2.isChecked():
+          self.commande+=" --fix2pass"
+        else:
+          self.commande+=" --check"
+      if self.CB_PreserveTopology.isChecked():
+        self.commande+=" --topology respect"
+      else:
+        self.commande+=" --topology ignore"
+      if self.CB_FillHoles.isChecked(): #no fill holes default
+        self.commande+=" --min_hole_size " + str(self.SP_minHoleSize.value())
+      if not self.CB_computedToleranceDisplacement.isChecked(): #computed default
+        self.commande+=" --tolerance_displacement " + str(self.SP_toleranceDisplacement.value())
+      if not self.CB_computedResolutionLength.isChecked(): #computed default
+        self.commande+=" --tolerance_displacement " + str(self.SP_resolutionLength.value())
+      self.commande+=" --folding_angle " + str(self.SP_foldingAngle.value())
+      if self.CB_RemeshPlanes.isChecked(): #no remesh default
+        self.commande+=" --remesh_planes"
+      if not self.CB_computedOverlapDistance.isChecked(): #computed default
+        self.commande+=" --overlap_distance " + str(self.SP_overlapDistance.value())
+      self.commande+=" --overlap_angle " + str(self.SP_overlapAngle.value())
       return True
-
+      
   def clean(self):
       self.RB_Check.setChecked(False)
       self.RB_Fix1.setChecked(False)
       self.RB_Fix2.setChecked(True)
-      self.CB_Preserve.setChecked(False)
+      self.CB_PreserveTopology.setChecked(False)
       self.CB_FillHoles.setChecked(False)
       self.CB_RemeshPlanes.setChecked(False)
       
@@ -330,7 +328,7 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
       self.SP_toleranceDisplacement.setProperty("value", 0)
       self.SP_resolutionLength.setProperty("value", 0)
       self.SP_foldingAngle.setProperty("value", 15)
-      self.SP_overlapdistance.setProperty("value", 0)
+      self.SP_overlapDistance.setProperty("value", 0)
       self.SP_overlapAngle.setProperty("value", 15)
       self.SP_Verbosity.setProperty("value", 3)
       
@@ -351,3 +349,23 @@ def getDialog():
     #   __dialog.clean()
     return __dialog
 
+
+#
+# ==============================================================================
+# Basic use cases and unit test functions
+# ==============================================================================
+#
+def TEST_MGCleanerMonPlugDialog():
+    print 'TEST_MGCleanerMonPlugDialog'
+    import sys
+    from PyQt4.QtGui import QApplication
+    from PyQt4.QtCore import QObject, SIGNAL, SLOT
+    app = QApplication(sys.argv)
+    QObject.connect(app, SIGNAL("lastWindowClosed()"), app, SLOT("quit()"))
+
+    dlg=MGCleanerMonPlugDialog()
+    dlg.show()
+    sys.exit(app.exec_())
+
+if __name__ == "__main__":
+    TEST_MGCleanerMonPlugDialog()

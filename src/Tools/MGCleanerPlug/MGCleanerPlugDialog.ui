@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>400</height>
+    <height>500</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -221,7 +221,7 @@ Default is to fix with two passes.</string>
          </item>
 
        <item>
-       <widget class="QCheckBox" name="CB_Preserve">
+       <widget class="QCheckBox" name="CB_PreserveTopology">
            <property name="toolTip">
             <string>Disables fixing operations which induce topology modifications.
 Default is enable topology modifications.
@@ -640,7 +640,7 @@ Default is 15 degrees.</string>
         </property>
        </widget>
 #5
-       <widget class="QDoubleSpinBox" name="SP_overlapdistance">
+       <widget class="QDoubleSpinBox" name="SP_overlapDistance">
         <property name="geometry">
          <rect>
           <x>20</x>
@@ -665,7 +665,7 @@ Default is 15 degrees.</string>
             <bool>false</bool>
            </property>
        </widget>
-       <widget class="QLabel" name="LA_overlapdistance">
+       <widget class="QLabel" name="LA_overlapDistance">
         <property name="geometry">
          <rect>
           <x>130</x>
@@ -762,99 +762,44 @@ Default is 15 degrees.</string>
        <property name="title">
         <string>MGCleaner Generic Options</string>
        </property>
-       <widget class="QWidget" name="layoutWidget">
+       
+          <widget class="QSpinBox" name="SP_Verbosity">
         <property name="geometry">
          <rect>
-          <x>40</x>
+          <x>20</x>
           <y>30</y>
-          <width>441</width>
-          <height>27</height>
+          <width>100</width>
+          <height>25</height>
          </rect>
         </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_3">
-         <item>
-          <widget class="QLabel" name="label">
-           <property name="text">
-            <string>Verbosity Level</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_2">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>28</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QSpinBox" name="SP_Verbosity">
            <property name="maximum">
             <number>10</number>
            </property>
            <property name="value">
-            <number>7</number>
+            <number>3</number>
            </property>
           </widget>
-         </item>
-        </layout>
-       </widget>
-       <widget class="QWidget" name="layoutWidget_2">
+       
+          <widget class="QLabel" name="label">
         <property name="geometry">
          <rect>
-          <x>40</x>
-          <y>70</y>
-          <width>441</width>
-          <height>27</height>
+          <x>130</x>
+          <y>30</y>
+          <width>600</width>
+          <height>30</height>
          </rect>
         </property>
-        <layout class="QHBoxLayout" name="horizontalLayout_4">
-         <item>
-          <widget class="QLabel" name="label_6">
-           <property name="minimumSize">
-            <size>
-             <width>225</width>
-             <height>25</height>
-            </size>
-           </property>
+        <property name="toolTip">
+         <string>sets the verbosity level.
+From 0 (no detail) to 10 (very detailed).
+Default is 3.</string>
+        </property>
            <property name="text">
-            <string>zzz21</string>
+            <string>Verbosity Level</string>
            </property>
           </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer_3">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>28</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QSpinBox" name="SP_Memory">
-           <property name="toolTip">
-            <string>zzz22</string>
-           </property>
-           <property name="maximum">
-            <number>100000</number>
-           </property>
-           <property name="value">
-            <number>0</number>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
+       
+       
       </widget>
       <widget class="QGroupBox" name="groupBox_6">
        <property name="geometry">

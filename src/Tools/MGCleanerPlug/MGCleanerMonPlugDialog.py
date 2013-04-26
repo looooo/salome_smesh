@@ -59,6 +59,8 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
         self.LE_ParamsFile.setText(self.paramsFile)
         self.LE_MeshFile.setText("")
         self.LE_MeshSmesh.setText("")
+        
+        self.clean()
 
   def connecterSignaux(self) :
         self.connect(self.PB_Cancel,SIGNAL("clicked()"),self.PBCancelPressed)
@@ -317,26 +319,24 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
       return True
 
   def clean(self):
-        self.RB_0.setChecked(True)
-        self.RB_G.setChecked(False)
-        self.RB_U.setChecked(False)
-        self.RB_S.setChecked(False)
-        self.RB_2.setChecked(False)
-        self.RB_1.setChecked(False)
-        self.RB_Absolute.setChecked(False)
-        self.RB_Relative.setChecked(True)
-        self.SP_Tolerance.setProperty("value", 0.1)
-        self.SP_Geomapp.setProperty("value", 0.04)
-        self.SP_Ridge.setProperty("value", 45.0)
-        self.SP_Gradation.setProperty("value", 1.3)
-        self.CB_Ridge.setChecked(True)
-        self.CB_Point.setChecked(True)
-        self.CB_SplitEdge.setChecked(False)
-        self.SP_MaxSize.setProperty("value", -2.0)
-        self.SP_MinSize.setProperty("value", -2.0)
-        self.SP_Verbosity.setProperty("value", 3)
-        self.SP_Memory.setProperty("value", 0)
-
+      self.RB_Check.setChecked(False)
+      self.RB_Fix1.setChecked(False)
+      self.RB_Fix2.setChecked(True)
+      self.CB_Preserve.setChecked(False)
+      self.CB_FillHoles.setChecked(False)
+      self.CB_RemeshPlanes.setChecked(False)
+      
+      self.SP_minHoleSize.setProperty("value", 0)
+      self.SP_toleranceDisplacement.setProperty("value", 0)
+      self.SP_resolutionLength.setProperty("value", 0)
+      self.SP_foldingAngle.setProperty("value", 15)
+      self.SP_overlapdistance.setProperty("value", 0)
+      self.SP_overlapAngle.setProperty("value", 15)
+      self.SP_Verbosity.setProperty("value", 3)
+      
+      self.CB_computedToleranceDisplacement.setChecked(True)
+      self.CB_computedResolutionLength.setChecked(True)
+      self.CB_computedOverlapDistance.setChecked(True)
 
 __dialog=None
 def getDialog():

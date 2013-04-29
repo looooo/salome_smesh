@@ -45,7 +45,7 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
         # other solution could be in the same folder than this python module file:
         # iconfolder=os.path.dirname(os.path.abspath(__file__))
 
-        iconfolder=os.environ['SMESH_ROOT_DIR']+'/share/salome/resources/smesh'
+        iconfolder=os.environ["SMESH_ROOT_DIR"]+"/share/salome/resources/smesh"
         #print "MGCleanerMonPlugDialog iconfolder",iconfolder
         icon = QIcon()
         icon.addFile(os.path.join(iconfolder,"select1.png"))
@@ -55,7 +55,7 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
         self.PB_ParamsFileExplorer.setIcon(icon)
 
         #Ces parametres ne sont pas remis à rien par le clean
-        self.paramsFile= os.path.abspath(os.path.join(os.environ['HOME'],'.MGCleaner.dat'))
+        self.paramsFile= os.path.abspath(os.path.join(os.environ["HOME"],".MGCleaner.dat"))
         self.LE_ParamsFile.setText(self.paramsFile)
         self.LE_MeshFile.setText("")
         self.LE_MeshSmesh.setText("")
@@ -75,15 +75,15 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
         self.connect(self.LE_MeshFile,SIGNAL("returnPressed()"),self.meshFileNameChanged)
         self.connect(self.LE_ParamsFile,SIGNAL("returnPressed()"),self.paramsFileNameChanged)
 
-        #QtCore.QObject.connect(self.checkBox, QtCore.SIGNAL('stateChanged(int)'), self.change) 
-        self.connect(self.CB_FillHoles,SIGNAL("stateChanged(int)"),self.SP_minHoleSize.setEnabled)
-        self.connect(self.CB_computedToleranceDisplacement,SIGNAL("stateChanged(int)"),self.SP_toleranceDisplacement.setDisabled)
-        self.connect(self.CB_computedResolutionLength,SIGNAL("stateChanged(int)"),self.SP_resolutionLength.setDisabled)
-        self.connect(self.CB_computedOverlapDistance,SIGNAL("stateChanged(int)"),self.SP_overlapDistance.setDisabled)
+        #QtCore.QObject.connect(self.checkBox, QtCore.SIGNAL("stateChanged(int)"), self.change) 
+        self.connect(self.CB_FillHoles,SIGNAL("stateChanged(int)"),self.SP_MinHoleSize.setEnabled)
+        self.connect(self.CB_ComputedToleranceDisplacement,SIGNAL("stateChanged(int)"),self.SP_ToleranceDisplacement.setDisabled)
+        self.connect(self.CB_ComputedResolutionLength,SIGNAL("stateChanged(int)"),self.SP_ResolutionLength.setDisabled)
+        self.connect(self.CB_ComputedOverlapDistance,SIGNAL("stateChanged(int)"),self.SP_OverlapDistance.setDisabled)
         
   def PBHelpPressed(self):
         try :
-          mydir=os.environ['SMESH_ROOT_DIR']
+          mydir=os.environ["SMESH_ROOT_DIR"]
         except Exception:
           QMessageBox.warning( self, "Help unavailable $SMESH_ROOT_DIR not found")
         maDoc=mydir+"/share/doc/salome/gui/SMESH/MGCleaner/_downloads/mg-cleaner_user_manual.pdf"
@@ -106,20 +106,20 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
         maStudy=studyedit.getActiveStudy()
         smesh.SetCurrentStudy(maStudy)
         (outputMesh, status) = smesh.CreateMeshesFromGMF(self.fichierOut)
-        meshname = 'MGCleaner'+str(self.num)
+        meshname = "MGCleaner"+str(self.num)
         smesh.SetName(outputMesh.GetMesh(), meshname)
         outputMesh.Compute()
 
 
         self.editor = studyedit.getStudyEditor()    # 
         moduleEntry=self.editor.findOrCreateComponent("SMESH","SMESH")
-        HypReMeshEntry = self.editor.findOrCreateItem( moduleEntry, name = 'HypoForRemesh',
-                                           comment = 'HypoForRemeshing')
+        HypReMeshEntry = self.editor.findOrCreateItem( moduleEntry, name = "HypoForRemesh",
+                                           comment = "HypoForRemeshing")
         monStudyBuilder=maStudy.NewBuilder();
         monStudyBuilder.NewCommand();
         newStudyIter=monStudyBuilder.NewObject(HypReMeshEntry)
         aNameAttrib=monStudyBuilder.FindOrCreateAttribute(newStudyIter,"AttributeName")
-        hypoName = 'anHypo_MGCleaner_'+str(self.num)
+        hypoName = "anHypo_MGCleaner_"+str(self.num)
         aNameAttrib.SetValue(hypoName)
         aCommentAttrib=monStudyBuilder.FindOrCreateAttribute(newStudyIter,"AttributeComment")
         aCommentAttrib.SetValue(str(self.commande))
@@ -133,33 +133,37 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
 
   def PBSavePressed(self,NomHypo=False):
         if NomHypo: 
-          text = '# Params for Hypothese : anHypo_MGCleaner_'+str(self.num - 1)+"\n"
+          text = "# Params for Hypothese : anHypo_MGCleaner_"+str(self.num - 1)+"\n"
         else:
-          text = '# Save intermediate params \n' 
-        text += "# Params for mesh : " +  self.LE_MeshSmesh.text() +'\n'
+          text = "# Save intermediate params \n" 
+        text += "# Params for mesh : " +  self.LE_MeshSmesh.text() +"\n"
+
+        if self.RB_Fix1.isChecked():
+          CheckOrFix="fix1pass"
+        else:
+          if self.RB_Fix2.isChecked():
+            CheckOrFix="fix2pass"
+          else:
+            CheckOrFix="check"
+        text+="CheckOrFix=" + CheckOrFix+"\n"
         
-        """
-        for RB in self.GBOptim.findChildren(QRadioButton,):
-            if RB.isChecked()==True:
-               text+="Optimisation ='"+RB.text()+"'\n"
-               break
-        for RB in self.GBUnit.findChildren(QRadioButton,):
-            if RB.isChecked()==True:
-               text+="Units ='"+RB.text()+"'\n"
-        text+='Chordal_Tolerance_Deviation='+str(self.SP_Tolerance.value())+'\n'
-        text+='Ridge_Detection=' + str(self.CB_Ridge.isChecked())+'\n'
-        text+='Split_Edge='      + str(self.CB_SplitEdge.isChecked())+'\n'
-        text+='Point_Smoothing=' + str(self.CB_Point.isChecked())+'\n'
-        text+='Geometrical_Approximation='+ str(self.SP_Geomapp.value())  +'\n'
-        text+='Ridge_Angle='              + str(self.SP_Ridge.value())    +'\n'
-        text+='Maximum_Size='             + str(self.SP_MaxSize.value())  +'\n'
-        text+='Minimum_Size='             + str(self.SP_MaxSize.value())  +'\n'
-        text+='Mesh_Gradation='           + str(self.SP_Gradation.value())+'\n'
-        text+='Verbosity='                + str(self.SP_Verbosity.value())+'\n'
-        text+='\n\n'
-        """
+        text+="PreserveTopology=" + str(self.CB_PreserveTopology.isChecked())+"\n"
+        text+="FillHoles=" + str(self.CB_FillHoles.isChecked())+"\n"
+        text+="MinHoleSize=" + str(self.SP_MinHoleSize.value())+"\n"
+        text+="ComputedToleranceDisplacement=" + str(self.CB_ComputedToleranceDisplacement.isChecked())+"\n"
+        text+="ToleranceDisplacement=" + str(self.SP_ToleranceDisplacement.value())+"\n"
+        text+="ComputedResolutionLength=" + str(self.CB_ComputedResolutionLength.isChecked())+"\n"
+        text+="ResolutionLength=" + str(self.SP_ResolutionLength.value())+"\n"
+        text+="FoldingAngle=" + str(self.SP_FoldingAngle.value())+"\n"
+        text+="RemeshPlanes=" + str(self.CB_RemeshPlanes.isChecked())+"\n"
+        text+="ComputedOverlapDistance=" + str(self.CB_ComputedOverlapDistance.isChecked())+"\n"
+        text+="OverlapDistance=" + str(self.SP_OverlapDistance.value())+"\n"
+        text+="OverlapAngle=" + str(self.SP_OverlapAngle.value())+"\n"
+        text+="Verbosity=" + str(self.SP_Verbosity.value())+"\n"
+        text+="\n\n"
+
         try:
-           f=open(self.paramsFile,'a')
+           f=open(self.paramsFile,"a")
         except:
            QMessageBox.warning(self, "File", "Unable to open "+self.paramsFile)
            return
@@ -172,7 +176,7 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
 
   def PBLoadPressed(self):
         try:
-           f=open(self.paramsFile,'r')
+           f=open(self.paramsFile,"r")
         except :
            QMessageBox.warning(self, "File", "Unable to open "+self.paramsFile)
            return
@@ -182,30 +186,38 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
            QMessageBox.warning(self, "File", "Unable to read "+self.paramsFile)
            return
         f.close()
-        d={}
-        exec text in d
-        for RB in self.GBOptim.findChildren(QRadioButton,):
-            if d['Optimisation']== RB.text():
-               RB.setChecked(True)
-               break
-        for RB in self.GBUnit.findChildren(QRadioButton,):
-            if d['Units']==RB.text():
-               RB.setChecked(True)
-               break
-        self.SP_Tolerance.setValue(d['Chordal_Tolerance_Deviation'])
-
-        self.CB_Ridge.setChecked(d['Ridge_Detection'])
-        self.CB_Point.setChecked(d['Point_Smoothing'])
-        self.CB_SplitEdge.setChecked(d['Split_Edge'])
-        self.SP_Geomapp.setValue(d['Geometrical_Approximation'])
-        self.SP_Ridge.setValue(d['Ridge_Angle'])
-        self.SP_MaxSize.setValue(d['Maximum_Size'])
-        self.SP_MinSize.setValue(d['Minimum_Size'])
-        self.SP_Gradation.setValue(d['Mesh_Gradation'])
-
-        self.SP_Verbosity.setValue(d['Verbosity'])
-        self.SP_Memory.setValue(d['Memory'])
-
+        
+        self.clean()
+        for slig in reversed(text.split("\n")):
+          lig=slig.strip()
+          #print "load params",self.paramsFile,lig
+          if lig=="": continue #skip blanck lines
+          if lig[0]=="#": break
+          try:
+            tit,value=lig.split("=")
+            if tit=="CheckOrFix":
+              self.RB_Fix1.setChecked(False)
+              self.RB_Fix2.setChecked(False)
+              self.RB_Check.setChecked(False)
+              if value=="fix1pass": self.RB_Fix1.setChecked(True)
+              if value=="fix2pass": self.RB_Fix2.setChecked(True)
+              if value=="check": self.RB_Check.setChecked(True)
+            if tit=="PreserveTopology": self.CB_PreserveTopology.setChecked(bool(value))
+            if tit=="FillHoles": self.CB_FillHoles.setChecked(bool(value))
+            if tit=="MinHoleSize": self.SP_MinHoleSize.setProperty("value", float(value))
+            if tit=="ComputedToleranceDisplacement": self.CB_ComputedToleranceDisplacement.setChecked(bool(value))
+            if tit=="ToleranceDisplacement": self.SP_ToleranceDisplacement.setProperty("value", float(value))
+            if tit=="ComputedResolutionLength": self.CB_ComputedResolutionLength.setChecked(bool(value))
+            if tit=="ResolutionLength": self.SP_ResolutionLength.setProperty("value", float(value))
+            if tit=="FoldingAngle": self.SP_FoldingAngle.setProperty("value", float(value))
+            if tit=="RemeshPlanes": self.CB_RemeshPlanes.setChecked(bool(value))
+            if tit=="ComputedOverlapDistance": self.CB_ComputedOverlapDistance.setChecked(bool(value))
+            if tit=="OverlapDistance": self.SP_OverlapDistance.setProperty("value", float(value))
+            if tit=="OverlapAngle": self.SP_OverlapAngle.setProperty("value", float(value))
+            if tit=="Verbosity": self.SP_Verbosity.setProperty("value", int(float(value)))
+          except:
+            QMessageBox.warning(self, "File", "Problem to read '"+lig+"'")
+        
 
   def PBCancelPressed(self):
         self.close()
@@ -303,17 +315,17 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
       else:
         self.commande+=" --topology ignore"
       if self.CB_FillHoles.isChecked(): #no fill holes default
-        self.commande+=" --min_hole_size " + str(self.SP_minHoleSize.value())
-      if not self.CB_computedToleranceDisplacement.isChecked(): #computed default
-        self.commande+=" --tolerance_displacement " + str(self.SP_toleranceDisplacement.value())
-      if not self.CB_computedResolutionLength.isChecked(): #computed default
-        self.commande+=" --tolerance_displacement " + str(self.SP_resolutionLength.value())
-      self.commande+=" --folding_angle " + str(self.SP_foldingAngle.value())
+        self.commande+=" --min_hole_size " + str(self.SP_MinHoleSize.value())
+      if not self.CB_ComputedToleranceDisplacement.isChecked(): #computed default
+        self.commande+=" --tolerance_displacement " + str(self.SP_ToleranceDisplacement.value())
+      if not self.CB_ComputedResolutionLength.isChecked(): #computed default
+        self.commande+=" --tolerance_displacement " + str(self.SP_ResolutionLength.value())
+      self.commande+=" --folding_angle " + str(self.SP_FoldingAngle.value())
       if self.CB_RemeshPlanes.isChecked(): #no remesh default
         self.commande+=" --remesh_planes"
-      if not self.CB_computedOverlapDistance.isChecked(): #computed default
-        self.commande+=" --overlap_distance " + str(self.SP_overlapDistance.value())
-      self.commande+=" --overlap_angle " + str(self.SP_overlapAngle.value())
+      if not self.CB_ComputedOverlapDistance.isChecked(): #computed default
+        self.commande+=" --overlap_distance " + str(self.SP_OverlapDistance.value())
+      self.commande+=" --overlap_angle " + str(self.SP_OverlapAngle.value())
       return True
       
   def clean(self):
@@ -324,17 +336,17 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
       self.CB_FillHoles.setChecked(False)
       self.CB_RemeshPlanes.setChecked(False)
       
-      self.SP_minHoleSize.setProperty("value", 0)
-      self.SP_toleranceDisplacement.setProperty("value", 0)
-      self.SP_resolutionLength.setProperty("value", 0)
-      self.SP_foldingAngle.setProperty("value", 15)
-      self.SP_overlapDistance.setProperty("value", 0)
-      self.SP_overlapAngle.setProperty("value", 15)
+      self.SP_MinHoleSize.setProperty("value", 0)
+      self.SP_ToleranceDisplacement.setProperty("value", 0)
+      self.SP_ResolutionLength.setProperty("value", 0)
+      self.SP_FoldingAngle.setProperty("value", 15)
+      self.SP_OverlapDistance.setProperty("value", 0)
+      self.SP_OverlapAngle.setProperty("value", 15)
       self.SP_Verbosity.setProperty("value", 3)
       
-      self.CB_computedToleranceDisplacement.setChecked(True)
-      self.CB_computedResolutionLength.setChecked(True)
-      self.CB_computedOverlapDistance.setChecked(True)
+      self.CB_ComputedToleranceDisplacement.setChecked(True)
+      self.CB_ComputedResolutionLength.setChecked(True)
+      self.CB_ComputedOverlapDistance.setChecked(True)
 
 __dialog=None
 def getDialog():
@@ -356,7 +368,7 @@ def getDialog():
 # ==============================================================================
 #
 def TEST_MGCleanerMonPlugDialog():
-    print 'TEST_MGCleanerMonPlugDialog'
+    print "TEST_MGCleanerMonPlugDialog"
     import sys
     from PyQt4.QtGui import QApplication
     from PyQt4.QtCore import QObject, SIGNAL, SLOT

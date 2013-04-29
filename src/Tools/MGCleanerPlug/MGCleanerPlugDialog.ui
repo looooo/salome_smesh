@@ -426,7 +426,7 @@ Default is not to mesh planes.</string>
         <string>You can control </string>
        </property>
 #1
-       <widget class="QDoubleSpinBox" name="SP_minHoleSize">
+       <widget class="QDoubleSpinBox" name="SP_MinHoleSize">
         <property name="geometry">
          <rect>
           <x>20</x>
@@ -469,7 +469,7 @@ Set 'Fill holes' in 'Simple Remeshing Options'.</string>
         </property>
        </widget>
 #2
-       <widget class="QDoubleSpinBox" name="SP_toleranceDisplacement">
+       <widget class="QDoubleSpinBox" name="SP_ToleranceDisplacement">
         <property name="geometry">
          <rect>
           <x>20</x>
@@ -514,7 +514,7 @@ Unused in collision resolution .
         </property>
        </widget>
 
-          <widget class="QCheckBox" name="CB_computedToleranceDisplacement">
+          <widget class="QCheckBox" name="CB_ComputedToleranceDisplacement">
         <property name="geometry">
          <rect>
           <x>650</x>
@@ -535,7 +535,7 @@ Unused in collision resolution .
           </widget>
 
 #3
-       <widget class="QDoubleSpinBox" name="SP_resolutionLength">
+       <widget class="QDoubleSpinBox" name="SP_ResolutionLength">
         <property name="geometry">
          <rect>
           <x>20</x>
@@ -578,7 +578,7 @@ Default is computed from model.</string>
          <string>Distance threshold for two points distinct (--resolution_length)</string>
         </property>
        </widget>
-          <widget class="QCheckBox" name="CB_computedResolutionLength">
+          <widget class="QCheckBox" name="CB_ComputedResolutionLength">
         <property name="geometry">
          <rect>
           <x>650</x>
@@ -598,7 +598,7 @@ Default is computed from model.</string>
            </property>
           </widget>
 #4
-       <widget class="QDoubleSpinBox" name="SP_foldingAngle">
+       <widget class="QDoubleSpinBox" name="SP_FoldingAngle">
         <property name="geometry">
          <rect>
           <x>20</x>
@@ -640,7 +640,7 @@ Default is 15 degrees.</string>
         </property>
        </widget>
 #5
-       <widget class="QDoubleSpinBox" name="SP_overlapDistance">
+       <widget class="QDoubleSpinBox" name="SP_OverlapDistance">
         <property name="geometry">
          <rect>
           <x>20</x>
@@ -684,7 +684,7 @@ Default is computed from model.</string>
 (--overlap_distance)</string>
         </property>
        </widget>
-          <widget class="QCheckBox" name="CB_computedOverlapDistance">
+          <widget class="QCheckBox" name="CB_ComputedOverlapDistance">
         <property name="geometry">
          <rect>
           <x>650</x>
@@ -704,7 +704,7 @@ Default is computed from model.</string>
            </property>
           </widget>
 #6
-       <widget class="QDoubleSpinBox" name="SP_overlapAngle">
+       <widget class="QDoubleSpinBox" name="SP_OverlapAngle">
         <property name="geometry">
          <rect>
           <x>20</x>

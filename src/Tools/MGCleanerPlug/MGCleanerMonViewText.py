@@ -1,4 +1,4 @@
-# -*- coding: iso-8859-1 -*-
+# -*- coding: utf-8 -*-
 # Copyright (C) 2007-2013  EDF R&D
 #
 # This library is free software; you can redistribute it and/or
@@ -40,6 +40,8 @@ class MGCleanerMonViewText(Ui_ViewExe,QDialog):
         self.resize( QSize(1000,600).expandedTo(self.minimumSizeHint()) )
         self.connect( self.PB_Ok,SIGNAL("clicked()"), self, SLOT("close()") )
         self.connect( self.PB_Save,SIGNAL("clicked()"), self.saveFile )
+        self.PB_Save.setToolTip("Save trace in log file")
+        self.PB_Ok.setToolTip("Close view")
         self.monExe=QProcess(self)
 
 

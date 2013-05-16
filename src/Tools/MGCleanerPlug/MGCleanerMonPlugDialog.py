@@ -86,6 +86,7 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
     
     self.connect(self.PB_MeshFile,SIGNAL("clicked()"),self.PBMeshFilePressed)
     self.connect(self.PB_MeshSmesh,SIGNAL("clicked()"),self.PBMeshSmeshPressed)
+    self.connect(self.LE_MeshSmesh,SIGNAL("returnPressed()"),self.meshSmeshNameChanged)
     self.connect(self.PB_ParamsFileExplorer,SIGNAL("clicked()"),self.setParamsFileName)
     self.connect(self.LE_MeshFile,SIGNAL("returnPressed()"),self.meshFileNameChanged)
     self.connect(self.LE_ParamsFile,SIGNAL("returnPressed()"),self.paramsFileNameChanged)
@@ -105,11 +106,10 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
     command="xdg-open "+maDoc+";"
     subprocess.call(command, shell=True)
 
-
   def PBOKPressed(self):
     if not(self.PrepareLigneCommande()): return
-    maFenetre=MGCleanerMonViewText(self, self.commande)
     #print "compute Pressed"
+    maFenetre=MGCleanerMonViewText(self, self.commande)
     if os.path.isfile(self.fichierOut): self.enregistreResultat()
 
   def enregistreResultat(self):
@@ -336,10 +336,20 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
     self.fichierIn=str(self.LE_MeshFile.text())
     #print "meshFileNameChanged", self.fichierIn
     if os.path.exists(self.fichierIn): 
+      self.__selectedMesh=None
       self.MeshIn=""
       self.LE_MeshSmesh.setText("")
       return
     QMessageBox.warning( self, "Unknown File", "File doesn't exist")
+
+  def meshSmeshNameChanged(self):
+    self.MeshIn=str(self.LE_MeshSmesh.text())
+    #print "meshSmeshNameChanged", self.MeshIn
+    self.__selectedMesh = None
+    self.MeshIn=""
+    self.LE_MeshSmesh.setText("")
+    self.fichierIn=""
+    return
 
   def paramsFileNameChanged(self):
     self.paramsFile=self.LE_ParamsFile.text()
@@ -374,8 +384,9 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
 
   def prepareFichier(self):
     self.fichierIn="/tmp/ForMGCleaner_"+str(self.num)+".mesh"
+    #print "prepareFichier"
     import SMESH
-    self.__selectedMesh.ExportGMF(self.__selectedMesh,self.fichierIn, True)
+    self.__selectedMesh.ExportGMF(self.__selectedMesh, self.fichierIn, True)
 
   def PrepareLigneCommande(self):
     """
@@ -395,10 +406,11 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
     
     #self.commande="mg-cleaner.exe --in " + self.fichierIn + " --out " + self.fichierOut + " --fix2pass" 
     #return True
+    #print "PrepareLigneCommande '"+self.fichierIn+"' '"+self.MeshIn+"'",self.__selectedMesh
     if self.fichierIn=="" and self.MeshIn=="" :
       QMessageBox.critical(self, "Mesh", "select an input mesh")
       return False
-    if self.MeshIn!="" : self.prepareFichier()
+    if self.__selectedMesh!=None: self.prepareFichier()
     if not (os.path.isfile(self.fichierIn)):
       QMessageBox.critical(self, "File", "unable to read GMF Mesh in "+str(self.fichierIn))
       return False
@@ -498,7 +510,7 @@ def TEST_standalone():
 # ==============================================================================
 #
 def TEST_MGCleanerMonPlugDialog():
-  print "TEST_MGCleanerMonPlugDialog"
+  #print "TEST_MGCleanerMonPlugDialog"
   import sys
   from PyQt4.QtGui import QApplication
   from PyQt4.QtCore import QObject, SIGNAL, SLOT

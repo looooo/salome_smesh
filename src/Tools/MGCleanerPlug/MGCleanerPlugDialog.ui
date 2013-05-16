@@ -63,23 +63,61 @@
       </spacer>
      </item>
      <item>
+      <widget class="QPushButton" name="PB_SaveHyp">
+       <property name="text">
+        <string>Save</string>
+       </property>
+        <property name="iconSize">
+         <size>
+          <width>18</width>
+          <height>18</height>
+         </size>
+        </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="PB_LoadHyp">
+       <property name="text">
+        <string>Load</string>
+       </property>
+        <property name="iconSize">
+         <size>
+          <width>18</width>
+          <height>18</height>
+         </size>
+        </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="PB_Save">
        <property name="text">
-        <string>Save Params</string>
+        <string>Save</string>
        </property>
+        <property name="iconSize">
+         <size>
+          <width>18</width>
+          <height>18</height>
+         </size>
+        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="PB_Load">
        <property name="text">
-        <string>Load Params</string>
+        <string>Load</string>
        </property>
+        <property name="iconSize">
+         <size>
+          <width>18</width>
+          <height>18</height>
+         </size>
+        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="PB_Default">
        <property name="text">
-        <string>Default Params</string>
+        <string>Default</string>
        </property>
       </widget>
      </item>
@@ -295,8 +333,8 @@ Default is not to mesh planes.</string>
          <rect>
           <x>40</x>
           <y>70</y>
-          <width>191</width>
-          <height>33</height>
+          <width>190</width>
+          <height>31</height>
          </rect>
         </property>
         <property name="font">
@@ -305,7 +343,13 @@ Default is not to mesh planes.</string>
          </font>
         </property>
         <property name="text">
-         <string>Mesh File (GMF format)</string>
+         <string>Mesh File GMF format</string>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>18</width>
+          <height>18</height>
+         </size>
         </property>
        </widget>
        <widget class="QLineEdit" name="LE_MeshFile">
@@ -326,18 +370,14 @@ Default is not to mesh planes.</string>
        <widget class="QPushButton" name="PB_MeshSmesh">
         <property name="geometry">
          <rect>
-          <x>190</x>
+          <x>40</x>
           <y>30</y>
-          <width>41</width>
+          <width>190</width>
           <height>31</height>
          </rect>
         </property>
         <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset>
-          <normaloff>:select1.png</normaloff>:select1.png</iconset>
+         <string>Mesh Object Browser</string>
         </property>
         <property name="iconSize">
          <size>
@@ -362,34 +402,6 @@ Default is not to mesh planes.</string>
          <font>
           <pointsize>10</pointsize>
          </font>
-        </property>
-       </widget>
-       <widget class="QLabel" name="label_7">
-        <property name="geometry">
-         <rect>
-          <x>40</x>
-          <y>30</y>
-          <width>141</width>
-          <height>31</height>
-         </rect>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>10</pointsize>
-          <strikeout>false</strikeout>
-         </font>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::Box</enum>
-        </property>
-        <property name="text">
-         <string>Smesh mesh</string>
-        </property>
-        <property name="wordWrap">
-         <bool>false</bool>
-        </property>
-        <property name="margin">
-         <number>0</number>
         </property>
        </widget>
        <widget class="QLabel" name="label_8">
@@ -795,7 +807,7 @@ From 0 (no detail) to 10 (very detailed).
 Default is 3.</string>
         </property>
            <property name="text">
-            <string>Verbosity Level</string>
+            <string>Verbosity level</string>
            </property>
           </widget>
        
@@ -823,7 +835,7 @@ Default is 3.</string>
          </rect>
         </property>
         <property name="text">
-         <string>File used to save MGCleaner Params :</string>
+         <string>File used to save MGCleaner hypothesis parameters :</string>
         </property>
        </widget>
        <widget class="QPushButton" name="PB_ParamsFileExplorer">
@@ -837,10 +849,6 @@ Default is 3.</string>
         </property>
         <property name="text">
          <string/>
-        </property>
-        <property name="icon">
-         <iconset>
-          <normaloff>:open.png</normaloff>:open.png</iconset>
         </property>
        </widget>
        <widget class="QLineEdit" name="LE_ParamsFile">

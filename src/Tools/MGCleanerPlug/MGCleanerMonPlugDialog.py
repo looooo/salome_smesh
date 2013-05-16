@@ -32,335 +32,465 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
   """
   """
   def __init__(self):
-        QWidget.__init__(self)
-        self.setupUi(self)
-        self.connecterSignaux()
-        self.fichierIn=""
-        self.fichierOut=""
-        self.MeshIn="" 
-        self.num=1
+    QWidget.__init__(self)
+    self.setupUi(self)
+    self.connecterSignaux()
+    self.fichierIn=""
+    self.fichierOut=""
+    self.MeshIn=""
+    self.num=1
 
-        # complex whith QResources: not used
-        # The icon are supposed to be located in the $SMESH_ROOT_DIR/share/salome/resources/smesh folder,
-        # other solution could be in the same folder than this python module file:
-        # iconfolder=os.path.dirname(os.path.abspath(__file__))
+    # complex whith QResources: not used
+    # The icon are supposed to be located in the $SMESH_ROOT_DIR/share/salome/resources/smesh folder,
+    # other solution could be in the same folder than this python module file:
+    # iconfolder=os.path.dirname(os.path.abspath(__file__))
 
-        iconfolder=os.environ["SMESH_ROOT_DIR"]+"/share/salome/resources/smesh"
-        #print "MGCleanerMonPlugDialog iconfolder",iconfolder
-        icon = QIcon()
-        icon.addFile(os.path.join(iconfolder,"select1.png"))
-        self.PB_MeshSmesh.setIcon(icon)
-        icon = QIcon()
-        icon.addFile(os.path.join(iconfolder,"open.png"))
-        self.PB_ParamsFileExplorer.setIcon(icon)
-
-        #Ces parametres ne sont pas remis à rien par le clean
-        self.paramsFile= os.path.abspath(os.path.join(os.environ["HOME"],".MGCleaner.dat"))
-        self.LE_ParamsFile.setText(self.paramsFile)
-        self.LE_MeshFile.setText("")
-        self.LE_MeshSmesh.setText("")
-        self.resize(800, 500)
-        self.clean()
+    self.iconfolder=os.environ["SMESH_ROOT_DIR"]+"/share/salome/resources/smesh"
+    #print "MGCleanerMonPlugDialog iconfolder",iconfolder
+    icon = QIcon()
+    icon.addFile(os.path.join(self.iconfolder,"select1.png"))
+    self.PB_LoadHyp.setIcon(icon)
+    self.PB_LoadHyp.setToolTip("hypothesis from Salome Object Browser")
+    self.PB_SaveHyp.setIcon(icon)
+    self.PB_SaveHyp.setToolTip("hypothesis to Salome Object Browser")
+    self.PB_MeshSmesh.setIcon(icon)
+    self.PB_MeshSmesh.setToolTip("source mesh from Salome Object Browser")
+    icon = QIcon()
+    icon.addFile(os.path.join(self.iconfolder,"open.png"))
+    self.PB_ParamsFileExplorer.setIcon(icon)
+    self.PB_Load.setIcon(icon)
+    self.PB_Load.setToolTip("hypothesis from file")
+    self.PB_Save.setIcon(icon)
+    self.PB_Save.setToolTip("hypothesis to file")
+    self.PB_MeshFile.setIcon(icon)
+    self.PB_MeshFile.setToolTip("source mesh from a file in disk")
+    
+    #Ces parametres ne sont pas remis à rien par le clean
+    self.paramsFile= os.path.abspath(os.path.join(os.environ["HOME"],".MGCleaner.dat"))
+    self.LE_ParamsFile.setText(self.paramsFile)
+    self.LE_MeshFile.setText("")
+    self.LE_MeshSmesh.setText("")
+    self.resize(800, 500)
+    self.clean()
 
   def connecterSignaux(self) :
-        self.connect(self.PB_Cancel,SIGNAL("clicked()"),self.PBCancelPressed)
-        self.connect(self.PB_Default,SIGNAL("clicked()"),self.clean)
-        self.connect(self.PB_Help,SIGNAL("clicked()"),self.PBHelpPressed)
-        self.connect(self.PB_Load,SIGNAL("clicked()"),self.PBLoadPressed)
-        self.connect(self.PB_OK,SIGNAL("clicked()"),self.PBOKPressed)
-        self.connect(self.PB_Save,SIGNAL("clicked()"),self.PBSavePressed)
-        self.connect(self.PB_MeshFile,SIGNAL("clicked()"),self.PBMeshFilePressed)
-        self.connect(self.PB_MeshSmesh,SIGNAL("clicked()"),self.PBMeshSmeshPressed)
-        self.connect(self.PB_ParamsFileExplorer,SIGNAL("clicked()"),self.setParamsFileName)
-        self.connect(self.LE_MeshFile,SIGNAL("returnPressed()"),self.meshFileNameChanged)
-        self.connect(self.LE_ParamsFile,SIGNAL("returnPressed()"),self.paramsFileNameChanged)
+    self.connect(self.PB_Cancel,SIGNAL("clicked()"),self.PBCancelPressed)
+    self.connect(self.PB_Default,SIGNAL("clicked()"),self.clean)
+    self.connect(self.PB_Help,SIGNAL("clicked()"),self.PBHelpPressed)
+    self.connect(self.PB_OK,SIGNAL("clicked()"),self.PBOKPressed)
+    
+    self.connect(self.PB_Load,SIGNAL("clicked()"),self.PBLoadPressed)
+    self.connect(self.PB_Save,SIGNAL("clicked()"),self.PBSavePressed)
+    self.connect(self.PB_LoadHyp,SIGNAL("clicked()"),self.PBLoadHypPressed)
+    self.connect(self.PB_SaveHyp,SIGNAL("clicked()"),self.PBSaveHypPressed)
+    
+    self.connect(self.PB_MeshFile,SIGNAL("clicked()"),self.PBMeshFilePressed)
+    self.connect(self.PB_MeshSmesh,SIGNAL("clicked()"),self.PBMeshSmeshPressed)
+    self.connect(self.PB_ParamsFileExplorer,SIGNAL("clicked()"),self.setParamsFileName)
+    self.connect(self.LE_MeshFile,SIGNAL("returnPressed()"),self.meshFileNameChanged)
+    self.connect(self.LE_ParamsFile,SIGNAL("returnPressed()"),self.paramsFileNameChanged)
 
-        #QtCore.QObject.connect(self.checkBox, QtCore.SIGNAL("stateChanged(int)"), self.change) 
-        self.connect(self.CB_FillHoles,SIGNAL("stateChanged(int)"),self.SP_MinHoleSize.setEnabled)
-        self.connect(self.CB_ComputedToleranceDisplacement,SIGNAL("stateChanged(int)"),self.SP_ToleranceDisplacement.setDisabled)
-        self.connect(self.CB_ComputedResolutionLength,SIGNAL("stateChanged(int)"),self.SP_ResolutionLength.setDisabled)
-        self.connect(self.CB_ComputedOverlapDistance,SIGNAL("stateChanged(int)"),self.SP_OverlapDistance.setDisabled)
+    #QtCore.QObject.connect(self.checkBox, QtCore.SIGNAL("stateChanged(int)"), self.change) 
+    self.connect(self.CB_FillHoles,SIGNAL("stateChanged(int)"),self.SP_MinHoleSize.setEnabled)
+    self.connect(self.CB_ComputedToleranceDisplacement,SIGNAL("stateChanged(int)"),self.SP_ToleranceDisplacement.setDisabled)
+    self.connect(self.CB_ComputedResolutionLength,SIGNAL("stateChanged(int)"),self.SP_ResolutionLength.setDisabled)
+    self.connect(self.CB_ComputedOverlapDistance,SIGNAL("stateChanged(int)"),self.SP_OverlapDistance.setDisabled)
         
   def PBHelpPressed(self):
-        try :
-          mydir=os.environ["SMESH_ROOT_DIR"]
-        except Exception:
-          QMessageBox.warning( self, "Help unavailable $SMESH_ROOT_DIR not found")
-        maDoc=mydir+"/share/doc/salome/gui/SMESH/MGCleaner/_downloads/mg-cleaner_user_manual.pdf"
-        command="xdg-open "+maDoc+";"
-        subprocess.call(command, shell=True)
+    try :
+      mydir=os.environ["SMESH_ROOT_DIR"]
+    except Exception:
+      QMessageBox.warning( self, "Help unavailable $SMESH_ROOT_DIR not found")
+    maDoc=mydir+"/share/doc/salome/gui/SMESH/MGCleaner/_downloads/mg-cleaner_user_manual.pdf"
+    command="xdg-open "+maDoc+";"
+    subprocess.call(command, shell=True)
 
 
   def PBOKPressed(self):
-        if not(self.PrepareLigneCommande()): return
-        self.PBSavePressed(NomHypo=True)
-        maFenetre=MGCleanerMonViewText(self,self.commande)
-        if os.path.isfile(self.fichierOut): self.enregistreResultat()
+    if not(self.PrepareLigneCommande()): return
+    maFenetre=MGCleanerMonViewText(self, self.commande)
+    #print "compute Pressed"
+    if os.path.isfile(self.fichierOut): self.enregistreResultat()
 
   def enregistreResultat(self):
-        import smesh
-        import SMESH
-        import salome
-        from salome.kernel import studyedit
+    import smesh
+    import SMESH
+    import salome
+    from salome.kernel import studyedit
 
-        maStudy=studyedit.getActiveStudy()
-        smesh.SetCurrentStudy(maStudy)
-        (outputMesh, status) = smesh.CreateMeshesFromGMF(self.fichierOut)
-        meshname = "MGCleaner"+str(self.num)
-        smesh.SetName(outputMesh.GetMesh(), meshname)
-        outputMesh.Compute()
+    #print "enregistreResultat"
+    maStudy=studyedit.getActiveStudy()
+    smesh.SetCurrentStudy(maStudy)
+    (outputMesh, status) = smesh.CreateMeshesFromGMF(self.fichierOut)
+    name=str(self.LE_MeshSmesh.text())
+    if name=="":
+      #print "name new MESH",self.LE_MeshFile.text()
+      a=str(self.fichierIn)
+      name=os.path.basename(os.path.splitext(a)[0])
 
+    meshname = name+"_MGC_"+str(self.num)
+    smesh.SetName(outputMesh.GetMesh(), meshname)
+    outputMesh.Compute() #no algorithms message for "Mesh_x" has been computed with warnings: -  global 1D algorithm is missing
 
-        self.editor = studyedit.getStudyEditor()    # 
-        moduleEntry=self.editor.findOrCreateComponent("SMESH","SMESH")
-        HypReMeshEntry = self.editor.findOrCreateItem( moduleEntry, name = "HypoForRemesh",
-                                           comment = "HypoForRemeshing")
-        monStudyBuilder=maStudy.NewBuilder();
-        monStudyBuilder.NewCommand();
-        newStudyIter=monStudyBuilder.NewObject(HypReMeshEntry)
-        aNameAttrib=monStudyBuilder.FindOrCreateAttribute(newStudyIter,"AttributeName")
-        hypoName = "anHypo_MGCleaner_"+str(self.num)
-        aNameAttrib.SetValue(hypoName)
-        aCommentAttrib=monStudyBuilder.FindOrCreateAttribute(newStudyIter,"AttributeComment")
-        aCommentAttrib.SetValue(str(self.commande))
-        
-        SOMesh=maStudy.FindObjectByName(meshname ,"SMESH")[0]
-        newLink=monStudyBuilder.NewObject(SOMesh)
-        monStudyBuilder.Addreference(newLink, newStudyIter);
-        if salome.sg.hasDesktop(): salome.sg.updateObjBrowser(0)
-        self.num+=1
-        return True
+    self.editor = studyedit.getStudyEditor()
+    moduleEntry=self.editor.findOrCreateComponent("SMESH","SMESH")
+    HypReMeshEntry = self.editor.findOrCreateItem(
+        moduleEntry, name = "MGCleaner Hypotheses", icon="mesh_tree_algo.png") #, comment = "HypoForRemeshing" )
+    
+    monStudyBuilder=maStudy.NewBuilder()
+    monStudyBuilder.NewCommand()
+    newStudyIter=monStudyBuilder.NewObject(HypReMeshEntry)
+    aNameAttrib=monStudyBuilder.FindOrCreateAttribute(newStudyIter,"AttributeName")
+    hypoName = "HypoMGC_"+str(self.num)
+    aNameAttrib.SetValue(hypoName)
+    aCommentAttrib=monStudyBuilder.FindOrCreateAttribute(newStudyIter,"AttributeComment")
+    aCommentAttrib.SetValue(self.getResumeData(separator=" ; "))
+    
+    SOMesh=maStudy.FindObjectByName(meshname ,"SMESH")[0]
+    newLink=monStudyBuilder.NewObject(SOMesh)
+    monStudyBuilder.Addreference(newLink, newStudyIter);
 
-  def PBSavePressed(self,NomHypo=False):
-        if NomHypo: 
-          text = "# Params for Hypothese : anHypo_MGCleaner_"+str(self.num - 1)+"\n"
-        else:
-          text = "# Save intermediate params \n" 
-        text += "# Params for mesh : " +  self.LE_MeshSmesh.text() +"\n"
+    if salome.sg.hasDesktop(): salome.sg.updateObjBrowser(0)
+    self.num+=1
+    return True
 
-        if self.RB_Fix1.isChecked():
-          CheckOrFix="fix1pass"
-        else:
-          if self.RB_Fix2.isChecked():
-            CheckOrFix="fix2pass"
-          else:
-            CheckOrFix="check"
-        text+="CheckOrFix=" + CheckOrFix+"\n"
-        
-        text+="PreserveTopology=" + str(self.CB_PreserveTopology.isChecked())+"\n"
-        text+="FillHoles=" + str(self.CB_FillHoles.isChecked())+"\n"
-        text+="MinHoleSize=" + str(self.SP_MinHoleSize.value())+"\n"
-        text+="ComputedToleranceDisplacement=" + str(self.CB_ComputedToleranceDisplacement.isChecked())+"\n"
-        text+="ToleranceDisplacement=" + str(self.SP_ToleranceDisplacement.value())+"\n"
-        text+="ComputedResolutionLength=" + str(self.CB_ComputedResolutionLength.isChecked())+"\n"
-        text+="ResolutionLength=" + str(self.SP_ResolutionLength.value())+"\n"
-        text+="FoldingAngle=" + str(self.SP_FoldingAngle.value())+"\n"
-        text+="RemeshPlanes=" + str(self.CB_RemeshPlanes.isChecked())+"\n"
-        text+="ComputedOverlapDistance=" + str(self.CB_ComputedOverlapDistance.isChecked())+"\n"
-        text+="OverlapDistance=" + str(self.SP_OverlapDistance.value())+"\n"
-        text+="OverlapAngle=" + str(self.SP_OverlapAngle.value())+"\n"
-        text+="Verbosity=" + str(self.SP_Verbosity.value())+"\n"
-        text+="\n\n"
+  def PBSavePressed(self, NomHypo=False):
+    from datetime import datetime
+    if NomHypo: 
+      text = "# Params for Hypothese : Hypo_MGCleaner_"+str(self.num - 1)+"\n"
+    else:
+      text = "# Save intermediate params \n" 
+    text += "# Params for mesh : " +  self.LE_MeshSmesh.text() +"\n"
+    text += datetime.now().strftime("# Date : %d/%m/%y %H:%M:%S\n")
+    text += self.getResumeData(separator="\n")
+    text += "\n\n"
 
-        try:
-           f=open(self.paramsFile,"a")
-        except:
-           QMessageBox.warning(self, "File", "Unable to open "+self.paramsFile)
-           return
-        try:
-           f.write(text)
-        except:
-           QMessageBox.warning(self, "File", "Unable to write "+self.paramsFile)
-           return
-        f.close()
+    try:
+        f=open(self.paramsFile,"a")
+    except:
+        QMessageBox.warning(self, "File", "Unable to open "+self.paramsFile)
+        return
+    try:
+        f.write(text)
+    except:
+        QMessageBox.warning(self, "File", "Unable to write "+self.paramsFile)
+        return
+    f.close()
+
+  def PBSaveHypPressed(self):
+    """save hypothesis in Object Browser"""
+    #QMessageBox.warning(self, "save Object Browser MGCleaner Hypothesis", "TODO")
+    
+    import smesh
+    import SMESH
+    import salome
+    from salome.kernel import studyedit
+
+    maStudy=studyedit.getActiveStudy()
+    smesh.SetCurrentStudy(maStudy)
+    
+    self.editor = studyedit.getStudyEditor()
+    moduleEntry=self.editor.findOrCreateComponent("SMESH","SMESH")
+    HypReMeshEntry = self.editor.findOrCreateItem(
+        moduleEntry, name = "MGCleaner Hypotheses", icon="mesh_tree_algo.png") #, comment = "HypoForRemeshing" )
+    
+    monStudyBuilder=maStudy.NewBuilder()
+    monStudyBuilder.NewCommand()
+    newStudyIter=monStudyBuilder.NewObject(HypReMeshEntry)
+    aNameAttrib=monStudyBuilder.FindOrCreateAttribute(newStudyIter,"AttributeName")
+    hypoName = "HypoMGC_"+str(self.num)
+    aNameAttrib.SetValue(hypoName)
+    aCommentAttrib=monStudyBuilder.FindOrCreateAttribute(newStudyIter,"AttributeComment")
+    aCommentAttrib.SetValue(self.getResumeData(separator=" ; "))
+    
+    if salome.sg.hasDesktop(): salome.sg.updateObjBrowser(0)
+    self.num+=1
+    return True
+
+  def getResumeData(self, separator="\n"):
+    text=""
+    if self.RB_Fix1.isChecked():
+      CheckOrFix="fix1pass"
+    else:
+      if self.RB_Fix2.isChecked():
+        CheckOrFix="fix2pass"
+      else:
+        CheckOrFix="check"
+    text+="CheckOrFix=" + CheckOrFix+separator
+    text+="PreserveTopology=" + str(self.CB_PreserveTopology.isChecked())+separator
+    text+="FillHoles=" + str(self.CB_FillHoles.isChecked())+separator
+    text+="MinHoleSize=" + str(self.SP_MinHoleSize.value())+separator
+    text+="ComputedToleranceDisplacement=" + str(self.CB_ComputedToleranceDisplacement.isChecked())+separator
+    text+="ToleranceDisplacement=" + str(self.SP_ToleranceDisplacement.value())+separator
+    text+="ComputedResolutionLength=" + str(self.CB_ComputedResolutionLength.isChecked())+separator
+    text+="ResolutionLength=" + str(self.SP_ResolutionLength.value())+separator
+    text+="FoldingAngle=" + str(self.SP_FoldingAngle.value())+separator
+    text+="RemeshPlanes=" + str(self.CB_RemeshPlanes.isChecked())+separator
+    text+="ComputedOverlapDistance=" + str(self.CB_ComputedOverlapDistance.isChecked())+separator
+    text+="OverlapDistance=" + str(self.SP_OverlapDistance.value())+separator
+    text+="OverlapAngle=" + str(self.SP_OverlapAngle.value())+separator
+    text+="Verbosity=" + str(self.SP_Verbosity.value())+separator
+    return text
+
+  def loadResumeData(self, hypothesis, separator="\n"):
+    text=str(hypothesis)
+    self.clean()
+    for slig in reversed(text.split(separator)):
+      lig=slig.strip()
+      #print "load ResumeData",lig
+      if lig=="": continue #skip blanck lines
+      if lig[0]=="#": break
+      try:
+        tit,value=lig.split("=")
+        if tit=="CheckOrFix":
+          self.RB_Fix1.setChecked(False)
+          self.RB_Fix2.setChecked(False)
+          self.RB_Check.setChecked(False)
+          if value=="fix1pass": self.RB_Fix1.setChecked(True)
+          if value=="fix2pass": self.RB_Fix2.setChecked(True)
+          if value=="check": self.RB_Check.setChecked(True)
+        if tit=="PreserveTopology": self.CB_PreserveTopology.setChecked(value=="True")
+        if tit=="FillHoles": self.CB_FillHoles.setChecked(value=="True")
+        if tit=="MinHoleSize": self.SP_MinHoleSize.setProperty("value", float(value))
+        if tit=="ComputedToleranceDisplacement": self.CB_ComputedToleranceDisplacement.setChecked(value=="True")
+        if tit=="ToleranceDisplacement": self.SP_ToleranceDisplacement.setProperty("value", float(value))
+        if tit=="ComputedResolutionLength": self.CB_ComputedResolutionLength.setChecked(value=="True")
+        if tit=="ResolutionLength": self.SP_ResolutionLength.setProperty("value", float(value))
+        if tit=="FoldingAngle": self.SP_FoldingAngle.setProperty("value", float(value))
+        if tit=="RemeshPlanes": self.CB_RemeshPlanes.setChecked(value=="True")
+        if tit=="ComputedOverlapDistance": self.CB_ComputedOverlapDistance.setChecked(value=="True")
+        if tit=="OverlapDistance": self.SP_OverlapDistance.setProperty("value", float(value))
+        if tit=="OverlapAngle": self.SP_OverlapAngle.setProperty("value", float(value))
+        if tit=="Verbosity": self.SP_Verbosity.setProperty("value", int(float(value)))
+      except:
+        QMessageBox.warning(self, "load MGCleaner Hypothesis", "Problem on '"+lig+"'")
 
   def PBLoadPressed(self):
-        try:
-           f=open(self.paramsFile,"r")
-        except :
-           QMessageBox.warning(self, "File", "Unable to open "+self.paramsFile)
-           return
-        try:
-           text=f.read()
-        except :
-           QMessageBox.warning(self, "File", "Unable to read "+self.paramsFile)
-           return
-        f.close()
-        
-        self.clean()
-        for slig in reversed(text.split("\n")):
-          lig=slig.strip()
-          #print "load params",self.paramsFile,lig
-          if lig=="": continue #skip blanck lines
-          if lig[0]=="#": break
-          try:
-            tit,value=lig.split("=")
-            if tit=="CheckOrFix":
-              self.RB_Fix1.setChecked(False)
-              self.RB_Fix2.setChecked(False)
-              self.RB_Check.setChecked(False)
-              if value=="fix1pass": self.RB_Fix1.setChecked(True)
-              if value=="fix2pass": self.RB_Fix2.setChecked(True)
-              if value=="check": self.RB_Check.setChecked(True)
-            if tit=="PreserveTopology": self.CB_PreserveTopology.setChecked(bool(value))
-            if tit=="FillHoles": self.CB_FillHoles.setChecked(bool(value))
-            if tit=="MinHoleSize": self.SP_MinHoleSize.setProperty("value", float(value))
-            if tit=="ComputedToleranceDisplacement": self.CB_ComputedToleranceDisplacement.setChecked(bool(value))
-            if tit=="ToleranceDisplacement": self.SP_ToleranceDisplacement.setProperty("value", float(value))
-            if tit=="ComputedResolutionLength": self.CB_ComputedResolutionLength.setChecked(bool(value))
-            if tit=="ResolutionLength": self.SP_ResolutionLength.setProperty("value", float(value))
-            if tit=="FoldingAngle": self.SP_FoldingAngle.setProperty("value", float(value))
-            if tit=="RemeshPlanes": self.CB_RemeshPlanes.setChecked(bool(value))
-            if tit=="ComputedOverlapDistance": self.CB_ComputedOverlapDistance.setChecked(bool(value))
-            if tit=="OverlapDistance": self.SP_OverlapDistance.setProperty("value", float(value))
-            if tit=="OverlapAngle": self.SP_OverlapAngle.setProperty("value", float(value))
-            if tit=="Verbosity": self.SP_Verbosity.setProperty("value", int(float(value)))
-          except:
-            QMessageBox.warning(self, "File", "Problem to read '"+lig+"'")
-        
+    """load last hypothesis saved in tail of file"""
+    try:
+        f=open(self.paramsFile,"r")
+    except :
+        QMessageBox.warning(self, "File", "Unable to open "+self.paramsFile)
+        return
+    try:
+        text=f.read()
+    except :
+        QMessageBox.warning(self, "File", "Unable to read "+self.paramsFile)
+        return
+    f.close()
+    self.loadResumeData(text, separator="\n")
 
+  def PBLoadHypPressed(self):
+    """load hypothesis saved in Object Browser"""
+    #QMessageBox.warning(self, "load Object Browser MGCleaner hypothesis", "TODO")
+    import salome
+    from salome.kernel import studyedit
+    from salome.smesh.smeshstudytools import SMeshStudyTools
+    from salome.gui import helper as guihelper
+    from omniORB import CORBA
+
+    mySObject, myEntry = guihelper.getSObjectSelected()
+    if CORBA.is_nil(mySObject) or mySObject==None:
+      QMessageBox.critical(self, "Hypothese", "select an Object Browser MGCleaner hypothesis")
+      return
+    
+    #for i in dir(mySObject): print "dir mySObject",i
+    #print "GetAllAttributes",mySObject.GetAllAttributes()
+    #print "GetComment",mySObject.GetComment()
+    #print "GetName",mySObject.GetName()
+    
+    #could be renamed...
+    #if mySObject.GetFather().GetName()!="MGCleaner Hypotheses":
+    #  QMessageBox.critical(self, "Hypothese", "not a child of MGCleaner Hypotheses")
+    #  return
+    
+    text=mySObject.GetComment()
+    
+    #a verification
+    if "CheckOrFix=" not in text:
+      QMessageBox.critical(self, "Load Hypothese", "Object Browser selection not a MGCleaner Hypothesis")
+      return
+    self.loadResumeData(text, separator=" ; ")
+    return
+    
   def PBCancelPressed(self):
-        self.close()
+    self.close()
 
   def PBMeshFilePressed(self):
-       fd = QFileDialog(self, "select an existing Mesh file", self.LE_MeshFile.text(), "Mesh-Files (*.mesh);;All Files (*)")
-       if fd.exec_():
-          infile = fd.selectedFiles()[0]
-          self.LE_MeshFile.setText(infile)
-          self.fichierIn=infile.toLatin1()
+    fd = QFileDialog(self, "select an existing Mesh file", self.LE_MeshFile.text(), "Mesh-Files (*.mesh);;All Files (*)")
+    if fd.exec_():
+      infile = fd.selectedFiles()[0]
+      self.LE_MeshFile.setText(infile)
+      self.fichierIn=infile.toLatin1()
+      self.MeshIn=""
+      self.LE_MeshSmesh.setText("")
 
   def setParamsFileName(self):
-       fd = QFileDialog(self, "select a file", self.LE_ParamsFile.text(), "dat Files (*.dat);;All Files (*)")
-       if fd.exec_():
-          infile = fd.selectedFiles()[0]
-          self.LE_ParamsFile.setText(infile)
-          self.paramsFile=infile.toLatin1()
+    fd = QFileDialog(self, "select a file", self.LE_ParamsFile.text(), "dat Files (*.dat);;All Files (*)")
+    if fd.exec_():
+      infile = fd.selectedFiles()[0]
+      self.LE_ParamsFile.setText(infile)
+      self.paramsFile=infile.toLatin1()
 
   def meshFileNameChanged(self):
-      self.fichierIn=self.LE_MeshFile.text()
-      if os.path.exists(self.fichierIn): return
-      QMessageBox.warning( self, "Unknown File", "File doesn't exist")
+    self.fichierIn=str(self.LE_MeshFile.text())
+    #print "meshFileNameChanged", self.fichierIn
+    if os.path.exists(self.fichierIn): 
+      self.MeshIn=""
+      self.LE_MeshSmesh.setText("")
+      return
+    QMessageBox.warning( self, "Unknown File", "File doesn't exist")
 
   def paramsFileNameChanged(self):
-      self.paramsFile=self.LE_ParamsFile.text()
+    self.paramsFile=self.LE_ParamsFile.text()
 
   def PBMeshSmeshPressed(self):
-      import salome
-      import smesh
-      from salome.kernel import studyedit
-      from salome.smesh.smeshstudytools import SMeshStudyTools
-      from salome.gui import helper as guihelper
-      from omniORB import CORBA
+    import salome
+    import smesh
+    from salome.kernel import studyedit
+    from salome.smesh.smeshstudytools import SMeshStudyTools
+    from salome.gui import helper as guihelper
+    from omniORB import CORBA
 
-      mySObject, myEntry = guihelper.getSObjectSelected()
-      if CORBA.is_nil(mySObject) or mySObject==None:
-         QMessageBox.critical(self, "Mesh", "select an input mesh")
-         return
-      self.smeshStudyTool = SMeshStudyTools()
+    mySObject, myEntry = guihelper.getSObjectSelected()
+    if CORBA.is_nil(mySObject) or mySObject==None:
+      QMessageBox.critical(self, "Mesh", "select an input mesh")
+      return
+    self.smeshStudyTool = SMeshStudyTools()
+    try:
       self.__selectedMesh = self.smeshStudyTool.getMeshObjectFromSObject(mySObject)
-      if CORBA.is_nil(self.__selectedMesh):
-         QMessageBox.critical(self, "Mesh", "select an input mesh")
-         return
-      myName = mySObject.GetName()
-      self.MeshIn=myName
-      self.LE_MeshSmesh.setText(myName)
+    except:
+      QMessageBox.critical(self, "Mesh", "select an input mesh")
+      return
+    if CORBA.is_nil(self.__selectedMesh):
+      QMessageBox.critical(self, "Mesh", "select an input mesh")
+      return
+    myName = mySObject.GetName()
+    #print "MeshSmeshNameChanged", myName
+    self.MeshIn=myName
+    self.LE_MeshSmesh.setText(myName)
+    self.LE_MeshFile.setText("")
+    self.fichierIn=""
 
   def prepareFichier(self):
-      self.fichierIn="/tmp/PourMGCleaner_"+str(self.num)+".mesh"
-      import SMESH
-      self.__selectedMesh.ExportGMF(self.__selectedMesh,self.fichierIn, True)
+    self.fichierIn="/tmp/ForMGCleaner_"+str(self.num)+".mesh"
+    import SMESH
+    self.__selectedMesh.ExportGMF(self.__selectedMesh,self.fichierIn, True)
 
   def PrepareLigneCommande(self):
-      """
-      #use doc examples of mg-cleaner:
-      ls -al /data/tmplgls/salome/prerequis/install/COMMON_64/MeshGems-1.0/bin
-      source /data/tmplgls/salome/prerequis/install/LICENSE/dlim8.var.sh
-      export PATH=/data/tmplgls/salome/prerequis/install/COMMON_64/MeshGems-1.0/bin/Linux_64:$PATH
-      cp -r /data/tmplgls/salome/prerequis/install/COMMON_64/MeshGems-1.0/examples .
-      cd examples
-      mg-cleaner.exe --help
-      mg-cleaner.exe --in case7.mesh --out case7-test.mesh --check
-      mg-cleaner.exe case7.mesh case7-fix.mesh --fix
-      mg-cleaner.exe --in Porsche.mesh --out Porsche-test.mesh --check
-      mg-cleaner.exe --in Porsche.mesh --out Porschefix.mesh --fix
-      mg-cleaner.exe --in Porsche.mesh --out PorscheNewfix.mesh --fix --resolution_length 0.03
-      """
-      
-      #self.commande="mg-cleaner.exe --in " + self.fichierIn + " --out " + self.fichierOut + " --fix2pass" 
-      #return True
-      if self.fichierIn=="" and self.MeshIn=="" :
-        QMessageBox.critical(self, "Mesh", "select an input mesh")
-        return False
-      if self.MeshIn!="" : self.prepareFichier()
-      if not (os.path.isfile(self.fichierIn)):
-        QMessageBox.critical(self, "File", "unable to read GMF Mesh in "+str(self.fichierIn))
-        return False
-     
-      self.commande="mg-cleaner.exe"
-      verbosity=str(self.SP_Verbosity.value())
-      self.commande+=" --verbose " + verbosity
-      self.commande+=" --in " + self.fichierIn
-      deb=os.path.splitext(self.fichierIn)
-      self.fichierOut=deb[0] + "_fix.mesh"
-      self.commande+=" --out "+self.fichierOut
-      if self.RB_Fix1.isChecked():
-        self.commande+=" --fix1pass"
+    """
+    #use doc examples of mg-cleaner:
+    ls -al /data/tmplgls/salome/prerequis/install/COMMON_64/MeshGems-1.0/bin
+    source /data/tmplgls/salome/prerequis/install/LICENSE/dlim8.var.sh
+    export PATH=/data/tmplgls/salome/prerequis/install/COMMON_64/MeshGems-1.0/bin/Linux_64:$PATH
+    cp -r /data/tmplgls/salome/prerequis/install/COMMON_64/MeshGems-1.0/examples .
+    cd examples
+    mg-cleaner.exe --help
+    mg-cleaner.exe --in case7.mesh --out case7-test.mesh --check
+    mg-cleaner.exe case7.mesh case7-fix.mesh --fix
+    mg-cleaner.exe --in Porsche.mesh --out Porsche-test.mesh --check
+    mg-cleaner.exe --in Porsche.mesh --out Porschefix.mesh --fix
+    mg-cleaner.exe --in Porsche.mesh --out PorscheNewfix.mesh --fix --resolution_length 0.03
+    """
+    
+    #self.commande="mg-cleaner.exe --in " + self.fichierIn + " --out " + self.fichierOut + " --fix2pass" 
+    #return True
+    if self.fichierIn=="" and self.MeshIn=="" :
+      QMessageBox.critical(self, "Mesh", "select an input mesh")
+      return False
+    if self.MeshIn!="" : self.prepareFichier()
+    if not (os.path.isfile(self.fichierIn)):
+      QMessageBox.critical(self, "File", "unable to read GMF Mesh in "+str(self.fichierIn))
+      return False
+    
+    self.commande="mg-cleaner.exe"
+    verbosity=str(self.SP_Verbosity.value())
+    self.commande+=" --verbose " + verbosity
+    self.commande+=" --in " + self.fichierIn
+    #print "self.fichierIn",self.fichierIn,type(self.fichierIn)
+    deb=os.path.splitext(str(self.fichierIn))
+    self.fichierOut=deb[0] + "_fix.mesh"
+    self.commande+=" --out "+self.fichierOut
+    if self.RB_Fix1.isChecked():
+      self.commande+=" --fix1pass"
+    else:
+      if self.RB_Fix2.isChecked():
+        self.commande+=" --fix2pass"
       else:
-        if self.RB_Fix2.isChecked():
-          self.commande+=" --fix2pass"
-        else:
-          self.commande+=" --check"
-      if self.CB_PreserveTopology.isChecked():
-        self.commande+=" --topology respect"
-      else:
-        self.commande+=" --topology ignore"
-      if self.CB_FillHoles.isChecked(): #no fill holes default
-        self.commande+=" --min_hole_size " + str(self.SP_MinHoleSize.value())
-      if not self.CB_ComputedToleranceDisplacement.isChecked(): #computed default
-        self.commande+=" --tolerance_displacement " + str(self.SP_ToleranceDisplacement.value())
-      if not self.CB_ComputedResolutionLength.isChecked(): #computed default
-        self.commande+=" --tolerance_displacement " + str(self.SP_ResolutionLength.value())
-      self.commande+=" --folding_angle " + str(self.SP_FoldingAngle.value())
-      if self.CB_RemeshPlanes.isChecked(): #no remesh default
-        self.commande+=" --remesh_planes"
-      if not self.CB_ComputedOverlapDistance.isChecked(): #computed default
-        self.commande+=" --overlap_distance " + str(self.SP_OverlapDistance.value())
-      self.commande+=" --overlap_angle " + str(self.SP_OverlapAngle.value())
-      return True
-      
+        self.commande+=" --check"
+    if self.CB_PreserveTopology.isChecked():
+      self.commande+=" --topology respect"
+    else:
+      self.commande+=" --topology ignore"
+    if self.CB_FillHoles.isChecked(): #no fill holes default
+      self.commande+=" --min_hole_size " + str(self.SP_MinHoleSize.value())
+    if not self.CB_ComputedToleranceDisplacement.isChecked(): #computed default
+      self.commande+=" --tolerance_displacement " + str(self.SP_ToleranceDisplacement.value())
+    if not self.CB_ComputedResolutionLength.isChecked(): #computed default
+      self.commande+=" --tolerance_displacement " + str(self.SP_ResolutionLength.value())
+    self.commande+=" --folding_angle " + str(self.SP_FoldingAngle.value())
+    if self.CB_RemeshPlanes.isChecked(): #no remesh default
+      self.commande+=" --remesh_planes"
+    if not self.CB_ComputedOverlapDistance.isChecked(): #computed default
+      self.commande+=" --overlap_distance " + str(self.SP_OverlapDistance.value())
+    self.commande+=" --overlap_angle " + str(self.SP_OverlapAngle.value())
+    return True
+    
   def clean(self):
-      self.RB_Check.setChecked(False)
-      self.RB_Fix1.setChecked(False)
-      self.RB_Fix2.setChecked(True)
-      self.CB_PreserveTopology.setChecked(False)
-      self.CB_FillHoles.setChecked(False)
-      self.CB_RemeshPlanes.setChecked(False)
-      
-      self.SP_MinHoleSize.setProperty("value", 0)
-      self.SP_ToleranceDisplacement.setProperty("value", 0)
-      self.SP_ResolutionLength.setProperty("value", 0)
-      self.SP_FoldingAngle.setProperty("value", 15)
-      self.SP_OverlapDistance.setProperty("value", 0)
-      self.SP_OverlapAngle.setProperty("value", 15)
-      self.SP_Verbosity.setProperty("value", 3)
-      
-      self.CB_ComputedToleranceDisplacement.setChecked(True)
-      self.CB_ComputedResolutionLength.setChecked(True)
-      self.CB_ComputedOverlapDistance.setChecked(True)
+    self.RB_Check.setChecked(False)
+    self.RB_Fix1.setChecked(False)
+    self.RB_Fix2.setChecked(True)
+    self.CB_PreserveTopology.setChecked(False)
+    self.CB_FillHoles.setChecked(False)
+    self.CB_RemeshPlanes.setChecked(False)
+    
+    self.SP_MinHoleSize.setProperty("value", 0)
+    self.SP_ToleranceDisplacement.setProperty("value", 0)
+    self.SP_ResolutionLength.setProperty("value", 0)
+    self.SP_FoldingAngle.setProperty("value", 15)
+    self.SP_OverlapDistance.setProperty("value", 0)
+    self.SP_OverlapAngle.setProperty("value", 15)
+    self.SP_Verbosity.setProperty("value", 3)
+    
+    self.CB_ComputedToleranceDisplacement.setChecked(True)
+    self.CB_ComputedResolutionLength.setChecked(True)
+    self.CB_ComputedOverlapDistance.setChecked(True)
 
 __dialog=None
 def getDialog():
-    """
-    This function returns a singleton instance of the plugin dialog.
-    c est obligatoire pour faire un show sans parent...
-    """
-    global __dialog
-    if __dialog is None:
-        __dialog = MGCleanerMonPlugDialog()
-    #else :
-    #   __dialog.clean()
-    return __dialog
+  """
+  This function returns a singleton instance of the plugin dialog.
+  c est obligatoire pour faire un show sans parent...
+  """
+  global __dialog
+  if __dialog is None:
+      __dialog = MGCleanerMonPlugDialog()
+  #else :
+  #   __dialog.clean()
+  return __dialog
 
+
+#
+# ==============================================================================
+# For memory
+# ==============================================================================
+#
+def TEST_standalone():
+  """
+  works only if a salome is launched yet with a study loaded
+  to launch standalone python do:
+  /export/home/wambeke/2013/V6_main_MGC_CO6.4_64/APPLI/runSession
+  python
+  or (do not works)
+  python /export/home/wambeke/2013/V6_main_MGC_CO6.4_64/INSTALL/SMESH/share/salome/plugins/smesh/MGCleanerMonPlugDialog.py
+  """
+  import salome
+  import smesh
+  import SMESH
+  from salome.kernel import studyedit
+  salome.salome_init()
+  maStudy=studyedit.getActiveStudy()
+  #etc...a mano...
 
 #
 # ==============================================================================
@@ -368,16 +498,18 @@ def getDialog():
 # ==============================================================================
 #
 def TEST_MGCleanerMonPlugDialog():
-    print "TEST_MGCleanerMonPlugDialog"
-    import sys
-    from PyQt4.QtGui import QApplication
-    from PyQt4.QtCore import QObject, SIGNAL, SLOT
-    app = QApplication(sys.argv)
-    QObject.connect(app, SIGNAL("lastWindowClosed()"), app, SLOT("quit()"))
+  print "TEST_MGCleanerMonPlugDialog"
+  import sys
+  from PyQt4.QtGui import QApplication
+  from PyQt4.QtCore import QObject, SIGNAL, SLOT
+  app = QApplication(sys.argv)
+  QObject.connect(app, SIGNAL("lastWindowClosed()"), app, SLOT("quit()"))
 
-    dlg=MGCleanerMonPlugDialog()
-    dlg.show()
-    sys.exit(app.exec_())
+  dlg=MGCleanerMonPlugDialog()
+  dlg.show()
+  sys.exit(app.exec_())
 
 if __name__ == "__main__":
-    TEST_MGCleanerMonPlugDialog()
+  TEST_MGCleanerMonPlugDialog()
+  #TEST_standalone()
+  pass

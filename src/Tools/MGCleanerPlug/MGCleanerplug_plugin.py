@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright (C) 2006-2013  EDF R&D
 #
 # This library is free software; you can redistribute it and/or
@@ -34,11 +35,12 @@ def MGCleanerLct(context):
   from PyQt4.QtGui import QFileDialog
   from PyQt4.QtGui import QMessageBox
   
+  #prior test to avoid unnecessary user GUI work with ending crash
   try :
       os.environ['DISTENE_LICENCE_FILE_FOR_MGCLEANER']
   except:
-      QMessageBox.warning(None,"Products","Distene's products MeshGemCleaner are not installed")
+      QMessageBox.warning(None,"Products","Distene's product MeshGem Cleaner is not installed.\nrequired environment variable:\nDISTENE_LICENCE_FILE_FOR_MGCLEANER='/.../dlim8.var.sh'")
       return
   import MGCleanerMonPlugDialog
-  window=MGCleanerMonPlugDialog.getDialog() 
+  window=MGCleanerMonPlugDialog.getDialog()
   window.show()

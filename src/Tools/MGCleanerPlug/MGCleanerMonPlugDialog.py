@@ -38,8 +38,10 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
     self.fichierIn=""
     self.fichierOut=""
     self.MeshIn=""
+    self.commande=""
     self.num=1
-
+    self.__selectedMesh=None
+    
     # complex whith QResources: not used
     # The icon are supposed to be located in the $SMESH_ROOT_DIR/share/salome/resources/smesh folder,
     # other solution could be in the same folder than this python module file:
@@ -154,27 +156,26 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
     self.num+=1
     return True
 
-  def PBSavePressed(self, NomHypo=False):
+  def PBSavePressed(self):
     from datetime import datetime
-    if NomHypo: 
-      text = "# Params for Hypothese : Hypo_MGCleaner_"+str(self.num - 1)+"\n"
-    else:
-      text = "# Save intermediate params \n" 
+    if not(self.PrepareLigneCommande()): return
+    text = "# MGCleaner hypothesis parameters\n" 
     text += "# Params for mesh : " +  self.LE_MeshSmesh.text() +"\n"
     text += datetime.now().strftime("# Date : %d/%m/%y %H:%M:%S\n")
+    text += "# Command : "+self.commande+"\n"
     text += self.getResumeData(separator="\n")
     text += "\n\n"
 
     try:
-        f=open(self.paramsFile,"a")
+      f=open(self.paramsFile,"a")
     except:
-        QMessageBox.warning(self, "File", "Unable to open "+self.paramsFile)
-        return
+      QMessageBox.warning(self, "File", "Unable to open "+self.paramsFile)
+      return
     try:
-        f.write(text)
+      f.write(text)
     except:
-        QMessageBox.warning(self, "File", "Unable to write "+self.paramsFile)
-        return
+      QMessageBox.warning(self, "File", "Unable to write "+self.paramsFile)
+      return
     f.close()
 
   def PBSaveHypPressed(self):
@@ -343,7 +344,8 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
     QMessageBox.warning( self, "Unknown File", "File doesn't exist")
 
   def meshSmeshNameChanged(self):
-    self.MeshIn=str(self.LE_MeshSmesh.text())
+    """only change by GUI mouse selection, otherwise clear"""
+    #self.MeshIn=str(self.LE_MeshSmesh.text())
     #print "meshSmeshNameChanged", self.MeshIn
     self.__selectedMesh = None
     self.MeshIn=""

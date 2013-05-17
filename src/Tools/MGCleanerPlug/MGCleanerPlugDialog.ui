@@ -435,7 +435,7 @@ Default is not to mesh planes.</string>
         </rect>
        </property>
        <property name="title">
-        <string>You can control </string>
+        <string>You can control</string>
        </property>
 #1
        <widget class="QDoubleSpinBox" name="SP_MinHoleSize">

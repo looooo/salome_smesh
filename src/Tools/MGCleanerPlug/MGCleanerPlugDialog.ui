@@ -188,7 +188,7 @@
         </rect>
        </property>
        <property name="title">
-        <string>Optimisation</string>
+        <string>Options</string>
        </property>
 
         <layout class="QHBoxLayout" name="RBLayoutopt">

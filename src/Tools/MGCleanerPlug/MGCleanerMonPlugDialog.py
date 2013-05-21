@@ -98,9 +98,9 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
     self.connect(self.CB_ComputedToleranceDisplacement,SIGNAL("stateChanged(int)"),self.SP_ToleranceDisplacement.setDisabled)
     self.connect(self.CB_ComputedResolutionLength,SIGNAL("stateChanged(int)"),self.SP_ResolutionLength.setDisabled)
     self.connect(self.CB_ComputedOverlapDistance,SIGNAL("stateChanged(int)"),self.SP_OverlapDistance.setDisabled)
-        
+
   def PBHelpPressed(self):
-    try :
+    try:
       mydir=os.environ["SMESH_ROOT_DIR"]
     except Exception:
       QMessageBox.warning( self, "Help unavailable $SMESH_ROOT_DIR not found")
@@ -159,7 +159,7 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
   def PBSavePressed(self):
     from datetime import datetime
     if not(self.PrepareLigneCommande()): return
-    text = "# MGCleaner hypothesis parameters\n" 
+    text = "# MGCleaner hypothesis parameters\n"
     text += "# Params for mesh : " +  self.LE_MeshSmesh.text() +"\n"
     text += datetime.now().strftime("# Date : %d/%m/%y %H:%M:%S\n")
     text += "# Command : "+self.commande+"\n"
@@ -202,6 +202,7 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
     hypoName = "HypoMGC_"+str(self.num)
     aNameAttrib.SetValue(hypoName)
     aCommentAttrib=monStudyBuilder.FindOrCreateAttribute(newStudyIter,"AttributeComment")
+    #print "getResumeData",type(self.getResumeData(separator=" ; ")),self.getResumeData(separator=" ; ")
     aCommentAttrib.SetValue(self.getResumeData(separator=" ; "))
     
     if salome.sg.hasDesktop(): salome.sg.updateObjBrowser(0)
@@ -217,21 +218,21 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
         CheckOrFix="fix2pass"
       else:
         CheckOrFix="check"
-    text+="CheckOrFix=" + CheckOrFix+separator
-    text+="PreserveTopology=" + str(self.CB_PreserveTopology.isChecked())+separator
-    text+="FillHoles=" + str(self.CB_FillHoles.isChecked())+separator
-    text+="MinHoleSize=" + str(self.SP_MinHoleSize.value())+separator
-    text+="ComputedToleranceDisplacement=" + str(self.CB_ComputedToleranceDisplacement.isChecked())+separator
-    text+="ToleranceDisplacement=" + str(self.SP_ToleranceDisplacement.value())+separator
-    text+="ComputedResolutionLength=" + str(self.CB_ComputedResolutionLength.isChecked())+separator
-    text+="ResolutionLength=" + str(self.SP_ResolutionLength.value())+separator
-    text+="FoldingAngle=" + str(self.SP_FoldingAngle.value())+separator
-    text+="RemeshPlanes=" + str(self.CB_RemeshPlanes.isChecked())+separator
-    text+="ComputedOverlapDistance=" + str(self.CB_ComputedOverlapDistance.isChecked())+separator
-    text+="OverlapDistance=" + str(self.SP_OverlapDistance.value())+separator
-    text+="OverlapAngle=" + str(self.SP_OverlapAngle.value())+separator
-    text+="Verbosity=" + str(self.SP_Verbosity.value())+separator
-    return text
+    text+="CheckOrFix="+CheckOrFix+separator
+    text+="PreserveTopology="+str(self.CB_PreserveTopology.isChecked())+separator
+    text+="FillHoles="+str(self.CB_FillHoles.isChecked())+separator
+    text+="MinHoleSize="+str(self.SP_MinHoleSize.value())+separator
+    text+="ComputedToleranceDisplacement="+str(self.CB_ComputedToleranceDisplacement.isChecked())+separator
+    text+="ToleranceDisplacement="+str(self.SP_ToleranceDisplacement.value())+separator
+    text+="ComputedResolutionLength="+str(self.CB_ComputedResolutionLength.isChecked())+separator
+    text+="ResolutionLength="+str(self.SP_ResolutionLength.value())+separator
+    text+="FoldingAngle="+str(self.SP_FoldingAngle.value())+separator
+    text+="RemeshPlanes="+str(self.CB_RemeshPlanes.isChecked())+separator
+    text+="ComputedOverlapDistance="+str(self.CB_ComputedOverlapDistance.isChecked())+separator
+    text+="OverlapDistance="+str(self.SP_OverlapDistance.value())+separator
+    text+="OverlapAngle="+str(self.SP_OverlapAngle.value())+separator
+    text+="Verbosity="+str(self.SP_Verbosity.value())+separator
+    return str(text)
 
   def loadResumeData(self, hypothesis, separator="\n"):
     text=str(hypothesis)
@@ -409,7 +410,7 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
     #self.commande="mg-cleaner.exe --in " + self.fichierIn + " --out " + self.fichierOut + " --fix2pass" 
     #return True
     #print "PrepareLigneCommande '"+self.fichierIn+"' '"+self.MeshIn+"'",self.__selectedMesh
-    if self.fichierIn=="" and self.MeshIn=="" :
+    if self.fichierIn=="" and self.MeshIn=="":
       QMessageBox.critical(self, "Mesh", "select an input mesh")
       return False
     if self.__selectedMesh!=None: self.prepareFichier()

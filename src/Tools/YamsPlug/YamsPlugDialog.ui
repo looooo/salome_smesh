@@ -190,15 +190,27 @@
        <property name="title">
         <string>Optimisation</string>
        </property>
-       <widget class="QGroupBox" name="mesRB">
-        <property name="geometry">
-         <rect>
-          <x>10</x>
-          <y>30</y>
-          <width>611</width>
-          <height>209</height>
-         </rect>
-        </property>
+
+        <layout class="QHBoxLayout" name="RBLayoutopt">
+
+         <item>
+      <spacer name="horizontalSpacer_xx">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Minimum</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>30</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+         </item>
+
+         <item>
         <layout class="QVBoxLayout" name="monRBLayout">
          <item>
           <widget class="QRadioButton" name="RB_0">
@@ -324,8 +336,13 @@ good quality elements</string>
            </property>
           </widget>
          </item>
+
         </layout>
-       </widget>
+
+       </item>
+
+      </layout>
+
       </widget>
       <widget class="QGroupBox" name="GBUnit">
        <property name="geometry">
@@ -567,7 +584,7 @@ If the Units parameter is absolute, the tolerance parameter is expressed in mode
         <property name="toolTip">
          <string>If not set (ridge detection disabled), Yams will not try to detect any new ridge edge by its own mechanism : 
 it will consider as ridge only the ridges given in the mesh. 
-All non-ridge edges that would have been detected as ridge by the Ridge angle paramaeter 
+All non-ridge edges that would have been detected as ridge by the ridge angle parameter 
 (see below)  will be considered as part of the same continuous patch.
 This option should not be checked when all the known ridges of the mesh are given and
 when all other possible ridges are not geometric ridges to take into account.</string>
@@ -631,7 +648,7 @@ New created vertices are saved in the .mesh file under keyword section 'Vertices
          <x>10</x>
          <y>140</y>
          <width>750</width>
-         <height>280</height>
+         <height>270</height>
         </rect>
        </property>
        <property name="title">
@@ -915,21 +932,6 @@ Default is 3.</string>
           <height>25</height>
          </rect>
         </property>
-           <property name="toolTip">
-            <string>The program requires roughly about 370 bytes per point. It is thus possible to estimate a priori 
-the required memory size to complete a job. As an example of memory space needed, a mesh 
-of 543,652 points (1,087,716 triangles) requires 182 Mbytes (about 351 bytes per point). Conversely, 
-a workstation having 512 Mbytes of memory can handle a mesh of about 2,750,000 points.
-The memory needed for mesh modification is allocated dynamically at the beginning of the procedure 
-(data reading), based on the initial triangulation size. When the program reaches the amount of maximal 
-memory allowed, it will stop inserting points and, if possible, the current mesh will be saved as it is, 
-valid and conformal, provided the input mesh was valid and conformal.
-Specify the memory if:
-- the automatically allocated memory reveals insufficient when the user asked to enrich the given mesh.
-- you want to limit the amount of memory used by the program.
-If the input mesh size requires more memory than requested or if the allocated memory (user defined or not)
-exceeds the machine capabilities, the tool will stop because of insufficient memory.</string>
-           </property>
            <property name="maximum">
             <number>100000</number>
            </property>
@@ -947,16 +949,23 @@ exceeds the machine capabilities, the tool will stop because of insufficient mem
           <height>30</height>
          </rect>
         </property>
-        <property name="minimumSize">
-         <rect>
-          <x>130</x>
-          <y>700</y>
-          <width>600</width>
-          <height>30</height>
-         </rect>
-        </property>
            <property name="text">
             <string>Memory size (in Mbytes)</string>
+           </property>
+           <property name="toolTip">
+            <string>The program requires roughly about 370 bytes per point. It is thus possible to estimate a priori 
+the required memory size to complete a job. As an example of memory space needed, a mesh 
+of 543,652 points (1,087,716 triangles) requires 182 Mbytes (about 351 bytes per point). Conversely, 
+a workstation having 512 Mbytes of memory can handle a mesh of about 2,750,000 points.
+The memory needed for mesh modification is allocated dynamically at the beginning of the procedure 
+(data reading), based on the initial triangulation size. When the program reaches the amount of maximal 
+memory allowed, it will stop inserting points and, if possible, the current mesh will be saved as it is, 
+valid and conformal, provided the input mesh was valid and conformal.
+Specify the memory if:
+- the automatically allocated memory reveals insufficient when the user asked to enrich the given mesh.
+- you want to limit the amount of memory used by the program.
+If the input mesh size requires more memory than requested or if the allocated memory (user defined or not)
+exceeds the machine capabilities, the tool will stop because of insufficient memory.</string>
            </property>
           </widget>
         

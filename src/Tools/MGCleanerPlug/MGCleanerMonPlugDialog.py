@@ -120,15 +120,18 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
     import salome
     from salome.kernel import studyedit
 
-    #print "enregistreResultat"
     maStudy=studyedit.getActiveStudy()
     smesh.SetCurrentStudy(maStudy)
     (outputMesh, status) = smesh.CreateMeshesFromGMF(self.fichierOut)
     name=str(self.LE_MeshSmesh.text())
+    initialMeshFile=None
+    initialMeshObject=None
     if name=="":
-      #print "name new MESH",self.LE_MeshFile.text()
       a=str(self.fichierIn)
       name=os.path.basename(os.path.splitext(a)[0])
+      initialMeshFile=a
+    else:
+      initialMeshObject=maStudy.FindObjectByName(name ,"SMESH")[0]
 
     meshname = name+"_MGC_"+str(self.num)
     smesh.SetName(outputMesh.GetMesh(), meshname)
@@ -137,20 +140,28 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
     self.editor = studyedit.getStudyEditor()
     moduleEntry=self.editor.findOrCreateComponent("SMESH","SMESH")
     HypReMeshEntry = self.editor.findOrCreateItem(
-        moduleEntry, name = "MGCleaner Hypotheses", icon="mesh_tree_algo.png") #, comment = "HypoForRemeshing" )
+        moduleEntry, name = "Plugins Hypotheses", icon="mesh_tree_hypo.png") #, comment = "HypoForRemeshing" )
     
     monStudyBuilder=maStudy.NewBuilder()
     monStudyBuilder.NewCommand()
     newStudyIter=monStudyBuilder.NewObject(HypReMeshEntry)
-    aNameAttrib=monStudyBuilder.FindOrCreateAttribute(newStudyIter,"AttributeName")
-    hypoName = "HypoMGC_"+str(self.num)
-    aNameAttrib.SetValue(hypoName)
-    aCommentAttrib=monStudyBuilder.FindOrCreateAttribute(newStudyIter,"AttributeComment")
-    aCommentAttrib.SetValue(self.getResumeData(separator=" ; "))
+    self.editor.setAttributeValue(newStudyIter, "AttributeName", "MGCleaner Parameters_"+str(self.num))
+    self.editor.setAttributeValue(newStudyIter, "AttributeComment", self.getResumeData(separator=" ; "))
     
     SOMesh=maStudy.FindObjectByName(meshname ,"SMESH")[0]
+    
+    if initialMeshFile!=None:
+      newStudyFileName=monStudyBuilder.NewObject(SOMesh)
+      self.editor.setAttributeValue(newStudyFileName, "AttributeName", "meshFile")
+      self.editor.setAttributeValue(newStudyFileName, "AttributeExternalFileDef", initialMeshFile)
+      self.editor.setAttributeValue(newStudyFileName, "AttributeComment", initialMeshFile)
+
+    if initialMeshObject!=None:
+      newLink=monStudyBuilder.NewObject(SOMesh)
+      monStudyBuilder.Addreference(newLink, initialMeshObject)
+
     newLink=monStudyBuilder.NewObject(SOMesh)
-    monStudyBuilder.Addreference(newLink, newStudyIter);
+    monStudyBuilder.Addreference(newLink, newStudyIter)
 
     if salome.sg.hasDesktop(): salome.sg.updateObjBrowser(0)
     self.num+=1
@@ -193,21 +204,23 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
     self.editor = studyedit.getStudyEditor()
     moduleEntry=self.editor.findOrCreateComponent("SMESH","SMESH")
     HypReMeshEntry = self.editor.findOrCreateItem(
-        moduleEntry, name = "MGCleaner Hypotheses", icon="mesh_tree_algo.png") #, comment = "HypoForRemeshing" )
+        moduleEntry, name = "Plugins Hypotheses", icon="mesh_tree_hypo.png") #, comment = "HypoForRemeshing" )
     
     monStudyBuilder=maStudy.NewBuilder()
     monStudyBuilder.NewCommand()
     newStudyIter=monStudyBuilder.NewObject(HypReMeshEntry)
-    aNameAttrib=monStudyBuilder.FindOrCreateAttribute(newStudyIter,"AttributeName")
-    hypoName = "HypoMGC_"+str(self.num)
-    aNameAttrib.SetValue(hypoName)
-    aCommentAttrib=monStudyBuilder.FindOrCreateAttribute(newStudyIter,"AttributeComment")
-    #print "getResumeData",type(self.getResumeData(separator=" ; ")),self.getResumeData(separator=" ; ")
-    aCommentAttrib.SetValue(self.getResumeData(separator=" ; "))
+    self.editor.setAttributeValue(newStudyIter, "AttributeName", "MGCleaner Parameters_"+str(self.num))
+    self.editor.setAttributeValue(newStudyIter, "AttributeComment", self.getResumeData(separator=" ; "))
     
     if salome.sg.hasDesktop(): salome.sg.updateObjBrowser(0)
     self.num+=1
     return True
+
+    """
+    import salome_pluginsmanager
+    print "salome_pluginsmanager.plugins",salome_pluginsmanager.plugins
+    print "salome_pluginsmanager.current_plugins_manager",salome_pluginsmanager.current_plugins_manager
+    """
 
   def getResumeData(self, separator="\n"):
     text=""

@@ -44,3 +44,4 @@ def MGCleanerLct(context):
   import MGCleanerMonPlugDialog
   window=MGCleanerMonPlugDialog.getDialog()
   window.show()
+

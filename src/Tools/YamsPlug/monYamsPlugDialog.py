@@ -113,15 +113,18 @@ class MonYamsPlugDialog(Ui_YamsPlugDialog,QWidget):
     import salome
     from salome.kernel import studyedit
 
-    #print "enregistreResultat"
     maStudy=studyedit.getActiveStudy()
     smesh.SetCurrentStudy(maStudy)
     (outputMesh, status) = smesh.CreateMeshesFromGMF(self.fichierOut)
     name=str(self.LE_MeshSmesh.text())
+    initialMeshFile=None
+    initialMeshObject=None
     if name=="":
-      #print "name new MESH",self.LE_MeshFile.text()
       a=str(self.fichierIn)
       name=os.path.basename(os.path.splitext(a)[0])
+      initialMeshFile=a
+    else:
+      initialMeshObject=maStudy.FindObjectByName(name ,"SMESH")[0]
 
     meshname = name+"_YAMS_"+str(self.num)
     smesh.SetName(outputMesh.GetMesh(), meshname)
@@ -130,21 +133,29 @@ class MonYamsPlugDialog(Ui_YamsPlugDialog,QWidget):
     self.editor = studyedit.getStudyEditor()    # 
     moduleEntry=self.editor.findOrCreateComponent("SMESH","SMESH")
     HypReMeshEntry = self.editor.findOrCreateItem(
-        moduleEntry, name = "YAMS Hypotheses", icon="mesh_tree_algo.png") #, comment = "HypoForRemeshing" )
+        moduleEntry, name = "Plugins Hypotheses", icon="mesh_tree_hypo.png") #, comment = "HypoForRemeshing" )
 
-    monStudyBuilder=maStudy.NewBuilder();
-    monStudyBuilder.NewCommand();
+    monStudyBuilder=maStudy.NewBuilder()
+    monStudyBuilder.NewCommand()
     newStudyIter=monStudyBuilder.NewObject(HypReMeshEntry)
-    aNameAttrib=monStudyBuilder.FindOrCreateAttribute(newStudyIter,"AttributeName")
-    hypoName = "HypoYams_"+str(self.num)
-    aNameAttrib.SetValue(hypoName)
-    aCommentAttrib=monStudyBuilder.FindOrCreateAttribute(newStudyIter,"AttributeComment")
-    aCommentAttrib.SetValue(self.getResumeData(separator=" ; "))
+    self.editor.setAttributeValue(newStudyIter, "AttributeName", "YAMS Parameters_"+str(self.num))
+    self.editor.setAttributeValue(newStudyIter, "AttributeComment", self.getResumeData(separator=" ; "))
     
     SOMesh=maStudy.FindObjectByName(meshname ,"SMESH")[0]
+    
+    if initialMeshFile!=None:
+      newStudyFileName=monStudyBuilder.NewObject(SOMesh)
+      self.editor.setAttributeValue(newStudyFileName, "AttributeName", "meshFile")
+      self.editor.setAttributeValue(newStudyFileName, "AttributeExternalFileDef", initialMeshFile)
+      self.editor.setAttributeValue(newStudyFileName, "AttributeComment", initialMeshFile)
+
+    if initialMeshObject!=None:
+      newLink=monStudyBuilder.NewObject(SOMesh)
+      monStudyBuilder.Addreference(newLink, initialMeshObject)
+
     newLink=monStudyBuilder.NewObject(SOMesh)
     monStudyBuilder.Addreference(newLink, newStudyIter)
-    
+
     if salome.sg.hasDesktop(): salome.sg.updateObjBrowser(0)
     self.num+=1
     return True
@@ -186,17 +197,13 @@ class MonYamsPlugDialog(Ui_YamsPlugDialog,QWidget):
     self.editor = studyedit.getStudyEditor()
     moduleEntry=self.editor.findOrCreateComponent("SMESH","SMESH")
     HypReMeshEntry = self.editor.findOrCreateItem(
-        moduleEntry, name = "YAMS Hypotheses", icon="mesh_tree_algo.png") #, comment = "HypoForRemeshing" )
+        moduleEntry, name = "Plugins Hypotheses", icon="mesh_tree_hypo.png") #, comment = "HypoForRemeshing" )
     
     monStudyBuilder=maStudy.NewBuilder()
     monStudyBuilder.NewCommand()
     newStudyIter=monStudyBuilder.NewObject(HypReMeshEntry)
-    aNameAttrib=monStudyBuilder.FindOrCreateAttribute(newStudyIter,"AttributeName")
-    hypoName = "HypoYams_"+str(self.num)
-    aNameAttrib.SetValue(hypoName)
-    aCommentAttrib=monStudyBuilder.FindOrCreateAttribute(newStudyIter,"AttributeComment")
-    #print "getResumeData",type(self.getResumeData(separator=" ; ")),self.getResumeData(separator=" ; ")
-    aCommentAttrib.SetValue(self.getResumeData(separator=" ; "))
+    self.editor.setAttributeValue(newStudyIter, "AttributeName", "YAMS Parameters_"+str(self.num))
+    self.editor.setAttributeValue(newStudyIter, "AttributeComment", self.getResumeData(separator=" ; "))
     
     if salome.sg.hasDesktop(): salome.sg.updateObjBrowser(0)
     self.num+=1
@@ -284,16 +291,6 @@ class MonYamsPlugDialog(Ui_YamsPlugDialog,QWidget):
       QMessageBox.critical(self, "Hypothese", "select an Object Browser YAMS hypothesis")
       return
     
-    #for i in dir(mySObject): print "dir mySObject",i
-    #print "GetAllAttributes",mySObject.GetAllAttributes()
-    #print "GetComment",mySObject.GetComment()
-    #print "GetName",mySObject.GetName()
-    
-    #could be renamed...
-    #if mySObject.GetFather().GetName()!="MGCleaner Hypotheses":
-    #  QMessageBox.critical(self, "Hypothese", "not a child of MGCleaner Hypotheses")
-    #  return
-    
     text=mySObject.GetComment()
     
     #a verification
@@ -334,8 +331,6 @@ class MonYamsPlugDialog(Ui_YamsPlugDialog,QWidget):
 
   def meshSmeshNameChanged(self):
     """only change by GUI mouse selection, otherwise clear"""
-    #self.MeshIn=str(self.LE_MeshSmesh.text())
-    #print "meshSmeshNameChanged", self.MeshIn
     self.__selectedMesh = None
     self.MeshIn=""
     self.LE_MeshSmesh.setText("")

@@ -21,8 +21,8 @@ Contents:
   
    lct.rst
    Mandatory_params.rst
-   Generics_params.rst
    Advanced_params.rst
+   Generics_params.rst
    editHypo.rst
    
    

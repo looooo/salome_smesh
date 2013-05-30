@@ -340,6 +340,48 @@ Driver_Mesh::Status DriverGMF_Write::Perform()
   return DRS_OK;
 }
 
+void DriverGMF_Write::AddSizeMapSection(int meshID, int nbControlPoints)
+{
+//   const int dim = 3, version = sizeof(long) == 4 ? 2 : 3;
+//   int meshID = GmfOpenMesh( myFile.c_str(), GmfWrite, version, dim );
+  int TypTab[] = {GmfSca};
+  GmfSetKwd(meshID, GmfSolAtVertices, nbControlPoints, 1, TypTab);
+//   GmfCloseMesh(meshID);
+//   return DRS_OK;
+}
+
+void DriverGMF_Write::AppendSize(int meshID, double size)
+{
+//   const int dim = 3, version = sizeof(long) == 4 ? 2 : 3;
+//   int meshID = GmfOpenMesh( myFile.c_str(), GmfWrite, version, dim );
+//   int nbPoints = GmfStatKwd( meshID, GmfSolAtVertices);
+//   GmfSetKwd( meshID, GmfSolAtVertices, nbPoints+1, 1, 1 );
+  double ValTab[] = {size};
+  GmfSetLin( meshID, GmfSolAtVertices, ValTab);
+//   return DRS_OK;
+}
+
+int DriverGMF_Write::NbVerticesInFile()
+{
+  int dim, version;
+  // open the file
+  int meshID = GmfOpenMesh( myFile.c_str(), GmfRead, &version, &dim );
+  int nbVertices = GmfStatKwd( meshID, GmfVertices);
+  return nbVertices;
+}
+
+int DriverGMF_Write::OpenFileToWrite()
+{
+  const int dim = 3, version = sizeof(long) == 4 ? 2 : 3;
+  int meshID = GmfOpenMesh( myFile.c_str(), GmfWrite, version, dim );
+  return meshID;
+}
+
+void DriverGMF_Write::CloseFile( int meshID )
+{
+  GmfCloseMesh( meshID );
+}
+
 //================================================================================
 /*!
  * \brief Returns an iterator on elements of a certain type

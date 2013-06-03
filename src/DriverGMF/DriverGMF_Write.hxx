@@ -49,11 +49,12 @@ public:
   }
    
   virtual Status Perform(); 
-  void AddSizeMapSection( int meshID, int nbControlPoints );
-  void AppendSize( int meshID, double size );
-  int NbVerticesInFile();
-  int OpenFileToWrite();
-  void CloseFile( int );
+  void WriteSizeMapFromMesh( double size );
+//   void AddSizeMapSection( int meshID, int nbControlPoints );
+//   void AppendSize( int meshID, double size );
+//   int NbVerticesInFile();
+//   int OpenFileToWrite();
+//   void CloseFile( int );
 
  private:
 

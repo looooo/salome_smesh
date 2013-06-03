@@ -340,45 +340,76 @@ Driver_Mesh::Status DriverGMF_Write::Perform()
   return DRS_OK;
 }
 
-void DriverGMF_Write::AddSizeMapSection(int meshID, int nbControlPoints)
-{
+// void DriverGMF_Write::AddSizeMapSection(int meshID, int nbControlPoints)
+// {
+// //   const int dim = 3, version = sizeof(long) == 4 ? 2 : 3;
+// //   int meshID = GmfOpenMesh( myFile.c_str(), GmfWrite, version, dim );
+//   int TypTab[] = {GmfSca};
+//   GmfSetKwd(meshID, GmfSolAtVertices, nbControlPoints, 1, TypTab);
+// //   GmfCloseMesh(meshID);
+// //   return DRS_OK;
+// }
+// 
+// void DriverGMF_Write::AppendSize(int meshID, double size)
+// {
+// //   const int dim = 3, version = sizeof(long) == 4 ? 2 : 3;
+// //   int meshID = GmfOpenMesh( myFile.c_str(), GmfWrite, version, dim );
+// //   int nbPoints = GmfStatKwd( meshID, GmfSolAtVertices);
+// //   GmfSetKwd( meshID, GmfSolAtVertices, nbPoints+1, 1, 1 );
+//   double ValTab[] = {size};
+//   GmfSetLin( meshID, GmfSolAtVertices, ValTab);
+// //   return DRS_OK;
+// }
+// 
+// int DriverGMF_Write::NbVerticesInFile()
+// {
+//   int dim, version;
+//   // open the file
+//   int meshID = GmfOpenMesh( myFile.c_str(), GmfRead, &version, &dim );
+//   int nbVertices = GmfStatKwd( meshID, GmfVertices);
+//   return nbVertices;
+// }
+// 
+// int DriverGMF_Write::OpenFileToWrite()
+// {
 //   const int dim = 3, version = sizeof(long) == 4 ? 2 : 3;
 //   int meshID = GmfOpenMesh( myFile.c_str(), GmfWrite, version, dim );
-  int TypTab[] = {GmfSca};
-  GmfSetKwd(meshID, GmfSolAtVertices, nbControlPoints, 1, TypTab);
-//   GmfCloseMesh(meshID);
-//   return DRS_OK;
-}
+//   return meshID;
+// }
+// 
+// void DriverGMF_Write::CloseFile( int meshID )
+// {
+//   GmfCloseMesh( meshID );
+// }
 
-void DriverGMF_Write::AppendSize(int meshID, double size)
+void DriverGMF_Write::WriteSizeMapFromMesh( double size )
 {
-//   const int dim = 3, version = sizeof(long) == 4 ? 2 : 3;
-//   int meshID = GmfOpenMesh( myFile.c_str(), GmfWrite, version, dim );
-//   int nbPoints = GmfStatKwd( meshID, GmfSolAtVertices);
-//   GmfSetKwd( meshID, GmfSolAtVertices, nbPoints+1, 1, 1 );
-  double ValTab[] = {size};
-  GmfSetLin( meshID, GmfSolAtVertices, ValTab);
-//   return DRS_OK;
-}
-
-int DriverGMF_Write::NbVerticesInFile()
-{
-  int dim, version;
-  // open the file
-  int meshID = GmfOpenMesh( myFile.c_str(), GmfRead, &version, &dim );
-  int nbVertices = GmfStatKwd( meshID, GmfVertices);
-  return nbVertices;
-}
-
-int DriverGMF_Write::OpenFileToWrite()
-{
+  // Open file
   const int dim = 3, version = sizeof(long) == 4 ? 2 : 3;
-  int meshID = GmfOpenMesh( myFile.c_str(), GmfWrite, version, dim );
-  return meshID;
-}
-
-void DriverGMF_Write::CloseFile( int meshID )
-{
+  int meshID = GmfOpenMesh( myFile.c_str(), GmfWrite, version, dim );  
+  
+  // Vertices Keyword
+  int iN = 0, nbNodes = myMesh->NbNodes();
+  GmfSetKwd( meshID, GmfVertices, nbNodes );
+  double xyz[3];
+  SMDS_NodeIteratorPtr nodeIt = myMesh->nodesIterator();
+  while ( nodeIt->more() )
+  {
+    const SMDS_MeshNode* n = nodeIt->next();
+    n->GetXYZ( xyz );
+    GmfSetLin( meshID, GmfVertices, xyz[0], xyz[1], xyz[2], n->getshapeId() );
+  }
+  
+  // solAtVertices Keyword
+  int TypTab[] = {GmfSca};
+  GmfSetKwd(meshID, GmfSolAtVertices, nbNodes, 1, TypTab);
+  for ( int i=1; i<= nbNodes; i++)
+  {
+    double ValTab[] = {size};
+    GmfSetLin( meshID, GmfSolAtVertices, ValTab);
+  }
+  
+  // Close File
   GmfCloseMesh( meshID );
 }
 

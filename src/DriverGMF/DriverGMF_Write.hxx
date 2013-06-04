@@ -33,6 +33,17 @@
 #include "SMDSAbs_ElementType.hxx"
 #include "SMDS_ElemIterator.hxx"
 
+struct TLocalSize
+{
+  TLocalSize( int theNbNodes, double theSize)
+  {
+    nbNodes = theNbNodes;
+    size = theSize;
+  }
+  int nbNodes;
+  double size;
+};
+
 /*!
  * \brief Driver Writing a mesh into a GMF file.
  */
@@ -48,8 +59,10 @@ public:
     _exportRequiredGroups = toExport;
   }
    
-  virtual Status Perform(); 
-  void WriteSizeMapFromMesh( double size );
+  virtual Status Perform();
+  Status PerformSizeMap();
+  void AddSizeMapFromMesh( SMESHDS_Mesh* mesh, double size);
+//   void WriteSizeMapFromMesh( double size );
 //   void AddSizeMapSection( int meshID, int nbControlPoints );
 //   void AppendSize( int meshID, double size );
 //   int NbVerticesInFile();
@@ -63,6 +76,9 @@ public:
   SMDS_ElemIteratorPtr elementIterator(SMDSAbs_GeometryType type);
 
   bool _exportRequiredGroups;
+  int mySizeMapVerticesNumber;
+  std::list<SMESHDS_Mesh*> mySizeMapMeshes;
+  std::list<TLocalSize> myLocalSizes;
 };
 
 #endif

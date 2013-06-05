@@ -97,21 +97,27 @@ class MonYamsPlugDialog(Ui_YamsPlugDialog,QWidget):
     try :
       mydir=os.environ["SMESH_ROOT_DIR"]
     except Exception:
-      QMessageBox.warning( self, "Help unavailable $SMESH_ROOT_DIR not found")
+      QMessageBox.warning(self, "Help", "Help unavailable $SMESH_ROOT_DIR not found")
+      return
     maDoc=mydir+"/share/doc/salome/gui/SMESH/yams/_downloads/YamsWhitePaper_3.2.pdf"
     command="xdg-open "+maDoc+";"
     subprocess.call(command, shell=True)
 
   def PBOKPressed(self):
-    if not(self.PrepareLigneCommande()) : return
+    if not(self.PrepareLigneCommande()):
+      #warning done yet
+      #QMessageBox.warning(self, "Compute", "Command not found")
+      return
     maFenetre=MonViewText(self,self.commande)
-    if os.path.isfile(self.fichierOut): self.enregistreResultat()
 
   def enregistreResultat(self):
     import smesh
     import SMESH
     import salome
     from salome.kernel import studyedit
+
+    if not os.path.isfile(self.fichierOut):
+      QMessageBox.warning(self, "Compute", "Result file "+self.fichierOut+" not found")
 
     maStudy=studyedit.getActiveStudy()
     smesh.SetCurrentStudy(maStudy)
@@ -327,7 +333,7 @@ class MonYamsPlugDialog(Ui_YamsPlugDialog,QWidget):
       self.MeshIn=""
       self.LE_MeshSmesh.setText("")
       return
-    QMessageBox.warning( self, "Unknown File", "File doesn't exist")
+    QMessageBox.warning(self, "Mesh file", "File doesn't exist")
 
   def meshSmeshNameChanged(self):
     """only change by GUI mouse selection, otherwise clear"""
@@ -396,7 +402,7 @@ class MonYamsPlugDialog(Ui_YamsPlugDialog,QWidget):
     self.commande+=" -O "+self.style.toLatin1()
 
     deb=os.path.splitext(self.fichierIn)
-    self.fichierOut=deb[0]+".d.meshb"
+    self.fichierOut=deb[0] + ".d.meshb"
 
     if self.RB_Absolute.isChecked()==True :
         self.commande+=" -Dabsolute"

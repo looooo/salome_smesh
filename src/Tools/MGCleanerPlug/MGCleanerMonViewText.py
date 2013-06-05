@@ -68,7 +68,7 @@ class MGCleanerMonViewText(Ui_ViewExe, QDialog):
         else:
           cmds+="# $DISTENE_PATH_FOR_MGCLEANER NOT SET\n"
         #cmds+='env\n'
-        cmds+='rm -f /tmp/ForMGCleaner*fix.mesh\n'
+        cmds+='rm -f '+self.parent().fichierOut+'\n'
         cmds+=txt+'\n'
         cmds+='echo END_OF_MGCleaner\n'
         pid=self.monExe.pid()

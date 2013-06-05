@@ -103,22 +103,27 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
     try:
       mydir=os.environ["SMESH_ROOT_DIR"]
     except Exception:
-      QMessageBox.warning( self, "Help unavailable $SMESH_ROOT_DIR not found")
+      QMessageBox.warning( self, "Help", "Help unavailable $SMESH_ROOT_DIR not found")
+      return
     maDoc=mydir+"/share/doc/salome/gui/SMESH/MGCleaner/_downloads/mg-cleaner_user_manual.pdf"
     command="xdg-open "+maDoc+";"
     subprocess.call(command, shell=True)
 
   def PBOKPressed(self):
-    if not(self.PrepareLigneCommande()): return
-    #print "compute Pressed"
+    if not(self.PrepareLigneCommande()):
+      #warning done yet
+      #QMessageBox.warning(self, "Compute", "Command not found")
+      return
     maFenetre=MGCleanerMonViewText(self, self.commande)
-    if os.path.isfile(self.fichierOut): self.enregistreResultat()
 
   def enregistreResultat(self):
     import smesh
     import SMESH
     import salome
     from salome.kernel import studyedit
+
+    if not os.path.isfile(self.fichierOut):
+      QMessageBox.warning(self, "Compute", "Result file "+self.fichierOut+" not found")
 
     maStudy=studyedit.getActiveStudy()
     smesh.SetCurrentStudy(maStudy)
@@ -355,7 +360,7 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
       self.MeshIn=""
       self.LE_MeshSmesh.setText("")
       return
-    QMessageBox.warning( self, "Unknown File", "File doesn't exist")
+    QMessageBox.warning(self, "Mesh file", "File doesn't exist")
 
   def meshSmeshNameChanged(self):
     """only change by GUI mouse selection, otherwise clear"""

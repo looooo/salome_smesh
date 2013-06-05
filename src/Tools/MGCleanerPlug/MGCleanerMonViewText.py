@@ -30,20 +30,20 @@ from PyQt4.QtCore import *
 
 from MGCleanerViewText import Ui_ViewExe
 
-class MGCleanerMonViewText(Ui_ViewExe,QDialog):
+class MGCleanerMonViewText(Ui_ViewExe, QDialog):
     """
     Classe permettant la visualisation de texte
     """
-    def __init__(self,parent,txt):
+    def __init__(self, parent, txt, ):
         QDialog.__init__(self,parent)
         self.setupUi(self)
         self.resize( QSize(1000,600).expandedTo(self.minimumSizeHint()) )
-        self.connect( self.PB_Ok,SIGNAL("clicked()"), self, SLOT("close()") )
+        #self.connect( self.PB_Ok,SIGNAL("clicked()"), self, SLOT("close()") )
+        self.connect( self.PB_Ok,SIGNAL("clicked()"), self.theClose )
         self.connect( self.PB_Save,SIGNAL("clicked()"), self.saveFile )
         self.PB_Save.setToolTip("Save trace in log file")
         self.PB_Ok.setToolTip("Close view")
         self.monExe=QProcess(self)
-
 
         self.connect(self.monExe, SIGNAL("readyReadStandardOutput()"), self.readFromStdOut )
         self.connect(self.monExe, SIGNAL("readyReadStandardError()"), self.readFromStdErr )
@@ -68,7 +68,9 @@ class MGCleanerMonViewText(Ui_ViewExe,QDialog):
         else:
           cmds+="# $DISTENE_PATH_FOR_MGCLEANER NOT SET\n"
         #cmds+='env\n'
+        cmds+='rm -f /tmp/ForMGCleaner*fix.mesh\n'
         cmds+=txt+'\n'
+        cmds+='echo END_OF_MGCleaner\n'
         pid=self.monExe.pid()
         nomFichier='/tmp/MGCleaner_'+str(pid)+'.sh'
         f=open(nomFichier,'w')
@@ -78,9 +80,9 @@ class MGCleanerMonViewText(Ui_ViewExe,QDialog):
         maBidouille='sh ' + nomFichier
         self.monExe.start(maBidouille)
         self.monExe.closeWriteChannel()
+        self.enregistreResultatsDone=False
         self.show()
 
-        
     def saveFile(self):
         #recuperation du nom du fichier
         savedir=os.environ['HOME']
@@ -98,8 +100,19 @@ class MGCleanerMonViewText(Ui_ViewExe,QDialog):
 
     def readFromStdErr(self):
         a=self.monExe.readAllStandardError()
-        self.TB_Exe.append(QString.fromUtf8(a.data(),len(a))) ;
+        self.TB_Exe.append(QString.fromUtf8(a.data(),len(a)))
 
     def readFromStdOut(self) :
         a=self.monExe.readAllStandardOutput()
-        self.TB_Exe.append(QString.fromUtf8(a.data(),len(a))) ;
+        aa=QString.fromUtf8(a.data(),len(a))
+        self.TB_Exe.append(aa)
+        if "END_OF_MGCleaner" in aa:
+          self.parent().enregistreResultat()
+          self.enregistreResultatsDone=True
+          #self.theClose()
+    
+    def theClose(self):
+      if not self.enregistreResultatsDone:
+        self.parent().enregistreResultat()
+        self.enregistreResultatsDone=True
+      self.close()

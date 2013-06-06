@@ -77,8 +77,8 @@ public:
 
   bool _exportRequiredGroups;
   int mySizeMapVerticesNumber;
-  std::list<SMESHDS_Mesh*> mySizeMapMeshes;
-  std::list<TLocalSize> myLocalSizes;
+  std::vector<SMESHDS_Mesh*> mySizeMapMeshes;
+  std::vector<TLocalSize> myLocalSizes;
 };
 
 #endif

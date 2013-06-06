@@ -396,26 +396,31 @@ Driver_Mesh::Status DriverGMF_Write::PerformSizeMap()
   // Vertices Keyword
   GmfSetKwd( meshID, GmfVertices, mySizeMapVerticesNumber );
   double xyz[3];
-  std::list<TLocalSize>::iterator sizes_it;
-  std::list<SMESHDS_Mesh*>::iterator meshes_it;
+  std::vector<SMESHDS_Mesh*>::iterator meshes_it;
   SMESHDS_Mesh* aMesh;
-  for ( sizes_it = myLocalSizes.begin(), meshes_it = mySizeMapMeshes.begin()
-       ; sizes_it != myLocalSizes.end()
-       ; sizes_it++, meshes_it++ )
+  
+  // Iterate on size map meshes
+  for (meshes_it = mySizeMapMeshes.begin(); meshes_it != mySizeMapMeshes.end(); meshes_it++ )
   {
     aMesh= *meshes_it;
     SMDS_NodeIteratorPtr nodeIt = aMesh->nodesIterator();
+    
+    // Iterate on the nodes of the mesh and write their coordinates under the GmfVertices keyword
     while ( nodeIt->more() )
     {
       const SMDS_MeshNode* n = nodeIt->next();
       n->GetXYZ( xyz );
       GmfSetLin( meshID, GmfVertices, xyz[0], xyz[1], xyz[2], n->getshapeId() );
     }
-    
-    // solAtVertices Keyword
-    int TypTab[] = {GmfSca};
-    GmfSetKwd(meshID, GmfSolAtVertices, mySizeMapVerticesNumber, 1, TypTab);
+  }
+ 
+  // SolAtVertices Keyword
+  int TypTab[] = {GmfSca};
+  GmfSetKwd(meshID, GmfSolAtVertices, mySizeMapVerticesNumber, 1, TypTab);
   
+  std::vector<TLocalSize>::iterator sizes_it; 
+  for ( sizes_it = myLocalSizes.begin(); sizes_it != myLocalSizes.end(); sizes_it++ )
+  {
     for ( int i = 1; i <= sizes_it->nbNodes; i++ )
     {
       double ValTab[] = {sizes_it->size};

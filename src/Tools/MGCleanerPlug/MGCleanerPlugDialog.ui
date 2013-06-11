@@ -412,7 +412,7 @@ Default is not to mesh planes.</string>
         <string>You can control</string>
        </property>
 #1
-       <widget class="QDoubleSpinBox" name="SP_MinHoleSize">
+       <widget class="QLineEdit" name="SP_MinHoleSize">
         <property name="geometry">
          <rect>
           <x>20</x>
@@ -420,18 +420,6 @@ Default is not to mesh planes.</string>
           <width>100</width>
           <height>25</height>
          </rect>
-        </property>
-        <property name="maximum">
-         <double>10000</double>
-        </property>
-        <property name="minimum">
-         <double>0</double>
-        </property>
-        <property name="singleStep">
-         <double>0.01</double>
-        </property>
-        <property name="value">
-         <double>0.01</double>
         </property>
            <property name="enabled">
             <bool>false</bool>
@@ -455,7 +443,7 @@ Set 'Fill holes' in 'Simple Remeshing Options'.</string>
         </property>
        </widget>
 #2
-       <widget class="QDoubleSpinBox" name="SP_ToleranceDisplacement">
+       <widget class="QLineEdit" name="SP_ToleranceDisplacement">
         <property name="geometry">
          <rect>
           <x>20</x>
@@ -463,18 +451,6 @@ Set 'Fill holes' in 'Simple Remeshing Options'.</string>
           <width>100</width>
           <height>25</height>
          </rect>
-        </property>
-        <property name="maximum">
-         <double>10000</double>
-        </property>
-        <property name="minimum">
-         <double>0</double>
-        </property>
-        <property name="singleStep">
-         <double>0.01</double>
-        </property>
-        <property name="value">
-         <double>0.01</double>
         </property>
            <property name="enabled">
             <bool>false</bool>
@@ -521,7 +497,7 @@ Unused in collision resolution .
           </widget>
 
 #3
-       <widget class="QDoubleSpinBox" name="SP_ResolutionLength">
+       <widget class="QLineEdit" name="SP_ResolutionLength">
         <property name="geometry">
          <rect>
           <x>20</x>
@@ -529,18 +505,6 @@ Unused in collision resolution .
           <width>100</width>
           <height>25</height>
          </rect>
-        </property>
-        <property name="maximum">
-         <double>10000</double>
-        </property>
-        <property name="minimum">
-         <double>0</double>
-        </property>
-        <property name="singleStep">
-         <double>0.01</double>
-        </property>
-        <property name="value">
-         <double>0.01</double>
         </property>
            <property name="enabled">
             <bool>false</bool>
@@ -594,7 +558,7 @@ Default is computed from model.</string>
          </rect>
         </property>
         <property name="maximum">
-         <double>10000</double>
+         <double>360</double>
         </property>
         <property name="minimum">
          <double>0</double>
@@ -626,7 +590,7 @@ Default is 15 degrees.</string>
         </property>
        </widget>
 #5
-       <widget class="QDoubleSpinBox" name="SP_OverlapDistance">
+       <widget class="QLineEdit" name="SP_OverlapDistance">
         <property name="geometry">
          <rect>
           <x>20</x>
@@ -634,18 +598,6 @@ Default is 15 degrees.</string>
           <width>100</width>
           <height>25</height>
          </rect>
-        </property>
-        <property name="maximum">
-         <double>10000</double>
-        </property>
-        <property name="minimum">
-         <double>0</double>
-        </property>
-        <property name="singleStep">
-         <double>0.01</double>
-        </property>
-        <property name="value">
-         <double>0.01</double>
         </property>
            <property name="enabled">
             <bool>false</bool>
@@ -700,7 +652,7 @@ Default is computed from model.</string>
          </rect>
         </property>
         <property name="maximum">
-         <double>10000</double>
+         <double>360</double>
         </property>
         <property name="minimum">
          <double>0</double>

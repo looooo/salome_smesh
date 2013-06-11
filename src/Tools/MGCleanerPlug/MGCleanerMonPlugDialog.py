@@ -72,6 +72,31 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
     self.LE_ParamsFile.setText(self.paramsFile)
     self.LE_MeshFile.setText("")
     self.LE_MeshSmesh.setText("")
+
+    v1=QDoubleValidator(self)
+    v1.setBottom(0.)
+    #v1.setTop(10000.)
+    v1.setDecimals(4)
+    self.SP_MinHoleSize.setValidator(v1)
+
+    v2=QDoubleValidator(self)
+    v2.setBottom(0.)
+    #v2.setTop(10000.)
+    v2.setDecimals(4)
+    self.SP_ToleranceDisplacement.setValidator(v2)
+
+    v3=QDoubleValidator(self)
+    v3.setBottom(0.)
+    #v3.setTop(10000.)
+    v3.setDecimals(4)
+    self.SP_ResolutionLength.setValidator(v3)
+    
+    v4=QDoubleValidator(self)
+    v4.setBottom(0.)
+    #v4.setTop(10000.)
+    v4.setDecimals(4)
+    self.SP_OverlapDistance.setValidator(v4)
+    
     self.resize(800, 500)
     self.clean()
 
@@ -226,6 +251,14 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
     print "salome_pluginsmanager.plugins",salome_pluginsmanager.plugins
     print "salome_pluginsmanager.current_plugins_manager",salome_pluginsmanager.current_plugins_manager
     """
+  
+  def SP_toStr(self, widget):
+    #cr, pos=widget.validator().validate(res, 0) #n.b. "1,3" is acceptable !locale!
+    try:
+      return str(float(widget.text()))
+    except:
+      widget.setProperty("text", "0.0")
+      return "0.0"
 
   def getResumeData(self, separator="\n"):
     text=""
@@ -239,15 +272,19 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
     text+="CheckOrFix="+CheckOrFix+separator
     text+="PreserveTopology="+str(self.CB_PreserveTopology.isChecked())+separator
     text+="FillHoles="+str(self.CB_FillHoles.isChecked())+separator
-    text+="MinHoleSize="+str(self.SP_MinHoleSize.value())+separator
+    v=self.SP_toStr(self.SP_MinHoleSize)
+    text+="MinHoleSize="+v+separator
     text+="ComputedToleranceDisplacement="+str(self.CB_ComputedToleranceDisplacement.isChecked())+separator
-    text+="ToleranceDisplacement="+str(self.SP_ToleranceDisplacement.value())+separator
+    v=self.SP_toStr(self.SP_ToleranceDisplacement)
+    text+="ToleranceDisplacement="+v+separator
     text+="ComputedResolutionLength="+str(self.CB_ComputedResolutionLength.isChecked())+separator
-    text+="ResolutionLength="+str(self.SP_ResolutionLength.value())+separator
+    v=self.SP_toStr(self.SP_ResolutionLength)
+    text+="ResolutionLength="+v+separator
     text+="FoldingAngle="+str(self.SP_FoldingAngle.value())+separator
     text+="RemeshPlanes="+str(self.CB_RemeshPlanes.isChecked())+separator
     text+="ComputedOverlapDistance="+str(self.CB_ComputedOverlapDistance.isChecked())+separator
-    text+="OverlapDistance="+str(self.SP_OverlapDistance.value())+separator
+    v=self.SP_toStr(self.SP_OverlapDistance)
+    text+="OverlapDistance="+v+separator
     text+="OverlapAngle="+str(self.SP_OverlapAngle.value())+separator
     text+="Verbosity="+str(self.SP_Verbosity.value())+separator
     return str(text)
@@ -271,15 +308,15 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
           if value=="check": self.RB_Check.setChecked(True)
         if tit=="PreserveTopology": self.CB_PreserveTopology.setChecked(value=="True")
         if tit=="FillHoles": self.CB_FillHoles.setChecked(value=="True")
-        if tit=="MinHoleSize": self.SP_MinHoleSize.setProperty("value", float(value))
+        if tit=="MinHoleSize": self.SP_MinHoleSize.setProperty("text", value)
         if tit=="ComputedToleranceDisplacement": self.CB_ComputedToleranceDisplacement.setChecked(value=="True")
-        if tit=="ToleranceDisplacement": self.SP_ToleranceDisplacement.setProperty("value", float(value))
+        if tit=="ToleranceDisplacement": self.SP_ToleranceDisplacement.setProperty("text", value)
         if tit=="ComputedResolutionLength": self.CB_ComputedResolutionLength.setChecked(value=="True")
-        if tit=="ResolutionLength": self.SP_ResolutionLength.setProperty("value", float(value))
+        if tit=="ResolutionLength": self.SP_ResolutionLength.setProperty("text", value)
         if tit=="FoldingAngle": self.SP_FoldingAngle.setProperty("value", float(value))
         if tit=="RemeshPlanes": self.CB_RemeshPlanes.setChecked(value=="True")
         if tit=="ComputedOverlapDistance": self.CB_ComputedOverlapDistance.setChecked(value=="True")
-        if tit=="OverlapDistance": self.SP_OverlapDistance.setProperty("value", float(value))
+        if tit=="OverlapDistance": self.SP_OverlapDistance.setProperty("text", value)
         if tit=="OverlapAngle": self.SP_OverlapAngle.setProperty("value", float(value))
         if tit=="Verbosity": self.SP_Verbosity.setProperty("value", int(float(value)))
       except:
@@ -456,16 +493,16 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
     else:
       self.commande+=" --topology ignore"
     if self.CB_FillHoles.isChecked(): #no fill holes default
-      self.commande+=" --min_hole_size " + str(self.SP_MinHoleSize.value())
+      self.commande+=" --min_hole_size " + self.SP_toStr(self.SP_MinHoleSize)
     if not self.CB_ComputedToleranceDisplacement.isChecked(): #computed default
-      self.commande+=" --tolerance_displacement " + str(self.SP_ToleranceDisplacement.value())
+      self.commande+=" --tolerance_displacement " + self.SP_toStr(self.SP_ToleranceDisplacement)
     if not self.CB_ComputedResolutionLength.isChecked(): #computed default
-      self.commande+=" --tolerance_displacement " + str(self.SP_ResolutionLength.value())
+      self.commande+=" --resolution_length " + self.SP_toStr(self.SP_ResolutionLength)
     self.commande+=" --folding_angle " + str(self.SP_FoldingAngle.value())
     if self.CB_RemeshPlanes.isChecked(): #no remesh default
       self.commande+=" --remesh_planes"
     if not self.CB_ComputedOverlapDistance.isChecked(): #computed default
-      self.commande+=" --overlap_distance " + str(self.SP_OverlapDistance.value())
+      self.commande+=" --overlap_distance " + self.SP_toStr(self.SP_OverlapDistance)
     self.commande+=" --overlap_angle " + str(self.SP_OverlapAngle.value())
     return True
     
@@ -477,11 +514,11 @@ class MGCleanerMonPlugDialog(Ui_MGCleanerPlugDialog,QWidget):
     self.CB_FillHoles.setChecked(False)
     self.CB_RemeshPlanes.setChecked(False)
     
-    self.SP_MinHoleSize.setProperty("value", 0)
-    self.SP_ToleranceDisplacement.setProperty("value", 0)
-    self.SP_ResolutionLength.setProperty("value", 0)
+    self.SP_MinHoleSize.setProperty("text", 0)
+    self.SP_ToleranceDisplacement.setProperty("text", 0)
+    self.SP_ResolutionLength.setProperty("text", 0)
     self.SP_FoldingAngle.setProperty("value", 15)
-    self.SP_OverlapDistance.setProperty("value", 0)
+    self.SP_OverlapDistance.setProperty("text", 0)
     self.SP_OverlapAngle.setProperty("value", 15)
     self.SP_Verbosity.setProperty("value", 3)
     

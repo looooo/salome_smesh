@@ -72,6 +72,14 @@ class MonYamsPlugDialog(Ui_YamsPlugDialog,QWidget):
     self.LE_ParamsFile.setText(self.paramsFile)
     self.LE_MeshFile.setText("")
     self.LE_MeshSmesh.setText("")
+    
+    v1=QDoubleValidator(self)
+    v1.setBottom(0.)
+    #v1.setTop(1000.) #per thousand... only if relative
+    v1.setDecimals(2)
+    self.SP_Tolerance.setValidator(v1)
+    self.SP_Tolerance.titleForWarning="Chordal Tolerance"
+    
     self.resize(800, 600)
     self.clean()
 
@@ -215,16 +223,44 @@ class MonYamsPlugDialog(Ui_YamsPlugDialog,QWidget):
     self.num+=1
     return True
 
+  def SP_toStr(self, widget):
+    """only for a QLineEdit widget"""
+    #cr, pos=widget.validator().validate(res, 0) #n.b. "1,3" is acceptable !locale!
+    try:
+      val=float(widget.text())
+    except:
+      QMessageBox.warning(self, widget.titleForWarning, "float value is incorrect: '"+widget.text()+"'")
+      res=str(widget.validator().bottom())
+      widget.setProperty("text", res)
+      return res
+    valtest=widget.validator().bottom()
+    if valtest!=None:
+      if val<valtest:
+        QMessageBox.warning(self, widget.titleForWarning, "float value is under minimum: "+str(val)+" < "+str(valtest))
+        res=str(valtest)
+        widget.setProperty("text", res)
+        return res
+    valtest=widget.validator().top()
+    if valtest!=None:
+      if val>valtest:
+        QMessageBox.warning(self, widget.titleForWarning, "float value is over maximum: "+str(val)+" > "+str(valtest))
+        res=str(valtest)
+        widget.setProperty("text", res)
+        return res    
+    return str(val)
+
   def getResumeData(self, separator="\n"):
     text=""
     for RB in self.GBOptim.findChildren(QRadioButton,):
       if RB.isChecked()==True:
         text+="Optimisation="+RB.text()+separator
         break
-    for RB in self.GBUnit.findChildren(QRadioButton,):
-      if RB.isChecked()==True:
-        text+="Units="+RB.text()+separator
-    text+="ChordalToleranceDeviation="+str(self.SP_Tolerance.value())+separator
+    if self.RB_Absolute.isChecked():
+      text+="Units=absolute"+separator
+    else:
+      text+="Units=relative"+separator
+    v=self.SP_toStr(self.SP_Tolerance)
+    text+="ChordalToleranceDeviation="+v+separator
     text+="RidgeDetection="+str(self.CB_Ridge.isChecked())+separator
     text+="SplitEdge="+str(self.CB_SplitEdge.isChecked())+separator
     text+="PointSmoothing="+str(self.CB_Point.isChecked())+separator
@@ -254,7 +290,14 @@ class MonYamsPlugDialog(Ui_YamsPlugDialog,QWidget):
             if RB.text()==value :
               RB.setChecked(True)
               break
-        if tit=="ChordalToleranceDeviation": self.SP_Tolerance.setProperty("value", float(value))
+        if tit=="Units":
+          if value=="absolute":
+            self.RB_Absolute.setChecked(True)
+            self.RB_Relative.setChecked(False)
+          else:
+            self.RB_Absolute.setChecked(False)
+            self.RB_Relative.setChecked(True)
+        if tit=="ChordalToleranceDeviation": self.SP_Tolerance.setProperty("text", float(value))
         if tit=="RidgeDetection": self.CB_Ridge.setChecked(value=="True")
         if tit=="SplitEdge": self.CB_SplitEdge.setChecked(value=="True")
         if tit=="PointSmoothing": self.CB_Point.setChecked(value=="True")
@@ -408,9 +451,11 @@ class MonYamsPlugDialog(Ui_YamsPlugDialog,QWidget):
         self.commande+=" -Dabsolute"
     else :
         self.commande+=" -Drelative"
-    self.commande+=",tolerance=%f"%self.SP_Tolerance.value()
-    if self.CB_Ridge.isChecked()==False : self.commande+=",nr"
-    if self.CB_Point.isChecked()==False : self.commande+=",ns"
+    
+    v=self.SP_toStr(self.SP_Tolerance)
+    self.commande+=",tolerance="+v
+    if self.CB_Ridge.isChecked()==False : self.commande+=",-nr"
+    if self.CB_Point.isChecked()==False : self.commande+=",-ns"
     if self.SP_Geomapp.value()!=0.04 : self.commande+=",geomapp=%f"%self.SP_Geomapp.value()
     if self.SP_Ridge.value()!=45.0 : self.commande+=",ridge=%f"%self.SP_Ridge.value()
     if self.SP_MaxSize.value()!=100 : self.commande+=",maxsize=%f"%self.SP_MaxSize.value()
@@ -433,7 +478,7 @@ class MonYamsPlugDialog(Ui_YamsPlugDialog,QWidget):
     self.RB_1.setChecked(False)
     self.RB_Absolute.setChecked(False)
     self.RB_Relative.setChecked(True)
-    self.SP_Tolerance.setProperty("value", 0.1)
+    self.SP_Tolerance.setProperty("text", "10.")
     self.SP_Geomapp.setProperty("value", 0.04)
     self.SP_Ridge.setProperty("value", 45.0)
     self.SP_Gradation.setProperty("value", 1.3)

@@ -33,16 +33,53 @@
 #include "SMDSAbs_ElementType.hxx"
 #include "SMDS_ElemIterator.hxx"
 
+#include <gp_Pnt.hxx>
+
 struct TLocalSize
 {
-  TLocalSize( int theNbNodes, double theSize)
+  TLocalSize( int theNbPoints, double theSize)
   {
-    nbNodes = theNbNodes;
+    nbPoints = theNbPoints;
     size = theSize;
   }
-  int nbNodes;
+  int nbPoints;
   double size;
 };
+
+// struct gp_Pnt
+// {
+//   gp_Pnt( double theX, double theY, double theZ )
+//   {
+//     x = theX;
+//     y = theY;
+//     z = theZ; 
+//   };
+//   double x;
+//   double y;
+//   double z;
+// };
+
+// class TSizeMap
+// { 
+// public:
+//   TSizeMap():
+//     points(), size(0.0)
+//   {
+//   };
+// 
+//   TSizeMap(const std::vector<gp_Pnt>& thePoints, double theSize )
+//   {
+//     points = thePoints;
+//     size = theSize;
+//   };
+//   
+//   double GetSize(){ return size; };
+//   std::vector<gp_Pnt> GetPoints(){ return points; };
+//   
+// private:
+//   std::vector<gp_Pnt> points;
+//   double              size;
+// };
 
 /*!
  * \brief Driver Writing a mesh into a GMF file.
@@ -62,6 +99,11 @@ public:
   virtual Status Perform();
   Status PerformSizeMap();
   void AddSizeMapFromMesh( SMESHDS_Mesh* mesh, double size);
+  void AddSizeMap( const std::vector<gp_Pnt>& points, double size );
+  void SetSizeMapPrefix( std::string prefix )
+  {
+    mySizeMapPrefix = prefix;
+  };
 //   void WriteSizeMapFromMesh( double size );
 //   void AddSizeMapSection( int meshID, int nbControlPoints );
 //   void AppendSize( int meshID, double size );
@@ -77,8 +119,11 @@ public:
 
   bool _exportRequiredGroups;
   int mySizeMapVerticesNumber;
+  std::string mySizeMapPrefix;
   std::vector<SMESHDS_Mesh*> mySizeMapMeshes;
   std::vector<TLocalSize> myLocalSizes;
+  std::vector<gp_Pnt> myPoints;
+//   std::vector<TSizeMap> mySizeMaps;
 };
 
 #endif

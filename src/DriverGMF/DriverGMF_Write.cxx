@@ -79,9 +79,32 @@ extern "C"
   );                                         \
   }}}}
   
-  
+
+Control_Pnt::Control_Pnt(): gp_Pnt()
+{
+  size=0;
+}
+Control_Pnt::Control_Pnt( const gp_Pnt& aPnt, 
+                          double theSize): gp_Pnt( aPnt )
+{
+  size=theSize;
+}
+Control_Pnt::Control_Pnt(double theX, 
+                         double theY, 
+                         double theZ): gp_Pnt(theX, theY, theZ)
+{
+  size=0;
+}
+Control_Pnt::Control_Pnt(double theX, 
+                         double theY, 
+                         double theZ, 
+                         double theSize): gp_Pnt(theX, theY, theZ)
+{
+  size=theSize;
+}
+
 DriverGMF_Write::DriverGMF_Write():
-  Driver_SMESHDS_Mesh(), _exportRequiredGroups( true ), mySizeMapVerticesNumber( 0 ), mySizeMapMeshes(), myLocalSizes()//, mySizeMaps()
+  Driver_SMESHDS_Mesh(), _exportRequiredGroups( true )
 {
 }
 DriverGMF_Write::~DriverGMF_Write()
@@ -342,67 +365,7 @@ Driver_Mesh::Status DriverGMF_Write::Perform()
   return DRS_OK;
 }
 
-// void DriverGMF_Write::AddSizeMapSection(int meshID, int nbControlPoints)
-// {
-// //   const int dim = 3, version = sizeof(long) == 4 ? 2 : 3;
-// //   int meshID = GmfOpenMesh( myFile.c_str(), GmfWrite, version, dim );
-//   int TypTab[] = {GmfSca};
-//   GmfSetKwd(meshID, GmfSolAtVertices, nbControlPoints, 1, TypTab);
-// //   GmfCloseMesh(meshID);
-// //   return DRS_OK;
-// }
-// 
-// void DriverGMF_Write::AppendSize(int meshID, double size)
-// {
-// //   const int dim = 3, version = sizeof(long) == 4 ? 2 : 3;
-// //   int meshID = GmfOpenMesh( myFile.c_str(), GmfWrite, version, dim );
-// //   int nbPoints = GmfStatKwd( meshID, GmfSolAtVertices);
-// //   GmfSetKwd( meshID, GmfSolAtVertices, nbPoints+1, 1, 1 );
-//   double ValTab[] = {size};
-//   GmfSetLin( meshID, GmfSolAtVertices, ValTab);
-// //   return DRS_OK;
-// }
-// 
-// int DriverGMF_Write::NbVerticesInFile()
-// {
-//   int dim, version;
-//   // open the file
-//   int meshID = GmfOpenMesh( myFile.c_str(), GmfRead, &version, &dim );
-//   int nbVertices = GmfStatKwd( meshID, GmfVertices);
-//   return nbVertices;
-// }
-// 
-// int DriverGMF_Write::BeginSizeMap()
-// {
-//   const int dim = 3, version = sizeof(long) == 4 ? 2 : 3;
-//   myGmfID = GmfOpenMesh( myFile.c_str(), GmfWrite, version, dim );
-// }
-//  
-// void DriverGMF_Write::EndSizeMap()
-// {
-//   GmfCloseMesh( myGmfID );
-// }
-void DriverGMF_Write::AddSizeMapFromMesh( SMESHDS_Mesh* mesh, double size)
-{
-  mySizeMapMeshes.push_back( mesh );
-  mySizeMapVerticesNumber += mesh->NbNodes();
-  myLocalSizes.push_back(TLocalSize(mesh->NbNodes(), size));
-}
-
-void DriverGMF_Write::AddSizeMap( const std::vector<gp_Pnt>& points, double size )
-{
-//   TSizeMap aMap( points, size );
-//   mySizeMaps.push_back( aMap );
-  std::vector<gp_Pnt>::const_iterator it;
-  for( it = points.begin(); it != points.end(); it++)
-  {
-    myPoints.push_back( *it );
-  }
-  mySizeMapVerticesNumber += points.size();
-  myLocalSizes.push_back(TLocalSize(points.size(), size));
-}
-
-Driver_Mesh::Status DriverGMF_Write::PerformSizeMap()
+Driver_Mesh::Status DriverGMF_Write::PerformSizeMap( const std::vector<Control_Pnt>& points )
 {
 //   const int dim = 3, version = sizeof(long) == 4 ? 2 : 3;
   const int dim = 3, version = 2; // Version 3 not supported by mg-hexa
@@ -413,116 +376,27 @@ Driver_Mesh::Status DriverGMF_Write::PerformSizeMap()
   int verticesFileID = GmfOpenMesh( aVerticesFile.c_str(), GmfWrite, version, dim );  
   int solFileID = GmfOpenMesh( aSolFile.c_str(), GmfWrite, version, dim );
   
+  int pointsNumber = points.size();
+  
   // Vertices Keyword
-  GmfSetKwd( verticesFileID, GmfVertices, mySizeMapVerticesNumber );
-  
-  std::vector<gp_Pnt>::iterator points_it;
-  // Iterate on sizeMaps
-  for (points_it = myPoints.begin(); points_it != myPoints.end(); points_it++ )
-  {
-//     MESSAGE("Point : X = "<<points_it->X()<<", Y ="<<points_it->Y()<<", Z = "<<points_it->Z())
-    GmfSetLin( verticesFileID, GmfVertices, points_it->X(), points_it->Y(), points_it->Z(), 0 );
-  }
-  
+  GmfSetKwd( verticesFileID, GmfVertices, pointsNumber );
   // SolAtVertices Keyword
   int TypTab[] = {GmfSca};
-  GmfSetKwd(solFileID, GmfSolAtVertices, mySizeMapVerticesNumber, 1, TypTab);
-  std::vector<TLocalSize>::iterator sizes_it; 
-  for ( sizes_it = myLocalSizes.begin(); sizes_it != myLocalSizes.end(); sizes_it++ )
+  GmfSetKwd(solFileID, GmfSolAtVertices, pointsNumber, 1, TypTab);
+  
+  // Read the control points information from the vector and write it into the files
+  std::vector<Control_Pnt>::const_iterator points_it;
+  for (points_it = points.begin(); points_it != points.end(); points_it++ )
   {
-    for ( int i = 1; i <= sizes_it->nbPoints ; i++ )
-    {
-      double ValTab[] = {sizes_it->size};
-      GmfSetLin( solFileID, GmfSolAtVertices, ValTab);
-    }
-  }
+    GmfSetLin( verticesFileID, GmfVertices, points_it->X(), points_it->Y(), points_it->Z(), 0 );
+    double ValTab[] = {points_it->Size()};
+    GmfSetLin( solFileID, GmfSolAtVertices, ValTab);
+  } 
   
   // Close Files
   GmfCloseMesh( verticesFileID );
   GmfCloseMesh( solFileID );
 }
-
-// Driver_Mesh::Status DriverGMF_Write::PerformSizeMap()
-// {
-// //   const int dim = 3, version = sizeof(long) == 4 ? 2 : 3;
-//   const int dim = 3, version = 2; // Version 3 not supported by mg-hexa
-//   std::string aVerticesFile = mySizeMapPrefix + ".mesh";
-//   std::string aSolFile = mySizeMapPrefix + ".sol";
-//   
-//   // Open files
-//   int verticesFileID = GmfOpenMesh( aVerticesFile.c_str(), GmfWrite, version, dim );  
-//   int solFileID = GmfOpenMesh( aSolFile.c_str(), GmfWrite, version, dim );
-//   
-//   // Vertices Keyword
-//   GmfSetKwd( verticesFileID, GmfVertices, mySizeMapVerticesNumber );
-//   double xyz[3];
-//   std::vector<SMESHDS_Mesh*>::iterator meshes_it;
-//   SMESHDS_Mesh* aMesh;
-//   
-//   // Iterate on size map meshes
-//   for (meshes_it = mySizeMapMeshes.begin(); meshes_it != mySizeMapMeshes.end(); meshes_it++ )
-//   {
-//     aMesh= *meshes_it;
-//     SMDS_NodeIteratorPtr nodeIt = aMesh->nodesIterator();
-//     
-//     // Iterate on the nodes of the mesh and write their coordinates under the GmfVertices keyword
-//     while ( nodeIt->more() )
-//     {
-//       const SMDS_MeshNode* n = nodeIt->next();
-//       n->GetXYZ( xyz );
-//       GmfSetLin( verticesFileID, GmfVertices, xyz[0], xyz[1], xyz[2], n->getshapeId() );
-//     }
-//   }
-//  
-//   // SolAtVertices Keyword
-//   int TypTab[] = {GmfSca};
-//   GmfSetKwd(solFileID, GmfSolAtVertices, mySizeMapVerticesNumber, 1, TypTab);
-//   
-//   std::vector<TLocalSize>::iterator sizes_it; 
-//   for ( sizes_it = myLocalSizes.begin(); sizes_it != myLocalSizes.end(); sizes_it++ )
-//   {
-//     for ( int i = 1; i <= sizes_it->nbNodes; i++ )
-//     {
-//       double ValTab[] = {sizes_it->size};
-//       GmfSetLin( solFileID, GmfSolAtVertices, ValTab);
-//     }
-//   }
-//   
-//   // Close Files
-//   GmfCloseMesh( verticesFileID );
-//   GmfCloseMesh( solFileID );
-// }
-
-// void DriverGMF_Write::WriteSizeMapFromMesh( double size )
-// {
-//   // Open file
-//   const int dim = 3, version = sizeof(long) == 4 ? 2 : 3;
-//   int meshID = GmfOpenMesh( myFile.c_str(), GmfWrite, version, dim );  
-//   
-//   // Vertices Keyword
-//   int iN = 0, nbNodes = myMesh->NbNodes();
-//   GmfSetKwd( meshID, GmfVertices, nbNodes );
-//   double xyz[3];
-//   SMDS_NodeIteratorPtr nodeIt = myMesh->nodesIterator();
-//   while ( nodeIt->more() )
-//   {
-//     const SMDS_MeshNode* n = nodeIt->next();
-//     n->GetXYZ( xyz );
-//     GmfSetLin( meshID, GmfVertices, xyz[0], xyz[1], xyz[2], n->getshapeId() );
-//   }
-//   
-//   // solAtVertices Keyword
-//   int TypTab[] = {GmfSca};
-//   GmfSetKwd(meshID, GmfSolAtVertices, nbNodes, 1, TypTab);
-//   for ( int i=1; i<= nbNodes; i++)
-//   {
-//     double ValTab[] = {size};
-//     GmfSetLin( meshID, GmfSolAtVertices, ValTab);
-//   }
-//   
-//   // Close File
-//   GmfCloseMesh( meshID );
-// }
 
 //================================================================================
 /*!

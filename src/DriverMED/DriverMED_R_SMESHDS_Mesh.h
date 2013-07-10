@@ -29,10 +29,12 @@
 
 #include "SMESH_DriverMED.hxx"
 
+#include "DriverMED.hxx"
 #include "Driver_SMESHDS_Mesh.h"
-#include "DriverMED_Family.h"
+#include "SMDSAbs_ElementType.hxx"
 
 #include <list>
+#include <map>
 
 class SMESHDS_Mesh;
 class SMESHDS_Group;
@@ -52,18 +54,6 @@ class MESHDRIVERMED_EXPORT DriverMED_R_SMESHDS_Mesh: public Driver_SMESHDS_Mesh
 
   std::list<std::string> GetMeshNames(Status& theStatus);
   void SetMeshName(std::string theMeshName);
-
- private:
-  /*!
-   * \brief Ensure aFamily has required ID
-    * \param aFamily - a family to check
-    * \param anID - an ID aFamily should have
-    * \retval bool  - true if successful
-   */
-  bool checkFamilyID(DriverMED_FamilyPtr & aFamily, int anID) const;
-
-  bool buildMeshGrille(const MED::PWrapper& theWrapper,
-                       const MED::PMeshInfo& theMeshInfo);
 
  private:
   std::string myMeshName;

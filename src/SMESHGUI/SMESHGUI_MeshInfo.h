@@ -26,7 +26,9 @@
 #define SMESHGUI_MESHINFO_H
 
 #include "SMESH_SMESHGUI.hxx"
-#include <SALOME_InteractiveObject.hxx>
+#include "SMESH_ControlsDef.hxx"
+
+#include <Plot2d_Histogram.h>
 
 #include <QFrame>
 #include <QDialog>
@@ -39,7 +41,12 @@
 #include <SALOMEconfig.h>
 #include CORBA_SERVER_HEADER(SMESH_Mesh)
 #include CORBA_SERVER_HEADER(SMESH_Group)
+#include CORBA_SERVER_HEADER(SMESH_Filter)
 
+#include <SALOME_InteractiveObject.hxx>
+#include <SALOME_GenericObj_wrap.hxx>
+
+class QAbstractButton;
 class QButtonGroup;
 class QContextMenuEvent;
 class QLabel;
@@ -47,9 +54,11 @@ class QLineEdit;
 class QPushButton;
 class QTabWidget;
 class QTextBrowser;
+class QGridLayout;
 class SMESH_Actor;
 class SMDS_MeshNode;
 class SMDS_MeshElement;
+class SMESHGUI_SpinBox;
 
 class ExtraWidget;
 
@@ -280,6 +289,54 @@ private:
   SMESH::submesh_array_var mySubMeshes;
 };
 
+class SMESHGUI_EXPORT SMESHGUI_CtrlInfo : public QFrame
+{
+  Q_OBJECT;
+
+public:
+  SMESHGUI_CtrlInfo( QWidget* = 0 );
+  ~SMESHGUI_CtrlInfo();
+
+  void                  showInfo( SMESH::SMESH_IDSource_ptr );
+  void                  saveInfo( QTextStream &out );
+
+private:
+  enum ObjectType { Mesh, SubMesh, Group };
+  QLabel*               createField();
+  QwtPlot*              createPlot( QWidget* );
+  void                  setFontAttributes( QWidget* );
+  void                  clearInternal();
+  Plot2d_Histogram*     getHistogram( SMESH::NumericalFunctor_ptr functor );
+  void                  computeNb( int ft, int iBut, int iWdg );
+
+private slots:
+  void                  computeAspectRatio();
+  void                  computeAspectRatio3D();
+  void                  computeFreeNodesInfo();
+  void                  computeDoubleNodesInfo();
+  void                  computeDoubleEdgesInfo();
+  void                  computeDoubleFacesInfo();
+  void                  computeOverConstrainedFacesInfo();
+  void                  computeDoubleVolumesInfo();
+  void                  computeOverConstrainedVolumesInfo();
+  void                  setTolerance( const double theTolerance );
+  
+
+private:
+  typedef SALOME::GenericObj_wrap< SMESH::Predicate >        TPredicate;
+  typedef SALOME::GenericObj_wrap< SMESH::NumericalFunctor > TNumFunctor;
+  SMESH::SMESH_IDSource_var myObject;
+  ObjectType                myObjectType;
+  SMESHGUI_SpinBox*         myToleranceWidget;
+  QList<QLabel*>            myWidgets;
+  QGridLayout*              myMainLayout;
+  QwtPlot*                  myPlot;
+  QwtPlot*                  myPlot3D;
+  QList<QAbstractButton*>   myButtons;
+  QList<TPredicate>         myPredicates;
+  TNumFunctor               myAspectRatio, myAspectRatio3D;
+};
+
 class SMESHGUI_EXPORT SMESHGUI_MeshInfoDlg : public QDialog
 { 
   Q_OBJECT;
@@ -291,7 +348,8 @@ public:
   enum { 
     BaseInfo,  //!< base mesh information
     ElemInfo,  //!< mesh element information
-    AddInfo    //!< additional information
+    AddInfo,   //!< additional information
+    CtrlInfo //!< controls information
   };
 
   SMESHGUI_MeshInfoDlg( QWidget* = 0, int = BaseInfo );
@@ -323,7 +381,29 @@ private:
   QLineEdit*         myID;
   SMESHGUI_ElemInfo* myElemInfo;   
   SMESHGUI_AddInfo*  myAddInfo;
+  SMESHGUI_CtrlInfo* myCtrlInfo;
   SMESH_Actor*       myActor;
+};
+
+class SMESHGUI_EXPORT SMESHGUI_CtrlInfoDlg : public QDialog
+{ 
+  Q_OBJECT;
+
+public:
+  SMESHGUI_CtrlInfoDlg( QWidget* = 0 );
+  ~SMESHGUI_CtrlInfoDlg();
+
+  void showInfo( const Handle(SALOME_InteractiveObject)& );
+  void reject();
+
+private slots:
+  void updateInfo();
+  void activate();
+  void deactivate();
+  void updateSelection();
+
+private:
+  SMESHGUI_CtrlInfo*  myCtrlInfo;
 };
 
 #endif // SMESHGUI_MESHINFO_H

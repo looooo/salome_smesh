@@ -829,6 +829,10 @@
         <translation>Reset</translation>
     </message>
     <message>
+        <source>MEN_OVERALL_MESH_QUALITY</source>
+        <translation>Overall Mesh Quality</translation>
+    </message>
+    <message>
         <source>MEN_DISTRIBUTION_CTRL</source>
         <translation>Distribution</translation>
     </message>
@@ -946,7 +950,7 @@
     </message>
     <message>
         <source>MEN_DUPLICATE_NODES</source>
-        <translation>Duplicate Nodes</translation>
+        <translation>Duplicate Nodes or/and Elements</translation>
     </message>
     <message>
         <source>MEN_TRANSF</source>
@@ -1268,6 +1272,10 @@ Please enter correct values and try again</translation>
     <message>
         <source>SMESH_AUTO_GROUPS</source>
         <translation>Automatically create groups</translation>
+    </message>
+    <message>
+        <source>SMESH_AUTO_DIM</source>
+        <translation>Automatically define space dimension</translation>
     </message>
     <message>
         <source>SMESH_REQUIRED_GROUPS</source>
@@ -2555,7 +2563,7 @@ Check algorithm documentation for supported geometry</translation>
     </message>
     <message>
         <source>SMESH_DUPLICATE_TITLE</source>
-        <translation>Duplicate Nodes</translation>
+        <translation>Duplicate Nodes and/or Elements</translation>
     </message>
     <message>
         <source>SMESH_SCALE</source>
@@ -2711,6 +2719,12 @@ Consider saving your work before application crash</translation>
         <source>SMESH_WRN_SIZE_LIMIT_EXCEEDED</source>
         <translation>No automatic update of the presentation has been done: new mesh size (%1 elements) exceeds current size limit (%2 elements).
 Please check preferences of Mesh module.
+</translation>
+    </message>
+    <message>
+        <source>SMESH_WRN_SIZE_INC_LIMIT_EXCEEDED</source>
+        <translation>New mesh sise (%1 elements) exceeds current size limit (%2 elements).
+Not all mesh elements are shown. Please check preferences of Mesh module.
 </translation>
     </message>
     <message>
@@ -3283,7 +3297,7 @@ Please check preferences of Mesh module.
     </message>
     <message>
         <source>STB_DUPLICATE_NODES</source>
-        <translation>Duplicate Nodes</translation>
+        <translation>Duplicate Nodes or/and Elements</translation>
     </message>
     <message>
         <source>STB_TRANSP</source>
@@ -3891,7 +3905,7 @@ Please check preferences of Mesh module.
     </message>
     <message>
         <source>TOP_DUPLICATE_NODES</source>
-        <translation>Duplicate Nodes</translation>
+        <translation>Duplicate Nodes or/and Elements</translation>
     </message>
     <message>
         <source>TOP_TRANSP</source>
@@ -4092,6 +4106,22 @@ Input value precision can be adjusted using
         <translation>Selected object has been used to create another one.
 It can&apos;t be deleted </translation>
     </message>
+    <message>
+        <source>SMESH_FREERAM</source>
+        <translation>Free RAM</translation>
+    </message>
+    <message>
+        <source>SMESH_GIGABYTE</source>
+        <translation>%1 GB</translation>
+    </message>
+    <message>
+        <source>MEN_SORT_CHILD_ITEMS</source>
+        <translation>Sort children</translation>
+    </message>
+    <message>
+        <source>STB_SORT_CHILD_ITEMS</source>
+        <translation>Sort child items</translation>
+    </message>
 </context>
 <context>
     <name>SMESHGUI_Dialog</name>
@@ -4150,6 +4180,10 @@ Please, create VTK viewer and try again</translation>
     <message>
         <source>PREF_UPDATE_LIMIT_NOLIMIT</source>
         <translation>No limit</translation>
+    </message>
+    <message>
+        <source>PREF_INCREMENTAL_LIMIT</source>
+        <translation>Incremental limit check</translation>
     </message>
     <message>
         <source>PREF_BACKFACE</source>
@@ -4264,8 +4298,16 @@ Please, create VTK viewer and try again</translation>
         <translation>Dump additional information</translation>
     </message>
     <message>
+        <source>PREF_DUMP_CTRL_INFO</source>
+        <translation>Dump controls information</translation>
+    </message>
+    <message>
         <source>PREF_GPP_NODES_LIMIT</source>
         <translation>Automatic nodes compute limit</translation>
+    </message>
+    <message>
+        <source>PREF_CTRL_LIMIT</source>
+        <translation>Automatic controls compute limit</translation>
     </message>
     <message>
         <source>SMESH_PREF_GROUP_PRECISION</source>
@@ -4615,6 +4657,21 @@ Please, create VTK viewer and try again</translation>
     <message>
         <source>GROUP_OF_BAD_MESH</source>
         <translation>Bad Mesh to Group</translation>
+    </message>
+</context>
+<context>
+    <name>SMESHGUI_ComputeDlg_QThreadQDialog</name>
+    <message>
+        <source>CANCEL</source>
+        <translation>Cancel</translation>
+    </message>
+    <message>
+        <source>CANCELING</source>
+        <translation>Canceling...</translation>
+    </message>
+    <message>
+        <source>TITLE</source>
+        <translation>Compute</translation>
     </message>
 </context>
 <context>
@@ -6463,7 +6520,7 @@ It is impossible to read point coordinates from file</translation>
     </message>
     <message>
         <source>DUPLICATION_WITHOUT_ELEMS</source>
-        <translation>Without duplication of border elements</translation>
+        <translation>Duplicate nodes only</translation>
     </message>
     <message>
         <source>GROUP_NODES_TO_DUPLICATE</source>
@@ -6475,7 +6532,11 @@ It is impossible to read point coordinates from file</translation>
     </message>
     <message>
         <source>DUPLICATION_WITH_ELEMS</source>
-        <translation>With duplication of border elements</translation>
+        <translation>Duplicate nodes and border elements</translation>
+    </message>
+    <message>
+        <source>DUPLICATION_ONLY_ELEMS</source>
+        <translation>Duplicate elements only</translation>
     </message>
     <message>
         <source>GROUP_ELEMS_TO_DUPLICATE</source>
@@ -6738,6 +6799,10 @@ as they are of improper type:
     <message>
         <source>ADDITIONAL_INFO</source>
         <translation>Additional Info</translation>
+    </message>
+    <message>
+        <source>CTRL_INFO</source>
+        <translation>Quality Info</translation>
     </message>
     <message>
         <source>NODE_MODE</source>
@@ -7103,6 +7168,84 @@ as they are of improper type:
     <message>
         <source>SUBMESHES_7</source>
         <translation>Vertex</translation>
+    </message>
+</context>
+<context>
+    <name>SMESHGUI_CtrlInfo</name>
+    <message>
+        <source>CTRL_INFO</source>
+        <translation>Quality information</translation>
+    </message>
+    <message>
+        <source>NAME_LAB</source>
+        <translation>Name:</translation>
+    </message>
+    <message>
+        <source>VALUE</source>
+        <translation>Value</translation>
+    </message>
+    <message>
+        <source>BUT_COMPUTE</source>
+        <translation>Compute</translation>
+    </message>
+    <message>
+        <source>NODES_INFO</source>
+        <translation>Nodes Information:</translation>
+    </message>
+    <message>
+        <source>NUMBER_OF_THE_FREE_NODES</source>
+        <translation>Number of the free nodes</translation>
+    </message>
+    <message>
+        <source>DOUBLE_NODES_TOLERANCE</source>
+        <translation>Double nodes tolerance</translation>
+    </message>
+    <message>
+        <source>NUMBER_OF_THE_DOUBLE_NODES</source>
+        <translation>Number of the double nodes</translation>
+    </message>
+    <message>
+        <source>EDGES_INFO</source>
+        <translation>Edges Information:</translation>
+    </message>
+    <message>
+        <source>NUMBER_OF_THE_DOUBLE_EDGES</source>
+        <translation>Number of the double edges</translation>
+    </message>
+    <message>
+        <source>FACES_INFO</source>
+        <translation>Faces Information:</translation>
+    </message>
+    <message>
+        <source>NUMBER_OF_THE_DOUBLE_FACES</source>
+        <translation>Number of the double faces</translation>
+    </message>   
+    <message>
+        <source>ASPECT_RATIO_HISTOGRAM</source>
+        <translation>Aspect Ratio histogram</translation>
+    </message>
+    <message>
+        <source>VOLUMES_INFO</source>
+        <translation>Volumes Information:</translation>
+    </message>
+    <message>
+        <source>NUMBER_OF_THE_DOUBLE_VOLUMES</source>
+        <translation>Number of the double volumes</translation>
+    </message>
+    <message>
+        <source>NUMBER_OF_THE_OVER_CONSTRAINED</source>
+        <translation>Number of the over-constrained</translation>
+    </message>
+    <message>
+        <source>ASPECT_RATIO_3D_HISTOGRAM</source>
+        <translation>Aspect Ratio 3D histogram</translation>
+    </message>
+</context>
+<context>
+    <name>SMESHGUI_CtrlInfoDlg</name>
+    <message>
+        <source>CTRL_INFO</source>
+        <translation>Quality Info</translation>
     </message>
 </context>
 <context>

@@ -23,13 +23,13 @@
 //
 #include "SMESHGUI_FileInfoDlg.h"
 
-#include <MED_Common.hxx>
+#include "MED_Common.hxx"
 
 #include <QGridLayout>
 #include <QLabel>
 #include <QLineEdit>
 
-SMESHGUI_FileInfoDlg::SMESHGUI_FileInfoDlg( QWidget* parent, SALOME_MED::MedFileInfo* inf )
+SMESHGUI_FileInfoDlg::SMESHGUI_FileInfoDlg( QWidget* parent, SMESH::MedFileInfo* inf )
   : QtxDialog( parent, true, true, QtxDialog::OK )
 {
   setWindowTitle( tr( "CAPTION" ) );

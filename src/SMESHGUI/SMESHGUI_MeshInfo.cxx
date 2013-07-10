@@ -24,18 +24,19 @@
 
 #include "SMESHGUI_MeshInfo.h"
 
-#include "SMESH_Actor.h"
-#include "SMESHGUI.h"
-#include "SMESHGUI_IdValidator.h"
-#include "SMESHGUI_Utils.h"
-#include "SMESHGUI_VTKUtils.h"
 #include "SMDSAbs_ElementType.hxx"
-#include "SMDS_Mesh.hxx"
 #include "SMDS_BallElement.hxx"
 #include "SMDS_EdgePosition.hxx"
 #include "SMDS_FacePosition.hxx"
+#include "SMDS_Mesh.hxx"
 #include "SMESHDS_Mesh.hxx"
-#include "SMESH_ControlsDef.hxx"
+#include "SMESHGUI.h"
+#include "SMESHGUI_FilterUtils.h"
+#include "SMESHGUI_IdValidator.h"
+#include "SMESHGUI_SpinBox.h"
+#include "SMESHGUI_Utils.h"
+#include "SMESHGUI_VTKUtils.h"
+#include "SMESH_Actor.h"
 
 #include <LightApp_SelectionMgr.h>
 #include <SUIT_FileDlg.h>
@@ -60,6 +61,7 @@
 #include <QLineEdit>
 #include <QMenu>
 #include <QPushButton>
+#include <QToolButton>
 #include <QRadioButton>
 #include <QTextStream>
 #include <QTabWidget>
@@ -70,6 +72,8 @@
 
 #include <SALOMEconfig.h>
 #include CORBA_SERVER_HEADER(GEOM_Gen)
+
+namespace {
 
 const int SPACING      = 6;
 const int MARGIN       = 9;
@@ -87,12 +91,12 @@ enum InfoType {
   NodeConnectivity = 100,
   ElemConnectivity,
 };
+} // namesapce
 
 /*!
   \class ExtraWidget
   \internal
 */
-
 class ExtraWidget : public QWidget
 {
 public:
@@ -150,6 +154,7 @@ public:
   QCheckBox* myBaseChk;
   QCheckBox* myElemChk;
   QCheckBox* myAddChk;
+  QCheckBox* myCtrlChk;
 };
 
 /*!
@@ -164,11 +169,13 @@ DumpFileDlg::DumpFileDlg( QWidget* parent ) : SUIT_FileDlg( parent, false, true,
     myBaseChk = new QCheckBox( SMESHGUI::tr( "PREF_DUMP_BASE_INFO" ), hB );
     myElemChk = new QCheckBox( SMESHGUI::tr( "PREF_DUMP_ELEM_INFO" ), hB );
     myAddChk  = new QCheckBox( SMESHGUI::tr( "PREF_DUMP_ADD_INFO" ),  hB );
+    myCtrlChk = new QCheckBox( SMESHGUI::tr( "PREF_DUMP_CTRL_INFO" ), hB );
 
-    QHBoxLayout* layout = new QHBoxLayout( hB );
-    layout->addWidget( myBaseChk );
-    layout->addWidget( myElemChk );
-    layout->addWidget( myAddChk );
+    QGridLayout* layout = new QGridLayout( hB );
+    layout->addWidget( myBaseChk, 0, 0 );
+    layout->addWidget( myElemChk, 0, 1 );
+    layout->addWidget( myAddChk, 1, 0 );
+    layout->addWidget( myCtrlChk, 1, 1 );
 
     QPushButton* pb = new QPushButton( this );
 
@@ -418,13 +425,13 @@ SMESHGUI_MeshInfo::SMESHGUI_MeshInfo( QWidget* parent )
   l->addWidget( a3DHexPriTotal, 25, 1 );
   l->addWidget( a3DPolLab,   26, 0 );
   l->addWidget( a3DPolTotal, 26, 1 ); 
-  l->addWidget( myLoadBtn,   27, 1, 1, 3 );
+  l->addWidget( myLoadBtn,   28, 1, 1, 3 );
 
   l->setColumnStretch( 0, 0 );
   l->setColumnStretch( 1, 5 );
   l->setColumnStretch( 2, 5 );
   l->setColumnStretch( 3, 5 );
-  l->setRowStretch( 23, 5 );
+  l->setRowStretch( 27, 5 );
 
   clear();
 }
@@ -459,27 +466,13 @@ void SMESHGUI_MeshInfo::showInfo( SMESH::SMESH_IDSource_ptr obj )
     else if ( !aGroup->_is_nil() ) {
       QString objType;
       switch( aGroup->GetType() ) {
-      case SMESH::NODE:
-        objType = tr( "OBJECT_GROUP_NODES" );
-        break;
-      case SMESH::EDGE:
-        objType = tr( "OBJECT_GROUP_EDGES" );
-        break;
-      case SMESH::FACE:
-        objType = tr( "OBJECT_GROUP_FACES" );
-        break;
-      case SMESH::VOLUME:
-        objType = tr( "OBJECT_GROUP_VOLUMES" );
-        break;
-      case SMESH::ELEM0D:
-        objType = tr( "OBJECT_GROUP_0DELEMS" );
-        break;
-      case SMESH::BALL:
-        objType = tr( "OBJECT_GROUP_BALLS" );
-        break;
-      default:
-        objType = tr( "OBJECT_GROUP" );
-        break;
+      case SMESH::NODE:  objType = tr( "OBJECT_GROUP_NODES"   );break;
+      case SMESH::EDGE:  objType = tr( "OBJECT_GROUP_EDGES"   );break;
+      case SMESH::FACE:  objType = tr( "OBJECT_GROUP_FACES"   );break;
+      case SMESH::VOLUME:objType = tr( "OBJECT_GROUP_VOLUMES" );break;
+      case SMESH::ELEM0D:objType = tr( "OBJECT_GROUP_0DELEMS" );break;
+      case SMESH::BALL:  objType = tr( "OBJECT_GROUP_BALLS"   );break;
+      default:           objType = tr( "OBJECT_GROUP"         );break;
       }
       myWidgets[iObject][iSingle]->setProperty( "text", objType );
     }
@@ -495,7 +488,7 @@ void SMESHGUI_MeshInfo::showInfo( SMESH::SMESH_IDSource_ptr obj )
     long nbQuadrangles = info[SMDSEntity_Quadrangle] + info[SMDSEntity_Quad_Quadrangle] + info[SMDSEntity_BiQuad_Quadrangle];
     long nb2DLinear    = info[SMDSEntity_Triangle] + info[SMDSEntity_Quadrangle] + info[SMDSEntity_Polygon];
     long nb2DQuadratic = info[SMDSEntity_Quad_Triangle] + info[SMDSEntity_BiQuad_Triangle] + info[SMDSEntity_Quad_Quadrangle] + info[SMDSEntity_BiQuad_Quadrangle];
-    myWidgets[i2D][iTotal]               ->setProperty( "text", QString::number( nb2DLinear + nb2DQuadratic ) );
+    myWidgets[i2D][iTotal]               ->setProperty( "text", QString::number( nb2DLinear + nb2DQuadratic ));
     myWidgets[i2D][iLinear]              ->setProperty( "text", QString::number( nb2DLinear ) );
     myWidgets[i2D][iQuadratic]           ->setProperty( "text", QString::number( nb2DQuadratic ) );
     myWidgets[i2DTriangles][iTotal]      ->setProperty( "text", QString::number( nbTriangles ) );
@@ -2242,7 +2235,7 @@ void SMESHGUI_AddInfo::meshInfo( SMESH::SMESH_Mesh_ptr mesh, QTreeWidgetItem* pa
 {
   // type
   GEOM::GEOM_Object_var shape = mesh->GetShapeToMesh();
-  SALOME_MED::MedFileInfo* inf = mesh->GetMEDFileInfo();
+  SMESH::MedFileInfo* inf = mesh->GetMEDFileInfo();
   QTreeWidgetItem* typeItem = createItem( parent, Bold );
   typeItem->setText( 0, tr( "TYPE" ) );
   if ( !CORBA::is_nil( shape ) ) {
@@ -2653,6 +2646,11 @@ SMESHGUI_MeshInfoDlg::SMESHGUI_MeshInfoDlg( QWidget* parent, int page )
   myAddInfo = new SMESHGUI_AddInfo( myTabWidget );
   myTabWidget->addTab( myAddInfo, tr( "ADDITIONAL_INFO" ) );
 
+  // controls info
+
+  myCtrlInfo = new SMESHGUI_CtrlInfo( myTabWidget );
+  myTabWidget->addTab( myCtrlInfo, tr( "CTRL_INFO" ) );
+
   // buttons
 
   QPushButton* okBtn = new QPushButton( tr( "SMESH_BUT_OK" ), this );
@@ -2712,6 +2710,7 @@ void SMESHGUI_MeshInfoDlg::showInfo( const Handle(SALOME_InteractiveObject)& IO 
   if ( !CORBA::is_nil( obj ) ) {
     myBaseInfo->showInfo( obj );
     myAddInfo->showInfo( obj );
+    myCtrlInfo->showInfo( obj );
 
     myActor = SMESH::FindActorByEntry( IO->getEntry() );
     SVTK_Selector* selector = SMESH::GetViewWindow()->GetSelector();
@@ -2782,7 +2781,7 @@ void SMESHGUI_MeshInfoDlg::updateSelection()
   disconnect( selMgr, 0, this, 0 );
   selMgr->clearFilters();
 
-  if ( myTabWidget->currentIndex() == BaseInfo || myTabWidget->currentIndex() == AddInfo ) {
+  if ( myTabWidget->currentIndex() == BaseInfo || myTabWidget->currentIndex() == AddInfo || myTabWidget->currentIndex() == CtrlInfo ) {
     SMESH::SetPointRepresentation( false );
     if ( SVTK_ViewWindow* aViewWindow = SMESH::GetViewWindow() )
       aViewWindow->SetSelectionMode( ActorSelection );
@@ -2933,11 +2932,13 @@ void SMESHGUI_MeshInfoDlg::dump()
   bool anIsBase = true;
   bool anIsElem = true;
   bool anIsAdd  = true;
+  bool anIsCtrl = true;
 
   if ( SUIT_ResourceMgr* aResourceMgr = SMESHGUI::resourceMgr() ) {
     anIsBase = aResourceMgr->booleanValue( "SMESH", "info_dump_base", anIsBase );
     anIsElem = aResourceMgr->booleanValue( "SMESH", "info_dump_elem", anIsElem );
     anIsAdd  = aResourceMgr->booleanValue( "SMESH", "info_dump_add",  anIsAdd );
+    anIsCtrl = aResourceMgr->booleanValue( "SMESH", "info_dump_ctrl", anIsCtrl );
   }
 
   DumpFileDlg fd( this );
@@ -2946,6 +2947,7 @@ void SMESHGUI_MeshInfoDlg::dump()
   fd.myBaseChk->setChecked( anIsBase );
   fd.myElemChk->setChecked( anIsElem );
   fd.myAddChk ->setChecked( anIsAdd );
+  fd.myCtrlChk->setChecked( anIsCtrl );
   if ( fd.exec() == QDialog::Accepted )
   {
     QString aFileName = fd.selectedFile();
@@ -2953,6 +2955,7 @@ void SMESHGUI_MeshInfoDlg::dump()
     bool toBase = fd.myBaseChk->isChecked();
     bool toElem = fd.myElemChk->isChecked();
     bool toAdd  = fd.myAddChk->isChecked();
+    bool toCtrl = fd.myCtrlChk->isChecked();
 
     if ( !aFileName.isEmpty() ) {
       QFileInfo aFileInfo( aFileName );
@@ -2968,6 +2971,639 @@ void SMESHGUI_MeshInfoDlg::dump()
       if ( toBase ) myBaseInfo->saveInfo( out );
       if ( toElem ) myElemInfo->saveInfo( out );
       if ( toAdd )  myAddInfo ->saveInfo( out );
+      if ( toCtrl ) myCtrlInfo->saveInfo( out );
     }
   }
 }
+
+/*!
+  \class SMESHGUI_CtrlInfo
+  \brief Class for the mesh controls information widget.
+*/
+
+/*!
+  \brief Constructor
+  \param parent parent widget
+*/
+SMESHGUI_CtrlInfo::SMESHGUI_CtrlInfo( QWidget* parent )
+  : QFrame( parent ), myPlot( 0 ), myPlot3D( 0 )
+{
+  setFrameStyle( StyledPanel | Sunken );
+
+  myMainLayout = new QGridLayout( this );
+  myMainLayout->setMargin( MARGIN );
+  myMainLayout->setSpacing( SPACING );
+
+  // name
+  QLabel* aNameLab = new QLabel( tr( "NAME_LAB" ), this );
+  QLabel* aName = createField();
+  aName->setMinimumWidth( 150 );
+  myWidgets << aName;
+
+  SUIT_ResourceMgr* aResMgr = SUIT_Session::session()->resourceMgr();
+  QIcon aComputeIcon( aResMgr->loadPixmap( "SMESH", tr( "ICON_COMPUTE" ) ) );
+
+  SMESH::FilterManager_var aFilterMgr = SMESH::GetFilterManager();
+
+  // nodes info
+  QLabel* aNodesLab = new QLabel( tr( "NODES_INFO" ), this );
+  QLabel* aNodesFreeLab = new QLabel( tr( "NUMBER_OF_THE_FREE_NODES" ), this );
+  QLabel* aNodesFree = createField();
+  myWidgets << aNodesFree;
+  myPredicates << aFilterMgr->CreateFreeNodes();
+  //
+  QLabel* aNodesDoubleLab = new QLabel( tr( "NUMBER_OF_THE_DOUBLE_NODES" ), this );
+  QLabel* aNodesDouble = createField();
+  myWidgets << aNodesDouble;
+  myPredicates << aFilterMgr->CreateEqualNodes();
+  QLabel* aToleranceLab = new QLabel( tr( "DOUBLE_NODES_TOLERANCE" ), this );
+  myToleranceWidget = new SMESHGUI_SpinBox( this );
+  myToleranceWidget->RangeStepAndValidator(0.0000000001, 1000000.0, 0.0000001, "length_precision" );
+  myToleranceWidget->setAcceptNames( false );
+  myToleranceWidget->SetValue( SMESHGUI::resourceMgr()->doubleValue( "SMESH", "equal_nodes_tolerance", 1e-7 ) );
+
+  // edges info
+  QLabel* anEdgesLab = new QLabel( tr( "EDGES_INFO" ),  this );
+  QLabel* anEdgesDoubleLab = new QLabel( tr( "NUMBER_OF_THE_DOUBLE_EDGES" ),     this );
+  QLabel* anEdgesDouble = createField();
+  myWidgets << anEdgesDouble;
+  myPredicates << aFilterMgr->CreateEqualEdges();
+
+  // faces info
+  QLabel* aFacesLab = new QLabel( tr( "FACES_INFO" ), this );
+  QLabel* aFacesDoubleLab = new QLabel( tr( "NUMBER_OF_THE_DOUBLE_FACES" ), this );
+  QLabel* aFacesDouble = createField();
+  myWidgets << aFacesDouble;
+  myPredicates << aFilterMgr->CreateEqualFaces();
+  QLabel* aFacesOverLab = new QLabel( tr( "NUMBER_OF_THE_OVER_CONSTRAINED" ), this );
+  QLabel* aFacesOver = createField();
+  myWidgets << aFacesOver;
+  myPredicates << aFilterMgr->CreateOverConstrainedFace();
+  QLabel* anAspectRatioLab = new QLabel( tr( "ASPECT_RATIO_HISTOGRAM" ), this );
+  myPlot = createPlot( this );
+  myAspectRatio = aFilterMgr->CreateAspectRatio();
+ 
+  // volumes info
+  QLabel* aVolumesLab = new QLabel( tr( "VOLUMES_INFO" ), this );
+  QLabel* aVolumesDoubleLab = new QLabel( tr( "NUMBER_OF_THE_DOUBLE_VOLUMES" ), this );
+  QLabel* aVolumesDouble = createField();
+  myWidgets << aVolumesDouble;
+  myPredicates << aFilterMgr->CreateEqualVolumes();
+  QLabel* aVolumesOverLab = new QLabel( tr( "NUMBER_OF_THE_OVER_CONSTRAINED" ), this );
+  QLabel* aVolumesOver = createField();
+  myWidgets << aVolumesOver;
+  myPredicates << aFilterMgr->CreateOverConstrainedVolume();
+  QLabel* anAspectRatio3DLab = new QLabel( tr( "ASPECT_RATIO_3D_HISTOGRAM" ), this );
+  myPlot3D = createPlot( this );
+  myAspectRatio3D = aFilterMgr->CreateAspectRatio3D();
+
+  QToolButton* aFreeNodesBtn = new QToolButton( this );
+  aFreeNodesBtn->setIcon(aComputeIcon);
+  myButtons << aFreeNodesBtn;       //0
+
+  QToolButton* aDoubleNodesBtn = new QToolButton( this );
+  aDoubleNodesBtn->setIcon(aComputeIcon);
+  myButtons << aDoubleNodesBtn;     //1
+
+  QToolButton* aDoubleEdgesBtn = new QToolButton( this );
+  aDoubleEdgesBtn->setIcon(aComputeIcon);
+  myButtons << aDoubleEdgesBtn;     //2
+
+  QToolButton* aDoubleFacesBtn = new QToolButton( this );
+  aDoubleFacesBtn->setIcon(aComputeIcon);
+  myButtons << aDoubleFacesBtn;     //3
+
+  QToolButton* aOverContFacesBtn = new QToolButton( this );
+  aOverContFacesBtn->setIcon(aComputeIcon);
+  myButtons << aOverContFacesBtn;   //4
+
+  QToolButton* aComputeFaceBtn = new QToolButton( this );
+  aComputeFaceBtn->setIcon(aComputeIcon);
+  myButtons << aComputeFaceBtn;     //5
+
+  QToolButton* aDoubleVolumesBtn = new QToolButton( this );
+  aDoubleVolumesBtn->setIcon(aComputeIcon);
+  myButtons << aDoubleVolumesBtn;   //6
+
+  QToolButton* aOverContVolumesBtn = new QToolButton( this );
+  aOverContVolumesBtn->setIcon(aComputeIcon);
+  myButtons << aOverContVolumesBtn; //7
+
+  QToolButton* aComputeVolumeBtn = new QToolButton( this );
+  aComputeVolumeBtn->setIcon(aComputeIcon);
+  myButtons << aComputeVolumeBtn;   //8
+
+  connect( aComputeFaceBtn,   SIGNAL( clicked() ), this, SLOT( computeAspectRatio() ) );
+  connect( aComputeVolumeBtn, SIGNAL( clicked() ), this, SLOT( computeAspectRatio3D() ) );
+  connect( aFreeNodesBtn, SIGNAL( clicked() ), this, SLOT( computeFreeNodesInfo() ) );
+  connect( aDoubleNodesBtn, SIGNAL( clicked() ), this, SLOT( computeDoubleNodesInfo() ) );
+  connect( aDoubleEdgesBtn, SIGNAL( clicked() ), this, SLOT( computeDoubleEdgesInfo() ) );
+  connect( aDoubleFacesBtn, SIGNAL( clicked() ), this, SLOT( computeDoubleFacesInfo() ) );
+  connect( aOverContFacesBtn, SIGNAL( clicked() ), this, SLOT( computeOverConstrainedFacesInfo() ) );
+  connect( aDoubleVolumesBtn, SIGNAL( clicked() ), this, SLOT( computeDoubleVolumesInfo() ) );
+  connect( aOverContVolumesBtn, SIGNAL( clicked() ), this, SLOT( computeOverConstrainedVolumesInfo() ) );
+  connect( myToleranceWidget, SIGNAL(valueChanged(double)), this, SLOT( setTolerance( double )));
+
+  setFontAttributes( aNameLab );
+  setFontAttributes( aNodesLab );
+  setFontAttributes( anEdgesLab );
+  setFontAttributes( aFacesLab );
+  setFontAttributes( aVolumesLab );
+
+  myMainLayout->addWidget( aNameLab,           0, 0 );       //0
+  myMainLayout->addWidget( aName,              0, 1, 1, 2 ); //1
+  myMainLayout->addWidget( aNodesLab,          1, 0, 1, 3 ); //2
+  myMainLayout->addWidget( aNodesFreeLab,      2, 0 );       //3
+  myMainLayout->addWidget( aNodesFree,         2, 1 );       //4
+  myMainLayout->addWidget( aFreeNodesBtn,      2, 2 );       //5
+  myMainLayout->addWidget( aNodesDoubleLab,    3, 0 );       //6
+  myMainLayout->addWidget( aNodesDouble,       3, 1 );       //7
+  myMainLayout->addWidget( aDoubleNodesBtn,    3, 2 );       //8
+  myMainLayout->addWidget( aToleranceLab,      4, 0 );       //9
+  myMainLayout->addWidget( myToleranceWidget,  4, 1 );       //10
+  myMainLayout->addWidget( anEdgesLab,         5, 0, 1, 3 ); //11
+  myMainLayout->addWidget( anEdgesDoubleLab,   6, 0 );       //12
+  myMainLayout->addWidget( anEdgesDouble,      6, 1 );       //13
+  myMainLayout->addWidget( aDoubleEdgesBtn,    6, 2 );       //14
+  myMainLayout->addWidget( aFacesLab,          7, 0, 1, 3 ); //15
+  myMainLayout->addWidget( aFacesDoubleLab,    8, 0 );       //16
+  myMainLayout->addWidget( aFacesDouble,       8, 1 );       //17
+  myMainLayout->addWidget( aDoubleFacesBtn,    8, 2 );       //18
+  myMainLayout->addWidget( aFacesOverLab,      9, 0 );       //19
+  myMainLayout->addWidget( aFacesOver,         9, 1 );       //20
+  myMainLayout->addWidget( aOverContFacesBtn,  9, 2 );       //21
+  myMainLayout->addWidget( anAspectRatioLab,   10, 0 );      //22
+  myMainLayout->addWidget( aComputeFaceBtn,    10, 2 );      //23
+  myMainLayout->addWidget( myPlot,             11, 0, 1, 3 );//24
+  myMainLayout->addWidget( aVolumesLab,        12, 0, 1, 3 );//25
+  myMainLayout->addWidget( aVolumesDoubleLab,  13, 0 );      //26
+  myMainLayout->addWidget( aVolumesDouble,     13, 1 );      //27
+  myMainLayout->addWidget( aDoubleVolumesBtn,  13, 2 );      //28
+  myMainLayout->addWidget( aVolumesOverLab,    14, 0 );      //28
+  myMainLayout->addWidget( aVolumesOver,       14, 1 );      //30
+  myMainLayout->addWidget( aOverContVolumesBtn,14, 2 );      //31
+  myMainLayout->addWidget( anAspectRatio3DLab, 15, 0 );      //32
+  myMainLayout->addWidget( aComputeVolumeBtn,  15, 2 );      //33
+  myMainLayout->addWidget( myPlot3D,           16, 0, 1, 3 );//34
+ 
+  myMainLayout->setColumnStretch(  0,  0 );
+  myMainLayout->setColumnStretch(  1,  5 );
+  myMainLayout->setRowStretch   ( 11,  5 );
+  myMainLayout->setRowStretch   ( 16,  5 );
+  myMainLayout->setRowStretch   ( 17,  1 );
+
+  clearInternal();
+}
+
+/*!
+  \brief Destructor
+*/
+SMESHGUI_CtrlInfo::~SMESHGUI_CtrlInfo()
+{}
+
+/*!
+  \brief Change widget font attributes (bold, ...).
+  \param w widget
+  \param attr font attributes (XORed flags)
+*/
+void SMESHGUI_CtrlInfo::setFontAttributes( QWidget* w )
+{
+  if ( w ) {
+    QFont f = w->font();
+    f.setBold( true );
+    w->setFont( f );
+  }
+}
+
+/*!
+  \brief Create info field
+  \return new info field
+*/
+QLabel* SMESHGUI_CtrlInfo::createField()
+{
+  QLabel* lab = new QLabel( this );
+  lab->setFrameStyle( StyledPanel | Sunken );
+  lab->setAlignment( Qt::AlignCenter );
+  lab->setAutoFillBackground( true );
+  QPalette pal = lab->palette();
+  pal.setColor( QPalette::Window, QApplication::palette().color( QPalette::Active, QPalette::Base ) );
+  lab->setPalette( pal );
+  lab->setMinimumWidth( 60 );
+  return lab;
+}
+
+/*!
+  \brief Create QwtPlot
+  \return new QwtPlot
+*/
+QwtPlot* SMESHGUI_CtrlInfo::createPlot( QWidget* parent )
+{
+  QwtPlot* aPlot = new QwtPlot( parent );
+  aPlot->setMinimumSize( 100, 100 );
+  QFont xFont = aPlot->axisFont( QwtPlot::xBottom );
+  xFont.setPointSize( 5 );
+  QFont yFont = aPlot->axisFont( QwtPlot::yLeft );
+  yFont.setPointSize( 5 );
+  aPlot->setAxisFont( QwtPlot::xBottom, xFont );
+  aPlot->setAxisFont( QwtPlot::yLeft, yFont );
+  aPlot->replot();
+  return aPlot;
+}
+
+/*!
+  \brief Show controls information on the selected object
+*/
+void SMESHGUI_CtrlInfo::showInfo( SMESH::SMESH_IDSource_ptr obj )
+{
+  clearInternal();
+
+  myObject = SMESH::SMESH_IDSource::_duplicate( obj );
+  if ( myObject->_is_nil() ) return;
+
+  if ( _PTR(SObject) aSO = SMESH::FindSObject( obj ))
+    myWidgets[0]->setText( aSO->GetName().c_str() );
+
+  SMESH::SMESH_Mesh_var mesh = obj->GetMesh();
+  if ( mesh->_is_nil() ) return;
+
+  const bool meshLoaded = mesh->IsLoaded();
+  if ( !meshLoaded ) // mesh not yet loaded from the hdf file
+    // enable Compute buttons, just in case obj->GetNbElementsByType() fails
+    for ( int i = 0; i < myButtons.count(); ++i )
+      myButtons[i]->setEnabled( true );
+
+  SMESH::long_array_var nbElemsByType = obj->GetNbElementsByType();
+  if ( ! &nbElemsByType.in() ) return;
+
+  const CORBA::Long ctrlLimit =
+    meshLoaded ? SMESHGUI::resourceMgr()->integerValue( "SMESH", "info_controls_limit", 3000 ) : -1;
+
+  // nodes info
+  const CORBA::Long nbNodes =   nbElemsByType[ SMESH::NODE ];
+  const CORBA::Long nbElems = ( nbElemsByType[ SMESH::EDGE ] +
+                                nbElemsByType[ SMESH::FACE ] +
+                                nbElemsByType[ SMESH::VOLUME ] );
+  if ( nbNodes + nbElems > 0 ) {
+    if ( Max( (int)nbNodes, (int)nbElems ) <= ctrlLimit ) {
+      // free nodes
+      computeFreeNodesInfo();
+      // double nodes
+      computeDoubleNodesInfo();
+    }
+    else {
+      myButtons[0]->setEnabled( true );
+      myButtons[1]->setEnabled( true );
+    }
+  }
+  else {
+    for( int i=2; i<=10; i++)
+      myMainLayout->itemAt(i)->widget()->setVisible( false );
+  }
+
+  // edges info
+  if ( nbElemsByType[ SMESH::EDGE ] > 0 ) {
+    // double edges
+    if( nbElemsByType[ SMESH::EDGE ] <= ctrlLimit )
+      computeDoubleEdgesInfo();
+    else
+      myButtons[2]->setEnabled( true );
+  }
+  else {
+    for( int i=11; i<=14; i++)
+      myMainLayout->itemAt(i)->widget()->setVisible( false );
+  }
+ 
+  // faces info
+  if ( nbElemsByType[ SMESH::FACE ] > 0 ) {
+    if ( nbElemsByType[ SMESH::FACE ] <= ctrlLimit ) {
+      // double faces
+      computeDoubleFacesInfo();
+      // over constrained faces
+      computeOverConstrainedFacesInfo();
+      // aspect Ratio histogram
+      computeAspectRatio();
+    }
+    else {
+      myButtons[3]->setEnabled( true );
+      myButtons[4]->setEnabled( true );
+      myButtons[5]->setEnabled( true );
+    }
+  }
+  else {
+    myMainLayout->setRowStretch(11,0);
+    for( int i=15; i<=24; i++)
+      myMainLayout->itemAt(i)->widget()->setVisible( false );
+  }
+
+  // volumes info
+  if ( nbElemsByType[ SMESH::VOLUME ] > 0 ) {
+    if ( nbElemsByType[ SMESH::VOLUME ] <= ctrlLimit ) {
+      // double volumes
+      computeDoubleVolumesInfo();
+      // over constrained volumes
+      computeOverConstrainedVolumesInfo();
+      // aspect Ratio 3D histogram
+      computeAspectRatio3D();
+     }
+     else {
+       myButtons[6]->setEnabled( true );
+       myButtons[7]->setEnabled( true );
+       myButtons[8]->setEnabled( true );
+     }
+  }
+  else {
+    myMainLayout->setRowStretch(16,0);
+    for( int i=25; i<=34; i++)
+      myMainLayout->itemAt(i)->widget()->setVisible( false );
+  }
+}
+
+//================================================================================
+/*!
+ * \brief Computes and shows nb of elements satisfying a given predicate
+ *  \param [in] ft - a predicate type (SMESH::FunctorType)
+ *  \param [in] iBut - index of one of myButtons to disable
+ *  \param [in] iWdg - index of one of myWidgets to show the computed number
+ */
+//================================================================================
+
+void SMESHGUI_CtrlInfo::computeNb( int ft, int iBut, int iWdg )
+{
+  myButtons[ iBut ]->setEnabled( false );
+  myWidgets[ iWdg ]->setText( "" );
+  if ( myObject->_is_nil() ) return;
+
+  SUIT_OverrideCursor wc;
+
+  SMESH::SMESH_Mesh_var mesh = myObject->GetMesh();
+  if ( !mesh->_is_nil() && !mesh->IsLoaded() )
+  {
+    mesh->Load();
+    this->showInfo( myObject ); // try to show all values
+    if ( !myWidgets[ iWdg ]->text().isEmpty() )
+      return; // <ft> predicate already computed
+  }
+  // look for a predicate of type <ft>
+  for ( int i = 0; i < myPredicates.count(); ++i )
+    if ( myPredicates[i]->GetFunctorType() == ft )
+    {
+      CORBA::Long nb = myPredicates[i]->NbSatisfying( myObject );
+      myWidgets[ iWdg ]->setText( QString::number( nb ));
+    }
+}
+
+void SMESHGUI_CtrlInfo::computeFreeNodesInfo()
+{
+  computeNb( SMESH::FT_FreeNodes, 0, 1 );
+}
+
+void SMESHGUI_CtrlInfo::computeDoubleNodesInfo()
+{
+  computeNb( SMESH::FT_EqualNodes, 1, 2 );
+}
+
+void SMESHGUI_CtrlInfo::computeDoubleEdgesInfo()
+{
+  computeNb( SMESH::FT_EqualEdges, 2, 3 );
+}
+
+void SMESHGUI_CtrlInfo::computeDoubleFacesInfo()
+{
+  computeNb( SMESH::FT_EqualFaces, 3, 4 );
+}
+
+void SMESHGUI_CtrlInfo::computeOverConstrainedFacesInfo()
+{
+  computeNb( SMESH::FT_OverConstrainedFace, 4, 5 );
+}
+
+void SMESHGUI_CtrlInfo::computeDoubleVolumesInfo()
+{
+  computeNb( SMESH::FT_EqualVolumes, 6, 6 );
+}
+
+void SMESHGUI_CtrlInfo::computeOverConstrainedVolumesInfo()
+{
+  computeNb( SMESH::FT_OverConstrainedVolume, 7, 7 );
+}
+
+void SMESHGUI_CtrlInfo::computeAspectRatio()
+{
+  myButtons[5]->setEnabled( false );
+
+  if ( myObject->_is_nil() ) return;
+
+  SUIT_OverrideCursor wc;
+
+  Plot2d_Histogram* aHistogram = getHistogram( myAspectRatio );
+  if ( aHistogram && !aHistogram->isEmpty() ) {
+    QwtPlotItem* anItem = aHistogram->createPlotItem();
+    anItem->attach( myPlot );
+    myPlot->replot();
+  }
+}
+
+void SMESHGUI_CtrlInfo::computeAspectRatio3D()
+{
+  myButtons[8]->setEnabled( false );
+
+  if ( myObject->_is_nil() ) return;
+
+  SUIT_OverrideCursor wc;
+
+  Plot2d_Histogram* aHistogram = getHistogram( myAspectRatio3D );
+  if ( aHistogram && !aHistogram->isEmpty() ) {
+    QwtPlotItem* anItem = aHistogram->createPlotItem();
+    anItem->attach( myPlot3D );
+    myPlot3D->replot();
+  }
+}
+
+/*!
+  \brief Internal clean-up (reset widget)
+*/
+void SMESHGUI_CtrlInfo::clearInternal()
+{
+  for( int i=0; i<=34; i++)
+    myMainLayout->itemAt(i)->widget()->setVisible( true );
+  for( int i=0; i<=8; i++)
+    myButtons[i]->setEnabled( false );
+  myPlot->detachItems();
+  myPlot3D->detachItems();
+  myPlot->replot();
+  myPlot3D->replot();
+  myWidgets[0]->setText( QString() );
+  for ( int i = 1; i < myWidgets.count(); i++ )
+    myWidgets[i]->setText( "" );
+  myMainLayout->setRowStretch(11,5);
+  myMainLayout->setRowStretch(16,5);
+}
+
+void SMESHGUI_CtrlInfo::setTolerance( double theTolerance )
+{
+  //SMESH::long_array_var anElems = getElementsByType( SMESH::NODE );
+  myButtons[1]->setEnabled( true );
+  myWidgets[2]->setText("");
+}
+
+Plot2d_Histogram* SMESHGUI_CtrlInfo::getHistogram( SMESH::NumericalFunctor_ptr aNumFun )
+{
+  SMESH::SMESH_Mesh_var mesh = myObject->GetMesh();
+  if ( mesh->_is_nil() ) return 0;
+  if ( !mesh->IsLoaded() )
+    mesh->Load();
+  aNumFun->SetMesh( mesh );
+
+  CORBA::Long cprecision = 6;
+  if ( SMESHGUI::resourceMgr()->booleanValue( "SMESH", "use_precision", false ) ) 
+    cprecision = SMESHGUI::resourceMgr()->integerValue( "SMESH", "controls_precision", -1 );
+  aNumFun->SetPrecision( cprecision );
+
+  int nbIntervals = SMESHGUI::resourceMgr()->integerValue( "SMESH", "scalar_bar_num_colors", false );
+
+  SMESH::Histogram_var histogramVar = aNumFun->GetLocalHistogram( nbIntervals,
+                                                                  /*isLogarithmic=*/false,
+                                                                  myObject );
+  Plot2d_Histogram* aHistogram = new Plot2d_Histogram();
+  aHistogram->setColor( palette().color( QPalette::Highlight ) );
+  if ( &histogramVar.in() )
+  {
+    for ( size_t i = 0, nb = histogramVar->length(); i < nb; i++ )
+      aHistogram->addPoint( 0.5 * ( histogramVar[i].min + histogramVar[i].max ), histogramVar[i].nbEvents );
+    if ( histogramVar->length() >= 2 )
+      aHistogram->setWidth( ( histogramVar[0].max - histogramVar[0].min ) * 0.8 );
+  }
+  return aHistogram;
+}
+
+void SMESHGUI_CtrlInfo::saveInfo( QTextStream &out ) {
+  out << QString( 20, '-' ) << "\n";
+  out << tr( "CTRL_INFO"  ) << "\n";
+  out << QString( 20, '-' ) << "\n";
+  out <<                                 tr( "NAME_LAB" )                       << "  " << myWidgets[0]->text() << "\n";
+  out <<                                 tr( "NODES_INFO" )                     << "\n";
+  out << QString( SPACING_INFO, ' ' ) << tr( "NUMBER_OF_THE_FREE_NODES" )       << ": " << myWidgets[1]->text() << "\n";
+  out << QString( SPACING_INFO, ' ' ) << tr( "NUMBER_OF_THE_DOUBLE_NODES" )     << ": " << myWidgets[2]->text() << "\n";
+  out <<                                 tr( "EDGES_INFO" )                     << "\n";
+  out << QString( SPACING_INFO, ' ' ) << tr( "NUMBER_OF_THE_DOUBLE_EDGES" )     << ": " << myWidgets[3]->text() << "\n";
+  out <<                                 tr( "FACES_INFO" )                     << "\n";
+  out << QString( SPACING_INFO, ' ' ) << tr( "NUMBER_OF_THE_DOUBLE_FACES" )     << ": " << myWidgets[4]->text() << "\n";
+  out << QString( SPACING_INFO, ' ' ) << tr( "NUMBER_OF_THE_OVER_CONSTRAINED" ) << ": " << myWidgets[5]->text() << "\n";
+  out <<                                 tr( "VOLUMES_INFO" )                   << "\n";
+  out << QString( SPACING_INFO, ' ' ) << tr( "NUMBER_OF_THE_DOUBLE_VOLUMES" )   << ": " << myWidgets[6]->text() << "\n";
+  out << QString( SPACING_INFO, ' ' ) << tr( "NUMBER_OF_THE_OVER_CONSTRAINED" ) << ": " << myWidgets[7]->text() << "\n";
+}
+
+/*!
+  \class SMESHGUI_CtrlInfoDlg
+  \brief Controls information dialog box
+*/
+
+/*!
+  \brief Constructor
+  \param parent parent widget
+  \param page specifies the dialog page to be shown at the start-up
+*/
+SMESHGUI_CtrlInfoDlg::SMESHGUI_CtrlInfoDlg( QWidget* parent )
+: QDialog( parent )
+{
+  setAttribute( Qt::WA_DeleteOnClose, true );
+  setWindowTitle( tr( "CTRL_INFO" ) );
+  setMinimumSize( 400, 600 );
+
+  myCtrlInfo = new SMESHGUI_CtrlInfo( this );
+  
+  // buttons
+  QPushButton* okBtn = new QPushButton( tr( "SMESH_BUT_OK" ), this );
+  okBtn->setAutoDefault( true );
+  okBtn->setDefault( true );
+  okBtn->setFocus();
+
+  QGridLayout* l = new QGridLayout ( this );
+  l->setMargin( MARGIN );
+  l->setSpacing( SPACING );
+  l->addWidget( myCtrlInfo, 0, 0, 1, 3 );
+  l->addWidget( okBtn, 1, 1 );
+  l->setColumnStretch( 0, 5 );
+  l->setColumnStretch( 2, 5 );
+
+  connect( okBtn,                   SIGNAL( clicked() ),                      this, SLOT( reject() ) );
+  connect( SMESHGUI::GetSMESHGUI(), SIGNAL( SignalDeactivateActiveDialog() ), this, SLOT( deactivate() ) );
+  connect( SMESHGUI::GetSMESHGUI(), SIGNAL( SignalCloseAllDialogs() ),        this, SLOT( reject() ) );
+
+  updateSelection();
+}
+
+/*!
+  \brief Destructor
+*/
+SMESHGUI_CtrlInfoDlg::~SMESHGUI_CtrlInfoDlg()
+{
+}
+
+/*!
+  \brief Show controls information
+  \param IO interactive object
+*/
+void SMESHGUI_CtrlInfoDlg::showInfo( const Handle(SALOME_InteractiveObject)& IO )
+{  
+  if ( SMESH::SMESH_IDSource_var obj = SMESH::IObjectToInterface<SMESH::SMESH_IDSource>( IO ) )
+    myCtrlInfo->showInfo( obj );
+}
+
+/*!
+  \brief Perform clean-up actions on the dialog box closing.
+*/
+void SMESHGUI_CtrlInfoDlg::reject()
+{
+  SMESH::SetPointRepresentation( false );
+  QDialog::reject();
+}
+
+/*!
+  \brief Setup selection mode depending on the current dialog box state.
+*/
+void SMESHGUI_CtrlInfoDlg::updateSelection()
+{
+  LightApp_SelectionMgr* selMgr = SMESHGUI::selectionMgr();
+  disconnect( selMgr, 0, this, 0 );
+  SMESH::SetPointRepresentation( false );  
+  connect( selMgr, SIGNAL( currentSelectionChanged() ), this, SLOT( updateInfo() ) );
+  updateInfo();  
+}
+
+/*!
+  \brief Show mesh information
+*/
+void SMESHGUI_CtrlInfoDlg::updateInfo()
+{
+  SUIT_OverrideCursor wc;
+
+  SALOME_ListIO selected;
+  SMESHGUI::selectionMgr()->selectedObjects( selected );
+
+  if ( selected.Extent() == 1 ) {
+    Handle(SALOME_InteractiveObject) IO = selected.First();
+    showInfo( IO );
+  }
+}
+
+/*!
+  \brief Activate dialog box
+*/
+void SMESHGUI_CtrlInfoDlg::activate()
+{
+  SMESHGUI::GetSMESHGUI()->EmitSignalDeactivateDialog();
+  SMESHGUI::GetSMESHGUI()->SetActiveDialogBox( this );
+  updateSelection();
+}
+
+/*!
+  \brief Deactivate dialog box
+*/
+void SMESHGUI_CtrlInfoDlg::deactivate()
+{
+  disconnect( SMESHGUI::selectionMgr(), SIGNAL( currentSelectionChanged() ), this, SLOT( updateInfo() ) );
+}
+
+

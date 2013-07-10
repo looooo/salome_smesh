@@ -77,6 +77,7 @@
     <parameter name="distribution_color"           value="0, 85, 0" />
     <parameter name="DisplayMode"                  value="true" />
     <parameter name="auto_update"                  value="true" />
+    <parameter name="incremental_limit"            value="false" />
     <parameter name="update_limit"                 value="500000" />
     <parameter name="display_entity"               value="true" />
     <parameter name="display_mode"                 value="1"    />
@@ -85,9 +86,11 @@
     <parameter name="mesh_elem_info"               value="1"/>
     <parameter name="elem_info_grp_details"        value="false"/>
     <parameter name="info_groups_nodes_limit"      value="100000"/>
+    <parameter name="info_controls_limit"          value="3000"/>
     <parameter name="info_dump_base"               value="true" />
     <parameter name="info_dump_elem"               value="true" />
     <parameter name="info_dump_add"                value="true" />
+    <parameter name="info_dump_ctrl"               value="true" />
     <parameter name="segmentation"                 value="10"/>
     <parameter name="nb_segments_per_edge"         value="15"/>
     <parameter name="forget_mesh_on_hyp_modif"     value="true"/>
@@ -113,6 +116,7 @@
     <parameter name="sub_menu"          value="%1 module"/>
     <parameter name="User's Guide"      value="%SMESH_ROOT_DIR%/share/doc/salome/gui/SMESH/index.html"/>
     <parameter name="Plug-ins/Yams plugin User's Guide" value="%SMESH_ROOT_DIR%/share/doc/salome/gui/SMESH/yams/index.html"/>
+    <parameter name="Plug-ins/MGCleaner plugin User's Guide" value="%SMESH_ROOT_DIR%/share/doc/salome/gui/SMESH/MGCleaner/index.html"/>
     <parameter name="Developer's Guide" value="%SMESH_ROOT_DIR%/share/doc/salome/tui/SMESH/index.html"/>
   </section>
   <section name="resources">

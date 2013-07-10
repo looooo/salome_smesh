@@ -34,7 +34,6 @@
 #include CORBA_SERVER_HEADER(SMESH_Mesh)
 #include CORBA_SERVER_HEADER(SMESH_Hypothesis)
 #include CORBA_CLIENT_HEADER(GEOM_Gen)
-#include CORBA_CLIENT_HEADER(MED)
 
 #include "SALOME_GenericObj_i.hh"
 #include "SMESH_Mesh_i.hxx"
@@ -80,9 +79,6 @@ public:
 
   CORBA::Long GetId();
 
-  SALOME_MED::FAMILY_ptr GetFamily()
-    throw (SALOME::SALOME_Exception);
-
 
   // =========================
   // interface SMESH_IDSource
@@ -92,11 +88,15 @@ public:
    */
   virtual SMESH::long_array* GetIDs();
   /*!
-   * Returns statistic of mesh elements
-   * Result array of number enityties
+   * Returns number of mesh elements of each \a EntityType
+   * Result array of number of elements per \a EntityType
    * Inherited from SMESH_IDSource
    */
   virtual SMESH::long_array* GetMeshInfo();
+  /*!
+   * Returns number of mesh elements of each \a ElementType
+   */
+  virtual SMESH::long_array* GetNbElementsByType();
   /*!
    * Returns types of elements it contains
    */

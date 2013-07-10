@@ -148,6 +148,8 @@ public:
                     const bool                               andAncestors,
                     std::list< TopoDS_Shape > *              assignedTo=0) const;
 
+  SMESH_Hypothesis * GetHypothesis(const int aHypID) const;
+
   const std::list<SMESHDS_Command*> & GetLog() throw(SALOME_Exception);
   
   void ClearLog() throw(SALOME_Exception);
@@ -229,11 +231,12 @@ public:
    */
   bool HasDuplicatedGroupNamesMED();
 
-  void ExportMED(const char *file, 
-                 const char* theMeshName = NULL, 
-                 bool theAutoGroups = true, 
-                 int theVersion = 0,
-                 const SMESHDS_Mesh* meshPart = 0) 
+  void ExportMED(const char *        theFile, 
+                 const char*         theMeshName = NULL, 
+                 bool                theAutoGroups = true, 
+                 int                 theVersion = 0,
+                 const SMESHDS_Mesh* theMeshPart = 0,
+                 bool                theAutoDimension = false)
     throw(SALOME_Exception);
 
   void ExportDAT(const char *        file,
@@ -251,6 +254,8 @@ public:
   void ExportSAUV(const char *file, 
                   const char* theMeshName = NULL, 
                   bool theAutoGroups = true) throw(SALOME_Exception);
+
+  double GetComputeProgress() const;
   
   int NbNodes() const throw(SALOME_Exception);
   int Nb0DElements() const throw(SALOME_Exception);

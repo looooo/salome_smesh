@@ -58,6 +58,7 @@
 #include <BRepBndLib.hxx>
 #include <BRepPrimAPI_MakeBox.hxx>
 #include <Bnd_Box.hxx>
+#include <TColStd_MapOfInteger.hxx>
 #include <TopExp.hxx>
 #include <TopExp_Explorer.hxx>
 #include <TopTools_ListIteratorOfListOfShape.hxx>
@@ -592,19 +593,9 @@ SMESH_Hypothesis::Hypothesis_Status
   if ( !subMesh || !subMesh->GetId())
     return SMESH_Hypothesis::HYP_BAD_SUBSHAPE;
 
-  StudyContextStruct *sc = _gen->GetStudyContext(_studyId);
-  if (sc->mapHypothesis.find(anHypId) == sc->mapHypothesis.end())
-  {
-    if(MYDEBUG) MESSAGE("Hypothesis ID does not give an hypothesis");
-    if(MYDEBUG) {
-      SCRUTE(_studyId);
-      SCRUTE(anHypId);
-    }
+  SMESH_Hypothesis *anHyp = GetHypothesis( anHypId );
+  if ( !anHyp )
     throw SALOME_Exception(LOCALIZED("hypothesis does not exist"));
-  }
-
-  SMESH_Hypothesis *anHyp = sc->mapHypothesis[anHypId];
-  MESSAGE( "SMESH_Mesh::AddHypothesis " << anHyp->GetName() );
 
   bool isGlobalHyp = IsMainShape( aSubShape );
 
@@ -682,8 +673,7 @@ SMESH_Hypothesis::Hypothesis_Status
   
   SMESH_Hypothesis *anHyp = sc->mapHypothesis[anHypId];
   if(MYDEBUG) {
-    int hypType = anHyp->GetType();
-    SCRUTE(hypType);
+    SCRUTE(anHyp->GetType());
   }
   
   // shape 
@@ -875,6 +865,22 @@ int SMESH_Mesh::GetHypotheses(const TopoDS_Shape &                aSubShape,
     }
   }
   return nbHyps;
+}
+
+//================================================================================
+/*!
+ * \brief Return a hypothesis by its ID
+ */
+//================================================================================
+
+SMESH_Hypothesis * SMESH_Mesh::GetHypothesis(const int anHypId) const
+{
+  StudyContextStruct *sc = _gen->GetStudyContext(_studyId);
+  if (sc->mapHypothesis.find(anHypId) == sc->mapHypothesis.end())
+    return false;
+
+  SMESH_Hypothesis *anHyp = sc->mapHypothesis[anHypId];
+  return anHyp;
 }
 
 //=============================================================================
@@ -1249,19 +1255,21 @@ void SMESH_Mesh::ExportMED(const char *        file,
                            const char*         theMeshName, 
                            bool                theAutoGroups,
                            int                 theVersion,
-                           const SMESHDS_Mesh* meshPart) 
+                           const SMESHDS_Mesh* meshPart,
+                           bool                theAutoDimension)
   throw(SALOME_Exception)
 {
   Unexpect aCatch(SalomeException);
 
   DriverMED_W_SMESHDS_Mesh myWriter;
-  myWriter.SetFile    ( file, MED::EVersion(theVersion) );
-  myWriter.SetMesh    ( meshPart ? (SMESHDS_Mesh*) meshPart : _myMeshDS   );
+  myWriter.SetFile         ( file, MED::EVersion(theVersion) );
+  myWriter.SetMesh         ( meshPart ? (SMESHDS_Mesh*) meshPart : _myMeshDS   );
+  myWriter.SetAutoDimension( theAutoDimension );
   if ( !theMeshName ) 
-    myWriter.SetMeshId  ( _id         );
+    myWriter.SetMeshId     ( _id         );
   else {
-    myWriter.SetMeshId  ( -1          );
-    myWriter.SetMeshName( theMeshName );
+    myWriter.SetMeshId     ( -1          );
+    myWriter.SetMeshName   ( theMeshName );
   }
 
   if ( theAutoGroups ) {
@@ -1299,6 +1307,12 @@ void SMESH_Mesh::ExportMED(const char *        file,
   // Perform export
   myWriter.Perform();
 }
+
+//================================================================================
+/*!
+ * \brief Export the mesh to a SAUV file
+ */
+//================================================================================
 
 void SMESH_Mesh::ExportSAUV(const char *file, 
                             const char* theMeshName, 
@@ -1442,6 +1456,66 @@ void SMESH_Mesh::ExportGMF(const char *        file,
   myWriter.SetExportRequiredGroups( withRequiredGroups );
 
   myWriter.Perform();
+}
+
+//================================================================================
+/*!
+ * \brief Return a ratio of "compute cost" of computed sub-meshes to the whole
+ *        "compute cost".
+ */
+//================================================================================
+
+double SMESH_Mesh::GetComputeProgress() const
+{
+  double totalCost = 1e-100, computedCost = 0;
+  const SMESH_subMesh* curSM = _gen->GetCurrentSubMesh();
+
+  // get progress of a current algo
+  TColStd_MapOfInteger currentSubIds; 
+  if ( curSM )
+    if ( SMESH_Algo* algo = curSM->GetAlgo() )
+    {
+      int algoNotDoneCost = 0, algoDoneCost = 0;
+      const std::vector<SMESH_subMesh*>& smToCompute = algo->SubMeshesToCompute();
+      for ( size_t i = 0; i < smToCompute.size(); ++i )
+      {
+        if ( smToCompute[i]->IsEmpty() )
+          algoNotDoneCost += smToCompute[i]->GetComputeCost();
+        else
+          algoDoneCost += smToCompute[i]->GetComputeCost();
+        currentSubIds.Add( smToCompute[i]->GetId() );
+      }
+      double rate = algo->GetProgress();
+      if ( !( 0. < rate && rate < 1.001 ))
+      {
+        rate = algo->GetProgressByTic();
+      }
+      // cout << "rate: "<<rate << " algoNotDoneCost: " << algoNotDoneCost << endl;
+      computedCost += algoDoneCost + rate * algoNotDoneCost;
+    }
+
+  // get cost of already treated sub-meshes
+  if ( SMESH_subMesh* mainSM = GetSubMeshContaining( 1 ))
+  {
+    SMESH_subMeshIteratorPtr smIt = mainSM->getDependsOnIterator(/*includeSelf=*/true);
+    while ( smIt->more() )
+    {
+      const SMESH_subMesh* sm = smIt->next();
+      const int smCost = sm->GetComputeCost();
+      totalCost += smCost;
+      if ( !currentSubIds.Contains( sm->GetId() ) )
+      {
+        if (( !sm->IsEmpty() ) ||
+            ( sm->GetComputeState() == SMESH_subMesh::FAILED_TO_COMPUTE &&
+              !sm->DependsOn( curSM ) ))
+          computedCost += smCost;
+      }
+    }
+  }
+  // cout << "Total: " << totalCost
+  //      << " computed: " << computedCost << " progress: " << computedCost / totalCost
+  //      << " nbElems: " << GetMeshDS()->GetMeshInfo().NbElements() << endl;
+  return computedCost / totalCost;
 }
 
 //================================================================================

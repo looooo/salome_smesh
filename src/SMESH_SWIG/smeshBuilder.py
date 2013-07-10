@@ -1567,14 +1567,21 @@ class Mesh:
     #  @param version MED format version(MED_V2_1 or MED_V2_2)
     #  @param overwrite boolean parameter for overwriting/not overwriting the file
     #  @param meshPart a part of mesh (group, sub-mesh) to export instead of the mesh
+    #  @param autoDimension: if @c True (default), a space dimension of a MED mesh can be either
+    #         - 1D if all mesh nodes lie on OX coordinate axis, or
+    #         - 2D if all mesh nodes lie on XOY coordinate plane, or
+    #         - 3D in the rest cases.
+    #
+    #         If @a autoDimension is @c False, the space dimension is always 3.
     #  @ingroup l2_impexp
-    def ExportMED(self, f, auto_groups=0, version=MED_V2_2, overwrite=1, meshPart=None):
+    def ExportMED(self, f, auto_groups=0, version=MED_V2_2,
+                  overwrite=1, meshPart=None, autoDimension=True):
         if meshPart:
             if isinstance( meshPart, list ):
                 meshPart = self.GetIDSource( meshPart, SMESH.ALL )
-            self.mesh.ExportPartToMED( meshPart, f, auto_groups, version, overwrite )
+            self.mesh.ExportPartToMED( meshPart, f, auto_groups, version, overwrite, autoDimension)
         else:
-            self.mesh.ExportToMEDX(f, auto_groups, version, overwrite)
+            self.mesh.ExportToMEDX(f, auto_groups, version, overwrite, autoDimension)
 
     ## Exports the mesh in a file in SAUV format
     #  @param f is the file name
@@ -1964,12 +1971,6 @@ class Mesh:
     #  @ingroup l1_auxiliary
     def GetIDSource(self, ids, elemType):
         return self.editor.MakeIDSource(ids, elemType)
-
-    ## Gets MED Mesh
-    #  @return an instance of SALOME_MED::MESH
-    #  @ingroup l1_auxiliary
-    def GetMEDMesh(self):
-        return self.mesh.GetMEDMesh()
 
 
     # Get informations about mesh contents:
@@ -4133,12 +4134,30 @@ class Mesh:
     def GetLastCreatedElems(self):
         return self.editor.GetLastCreatedElems()
 
-    ## Clear sequences of nodes and elements created by mesh edition oparations
+    ## Clears sequences of nodes and elements created by mesh edition oparations
     #  @ingroup l1_auxiliary
     def ClearLastCreated(self):
         self.editor.ClearLastCreated()
 
-     ## Creates a hole in a mesh by doubling the nodes of some particular elements
+    ## Creates Duplicates given elements, i.e. creates new elements based on the 
+    #  same nodes as the given ones.
+    #  @param theElements - container of elements to duplicate. It can be a Mesh,
+    #         sub-mesh, group, filter or a list of element IDs.
+    # @param theGroupName - a name of group to contain the generated elements.
+    #                    If a group with such a name already exists, the new elements
+    #                    are added to the existng group, else a new group is created.
+    #                    If \a theGroupName is empty, new elements are not added 
+    #                    in any group.
+    # @return a group where the new elements are added. None if theGroupName == "".
+    #  @ingroup l2_modif_edit
+    def DoubleElements(self, theElements, theGroupName=""):
+        if isinstance( theElements, Mesh ):
+            theElements = theElements.mesh
+        elif isinstance( theElements, list ):
+            theElements = self.GetIDSource( theElements, SMESH.ALL )
+        return self.editor.DoubleElements(theElements, theGroupName)
+
+    ## Creates a hole in a mesh by doubling the nodes of some particular elements
     #  @param theNodes identifiers of nodes to be doubled
     #  @param theModifiedElems identifiers of elements to be updated by the new (doubled)
     #         nodes. If list of element identifiers is empty then nodes are doubled but

@@ -69,7 +69,10 @@
 #include <TColStd_Array1OfReal.hxx>
 #include <TopExp.hxx>
 #include <TopExp_Explorer.hxx>
+#include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
+#include <TopTools_ListIteratorOfListOfShape.hxx>
+#include <TopTools_ListOfShape.hxx>
 #include <TopTools_MapOfShape.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Edge.hxx>
@@ -332,11 +335,11 @@ namespace VISCOUS_2D
                       const StdMeshers_ViscousLayers2D* theHyp);
     SMESH_ComputeErrorPtr GetError() const { return _error; }
     // does it's job
-    SMESH_ProxyMesh::Ptr  Compute();
+    SMESH_ProxyMesh::Ptr  Compute(const TopoDS_Shape& theShapeHypAssignedTo);
 
   private:
 
-    bool findEdgesWithLayers();
+    bool findEdgesWithLayers(const TopoDS_Shape& theShapeHypAssignedTo);
     bool makePolyLines();
     bool inflate();
     bool fixCollisions();
@@ -398,13 +401,58 @@ namespace VISCOUS_2D
    * \brief Returns StdMeshers_ViscousLayers2D for the FACE
    */
   const StdMeshers_ViscousLayers2D* findHyp(SMESH_Mesh&        theMesh,
-                                            const TopoDS_Face& theFace)
+                                            const TopoDS_Face& theFace,
+                                            TopoDS_Shape*      assignedTo=0)
   {
     SMESH_HypoFilter hypFilter
       ( SMESH_HypoFilter::HasName( StdMeshers_ViscousLayers2D::GetHypType() ));
     const SMESH_Hypothesis * hyp =
-      theMesh.GetHypothesis( theFace, hypFilter, /*ancestors=*/true );
+      theMesh.GetHypothesis( theFace, hypFilter, /*ancestors=*/true, assignedTo );
     return dynamic_cast< const StdMeshers_ViscousLayers2D* > ( hyp );
+  }
+
+  //================================================================================
+  /*!
+   * \brief Returns ids of EDGEs not to create Viscous Layers on
+   *  \param [in] theHyp - the hypothesis, holding edges either to ignore or not to.
+   *  \param [in] theFace - the FACE whose EDGEs are checked.
+   *  \param [in] theMesh - the mesh.
+   *  \param [in,out] theEdgeIds - container returning EDGEs to ignore.
+   *  \return int - number of found EDGEs of the FACE.
+   */
+  //================================================================================
+
+  int getEdgesToIgnore( const StdMeshers_ViscousLayers2D* theHyp,
+                        const TopoDS_Shape&               theFace,
+                        const SMESHDS_Mesh*               theMesh,
+                        set< int > &                      theEdgeIds)
+  {
+    int nbToEdgesIgnore = 0;
+    vector<TGeomID> ids = theHyp->GetBndShapes();
+    if ( theHyp->IsToIgnoreShapes() ) // EDGEs to ignore are given
+    {
+      for ( size_t i = 0; i < ids.size(); ++i )
+      {
+        const TopoDS_Shape& E = theMesh->IndexToShape( ids[i] );
+        if ( !E.IsNull() &&
+             E.ShapeType() == TopAbs_EDGE &&
+             SMESH_MesherHelper::IsSubShape( E, theFace ))
+        {
+          theEdgeIds.insert( ids[i] );
+          ++nbToEdgesIgnore;
+        }
+      }
+    }
+    else // EDGEs to make the Viscous Layers on are given
+    {
+      TopExp_Explorer E( theFace, TopAbs_EDGE );
+      for ( ; E.More(); E.Next(), ++nbToEdgesIgnore )
+        theEdgeIds.insert( theMesh->ShapeToIndex( E.Current() ));
+
+      for ( size_t i = 0; i < ids.size(); ++i )
+        nbToEdgesIgnore -= theEdgeIds.erase( ids[i] );
+    }
+    return nbToEdgesIgnore;
   }
 
 } // namespace VISCOUS_2D
@@ -432,11 +480,12 @@ StdMeshers_ViscousLayers2D::Compute(SMESH_Mesh&        theMesh,
 {
   SMESH_ProxyMesh::Ptr pm;
 
-  const StdMeshers_ViscousLayers2D* vlHyp = VISCOUS_2D::findHyp( theMesh, theFace );
+  TopoDS_Shape hypAssignedTo;
+  const StdMeshers_ViscousLayers2D* vlHyp = VISCOUS_2D::findHyp( theMesh, theFace, &hypAssignedTo );
   if ( vlHyp )
   {
     VISCOUS_2D::_ViscousBuilder2D builder( theMesh, theFace, vlHyp );
-    pm = builder.Compute();
+    pm = builder.Compute( hypAssignedTo );
     SMESH_ComputeErrorPtr error = builder.GetError();
     if ( error && !error->IsOK() )
       theMesh.GetSubMesh( theFace )->GetComputeError() = error;
@@ -495,9 +544,9 @@ _ViscousBuilder2D::_ViscousBuilder2D(SMESH_Mesh&                       theMesh,
   _mesh( &theMesh ), _face( theFace ), _hyp( theHyp ), _helper( theMesh )
 {
   _helper.SetSubShape( _face );
-  _helper.SetElementsOnShape(true);
+  _helper.SetElementsOnShape( true );
 
-  //_face.Orientation( TopAbs_FORWARD );
+  _face.Orientation( TopAbs_FORWARD ); // 2D logic works only in this case
   _surface = BRep_Tool::Surface( _face );
 
   if ( _hyp )
@@ -512,7 +561,6 @@ _ViscousBuilder2D::_ViscousBuilder2D(SMESH_Mesh&                       theMesh,
 
 bool _ViscousBuilder2D::error(const string& text )
 {
-  cout << "_ViscousBuilder2D::error " << text << endl;
   _error->myName    = COMPERR_ALGO_FAILED;
   _error->myComment = string("Viscous layers builder 2D: ") + text;
   if ( SMESH_subMesh* sm = _mesh->GetSubMesh( _face ) )
@@ -522,8 +570,9 @@ bool _ViscousBuilder2D::error(const string& text )
       _error->myAlgo = smError->myAlgo;
     smError = _error;
   }
-  //makeGroupOfLE(); // debug
-
+#ifdef _DEBUG_
+  cout << "_ViscousBuilder2D::error " << text << endl;
+#endif
   return false;
 }
 
@@ -533,14 +582,14 @@ bool _ViscousBuilder2D::error(const string& text )
  */
 //================================================================================
 
-SMESH_ProxyMesh::Ptr _ViscousBuilder2D::Compute()
+SMESH_ProxyMesh::Ptr _ViscousBuilder2D::Compute(const TopoDS_Shape& theShapeHypAssignedTo)
 {
   _error       = SMESH_ComputeError::New(COMPERR_OK);
   _faceSideVec = StdMeshers_FaceSide::GetFaceWires( _face, *_mesh, true, _error );
   if ( !_error->IsOK() )
     return _proxyMesh;
 
-  if ( !findEdgesWithLayers() ) // analysis of a shape
+  if ( !findEdgesWithLayers(theShapeHypAssignedTo) ) // analysis of a shape
     return _proxyMesh;
 
   if ( ! makePolyLines() ) // creation of fronts
@@ -569,53 +618,49 @@ SMESH_ProxyMesh::Ptr _ViscousBuilder2D::Compute()
  */
 //================================================================================
 
-bool _ViscousBuilder2D::findEdgesWithLayers()
+bool _ViscousBuilder2D::findEdgesWithLayers(const TopoDS_Shape& theShapeHypAssignedTo)
 {
   // collect all EDGEs to ignore defined by hyp
-  int nbMyEdgesIgnored = 0;
-  vector<TGeomID> ids = _hyp->GetBndShapesToIgnore();
-  for ( size_t i = 0; i < ids.size(); ++i )
-  {
-    const TopoDS_Shape& s = getMeshDS()->IndexToShape( ids[i] );
-    if ( !s.IsNull() && s.ShapeType() == TopAbs_EDGE ) {
-      _ignoreShapeIds.insert( ids[i] );
-      nbMyEdgesIgnored += ( _helper.IsSubShape( s, _face ));
-    }
-  }
+  int nbMyEdgesIgnored = getEdgesToIgnore( _hyp, _face, getMeshDS(), _ignoreShapeIds );
 
   // check all EDGEs of the _face
   int totalNbEdges = 0;
+  TopTools_IndexedDataMapOfShapeListOfShape facesOfEdgeMap;
+  TopExp::MapShapesAndAncestors( theShapeHypAssignedTo,
+                                 TopAbs_EDGE, TopAbs_FACE, facesOfEdgeMap);
   for ( size_t iWire = 0; iWire < _faceSideVec.size(); ++iWire )
   {
     StdMeshers_FaceSidePtr wire = _faceSideVec[ iWire ];
     totalNbEdges += wire->NbEdges();
     for ( int iE = 0; iE < wire->NbEdges(); ++iE )
-      if ( _helper.NbAncestors( wire->Edge( iE ), *_mesh, TopAbs_FACE ) > 1 )
+    {
+      const TopTools_ListOfShape& faceList = facesOfEdgeMap.FindFromKey( wire->Edge( iE ));
+      if ( faceList.Extent() > 1 )
       {
         // ignore internal EDGEs (shared by several FACEs)
-        TGeomID edgeID = getMeshDS()->ShapeToIndex( wire->Edge( iE ));
+        const TGeomID edgeID = wire->EdgeID( iE );
         _ignoreShapeIds.insert( edgeID );
 
         // check if ends of an EDGE are to be added to _noShrinkVert
-        PShapeIteratorPtr faceIt = _helper.GetAncestors( wire->Edge( iE ), *_mesh, TopAbs_FACE );
-        while ( const TopoDS_Shape* neighbourFace = faceIt->next() )
+        TopTools_ListIteratorOfListOfShape faceIt( faceList );
+        for ( ; faceIt.More(); faceIt.Next() )
         {
-          if ( neighbourFace->IsSame( _face )) continue;
-          SMESH_Algo* algo = _mesh->GetGen()->GetAlgo( *_mesh, *neighbourFace );
+          const TopoDS_Shape& neighbourFace = faceIt.Value();
+          if ( neighbourFace.IsSame( _face )) continue;
+          SMESH_Algo* algo = _mesh->GetGen()->GetAlgo( *_mesh, neighbourFace );
           if ( !algo ) continue;
 
           const StdMeshers_ViscousLayers2D* viscHyp = 0;
           const list <const SMESHDS_Hypothesis *> & allHyps =
-            algo->GetUsedHypothesis(*_mesh, *neighbourFace, /*noAuxiliary=*/false);
+            algo->GetUsedHypothesis(*_mesh, neighbourFace, /*noAuxiliary=*/false);
           list< const SMESHDS_Hypothesis *>::const_iterator hyp = allHyps.begin();
           for ( ; hyp != allHyps.end() && !viscHyp; ++hyp )
             viscHyp = dynamic_cast<const StdMeshers_ViscousLayers2D*>( *hyp );
 
           set<TGeomID> neighbourIgnoreEdges;
-          if (viscHyp) {
-            vector<TGeomID> ids = _hyp->GetBndShapesToIgnore();
-            neighbourIgnoreEdges.insert( ids.begin(), ids.end() );
-          }
+          if (viscHyp)
+            getEdgesToIgnore( viscHyp, neighbourFace, getMeshDS(), neighbourIgnoreEdges );
+
           for ( int iV = 0; iV < 2; ++iV )
           {
             TopoDS_Vertex vertex = iV ? wire->LastVertex(iE) : wire->FirstVertex(iE);
@@ -626,13 +671,32 @@ bool _ViscousBuilder2D::findEdgesWithLayers()
               PShapeIteratorPtr edgeIt = _helper.GetAncestors( vertex, *_mesh, TopAbs_EDGE );
               while ( const TopoDS_Shape* edge = edgeIt->next() )
                 if ( !edge->IsSame( wire->Edge( iE )) &&
+                     _helper.IsSubShape( *edge, neighbourFace ) &&
                      neighbourIgnoreEdges.count( getMeshDS()->ShapeToIndex( *edge )))
+                {
                   _noShrinkVert.insert( getMeshDS()->ShapeToIndex( vertex ));
+                  break;
+                }
             }
           }
         }
       }
+    }
   }
+
+  // add VERTEXes w/o layers to _ignoreShapeIds (this is used by toShrinkForAdjacent())
+  for ( size_t iWire = 0; iWire < _faceSideVec.size(); ++iWire )
+  {
+    StdMeshers_FaceSidePtr wire = _faceSideVec[ iWire ];
+    for ( int iE = 0; iE < wire->NbEdges(); ++iE )
+    {
+      TGeomID edge1 = wire->EdgeID( iE );
+      TGeomID edge2 = wire->EdgeID( iE+1 );
+      if ( _ignoreShapeIds.count( edge1 ) && _ignoreShapeIds.count( edge2 ))
+        _ignoreShapeIds.insert( getMeshDS()->ShapeToIndex( wire->LastVertex( iE )));
+    }
+  }
+
   return ( nbMyEdgesIgnored < totalNbEdges );
 }
 
@@ -773,7 +837,8 @@ bool _ViscousBuilder2D::makePolyLines()
         }
       }
     }
-    _thickness = Min( _hyp->GetTotalThickness(), maxPossibleThick );
+    if ( maxPossibleThick > 0. )
+      _thickness = Min( _hyp->GetTotalThickness(), maxPossibleThick );
   }
 
   // Adjust _LayerEdge's at _PolyLine's extremities
@@ -1713,11 +1778,12 @@ bool _ViscousBuilder2D::toShrinkForAdjacent( const TopoDS_Face&   adjFace,
                                              const TopoDS_Edge&   E,
                                              const TopoDS_Vertex& V)
 {
-  if ( const StdMeshers_ViscousLayers2D* vlHyp = findHyp( *_mesh, adjFace ))
+  TopoDS_Shape hypAssignedTo;
+  if ( const StdMeshers_ViscousLayers2D* vlHyp = findHyp( *_mesh, adjFace, &hypAssignedTo ))
   {
     VISCOUS_2D::_ViscousBuilder2D builder( *_mesh, adjFace, vlHyp );
     builder._faceSideVec = StdMeshers_FaceSide::GetFaceWires( adjFace, *_mesh, true, _error );
-    builder.findEdgesWithLayers();
+    builder.findEdgesWithLayers( hypAssignedTo );
 
     PShapeIteratorPtr edgeIt = _helper.GetAncestors( V, *_mesh, TopAbs_EDGE );
     while ( const TopoDS_Shape* edgeAtV = edgeIt->next() )
@@ -1732,7 +1798,7 @@ bool _ViscousBuilder2D::toShrinkForAdjacent( const TopoDS_Face&   adjFace,
   }
   return false;
 }
-  
+
 //================================================================================
 /*!
  * \brief Make faces
@@ -1741,6 +1807,10 @@ bool _ViscousBuilder2D::toShrinkForAdjacent( const TopoDS_Face&   adjFace,
 
 bool _ViscousBuilder2D::refine()
 {
+  // find out orientation of faces to create
+  bool isReverse = 
+    ( _helper.GetSubShapeOri( _mesh->GetShapeToMesh(), _face ) == TopAbs_REVERSED );
+
   // store a proxyMesh in a sub-mesh
   // make faces on each _PolyLine
   vector< double > layersHeight;
@@ -1845,6 +1915,8 @@ bool _ViscousBuilder2D::refine()
       nbN = innerNodes.size() - ( hasRightNode || hasOwnRightNode );
     L._leftNodes .reserve( _hyp->GetNumberLayers() );
     L._rightNodes.reserve( _hyp->GetNumberLayers() );
+    int cur = 0, prev = -1; // to take into account orientation of _face
+    if ( isReverse ) std::swap( cur, prev );
     for ( int iF = 0; iF < _hyp->GetNumberLayers(); ++iF ) // loop on layers of faces
     {
       // get accumulated length of intermediate segments
@@ -1878,10 +1950,9 @@ bool _ViscousBuilder2D::refine()
       if ( !hasOwnRightNode ) L._rightNodes.push_back( innerNodes.back() );
 
       // create faces
-      // TODO care of orientation
       for ( size_t i = 1; i < innerNodes.size(); ++i )
-        if ( SMDS_MeshElement* f = _helper.AddFace( outerNodes[ i-1 ], outerNodes[ i ],
-                                                    innerNodes[ i ],   innerNodes[ i-1 ]))
+        if ( SMDS_MeshElement* f = _helper.AddFace( outerNodes[ i+prev ], outerNodes[ i+cur ],
+                                                    innerNodes[ i+cur  ], innerNodes[ i+prev ]))
           L._newFaces.insert( L._newFaces.end(), f );
 
       outerNodes.swap( innerNodes );
@@ -1898,11 +1969,14 @@ bool _ViscousBuilder2D::refine()
         continue;
 
       for ( size_t i = 1; i < lNodes.size(); ++i )
-        _helper.AddFace( lNodes[ i-1 ], rNodes[ i-1 ],
-                         rNodes[ i ],   lNodes[ i ]);
+        _helper.AddFace( lNodes[ i+prev ], rNodes[ i+prev ],
+                         rNodes[ i+cur ],  lNodes[ i+cur ]);
 
       const UVPtStruct& ptOnVertex = points[ isR ? L._lastPntInd : L._firstPntInd ];
-      _helper.AddFace( ptOnVertex.node, rNodes[ 0 ], lNodes[ 0 ]);
+      if ( isReverse )
+        _helper.AddFace( ptOnVertex.node, lNodes[ 0 ], rNodes[ 0 ]);
+      else
+        _helper.AddFace( ptOnVertex.node, rNodes[ 0 ], lNodes[ 0 ]);
     }
 
     // Fill the _ProxyMeshOfFace

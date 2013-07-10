@@ -67,6 +67,12 @@
 #include "SMESH_Gen_i.hxx"
 #include "SMESH_version.h"
 
+#include "DriverMED_W_SMESHDS_Mesh.h"
+#include "DriverMED_R_SMESHDS_Mesh.h"
+#ifdef WITH_CGNS
+#include "DriverCGNS_Read.hxx"
+#endif
+#include "MED_Factory.hxx"
 #include "SMDS_EdgePosition.hxx"
 #include "SMDS_FacePosition.hxx"
 #include "SMDS_PolyhedralVolumeOfNodes.hxx"
@@ -87,17 +93,12 @@
 #include "SMESH_Mesh_i.hxx"
 #include "SMESH_PreMeshInfo.hxx"
 #include "SMESH_PythonDump.hxx"
+#include "memoire.h"
 
 #include CORBA_SERVER_HEADER(SMESH_Group)
 #include CORBA_SERVER_HEADER(SMESH_Filter)
 #include CORBA_SERVER_HEADER(SMESH_MeshEditor)
 
-#include "DriverMED_W_SMESHDS_Mesh.h"
-#include "DriverMED_R_SMESHDS_Mesh.h"
-#ifdef WITH_CGNS
-#include "DriverCGNS_Read.hxx"
-#endif
-#include "memoire.h"
 
 #include <GEOM_Client.hxx>
 
@@ -473,7 +474,8 @@ SMESH::SMESH_Hypothesis_ptr SMESH_Gen_i::createHypothesis(const char* theHypName
   // activate the CORBA servant of hypothesis
   hypothesis_i = SMESH::SMESH_Hypothesis::_narrow( myHypothesis_i->_this() );
   int nextId = RegisterObject( hypothesis_i );
-  if(MYDEBUG) MESSAGE( "Add hypo to map with id = "<< nextId );
+  if(MYDEBUG) { MESSAGE( "Add hypo to map with id = "<< nextId ); }
+  else        { nextId = 0; } // avoid "unused variable" warning in release mode
 
   return hypothesis_i._retn();
 }
@@ -502,7 +504,8 @@ SMESH::SMESH_Mesh_ptr SMESH_Gen_i::createMesh()
     // activate the CORBA servant of Mesh
     SMESH::SMESH_Mesh_var mesh = SMESH::SMESH_Mesh::_narrow( meshServant->_this() );
     int nextId = RegisterObject( mesh );
-    if(MYDEBUG) MESSAGE( "Add mesh to map with id = "<< nextId);
+    if(MYDEBUG) { MESSAGE( "Add mesh to map with id = "<< nextId); }
+    else        { nextId = 0; } // avoid "unused variable" warning in release mode
     return mesh._retn();
   }
   catch (SALOME_Exception& S_ex) {
@@ -1830,7 +1833,7 @@ SMESH::MeshPreviewStruct* SMESH_Gen_i::Precompute( SMESH::SMESH_Mesh_ptr theMesh
       ::SMESH_Mesh& myLocMesh = meshServant->GetImpl();
       TSetOfInt shapeIds;
       ::MeshDimension aDim = (MeshDimension)theDimension;
-      if ( myGen.Compute( myLocMesh, myLocShape, false, aDim, &shapeIds ) )
+      if ( myGen.Compute( myLocMesh, myLocShape, false, false, aDim, &shapeIds ) )
       {
         int nbShapeId = shapeIds.size();
         theShapesId.length( nbShapeId );
@@ -4787,6 +4790,18 @@ bool SMESH_Gen_i::Load( SALOMEDS::SComponent_ptr theComponent,
   }
   pd << ""; // prevent optimizing pd out
 
+  // creation of tree nodes for all data objects in the study
+  // to support tree representation customization and drag-n-drop:
+  SALOMEDS::UseCaseBuilder_var useCaseBuilder = theComponent->GetStudy()->GetUseCaseBuilder();
+  if ( !useCaseBuilder->IsUseCaseNode( theComponent ) ) {
+    useCaseBuilder->SetRootCurrent();
+    useCaseBuilder->Append( theComponent ); // component object is added as the top level item
+    SALOMEDS::ChildIterator_var it = theComponent->GetStudy()->NewChildIterator( theComponent ); 
+    for (it->InitEx(true); it->More(); it->Next()) {
+      useCaseBuilder->AppendTo( it->Value()->GetFather(), it->Value() );
+    }
+  }
+
   INFOS( "SMESH_Gen_i::Load completed" );
   return true;
 }
@@ -4992,6 +5007,46 @@ char* SMESH_Gen_i::getVersion()
 #else
   return CORBA::string_dup(SMESH_VERSION_STR);
 #endif
+}
+
+//=================================================================================
+// function : Move()
+// purpose  : Moves objects to the specified position. 
+//            Is used in the drag-n-drop functionality.
+//=================================================================================
+void SMESH_Gen_i::Move( const SMESH::sobject_list& what,
+			SALOMEDS::SObject_ptr where,
+			CORBA::Long row )
+{
+  if ( CORBA::is_nil( where ) ) return;
+
+  SALOMEDS::Study_var study = where->GetStudy();
+  SALOMEDS::StudyBuilder_var studyBuilder = study->NewBuilder();
+  SALOMEDS::UseCaseBuilder_var useCaseBuilder = study->GetUseCaseBuilder();
+  SALOMEDS::SComponent_var father = where->GetFatherComponent();
+  std::string dataType = father->ComponentDataType();
+  if ( dataType != "SMESH" ) return; // not a SMESH component
+  
+  SALOMEDS::SObject_var objAfter;
+  if ( row >= 0 && useCaseBuilder->HasChildren( where ) ) {
+    // insert at given row -> find insertion position
+    SALOMEDS::UseCaseIterator_var useCaseIt = useCaseBuilder->GetUseCaseIterator( where );
+    int i;
+    for ( i = 0; i < row && useCaseIt->More(); i++, useCaseIt->Next() );
+    if ( i == row && useCaseIt->More() ) {
+      objAfter = useCaseIt->Value();
+    }
+  }
+  
+  for ( int i = 0; i < what.length(); i++ ) {
+    SALOMEDS::SObject_var sobj = what[i];
+    if ( CORBA::is_nil( sobj ) ) continue; // skip bad object
+    // insert the object to the use case tree
+    if ( !CORBA::is_nil( objAfter ) )
+      useCaseBuilder->InsertBefore( sobj, objAfter ); // insert at given row
+    else
+      useCaseBuilder->AppendTo( where, sobj );        // append to the end of list
+  }
 }
 
 //=============================================================================

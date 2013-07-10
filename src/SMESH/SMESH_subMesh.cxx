@@ -104,6 +104,8 @@ SMESH_subMesh::SMESH_subMesh(int                  Id,
     _algoState = NO_ALGO;
     _computeState = NOT_READY;
   }
+  _computeCost = 0; // how costly is to compute this sub-mesh
+  _realComputeCost = 0;
 }
 
 //=============================================================================
@@ -355,6 +357,48 @@ bool SMESH_subMesh::SubMeshesComputed(bool * isFailedToCompute/*=0*/) const
   return subMeshesComputed;
 }
 
+//================================================================================
+/*!
+ * \brief Return cost of computing this sub-mesh. If hypotheses are not well defined,
+ *        zero is returned
+ *  \return int - the computation cost in abstract units.
+ */
+//================================================================================
+
+int SMESH_subMesh::GetComputeCost() const
+{
+  return _realComputeCost;
+}
+
+//================================================================================
+/*!
+ * \brief Return cost of computing this sub-mesh. The cost depends on the shape type
+ *        and number of sub-meshes this one DependsOn().
+ *  \return int - the computation cost in abstract units.
+ */
+//================================================================================
+
+int SMESH_subMesh::computeCost() const
+{
+  if ( !_computeCost )
+  {
+    int computeCost;
+    switch ( _subShape.ShapeType() ) {
+    case TopAbs_SOLID:
+    case TopAbs_SHELL: computeCost = 1000; break;
+    case TopAbs_FACE:  computeCost = 100; break;
+    case TopAbs_EDGE:  computeCost = 10; break;
+    default:           computeCost = 1;
+    }
+    SMESH_subMeshIteratorPtr childIt = getDependsOnIterator(/*includeSelf=*/false);
+    while ( childIt->more() )
+      computeCost += childIt->next()->computeCost();
+
+    ((SMESH_subMesh*)this)->_computeCost = computeCost;
+  }
+  return _computeCost;
+}
+
 //=============================================================================
 /*!
  *
@@ -501,6 +545,23 @@ const map < int, SMESH_subMesh * >& SMESH_subMesh::DependsOn()
   return _mapDepend;
 }
 
+//================================================================================
+/*!
+ * \brief Return a key for SMESH_subMesh::_mapDepend map
+ */
+//================================================================================
+
+namespace {
+  int dependsOnMapKey( const SMESH_subMesh* sm )
+  {
+    int type = sm->GetSubShape().ShapeType();
+    int ordType = 9 - type;               // 2 = Vertex, 8 = CompSolid
+    int cle = sm->GetId();
+    cle += 10000000 * ordType;    // sort map by ordType then index
+    return cle;
+  }
+}
+
 //=============================================================================
 /*!
  * For simple Shapes (solid, face, edge): add subMesh into dependence list.
@@ -510,10 +571,7 @@ const map < int, SMESH_subMesh * >& SMESH_subMesh::DependsOn()
 void SMESH_subMesh::insertDependence(const TopoDS_Shape aSubShape)
 {
   SMESH_subMesh *aSubMesh = _father->GetSubMesh(aSubShape);
-  int type = aSubShape.ShapeType();
-  int ordType = 9 - type;               // 2 = Vertex, 8 = CompSolid
-  int cle = aSubMesh->GetId();
-  cle += 10000000 * ordType;    // sort map by ordType then index
+  int cle = dependsOnMapKey( aSubMesh );
   if ( _mapDepend.find( cle ) == _mapDepend.end())
   {
     _mapDepend[cle] = aSubMesh;
@@ -522,18 +580,27 @@ void SMESH_subMesh::insertDependence(const TopoDS_Shape aSubShape)
   }
 }
 
+//================================================================================
+/*!
+ * \brief Return \c true if \a this sub-mesh depends on \a other
+ */
+//================================================================================
+
+bool SMESH_subMesh::DependsOn( const SMESH_subMesh* other ) const
+{
+  return other ? _mapDepend.count( dependsOnMapKey( other )) : false;
+}
+
 //=============================================================================
 /*!
- *
+ * Return a shape of \a this sub-mesh
  */
 //=============================================================================
 
 const TopoDS_Shape & SMESH_subMesh::GetSubShape() const
 {
-        //MESSAGE("SMESH_subMesh::GetSubShape");
-        return _subShape;
+  return _subShape;
 }
-
 
 //=======================================================================
 //function : CanAddHypothesis
@@ -1074,6 +1141,8 @@ SMESH_Hypothesis::Hypothesis_Status
   if (stateChange || modifiedHyp)
     ComputeStateEngine(MODIF_ALGO_STATE);
 
+  _realComputeCost = ( _algoState == HYP_OK ) ? computeCost() : 0;
+
   return ret;
 }
 
@@ -1251,8 +1320,7 @@ void SMESH_subMesh::cleanDependsOn( SMESH_Algo* algoRequiringCleaning/*=0*/ )
 
 void SMESH_subMesh::DumpAlgoState(bool isMain)
 {
-        int dim = SMESH_Gen::GetShapeDim(_subShape);
-//   if (dim < 1) return;
+  // if (dim < 1) return;
         if (isMain)
         {
                 const map < int, SMESH_subMesh * >&subMeshes = DependsOn();
@@ -1264,8 +1332,9 @@ void SMESH_subMesh::DumpAlgoState(bool isMain)
                         sm->DumpAlgoState(false);
                 }
         }
-        int type = _subShape.ShapeType();
-        MESSAGE("dim = " << dim << " type of shape " << type);
+        //int type = _subShape.ShapeType();
+        MESSAGE("dim = " << SMESH_Gen::GetShapeDim(_subShape) <<
+                " type of shape " << _subShape.ShapeType());
         switch (_algoState)
         {
         case NO_ALGO:
@@ -1462,13 +1531,14 @@ bool SMESH_subMesh::ComputeStateEngine(int event)
           break;
         }
         TopoDS_Shape shape = _subShape;
+        algo->SubMeshesToCompute().assign( 1, this );
         // check submeshes needed
         if (_father->HasShapeToMesh() ) {
           bool subComputed = false, subFailed = false;
           if (!algo->OnlyUnaryInput()) {
             if ( event == COMPUTE /*&&
                  ( algo->NeedDiscreteBoundary() || algo->SupportSubmeshes() )*/)
-              shape = getCollection( gen, algo, subComputed, subFailed );
+              shape = getCollection( gen, algo, subComputed, subFailed, algo->SubMeshesToCompute());
             else
               subComputed = SubMeshesComputed( & subFailed );
           }
@@ -1501,6 +1571,7 @@ bool SMESH_subMesh::ComputeStateEngine(int event)
           OCC_CATCH_SIGNALS;
 #endif
           algo->InitComputeError();
+
           MemoryReserve aMemoryReserve;
           SMDS_Mesh::CheckMemory();
           Kernel_Utils::Localizer loc;
@@ -2028,7 +2099,8 @@ void SMESH_subMesh::removeSubMeshElementsAndNodes()
 TopoDS_Shape SMESH_subMesh::getCollection(SMESH_Gen * theGen,
                                           SMESH_Algo* theAlgo,
                                           bool &      theSubComputed,
-                                          bool &      theSubFailed)
+                                          bool &      theSubFailed,
+                                          std::vector<SMESH_subMesh*>& theSubs)
 {
   theSubComputed = SubMeshesComputed( & theSubFailed );
 
@@ -2048,11 +2120,14 @@ TopoDS_Shape SMESH_subMesh::getCollection(SMESH_Gen * theGen,
   BRep_Builder aBuilder;
   aBuilder.MakeCompound( aCompound );
 
+  theSubs.clear();
+
   TopExp_Explorer anExplorer( mainShape, _subShape.ShapeType() );
   for ( ; anExplorer.More(); anExplorer.Next() )
   {
     const TopoDS_Shape& S = anExplorer.Current();
     SMESH_subMesh* subMesh = _father->GetSubMesh( S );
+    theSubs.push_back( subMesh );
     if ( subMesh == this )
     {
       aBuilder.Add( aCompound, S );

@@ -170,6 +170,11 @@ class SMESH_EXPORT SMESH_Algo : public SMESH_Hypothesis
   virtual void CancelCompute();
 
   /*!
+   * \brief If possible, returns progress of computation [0.,1.]
+   */
+  virtual double GetProgress() const;
+
+  /*!
    * \brief evaluates size of prospective mesh on a shape
     * \param aMesh - the mesh
     * \param aShape - the shape
@@ -224,14 +229,23 @@ class SMESH_EXPORT SMESH_Algo : public SMESH_Hypothesis
    */
   virtual bool SetParametersByMesh(const SMESH_Mesh* theMesh, const TopoDS_Shape& theShape);
   virtual bool SetParametersByDefaults(const TDefaults& dflts, const SMESH_Mesh* theMesh=0);
+
   /*!
    * \brief return compute error
    */
   SMESH_ComputeErrorPtr GetComputeError() const;
   /*!
-   * \brief initialize compute error
+   * \brief initialize compute error etc. before call of Compute()
    */
   void InitComputeError();
+  /*!
+   * \brief Return compute progress by nb of calls of this method
+   */
+  double GetProgressByTic() const;
+  /*!
+   * Return a vector of sub-meshes to Compute()
+   */
+  std::vector<SMESH_subMesh*>& SubMeshesToCompute() { return _smToCompute; }
 
 public:
   // ==================================================================
@@ -407,7 +421,13 @@ protected:
   std::list<const SMDS_MeshElement*> _badInputElements; //!< to explain COMPERR_BAD_INPUT_MESH
 
   volatile bool _computeCanceled; //!< is set to True while computing to stop it
+
+  double        _progress;        /* progress of Compute() [0.,1.],
+                                     to be set by an algo really tracking the progress */
+  int           _progressTic;     // counter of calls from SMESH_Mesh::GetComputeProgress()
+  std::vector<SMESH_subMesh*> _smToCompute; // sub-meshes to Compute()
 };
+
 
 class SMESH_EXPORT SMESH_0D_Algo: public SMESH_Algo
 {

@@ -24,19 +24,19 @@
 //  File   : DriverMED_W_SMESHDS_Mesh.cxx
 //  Module : SMESH
 //
-#include <sstream>
 
 #include "DriverMED_W_SMESHDS_Mesh.h"
-#include "DriverMED_Family.h"
 
-#include "SMESHDS_Mesh.hxx"
+#include "DriverMED_Family.h"
+#include "MED_Factory.hxx"
+#include "MED_Utilities.hxx"
 #include "SMDS_MeshElement.hxx"
 #include "SMDS_MeshNode.hxx"
 #include "SMDS_PolyhedralVolumeOfNodes.hxx"
+#include "SMESHDS_Mesh.hxx"
 
-#include "utilities.h"
+#include <utilities.h>
 
-#include "MED_Utilities.hxx"
 
 #define _EDF_NODE_IDS_
 //#define _ELEMENTS_BY_DIM_
@@ -46,25 +46,27 @@ using namespace MED;
 
 
 DriverMED_W_SMESHDS_Mesh::DriverMED_W_SMESHDS_Mesh():
+  myMedVersion(MED::eV2_2),
   myAllSubMeshes (false),
   myDoGroupOfNodes (false),
   myDoGroupOfEdges (false),
   myDoGroupOfFaces (false),
   myDoGroupOfVolumes (false),
   myDoGroupOf0DElems(false),
-  myDoGroupOfBalls(false)
+  myDoGroupOfBalls(false),
+  myAutoDimension(true)
 {}
 
 void DriverMED_W_SMESHDS_Mesh::SetFile(const std::string& theFileName, 
-                                       MED::EVersion theId)
+                                       MED::EVersion      theId)
 {
-  myMed = CrWrapper(theFileName,theId);
   Driver_SMESHDS_Mesh::SetFile(theFileName);
+  myMedVersion = theId;
 }
 
 void DriverMED_W_SMESHDS_Mesh::SetFile(const std::string& theFileName)
 {
-  return SetFile(theFileName,MED::eV2_2);
+  Driver_SMESHDS_Mesh::SetFile(theFileName);
 }
 
 string DriverMED_W_SMESHDS_Mesh::GetVersionString(const MED::EVersion theVersion, int theNbDigits)
@@ -120,7 +122,8 @@ void DriverMED_W_SMESHDS_Mesh::AddGroupOfVolumes()
   myDoGroupOfVolumes = true;
 }
 
-namespace{
+namespace
+{
   typedef double (SMDS_MeshNode::* TGetCoord)() const;
   typedef const char* TName;
   typedef const char* TUnit;
@@ -311,12 +314,13 @@ Driver_Mesh::Status DriverMED_W_SMESHDS_Mesh::Perform()
     }
 
     // Mesh dimension definition
-    TInt aSpaceDimension;
+    TInt aSpaceDimension = 3;
     TCoordHelperPtr aCoordHelperPtr;
     {
       bool anIsXDimension = false;
       bool anIsYDimension = false;
       bool anIsZDimension = false;
+      if ( myAutoDimension )
       {
         SMDS_NodeIteratorPtr aNodesIter = myMesh->nodesIterator();
         double aBounds[6];
@@ -390,6 +394,7 @@ Driver_Mesh::Status DriverMED_W_SMESHDS_Mesh::Perform()
     if ( myMesh->NbVolumes() > 0 )
       aMeshDimension = 3;
     
+    MED::PWrapper myMed = CrWrapper(myFile,myMedVersion);
     PMeshInfo aMeshInfo = myMed->CrMeshInfo(aMeshDimension,aSpaceDimension,aMeshName);
     MESSAGE("Add - aMeshName : "<<aMeshName<<"; "<<aMeshInfo->GetName());
     myMed->SetMeshInfo(aMeshInfo);

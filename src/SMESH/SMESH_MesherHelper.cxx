@@ -845,7 +845,7 @@ gp_XY SMESH_MesherHelper::GetCenterUV(const gp_XY& uv1,
 double SMESH_MesherHelper::GetNodeU(const TopoDS_Edge&   E,
                                     const SMDS_MeshNode* n,
                                     const SMDS_MeshNode* inEdgeNode,
-                                    bool*                check)
+                                    bool*                check) const
 {
   double param = Precision::Infinite();
 
@@ -2489,9 +2489,16 @@ bool SMESH_MesherHelper::IsReversedSubMesh (const TopoDS_Face& theFace)
     {
       SMESH_TNodeXYZ nPnt[3];
       SMDS_ElemIteratorPtr nodesIt = elem->nodesIterator();
+      int iNodeOnFace = 0, iPosDim = SMDS_TOP_VERTEX;
       for ( int iN = 0; nodesIt->more() && iN < 3; ++iN) // loop on nodes
+      {
         nPnt[ iN ] = nodesIt->next();
-
+        if ( nPnt[ iN ]._node->GetPosition()->GetTypeOfPosition() > iPosDim )
+        {
+          iNodeOnFace = iN;
+          iPosDim = nPnt[ iN ]._node->GetPosition()->GetTypeOfPosition();
+        }
+      }
       // compute normal
       gp_Vec v01( nPnt[0], nPnt[1] ), v02( nPnt[0], nPnt[2] );
       if ( v01.SquareMagnitude() > RealSmall() &&
@@ -2499,7 +2506,7 @@ bool SMESH_MesherHelper::IsReversedSubMesh (const TopoDS_Face& theFace)
       {
         Ne = v01 ^ v02;
         if (( normalOK = ( Ne.SquareMagnitude() > RealSmall() )))
-          uv = GetNodeUV( theFace, nPnt[0]._node, nPnt[2]._node, &normalOK );
+          uv = GetNodeUV( theFace, nPnt[iNodeOnFace]._node, 0, &normalOK );
       }
     }
   }

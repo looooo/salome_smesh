@@ -34,7 +34,6 @@
 #include CORBA_SERVER_HEADER(SMESH_Group)
 #include CORBA_SERVER_HEADER(SMESH_Hypothesis)
 #include CORBA_CLIENT_HEADER(GEOM_Gen)
-#include CORBA_CLIENT_HEADER(MED)
 
 #include "SMESH_Hypothesis.hxx"
 #include "SMESH_Mesh.hxx"
@@ -231,7 +230,8 @@ public:
   void ExportToMEDX( const char*        file,
                      CORBA::Boolean     auto_groups,
                      SMESH::MED_VERSION version,
-                     CORBA::Boolean     overwrite ) throw (SALOME::SALOME_Exception);
+                     CORBA::Boolean     overwrite,
+                     CORBA::Boolean     autoDimension=true) throw (SALOME::SALOME_Exception);
   void ExportToMED ( const char*        file,
                      CORBA::Boolean     auto_groups,
                      SMESH::MED_VERSION version ) throw (SALOME::SALOME_Exception);
@@ -254,7 +254,8 @@ public:
                        const char*               file,
                        CORBA::Boolean            auto_groups,
                        SMESH::MED_VERSION        version,
-                       CORBA::Boolean            overwrite) throw (SALOME::SALOME_Exception);
+                       CORBA::Boolean            overwrite,
+                       CORBA::Boolean            autoDim=true) throw (SALOME::SALOME_Exception);
   void ExportPartToDAT(SMESH::SMESH_IDSource_ptr meshPart,
                        const char*               file) throw (SALOME::SALOME_Exception);
   void ExportPartToUNV(SMESH::SMESH_IDSource_ptr meshPart,
@@ -263,8 +264,7 @@ public:
                        const char*               file,
                        CORBA::Boolean            isascii) throw (SALOME::SALOME_Exception);
 
-  SALOME_MED::MESH_ptr GetMEDMesh()
-    throw (SALOME::SALOME_Exception);
+  CORBA::Double GetComputeProgress();
 
   CORBA::Long NbNodes()
     throw (SALOME::SALOME_Exception);
@@ -560,7 +560,7 @@ public:
   /*!
    * Returns information about imported MED file
    */
-  virtual SALOME_MED::MedFileInfo* GetMEDFileInfo();
+  virtual SMESH::MedFileInfo* GetMEDFileInfo();
 
   /*!
    * Sets list of notebook variables used for Mesh operations separated by ":" symbol
@@ -578,12 +578,6 @@ public:
   SMESH::string_array* GetLastParameters();
 
   /*!
-   * Collect statistic of mesh elements given by iterator
-   */
-  static void CollectMeshInfo(const SMDS_ElemIteratorPtr theItr,
-                              SMESH::long_array&         theInfo);
-
-  /*!
    * \brief Return submesh objects list in meshing order
    */
   virtual SMESH::submesh_array_array* GetMeshOrder();
@@ -593,17 +587,32 @@ public:
   virtual ::CORBA::Boolean SetMeshOrder(const SMESH::submesh_array_array& theSubMeshArray);
 
 
+  /*!
+   * Collect statistic of mesh elements given by iterator
+   */
+  static void CollectMeshInfo(const SMDS_ElemIteratorPtr theItr,
+                              SMESH::long_array&         theInfo);
+  /*!
+   * \brief Return iterator on elements of given type in given object
+   */
+  static SMDS_ElemIteratorPtr GetElements(SMESH::SMESH_IDSource_ptr obj,
+                                          SMESH::ElementType        type);
+
   // =========================
   // SMESH_IDSource interface
   // =========================
 
   virtual SMESH::long_array* GetIDs();
   /*!
-   * Returns statistic of mesh elements
-   * Result array of number enityties
+   * Returns number of mesh elements of each \a EntityType
+   * Result array of number of elements per \a EntityType
    * Inherited from SMESH_IDSource
    */
   virtual SMESH::long_array* GetMeshInfo();
+  /*!
+   * Returns number of mesh elements of each \a ElementType
+   */
+  virtual SMESH::long_array* GetNbElementsByType();
   /*!
    * Returns types of elements it contains
    */
@@ -646,8 +655,8 @@ private:
   std::map<int, SMESH::SMESH_subMesh_ptr>    _mapSubMeshIor;
   std::map<int, SMESH::SMESH_GroupBase_ptr>  _mapGroups;
   std::map<int, SMESH::SMESH_Hypothesis_ptr> _mapHypo;
-  SALOME_MED::MedFileInfo_var _medFileInfo;
-  SMESH_PreMeshInfo*          _preMeshInfo; // mesh info before full loading from study file
+  SMESH::MedFileInfo_var _medFileInfo;
+  SMESH_PreMeshInfo*     _preMeshInfo; // mesh info before full loading from study file
 
   SMESH_PreMeshInfo* & changePreMeshInfo() { return _preMeshInfo; }
   friend class SMESH_PreMeshInfo;

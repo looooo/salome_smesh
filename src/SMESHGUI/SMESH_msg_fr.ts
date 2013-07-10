@@ -4,6 +4,46 @@
 <context>
     <name>@default</name>
     <message>
+        <source>SMESH_GIGABYTE</source>
+        <translation type="unfinished">%1 GB</translation>
+    </message>
+    <message>
+        <source>SMESH_FREERAM</source>
+        <translation type="unfinished">Free RAM</translation>
+    </message>
+    <message>
+        <source>STB_BIQUADRATIC_TRIANGLE</source>
+        <translation type="unfinished">BiQuadratic Triangle</translation>
+    </message>
+    <message>
+        <source>TOP_BIQUADRATIC_TRIANGLE</source>
+        <translation type="unfinished">BiQuadratic Triangle</translation>
+    </message>
+    <message>
+        <source>MEN_BIQUADRATIC_TRIANGLE</source>
+        <translation type="unfinished">BiQuadratic Triangle</translation>
+    </message>
+    <message>
+        <source>SMESH_BIQUADRATIC_TRIANGLES</source>
+        <translation type="unfinished">BiQuadratic Triangles</translation>
+    </message>
+    <message>
+        <source>SMESH_BIQUADRATIC_TRIANGLE</source>
+        <translation type="unfinished">BiQuadratic Triangle</translation>
+    </message>
+    <message>
+        <source>SMESH_AUTO_DIM</source>
+        <translation type="unfinished">Automatically define space dimension</translation>
+    </message>
+    <message>
+        <source>SMESH_ADD_BIQUADRATIC_TRIANGLE_TITLE</source>
+        <translation type="unfinished">Add BiQuadratic Triangle</translation>
+    </message>
+    <message>
+        <source>COMPERR_WARNING</source>
+        <translation type="unfinished">Warning</translation>
+    </message>
+    <message>
         <source>SMESH_EXPORT_MESH</source>
         <translation>Exporter le maillage</translation>
     </message>
@@ -823,6 +863,10 @@
     <message>
         <source>MEN_RESET</source>
         <translation>Restaurer</translation>
+    </message>
+    <message>
+        <source>MEN_OVERALL_MESH_QUALITY</source>
+        <translation type="unfinished">Overall Mesh Quality</translation>
     </message>
     <message>
         <source>MEN_DISTRIBUTION_CTRL</source>
@@ -2686,6 +2730,12 @@ Vérifiez la limite dans les préférences du module Mesh.
 </translation>
     </message>
     <message>
+        <source>SMESH_WRN_SIZE_INC_LIMIT_EXCEEDED</source>
+        <translation type="unfinished">New mesh sise (%1 elements) exceeds current size limit (%2 elements).
+Not all mesh elements are shown. Please check preferences of Mesh module.
+</translation>
+    </message>
+    <message>
         <source>SMESH_WRN_WARNING</source>
         <translation>Avertissement</translation>
     </message>
@@ -4064,6 +4114,14 @@ avec le paramètre &apos;%1&apos; des préférences du module Mesh.</translation
         <translation>L&apos;objet sélectionné a été utilisé pour en créer un autre.
 Il ne peut pas être supprimé.</translation>
     </message>
+    <message>
+        <source>MEN_SORT_CHILD_ITEMS</source>
+        <translation type="unfinished">Sort children</translation>
+    </message>
+    <message>
+        <source>STB_SORT_CHILD_ITEMS</source>
+        <translation type="unfinished">Sort child items</translation>
+    </message>
 </context>
 <context>
     <name>SMESHGUI_Dialog</name>
@@ -4122,6 +4180,10 @@ Ouvrez une fenêtre VTK et essayez de nouveau</translation>
     <message>
         <source>PREF_UPDATE_LIMIT_NOLIMIT</source>
         <translation>Sans limite</translation>
+    </message>
+    <message>
+        <source>PREF_INCREMENTAL_LIMIT</source>
+        <translation type="unfinished">Incremental limit check</translation>
     </message>
     <message>
         <source>PREF_BACKFACE</source>
@@ -4236,8 +4298,16 @@ Ouvrez une fenêtre VTK et essayez de nouveau</translation>
         <translation>Copier les informations additionelles</translation>
     </message>
     <message>
+        <source>PREF_DUMP_CTRL_INFO</source>
+        <translation type="unfinished">Dump controls information</translation>
+    </message>
+    <message>
         <source>PREF_GPP_NODES_LIMIT</source>
         <translation>Calcul automatique du nombre de nœuds: limite</translation>
+    </message>
+    <message>
+        <source>PREF_CTRL_LIMIT</source>
+        <translation type="unfinished">Automatic controls compute limit</translation>
     </message>
     <message>
         <source>SMESH_PREF_GROUP_PRECISION</source>
@@ -4436,6 +4506,10 @@ Ouvrez une fenêtre VTK et essayez de nouveau</translation>
 <context>
     <name>SMESHGUI_AddQuadraticElementDlg</name>
     <message>
+        <source>SMESH_ADD_BIQUADRATIC_TRIANGLE</source>
+        <translation type="unfinished">Add BiQuadratic Triangle</translation>
+    </message>
+    <message>
         <source>SMESH_ADD_QUADRATIC_EDGE</source>
         <translation>Ajouter une arête quadratique</translation>
     </message>
@@ -4544,6 +4618,10 @@ Ouvrez une fenêtre VTK et essayez de nouveau</translation>
 </context>
 <context>
     <name>SMESHGUI_ComputeDlg</name>
+    <message>
+        <source>GROUP_OF_BAD_MESH</source>
+        <translation type="unfinished">Bad Mesh to Group</translation>
+    </message>
     <message>
         <source>CAPTION</source>
         <translation>Le calcul du maillage a échoué</translation>
@@ -4763,6 +4841,10 @@ Vérifiez l&apos;espace de disque disponible et vos droits d&apos;écriture dans
 </context>
 <context>
     <name>SMESHGUI_CuttingOfQuadsDlg</name>
+    <message>
+        <source>TO_4_TRIA</source>
+        <translation type="unfinished">Cut into 4 triangles</translation>
+    </message>
     <message>
         <source>CAPTION</source>
         <translation>Découpe des quadrangles</translation>
@@ -5132,6 +5214,22 @@ Vérifiez la validité des informations données</translation>
 </context>
 <context>
     <name>SMESHGUI_FilterTable</name>
+    <message>
+        <source>ENTITY_TYPE_24</source>
+        <translation type="unfinished">BALL</translation>
+    </message>
+    <message>
+        <source>ENTITY_TYPE_23</source>
+        <translation type="unfinished">QPOLYEDRE</translation>
+    </message>
+    <message>
+        <source>ENTITY_TYPE_1</source>
+        <translation type="unfinished">POINT1</translation>
+    </message>
+    <message>
+        <source>CONNECTED_ELEMS</source>
+        <translation type="unfinished">Elements of a domain</translation>
+    </message>
     <message>
         <source>ADD</source>
         <translation>Ajouter</translation>
@@ -6402,6 +6500,10 @@ Il y a trop peu de points dans le fichier </translation>
 <context>
     <name>SMESHGUI_DuplicateNodesDlg</name>
     <message>
+        <source>DUPLICATION_ONLY_ELEMS</source>
+        <translation type="unfinished">Duplicate elements only</translation>
+    </message>
+    <message>
         <source>DUPLICATION_MODE</source>
         <translation>Mode de duplication</translation>
     </message>
@@ -6682,6 +6784,10 @@ en raison de leurs types incompatibles:
     <message>
         <source>ADDITIONAL_INFO</source>
         <translation>Infos détaillées</translation>
+    </message>
+    <message>
+        <source>CTRL_INFO</source>
+        <translation type="unfinished">Quality Info</translation>
     </message>
     <message>
         <source>NODE_MODE</source>
@@ -7050,6 +7156,84 @@ en raison de leurs types incompatibles:
     </message>
 </context>
 <context>
+    <name>SMESHGUI_CtrlInfo</name>
+    <message>
+        <source>CTRL_INFO</source>
+        <translation type="unfinished">Quality information</translation>
+    </message>
+    <message>
+        <source>NAME_LAB</source>
+        <translation type="unfinished">Name:</translation>
+    </message>
+    <message>
+        <source>VALUE</source>
+        <translation type="unfinished">Value</translation>
+    </message>
+    <message>
+        <source>BUT_COMPUTE</source>
+        <translation type="unfinished">Compute</translation>
+    </message>
+    <message>
+        <source>NODES_INFO</source>
+        <translation type="unfinished">Nodes Information:</translation>
+    </message>
+    <message>
+        <source>NUMBER_OF_THE_FREE_NODES</source>
+        <translation type="unfinished">Number of the free nodes</translation>
+    </message>
+    <message>
+        <source>NUMBER_OF_THE_DOUBLE_NODES</source>
+        <translation type="unfinished">Number of the double nodes</translation>
+    </message>
+    <message>
+        <source>DOUBLE_NODES_TOLERANCE</source>
+        <translation>Tolérance des nœuds doubles</translation>
+    </message>
+    <message>
+        <source>EDGES_INFO</source>
+        <translation type="unfinished">Edges Information:</translation>
+    </message>
+    <message>
+        <source>NUMBER_OF_THE_DOUBLE_EDGES</source>
+        <translation type="unfinished">Number of the double edges</translation>
+    </message>
+    <message>
+        <source>FACES_INFO</source>
+        <translation type="unfinished">Faces Information:</translation>
+    </message>
+    <message>
+        <source>NUMBER_OF_THE_DOUBLE_FACES</source>
+        <translation type="unfinished">Number of the double faces</translation>
+    </message>   
+    <message>
+        <source>ASPECT_RATIO_HISTOGRAM</source>
+        <translation type="unfinished">Aspect Ratio histogram</translation>
+    </message>
+    <message>
+        <source>VOLUMES_INFO</source>
+        <translation type="unfinished">Volumes Information:</translation>
+    </message>
+    <message>
+        <source>NUMBER_OF_THE_DOUBLE_VOLUMES</source>
+        <translation type="unfinished">Number of the double volumes</translation>
+    </message>
+    <message>
+        <source>NUMBER_OF_THE_OVER_CONSTRAINED</source>
+        <translation type="unfinished">Number of the over-constrained</translation>
+    </message>
+    <message>
+        <source>ASPECT_RATIO_3D_HISTOGRAM</source>
+        <translation type="unfinished">Aspect Ratio 3D histogram</translation>
+    </message>
+</context>
+<context>
+    <name>SMESHGUI_CtrlInfoDlg</name>
+    <message>
+        <source>CTRL_INFO</source>
+        <translation type="unfinished">Quality Info</translation>
+    </message>
+</context>
+<context>
     <name>SMESHGUI_MinDistance</name>
     <message>
         <source>FIRST_TARGET</source>
@@ -7306,6 +7490,21 @@ en raison de leurs types incompatibles:
     <message>
         <source>SHRINK</source>
         <translation>Coef de réduction:</translation>
+    </message>
+</context>
+<context>
+    <name>SMESHGUI_ComputeDlg_QThreadQDialog</name>
+    <message>
+        <source>TITLE</source>
+        <translation type="unfinished">Compute</translation>
+    </message>
+    <message>
+        <source>CANCELING</source>
+        <translation type="unfinished">Canceling...</translation>
+    </message>
+    <message>
+        <source>CANCEL</source>
+        <translation type="unfinished">Cancel</translation>
     </message>
 </context>
 </TS>

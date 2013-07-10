@@ -33,6 +33,7 @@
 #include "SMESHGUI_MeshOrderOp.h"
 #include "SMESHGUI_MeshOrderDlg.h"
 
+#include "SMESH_Actor.h"
 #include "SMESH_ActorUtils.h"
 
 #include <SMDS_SetIterator.hxx>
@@ -91,6 +92,7 @@
 #include <QButtonGroup>
 #include <QCloseEvent>
 #include <QTimerEvent>
+#include <QProgressBar>
 
 // VTK includes
 #include <vtkProperty.h>
@@ -99,24 +101,14 @@
 #include <vector>
 #include <set>
 
+#ifndef WIN32
+#include <sys/sysinfo.h>
+#endif
+
 #define SPACING 6
 #define MARGIN  11
 
 #define COLONIZE(str)   (QString(str).contains(":") > 0 ? QString(str) : QString(str) + " :" )
-
-/* OBSOLETE
-static void addSeparator( QWidget* parent )
-{
-  QGridLayout* l = qobject_cast<QGridLayout*>( parent->layout() );
-  int row  = l->rowCount();
-  int cols = l->columnCount();
-  for ( int i = 0; i < cols; i++ ) {
-    QFrame* hline = new QFrame( parent );
-    hline->setFrameStyle( QFrame::HLine | QFrame::Sunken );
-    l->addWidget( hline, row, i );
-  }
-}
-*/
 
 enum TCol {
   COL_ALGO = 0, COL_SHAPE, COL_ERROR, COL_SHAPEID, COL_PUBLISHED, COL_BAD_MESH, NB_COLUMNS
@@ -740,25 +732,37 @@ SMESHGUI_ComputeDlg_QThreadQDialog::SMESHGUI_ComputeDlg_QThreadQDialog(QWidget  
     qthread(gen, mesh, mainShape)
 {
   // --
-  setWindowTitle(tr("Compute"));
+  setWindowTitle(tr("TITLE"));
   setMinimumWidth( 200 );
 
-  cancelButton = new QPushButton(tr("Cancel"));
+  cancelButton = new QPushButton(tr("CANCEL"));
   cancelButton->setDefault(true);
+  cancelButton->setCheckable(true);
 
   QLabel * nbNodesName = new QLabel(tr("SMESH_MESHINFO_NODES"), this );
   QLabel * nbElemsName = new QLabel(tr("SMESH_MESHINFO_ELEMENTS"), this );
+  QLabel * freeRAMName = new QLabel(tr("SMESH_FREERAM"), this );
   nbNodesLabel = new QLabel("0", this );
   nbElemsLabel = new QLabel("0", this );
+  freeRAMLabel = new QLabel("", this );
+  progressBar  = new QProgressBar(this);
+  progressBar->setMinimum( 0 );
+  progressBar->setMaximum( 1000 );
 
   QGridLayout* layout = new QGridLayout(this);
   layout->setMargin( MARGIN );
   layout->setSpacing( SPACING );
-  layout->addWidget(nbNodesName,  0, 0);
-  layout->addWidget(nbNodesLabel, 0, 1);
-  layout->addWidget(nbElemsName,  1, 0);
-  layout->addWidget(nbElemsLabel, 1, 1);
-  layout->addWidget(cancelButton, 2, 0, 1, 2);
+  int row = 0;
+  layout->addWidget(nbNodesName,  row,   0);
+  layout->addWidget(nbNodesLabel, row++, 1);
+  layout->addWidget(nbElemsName,  row,   0);
+  layout->addWidget(nbElemsLabel, row++, 1);
+#ifndef WNT
+  layout->addWidget(freeRAMName,  row,   0);
+  layout->addWidget(freeRAMLabel, row++, 1);
+#endif
+  layout->addWidget(progressBar,  row++, 0, 1, 2);
+  layout->addWidget(cancelButton, row++, 0, 1, 2);
   adjustSize();
   update();
 
@@ -776,23 +780,40 @@ bool SMESHGUI_ComputeDlg_QThreadQDialog::result()
 void SMESHGUI_ComputeDlg_QThreadQDialog::onCancel()
 {
   qthread.cancel();
-}  
+  cancelButton->setText( tr("CANCELING"));
+  cancelButton->setEnabled(false);
+}
 
 void SMESHGUI_ComputeDlg_QThreadQDialog::timerEvent(QTimerEvent *event)
 {
+  if ( !cancelButton->isChecked() ) // not yet cancelled
+    progressBar->setValue( progressBar->maximum() * qthread.getMesh()->GetComputeProgress() );
+
   if(qthread.isFinished())
-    {
-      close();
-    }
-  nbNodesLabel->setText( QString("%1").arg( qthread.getMesh()->NbNodes() ));
-  nbElemsLabel->setText( QString("%1").arg( qthread.getMesh()->NbElements() ));
+  {
+    close();
+  }
+  else
+  {
+    nbNodesLabel->setText( QString("%1").arg( qthread.getMesh()->NbNodes() ));
+    nbElemsLabel->setText( QString("%1").arg( qthread.getMesh()->NbElements() ));
+#ifndef WNT
+    struct sysinfo si;
+    const int err = sysinfo( &si );
+    if ( err )
+      freeRAMLabel->setText("");
+    else
+      freeRAMLabel->setText( tr("SMESH_GIGABYTE").arg
+                             ( si.freeram * si.mem_unit /1024./1024./1024., 0, 'f', 2 ));
+#endif
+  }
   event->accept();
 }
 
 void SMESHGUI_ComputeDlg_QThreadQDialog::closeEvent(QCloseEvent *event)
 {
   if(qthread.isRunning())
-    {
+  {
       event->ignore();
       return;
     }
@@ -839,13 +860,9 @@ void SMESHGUI_BaseComputeOp::computeMesh()
 #if (OCC_VERSION_MAJOR << 16 | OCC_VERSION_MINOR << 8 | OCC_VERSION_MAINTENANCE) > 0x060100
       OCC_CATCH_SIGNALS;
 #endif
-      bool res;
       SMESHGUI_ComputeDlg_QThreadQDialog qthreaddialog(desktop(), gen, myMesh, myMainShape);
       qthreaddialog.exec();
-      res = qthreaddialog.result();
-      res = gen->Compute(myMesh, myMainShape);
-      if (res)
-        computeFailed = false;
+      computeFailed = !qthreaddialog.result();
     }
     catch(const SALOME::SALOME_Exception & S_ex) {
       memoryLack = true;
@@ -875,17 +892,31 @@ void SMESHGUI_BaseComputeOp::computeMesh()
       // SHOW MESH
       // NPAL16631: if ( getSMESHGUI()->automaticUpdate() )
       SUIT_ResourceMgr* resMgr = SMESH::GetResourceMgr( SMESHGUI::GetSMESHGUI() );
-      long newSize = myMesh->NbElements();
       bool limitExceeded;
+      long limitSize = resMgr->integerValue( "SMESH", "update_limit", 500000 );
+      int entities = SMESH_Actor::eAllEntity;
       if ( !memoryLack )
       {
-        if ( getSMESHGUI()->automaticUpdate( newSize, &limitExceeded ) )
+        if ( getSMESHGUI()->automaticUpdate( myMesh, &entities, &limitExceeded ) )
         {
           try {
 #if (OCC_VERSION_MAJOR << 16 | OCC_VERSION_MINOR << 8 | OCC_VERSION_MAINTENANCE) > 0x060100
             OCC_CATCH_SIGNALS;
 #endif
+            SMESH_Actor *anActor = SMESH::FindActorByObject( myMesh );
+            if ( !anActor ) anActor = SMESH::CreateActor( aMeshSObj->GetStudy(), aMeshSObj->GetID().c_str(), true );    
+
+            anActor->SetEntityMode( entities );
+            SMESH::DisplayActor( SMESH::GetActiveWindow(), anActor );
+
             SMESH::Update(myIObject, true);
+
+            if ( limitExceeded )
+            {
+              SUIT_MessageBox::warning( desktop(),
+                                        tr( "SMESH_WRN_WARNING" ),
+                                        tr( "SMESH_WRN_SIZE_INC_LIMIT_EXCEEDED" ).arg( myMesh->NbElements() ).arg( limitSize ) );
+            }
           }
           catch (...) {
 #ifdef _DEBUG_
@@ -901,10 +932,9 @@ void SMESHGUI_BaseComputeOp::computeMesh()
         }
         else if ( limitExceeded )
         {
-          long limitSize = resMgr->integerValue( "SMESH", "update_limit", 500000 );
           SUIT_MessageBox::warning( desktop(),
                                     tr( "SMESH_WRN_WARNING" ),
-                                    tr( "SMESH_WRN_SIZE_LIMIT_EXCEEDED" ).arg( newSize ).arg( limitSize ) );
+                                    tr( "SMESH_WRN_SIZE_LIMIT_EXCEEDED" ).arg( myMesh->NbElements() ).arg( limitSize ) );
         }
       }
       LightApp_SelectionMgr *Sel = selectionMgr();

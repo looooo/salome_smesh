@@ -888,8 +888,8 @@ void SMESHDS_Mesh::RemoveFreeNode(const SMDS_MeshNode * n,
     set<SMESHDS_GroupBase*>::iterator GrIt = myGroups.begin();
     for (; GrIt != myGroups.end(); GrIt++) {
       SMESHDS_Group* group = dynamic_cast<SMESHDS_Group*>(*GrIt);
-      if (!group || group->IsEmpty()) continue;
-      group->SMDSGroup().Remove(n);
+      if (group && !group->IsEmpty())
+        group->SMDSGroup().Remove(n);
     }
   }
 
@@ -915,11 +915,12 @@ void SMESHDS_Mesh::RemoveElement(const SMDS_MeshElement * elt)
   if (!hasConstructionEdges() && !hasConstructionFaces())
   {
     SMESHDS_SubMesh* subMesh=0;
-    map<int,SMESHDS_SubMesh*>::iterator SubIt = myShapeIndexToSubMesh.begin();
-    for ( ; !subMesh && SubIt != myShapeIndexToSubMesh.end(); SubIt++ )
-      if (!SubIt->second->IsComplexSubmesh() && SubIt->second->Contains( elt ))
+    if ( elt->getshapeId() > 0 )
+    {
+      map<int,SMESHDS_SubMesh*>::iterator SubIt = myShapeIndexToSubMesh.find( elt->getshapeId() );
+      if ( SubIt != myShapeIndexToSubMesh.end() )
         subMesh = SubIt->second;
-    //MESSAGE("subMesh " << elt->getshapeId());
+    }
     RemoveFreeElement( elt, subMesh, true);
     return;
   }

@@ -749,6 +749,46 @@
         <translation>Boîte englobante</translation>
     </message>
     <message>
+        <source>MEN_BASIC_PROPERTIES</source>
+        <translation type="unfinished">Basic Properties</translation>
+    </message>
+    <message>
+        <source>MEN_MEASURE_LENGTH</source>
+        <translation type="unfinished">Length</translation>
+    </message>
+    <message>
+        <source>STB_MEASURE_LENGTH</source>
+        <translation type="unfinished">Calculate sum of length of all 1D elements of the selected object(s)</translation>
+    </message>
+    <message>
+        <source>TOP_MEASURE_LENGTH</source>
+        <translation type="unfinished">Length</translation>
+    </message>
+    <message>
+        <source>MEN_MEASURE_AREA</source>
+        <translation type="unfinished">Area</translation>
+    </message>
+    <message>
+        <source>STB_MEASURE_AREA</source>
+        <translation type="unfinished">Calculate sum of area of all 2D elements of the selected object(s)</translation>
+    </message>
+    <message>
+        <source>TOP_MEASURE_AREA</source>
+        <translation type="unfinished">Area</translation>
+    </message>
+     <message>
+        <source>MEN_MEASURE_VOLUME</source>
+        <translation type="unfinished">Volume</translation>
+    </message>
+    <message>
+        <source>STB_MEASURE_VOLUME</source>
+        <translation type="unfinished">Calculate sum of volume of all 3D elements of the selected object(s)</translation>
+    </message>
+    <message>
+        <source>TOP_MEASURE_VOLUME</source>
+        <translation type="unfinished">Volume</translation>
+    </message>
+    <message>
         <source>MEN_MOVE</source>
         <translation>Déplacer un nœud</translation>
     </message>
@@ -1676,6 +1716,10 @@ Voulez-vous continuer ?</translation>
     <message>
         <source>SMESH_FACE</source>
         <translation>Face</translation>
+    </message>
+    <message>
+        <source>SMESH_FACES</source>
+        <translation>Faces</translation>
     </message>
     <message>
         <source>SMESH_FEATUREANGLE</source>
@@ -2664,6 +2708,10 @@ Enregistrez votre travail avant que l&apos;application se plante</translation>
         <translation>Volume</translation>
     </message>
     <message>
+        <source>SMESH_VOLUMES</source>
+        <translation>Volumes</translation>
+    </message>
+    <message>
         <source>SMESH_WARNING</source>
         <translation>Avertissement</translation>
     </message>
@@ -2725,14 +2773,16 @@ Enregistrez votre travail avant que l&apos;application se plante</translation>
     </message>
     <message>
         <source>SMESH_WRN_SIZE_LIMIT_EXCEEDED</source>
-        <translation>La présentation n&apos;a pas été mise à jour automatiquement: la nouvelle taille du maillage (%1 éléments) dépasse la limite de taille actuelle (%2 éléments).
+        <translation>La présentation n&apos;a pas été mise à jour automatiquement:
+la nouvelle taille du maillage (%1 éléments) dépasse la limite de taille actuelle (%2 éléments).
 Vérifiez la limite dans les préférences du module Mesh.
 </translation>
     </message>
     <message>
         <source>SMESH_WRN_SIZE_INC_LIMIT_EXCEEDED</source>
-        <translation type="unfinished">New mesh sise (%1 elements) exceeds current size limit (%2 elements).
-Not all mesh elements are shown. Please check preferences of Mesh module.
+        <translation>La nouvelle taille de maillage (%1 éléments) dépasse l'actuelle taille limite de la mise à jour automatique (%2 éléments).
+Les éléments suivants ne sont pas affichés: %3.
+Utilisez le menu "Visualiser une entité" pour les afficher.
 </translation>
     </message>
     <message>
@@ -7229,6 +7279,18 @@ en raison de leurs types incompatibles:
 <context>
     <name>SMESHGUI_CtrlInfoDlg</name>
     <message>
+        <source>SAVE_INFO</source>
+        <translation type="unfinished">Save info</translation>
+    </message>
+    <message>
+        <source>TEXT_FILES</source>
+        <translation type="unfinished">Text files (*.txt)</translation>
+    </message>
+    <message>
+        <source>BUT_DUMP_MESH</source>
+        <translation type="unfinished">&amp;Dump</translation>
+    </message>
+    <message>
         <source>CTRL_INFO</source>
         <translation type="unfinished">Quality Info</translation>
     </message>
@@ -7273,6 +7335,33 @@ en raison de leurs types incompatibles:
     </message>
 </context>
 <context>
+    <name>SMESHGUI_BasicProperties</name>
+    <message>
+        <source>PROPERTY</source>
+        <translation type="unfinished">Property</translation>
+    </message>
+    <message>
+        <source>LENGTH</source>
+        <translation type="unfinished">Length</translation>
+    </message>
+    <message>
+        <source>AREA</source>
+        <translation type="unfinished">Area</translation>
+    </message>
+    <message>
+        <source>VOLUME</source>
+        <translation type="unfinished">Volume</translation>
+    </message>
+    <message>
+        <source>SOURCE_MESH_SUBMESH_GROUP</source>
+        <translation type="unfinished">Source (mesh, sub-mesh or group)</translation>
+    </message>
+    <message>
+        <source>COMPUTE</source>
+        <translation type="unfinished">Compute</translation>
+    </message>
+</context>
+<context>
     <name>SMESHGUI_CopyMeshDlg</name>
     <message>
         <source>OBJECT_NAME</source>
@@ -7300,6 +7389,10 @@ en raison de leurs types incompatibles:
     <message>
         <source>BND_BOX</source>
         <translation>Boîte englobante</translation>
+    </message>
+    <message>
+        <source>BASIC_PROPERTIES</source>
+        <translation type="unfinished">Basic Properties</translation>
     </message>
 </context>
 <context>

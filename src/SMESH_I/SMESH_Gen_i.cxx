@@ -93,7 +93,7 @@
 #include "SMESH_Mesh_i.hxx"
 #include "SMESH_PreMeshInfo.hxx"
 #include "SMESH_PythonDump.hxx"
-#include "memoire.h"
+//#include "memoire.h"
 
 #include CORBA_SERVER_HEADER(SMESH_Group)
 #include CORBA_SERVER_HEADER(SMESH_Filter)
@@ -360,10 +360,10 @@ SMESH_Gen_i::~SMESH_Gen_i()
 //=============================================================================
 SMESH::SMESH_Hypothesis_ptr SMESH_Gen_i::createHypothesis(const char* theHypName,
                                                           const char* theLibName)
-     throw (SALOME::SALOME_Exception)
+  throw (SALOME::SALOME_Exception)
 {
   /* It's Need to tranlate lib name for WIN32 or X platform */
-  char* aPlatformLibName = 0;
+  std::string aPlatformLibName;
   if ( theLibName && theLibName[0] != '\0'  )
   {
     int libNameLen = strlen(theLibName);
@@ -374,39 +374,24 @@ SMESH::SMESH_Hypothesis_ptr SMESH_Gen_i::createHypothesis(const char* theHypName
     {
       //the old format
 #ifdef WNT
-      aPlatformLibName = new char[libNameLen - 1];
-      aPlatformLibName[0] = '\0';
-      aPlatformLibName = strncat( aPlatformLibName, theLibName+3, libNameLen-6  );
-      aPlatformLibName = strcat( aPlatformLibName, ".dll" );
-      aPlatformLibName[libNameLen - 2] = '\0';
+      aPlatformLibName = std::string( theLibName+3, libNameLen-6 ) + ".dll";
 #else
-      aPlatformLibName = new char[ libNameLen + 1];
-      aPlatformLibName[0] = '\0';
-      aPlatformLibName = strcat( aPlatformLibName, theLibName );
-      aPlatformLibName[libNameLen] = '\0';
+      aPlatformLibName = theLibName;
 #endif
     }
     else
     {
       //try to use new format
 #ifdef WNT
-      aPlatformLibName = new char[ libNameLen + 5 ];
-      aPlatformLibName[0] = '\0';
-      aPlatformLibName = strcat( aPlatformLibName, theLibName );
-      aPlatformLibName = strcat( aPlatformLibName, ".dll" );
+      aPlatformLibName = theLibName + ".dll";
 #else
-      aPlatformLibName = new char[ libNameLen + 7 ];
-      aPlatformLibName[0] = '\0';
-      aPlatformLibName = strcat( aPlatformLibName, "lib" );
-      aPlatformLibName = strcat( aPlatformLibName, theLibName );
-      aPlatformLibName = strcat( aPlatformLibName, ".so" );
+      aPlatformLibName = "lib" + std::string( theLibName ) + ".so";
 #endif
     }
   }
 
-
   Unexpect aCatch(SALOME_SalomeException);
-  if(MYDEBUG) MESSAGE( "Create Hypothesis <" << theHypName << "> from " << aPlatformLibName/*theLibName*/);
+  if(MYDEBUG) MESSAGE( "Create Hypothesis <" << theHypName << "> from " << aPlatformLibName);
 
   // create a new hypothesis object servant
   SMESH_Hypothesis_i* myHypothesis_i = 0;
@@ -419,7 +404,7 @@ SMESH::SMESH_Hypothesis_ptr SMESH_Gen_i::createHypothesis(const char* theHypName
     {
       // load plugin library
       if(MYDEBUG) MESSAGE("Loading server meshers plugin library ...");
-      LibHandle libHandle = LoadLib( aPlatformLibName/*theLibName*/ );
+      LibHandle libHandle = LoadLib( aPlatformLibName.c_str() );
       if (!libHandle)
       {
         // report any error, if occured
@@ -458,21 +443,18 @@ SMESH::SMESH_Hypothesis_ptr SMESH_Gen_i::createHypothesis(const char* theHypName
     if(MYDEBUG) MESSAGE("Create Hypothesis " << theHypName);
     myHypothesis_i =
       myHypCreatorMap[string(theHypName)]->Create(myPoa, GetCurrentStudyID(), &myGen);
-    myHypothesis_i->SetLibName(aPlatformLibName/*theLibName*/); // for persistency assurance
+    myHypothesis_i->SetLibName(aPlatformLibName.c_str()); // for persistency assurance
   }
   catch (SALOME_Exception& S_ex)
   {
     THROW_SALOME_CORBA_EXCEPTION(S_ex.what(), SALOME::BAD_PARAM);
   }
 
-  if ( aPlatformLibName )
-    delete[] aPlatformLibName;
-
   if (!myHypothesis_i)
     return hypothesis_i._retn();
 
   // activate the CORBA servant of hypothesis
-  hypothesis_i = SMESH::SMESH_Hypothesis::_narrow( myHypothesis_i->_this() );
+  hypothesis_i = myHypothesis_i->_this();
   int nextId = RegisterObject( hypothesis_i );
   if(MYDEBUG) { MESSAGE( "Add hypo to map with id = "<< nextId ); }
   else        { nextId = 0; } // avoid "unused variable" warning in release mode
@@ -1712,7 +1694,7 @@ CORBA::Boolean SMESH_Gen_i::Compute( SMESH::SMESH_Mesh_ptr theMesh,
                                      GEOM::GEOM_Object_ptr theShapeObject )
      throw ( SALOME::SALOME_Exception )
 {
-  MEMOSTAT;
+  //MEMOSTAT;
   Unexpect aCatch(SALOME_SalomeException);
   if(MYDEBUG) MESSAGE( "SMESH_Gen_i::Compute" );
 
@@ -3957,7 +3939,7 @@ bool SMESH_Gen_i::Load( SALOMEDS::SComponent_ptr theComponent,
 
   // Get temporary files location
   TCollection_AsciiString tmpDir =
-    isMultiFile ? TCollection_AsciiString( ( char* )theURL ) : ( char* )SALOMEDS_Tool::GetTmpDir().c_str();
+    ( char* )( isMultiFile ? theURL : SALOMEDS_Tool::GetTmpDir().c_str() );
 
   INFOS( "THE URL++++++++++++++" );
   INFOS( theURL );
@@ -3969,12 +3951,13 @@ bool SMESH_Gen_i::Load( SALOMEDS::SComponent_ptr theComponent,
                                                                             tmpDir.ToCString(),
                                                                             isMultiFile );
   TCollection_AsciiString aStudyName( "" );
-  if ( isMultiFile )
-    aStudyName = ( (char*)SALOMEDS_Tool::GetNameFromPath( myCurrentStudy->URL() ).c_str() );
-
+  if ( isMultiFile ) {
+    CORBA::String_var url = myCurrentStudy->URL();
+    aStudyName = (char*)SALOMEDS_Tool::GetNameFromPath( url.in() ).c_str();
+  }
   // Set names of temporary files
-  TCollection_AsciiString filename = tmpDir + aStudyName + TCollection_AsciiString( "_SMESH.hdf" );
-  TCollection_AsciiString meshfile = tmpDir + aStudyName + TCollection_AsciiString( "_SMESH_Mesh.med" );
+  TCollection_AsciiString filename = tmpDir + aStudyName + "_SMESH.hdf";
+  TCollection_AsciiString meshfile = tmpDir + aStudyName + "_SMESH_Mesh.med";
 
   int size;
   HDFfile*    aFile;
@@ -4430,21 +4413,21 @@ bool SMESH_Gen_i::Load( SALOMEDS::SComponent_ptr theComponent,
 
       // --> try to find SUB-MESHES containers for each type of submesh
       for ( int j = GetSubMeshOnVertexTag(); j <= GetSubMeshOnCompoundTag(); j++ ) {
-        char name_meshgroup[ 30 ];
+        const char* name_meshgroup;
         if ( j == GetSubMeshOnVertexTag() )
-          strcpy( name_meshgroup, "SubMeshes On Vertex" );
+          name_meshgroup = "SubMeshes On Vertex";
         else if ( j == GetSubMeshOnEdgeTag() )
-          strcpy( name_meshgroup, "SubMeshes On Edge" );
+          name_meshgroup = "SubMeshes On Edge";
         else if ( j == GetSubMeshOnWireTag() )
-          strcpy( name_meshgroup, "SubMeshes On Wire" );
+          name_meshgroup = "SubMeshes On Wire";
         else if ( j == GetSubMeshOnFaceTag() )
-          strcpy( name_meshgroup, "SubMeshes On Face" );
+          name_meshgroup = "SubMeshes On Face";
         else if ( j == GetSubMeshOnShellTag() )
-          strcpy( name_meshgroup, "SubMeshes On Shell" );
+          name_meshgroup = "SubMeshes On Shell";
         else if ( j == GetSubMeshOnSolidTag() )
-          strcpy( name_meshgroup, "SubMeshes On Solid" );
+          name_meshgroup = "SubMeshes On Solid";
         else if ( j == GetSubMeshOnCompoundTag() )
-          strcpy( name_meshgroup, "SubMeshes On Compound" );
+          name_meshgroup = "SubMeshes On Compound";
 
         // try to get submeshes container HDF group
         if ( aTopGroup->ExistInternalObject( name_meshgroup ) ) {
@@ -4458,9 +4441,9 @@ bool SMESH_Gen_i::Load( SALOMEDS::SComponent_ptr theComponent,
             // identify submesh
             char name_submeshgroup[ HDF_NAME_MAX_LEN+1 ];
             aGroup->InternalObjectIndentify( k, name_submeshgroup );
-            if ( string( name_submeshgroup ).substr( 0, 7 ) == string( "SubMesh" )  ) {
+            if ( strncmp( name_submeshgroup, "SubMesh", 7 ) == 0 ) {
               // --> get submesh id
-              int subid = atoi( string( name_submeshgroup ).substr( 7 ).c_str() );
+              int subid = atoi( name_submeshgroup + 7 );
               if ( subid <= 0 )
                 continue;
               // open submesh HDF group
@@ -4510,7 +4493,7 @@ bool SMESH_Gen_i::Load( SALOMEDS::SComponent_ptr theComponent,
                   char name_dataset[ HDF_NAME_MAX_LEN+1 ];
                   aSubSubGroup->InternalObjectIndentify( l, name_dataset );
                   // check if it is an algorithm
-                  if ( string( name_dataset ).substr( 0, 4 ) == string( "Algo" ) ) {
+                  if ( strncmp( name_dataset, "Algo", 4 ) == 0 ) {
                     aDataset = new HDFdataset( name_dataset, aSubSubGroup );
                     aDataset->OpenOnDisk();
                     size = aDataset->GetSize();
@@ -4675,8 +4658,10 @@ bool SMESH_Gen_i::Load( SALOMEDS::SComponent_ptr theComponent,
 
               if ( SMESH_GroupOnFilter_i* aFilterGroup =
                    dynamic_cast< SMESH_GroupOnFilter_i*>( aGroupImpl ))
+              {
                 aFilterGroup->SetFilter( filter );
-
+                filter->UnRegister();
+              }
               SMESHDS_GroupBase* aGroupBaseDS = aGroupImpl->GetGroupDS();
               if ( !aGroupBaseDS )
                 continue;
@@ -4792,11 +4777,11 @@ bool SMESH_Gen_i::Load( SALOMEDS::SComponent_ptr theComponent,
 
   // creation of tree nodes for all data objects in the study
   // to support tree representation customization and drag-n-drop:
-  SALOMEDS::UseCaseBuilder_var useCaseBuilder = theComponent->GetStudy()->GetUseCaseBuilder();
+  SALOMEDS::UseCaseBuilder_wrap useCaseBuilder = theComponent->GetStudy()->GetUseCaseBuilder();
   if ( !useCaseBuilder->IsUseCaseNode( theComponent ) ) {
     useCaseBuilder->SetRootCurrent();
     useCaseBuilder->Append( theComponent ); // component object is added as the top level item
-    SALOMEDS::ChildIterator_var it = theComponent->GetStudy()->NewChildIterator( theComponent ); 
+    SALOMEDS::ChildIterator_wrap it = theComponent->GetStudy()->NewChildIterator( theComponent ); 
     for (it->InitEx(true); it->More(); it->Next()) {
       useCaseBuilder->AppendTo( it->Value()->GetFather(), it->Value() );
     }
@@ -5015,8 +5000,8 @@ char* SMESH_Gen_i::getVersion()
 //            Is used in the drag-n-drop functionality.
 //=================================================================================
 void SMESH_Gen_i::Move( const SMESH::sobject_list& what,
-			SALOMEDS::SObject_ptr where,
-			CORBA::Long row )
+                        SALOMEDS::SObject_ptr where,
+                        CORBA::Long row )
 {
   if ( CORBA::is_nil( where ) ) return;
 

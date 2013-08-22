@@ -260,13 +260,34 @@ static SALOMEDS::SObject_ptr publish(SALOMEDS::Study_ptr   theStudy,
                                      const bool            theSelectable = true)
 {
   SALOMEDS::SObject_wrap SO = SMESH_Gen_i::ObjectToSObject( theStudy, theIOR );
-  SALOMEDS::StudyBuilder_var aStudyBuilder = theStudy->NewBuilder();
+  SALOMEDS::StudyBuilder_var    aStudyBuilder = theStudy->NewBuilder();
   SALOMEDS::UseCaseBuilder_var useCaseBuilder = theStudy->GetUseCaseBuilder();
+  SALOMEDS::SObject_wrap objAfter;
   if ( SO->_is_nil() ) {
-    if ( theTag == 0 )
+    if ( theTag == 0 ) {
       SO = aStudyBuilder->NewObject( theFatherObject );
-    else if ( !theFatherObject->FindSubObject( theTag, SO.inout() ))
+    } else if ( !theFatherObject->FindSubObject( theTag, SO.inout() )) {
       SO = aStudyBuilder->NewObjectToTag( theFatherObject, theTag );
+
+      // define the next tag after given one in the data tree to insert SOobject
+      std::string anEntry;
+      int last2Pnt_pos = -1;
+      int tagAfter = -1;
+      CORBA::String_var entry;
+      SALOMEDS::SObject_wrap curObj;
+      SALOMEDS::UseCaseIterator_var anUseCaseIter = useCaseBuilder->GetUseCaseIterator(theFatherObject);
+      for ( ; anUseCaseIter->More(); anUseCaseIter->Next() ) {
+        curObj = anUseCaseIter->Value();
+        entry = curObj->GetID();
+        anEntry = entry.in();
+        last2Pnt_pos = anEntry.rfind( ":" );
+        tagAfter = atoi( anEntry.substr( last2Pnt_pos+1 ).c_str() );
+        if ( tagAfter > theTag  ) {
+          objAfter = curObj;
+          break;
+        }
+      }
+    }
   }
 
   SALOMEDS::GenericAttribute_wrap anAttr;
@@ -275,6 +296,10 @@ static SALOMEDS::SObject_ptr publish(SALOMEDS::Study_ptr   theStudy,
     CORBA::String_var objStr = SMESH_Gen_i::GetORB()->object_to_string( theIOR );
     SALOMEDS::AttributeIOR_wrap iorAttr = anAttr;
     iorAttr->SetValue( objStr.in() );
+    // UnRegister() !!!
+    SALOME::GenericObj_var genObj = SALOME::GenericObj::_narrow( theIOR );
+    if ( !genObj->_is_nil() )
+      genObj->UnRegister();
   }
   if ( thePixMap ) {
     anAttr  = aStudyBuilder->FindOrCreateAttribute( SO, "AttributePixMap" );
@@ -289,7 +314,11 @@ static SALOMEDS::SObject_ptr publish(SALOMEDS::Study_ptr   theStudy,
 
   // add object to the use case tree
   // (to support tree representation customization and drag-n-drop)
-  useCaseBuilder->AppendTo( SO->GetFather(), SO );
+  if ( !CORBA::is_nil( objAfter ) ) {
+    useCaseBuilder->InsertBefore( SO, objAfter );    // insert at given tag
+  } else if ( !useCaseBuilder->IsUseCaseNode( SO ) ) {
+    useCaseBuilder->AppendTo( theFatherObject, SO ); // append to the end of list
+  }
 
   return SO._retn();
 }
@@ -1179,7 +1208,7 @@ char* SMESH_Gen_i::GetParameters(CORBA::Object_ptr theObject)
 {
   CORBA::String_var aResult("");
 
-  SALOMEDS::SObject_wrap aSObj = ObjectToSObject( myCurrentStudy,theObject);
+  SALOMEDS::SObject_wrap aSObj = ObjectToSObject( myCurrentStudy, theObject );
   if ( !aSObj->_is_nil() )
   {
     SALOMEDS::GenericAttribute_wrap attr;
@@ -1189,6 +1218,5 @@ char* SMESH_Gen_i::GetParameters(CORBA::Object_ptr theObject)
       aResult = strAttr->Value();
     }
   }
-
-  return CORBA::string_dup( aResult.in() );
+  return aResult._retn();
 }

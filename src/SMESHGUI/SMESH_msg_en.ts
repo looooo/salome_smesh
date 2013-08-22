@@ -713,6 +713,46 @@
         <translation>Bounding box</translation>
     </message>
     <message>
+        <source>MEN_BASIC_PROPERTIES</source>
+        <translation>Basic Properties</translation>
+    </message>
+    <message>
+        <source>MEN_MEASURE_LENGTH</source>
+        <translation>Length</translation>
+    </message>
+    <message>
+        <source>STB_MEASURE_LENGTH</source>
+        <translation>Calculate sum of length of all 1D elements of the selected object(s)</translation>
+    </message>
+    <message>
+        <source>TOP_MEASURE_LENGTH</source>
+        <translation>Length</translation>
+    </message>
+    <message>
+        <source>MEN_MEASURE_AREA</source>
+        <translation>Area</translation>
+    </message>
+    <message>
+        <source>STB_MEASURE_AREA</source>
+        <translation>Calculate sum of area of all 2D elements of the selected object(s)</translation>
+    </message>
+    <message>
+        <source>TOP_MEASURE_AREA</source>
+        <translation>Area</translation>
+    </message>
+     <message>
+        <source>MEN_MEASURE_VOLUME</source>
+        <translation>Volume</translation>
+    </message>
+    <message>
+        <source>STB_MEASURE_VOLUME</source>
+        <translation>Calculate sum of volume of all 3D elements of the selected object(s)</translation>
+    </message>
+    <message>
+        <source>TOP_MEASURE_VOLUME</source>
+        <translation>Volume</translation>
+    </message>
+    <message>
         <source>MEN_MOVE</source>
         <translation>Move Node</translation>
     </message>
@@ -1648,6 +1688,10 @@ Do you want to continue ?</translation>
     <message>
         <source>SMESH_FACE</source>
         <translation>Face</translation>
+    </message>
+    <message>
+        <source>SMESH_FACES</source>
+        <translation>Faces</translation>
     </message>
     <message>
         <source>SMESH_FEATUREANGLE</source>
@@ -2656,6 +2700,10 @@ Consider saving your work before application crash</translation>
         <translation>Volume</translation>
     </message>
     <message>
+        <source>SMESH_VOLUMES</source>
+        <translation>Volumes</translation>
+    </message>
+    <message>
         <source>SMESH_WARNING</source>
         <translation>Warning</translation>
     </message>
@@ -2717,14 +2765,15 @@ Consider saving your work before application crash</translation>
     </message>
     <message>
         <source>SMESH_WRN_SIZE_LIMIT_EXCEEDED</source>
-        <translation>No automatic update of the presentation has been done: new mesh size (%1 elements) exceeds current size limit (%2 elements).
-Please check preferences of Mesh module.
+        <translation>No automatic update of the presentation has been done:
+New mesh size (%1 elements) exceeds current size limit of automatic update (%2 elements).
 </translation>
     </message>
     <message>
         <source>SMESH_WRN_SIZE_INC_LIMIT_EXCEEDED</source>
-        <translation>New mesh sise (%1 elements) exceeds current size limit (%2 elements).
-Not all mesh elements are shown. Please check preferences of Mesh module.
+        <translation>New mesh size (%1 elements) exceeds current size limit of automatic update (%2 elements).
+The following elements are not shown: %3.
+Use Display Entity menu command to show them.
 </translation>
     </message>
     <message>
@@ -7247,6 +7296,18 @@ as they are of improper type:
         <source>CTRL_INFO</source>
         <translation>Quality Info</translation>
     </message>
+    <message>
+        <source>BUT_DUMP_MESH</source>
+        <translation>&amp;Dump</translation>
+    </message>
+    <message>
+        <source>TEXT_FILES</source>
+        <translation>Text files (*.txt)</translation>
+    </message>
+    <message>
+        <source>SAVE_INFO</source>
+        <translation>Save info</translation>
+    </message>
 </context>
 <context>
     <name>SMESHGUI_MinDistance</name>
@@ -7288,6 +7349,33 @@ as they are of improper type:
     </message>
 </context>
 <context>
+    <name>SMESHGUI_BasicProperties</name>
+    <message>
+        <source>PROPERTY</source>
+        <translation>Property</translation>
+    </message>
+    <message>
+        <source>LENGTH</source>
+        <translation>Length</translation>
+    </message>
+    <message>
+        <source>AREA</source>
+        <translation>Area</translation>
+    </message>
+    <message>
+        <source>VOLUME</source>
+        <translation>Volume</translation>
+    </message>
+    <message>
+        <source>SOURCE_MESH_SUBMESH_GROUP</source>
+        <translation>Source (mesh, sub-mesh or group)</translation>
+    </message>
+    <message>
+        <source>COMPUTE</source>
+        <translation>Compute</translation>
+    </message>
+</context>
+<context>
     <name>SMESHGUI_CopyMeshDlg</name>
     <message>
         <source>OBJECT_NAME</source>
@@ -7315,6 +7403,10 @@ as they are of improper type:
     <message>
         <source>BND_BOX</source>
         <translation>Bounding Box</translation>
+    </message>
+    <message>
+        <source>BASIC_PROPERTIES</source>
+        <translation>Basic Properties</translation>
     </message>
 </context>
 <context>

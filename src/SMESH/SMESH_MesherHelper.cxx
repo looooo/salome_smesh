@@ -600,10 +600,8 @@ gp_XY SMESH_MesherHelper::GetNodeUV(const TopoDS_Face&   F,
         for ( TopExp_Explorer vert(F,TopAbs_VERTEX); !uvOK && vert.More(); vert.Next() )
           uvOK = ( V == vert.Current() );
         if ( !uvOK ) {
-#ifdef _DEBUG_
           MESSAGE ( "SMESH_MesherHelper::GetNodeUV(); Vertex " << vertexID
-               << " not in face " << GetMeshDS()->ShapeToIndex( F ) );
-#endif
+                    << " not in face " << GetMeshDS()->ShapeToIndex( F ) );
           // get UV of a vertex closest to the node
           double dist = 1e100;
           gp_Pnt pn = XYZ( n );
@@ -944,6 +942,7 @@ bool SMESH_MesherHelper::CheckNodeU(const TopoDS_Edge&   E,
         }
         Quantity_Parameter U = projector->LowerDistanceParameter();
         u = double( U );
+        MESSAGE(" f " << f << " l " << l << " u " << u);
         curvPnt = curve->Value( u );
         dist = nodePnt.Distance( curvPnt );
         if ( distXYZ ) {
@@ -968,6 +967,7 @@ bool SMESH_MesherHelper::CheckNodeU(const TopoDS_Edge&   E,
       }
       if (( u < f-tol || u > l+tol ) && force )
       {
+        MESSAGE("u < f-tol || u > l+tol  ; u " << u << " f " << f << " l " << l);
         // node is on vertex but is set on periodic but trimmed edge (issue 0020890)
         try
         {
@@ -4673,4 +4673,3 @@ void SMESH_MesherHelper::FixQuadraticElements(SMESH_ComputeErrorPtr& compError,
     }
   }
 }
-

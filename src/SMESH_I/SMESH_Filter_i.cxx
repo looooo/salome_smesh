@@ -3070,8 +3070,7 @@ CORBA::Boolean Filter_i::GetCriteria( SMESH::Filter::Criteria_out theCriteria )
 //=======================================================================
 CORBA::Boolean Filter_i::SetCriteria( const SMESH::Filter::Criteria& theCriteria )
 {
-  if ( myPredicate != 0 )
-    myPredicate->UnRegister();
+  SetPredicate( SMESH::Predicate::_nil() );
 
   SMESH::FilterManager_i* aFilter = new SMESH::FilterManager_i();
   FilterManager_ptr aFilterMgr = aFilter->_this();
@@ -3423,6 +3422,8 @@ CORBA::Boolean Filter_i::SetCriteria( const SMESH::Filter::Criteria& theCriteria
   }
 
   SetPredicate( aResPredicate );
+
+  aResPredicate->UnRegister();
 
   return !aResPredicate->_is_nil();
 }

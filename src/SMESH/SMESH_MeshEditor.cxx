@@ -2101,7 +2101,7 @@ void SMESH_MeshEditor::SplitVolumesIntoTetra (const TIDSortedElemSet & theElems,
           GetMeshDS()->RemoveNode( volNodes[i] );
     }
   } // loop on volumes to split
-
+  
   myLastCreatedNodes = newNodes;
   myLastCreatedElems = newElems;
 }
@@ -5144,7 +5144,7 @@ SMESH_MeshEditor::ExtrusionAlongTrack (TIDSortedElemSet &   theElements,
 
   const TopoDS_Shape& aS = theTrack->GetShapeToMesh();
 
-  if( aS == SMESH_Mesh::PseudoShape() ) {
+  if ( !theTrack->HasShapeToMesh() ) {
     //Mesh without shape
     const SMDS_MeshNode* currentNode = NULL;
     const SMDS_MeshNode* prevNode = theN1;
@@ -5267,16 +5267,8 @@ SMESH_MeshEditor::ExtrusionAlongTrack (TIDSortedElemSet &   theElements,
     if ( BRep_Tool::Degenerated( aTrackEdge ) )
       return EXTR_BAD_PATH_SHAPE;
     TopExp::Vertices( aTrackEdge, aV1, aV2 );
-    const SMDS_MeshNode* aN1 = 0;
-    const SMDS_MeshNode* aN2 = 0;
-    if ( theTrack->GetSubMesh( aV1 ) && theTrack->GetSubMesh( aV1 )->GetSubMeshDS() ) {
-      aItN = theTrack->GetSubMesh( aV1 )->GetSubMeshDS()->GetNodes();
-      aN1 = aItN->next();
-    }
-    if ( theTrack->GetSubMesh( aV2 ) && theTrack->GetSubMesh( aV2 )->GetSubMeshDS() ) {
-      aItN = theTrack->GetSubMesh( aV2 )->GetSubMeshDS()->GetNodes();
-      aN2 = aItN->next();
-    }
+    const SMDS_MeshNode* aN1 = SMESH_Algo::VertexNode( aV1, pMeshDS );
+    const SMDS_MeshNode* aN2 = SMESH_Algo::VertexNode( aV2, pMeshDS );
     // starting node must be aN1 or aN2
     if ( !( aN1 == theN1 || aN2 == theN1 ) )
       return EXTR_BAD_STARTING_NODE;
@@ -5324,17 +5316,8 @@ SMESH_MeshEditor::ExtrusionAlongTrack (TIDSortedElemSet &   theElements,
         if ( aVprev.IsNull() ) {
           // if previous vertex is not yet defined, it means that we in the beginning of wire
           // and we have to find initial vertex corresponding to starting node theN1
-          const SMDS_MeshNode* aN1 = 0;
-          const SMDS_MeshNode* aN2 = 0;
-
-          if ( locTrack->GetFather()->GetSubMesh(aV1) && locTrack->GetFather()->GetSubMesh(aV1)->GetSubMeshDS() ) {
-            aItN = locTrack->GetFather()->GetSubMesh(aV1)->GetSubMeshDS()->GetNodes();
-            aN1 = aItN->next();
-          }
-          if ( locTrack->GetFather()->GetSubMesh(aV2) && locTrack->GetFather()->GetSubMesh(aV2)->GetSubMeshDS() ) {
-            aItN = locTrack->GetFather()->GetSubMesh(aV2)->GetSubMeshDS()->GetNodes();
-            aN2 = aItN->next();
-          }
+          const SMDS_MeshNode* aN1 = SMESH_Algo::VertexNode( aV1, pMeshDS );
+          const SMDS_MeshNode* aN2 = SMESH_Algo::VertexNode( aV2, pMeshDS );
           // starting node must be aN1 or aN2
           aN1isOK = ( aN1 && aN1 == theN1 );
           aN2isOK = ( aN2 && aN2 == theN1 );
@@ -5368,27 +5351,21 @@ SMESH_MeshEditor::ExtrusionAlongTrack (TIDSortedElemSet &   theElements,
       }
     }
     list< list<SMESH_MeshEditor_PathPoint> >::iterator itLLPP = LLPPs.begin();
-    list<SMESH_MeshEditor_PathPoint> firstList = *itLLPP;
-    list<SMESH_MeshEditor_PathPoint>::iterator itPP = firstList.begin();
-    for(; itPP!=firstList.end(); itPP++) {
-      fullList.push_back( *itPP );
-    }
+    list<SMESH_MeshEditor_PathPoint>& firstList = *itLLPP;
+    fullList.splice( fullList.end(), firstList );
+
     SMESH_MeshEditor_PathPoint PP1 = fullList.back();
     fullList.pop_back();
     itLLPP++;
     for(; itLLPP!=LLPPs.end(); itLLPP++) {
-      list<SMESH_MeshEditor_PathPoint> currList = *itLLPP;
-      itPP = currList.begin();
+      list<SMESH_MeshEditor_PathPoint>& currList = *itLLPP;
       SMESH_MeshEditor_PathPoint PP2 = currList.front();
       gp_Dir D1 = PP1.Tangent();
       gp_Dir D2 = PP2.Tangent();
       gp_Dir Dnew( ( D1.XYZ() + D2.XYZ() ) / 2 );
       PP1.SetTangent(Dnew);
       fullList.push_back(PP1);
-      itPP++;
-      for(; itPP!=currList.end(); itPP++) {
-        fullList.push_back( *itPP );
-      }
+      fullList.splice( fullList.end(), currList, ++currList.begin(), currList.end() );
       PP1 = fullList.back();
       fullList.pop_back();
     }
@@ -5410,9 +5387,9 @@ SMESH_MeshEditor::ExtrusionAlongTrack (TIDSortedElemSet &   theElements,
 //purpose  : auxilary for ExtrusionAlongTrack
 //=======================================================================
 SMESH_MeshEditor::Extrusion_Error
-SMESH_MeshEditor::MakeEdgePathPoints(std::list<double>& aPrms,
-                                     const TopoDS_Edge& aTrackEdge,
-                                     bool FirstIsStart,
+SMESH_MeshEditor::MakeEdgePathPoints(std::list<double>&                aPrms,
+                                     const TopoDS_Edge&                aTrackEdge,
+                                     bool                              FirstIsStart,
                                      list<SMESH_MeshEditor_PathPoint>& LPP)
 {
   Standard_Real aTx1, aTx2, aL2, aTolVec, aTolVec2;
@@ -5465,63 +5442,43 @@ SMESH_MeshEditor::MakeEdgePathPoints(std::list<double>& aPrms,
 //purpose  : auxilary for ExtrusionAlongTrack
 //=======================================================================
 SMESH_MeshEditor::Extrusion_Error
-SMESH_MeshEditor::MakeExtrElements(TIDSortedElemSet&  theElements,
+SMESH_MeshEditor::MakeExtrElements(TIDSortedElemSet&                 theElements,
                                    list<SMESH_MeshEditor_PathPoint>& fullList,
-                                   const bool theHasAngles,
-                                   list<double>& theAngles,
-                                   const bool theLinearVariation,
-                                   const bool theHasRefPoint,
-                                   const gp_Pnt& theRefPoint,
-                                   const bool theMakeGroups)
+                                   const bool                        theHasAngles,
+                                   list<double>&                     theAngles,
+                                   const bool                        theLinearVariation,
+                                   const bool                        theHasRefPoint,
+                                   const gp_Pnt&                     theRefPoint,
+                                   const bool                        theMakeGroups)
 {
-  MESSAGE("MakeExtrElements");
-  //cout<<"MakeExtrElements  fullList.size() = "<<fullList.size()<<endl;
-  int aNbTP = fullList.size();
-  vector<SMESH_MeshEditor_PathPoint> aPPs(aNbTP);
+  const int aNbTP = fullList.size();
   // Angles
-  if( theHasAngles && theAngles.size()>0 && theLinearVariation ) {
+  if( theHasAngles && !theAngles.empty() && theLinearVariation )
     LinearAngleVariation(aNbTP-1, theAngles);
-  }
-  vector<double> aAngles( aNbTP );
-  int j = 0;
-  for(; j<aNbTP; ++j) {
-    aAngles[j] = 0.;
-  }
-  if ( theHasAngles ) {
-    double anAngle;;
-    std::list<double>::iterator aItD = theAngles.begin();
-    for ( j=1; (aItD != theAngles.end()) && (j<aNbTP); ++aItD, ++j ) {
-      anAngle = *aItD;
-      aAngles[j] = anAngle;
-    }
-  }
   // fill vector of path points with angles
-  //aPPs.resize(fullList.size());
-  j = -1;
+  vector<SMESH_MeshEditor_PathPoint> aPPs;
   list<SMESH_MeshEditor_PathPoint>::iterator itPP = fullList.begin();
-  for(; itPP!=fullList.end(); itPP++) {
-    j++;
-    SMESH_MeshEditor_PathPoint PP = *itPP;
-    PP.SetAngle(aAngles[j]);
-    aPPs[j] = PP;
+  list<double>::iterator                 itAngles = theAngles.begin();
+  aPPs.push_back( *itPP++ );
+  for( ; itPP != fullList.end(); itPP++) {
+    aPPs.push_back( *itPP );
+    if ( theHasAngles && itAngles != theAngles.end() )
+      aPPs.back().SetAngle( *itAngles );
   }
 
-  TNodeOfNodeListMap mapNewNodes;
+  TNodeOfNodeListMap   mapNewNodes;
   TElemOfVecOfNnlmiMap mapElemNewNodes;
-  TElemOfElemListMap newElemsMap;
+  TElemOfElemListMap   newElemsMap;
   TIDSortedElemSet::iterator itElem;
-  double aX, aY, aZ;
-  int aNb;
-  SMDSAbs_ElementType aTypeE;
   // source elements for each generated one
   SMESH_SequenceOfElemPtr srcElems, srcNodes;
 
   // 3. Center of rotation aV0
   gp_Pnt aV0 = theRefPoint;
-  gp_XYZ aGC;
-  if ( !theHasRefPoint ) {
-    aNb = 0;
-    aGC.SetCoord( 0.,0.,0. );
+  if ( !theHasRefPoint )
+  {
+    gp_XYZ aGC( 0.,0.,0. );
+    TIDSortedElemSet newNodes;
 
     itElem = theElements.begin();
     for ( ; itElem != theElements.end(); itElem++ ) {
@@ -5529,25 +5486,14 @@ SMESH_MeshEditor::MakeExtrElements(TIDSortedElemSet&  theElements,
 
       SMDS_ElemIteratorPtr itN = elem->nodesIterator();
       while ( itN->more() ) {
-        const SMDS_MeshNode* node = static_cast<const SMDS_MeshNode*>( itN->next() );
-        aX = node->X();
-        aY = node->Y();
-        aZ = node->Z();
-
-        if ( mapNewNodes.find( node ) == mapNewNodes.end() ) {
-          list<const SMDS_MeshNode*> aLNx;
-          mapNewNodes[node] = aLNx;
-          //
-          gp_XYZ aXYZ( aX, aY, aZ );
-          aGC += aXYZ;
-          ++aNb;
-        }
+        const SMDS_MeshElement* node = itN->next();
+        if ( newNodes.insert( node ).second )
+          aGC += SMESH_TNodeXYZ( node );
       }
     }
-    aGC /= aNb;
+    aGC /= newNodes.size();
     aV0.SetXYZ( aGC );
   } // if (!theHasRefPoint) {
-  mapNewNodes.clear();
 
   // 4. Processing the elements
   SMESHDS_Mesh* aMesh = GetMeshDS();
@@ -5555,7 +5501,7 @@ SMESH_MeshEditor::MakeExtrElements(TIDSortedElemSet&  theElements,
   for ( itElem = theElements.begin(); itElem != theElements.end(); itElem++ ) {
     // check element type
     const SMDS_MeshElement* elem = *itElem;
-    aTypeE = elem->GetType();
+    SMDSAbs_ElementType   aTypeE = elem->GetType();
     if ( !elem || ( aTypeE != SMDSAbs_Face && aTypeE != SMDSAbs_Edge ) )
       continue;
 
@@ -5577,8 +5523,6 @@ SMESH_MeshEditor::MakeExtrElements(TIDSortedElemSet&  theElements,
         list<const SMDS_MeshNode*>& listNewNodes = nIt->second;
 
         // make new nodes
-        aX = node->X();  aY = node->Y(); aZ = node->Z();
-
         Standard_Real aAngle1x, aAngleT1T0, aTolAng;
         gp_Pnt aP0x, aP1x, aPN0, aPN1, aV0x, aV1x;
         gp_Ax1 anAx1, anAxT1T0;
@@ -5587,17 +5531,17 @@ SMESH_MeshEditor::MakeExtrElements(TIDSortedElemSet&  theElements,
         aTolAng=1.e-4;
 
         aV0x = aV0;
-        aPN0.SetCoord(aX, aY, aZ);
+        aPN0 = SMESH_TNodeXYZ( node );
 
         const SMESH_MeshEditor_PathPoint& aPP0 = aPPs[0];
         aP0x = aPP0.Pnt();
         aDT0x= aPP0.Tangent();
         //cout<<"j = 0   PP: Pnt("<<aP0x.X()<<","<<aP0x.Y()<<","<<aP0x.Z()<<")"<<endl;
 
-        for ( j = 1; j < aNbTP; ++j ) {
+        for ( int j = 1; j < aNbTP; ++j ) {
           const SMESH_MeshEditor_PathPoint& aPP1 = aPPs[j];
-          aP1x = aPP1.Pnt();
-          aDT1x = aPP1.Tangent();
+          aP1x     = aPP1.Pnt();
+          aDT1x    = aPP1.Tangent();
           aAngle1x = aPP1.Angle();
 
           gp_Trsf aTrsf, aTrsfRot, aTrsfRotT1T0;
@@ -5641,10 +5585,7 @@ SMESH_MeshEditor::MakeExtrElements(TIDSortedElemSet&  theElements,
             srcNodes.Append( node );
             listNewNodes.push_back( newNode );
           }
-          aX = aPN1.X();
-          aY = aPN1.Y();
-          aZ = aPN1.Z();
-          const SMDS_MeshNode* newNode = aMesh->AddNode( aX, aY, aZ );
+          const SMDS_MeshNode* newNode = aMesh->AddNode( aPN1.X(), aPN1.Y(), aPN1.Z() );
           myLastCreatedNodes.Append(newNode);
           srcNodes.Append( node );
           listNewNodes.push_back( newNode );
@@ -8505,11 +8446,20 @@ void SMESH_MeshEditor::ConvertToQuadratic(const bool theForce3d, const bool theT
       if ( !volume ) continue;
 
       const SMDSAbs_EntityType type = volume->GetEntityType();
-      if (( theToBiQuad  && type == SMDSEntity_TriQuad_Hexa ) ||
-          ( !theToBiQuad && type == SMDSEntity_Quad_Hexa ))
+      if ( volume->IsQuadratic() )
       {
-        aHelper.AddTLinks( static_cast< const SMDS_MeshVolume* >( volume ));
-        continue;
+        bool alreadyOK;
+        switch ( type )
+        {
+        case SMDSEntity_Quad_Hexa:    alreadyOK = !theToBiQuad; break;
+        case SMDSEntity_TriQuad_Hexa: alreadyOK = theToBiQuad; break;
+        default:                      alreadyOK = true;
+        }
+        if ( alreadyOK )
+        {
+          aHelper.AddTLinks( static_cast< const SMDS_MeshVolume* >( volume ));
+          continue;
+        }
       }
       const int id = volume->GetID();
       vector<const SMDS_MeshNode *> nodes (volume->begin_nodes(), volume->end_nodes());
@@ -9950,12 +9900,14 @@ namespace {
 
 //================================================================================
 /*!
-  \brief Identify the elements that will be affected by node duplication (actual duplication is not performed.
+  \brief Identify the elements that will be affected by node duplication (actual duplication is not performed).
   This method is the first step of DoubleNodeElemGroupsInRegion.
   \param theElems - list of groups of elements (edges or faces) to be replicated
   \param theNodesNot - list of groups of nodes not to replicated
   \param theShape - shape to detect affected elements (element which geometric center
-         located on or inside shape).
+         located on or inside shape). If the shape is null, detection is done on faces orientations
+         (select elements with a gravity center on the side given by faces normals).
+         This mode (null shape) is faster, but works only when theElems are faces, with coherents orientations.
          The replicated nodes should be associated to affected elements.
   \return groups of affected elements
   \sa DoubleNodeElemGroupsInRegion()
@@ -9968,44 +9920,145 @@ bool SMESH_MeshEditor::AffectedElemGroupsInRegion( const TIDSortedElemSet& theEl
                                                    TIDSortedElemSet&       theAffectedElems)
 {
   if ( theShape.IsNull() )
-    return false;
-
-  const double aTol = Precision::Confusion();
-  auto_ptr< BRepClass3d_SolidClassifier> bsc3d;
-  auto_ptr<_FaceClassifier>              aFaceClassifier;
-  if ( theShape.ShapeType() == TopAbs_SOLID )
   {
-    bsc3d.reset( new BRepClass3d_SolidClassifier(theShape));;
-    bsc3d->PerformInfinitePoint(aTol);
-  }
-  else if (theShape.ShapeType() == TopAbs_FACE )
-  {
-    aFaceClassifier.reset( new _FaceClassifier(TopoDS::Face(theShape)));
-  }
+    std::set<const SMDS_MeshNode*> alreadyCheckedNodes;
+    std::set<const SMDS_MeshElement*> alreadyCheckedElems;
+    std::set<const SMDS_MeshElement*> edgesToCheck;
+    alreadyCheckedNodes.clear();
+    alreadyCheckedElems.clear();
+    edgesToCheck.clear();
 
-  // iterates on indicated elements and get elements by back references from their nodes
-  TIDSortedElemSet::const_iterator elemItr = theElems.begin();
-  for ( ;  elemItr != theElems.end(); ++elemItr )
-  {
-    SMDS_MeshElement* anElem = (SMDS_MeshElement*)*elemItr;
-    if (!anElem)
-      continue;
+    // --- iterates on elements to be replicated and get elements by back references from their nodes
 
-    SMDS_ElemIteratorPtr nodeItr = anElem->nodesIterator();
-    while ( nodeItr->more() )
+    TIDSortedElemSet::const_iterator elemItr = theElems.begin();
+    int ielem = 1;
+    for ( ;  elemItr != theElems.end(); ++elemItr )
     {
-      const SMDS_MeshNode* aNode = cast2Node(nodeItr->next());
-      if ( !aNode || theNodesNot.find(aNode) != theNodesNot.end() )
+      SMDS_MeshElement* anElem = (SMDS_MeshElement*)*elemItr;
+      if (!anElem || (anElem->GetType() != SMDSAbs_Face))
         continue;
-      SMDS_ElemIteratorPtr backElemItr = aNode->GetInverseElementIterator();
-      while ( backElemItr->more() )
+      gp_XYZ normal;
+      SMESH_MeshAlgos::FaceNormal( anElem, normal, /*normalized=*/true );
+      MESSAGE("element " << ielem++ <<  " normal " << normal.X() << " " << normal.Y() << " " << normal.Z());
+      std::set<const SMDS_MeshNode*> nodesElem;
+      nodesElem.clear();
+      SMDS_ElemIteratorPtr nodeItr = anElem->nodesIterator();
+      while ( nodeItr->more() )
       {
-        const SMDS_MeshElement* curElem = backElemItr->next();
-        if ( curElem && theElems.find(curElem) == theElems.end() &&
-             ( bsc3d.get() ?
-               isInside( curElem, *bsc3d, aTol ) :
-               isInside( curElem, *aFaceClassifier, aTol )))
-          theAffectedElems.insert( curElem );
+        const SMDS_MeshNode* aNode = cast2Node(nodeItr->next());
+        nodesElem.insert(aNode);
+      }
+      std::set<const SMDS_MeshNode*>::iterator nodit = nodesElem.begin();
+      for (; nodit != nodesElem.end(); nodit++)
+      {
+        MESSAGE("  noeud ");
+        const SMDS_MeshNode* aNode = *nodit;
+        if ( !aNode || theNodesNot.find(aNode) != theNodesNot.end() )
+          continue;
+        if (alreadyCheckedNodes.find(aNode) != alreadyCheckedNodes.end())
+          continue;
+        alreadyCheckedNodes.insert(aNode);
+        SMDS_ElemIteratorPtr backElemItr = aNode->GetInverseElementIterator();
+        while ( backElemItr->more() )
+        {
+          MESSAGE("    backelem ");
+          const SMDS_MeshElement* curElem = backElemItr->next();
+          if (alreadyCheckedElems.find(curElem) != alreadyCheckedElems.end())
+            continue;
+          if (theElems.find(curElem) != theElems.end())
+            continue;
+          alreadyCheckedElems.insert(curElem);
+          double x=0, y=0, z=0;
+          int nb = 0;
+          SMDS_ElemIteratorPtr nodeItr2 = curElem->nodesIterator();
+          while ( nodeItr2->more() )
+          {
+            const SMDS_MeshNode* anotherNode = cast2Node(nodeItr2->next());
+            x += anotherNode->X();
+            y += anotherNode->Y();
+            z += anotherNode->Z();
+            nb++;
+          }
+          gp_XYZ p;
+          p.SetCoord( x/nb -aNode->X(),
+                      y/nb -aNode->Y(),
+                      z/nb -aNode->Z() );
+          MESSAGE("      check " << p.X() << " " << p.Y() << " " << p.Z());
+          if (normal*p > 0)
+          {
+            MESSAGE("    --- inserted")
+            theAffectedElems.insert( curElem );
+          }
+          else if (curElem->GetType() == SMDSAbs_Edge)
+            edgesToCheck.insert(curElem);
+        }
+      }
+    }
+    // --- add also edges lying on the set of faces (all nodes in alreadyCheckedNodes)
+    std::set<const SMDS_MeshElement*>::iterator eit = edgesToCheck.begin();
+    for( ; eit != edgesToCheck.end(); eit++)
+    {
+      bool onside = true;
+      const SMDS_MeshElement* anEdge = *eit;
+      SMDS_ElemIteratorPtr nodeItr = anEdge->nodesIterator();
+      while ( nodeItr->more() )
+      {
+        const SMDS_MeshNode* aNode = cast2Node(nodeItr->next());
+        if (alreadyCheckedNodes.find(aNode) == alreadyCheckedNodes.end())
+        {
+          onside = false;
+          break;
+        }
+      }
+      if (onside)
+      {
+        MESSAGE("    --- edge onside inserted")
+        theAffectedElems.insert(anEdge);
+      }
+    }
+  }
+  else
+  {
+    const double aTol = Precision::Confusion();
+    auto_ptr< BRepClass3d_SolidClassifier> bsc3d;
+    auto_ptr<_FaceClassifier>              aFaceClassifier;
+    if ( theShape.ShapeType() == TopAbs_SOLID )
+    {
+      bsc3d.reset( new BRepClass3d_SolidClassifier(theShape));;
+      bsc3d->PerformInfinitePoint(aTol);
+    }
+    else if (theShape.ShapeType() == TopAbs_FACE )
+    {
+      aFaceClassifier.reset( new _FaceClassifier(TopoDS::Face(theShape)));
+    }
+
+    // iterates on indicated elements and get elements by back references from their nodes
+    TIDSortedElemSet::const_iterator elemItr = theElems.begin();
+    int ielem = 1;
+    for ( ;  elemItr != theElems.end(); ++elemItr )
+    {
+      MESSAGE("element " << ielem++);
+      SMDS_MeshElement* anElem = (SMDS_MeshElement*)*elemItr;
+      if (!anElem)
+        continue;
+      SMDS_ElemIteratorPtr nodeItr = anElem->nodesIterator();
+      while ( nodeItr->more() )
+      {
+        MESSAGE("  noeud ");
+        const SMDS_MeshNode* aNode = cast2Node(nodeItr->next());
+        if ( !aNode || theNodesNot.find(aNode) != theNodesNot.end() )
+          continue;
+        SMDS_ElemIteratorPtr backElemItr = aNode->GetInverseElementIterator();
+        while ( backElemItr->more() )
+        {
+          MESSAGE("    backelem ");
+          const SMDS_MeshElement* curElem = backElemItr->next();
+          if ( curElem && theElems.find(curElem) == theElems.end() &&
+              ( bsc3d.get() ?
+                isInside( curElem, *bsc3d, aTol ) :
+                isInside( curElem, *aFaceClassifier, aTol )))
+            theAffectedElems.insert( curElem );
+        }
       }
     }
   }

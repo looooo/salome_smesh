@@ -35,6 +35,7 @@
 
 // SALOME KERNEL includes
 #include <SALOMEDSClient_definitions.hxx>
+#include <SALOME_GenericObj_wrap.hxx>
 
 // SALOME GUI includes
 #include <SALOME_InteractiveObject.hxx>
@@ -42,6 +43,9 @@
 
 //OCC includes
 #include <gp_XYZ.hxx>
+
+#include <SALOMEconfig.h>
+#include CORBA_CLIENT_HEADER(SMESH_Mesh)
 
 class SUIT_ViewWindow;
 class SUIT_Desktop;
@@ -175,6 +179,10 @@ SMESHGUI_EXPORT
    */
 SMESHGUI_EXPORT
   gp_XYZ getNormale( const SMDS_MeshFace* theFace );
+
+
+  // type to use instead of SMESH_IDSource_var for automatic UnRegister()
+  typedef SALOME::GenericObj_wrap<SMESH_IDSource> SMESH_IDSource_wrap;
 
 }
 

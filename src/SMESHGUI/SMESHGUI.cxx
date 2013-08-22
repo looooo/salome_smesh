@@ -361,11 +361,6 @@
               SMESH::SetName( aMeshSO, QFileInfo(filename).fileName() );
 
             anEntryList.append( aMeshSO->GetID().c_str() );
-
-            // obj has been published in study. Its refcount has been incremented.
-            // It is safe to decrement its refcount
-            // so that it will be destroyed when the entry in study will be removed
-            aMeshes[i]->UnRegister();
           }
           else {
             isEmpty = true;
@@ -928,7 +923,8 @@
     }
   }
 
-  void AutoColor(){
+  void AutoColor()
+  {
     SALOME_ListIO selected;
     SalomeApp_Application* app = dynamic_cast< SalomeApp_Application* >( SUIT_Session::session()->activeApplication() );
     if( !app )
@@ -951,6 +947,8 @@
     if( aMainObject->_is_nil() )
       return;
 
+    SUIT_OverrideCursor wc;
+
     aMainObject->SetAutoColor( true ); // mesh groups are re-colored here
 
     QList<SALOMEDS::Color> aReservedColors;
@@ -967,6 +965,7 @@
       SALOMEDS::Color aColor = SMESHGUI::getUniqueColor( aReservedColors );
       aReservedColors.append( aColor );
 #endif                    // SIMPLE_AUTOCOLOR
+      aGroupObject->SetColor( aColor );
 
       _PTR(SObject) aGroupSObject = SMESH::FindSObject(aGroupObject);
       if (aGroupSObject) {
@@ -1229,14 +1228,14 @@
       aSel->selectedObjects( selected );
       
       if(selected.Extent()){
-	Handle(SALOME_InteractiveObject) anIObject = selected.First();
-	_PTR(Study) aStudy = SMESH::GetActiveStudyDocument();
-	_PTR(SObject) aSObj = aStudy->FindObjectID(anIObject->getEntry());
-	if (aSObj) {
-	  if ( aStudy->GetUseCaseBuilder()->SortChildren( aSObj, true/*AscendingOrder*/ ) ) {
-	    SMESHGUI::GetSMESHGUI()->updateObjBrowser();
-	  }
-	}
+        Handle(SALOME_InteractiveObject) anIObject = selected.First();
+        _PTR(Study) aStudy = SMESH::GetActiveStudyDocument();
+        _PTR(SObject) aSObj = aStudy->FindObjectID(anIObject->getEntry());
+        if (aSObj) {
+          if ( aStudy->GetUseCaseBuilder()->SortChildren( aSObj, true/*AscendingOrder*/ ) ) {
+            SMESHGUI::GetSMESHGUI()->updateObjBrowser();
+          }
+        }
       }
     }
   }
@@ -1790,7 +1789,7 @@
           aSO = aRefSObject; // Delete main Object instead of reference
 
         listSO.push_back( aSO );
-        std::list< _PTR(SObject) >::iterator itSO = listSO.begin();
+        std::list< _PTR(SObject) >::iterator itSO = --listSO.end();
         for ( ; itSO != listSO.end(); ++itSO ) {
           _PTR(ChildIterator) it = aStudy->NewChildIterator( *itSO );
           for (it->InitEx(false); it->More(); it->Next())
@@ -1835,24 +1834,9 @@
       if ( !SO ) continue;
       std::string anEntry = SO->GetID();
 
-      /** Erase graphical object **/
+      /** Erase graphical object and remove all its data **/
       if(SO->FindAttribute(anAttr, "AttributeIOR")) {
         SMESH::RemoveVisualObjectWithActors( anEntry.c_str(), true);
-        // ViewManagerList aViewMenegers = anApp->viewManagers();
-        // ViewManagerList::const_iterator it = aViewMenegers.begin();
-        // for( ; it != aViewMenegers.end(); it++) {         
-        //   SUIT_ViewManager* vm = *it;
-        //   int nbSf = vm ? vm->getViewsCount() : 0;
-        //   if(vm) {
-        //     QVector<SUIT_ViewWindow*> aViews = vm->getViews();
-        //     for(int i = 0; i < nbSf; i++){
-        //       SUIT_ViewWindow *sf = aViews[i];
-        //       if(SMESH_Actor* anActor = SMESH::FindActorByEntry(sf,anEntry.c_str())){
-        //         SMESH::RemoveActor(sf,anActor);
-        //       }
-        //     }
-        //   }
-        // }
       }
       /** Remove an object from data structures **/
       SMESH::SMESH_GroupBase_var aGroup = SMESH::SMESH_GroupBase::_narrow( SMESH::SObjectToObject( SO ));
@@ -2002,7 +1986,7 @@ bool SMESHGUI::automaticUpdate(unsigned int requestedSize, bool* limitExceeded)
  */
 //=============================================================================
 bool SMESHGUI::automaticUpdate( SMESH::SMESH_Mesh_ptr theMesh,
-                                int* entities, bool* limitExceeded )
+                                int* entities, bool* limitExceeded, int* hidden )
 {
   SUIT_ResourceMgr* resMgr = SUIT_Session::session()->resourceMgr();
   if ( !resMgr )
@@ -2015,6 +1999,7 @@ bool SMESHGUI::automaticUpdate( SMESH::SMESH_Mesh_ptr theMesh,
   long requestedSize = theMesh->NbElements();
 
   *entities = SMESH_Actor::eAllEntity;
+  *hidden   = 0;
 
   bool exceeded = updateLimit > 0 && requestedSize > updateLimit;
 
@@ -2029,40 +2014,50 @@ bool SMESHGUI::automaticUpdate( SMESH::SMESH_Mesh_ptr theMesh,
     long total     = 0;
 
     if ( nbOdElems > 0 ) {
-      if ( total + nbOdElems > updateLimit )
+      if ( total + nbOdElems > updateLimit ) {
         *entities = *entities & ~SMESH_Actor::e0DElements;
+	*hidden = *hidden | SMESH_Actor::e0DElements;
+      }
       else
         exceeded = false;
     }
     total += nbOdElems;
 
     if ( nbEdges > 0 ) {
-      if ( total + nbEdges > updateLimit )
+      if ( total + nbEdges > updateLimit ) {
         *entities = *entities & ~SMESH_Actor::eEdges;
+	*hidden = *hidden | SMESH_Actor::eEdges;
+      }
       else
         exceeded = false;
     }
     total += nbEdges;
 
     if ( nbFaces > 0 ) {
-      if ( total + nbFaces > updateLimit )
+      if ( total + nbFaces > updateLimit ) {
         *entities = *entities & ~SMESH_Actor::eFaces;
+	*hidden = *hidden | SMESH_Actor::eFaces;
+      }
       else
         exceeded = false;
     }
     total += nbFaces;
 
     if ( nbVolumes > 0 ) {
-      if ( total + nbVolumes > updateLimit )
+      if ( total + nbVolumes > updateLimit ) {
         *entities = *entities & ~SMESH_Actor::eVolumes;
+	*hidden = *hidden | SMESH_Actor::eVolumes;
+      }
       else
         exceeded = false;
     }
     total += nbVolumes;
 
     if ( nbBalls > 0 ) {
-      if ( total + nbBalls > updateLimit )
+      if ( total + nbBalls > updateLimit ) {
         *entities = *entities & ~SMESH_Actor::eBallElem;
+	*hidden = *hidden | SMESH_Actor::eBallElem;
+      }
       else
         exceeded = false;
     }
@@ -2529,10 +2524,10 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
         if (vtkwnd) {
           SALOME_ListIteratorOfListIO It( to_process );
           for ( ; It.More(); It.Next()) {
-                MESSAGE("---");
+            MESSAGE("---");
             Handle(SALOME_InteractiveObject) IOS = It.Value();
             if (IOS->hasEntry()) {
-                MESSAGE("---");
+              MESSAGE("---");
               if (!SMESH::UpdateView(anAction, IOS->getEntry())) {
                 SMESHGUI::GetSMESHGUI()->EmitSignalVisibilityChanged();
                 break; // PAL16774 (Crash after display of many groups)
@@ -2548,7 +2543,7 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
 
         // PAL13338 + PAL15161 -->
         if ( ( theCommandID==301 || theCommandID==302 ) && !checkLock(aStudy)) {
-                MESSAGE("anAction = SMESH::eDisplayOnly");
+          MESSAGE("anAction = SMESH::eDisplayOnly");
           SMESH::UpdateView();
           SMESHGUI::GetSMESHGUI()->EmitSignalVisibilityChanged();
         }
@@ -3546,8 +3541,20 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
     }
   case 501:
   case 502:
+  case 503:
+  case 504:
+  case 505:
     {
-      int page = theCommandID == 501 ? SMESHGUI_MeasureDlg::MinDistance : SMESHGUI_MeasureDlg::BoundingBox;
+      int page = SMESHGUI_MeasureDlg::MinDistance;
+      if ( theCommandID == 502 )
+	page = SMESHGUI_MeasureDlg::BoundingBox;
+      else if ( theCommandID == 503 )
+	page = SMESHGUI_MeasureDlg::Length;
+      else if ( theCommandID == 504 )
+	page = SMESHGUI_MeasureDlg::Area;
+      else if ( theCommandID == 505 )
+	page = SMESHGUI_MeasureDlg::Volume;
+
       EmitSignalDeactivateDialog();
       SMESHGUI_MeasureDlg* dlg = new SMESHGUI_MeasureDlg( SMESHGUI::desktop(), page );
       dlg->show();
@@ -3849,6 +3856,9 @@ void SMESHGUI::initialize( CAM_Application* app )
 
   createSMESHAction( 501, "MEASURE_MIN_DIST", "ICON_MEASURE_MIN_DIST" );
   createSMESHAction( 502, "MEASURE_BND_BOX",  "ICON_MEASURE_BND_BOX" );
+  createSMESHAction( 503, "MEASURE_LENGTH",   "ICON_MEASURE_LENGTH" );
+  createSMESHAction( 504, "MEASURE_AREA",     "ICON_MEASURE_AREA" );
+  createSMESHAction( 505, "MEASURE_VOLUME",   "ICON_MEASURE_VOLUME" );
 
   createSMESHAction( 300, "HIDE" );
   createSMESHAction( 301, "SHOW" );
@@ -3877,7 +3887,8 @@ void SMESHGUI::initialize( CAM_Application* app )
       addId    = createMenu( tr( "MEN_ADD" ),    modifyId, 402 ),
       removeId = createMenu( tr( "MEN_REMOVE" ), modifyId, 403 ),
       renumId  = createMenu( tr( "MEN_RENUM" ),  modifyId, 404 ),
-      transfId = createMenu( tr( "MEN_TRANSF" ), modifyId, 405 );
+      transfId = createMenu( tr( "MEN_TRANSF" ), modifyId, 405 ),
+      basicPropId = createMenu( tr( "MEN_BASIC_PROPERTIES" ), measureId, -1, 10 );
 
   //createMenu( 111, importId, -1 );
   createMenu( 112, importId, -1 );
@@ -4025,6 +4036,9 @@ void SMESHGUI::initialize( CAM_Application* app )
 
   createMenu( 501, measureId, -1 );
   createMenu( 502, measureId, -1 );
+  createMenu( 503, basicPropId, -1 );
+  createMenu( 504, basicPropId, -1 );
+  createMenu( 505, basicPropId, -1 );
   createMenu( 214, viewId, -1 );
 
   // ----- create toolbars --------------

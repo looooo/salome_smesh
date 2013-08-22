@@ -2235,7 +2235,7 @@ void SMESHGUI_AddInfo::meshInfo( SMESH::SMESH_Mesh_ptr mesh, QTreeWidgetItem* pa
 {
   // type
   GEOM::GEOM_Object_var shape = mesh->GetShapeToMesh();
-  SMESH::MedFileInfo* inf = mesh->GetMEDFileInfo();
+  SMESH::MedFileInfo_var inf = mesh->GetMEDFileInfo();
   QTreeWidgetItem* typeItem = createItem( parent, Bold );
   typeItem->setText( 0, tr( "TYPE" ) );
   if ( !CORBA::is_nil( shape ) ) {
@@ -3401,6 +3401,7 @@ void SMESHGUI_CtrlInfo::computeAspectRatio()
     anItem->attach( myPlot );
     myPlot->replot();
   }
+  delete aHistogram;
 }
 
 void SMESHGUI_CtrlInfo::computeAspectRatio3D()
@@ -3417,6 +3418,7 @@ void SMESHGUI_CtrlInfo::computeAspectRatio3D()
     anItem->attach( myPlot3D );
     myPlot3D->replot();
   }
+  delete aHistogram;
 }
 
 /*!
@@ -3518,16 +3520,29 @@ SMESHGUI_CtrlInfoDlg::SMESHGUI_CtrlInfoDlg( QWidget* parent )
   okBtn->setAutoDefault( true );
   okBtn->setDefault( true );
   okBtn->setFocus();
+  QPushButton* dumpBtn = new QPushButton( tr( "BUT_DUMP_MESH" ), this );
+  dumpBtn->setAutoDefault( true );
+  QPushButton* helpBtn = new QPushButton( tr( "SMESH_BUT_HELP" ), this );
+  helpBtn->setAutoDefault( true );
 
-  QGridLayout* l = new QGridLayout ( this );
+  QHBoxLayout* btnLayout = new QHBoxLayout;
+  btnLayout->setSpacing( SPACING );
+  btnLayout->setMargin( 0 );
+
+  btnLayout->addWidget( okBtn );
+  btnLayout->addWidget( dumpBtn );
+  btnLayout->addStretch( 10 );
+  btnLayout->addWidget( helpBtn );
+
+  QVBoxLayout* l = new QVBoxLayout ( this );
   l->setMargin( MARGIN );
   l->setSpacing( SPACING );
-  l->addWidget( myCtrlInfo, 0, 0, 1, 3 );
-  l->addWidget( okBtn, 1, 1 );
-  l->setColumnStretch( 0, 5 );
-  l->setColumnStretch( 2, 5 );
+  l->addWidget( myCtrlInfo );
+  l->addLayout( btnLayout );
 
-  connect( okBtn,                   SIGNAL( clicked() ),                      this, SLOT( reject() ) );
+  connect( okBtn,   SIGNAL( clicked() ), this, SLOT( reject() ) );
+  connect( dumpBtn, SIGNAL( clicked() ), this, SLOT( dump() ) );
+  connect( helpBtn, SIGNAL( clicked() ), this, SLOT( help() ) );
   connect( SMESHGUI::GetSMESHGUI(), SIGNAL( SignalDeactivateActiveDialog() ), this, SLOT( deactivate() ) );
   connect( SMESHGUI::GetSMESHGUI(), SIGNAL( SignalCloseAllDialogs() ),        this, SLOT( reject() ) );
 
@@ -3606,4 +3621,49 @@ void SMESHGUI_CtrlInfoDlg::deactivate()
   disconnect( SMESHGUI::selectionMgr(), SIGNAL( currentSelectionChanged() ), this, SLOT( updateInfo() ) );
 }
 
+/*!
+ * \brief Dump contents into a file
+ */
+void SMESHGUI_CtrlInfoDlg::dump()
+{
+  SUIT_Application* app = SUIT_Session::session()->activeApplication();
+  if ( !app ) return;
+  SalomeApp_Study* appStudy = dynamic_cast<SalomeApp_Study *>( app->activeStudy() );
+  if ( !appStudy ) return;
+  _PTR( Study ) aStudy = appStudy->studyDS();
 
+  QStringList aFilters;
+  aFilters.append( tr( "TEXT_FILES" ) );
+
+  DumpFileDlg fd( this );
+  fd.setWindowTitle( tr( "SAVE_INFO" ) );
+  fd.setFilters( aFilters );
+  fd.myBaseChk->hide();
+  fd.myElemChk->hide();
+  fd.myAddChk ->hide();
+  fd.myCtrlChk->hide();
+  if ( fd.exec() == QDialog::Accepted )
+  {
+    QString aFileName = fd.selectedFile();
+    if ( !aFileName.isEmpty() ) {
+      QFileInfo aFileInfo( aFileName );
+      if ( aFileInfo.isDir() )
+        return;
+ 
+      QFile aFile( aFileName );
+      if ( !aFile.open( QIODevice::WriteOnly | QIODevice::Text ) )
+        return;
+      
+      QTextStream out( &aFile );
+      myCtrlInfo->saveInfo( out );
+    }
+  }
+}
+
+/*!
+ * \brief Show help
+ */
+void SMESHGUI_CtrlInfoDlg::help()
+{
+  SMESH::ShowHelpFile("mesh_infos_page.html#mesh_quality_info_anchor");
+}

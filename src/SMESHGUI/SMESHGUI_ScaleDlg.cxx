@@ -100,10 +100,6 @@ private:
 #define SPACING 6
 #define MARGIN  11
 
-//To disable automatic genericobj management, the following line should be commented.
-//Otherwise, it should be uncommented. Refer to KERNEL_SRC/src/SALOMEDSImpl/SALOMEDSImpl_AttributeIOR.cxx
-#define WITHGENERICOBJ
-
 //=================================================================================
 // class    : SMESHGUI_ScaleDlg()
 // purpose  :
@@ -489,8 +485,9 @@ bool SMESHGUI_ScaleDlg::ClickOnApply()
 	  }
 	else {
 	  SMESH::SMESH_MeshEditor_var aMeshEditor = myMeshes[0]->GetMeshEditor();
+          SMESH::SMESH_IDSource_wrap src = aMeshEditor->MakeIDSource(anElementsId, SMESH::ALL);
 	  myMeshes[0]->SetParameters( aParameters.join( ":" ).toLatin1().constData() );
-	  aMeshEditor->Scale(aMeshEditor->MakeIDSource(anElementsId, SMESH::ALL), aPoint, aScaleFact, false);
+	  aMeshEditor->Scale( src, aPoint, aScaleFact, false);
 	}
         break;
 
@@ -505,8 +502,9 @@ bool SMESHGUI_ScaleDlg::ClickOnApply()
 	    }
           else {
 	    SMESH::SMESH_MeshEditor_var aMeshEditor = myMeshes[0]->GetMeshEditor();
+            SMESH::SMESH_IDSource_wrap src = aMeshEditor->MakeIDSource(anElementsId, SMESH::ALL);
 	    myMeshes[0]->SetParameters(aParameters.join( ":" ).toLatin1().constData());
-	    groups = aMeshEditor->ScaleMakeGroups(aMeshEditor->MakeIDSource(anElementsId, SMESH::ALL), aPoint, aScaleFact);
+	    groups = aMeshEditor->ScaleMakeGroups( src, aPoint, aScaleFact);
 	  }
 	}
         else {
@@ -519,8 +517,9 @@ bool SMESHGUI_ScaleDlg::ClickOnApply()
 	  }
           else {
 	    SMESH::SMESH_MeshEditor_var aMeshEditor = myMeshes[0]->GetMeshEditor();
+            SMESH::SMESH_IDSource_wrap src = aMeshEditor->MakeIDSource(anElementsId, SMESH::ALL);
 	    myMeshes[0]->SetParameters(aParameters.join( ":" ).toLatin1().constData());
-	    aMeshEditor->Scale(aMeshEditor->MakeIDSource(anElementsId, SMESH::ALL), aPoint, aScaleFact, true);
+	    aMeshEditor->Scale( src, aPoint, aScaleFact, true);
 	  }
 	}
         break;
@@ -536,27 +535,16 @@ bool SMESHGUI_ScaleDlg::ClickOnApply()
 					      aName.toLatin1().data());
 	    if( _PTR(SObject) aSObject = SMESH::ObjectToSObject( mesh ) )
 	      anEntryList.append( aSObject->GetID().c_str() );
-#ifdef WITHGENERICOBJ
-	    // obj has been published in study. Its refcount has been incremented.
-	    // It is safe to decrement its refcount
-	    // so that it will be destroyed when the entry in study will be removed
-	    mesh->UnRegister();
-#endif
 	  }
 	}
 	else {
 	  SMESH::SMESH_MeshEditor_var aMeshEditor = myMeshes[0]->GetMeshEditor();
 	  myMeshes[0]->SetParameters(aParameters.join( ":" ).toLatin1().constData());
-	  mesh = aMeshEditor->ScaleMakeMesh(aMeshEditor->MakeIDSource(anElementsId, SMESH::ALL), aPoint, aScaleFact, makeGroups,
-					      LineEditNewMesh->text().toLatin1().data());
+          SMESH::SMESH_IDSource_wrap src = aMeshEditor->MakeIDSource(anElementsId, SMESH::ALL);
+	  mesh = aMeshEditor->ScaleMakeMesh( src, aPoint, aScaleFact, makeGroups,
+                                             LineEditNewMesh->text().toLatin1().data());
           if( _PTR(SObject) aSObject = SMESH::ObjectToSObject( mesh ) )
             anEntryList.append( aSObject->GetID().c_str() );
-#ifdef WITHGENERICOBJ
-          // obj has been published in study. Its refcount has been incremented.
-          // It is safe to decrement its refcount
-          // so that it will be destroyed when the entry in study will be removed
-          mesh->UnRegister();
-#endif
         }
         break;
       }
@@ -1158,7 +1146,8 @@ void SMESHGUI_ScaleDlg::onDisplaySimulation( bool toDisplayPreview ) {
 	  }
         else {
 	  SMESH::SMESH_MeshEditor_var aMeshEditor = myMeshes[0]->GetMeshEditPreviewer();
-	  aMeshEditor->Scale(aMeshEditor->MakeIDSource(anElementsId, SMESH::ALL), aPoint, aScaleFact, copy);
+          SMESH::SMESH_IDSource_wrap src = aMeshEditor->MakeIDSource(anElementsId, SMESH::ALL);
+	  aMeshEditor->Scale( src, aPoint, aScaleFact, copy);
 	  aMeshPreviewStruct << aMeshEditor->GetPreviewData();
 	}
 	setSimulationPreview(aMeshPreviewStruct);

@@ -369,12 +369,10 @@ Driver_Mesh::Status DriverGMF_Write::PerformSizeMap( const std::vector<Control_P
 {
 //   const int dim = 3, version = sizeof(long) == 4 ? 2 : 3;
   const int dim = 3, version = 2; // Version 3 not supported by mg-hexa
-  std::string aVerticesFile = mySizeMapPrefix + ".mesh";
-  std::string aSolFile = mySizeMapPrefix + ".sol";
   
   // Open files
-  int verticesFileID = GmfOpenMesh( aVerticesFile.c_str(), GmfWrite, version, dim );  
-  int solFileID = GmfOpenMesh( aSolFile.c_str(), GmfWrite, version, dim );
+  int verticesFileID = GmfOpenMesh( myVerticesFile.c_str(), GmfWrite, version, dim );  
+  int solFileID = GmfOpenMesh( mySolFile.c_str(), GmfWrite, version, dim );
   
   int pointsNumber = points.size();
   
@@ -396,6 +394,14 @@ Driver_Mesh::Status DriverGMF_Write::PerformSizeMap( const std::vector<Control_P
   // Close Files
   GmfCloseMesh( verticesFileID );
   GmfCloseMesh( solFileID );
+}
+
+std::vector<std::string> DriverGMF_Write::GetSizeMapFiles()
+{
+  std::vector<std::string> files;
+  files.push_back(myVerticesFile);
+  files.push_back(mySolFile);
+  return files;
 }
 
 //================================================================================

@@ -74,8 +74,10 @@ public:
   Status PerformSizeMap( const std::vector<Control_Pnt>& points );
   void SetSizeMapPrefix( std::string prefix )
   {
-    mySizeMapPrefix = prefix;
+    myVerticesFile = prefix + ".mesh";
+    mySolFile = prefix + ".sol";
   };
+  std::vector<std::string> GetSizeMapFiles();
 
  private:
 
@@ -84,7 +86,8 @@ public:
   SMDS_ElemIteratorPtr elementIterator(SMDSAbs_GeometryType type);
 
   bool _exportRequiredGroups;
-  std::string mySizeMapPrefix;
+  std::string myVerticesFile;
+  std::string mySolFile;
 };
 
 #endif

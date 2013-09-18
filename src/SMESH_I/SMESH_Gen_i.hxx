@@ -458,7 +458,7 @@ public:
                                            bool isMultiFile,
                                            bool isHistoricalDump,
                                            bool& aValidScript,
-                                           const TCollection_AsciiString& theSavedTrace);
+                                           TCollection_AsciiString& theSavedTrace);
 
   TCollection_AsciiString GetNewPythonLines (int theStudyID);
 

@@ -459,6 +459,11 @@ SMESH::SMESH_IDSource_ptr SMESH_MeshEditor_i::MakeIDSource(const SMESH::long_arr
   return anIDSourceVar._retn();
 }
 
+bool SMESH_MeshEditor_i::IsTemporaryIDSource( SMESH::SMESH_IDSource_ptr& idSource )
+{
+  return SMESH::DownCast<_IDSource*>( idSource );
+}
+
 //=============================================================================
 /*!
  *

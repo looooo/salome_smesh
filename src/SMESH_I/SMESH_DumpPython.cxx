@@ -25,15 +25,17 @@
 //  Module  : SMESH
 
 #include "SMESH_PythonDump.hxx"
-#include "SMESH_Gen_i.hxx"
-#include "SMESH_Filter_i.hxx"
-#include "SMESH_MeshEditor_i.hxx"
-#include "SMESH_2smeshpy.hxx"
 
+#include "SMESH_2smeshpy.hxx"
+#include "SMESH_Comment.hxx"
+#include "SMESH_Filter_i.hxx"
+#include "SMESH_Gen_i.hxx"
+#include "SMESH_MeshEditor_i.hxx"
+
+#include <LDOMParser.hxx>
+#include <Resource_DataMapIteratorOfDataMapOfAsciiStringAsciiString.hxx>
 #include <TColStd_HSequenceOfInteger.hxx>
 #include <TCollection_AsciiString.hxx>
-#include <SMESH_Comment.hxx>
-
 
 #ifdef _DEBUG_
 static int MYDEBUG = 0;
@@ -77,7 +79,7 @@ namespace SMESH
     }
   }
 
-  TPythonDump& //!< to store a variable value
+  TPythonDump& //!< store a variable value. Write either a value or '$varID$'
   TPythonDump::
   operator<<(const TVar& theVarValue)
   {
@@ -274,7 +276,7 @@ namespace SMESH
     if(aSObject->_is_nil() && !CORBA::is_nil(theArg))
       myStream << "hyp_" << theArg->GetId();
     else
-      *this << CORBA::Object_ptr( theArg );
+      *this << aSObject;
     return *this;
   }
 
@@ -288,16 +290,24 @@ namespace SMESH
     SALOMEDS::Study_var aStudy = aSMESHGen->GetCurrentStudy();
     SALOMEDS::SObject_var aSObject = SMESH_Gen_i::ObjectToSObject(aStudy,theArg);
     if(!aSObject->_is_nil())
-      return *this << aSObject;
-    if ( SMESH::Filter_i* filter = SMESH::DownCast<SMESH::Filter_i*>( theArg ))
-      return *this << filter;
-    SMESH::SMESH_Mesh_var mesh = theArg->GetMesh();
-    if ( !theArg->_is_equivalent( mesh ))
     {
-      SMESH::long_array_var anElementsId = theArg->GetIDs();
-      SMESH::array_of_ElementType_var types =  theArg->GetTypes();
-      SMESH::ElementType type = types->length() ? types[0] : SMESH::ALL;
-      return *this << mesh << ".GetIDSource(" << anElementsId << ", " << type << ")";
+      return *this << aSObject;
+    }
+    if ( SMESH::Filter_i* filter = SMESH::DownCast<SMESH::Filter_i*>( theArg ))
+    {
+      return *this << filter;
+    }
+    if ( SMESH_MeshEditor_i::IsTemporaryIDSource( theArg ))
+    {
+      SMESH::SMESH_Mesh_var            mesh = theArg->GetMesh();
+      SMESH::long_array_var    anElementsId = theArg->GetIDs();
+      SMESH::array_of_ElementType_var types = theArg->GetTypes();
+      SMESH::ElementType               type = types->length() ? types[0] : SMESH::ALL;
+      SALOMEDS::SObject_var          meshSO = SMESH_Gen_i::ObjectToSObject(aStudy,mesh);
+      if ( meshSO->_is_nil() ) // don't waste memory for dumping not published objects
+        return *this << mesh << ".GetIDSource([], " << type << ")";
+      else
+        return *this << mesh << ".GetIDSource(" << anElementsId << ", " << type << ")";
     }
     return *this << theNotPublishedObjectName;
   }
@@ -332,9 +342,9 @@ namespace SMESH
   {
     if ( theArg ) {
       FunctorType aFunctorType = theArg->GetFunctorType();
-      switch(aFunctorType){
-      case FT_AspectRatio:           myStream<< "anAspectRatio";          break;
-      case FT_AspectRatio3D:         myStream<< "anAspectRatio3D";        break;
+      switch(aFunctorType) {
+      case FT_AspectRatio:           myStream<< "aAspectRatio";           break;
+      case FT_AspectRatio3D:         myStream<< "aAspectRatio3D";         break;
       case FT_Warping:               myStream<< "aWarping";               break;
       case FT_MinimumAngle:          myStream<< "aMinimumAngle";          break;
       case FT_Taper:                 myStream<< "aTaper";                 break;
@@ -559,6 +569,13 @@ namespace SMESH
 
     return true;
   }
+
+  void printException( const char* text )
+  {
+#ifdef _DEBUG_
+    cout << "Exception in SMESH_Gen_i::DumpPython(): " << text << endl;
+#endif
+  }
 }
 
 //=======================================================================
@@ -600,7 +617,6 @@ Engines::TMPFile* SMESH_Gen_i::DumpPython (CORBA::Object_ptr theStudy,
   // Map study entries to object names
   Resource_DataMapOfAsciiStringAsciiString aMap;
   Resource_DataMapOfAsciiStringAsciiString aMapNames;
-  //TCollection_AsciiString s ("qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM0987654321_");
 
   SALOMEDS::ChildIterator_var Itr = aStudy->NewChildIterator(aSO);
   for (Itr->InitEx(true); Itr->More(); Itr->Next()) {
@@ -608,21 +624,22 @@ Engines::TMPFile* SMESH_Gen_i::DumpPython (CORBA::Object_ptr theStudy,
     CORBA::String_var anID = aValue->GetID();
     CORBA::String_var aName = aValue->GetName();
     TCollection_AsciiString aGUIName ( (char*) aName.in() );
-    TCollection_AsciiString anEnrty ( (char*) anID.in() );
+    TCollection_AsciiString anEntry ( (char*) anID.in() );
     if (aGUIName.Length() > 0) {
-      aMapNames.Bind( anEnrty, aGUIName );
-      aMap.Bind( anEnrty, aGUIName );
+      aMapNames.Bind( anEntry, aGUIName );
+      aMap.Bind( anEntry, aGUIName );
     }
   }
 
   // Get trace of restored study
-  //SALOMEDS::SObject_var aSO = SMESH_Gen_i::ObjectToSObject(theStudy, _this());
   SALOMEDS::StudyBuilder_var aStudyBuilder = aStudy->NewBuilder();
   SALOMEDS::GenericAttribute_var anAttr =
     aStudyBuilder->FindOrCreateAttribute(aSO, "AttributePythonObject");
 
-  char* oldValue = SALOMEDS::AttributePythonObject::_narrow(anAttr)->GetObject();
-  TCollection_AsciiString aSavedTrace (oldValue);
+  SALOMEDS::AttributePythonObject_var pyAttr =
+    SALOMEDS::AttributePythonObject::_narrow(anAttr);
+  CORBA::String_var oldValue = pyAttr->GetObject();
+  TCollection_AsciiString aSavedTrace (oldValue.in());
 
   // Add trace of API methods calls and replace study entries by names
   TCollection_AsciiString aScript;
@@ -684,8 +701,10 @@ void SMESH_Gen_i::SavePython (SALOMEDS::Study_ptr theStudy)
   SALOMEDS::GenericAttribute_var anAttr =
     aStudyBuilder->FindOrCreateAttribute(aSO, "AttributePythonObject");
 
-  char* oldValue = SALOMEDS::AttributePythonObject::_narrow(anAttr)->GetObject();
-  TCollection_AsciiString oldScript (oldValue);
+  SALOMEDS::AttributePythonObject_var pyAttr =
+    SALOMEDS::AttributePythonObject::_narrow(anAttr);
+  CORBA::String_var oldValue = pyAttr->GetObject();
+  TCollection_AsciiString oldScript (oldValue.in());
 
   if (oldScript.Length() > 0) {
     oldScript += "\n";
@@ -695,7 +714,7 @@ void SMESH_Gen_i::SavePython (SALOMEDS::Study_ptr theStudy)
   }
 
   // Store in PythonObject attribute
-  SALOMEDS::AttributePythonObject::_narrow(anAttr)->SetObject(oldScript.ToCString(), 1);
+  pyAttr->SetObject(oldScript.ToCString(), 1);
 
   // Clean trace of API methods calls
   CleanPythonTrace(theStudy->StudyId());
@@ -758,28 +777,39 @@ namespace {
    */
   //================================================================================
 
-  bool fixPythonName(TCollection_AsciiString & aName )
+  bool fixPythonName(TCollection_AsciiString & aName)
   {
-    const TCollection_AsciiString allowedChars =
-      "qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM0987654321_";
     bool isValidName = true;
     int nbUnderscore = 0;
-    int p=1; // replace not allowed chars by underscore
-    while (p <= aName.Length() &&
-           (p = aName.FirstLocationNotInSet(allowedChars, p, aName.Length())))
-    {
-      if ( p == 1 || p == aName.Length() || aName.Value(p-1) == '_')
-        aName.Remove( p, 1 ); // remove double _ from the start and the end
-      else
-        aName.SetValue(p, '_'), nbUnderscore++;
-      isValidName = false;
+    int p;
+    // replace not allowed chars by underscore
+    const char* name = aName.ToCString();
+    for ( p = 0; name[p]; ++p ) {
+      if ( !isalnum( name[p] ) && name[p] != '_' )
+      {
+        if ( p == 0 || p+1 == aName.Length() || name[p-1] == '_')
+        {
+          aName.Remove( p+1, 1 ); // remove __ and _ from the start and the end
+          --p;
+          name = aName.ToCString();
+        }
+        else
+        {
+          aName.SetValue( p+1, '_');
+          nbUnderscore++;
+        }
+        isValidName = false;
+      }
     }
-    if ( aName.IsIntegerValue() ) { // aName must not start with a digit
+    // aName must not start with a digit
+    if ( aName.IsIntegerValue() ) {
       aName.Insert( 1, 'a' );
       isValidName = false;
     }
     // shorten names like CartesianParameters3D_400_400_400_1000000_1
-    if ( aName.Length() > 20 && nbUnderscore > 2 )
+    const int nbAllowedUnderscore = 3; /* changed from 2 to 3 by an user request
+                                          posted to SALOME Forum */
+    if ( aName.Length() > 20 && nbUnderscore > nbAllowedUnderscore )
     {
       p = aName.Location( "_", 20, aName.Length());
       if ( p > 1 )
@@ -787,173 +817,254 @@ namespace {
     }
     return isValidName;
   }
+
+  //================================================================================
+  /*!
+   * \brief Return Python module names of available plug-ins.
+   */
+  //================================================================================
+
+  std::vector<std::string> getPluginNames()
+  {
+    std::vector<std::string> pluginNames;
+    std::vector< std::string > xmlPaths = SMESH_Gen::GetPluginXMLPaths();
+    LDOMParser xmlParser;
+    for ( size_t i = 0; i < xmlPaths.size(); ++i )
+    {
+      bool error = xmlParser.parse( xmlPaths[i].c_str() );
+      if ( error )
+      {
+        TCollection_AsciiString data;
+        INFOS( xmlParser.GetError(data) );
+        continue;
+      }
+      // <meshers-group name="Standard Meshers"
+      //                resources="StdMeshers"
+      //                idl-module="StdMeshers"
+      //                server-lib="StdMeshersEngine"
+      //                gui-lib="StdMeshersGUI">
+      LDOM_Document xmlDoc   = xmlParser.getDocument();
+      LDOM_NodeList nodeList = xmlDoc.getElementsByTagName( "meshers-group" );
+      for ( int i = 0; i < nodeList.getLength(); ++i )
+      {
+        LDOM_Node       node = nodeList.item( i );
+        LDOM_Element&   elem = (LDOM_Element&) node;
+        LDOMString idlModule = elem.getAttribute( "idl-module" );
+        if ( strlen( idlModule.GetString() ) > 0 )
+          pluginNames.push_back( idlModule.GetString() );
+      }
+    }
+    return pluginNames;
+  }
 }
 
-//=============================================================================
+//================================================================================
 /*!
- *  DumpPython
+ * \brief Createa a Dump Python script
+ *  \param [in] theStudy - the study to dump
+ *  \param [in,out] theObjectNames - map of an entry to a study and python name
+ *  \param [in] theNames -  - map of an entry to a study name
+ *  \param [in] isPublished - \c true if dump of object publication in study is needed
+ *  \param [in] isMultiFile - \c true if dump of each module goes to a separate file
+ *  \param [in] isHistoricalDump - \c true if removed object should be dumped
+ *  \param [out] aValidScript - returns \c true if the returned script seems valid
+ *  \param [in,out] theSavedTrace - the dump stored in the study. It's cleared to
+ *         decrease memory usage.
+ *  \return TCollection_AsciiString - the result dump script.
  */
-//=============================================================================
+//================================================================================
+
 TCollection_AsciiString SMESH_Gen_i::DumpPython_impl
-                        (SALOMEDS::Study_ptr theStudy,
+                        (SALOMEDS::Study_ptr                       theStudy,
                          Resource_DataMapOfAsciiStringAsciiString& theObjectNames,
                          Resource_DataMapOfAsciiStringAsciiString& theNames,
-                         bool isPublished,
-                         bool isMultiFile,
-                         bool isHistoricalDump,
-                         bool& aValidScript,
-                         const TCollection_AsciiString& theSavedTrace)
+                         bool                                      isPublished,
+                         bool                                      isMultiFile,
+                         bool                                      isHistoricalDump,
+                         bool&                                     aValidScript,
+                         TCollection_AsciiString&                  theSavedTrace)
 {
   int aStudyID = theStudy->StudyId();
 
-  TCollection_AsciiString helper; // to comfortably concatenate C strings
-  TCollection_AsciiString aSmeshpy( SMESH_2smeshpy::SmeshpyName() );
-  TCollection_AsciiString aSMESHGen( SMESH_2smeshpy::GenName() );
-  TCollection_AsciiString anOldGen( SMESH::TPythonDump::SMESHGenName() );
+  const TCollection_AsciiString aSmeshpy ( SMESH_2smeshpy::SmeshpyName() );
+  const TCollection_AsciiString aSMESHGen( SMESH_2smeshpy::GenName() );
+  const TCollection_AsciiString anOldGen ( SMESH::TPythonDump::SMESHGenName() );
+  const TCollection_AsciiString helper; // to comfortably append C strings to TCollection_AsciiString
+  const TCollection_AsciiString tab( isMultiFile ? "\t" : "" ), nt = helper + "\n" + tab;
 
-  TCollection_AsciiString aScript;
-  if( isMultiFile )
-    aScript += "def RebuildData(theStudy):";
-  aScript += "\n\t";
-  aScript += helper + "aFilterManager = " + aSMESHGen + ".CreateFilterManager()\n\t";
-  aScript += helper + "aMeasurements = " + aSMESHGen + ".CreateMeasurements()\n\t";
+  std::list< TCollection_AsciiString > lines; // lines of a script
+  std::list< TCollection_AsciiString >::iterator linesIt;
+  
   if ( isPublished )
-    aScript += aSMESHGen + ".SetCurrentStudy(theStudy)";
-  else
-    aScript += aSMESHGen + ".SetCurrentStudy(None)";
+    lines.push_back(  tab + aSMESHGen + " = smeshBuilder.New(theStudy)" );
+   else
+    lines.push_back(  tab + aSMESHGen + " = smeshBuilder.New(None)" );
+  lines.push_back(  tab + "aFilterManager = " + aSMESHGen + ".CreateFilterManager()" );
+  lines.push_back(  tab + "aMeasurements = "  + aSMESHGen + ".CreateMeasurements()" );
 
-  // import python files corresponding to plugins
-  set<string> moduleNameSet;
-  map<string, GenericHypothesisCreator_i*>::iterator hyp_creator = myHypCreatorMap.begin();
-  for ( ; hyp_creator != myHypCreatorMap.end(); ++hyp_creator ) {
-    string moduleName = hyp_creator->second->GetModuleName();
-    bool newModule = moduleNameSet.insert( moduleName ).second;
-    if ( newModule )
-      aScript += helper + "\n\t" + "import " + (char*) moduleName.c_str();
-  }
-
-  // Dump trace of restored study
-  if (theSavedTrace.Length() > 0) {
-    // For the convertion of IDL API calls -> smesh.py API, "smesh" standing for SMESH_Gen
+  // Treat dump trace of restored study
+  if (theSavedTrace.Length() > 0)
+  {
+    linesIt = --lines.end();
+    // Split theSavedTrace into lines
+    int from = 1, end = theSavedTrace.Length(), to;
+    while ( from < end && ( to = theSavedTrace.Location( "\n", from, end )))
+    {
+      if ( theSavedTrace.ToCString()[from-1] == '\t' )
+        ++from;
+      if ( to != from )
+        lines.push_back( theSavedTrace.SubString( from, to - 1 ));
+      from = to + 1;
+    }
+    // For the convertion of IDL API calls -> smeshBuilder.py API, "smesh" standing for SMESH_Gen
     // was replaces with "smeshgen" (==TPythonDump::SMESHGenName()).
-    // Change "smesh" -> "smeshgen" in the trace saved before passage to smesh.py API
+    // Change "smesh" -> "smeshgen" in the trace saved before passage to smeshBuilder.py API
     bool isNewVersion =
       theSavedTrace.Location( anOldGen + ".", 1, theSavedTrace.Length() );
-    if ( !isNewVersion ) {
-      TCollection_AsciiString aSavedTrace( theSavedTrace );
-      TCollection_AsciiString aSmeshCall ( "smesh." ), gen( "gen" );
-      int beg, end = aSavedTrace.Length(), from = 1;
-      while ( from < end && ( beg = aSavedTrace.Location( aSmeshCall, from, end ))) {
-        char charBefore = ( beg == 1 ) ? ' ' : aSavedTrace.Value( beg - 1 );
-        if ( isspace( charBefore ) || charBefore == '=' ) { // "smesh." is not a part of a long word
-          aSavedTrace.Insert( beg + aSmeshCall.Length() - 1, gen );// "smesh" -> "smeshgen"
-          end += gen.Length();
+    theSavedTrace.Clear();
+    if ( !isNewVersion )
+    {
+      const TCollection_AsciiString aSmeshCall ( "smesh." ), gen( "gen" );
+      int beg, end, from;
+      for ( ++linesIt; linesIt != lines.end(); ++linesIt )
+      {
+        TCollection_AsciiString& aSavedLine = *linesIt;
+        end = aSavedLine.Length(), from = 1;
+        while ( from < end && ( beg = aSavedLine.Location( aSmeshCall, from, end )))
+        {
+          char charBefore = ( beg == 1 ) ? ' ' : aSavedLine.Value( beg - 1 );
+          if ( isspace( charBefore ) || charBefore == '=' ) { // "smesh." is not a part of a long word
+            aSavedLine.Insert( beg + aSmeshCall.Length() - 1, gen );// "smesh" -> "smeshgen"
+            end += gen.Length();
+          }
+          from = beg + aSmeshCall.Length();
         }
-        from = beg + aSmeshCall.Length();
       }
-      aScript += helper + "\n" + aSavedTrace;
     }
-    else
-      // append a saved trace to the script
-      aScript += helper + "\n" + theSavedTrace;
   }
 
-  // Dump trace of API methods calls
-  TCollection_AsciiString aNewLines = GetNewPythonLines(aStudyID);
-  if (aNewLines.Length() > 0) {
-    aScript += helper + "\n" + aNewLines;
+  // Add new dump trace of API methods calls to script lines
+  if (myPythonScripts.find( aStudyID ) != myPythonScripts.end())
+  {
+    Handle(TColStd_HSequenceOfAsciiString) aPythonScript = myPythonScripts[ aStudyID ];
+    Standard_Integer istr, aLen = aPythonScript->Length();
+    for (istr = 1; istr <= aLen; istr++)
+      lines.push_back( aPythonScript->Value( istr ));
   }
 
-  // Convert IDL API calls into smesh.py API.
+  // Convert IDL API calls into smeshBuilder.py API.
   // Some objects are wrapped with python classes and
   // Resource_DataMapOfAsciiStringAsciiString holds methods returning wrapped objects
   Resource_DataMapOfAsciiStringAsciiString anEntry2AccessorMethod;
   std::set< TCollection_AsciiString >      aRemovedObjIDs;
   if ( !getenv("NO_2smeshpy_conversion"))
-    SMESH_2smeshpy::ConvertScript( aScript, anEntry2AccessorMethod,
+    SMESH_2smeshpy::ConvertScript( lines, anEntry2AccessorMethod,
                                    theObjectNames, aRemovedObjIDs,
                                    theStudy, isHistoricalDump );
 
-  // Replace characters used instead of quote marks to quote notebook variables
-  {
-    int pos = 1;
-    while (( pos = aScript.Location( 1, SMESH::TVar::Quote(), pos, aScript.Length() )))
-      aScript.SetValue( pos, '"' );
-  }
-
-  // Find entries to be replaced by names
-  Handle(TColStd_HSequenceOfInteger) aSeq = FindEntries(aScript);
-  Standard_Integer aLen = aSeq->Length();
-
-  if (aLen == 0 && isMultiFile)
-    return aScript;
-
-  // Replace entries by the names
-  GEOM::GEOM_Gen_ptr geom = GetGeomEngine();
-  TColStd_SequenceOfAsciiString seqRemoved;
-  Resource_DataMapOfAsciiStringAsciiString mapRemoved;
-  Standard_Integer objectCounter = 0, aStart = 1, aScriptLength = aScript.Length();
-  TCollection_AsciiString anUpdatedScript, anEntry, aName, aBaseName("smeshObj_");
-
-  // Collect names of GEOM objects to exclude same names of SMESH objects
-  GEOM::string_array_var aGeomNames = geom->GetAllDumpNames();
-  int ign = 0, nbgn = aGeomNames->length();
-  for (; ign < nbgn; ign++) {
-    aName = aGeomNames[ign];
-    theObjectNames.Bind(aName, "1");
-  }
-
   bool importGeom = false;
-  for (Standard_Integer i = 1; i <= aLen; i += 2) {
-    anUpdatedScript += aScript.SubString(aStart, aSeq->Value(i) - 1);
-    anEntry = aScript.SubString(aSeq->Value(i), aSeq->Value(i + 1));
-    // is a GEOM object?
-    aName = geom->GetDumpName( anEntry.ToCString() );
-    if (aName.IsEmpty()) {
-      // is a SMESH object
-      if (theObjectNames.IsBound(anEntry)) {
-        // The Object is in Study
-        aName = theObjectNames.Find(anEntry);
-        // check validity of aName
-        bool isValidName = fixPythonName( aName );
-        if (theObjectNames.IsBound(aName) && anEntry != theObjectNames(aName)) {
-          // diff objects have same name - make a new name by appending a digit
-          TCollection_AsciiString aName2;
-          Standard_Integer i = 0;
-          do {
-            aName2 = aName + "_" + ++i;
-          } while (theObjectNames.IsBound(aName2) && anEntry != theObjectNames(aName2));
-          aName = aName2;
-          isValidName = false;
-        }
-        if ( !isValidName )
-          theObjectNames(anEntry) = aName;
-
-      } else {
-        // Removed Object
-        do {
-          aName = aBaseName + (++objectCounter);
-        } while (theObjectNames.IsBound(aName));
-        if ( !aRemovedObjIDs.count( anEntry ))
-          seqRemoved.Append(aName);
-        mapRemoved.Bind(anEntry, "1");
-        theObjectNames.Bind(anEntry, aName);
-      }
-      theObjectNames.Bind(aName, anEntry); // to detect same name of diff objects
+  GEOM::GEOM_Gen_ptr geom = GetGeomEngine();
+  {
+    // Add names of GEOM objects to theObjectNames to exclude same names of SMESH objects
+    GEOM::string_array_var aGeomNames = geom->GetAllDumpNames();
+    int ign = 0, nbgn = aGeomNames->length();
+    for (; ign < nbgn; ign++) {
+      TCollection_AsciiString aName = aGeomNames[ign].in();
+      theObjectNames.Bind(aName, "1");
     }
-    else
-    {
-      importGeom = true;
-    }
-    anUpdatedScript += aName;
-    aStart = aSeq->Value(i + 1) + 1;
   }
 
-  // set initial part of aSript
+  TCollection_AsciiString anUpdatedScript;
+
+  Resource_DataMapOfAsciiStringAsciiString mapRemoved;
+  Resource_DataMapOfAsciiStringAsciiString mapEntries; // names and entries present in anUpdatedScript
+  Standard_Integer objectCounter = 0;
+  TCollection_AsciiString anEntry, aName, aGUIName, aBaseName("smeshObj_");
+
+  // Treat every script line and add it to anUpdatedScript
+  for ( linesIt = lines.begin(); linesIt != lines.end(); ++linesIt )
+  {
+    TCollection_AsciiString& aLine = *linesIt;
+    anUpdatedScript += tab;
+    {
+      //Replace characters used instead of quote marks to quote notebook variables
+      int pos = 1;
+      while (( pos = aLine.Location( 1, SMESH::TVar::Quote(), pos, aLine.Length() )))
+        aLine.SetValue( pos, '"' );
+    }
+    // Find entries to be replaced by names
+    Handle(TColStd_HSequenceOfInteger) aSeq = FindEntries(aLine);
+    const Standard_Integer aSeqLen = aSeq->Length();
+    Standard_Integer aStart = 1;
+    for (Standard_Integer i = 1; i <= aSeqLen; i += 2)
+    {
+      if ( aStart < aSeq->Value(i) )
+        anUpdatedScript += aLine.SubString( aStart, aSeq->Value(i) - 1 ); // line part before i-th entry
+      anEntry = aLine.SubString( aSeq->Value(i), aSeq->Value(i + 1) );
+      // is a GEOM object?
+      CORBA::String_var geomName = geom->GetDumpName( anEntry.ToCString() );
+      if ( !geomName.in() || !geomName[0] ) {
+        // is a SMESH object
+        if ( theObjectNames.IsBound( anEntry )) {
+          // The Object is in Study
+          aName = theObjectNames.Find( anEntry );
+          // check validity of aName
+          bool isValidName = fixPythonName( aName );
+          if (theObjectNames.IsBound(aName) && anEntry != theObjectNames(aName)) {
+            // diff objects have same name - make a new name by appending a digit
+            TCollection_AsciiString aName2;
+            Standard_Integer i = 0;
+            do {
+              aName2 = aName + "_" + ++i;
+            } while (theObjectNames.IsBound(aName2) && anEntry != theObjectNames(aName2));
+            aName = aName2;
+            isValidName = false;
+          }
+          if ( !isValidName )
+            theObjectNames(anEntry) = aName;
+
+          if ( aLine.Value(1) != '#' )
+            mapEntries.Bind(anEntry, aName);
+        }
+        else
+        {
+          // Removed Object
+          do {
+            aName = aBaseName + (++objectCounter);
+          } while (theObjectNames.IsBound(aName));
+
+          if ( !aRemovedObjIDs.count( anEntry ) && aLine.Value(1) != '#')
+            mapRemoved.Bind(anEntry, aName);
+
+          theObjectNames.Bind(anEntry, aName);
+        }
+        theObjectNames.Bind(aName, anEntry); // to detect same name of diff objects
+      }
+      else
+      {
+        aName = geomName.in();
+        importGeom = true;
+      }
+      anUpdatedScript += aName;
+      aStart = aSeq->Value(i + 1) + 1;
+
+    } // loop on entries within aLine
+
+    if ( aSeqLen == 0 )
+      anUpdatedScript += aLine;
+    else if ( aSeq->Value( aSeqLen ) < aLine.Length() )
+      anUpdatedScript += aLine.SubString( aSeq->Value(aSeqLen) + 1, aLine.Length() );
+
+    anUpdatedScript += '\n';
+  }
+
+  // Make an initial part of aSript
+
   TCollection_AsciiString initPart = "import ";
   if ( isMultiFile )
-    initPart += helper + "salome, ";
-  initPart += aSmeshpy + ", SMESH, SALOMEDS\n";
+    initPart += "salome, ";
+  initPart += " SMESH, SALOMEDS\n";
+  initPart += "from salome.smesh import smeshBuilder\n";
   if ( importGeom && isMultiFile )
   {
     initPart += ("\n## import GEOM dump file ## \n"
@@ -961,77 +1072,100 @@ TCollection_AsciiString SMESH_Gen_i::DumpPython_impl
                  "sys.path.insert( 0, os.path.dirname(__file__) )\n"
                  "exec(\"from \"+re.sub(\"SMESH$\",\"GEOM\",__name__)+\" import *\")\n");
   }
-  anUpdatedScript.Insert ( 1, initPart );
-
-  // add final part of aScript
-  if (aLen && aSeq->Value(aLen) < aScriptLength)
-    anUpdatedScript += aScript.SubString(aSeq->Value(aLen) + 1, aScriptLength);
-
-  // Remove removed objects
-  if ( seqRemoved.Length() > 0 ) {
-    anUpdatedScript += "\n\t## some objects were removed";
-    anUpdatedScript += "\n\taStudyBuilder = theStudy.NewBuilder()";
+  // import python files corresponding to plugins if they are used in anUpdatedScript
+  {
+    TCollection_AsciiString importStr;
+    std::vector<std::string> pluginNames = getPluginNames();
+    for ( size_t i = 0; i < pluginNames.size(); ++i )
+    {
+      // Convert access to plugin members:
+      // e.g. StdMeshers.QUAD_REDUCED -> StdMeshersBuilder.QUAD_REDUCED
+      TCollection_AsciiString pluginAccess = (pluginNames[i] + ".").c_str() ;
+      int iFrom = 1, iPos;
+      while (( iPos = anUpdatedScript.Location( pluginAccess, iFrom, anUpdatedScript.Length() )))
+      {
+        anUpdatedScript.Insert( iPos + pluginNames[i].size(), "Builder" );
+        iFrom = iPos + pluginNames[i].size() + 8;
+      }
+      // if any plugin member is used, import the plugin
+      if ( iFrom > 1 )
+        importStr += ( helper + "\n" "from salome." + pluginNames[i].c_str() +
+                       " import " + pluginNames[i].c_str() +"Builder" );
+    }
+    if ( !importStr.IsEmpty() )
+      initPart += importStr + "\n";
   }
-  for (int ir = 1; ir <= seqRemoved.Length(); ir++) {
-    anUpdatedScript += "\n\tSO = theStudy.FindObjectIOR(theStudy.ConvertObjectToIOR(";
-    anUpdatedScript += seqRemoved.Value(ir);
-    // for object wrapped by class of smesh.py
-    anEntry = theObjectNames( seqRemoved.Value(ir) );
-    if ( anEntry2AccessorMethod.IsBound( anEntry ) )
-      anUpdatedScript += helper + "." + anEntry2AccessorMethod( anEntry );
-    anUpdatedScript += "))\n\tif SO is not None: aStudyBuilder.RemoveObjectWithChildren(SO)";
+
+  if( isMultiFile )
+    initPart += "def RebuildData(theStudy):";
+  initPart += "\n";
+
+  anUpdatedScript.Prepend( initPart );
+
+  // Make a final part of aScript
+
+  // Dump object removal
+  TCollection_AsciiString removeObjPart;
+  if ( !mapRemoved.IsEmpty() ) {
+    removeObjPart += nt + "## some objects were removed";
+    removeObjPart += nt + "aStudyBuilder = theStudy.NewBuilder()";
+    Resource_DataMapIteratorOfDataMapOfAsciiStringAsciiString mapRemovedIt;
+    for ( mapRemovedIt.Initialize( mapRemoved ); mapRemovedIt.More(); mapRemovedIt.Next() ) {
+      aName   = mapRemovedIt.Value(); // python name
+      anEntry = mapRemovedIt.Key();
+      removeObjPart += nt + "SO = theStudy.FindObjectIOR(theStudy.ConvertObjectToIOR(";
+      removeObjPart += aName;
+      // for object wrapped by class of smeshBuilder.py
+      if ( anEntry2AccessorMethod.IsBound( anEntry ) )
+        removeObjPart += helper + "." + anEntry2AccessorMethod( anEntry );
+      removeObjPart += helper + "))" + nt + "if SO: aStudyBuilder.RemoveObjectWithChildren(SO)";
+    }
   }
 
   // Set object names
-
-  TCollection_AsciiString aGUIName, aSetNameScriptPart;
-  Resource_DataMapOfAsciiStringAsciiString mapEntries;
-  for (Standard_Integer i = 1; i <= aLen; i += 2)
+  TCollection_AsciiString setNamePart;
+  Resource_DataMapIteratorOfDataMapOfAsciiStringAsciiString mapEntriesIt;
+  for ( mapEntriesIt.Initialize( mapEntries ); mapEntriesIt.More(); mapEntriesIt.Next() )
   {
-    anEntry = aScript.SubString(aSeq->Value(i), aSeq->Value(i + 1));
-    aName = geom->GetDumpName( anEntry.ToCString() );
-    if (aName.IsEmpty() && // Not a GEOM object
-        theNames.IsBound(anEntry) &&
-        !aRemovedObjIDs.count(anEntry) && // a command creating anEntry was erased
-        !mapEntries.IsBound(anEntry) && // Not yet processed
-        !mapRemoved.IsBound(anEntry)) // Was not removed
+    anEntry = mapEntriesIt.Key();
+    aName   = mapEntriesIt.Value(); // python name
+    if ( theNames.IsBound( anEntry ))
     {
-      aName = theObjectNames.Find(anEntry);
       aGUIName = theNames.Find(anEntry);
-      mapEntries.Bind(anEntry, aName);
-      aSetNameScriptPart += helper + "\n\t" + aSMESHGen + ".SetName(" + aName;
+      setNamePart += nt + aSMESHGen + ".SetName(" + aName;
       if ( anEntry2AccessorMethod.IsBound( anEntry ) )
-        aSetNameScriptPart += helper + "." + anEntry2AccessorMethod( anEntry );
-      aSetNameScriptPart += helper + ", '" + aGUIName + "')";
+        setNamePart += helper + "." + anEntry2AccessorMethod( anEntry );
+      setNamePart += helper + ", '" + aGUIName + "')";
     }
   }
-  if ( !aSetNameScriptPart.IsEmpty() )
+  if ( !setNamePart.IsEmpty() )
   {
-    anUpdatedScript += "\n\t## set object names";
-    anUpdatedScript += aSetNameScriptPart;
+    setNamePart.Insert( 1, nt + "## Set names of Mesh objects" );
   }
 
-  // -----------------------------------------------------------------
-  // store visual properties of displayed objects
-  // -----------------------------------------------------------------
+  // Store visual properties of displayed objects
 
+  TCollection_AsciiString visualPropertiesPart;
   if (isPublished)
   {
     //Output the script that sets up the visual parameters.
-    char* script = theStudy->GetDefaultScript(ComponentDataType(), "\t");
-    if (script && strlen(script) > 0) {
-      anUpdatedScript += "\n\n\t### Store presentation parameters of displayed objects\n";
-      anUpdatedScript += script;
-      CORBA::string_free(script);
+    CORBA::String_var compDataType = ComponentDataType();
+    CORBA::String_var script = theStudy->GetDefaultScript( compDataType.in(), tab.ToCString() );
+    if ( script.in() && script[0] ) {
+      visualPropertiesPart += nt + "### Store presentation parameters of displayed objects\n";
+      visualPropertiesPart += script.in();
     }
   }
+
+  anUpdatedScript += removeObjPart + '\n' + setNamePart + '\n' + visualPropertiesPart;
 
   if( isMultiFile )
     anUpdatedScript += "\n\tpass";
   anUpdatedScript += "\n";
 
-  if( !isMultiFile ) // remove unnecessary tabulation
-    RemoveTabulation( anUpdatedScript );
+  // no need now as we use 'tab' and 'nt' variables depending on isMultiFile
+  // if( !isMultiFile ) // remove unnecessary tabulation
+  //   RemoveTabulation( anUpdatedScript );
 
   // -----------------------------------------------------------------
   // put string literals describing patterns into separate functions
@@ -1106,7 +1240,7 @@ TCollection_AsciiString SMESH_Gen_i::GetNewPythonLines (int theStudyID)
     Handle(TColStd_HSequenceOfAsciiString) aPythonScript = myPythonScripts[theStudyID];
     Standard_Integer istr, aLen = aPythonScript->Length();
     for (istr = 1; istr <= aLen; istr++) {
-      aScript += "\n\t";
+      aScript += "\n";
       aScript += aPythonScript->Value(istr);
     }
     aScript += "\n";

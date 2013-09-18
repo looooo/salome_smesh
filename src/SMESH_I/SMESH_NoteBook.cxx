@@ -865,6 +865,17 @@ TCollection_AsciiString SMESH_NoteBook::GetResultScript() const
 
 //================================================================================
 /*!
+ *  \brief Return lines of the result script
+ */
+//================================================================================
+void SMESH_NoteBook::GetResultLines(std::list< TCollection_AsciiString >& lines) const
+{
+  for(int i=0;i<_commands.size();i++)
+    lines.push_back( _commands[i]->GetString() );
+}
+
+//================================================================================
+/*!
  *  \brief Return value of the variable
  */
 //================================================================================

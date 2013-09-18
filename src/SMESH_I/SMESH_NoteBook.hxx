@@ -92,6 +92,7 @@ public:
   
   void AddCommand(const TCollection_AsciiString& theString);
   TCollection_AsciiString GetResultScript() const;
+  void GetResultLines(std::list< TCollection_AsciiString >& lines) const;
 
 private:
   void InitObjectMap();

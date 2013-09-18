@@ -896,6 +896,83 @@ bool SMESH_Gen::IsGlobalHypothesis(const SMESH_Hypothesis* theHyp, SMESH_Mesh& a
   return aMesh.GetHypothesis( aMesh.GetMeshDS()->ShapeToMesh(), filter, false );
 }
 
+//================================================================================
+/*!
+ * \brief Return paths to xml files of plugins
+ */
+//================================================================================
+
+std::vector< std::string > SMESH_Gen::GetPluginXMLPaths()
+{
+  // Get paths to xml files of plugins
+  vector< string > xmlPaths;
+  string sep;
+  if ( const char* meshersList = getenv("SMESH_MeshersList") )
+  {
+    string meshers = meshersList, plugin;
+    string::size_type from = 0, pos;
+    while ( from < meshers.size() )
+    {
+      // cut off plugin name
+      pos = meshers.find( ':', from );
+      if ( pos != string::npos )
+        plugin = meshers.substr( from, pos-from );
+      else
+        plugin = meshers.substr( from ), pos = meshers.size();
+      from = pos + 1;
+
+      // get PLUGIN_ROOT_DIR path
+      string rootDirVar, pluginSubDir = plugin;
+      if ( plugin == "StdMeshers" )
+        rootDirVar = "SMESH", pluginSubDir = "smesh";
+      else
+        for ( pos = 0; pos < plugin.size(); ++pos )
+          rootDirVar += toupper( plugin[pos] );
+      rootDirVar += "_ROOT_DIR";
+
+      const char* rootDir = getenv( rootDirVar.c_str() );
+      if ( !rootDir || strlen(rootDir) == 0 )
+      {
+        rootDirVar = plugin + "_ROOT_DIR"; // HexoticPLUGIN_ROOT_DIR
+        rootDir = getenv( rootDirVar.c_str() );
+        if ( !rootDir || strlen(rootDir) == 0 ) continue;
+      }
+
+      // get a separator from rootDir
+      for ( pos = strlen( rootDir )-1; pos >= 0 && sep.empty(); --pos )
+        if ( rootDir[pos] == '/' || rootDir[pos] == '\\' )
+        {
+          sep = rootDir[pos];
+          break;
+        }
+#ifdef WNT
+      if (sep.empty() ) sep = "\\";
+#else
+      if (sep.empty() ) sep = "/";
+#endif
+
+      // get a path to resource file
+      string xmlPath = rootDir;
+      if ( xmlPath[ xmlPath.size()-1 ] != sep[0] )
+        xmlPath += sep;
+      xmlPath += "share" + sep + "salome" + sep + "resources" + sep;
+      for ( pos = 0; pos < pluginSubDir.size(); ++pos )
+        xmlPath += tolower( pluginSubDir[pos] );
+      xmlPath += sep + plugin + ".xml";
+      bool fileOK;
+#ifdef WNT
+      fileOK = (GetFileAttributes(xmlPath.c_str()) != INVALID_FILE_ATTRIBUTES);
+#else
+      fileOK = (access(xmlPath.c_str(), F_OK) == 0);
+#endif
+      if ( fileOK )
+        xmlPaths.push_back( xmlPath );
+    }
+  }
+
+  return xmlPaths;
+}
+
 //=============================================================================
 /*!
  * Finds algo to mesh a shape. Optionally returns a shape the found algo is bound to

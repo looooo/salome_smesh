@@ -147,6 +147,8 @@ public:
   SMESH_Algo* GetAlgo(SMESH_Mesh & aMesh, const TopoDS_Shape & aShape, TopoDS_Shape* assignedTo=0);
   static bool IsGlobalHypothesis(const SMESH_Hypothesis* theHyp, SMESH_Mesh& aMesh);
 
+  static std::vector< std::string > GetPluginXMLPaths();
+
   int GetANewId();
 
   std::map < int, SMESH_Algo * >_mapAlgo;

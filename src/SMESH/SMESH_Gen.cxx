@@ -46,6 +46,10 @@
 
 #include "memoire.h"
 
+#ifdef WNT
+#include <windows.h>
+#endif
+
 using namespace std;
 
 //=============================================================================

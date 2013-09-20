@@ -895,10 +895,10 @@ TCollection_AsciiString SMESH_Gen_i::DumpPython_impl
   std::list< TCollection_AsciiString > lines; // lines of a script
   std::list< TCollection_AsciiString >::iterator linesIt;
   
-  if ( isPublished )
-    lines.push_back(  tab + aSMESHGen + " = smeshBuilder.New(theStudy)" );
-   else
-    lines.push_back(  tab + aSMESHGen + " = smeshBuilder.New(None)" );
+  // if ( isPublished )
+  //   lines.push_back(  tab + aSMESHGen + " = smeshBuilder.New(theStudy)" );
+  //  else
+  //   lines.push_back(  tab + aSMESHGen + " = smeshBuilder.New(None)" );
   lines.push_back(  tab + "aFilterManager = " + aSMESHGen + ".CreateFilterManager()" );
   lines.push_back(  tab + "aMeasurements = "  + aSMESHGen + ".CreateMeasurements()" );
 
@@ -1063,8 +1063,8 @@ TCollection_AsciiString SMESH_Gen_i::DumpPython_impl
   TCollection_AsciiString initPart = "import ";
   if ( isMultiFile )
     initPart += "salome, ";
-  initPart += " SMESH, SALOMEDS\n";
-  initPart += "from salome.smesh import smeshBuilder\n";
+  initPart += "smesh, SMESH, SALOMEDS\n";
+  //initPart += "from salome.smesh import smeshBuilder\n";
   if ( importGeom && isMultiFile )
   {
     initPart += ("\n## import GEOM dump file ## \n"
@@ -1084,13 +1084,13 @@ TCollection_AsciiString SMESH_Gen_i::DumpPython_impl
       int iFrom = 1, iPos;
       while (( iPos = anUpdatedScript.Location( pluginAccess, iFrom, anUpdatedScript.Length() )))
       {
-        anUpdatedScript.Insert( iPos + pluginNames[i].size(), "Builder" );
+        //anUpdatedScript.Insert( iPos + pluginNames[i].size(), "Builder" );
         iFrom = iPos + pluginNames[i].size() + 8;
       }
       // if any plugin member is used, import the plugin
       if ( iFrom > 1 )
         importStr += ( helper + "\n" "from salome." + pluginNames[i].c_str() +
-                       " import " + pluginNames[i].c_str() +"Builder" );
+                       " import " + pluginNames[i].c_str() /*+"Builder"*/ );
     }
     if ( !importStr.IsEmpty() )
       initPart += importStr + "\n";

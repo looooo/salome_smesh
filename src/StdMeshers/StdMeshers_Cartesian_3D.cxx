@@ -33,8 +33,8 @@
 #include "SMESH_subMeshEventListener.hxx"
 #include "StdMeshers_CartesianParameters3D.hxx"
 
-#include "utilities.h"
-#include "Utils_ExceptHandlers.hxx"
+#include <utilities.h>
+#include <Utils_ExceptHandlers.hxx>
 #include <Basics_OCCTVersion.hxx>
 
 #include <BRepAdaptor_Surface.hxx>
@@ -1309,7 +1309,7 @@ namespace
         _Link& link = _hexLinks[ iLink ];
         link._splits.clear();
         split._nodes[ 0 ] = link._nodes[0];
-        for ( size_t i = 0; i < link._intNodes.size(); ++ i )
+        for ( size_t i = 0; i < link._intNodes.size(); ++i )
         {
           if ( split._nodes[ 0 ]->Node() )
           {

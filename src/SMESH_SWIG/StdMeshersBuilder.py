@@ -552,28 +552,56 @@ class StdMeshersBuilder_Quadrangle(Mesh_Algorithm):
     #                    same number of segments, the other pair must have an even difference
     #                    between the numbers of segments on the sides.
     #  @param triangleVertex: vertex of a trilateral geometrical face, around which triangles
-    #                  will be created while other elements will be quadrangles.
-    #                  Vertex can be either a GEOM_Object or a vertex ID within the
-    #                  shape to mesh
-    #  @param UseExisting: if ==true - searches for the existing hypothesis created with
-    #                  the same parameters, else (default) - creates a new one
+    #                    will be created while other elements will be quadrangles.
+    #                    Vertex can be either a GEOM_Object or a vertex ID within the
+    #                    shape to mesh
+    #  @param enfVertices: list of shapes defining positions where nodes (enforced nodes)
+    #                    must be created by the mesher. Shapes can be of any type,
+    #                    vertices of given shapes define positions of enforced nodes.
+    #                    Only vertices successfully projected to the face are used.
+    #  @param enfPoint: list of points giving positions of enforced nodes.
+    #                    Point can be defined either as SMESH.PointStruct's
+    #                    ([SMESH.PointStruct(x1,y1,z1), SMESH.PointStruct(x2,y2,z2),...])
+    #                    or triples of values ([[x1,y1,z1], [x2,y2,z2], ...]).
+    #                    In the case if the defined QuadrangleParameters() refer to a sole face,
+    #                    all given points must lie on this face, else the mesher fails.
+    #  @param UseExisting: if \c True - searches for the existing hypothesis created with
+    #                    the same parameters, else (default) - creates a new one
     #  @ingroup l3_hypos_quad
-    def QuadrangleParameters(self, quadType=StdMeshers.QUAD_STANDARD, triangleVertex=0, UseExisting=0):
-        import GEOM
+    def QuadrangleParameters(self, quadType=StdMeshers.QUAD_STANDARD, triangleVertex=0,
+                             enfVertices=[],enfPoints=[],UseExisting=0):
+        import GEOM, SMESH
         vertexID = triangleVertex
         if isinstance( triangleVertex, GEOM._objref_GEOM_Object ):
             vertexID = self.mesh.geompyD.GetSubShapeID( self.mesh.geom, triangleVertex )
+        if isinstance( enfVertices, int ) and not enfPoints and not UseExisting:
+            # a call of old syntax, before inserting enfVertices and enfPoints before UseExisting
+            UseExisting, enfVertices = enfVertices, []
+        pStructs, xyz = [], []
+        for p in enfPoints:
+            if isinstance( p, SMESH.PointStruct ):
+                xyz.append(( p.x, p.y, p.z ))
+                pStructs.append( p )
+            else:
+                xyz.append(( p[0], p[1], p[2] ))
+                pStructs.append( SMESH.PointStruct( p[0], p[1], p[2] ))
         if not self.params:
             compFun = lambda hyp,args: \
                       hyp.GetQuadType() == args[0] and \
-                      ( hyp.GetTriaVertex()==args[1] or ( hyp.GetTriaVertex()<1 and args[1]<1))
-            self.params = self.Hypothesis("QuadrangleParams", [quadType,vertexID],
+                      (hyp.GetTriaVertex()==args[1] or ( hyp.GetTriaVertex()<1 and args[1]<1)) and \
+                      ((hyp.GetEnforcedNodes()) == (args[2],args[3])) # True w/o enfVertices only
+            entries = [ shape.GetStudyEntry() for shape in enfVertices ]
+            self.params = self.Hypothesis("QuadrangleParams", [quadType,vertexID,entries,xyz],
                                           UseExisting = UseExisting, CompareMethod=compFun)
             pass
         if self.params.GetQuadType() != quadType:
             self.params.SetQuadType(quadType)
         if vertexID > 0:
             self.params.SetTriaVertex( vertexID )
+        from salome.smesh.smeshBuilder import AssureGeomPublished
+        for v in enfVertices:
+            AssureGeomPublished( self.mesh, v )
+        self.params.SetEnforcedNodes( enfVertices, pStructs )
         return self.params
 
     ## Defines "QuadrangleParams" hypothesis with a type of quadrangulation that only

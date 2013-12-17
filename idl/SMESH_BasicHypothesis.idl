@@ -807,6 +807,22 @@ module StdMeshers
      * Get the type of quadrangulation
      */
     QuadType GetQuadType();
+
+    /*!
+     * Set positions of enforced nodes
+     */
+    void SetEnforcedNodes(in GEOM::ListOfGO vertices, in SMESH::nodes_array points)
+      raises (SALOME::SALOME_Exception);
+
+    /*!
+     * Returns positions of enforced nodes
+     */
+    void GetEnforcedNodes(out GEOM::ListOfGO vertices, out SMESH::nodes_array points);
+
+    /*!
+     * Returns entries of shapes defining enforced nodes
+     */
+    SMESH::string_array GetEnfVertices();
   };
 
   /*!

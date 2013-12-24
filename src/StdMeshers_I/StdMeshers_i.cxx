@@ -136,6 +136,8 @@ STDMESHERS_I_EXPORT
       aCreator = new StdHypothesisCreator_i<StdMeshers_NotConformAllowed_i>;
     else if (strcmp(aHypName, "Propagation") == 0)
       aCreator = new StdHypothesisCreator_i<StdMeshers_Propagation_i>;
+    else if (strcmp(aHypName, "PropagOfDistribution") == 0)
+      aCreator = new StdHypothesisCreator_i<StdMeshers_PropagOfDistribution_i>;
     else if (strcmp(aHypName, "MaxElementArea") == 0)
       aCreator = new StdHypothesisCreator_i<StdMeshers_MaxElementArea_i>;
     else if (strcmp(aHypName, "MaxElementVolume") == 0)

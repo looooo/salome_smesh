@@ -483,12 +483,24 @@ module StdMeshers
   };
 
   /*!
-   * StdMeshers_Propagation: interface of "Propagation" hypothesis.
+   * StdMeshers_Propagation: interface of "Propagation of 1D Hyp. on
+   * Opposite Edges" hypothesis.
    * Presence of this hypothesis on any edge propagates any other 1D
    * hypothesis from this edge on all edges, opposite to it.
    * It concerns only edges of quadrangle faces.
    */
   interface StdMeshers_Propagation : SMESH::SMESH_Hypothesis
+  {
+  };
+
+  /*!
+   * StdMeshers_Propagation: interface of "Propagation of Node
+   * Distribution on Opposite Edges" hypothesis.
+   * Presence of this hypothesis on any edge propagates distribution of nodes
+   * from this edge on all edges, opposite to it.
+   * It concerns only edges of quadrangle faces.
+   */
+  interface StdMeshers_PropagOfDistribution : SMESH::SMESH_Hypothesis
   {
   };
 

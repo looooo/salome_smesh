@@ -295,11 +295,22 @@ class StdMeshersBuilder_Segment(Mesh_Algorithm):
         hyp.SetDeflection(d)
         return hyp
 
-    ## Defines "Propagation" hypothesis that propagates all other hypotheses on all other edges that are at
-    #  the opposite side in case of quadrangular faces
+    ## Defines "Propagation" hypothesis that propagates 1D hypotheses
+    #  from an edge where this hypothesis is assigned to
+    #  on all other edges that are at the opposite side in case of quadrangular faces
+    #  This hypothesis should be assigned to an edge to propagate a hypothesis from.
     #  @ingroup l3_hypos_additi
     def Propagation(self):
         return self.Hypothesis("Propagation", UseExisting=1, CompareMethod=self.CompareEqualHyp)
+
+    ## Defines "Propagation of Node Distribution" hypothesis that propagates
+    #  distribution of nodes from an edge where this hypothesis is assigned to,
+    #  to opposite edges of quadrangular faces, so that number of segments on all these
+    #  edges will be the same, as well as relations between segment lengths. 
+    #  @ingroup l3_hypos_additi
+    def PropagationOfDistribution(self):
+        return self.Hypothesis("PropagOfDistribution", UseExisting=1,
+                               CompareMethod=self.CompareEqualHyp)
 
     ## Defines "AutomaticLength" hypothesis
     #  @param fineness for the fineness [0-1]

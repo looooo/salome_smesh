@@ -140,6 +140,7 @@ protected:
   // a source of propagated hypothesis, is set by CheckHypothesis()
   // always called before Compute()
   TopoDS_Shape _mainEdge;
+  bool         _isPropagOfDistribution;
 };
 
 #endif

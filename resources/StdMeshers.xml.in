@@ -86,6 +86,12 @@
                 dim      ="1"
                 auxiliary="true"/>
 
+    <hypothesis type     ="PropagOfDistribution"
+                label-id ="Propagation of Node Distribution on Opposite Edges"
+                icon-id  ="mesh_hypo_length.png"
+                dim      ="1"
+                auxiliary="true"/>
+
     <hypothesis type     ="AutomaticLength"
                 label-id ="Automatic Length"
                 icon-id  ="mesh_hypo_length.png"
@@ -206,7 +212,7 @@
 	       label-id ="Wire Discretisation"
 	       icon-id  ="mesh_algo_regular.png"
                hypos    ="Adaptive1D,LocalLength,MaxLength,Arithmetic1D,StartEndLength,NumberOfSegments,Deflection1D,AutomaticLength,FixedPoints1D"
-               opt-hypos="Propagation,QuadraticMesh"
+               opt-hypos="Propagation,PropagOfDistribution,QuadraticMesh"
                input    ="VERTEX"
                output   ="EDGE"
                dim      ="1">
@@ -229,7 +235,7 @@
 	       label-id ="Composite Side Discretisation"
 	       icon-id  ="mesh_algo_regular.png"
                hypos    ="Adaptive1D,LocalLength,MaxLength,Arithmetic1D,StartEndLength,NumberOfSegments,Deflection1D,AutomaticLength,FixedPoints1D"
-               opt-hypos="Propagation,QuadraticMesh"
+               opt-hypos="Propagation,PropagOfDistribution,QuadraticMesh"
                input    ="VERTEX"
                output   ="EDGE"
                dim      ="1">

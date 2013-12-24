@@ -232,6 +232,10 @@
             <translation>mesh_tree_hypo_length.png</translation>
         </message>
         <message>
+            <source>ICON_SMESH_TREE_HYPO_PropagOfDistribution</source>
+            <translation>mesh_tree_hypo_length.png</translation>
+        </message>
+        <message>
             <source>ICON_SMESH_TREE_HYPO_QuadranglePreference</source>
             <translation>mesh_tree_algo_quad.png</translation>
         </message>

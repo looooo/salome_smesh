@@ -23,7 +23,6 @@
 //  SMESH SMESH_I : idl implementation based on 'SMESH' unit's calsses
 //  File   : StdMeshers_Propagation_i.hxx
 //  Module : SMESH
-//  $Header$
 //
 #ifndef _SMESH_PROPAGATION_I_HXX_
 #define _SMESH_PROPAGATION_I_HXX_
@@ -41,6 +40,7 @@ class SMESH_Gen;
 // ======================================================
 // Propagation hypothesis
 // ======================================================
+
 class STDMESHERS_I_EXPORT StdMeshers_Propagation_i:
   public virtual POA_StdMeshers::StdMeshers_Propagation,
   public virtual SMESH_Hypothesis_i
@@ -50,11 +50,24 @@ public:
   StdMeshers_Propagation_i (PortableServer::POA_ptr thePOA,
                             int                     theStudyId,
                             ::SMESH_Gen*            theGenImpl);
-  // Destructor
-  virtual ~StdMeshers_Propagation_i();
+  
+  // Verify whether hypothesis supports given entity type 
+  CORBA::Boolean IsDimSupported( SMESH::Dimension type );
+};
 
-  // Get implementation
-  ::StdMeshers_Propagation* GetImpl();
+// ======================================================
+// Propagation of Distribution hypothesis
+// ======================================================
+
+class STDMESHERS_I_EXPORT StdMeshers_PropagOfDistribution_i:
+  public virtual POA_StdMeshers::StdMeshers_PropagOfDistribution,
+  public virtual SMESH_Hypothesis_i
+{
+public:
+  // Constructor
+  StdMeshers_PropagOfDistribution_i (PortableServer::POA_ptr thePOA,
+                                     int                     theStudyId,
+                                     ::SMESH_Gen*            theGenImpl);
   
   // Verify whether hypothesis supports given entity type 
   CORBA::Boolean IsDimSupported( SMESH::Dimension type );

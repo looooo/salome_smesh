@@ -41,6 +41,7 @@ There also exist
 with other hypotheses:
 <ul>
 <li>\ref propagation_anchor "Propagation of 1D Hypothesis on opposite edges"</li>
+<li>\ref propagofdistribution_anchor "Propagation of Node Distribution on Opposite Edges"</li>
 <li>\ref viscous_layers_anchor "Viscous layers"</li>
 <li>\ref quadratic_mesh_anchor "Quadratic mesh"</li>
 <li>\ref non_conform_allowed_anchor "Non conform mesh allowed"</li>

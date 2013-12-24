@@ -38,6 +38,19 @@ has been locally defined on the opposite edge.
 <br><b>See Also</b> a sample TUI Script of a 
 \ref tui_propagation "Propagation hypothesis" operation
 
+\anchor propagofdistribution_anchor
+<h2>Propagation of Node Distribution on Opposite Edges</h2>
+
+<b>Propagation of Node Distribution on Opposite Edges</b> allows to propagate
+distribution of nodes onto an opposite edge. If a local hypothesis and
+propagation are defined on an edge of a quadrangular face, the
+opposite edge will have the same number of nodes and the same
+relations between segment lengths, unless another hypothesis
+has been locally defined on the opposite edge.
+ 
+<br><b>See Also</b> a sample TUI Script of a 
+\ref tui_propagation "Propagation hypothesis" operation
+
 \anchor quadrangle_preference_anchor
 <h2>Quadrangle Preference</h2>
 

@@ -227,6 +227,7 @@
         <hypo>AutomaticLength=AutomaticLength(SetFineness())</hypo>
         <hypo>FixedPoints1D=FixedPoints1D(SetPoints(),SetNbSegments(),SetReversedEdges())</hypo>
         <hypo>Propagation=Propagation()</hypo>
+        <hypo>PropagOfDistribution=PropagationOfDistribution()</hypo>
         <hypo>QuadraticMesh=QuadraticMesh()</hypo>
       </python-wrap>
     </algorithm>
@@ -250,6 +251,7 @@
         <hypo>AutomaticLength=AutomaticLength(SetFineness())</hypo>
         <hypo>FixedPoints1D=FixedPoints1D(SetPoints(),SetNbSegments(),SetReversedEdges())</hypo>
         <hypo>Propagation=Propagation()</hypo>
+        <hypo>PropagOfDistribution=PropagationOfDistribution()</hypo>
         <hypo>QuadraticMesh=QuadraticMesh()</hypo>
       </python-wrap>
     </algorithm>

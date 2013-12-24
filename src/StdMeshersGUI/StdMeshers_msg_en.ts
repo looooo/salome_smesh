@@ -494,6 +494,10 @@
         <translation>Threshold</translation>
     </message>
     <message>
+        <source>ADD_EDGES</source>
+        <translation>Implement Edges</translation>
+    </message>
+    <message>
         <source>AXIS_X</source>
         <translation>Axis X</translation>
     </message>

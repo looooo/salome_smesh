@@ -459,7 +459,14 @@ namespace
       bool IsLinked( const B_IntersectPoint* other ) const
       {
         // node inside a SOLID is considered "linked" with any other node
-        return ( !other || !_intPoint ) ? true : _intPoint->HasCommonFace( other );
+        if ( !other || !_intPoint || _intPoint->HasCommonFace( other ))
+          return true;
+        const F_IntersectPoint* ip1 = dynamic_cast< const F_IntersectPoint* >( _intPoint );
+        const F_IntersectPoint* ip2 = dynamic_cast< const F_IntersectPoint* >( other );
+        if ( ip1 && ip2 )
+          return (( ip1->_transition != ip2->_transition ) &&
+                  ( ip1->_transition + ip2->_transition ) == Trans_IN + Trans_OUT );
+        return false;
       }
       bool IsOnFace( int faceID ) const // returns true if faceID is found
       {
@@ -591,8 +598,13 @@ namespace
     void addEdges(SMESH_MesherHelper&                      helper,
                   vector< Hexahedron* >&                   intersectedHex,
                   const map< TGeomID, vector< TGeomID > >& edge2faceIDsMap);
+    gp_Pnt findIntPoint( double u1, double proj1, double u2, double proj2,
+                         double proj, BRepAdaptor_Curve& curve,
+                         const gp_XYZ& axis, const gp_XYZ& origin );
     int  getEntity( const E_IntersectPoint* ip, int* facets, int& sub );
-    void addIntersection( const E_IntersectPoint& ip );
+    bool addIntersection( const E_IntersectPoint& ip,
+                          vector< Hexahedron* >&  hexes,
+                          int ijk[], int dIJK[] );
     bool findChain( _Node* n1, _Node* n2, _Face& quad, vector<_Node*>& chainNodes );
     int  addElements(SMESH_MesherHelper& helper);
     bool isInHole() const;
@@ -651,7 +663,8 @@ namespace
   /*!
    * \brief adjust \a i to have \a val between values[i] and values[i+1]
    */
-  inline void locateValue( int & i, double val, const vector<double>& values )
+  inline void locateValue( int & i, double val, const vector<double>& values,
+                           int& di, double tol )
   {
     val += values[0]; // input \a val is measured from 0.
     if ( i > values.size()-2 )
@@ -661,6 +674,13 @@ namespace
         ++i;
     while ( i > 0 && val < values[ i ])
       --i;
+
+    if ( i > 0 && val - values[ i ] < tol )
+      di = -1;
+    else if ( i+2 < values.size() && values[ i+1 ] - val < tol )
+      di = 1;
+    else
+      di = 0;
   }
   //=============================================================================
   /*
@@ -1636,8 +1656,6 @@ namespace
         } // switch( nbFacets )
 
       } // loop on _edgeIntPnts
-
-      //SMESHUtils::FreeVector( _edgeIntPnts );
     }
   }
   //================================================================================
@@ -1679,14 +1697,14 @@ namespace
 
     _Link polyLink;
 
-    bool hasEdgeIntersections = !_vertexNodes.empty();
+    bool hasEdgeIntersections = !_edgeIntPnts.empty();
 
     for ( int iF = 0; iF < 6; ++iF ) // loop on 6 sides of a hexahedron
     {
       _Face& quad = _hexQuads[ iF ] ;
 
-      if ( !quad._edgeNodes.empty() )
-        hasEdgeIntersections = true;
+      // if ( !quad._edgeNodes.empty() )
+      //   hasEdgeIntersections = true;
 
       _polygons.resize( _polygons.size() + 1 );
       _Face& polygon = _polygons.back();
@@ -1734,7 +1752,7 @@ namespace
           polygon._links.push_back( split );
         }
       }
-      if ( polygon._links.size() > 1 )
+      if ( !polygon._links.empty() && polygon._links.size() + quad._edgeNodes.size() > 1 )
       {
         _Node* n1 = polygon._links.back().LastNode();
         _Node* n2 = polygon._links.front().FirstNode();
@@ -1749,6 +1767,9 @@ namespace
             polygon._links.push_back( _OrientedLink( &polygon._polyLinks.back() ));
           }
         }
+      }
+      if ( polygon._links.size() >= 3 )
+      {
         // add polygon to its links
         for ( size_t iL = 0; iL < polygon._links.size(); ++iL )
         {
@@ -2139,6 +2160,7 @@ namespace
       }
     }
     const double deflection = _grid->_minCellSize / 20.;
+    const double tol        = _grid->_tol;
     // int facets[6] = { SMESH_Block::ID_F0yz, SMESH_Block::ID_F1yz,
     //                   SMESH_Block::ID_Fx0z, SMESH_Block::ID_Fx1z,
     //                   SMESH_Block::ID_Fxy0, SMESH_Block::ID_Fxy1 };
@@ -2170,7 +2192,7 @@ namespace
         double    xLen = _grid->_coords[ iDirX ].back() - _grid->_coords[ iDirX ][0];
         double    yLen = _grid->_coords[ iDirY ].back() - _grid->_coords[ iDirY ][0];
         double zFactor = _grid->_axes[ iDirZ ] * planes._zNorm;
-        //int*   zFacets = facets + iDirZ * 2;
+        int dIJK[3], d000[3] = { 0,0,0 };
 
         // locate the 1st point of a segment within the grid
         gp_XYZ p1     = discret.Value( 1 ).XYZ();
@@ -2181,9 +2203,9 @@ namespace
         int iX1       = int( uv.X() / xLen * ( _grid->_coords[ iDirX ].size() - 1. ));
         int iY1       = int( uv.Y() / yLen * ( _grid->_coords[ iDirY ].size() - 1. ));
         int iZ1       = int( zProj1 / planes._zProjs.back() * ( planes._zProjs.size() - 1. ));
-        locateValue( iX1, uv.X(), _grid->_coords[ iDirX ] );
-        locateValue( iY1, uv.Y(), _grid->_coords[ iDirY ] );
-        locateValue( iZ1, zProj1, planes._zProjs );
+        locateValue( iX1, uv.X(), _grid->_coords[ iDirX ], dIJK[ iDirX ], tol );
+        locateValue( iY1, uv.Y(), _grid->_coords[ iDirY ], dIJK[ iDirY ], tol );
+        locateValue( iZ1, zProj1, planes._zProjs         , dIJK[ iDirZ ], tol );
 
         int ijk[3]; // grid index where a segment intersect a plane
         ijk[ iDirX ] = iX1;
@@ -2194,15 +2216,14 @@ namespace
         ip._uvw[ iDirZ ] = zProj1 / zFactor + _grid->_coords[ iDirZ ][0];
 
         // add the 1st vertex point to a hexahedron
-        size_t hexIndex = _grid->CellIndex( ijk[0], ijk[1], ijk[2] );
-        if ( iDirZ == 0 && hexIndex < hexes.size() && hexes[ hexIndex ] )
+        if ( iDirZ == 0 )
         {
           //ip._shapeID = _grid->_shapes.Add( helper.IthVertex( 0, curve.Edge(),/*CumOri=*/false));
           ip._point   = p1;
           _grid->_edgeIntP.push_back( ip );
-          hexes[ hexIndex ]->addIntersection( _grid->_edgeIntP.back() );
+          if ( !addIntersection( _grid->_edgeIntP.back(), hexes, ijk, d000 ))
+            _grid->_edgeIntP.pop_back();
         }
-
         for ( int iP = 2; iP <= discret.NbPoints(); ++iP )
         {
           // locate the 2nd point of a segment within the grid
@@ -2210,35 +2231,34 @@ namespace
           double u2     = discret.Parameter( iP );
           double zProj2 = planes._zNorm * ( p2 - planes._origins[0] );
           int iZ2       = iZ1;
-          locateValue( iZ2, zProj2, planes._zProjs );
+          locateValue( iZ2, zProj2, planes._zProjs, dIJK[ iDirZ ], tol );
 
-          // treat intersections with planes between 2 points of a segment
+          // treat intersections with planes between 2 end points of a segment
           int dZ = ( iZ1 <= iZ2 ) ? +1 : -1;
           int iZ = iZ1 + ( iZ1 < iZ2 );
           for ( int i = 0, nb = Abs( iZ1 - iZ2 ); i < nb; ++i, iZ += dZ )
           {
-            double r  = (( planes._zProjs[ iZ ] - zProj1 ) / ( zProj2 - zProj1 ));
-            ip._point = curve.Value( u1 * ( 1 - r ) + u2 * r );
+            ip._point = findIntPoint( u1, zProj1, u2, zProj2,
+                                      planes._zProjs[ iZ ],
+                                      curve, planes._zNorm, planes._origins[0] );
             gp_XY uv  = planes.GetUV( ip._point, planes._origins[ iZ ]);
-            locateValue( ijk[ iDirX ], uv.X(), _grid->_coords[ iDirX ] );
-            locateValue( ijk[ iDirY ], uv.Y(), _grid->_coords[ iDirY ] );
+            locateValue( ijk[ iDirX ], uv.X(), _grid->_coords[ iDirX ], dIJK[ iDirX ], tol );
+            locateValue( ijk[ iDirY ], uv.Y(), _grid->_coords[ iDirY ], dIJK[ iDirY ], tol );
             ijk[ iDirZ ] = iZ;
             ip._uvw[ iDirX ] = uv.X()                         + _grid->_coords[ iDirX ][0];
             ip._uvw[ iDirY ] = uv.Y()                         + _grid->_coords[ iDirY ][0];
             ip._uvw[ iDirZ ] = planes._zProjs[ iZ ] / zFactor + _grid->_coords[ iDirZ ][0];
 
-            _grid->_edgeIntP.push_back( ip );
-
             // add ip to hex "above" the plane
-            hexIndex = _grid->CellIndex( ijk[0], ijk[1], ijk[2] );
-            if ( hexIndex < hexes.size() && hexes[ hexIndex ] )
-              hexes[ hexIndex ]->addIntersection( _grid->_edgeIntP.back() );
+            _grid->_edgeIntP.push_back( ip );
+            dIJK[ iDirZ ] = 0;
+            bool added = addIntersection(_grid->_edgeIntP.back(), hexes, ijk, dIJK);
 
             // add ip to hex "below" the plane
             ijk[ iDirZ ] = iZ-1;
-            hexIndex = _grid->CellIndex( ijk[0], ijk[1], ijk[2] );
-            if ( hexIndex < hexes.size() && hexes[ hexIndex ] )
-              hexes[ hexIndex ]->addIntersection( _grid->_edgeIntP.back() );
+            if ( !addIntersection( _grid->_edgeIntP.back(), hexes, ijk, dIJK ) &&
+                 !added)
+              _grid->_edgeIntP.pop_back();
           }
           iZ1    = iZ2;
           p1     = p2;
@@ -2250,19 +2270,16 @@ namespace
         {
           orig = planes._origins[0] + planes._zNorm * zProj1;
           uv   = planes.GetUV( p1, orig );
-          locateValue( ijk[ iDirX ], uv.X(), _grid->_coords[ iDirX ] );
-          locateValue( ijk[ iDirY ], uv.Y(), _grid->_coords[ iDirY ] );
+          locateValue( ijk[ iDirX ], uv.X(), _grid->_coords[ iDirX ], dIJK[ iDirX ], tol );
+          locateValue( ijk[ iDirY ], uv.Y(), _grid->_coords[ iDirY ], dIJK[ iDirY ], tol );
           ijk[ iDirZ ] = iZ1;
-          hexIndex = _grid->CellIndex( ijk[0], ijk[1], ijk[2] );
-          if ( hexIndex < hexes.size() && hexes[ hexIndex ] )
-          {
-            ip._uvw[ iDirX ] = uv.X()           + _grid->_coords[ iDirX ][0];
-            ip._uvw[ iDirY ] = uv.Y()           + _grid->_coords[ iDirY ][0];
-            ip._uvw[ iDirZ ] = zProj1 / zFactor + _grid->_coords[ iDirZ ][0];
-            ip._point   = p1;
-            _grid->_edgeIntP.push_back( ip );
-            hexes[ hexIndex ]->addIntersection( _grid->_edgeIntP.back() );
-          }
+          ip._uvw[ iDirX ] = uv.X()           + _grid->_coords[ iDirX ][0];
+          ip._uvw[ iDirY ] = uv.Y()           + _grid->_coords[ iDirY ][0];
+          ip._uvw[ iDirZ ] = zProj1 / zFactor + _grid->_coords[ iDirZ ][0];
+          ip._point = p1;
+          _grid->_edgeIntP.push_back( ip );
+          if ( !addIntersection( _grid->_edgeIntP.back(), hexes, ijk, d000 ))
+            _grid->_edgeIntP.pop_back();
         }
       } // loop on 3 grid directions
     } // loop on EDGEs
@@ -2293,6 +2310,42 @@ namespace
 
   //================================================================================
   /*!
+   * \brief Finds intersection of a curve with a plane
+   *  \param [in] u1 - parameter of one curve point
+   *  \param [in] proj1 - projection of the curve point to the plane normal
+   *  \param [in] u2 - parameter of another curve point
+   *  \param [in] proj2 - projection of the other curve point to the plane normal
+   *  \param [in] proj - projection of a point where the curve intersects the plane
+   *  \param [in] curve - the curve
+   *  \param [in] axis - the plane normal
+   *  \param [in] origin - the plane origin
+   *  \return gp_Pnt - the found intersection point
+   */
+  //================================================================================
+
+  gp_Pnt Hexahedron::findIntPoint( double u1, double proj1,
+                                   double u2, double proj2,
+                                   double proj,
+                                   BRepAdaptor_Curve& curve,
+                                   const gp_XYZ& axis,
+                                   const gp_XYZ& origin)
+  {
+    double r = (( proj - proj1 ) / ( proj2 - proj1 ));
+    double u = u1 * ( 1 - r ) + u2 * r;
+    gp_Pnt p = curve.Value( u );
+    double newProj =  axis * ( p.XYZ() - origin );
+    if ( Abs( proj - newProj ) > _grid->_tol / 10. )
+    {
+      if ( r > 0.5 )
+        return findIntPoint( u2, proj2, u, newProj, proj, curve, axis, origin );
+      else
+        return findIntPoint( u1, proj2, u, newProj, proj, curve, axis, origin );
+    }
+    return p;
+  }
+
+  //================================================================================
+  /*!
    * \brief Returns index of a hexahedron sub-entities holding a point
    *  \param [in] ip - intersection point
    *  \param [out] facets - 0-3 facets holding a point
@@ -2301,7 +2354,7 @@ namespace
    */
   int Hexahedron::getEntity( const E_IntersectPoint* ip, int* facets, int& sub )
   {
-    enum { X = 4, Y = 2, Z = 1 }; // == 100, 010, 001
+    enum { X = 1, Y = 2, Z = 4 }; // == 001, 010, 100
     int nbFacets = 0;
     int vertex = 0, egdeMask = 0;
 
@@ -2309,7 +2362,7 @@ namespace
       facets[ nbFacets++ ] = SMESH_Block::ID_F0yz;
       egdeMask |= X;
     }
-    if ( Abs( _grid->_coords[0][ _i+1 ] - ip->_uvw[0] ) < _grid->_tol ) {
+    else if ( Abs( _grid->_coords[0][ _i+1 ] - ip->_uvw[0] ) < _grid->_tol ) {
       facets[ nbFacets++ ] = SMESH_Block::ID_F1yz;
       vertex   |= X;
       egdeMask |= X;
@@ -2318,7 +2371,7 @@ namespace
       facets[ nbFacets++ ] = SMESH_Block::ID_Fx0z;
       egdeMask |= Y;
     }
-    if ( Abs( _grid->_coords[1][ _j+1 ] - ip->_uvw[1] ) < _grid->_tol ) {
+    else if ( Abs( _grid->_coords[1][ _j+1 ] - ip->_uvw[1] ) < _grid->_tol ) {
       facets[ nbFacets++ ] = SMESH_Block::ID_Fx1z;
       vertex   |= Y;
       egdeMask |= Y;
@@ -2327,57 +2380,75 @@ namespace
       facets[ nbFacets++ ] = SMESH_Block::ID_Fxy0;
       egdeMask |= Z;
     }
-    if ( Abs( _grid->_coords[2][ _k+1 ] - ip->_uvw[2] ) < _grid->_tol ) {
+    else if ( Abs( _grid->_coords[2][ _k+1 ] - ip->_uvw[2] ) < _grid->_tol ) {
       facets[ nbFacets++ ] = SMESH_Block::ID_Fxy1;
       vertex   |= Z;
       egdeMask |= Z;
     }
-    if ( nbFacets == 3 )
+
+    switch ( nbFacets )
     {
-      sub = vertex + SMESH_Block::ID_FirstV;
-    }
-    else if ( nbFacets == 2 )
-    {
+    case 0: sub = 0;         break;
+    case 1: sub = facets[0]; break;
+    case 2: {
       const int edge [3][8] = {
-        { SMESH_Block::ID_E00z, 0, SMESH_Block::ID_E01z, 0,
-          SMESH_Block::ID_E10z, 0, SMESH_Block::ID_E11z },
-        { SMESH_Block::ID_E0y0, SMESH_Block::ID_E0y1, 0, 0,
-          SMESH_Block::ID_E1y0, SMESH_Block::ID_E1y1, 0, 0 },
-        { SMESH_Block::ID_Ex00, SMESH_Block::ID_Ex01,
-          SMESH_Block::ID_Ex10, SMESH_Block::ID_Ex11, 0, 0, 0, 0 }
+        { SMESH_Block::ID_E00z, SMESH_Block::ID_E10z,
+          SMESH_Block::ID_E01z, SMESH_Block::ID_E11z },
+        { SMESH_Block::ID_E0y0, SMESH_Block::ID_E1y0, 0, 0,
+          SMESH_Block::ID_E0y1, SMESH_Block::ID_E1y1 },
+        { SMESH_Block::ID_Ex00, 0, SMESH_Block::ID_Ex10, 0,
+          SMESH_Block::ID_Ex01, 0, SMESH_Block::ID_Ex11 }
       };
       switch ( egdeMask ) {
       case X | Y: sub = edge[ 0 ][ vertex ]; break;
       case X | Z: sub = edge[ 1 ][ vertex ]; break;
       default:    sub = edge[ 2 ][ vertex ];
       }
+      break;
     }
-    else if ( nbFacets == 1 )
-    {
-      sub = facets[0];
+    //case 3:
+    default:
+      sub = vertex + SMESH_Block::ID_FirstV;
     }
-    else // nbFacets == 0
-    {
-    }
+
     return nbFacets;
   }
   //================================================================================
   /*!
-   * \brief Adds intersection with an EDGE, either to a _Face or inside a hex
+   * \brief Adds intersection with an EDGE
    */
-  void Hexahedron::addIntersection( const E_IntersectPoint& ip )
+  bool Hexahedron::addIntersection( const E_IntersectPoint& ip,
+                                    vector< Hexahedron* >&  hexes,
+                                    int ijk[], int dIJK[] )
   {
-    // check if ip is really inside the hex
+    bool added = false;
+
+    size_t hexIndex[4] = {
+      _grid->CellIndex( ijk[0], ijk[1], ijk[2] ),
+      dIJK[0] ? _grid->CellIndex( ijk[0]+dIJK[0], ijk[1], ijk[2] ) : -1,
+      dIJK[1] ? _grid->CellIndex( ijk[0], ijk[1]+dIJK[1], ijk[2] ) : -1,
+      dIJK[2] ? _grid->CellIndex( ijk[0], ijk[1], ijk[2]+dIJK[2] ) : -1
+    };
+    for ( int i = 0; i < 4; ++i )
+    {
+      if ( 0 <= hexIndex[i] && hexIndex[i] < hexes.size() && hexes[ hexIndex[i] ] )
+      {
+        Hexahedron* h = hexes[ hexIndex[i] ];
+        // check if ip is really inside the hex
 #ifdef _DEBUG_
-    if (( _grid->_coords[0][ _i   ] - _grid->_tol > ip._uvw[0] ) ||
-        ( _grid->_coords[0][ _i+1 ] + _grid->_tol < ip._uvw[0] ) ||
-        ( _grid->_coords[1][ _j   ] - _grid->_tol > ip._uvw[1] ) ||
-        ( _grid->_coords[1][ _j+1 ] + _grid->_tol < ip._uvw[1] ) ||
-        ( _grid->_coords[2][ _k   ] - _grid->_tol > ip._uvw[2] ) ||
-        ( _grid->_coords[2][ _k+1 ] + _grid->_tol < ip._uvw[2] ))
-      throw SALOME_Exception("ip outside a hex");
+        if (( _grid->_coords[0][ h->_i   ] - _grid->_tol > ip._uvw[0] ) ||
+            ( _grid->_coords[0][ h->_i+1 ] + _grid->_tol < ip._uvw[0] ) ||
+            ( _grid->_coords[1][ h->_j   ] - _grid->_tol > ip._uvw[1] ) ||
+            ( _grid->_coords[1][ h->_j+1 ] + _grid->_tol < ip._uvw[1] ) ||
+            ( _grid->_coords[2][ h->_k   ] - _grid->_tol > ip._uvw[2] ) ||
+            ( _grid->_coords[2][ h->_k+1 ] + _grid->_tol < ip._uvw[2] ))
+          throw SALOME_Exception("ip outside a hex");
 #endif
-    _edgeIntPnts.push_back( & ip );
+        h->_edgeIntPnts.push_back( & ip );
+        added = true;
+      }
+    }
+    return added;
   }
   //================================================================================
   /*!

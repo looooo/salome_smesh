@@ -23,12 +23,20 @@
         <translation>Arithmetic 1D</translation>
     </message>
     <message>
-        <source>SMESH_ARITHMETIC_1D_PARAM</source>
-        <translation>Arithmetic Reason</translation>
-    </message>
-    <message>
         <source>SMESH_ARITHMETIC_1D_TITLE</source>
         <translation>Hypothesis Construction</translation>
+    </message>
+    <message>
+        <source>SMESH_GEOMETRIC_1D_HYPOTHESIS</source>
+        <translation>Geometric Progression</translation>
+    </message>
+    <message>
+        <source>SMESH_GEOMETRIC_1D_TITLE</source>
+        <translation>Hypothesis Construction</translation>
+    </message>
+    <message>
+        <source>SMESH_COMMON_RATIO</source>
+        <translation>Common Ratio</translation>
     </message>
     <message>
         <source>SMESH_AUTOMATIC_LENGTH_HYPOTHESIS</source>

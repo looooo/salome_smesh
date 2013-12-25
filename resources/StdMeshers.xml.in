@@ -55,6 +55,11 @@
                 icon-id  ="mesh_hypo_length.png"
                 dim      ="1"/>
 
+    <hypothesis type     ="GeometricProgression"
+                label-id ="Geometric Progression"
+                icon-id  ="mesh_hypo_length.png"
+                dim      ="1"/>
+
     <hypothesis type     ="FixedPoints1D"
                 label-id ="Fixed Points 1D"
                 icon-id  ="mesh_hypo_length.png"
@@ -211,7 +216,7 @@
     <algorithm type     ="Regular_1D"
 	       label-id ="Wire Discretisation"
 	       icon-id  ="mesh_algo_regular.png"
-               hypos    ="Adaptive1D,LocalLength,MaxLength,Arithmetic1D,StartEndLength,NumberOfSegments,Deflection1D,AutomaticLength,FixedPoints1D"
+               hypos    ="Adaptive1D,LocalLength,MaxLength,Arithmetic1D,GeometricProgression,StartEndLength,NumberOfSegments,Deflection1D,AutomaticLength,FixedPoints1D"
                opt-hypos="Propagation,PropagOfDistribution,QuadraticMesh"
                input    ="VERTEX"
                output   ="EDGE"
@@ -221,6 +226,7 @@
         <hypo>LocalLength=LocalLength(SetLength(1),,SetPrecision(1))</hypo>
         <hypo>MaxLength=MaxSize(SetLength(1))</hypo>
         <hypo>Arithmetic1D=Arithmetic1D(SetStartLength(),SetEndLength(),SetReversedEdges())</hypo>
+        <hypo>GeometricProgression=GeometricProgression(SetStartLength(),SetCommonRatio(),SetReversedEdges())</hypo>
         <hypo>StartEndLength=StartEndLength(SetStartLength(),SetEndLength(),SetReversedEdges())</hypo>
         <hypo>Deflection1D=Deflection1D(SetDeflection())</hypo>
         <hypo>Adaptive1D=Adaptive(SetMinSize(),SetMaxSize(),SetDeflection())</hypo>
@@ -235,7 +241,7 @@
     <algorithm type     ="CompositeSegment_1D"
 	       label-id ="Composite Side Discretisation"
 	       icon-id  ="mesh_algo_regular.png"
-               hypos    ="Adaptive1D,LocalLength,MaxLength,Arithmetic1D,StartEndLength,NumberOfSegments,Deflection1D,AutomaticLength,FixedPoints1D"
+               hypos    ="Adaptive1D,LocalLength,MaxLength,Arithmetic1D,GeometricProgression,StartEndLength,NumberOfSegments,Deflection1D,AutomaticLength,FixedPoints1D"
                opt-hypos="Propagation,PropagOfDistribution,QuadraticMesh"
                input    ="VERTEX"
                output   ="EDGE"
@@ -245,6 +251,7 @@
         <hypo>LocalLength=LocalLength(SetLength(), ,SetPrecision())</hypo>
         <hypo>MaxLength=MaxSize(SetLength())</hypo>
         <hypo>Arithmetic1D=Arithmetic1D(SetStartLength(),SetEndLength(),SetReversedEdges())</hypo>
+        <hypo>GeometricProgression=GeometricProgression(SetStartLength(),SetCommonRatio(),SetReversedEdges())</hypo>
         <hypo>StartEndLength=StartEndLength(SetStartLength(),SetEndLength(),SetReversedEdges())</hypo>
         <hypo>Deflection1D=Deflection1D(SetDeflection())</hypo>
         <hypo>Adaptive1D=Adaptive(SetMinSize(),SetMaxSize(),SetDeflection())</hypo>

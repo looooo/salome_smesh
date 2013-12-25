@@ -35,6 +35,7 @@
 #include "StdMeshers_AutomaticLength_i.hxx"
 #include "StdMeshers_StartEndLength_i.hxx"
 #include "StdMeshers_Arithmetic1D_i.hxx"
+#include "StdMeshers_Geometric1D_i.hxx"
 #include "StdMeshers_FixedPoints1D_i.hxx"
 #include "StdMeshers_NumberOfSegments_i.hxx"
 #include "StdMeshers_Deflection1D_i.hxx"
@@ -152,6 +153,8 @@ STDMESHERS_I_EXPORT
       aCreator = new StdHypothesisCreator_i<StdMeshers_FixedPoints1D_i>;
     else if (strcmp(aHypName, "Arithmetic1D") == 0)
       aCreator = new StdHypothesisCreator_i<StdMeshers_Arithmetic1D_i>;
+    else if (strcmp(aHypName, "GeometricProgression") == 0)
+      aCreator = new StdHypothesisCreator_i<StdMeshers_Geometric1D_i>;
     else if (strcmp(aHypName, "AutomaticLength") == 0)
       aCreator = new StdHypothesisCreator_i<StdMeshers_AutomaticLength_i>;
     else if (strcmp(aHypName, "QuadranglePreference") == 0)

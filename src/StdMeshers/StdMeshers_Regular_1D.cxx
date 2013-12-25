@@ -37,6 +37,7 @@
 #include "SMESH_subMeshEventListener.hxx"
 #include "StdMeshers_Adaptive1D.hxx"
 #include "StdMeshers_Arithmetic1D.hxx"
+#include "StdMeshers_Geometric1D.hxx"
 #include "StdMeshers_AutomaticLength.hxx"
 #include "StdMeshers_Deflection1D.hxx"
 #include "StdMeshers_Distribution.hxx"
@@ -89,6 +90,7 @@ StdMeshers_Regular_1D::StdMeshers_Regular_1D(int hypId, int studyId,
   _compatibleHypothesis.push_back("StartEndLength");
   _compatibleHypothesis.push_back("Deflection1D");
   _compatibleHypothesis.push_back("Arithmetic1D");
+  _compatibleHypothesis.push_back("GeometricProgression");
   _compatibleHypothesis.push_back("FixedPoints1D");
   _compatibleHypothesis.push_back("AutomaticLength");
   _compatibleHypothesis.push_back("Adaptive1D");
@@ -218,6 +220,21 @@ bool StdMeshers_Regular_1D::CheckHypothesis( SMESH_Mesh&         aMesh,
     _value[ END_LENGTH_IND ] = hyp->GetLength( false );
     ASSERT( _value[ BEG_LENGTH_IND ] > 0 && _value[ END_LENGTH_IND ] > 0 );
     _hypType = ARITHMETIC_1D;
+
+    _revEdgesIDs = hyp->GetReversedEdges();
+
+    aStatus = SMESH_Hypothesis::HYP_OK;
+  }
+
+  else if (hypName == "GeometricProgression")
+  {
+    const StdMeshers_Geometric1D * hyp =
+      dynamic_cast <const StdMeshers_Geometric1D * >(theHyp);
+    ASSERT(hyp);
+    _value[ BEG_LENGTH_IND ] = hyp->GetStartLength();
+    _value[ END_LENGTH_IND ] = hyp->GetCommonRatio();
+    ASSERT( _value[ BEG_LENGTH_IND ] > 0 && _value[ END_LENGTH_IND ] > 0 );
+    _hypType = GEOMETRIC_1D;
 
     _revEdgesIDs = hyp->GetReversedEdges();
 
@@ -877,9 +894,54 @@ bool StdMeshers_Regular_1D::computeInternalParameters(SMESH_Mesh &     theMesh,
     return true;
   }
 
+  case GEOMETRIC_1D: {
+
+    double a1 = _value[ BEG_LENGTH_IND ], an;
+    double q  = _value[ END_LENGTH_IND ];
+
+    double U1 = theReverse ? l : f;
+    double Un = theReverse ? f : l;
+    double param = U1;
+    double eltSize = a1;
+    if ( theReverse )
+      eltSize = -eltSize;
+
+    int nbParams = 0;
+    while ( true ) {
+      // computes a point on a curve <theC3d> at the distance <eltSize>
+      // from the point of parameter <param>.
+      GCPnts_AbscissaPoint Discret( theC3d, eltSize, param );
+      if ( !Discret.IsDone() ) break;
+      param = Discret.Parameter();
+      if ( f < param && param < l )
+        theParams.push_back( param );
+      else
+        break;
+      an = eltSize;
+      eltSize *= q;
+      ++nbParams;
+    }
+    if ( nbParams > 1 )
+    {
+      if ( Abs( param - Un ) < 0.2 * Abs( param - theParams.back() ))
+      {
+        compensateError( a1, eltSize, U1, Un, theLength, theC3d, theParams );
+      }
+      else if ( Abs( Un - theParams.back() ) <
+                0.2 * Abs( theParams.back() - *(--theParams.rbegin())))
+      {
+        theParams.pop_back();
+        compensateError( a1, an, U1, Un, theLength, theC3d, theParams );
+      }
+    }
+    if (theReverse) theParams.reverse(); // NPAL18025
+
+    return true;
+  }
+
   case FIXED_POINTS_1D: {
     const std::vector<double>& aPnts = _fpHyp->GetPoints();
-    const std::vector<int>& nbsegs = _fpHyp->GetNbSegments();
+    const std::vector<int>&   nbsegs = _fpHyp->GetNbSegments();
     int i = 0;
     TColStd_SequenceOfReal Params;
     for(; i<aPnts.size(); i++) {

@@ -20,6 +20,7 @@ In \b MESH there are the following Basic Hypotheses:
 <li>\ref max_length_anchor "Max Size"</li>
 <li>\ref adaptive_1d_anchor "Adaptive"</li>
 <li>\ref arithmetic_1d_anchor "Arithmetic 1D"</li>
+<li>\ref geometric_1d_anchor "Geometric 1D"</li>
 <li>\ref start_and_end_length_anchor "Start and end length"</li>
 <li>\ref deflection_1d_anchor "Deflection 1D"</li>
 <li>\ref automatic_length_anchor "Automatic Length"</li>

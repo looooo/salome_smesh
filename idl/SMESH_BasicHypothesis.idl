@@ -128,9 +128,35 @@ module StdMeshers
   };
 
   /*!
+   * Common inteface of 1D hypotheses that can be reversed
+   */
+  interface Reversible1D
+  {
+    /*!
+     * Set list of edges to reverse
+     */
+    void SetReversedEdges( in SMESH::long_array list );
+    
+    /*!
+     * Returns list of edges to reverse
+     */
+    SMESH::long_array GetReversedEdges();
+    
+    /*!
+     * Set entry of the main object
+     */
+    void SetObjectEntry( in string entry );
+    
+    /*!
+     * Get the entry of the main object
+     */
+    string GetObjectEntry();
+  };
+
+  /*!
    * StdMeshers_NumberOfSegments: interface of "Nb. Segments" hypothesis
    */
-  interface StdMeshers_NumberOfSegments : SMESH::SMESH_Hypothesis
+  interface StdMeshers_NumberOfSegments : SMESH::SMESH_Hypothesis, Reversible1D
   {
     /*!
      * Builds and returns point distribution according to passed density function
@@ -209,32 +235,12 @@ module StdMeshers
      */
     long ConversionMode()
       raises (SALOME::SALOME_Exception);
-
-    /*!
-     * Set list of edges to reverse
-     */
-    void SetReversedEdges( in SMESH::long_array list );
-    
-    /*!
-     * Returns list of edges to reverse
-     */
-    SMESH::long_array GetReversedEdges();
-    
-    /*!
-     * Set entry of the main object
-     */
-    void SetObjectEntry( in string entry );
-    
-    /*!
-     * Get the entry of the main object
-     */
-    string GetObjectEntry();
   };
 
   /*!
    * StdMeshers_Arithmetic1D: interface of "Arithmetic 1D" hypothesis
    */
-  interface StdMeshers_Arithmetic1D : SMESH::SMESH_Hypothesis
+  interface StdMeshers_Arithmetic1D : SMESH::SMESH_Hypothesis, Reversible1D
   {
     /*!
      * Sets <start segment length> or <end segment length> parameter value
@@ -260,26 +266,36 @@ module StdMeshers
      * Returns <start segment length> or <end segment length> parameter value
      */
     double GetLength(in boolean isStartLength);
-    
+
+  };
+
+  /*!
+   * StdMeshers_Arithmetic1D: interface of "Geometric 1D" hypothesis
+   */
+  interface StdMeshers_Geometric1D : SMESH::SMESH_Hypothesis, Reversible1D
+  {
     /*!
-     * Set list of edges to reverse
+     * Sets length of the first segment
      */
-    void SetReversedEdges( in SMESH::long_array list );
-    
+    void SetStartLength(in double length) 
+      raises (SALOME::SALOME_Exception);
+
     /*!
-     * Returns list of edges to reverse
+     * Sets value of Common Ratio
      */
-    SMESH::long_array GetReversedEdges();
-    
+    void SetCommonRatio(in double factor)
+      raises (SALOME::SALOME_Exception);
+
     /*!
-     * Set entry of the main object
+     * Returns length of the first segment
      */
-    void SetObjectEntry( in string entry );
-    
+    double GetStartLength();
+
     /*!
-     * Get the entry of the main object
+     * Returns value of Common Ratio
      */
-    string GetObjectEntry();
+    double GetCommonRatio();
+
   };
 
   /*!
@@ -319,7 +335,7 @@ module StdMeshers
   /*!
    * StdMeshers_StartEndLength: interface of "Start and End Length" hypothesis
    */
-  interface StdMeshers_StartEndLength : SMESH::SMESH_Hypothesis
+  interface StdMeshers_StartEndLength : SMESH::SMESH_Hypothesis, Reversible1D
   {
     /*!
      * Sets <start segment length> or <end segment length> parameter value
@@ -346,25 +362,6 @@ module StdMeshers
      */
     double GetLength(in boolean isStartLength);
 
-    /*!
-     * Set list of edges to reverse
-     */
-    void SetReversedEdges( in SMESH::long_array list );
-    
-    /*!
-     * Returns list of edges to reverse
-     */
-    SMESH::long_array GetReversedEdges();
-    
-    /*!
-     * Set entry of the main object
-     */
-    void SetObjectEntry( in string entry );
-    
-    /*!
-     * Get the entry of the main object
-     */
-    string GetObjectEntry();
   };
 
 
@@ -388,7 +385,7 @@ module StdMeshers
   /*!
    * StdMeshers_FixedPoints1D: interface of "Fixed points 1D" hypothesis
    */
-  interface StdMeshers_FixedPoints1D : SMESH::SMESH_Hypothesis
+  interface StdMeshers_FixedPoints1D : SMESH::SMESH_Hypothesis, Reversible1D
   {
     /*!
      * Sets some points on edge using parameter on curve from 0 to 1
@@ -410,26 +407,7 @@ module StdMeshers
      * Returns list of numbers of segments
      */
     SMESH::long_array GetNbSegments();
-    
-    /*!
-     * Set list of edges to reverse
-     */
-    void SetReversedEdges( in SMESH::long_array list );
-    
-    /*!
-     * Returns list of edges to reverse
-     */
-    SMESH::long_array GetReversedEdges();
-    
-    /*!
-     * Set entry of the main object
-     */
-    void SetObjectEntry( in string entry );
-    
-    /*!
-     * Get the entry of the main object
-     */
-    string GetObjectEntry();
+
   };
 
   /*!

@@ -284,7 +284,7 @@ public:
                               std::list< int >  &       theNbEdgesInWires,
                               TopoDS_Vertex             theFirstVertex=TopoDS_Vertex(),
                               const bool                theShapeAnalysisAlgo=false);
-  // Return nb wires and a list of oredered edges.
+  // Return nb wires and a list of ordered edges.
   // It is used to assign indices to subshapes.
   // theFirstVertex may be NULL.
   // Always try to set a seam edge first

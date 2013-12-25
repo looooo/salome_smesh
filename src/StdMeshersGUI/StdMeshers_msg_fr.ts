@@ -4,6 +4,18 @@
 <context>
     <name>@default</name>
     <message>
+        <source>SMESH_COMMON_RATIO</source>
+        <translation type="unfinished">Common Ratio</translation>
+    </message>
+    <message>
+        <source>SMESH_GEOMETRIC_1D_TITLE</source>
+        <translation type="unfinished">Hypothesis Construction</translation>
+    </message>
+    <message>
+        <source>SMESH_GEOMETRIC_1D_HYPOTHESIS</source>
+        <translation type="unfinished">Geometric Progression</translation>
+    </message>
+    <message>
         <source>SMESH_EDGES_WITH_LAYERS</source>
         <translation type="unfinished">Edges with layers</translation>
     </message>

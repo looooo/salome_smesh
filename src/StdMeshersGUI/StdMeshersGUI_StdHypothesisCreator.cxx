@@ -523,6 +523,23 @@ QString StdMeshersGUI_StdHypothesisCreator::storeParams() const
         h->SetObjectEntry( w->GetMainShapeEntry() );
       }
     }
+    else if( hypType()=="GeometricProgression" )
+    {
+      StdMeshers::StdMeshers_Geometric1D_var h =
+        StdMeshers::StdMeshers_Geometric1D::_narrow( hypothesis() );
+
+      StdMeshersGUI_SubShapeSelectorWdg* w = 
+        widget< StdMeshersGUI_SubShapeSelectorWdg >( 2 );
+
+      h->SetVarParameter( params[0].text(), "SetStartLength" );
+      h->SetStartLength( params[0].myValue.toDouble() );
+      h->SetVarParameter( params[1].text(), "SetCommonRatio" );
+      h->SetCommonRatio( params[1].myValue.toDouble() );
+      if (w) {
+        h->SetReversedEdges( w->GetListOfIDs() );
+        h->SetObjectEntry( w->GetMainShapeEntry() );
+      }
+    }
     else if( hypType()=="FixedPoints1D" )
     {
       StdMeshers::StdMeshers_FixedPoints1D_var h =
@@ -878,6 +895,41 @@ bool StdMeshersGUI_StdHypothesisCreator::stdParams( ListOfStdParams& p ) const
     customWidgets()->append ( aDirectionWidget );
   }
 
+  else if( hypType()=="GeometricProgression" )
+  {
+    StdMeshers::StdMeshers_Geometric1D_var h =
+      StdMeshers::StdMeshers_Geometric1D::_narrow( hyp );
+
+    item.myName = tr( "SMESH_START_LENGTH_PARAM" );
+    if(!initVariableName( hyp, item, "SetStartLength" ))
+      item.myValue = h->GetStartLength();
+    p.append( item );
+
+    customWidgets()->append (0);
+
+    item.myName = tr( "SMESH_COMMON_RATIO" );
+    if(!initVariableName( hyp, item, "SetCommonRatio" ))
+      item.myValue = h->GetCommonRatio();
+    p.append( item );
+
+    customWidgets()->append (0);
+
+    item.myName = tr( "SMESH_REVERSED_EDGES" );
+    p.append( item );
+
+    StdMeshersGUI_SubShapeSelectorWdg* aDirectionWidget =
+      new StdMeshersGUI_SubShapeSelectorWdg();
+    QString aGeomEntry = SMESHGUI_GenericHypothesisCreator::getShapeEntry();
+    QString aMainEntry = SMESHGUI_GenericHypothesisCreator::getMainShapeEntry();
+    if ( aGeomEntry == "" )
+      aGeomEntry = h->GetObjectEntry();
+
+    aDirectionWidget->SetGeomShapeEntry( aGeomEntry );
+    aDirectionWidget->SetMainShapeEntry( aMainEntry );
+    aDirectionWidget->SetListOfIDs( h->GetReversedEdges() );
+    aDirectionWidget->showPreview( true );
+    customWidgets()->append ( aDirectionWidget );
+  }
 
   else if( hypType()=="FixedPoints1D" )
   {
@@ -1325,6 +1377,13 @@ void StdMeshersGUI_StdHypothesisCreator::attuneStdWidget (QWidget* w, const int)
     {
       sb->RangeStepAndValidator( VALUE_SMALL, VALUE_MAX, 1.0, "parametric_precision" );
     }
+    else if( hypType()=="GeometricProgression" )
+    {
+      if (sb->objectName() == tr("SMESH_START_LENGTH_PARAM"))
+        sb->RangeStepAndValidator( VALUE_SMALL, VALUE_MAX, 1.0, "length_precision" );
+      else if (sb->objectName() == tr("SMESH_COMMON_RATIO"))
+        sb->RangeStepAndValidator( -VALUE_MAX, VALUE_MAX, 0.5, "len_tol_precision" );
+    }
     else if( hypType()=="MaxLength" )
     {
       sb->RangeStepAndValidator( VALUE_SMALL, VALUE_MAX, 1.0, "length_precision" );
@@ -1423,6 +1482,7 @@ QString StdMeshersGUI_StdHypothesisCreator::hypTypeName( const QString& t ) cons
     types.insert( "Deflection1D", "DEFLECTION1D" );
     types.insert( "Adaptive1D", "ADAPTIVE1D" );
     types.insert( "Arithmetic1D", "ARITHMETIC_1D" );
+    types.insert( "GeometricProgression", "GEOMETRIC_1D" );
     types.insert( "FixedPoints1D", "FIXED_POINTS_1D" );
     types.insert( "AutomaticLength", "AUTOMATIC_LENGTH" );
     types.insert( "ProjectionSource1D", "PROJECTION_SOURCE_1D" );

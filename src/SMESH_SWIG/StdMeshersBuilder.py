@@ -199,7 +199,8 @@ class StdMeshersBuilder_Segment(Mesh_Algorithm):
         hyp.SetDeflection(deflection)
         return hyp
 
-    ## Defines "Arithmetic1D" hypothesis to cut an edge in several segments with increasing arithmetic length
+    ## Defines "Arithmetic1D" hypothesis to cut an edge in several segments with a length
+    #  that changes in arithmetic progression
     #  @param start defines the length of the first segment
     #  @param end   defines the length of the last  segment
     #  @param reversedEdges is a list of edges to mesh using reversed orientation.
@@ -226,6 +227,32 @@ class StdMeshersBuilder_Segment(Mesh_Algorithm):
         hyp.SetObjectEntry( entry )
         return hyp
 
+    ## Defines "GeometricProgression" hypothesis to cut an edge in several
+    #  segments with a length that changes in Geometric progression
+    #  @param start defines the length of the first segment
+    #  @param ratio defines the common ratio of the geometric progression
+    #  @param reversedEdges is a list of edges to mesh using reversed orientation.
+    #                       A list item can also be a tuple (edge, 1st_vertex_of_edge)
+    #  @param UseExisting if ==true - searches for an existing hypothesis created with
+    #                     the same parameters, else (default) - creates a new one
+    #  @return an instance of StdMeshers_Geometric1D hypothesis
+    #  @ingroup l3_hypos_1dhyps
+    def GeometricProgression(self, start, ratio, reversedEdges=[], UseExisting=0):
+        reversedEdgeInd = self.ReversedEdgeIndices(reversedEdges)
+        entry = self.MainShapeEntry()
+        from salome.smesh.smeshBuilder import IsEqual
+        compFun = lambda hyp, args: ( IsEqual(hyp.GetLength(1), args[0]) and \
+                                      IsEqual(hyp.GetLength(0), args[1]) and \
+                                      hyp.GetReversedEdges() == args[2]  and \
+                                      (not args[2] or hyp.GetObjectEntry() == args[3]))
+        hyp = self.Hypothesis("GeometricProgression", [start, ratio, reversedEdgeInd, entry],
+                              UseExisting=UseExisting, CompareMethod=compFun)
+        hyp.SetStartLength( start )
+        hyp.SetCommonRatio( ratio )
+        hyp.SetReversedEdges( reversedEdgeInd )
+        hyp.SetObjectEntry( entry )
+        return hyp
+
     ## Defines "FixedPoints1D" hypothesis to cut an edge using parameter
     # on curve from 0 to 1 (additionally it is neecessary to check
     # orientation of edges and create list of reversed edges if it is
@@ -237,7 +264,7 @@ class StdMeshersBuilder_Segment(Mesh_Algorithm):
     #                       A list item can also be a tuple (edge, 1st_vertex_of_edge)
     #  @param UseExisting if ==true - searches for an existing hypothesis created with
     #                     the same parameters, else (default) - creates a new one
-    #  @return an instance of StdMeshers_Arithmetic1D hypothesis
+    #  @return an instance of StdMeshers_FixedPoints1D hypothesis
     #  @ingroup l3_hypos_1dhyps
     def FixedPoints1D(self, points, nbSegs=[1], reversedEdges=[], UseExisting=0):
         if not isinstance(reversedEdges,list): #old version script, before adding reversedEdges
@@ -1019,7 +1046,8 @@ class StdMeshersBuilder_Prism3D(Mesh_Algorithm):
         return hyp
 
     ## Defines "Arithmetic1D" hypothesis, specifying the distribution of segments
-    #  to build between the inner and the outer shells with a length that changes in arithmetic progression
+    #  to build between the inner and the outer shells with a length that changes
+    #  in arithmetic progression
     #  @param start  the length of the first segment
     #  @param end    the length of the last  segment
     def Arithmetic1D(self, start, end ):
@@ -1029,6 +1057,20 @@ class StdMeshersBuilder_Prism3D(Mesh_Algorithm):
         hyp = self.OwnHypothesis("Arithmetic1D", [start, end])
         hyp.SetLength(start, 1)
         hyp.SetLength(end  , 0)
+        return hyp
+
+    ## Defines "GeometricProgression" hypothesis, specifying the distribution of segments
+    #  to build between the inner and the outer shells with a length that changes
+    #  in Geometric progression
+    #  @param start  the length of the first segment
+    #  @param ratio  the common ratio of the geometric progression
+    def GeometricProgression(self, start, ratio ):
+        if self.algoType != "RadialPrism_3D":
+            print "Prism_3D algorith doesn't support any hyposesis"
+            return None
+        hyp = self.OwnHypothesis("GeometricProgression", [start, ratio])
+        hyp.SetStartLength( start )
+        hyp.SetCommonRatio( ratio )
         return hyp
 
     ## Defines "StartEndLength" hypothesis, specifying distribution of segments
@@ -1185,6 +1227,16 @@ class StdMeshersBuilder_RadialQuadrangle1D2D(Mesh_Algorithm):
         hyp = self.OwnHypothesis("Arithmetic1D", [start, end])
         hyp.SetLength(start, 1)
         hyp.SetLength(end  , 0)
+        return hyp
+
+    ## Defines "GeometricProgression" hypothesis, specifying the distribution of segments
+    #  with a length that changes in Geometric progression
+    #  @param start  the length of the first segment
+    #  @param ratio  the common ratio of the geometric progression
+    def GeometricProgression(self, start, ratio ):
+        hyp = self.OwnHypothesis("GeometricProgression", [start, ratio])
+        hyp.SetStartLength( start )
+        hyp.SetCommonRatio( ratio )
         return hyp
 
     ## Defines "StartEndLength" hypothesis, specifying distribution of segments

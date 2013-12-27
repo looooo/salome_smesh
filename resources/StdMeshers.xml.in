@@ -307,6 +307,7 @@
                label-id ="Hexahedron (i,j,k)"
                icon-id  ="mesh_algo_hexa.png"
                input    ="QUAD"
+               output   ="HEXA,PENTA"
 	       need-geom="false"
                opt-hypos="ViscousLayers"
                dim      ="3">
@@ -394,6 +395,7 @@
                label-id="3D Extrusion"
                icon-id ="mesh_algo_hexa.png"
                input   ="QUAD,TRIA"
+               output  ="HEXA,PENTA,OCTA,POLYHEDRON"
                dim     ="3">
       <python-wrap>
         <algo>Prism_3D=Prism()</algo>
@@ -405,6 +407,7 @@
                icon-id ="mesh_algo_hexa.png"
                hypos   ="NumberOfLayers, LayerDistribution"
                input   ="QUAD,TRIA"
+               output  ="HEXA,PENTA,OCTA,POLYHEDRON"
                dim     ="3">
       <python-wrap>
         <algo>RadialPrism_3D=Prism('RadialPrism_3D')</algo>
@@ -439,7 +442,7 @@
                icon-id ="mesh_algo_quad.png"
                hypos   ="NumberOfLayers2D, LayerDistribution2D"
                input   ="EDGE"
-               output  ="QUAD,TRIA"
+               output  ="QUAD"
                dim     ="2">
       <python-wrap>
         <algo>RadialQuadrangle_1D2D=Quadrangle(algo=smeshBuilder.RADIAL_QUAD)</algo>
@@ -452,6 +455,7 @@
                icon-id          ="mesh_algo_hexa.png"
                hypos            ="CartesianParameters3D"
                support-submeshes="false"
+               output           ="HEXA"
                dim              ="3">
       <python-wrap>
         <algo>Cartesian_3D=BodyFitted()</algo>

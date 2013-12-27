@@ -438,7 +438,7 @@ namespace
 
       _Node(const SMDS_MeshNode* n=0, const B_IntersectPoint* ip=0):_node(n), _intPoint(ip) {} 
       const SMDS_MeshNode*    Node() const
-      { return _intPoint ? _intPoint->_node : _node; }
+      { return ( _intPoint && _intPoint->_node ) ? _intPoint->_node : _node; }
       const F_IntersectPoint* FaceIntPnt() const
       { return static_cast< const F_IntersectPoint* >( _intPoint ); }
       const E_IntersectPoint* EdgeIntPnt() const
@@ -458,15 +458,7 @@ namespace
       }
       bool IsLinked( const B_IntersectPoint* other ) const
       {
-        // node inside a SOLID is considered "linked" with any other node
-        if ( !other || !_intPoint || _intPoint->HasCommonFace( other ))
-          return true;
-        const F_IntersectPoint* ip1 = dynamic_cast< const F_IntersectPoint* >( _intPoint );
-        const F_IntersectPoint* ip2 = dynamic_cast< const F_IntersectPoint* >( other );
-        if ( ip1 && ip2 )
-          return (( ip1->_transition != ip2->_transition ) &&
-                  ( ip1->_transition + ip2->_transition ) == Trans_IN + Trans_OUT );
-        return false;
+        return _intPoint && _intPoint->HasCommonFace( other );
       }
       bool IsOnFace( int faceID ) const // returns true if faceID is found
       {
@@ -504,6 +496,7 @@ namespace
       }
       _Node* FirstNode() const { return _link->_nodes[ _reverse ]; }
       _Node* LastNode() const { return _link->_nodes[ !_reverse ]; }
+      operator bool() const { return _link; }
       vector< TGeomID > GetNotUsedFace(const set<TGeomID>& usedIDs ) const // returns a supporting FACEs
       {
         vector< TGeomID > faces;
@@ -518,19 +511,6 @@ namespace
         }
         return faces;
       }
-      // TGeomID GetNotUsedFace( set<TGeomID>& usedIDs ) const // returns a supporting FACE
-      // {
-      //   const B_IntersectPoint *ip0, *ip1;
-      //   if (( ip0 = _link->_nodes[0]->_intPoint ) &&
-      //       ( ip1 = _link->_nodes[1]->_intPoint ))
-      //   {
-      //     for ( size_t i = 0; i < ip0->_faceIDs.size(); ++i )
-      //       if ( ip1->IsOnFace ( ip0->_faceIDs[i] ) &&
-      //            usedIDs.insert( ip0->_faceIDs[i] ).second )
-      //         return ip0->_faceIDs[i];
-      //   }
-      //   return -100;
-      // }
     };
     // --------------------------------------------------------------------------------
     struct _Face
@@ -1532,18 +1512,15 @@ namespace
       _hexNodes[iN]._node     = _grid->_nodes   [ _origNodeInd + _nodeShift[iN] ];
       _hexNodes[iN]._intPoint = _grid->_gridIntP[ _origNodeInd + _nodeShift[iN] ];
       _nbCornerNodes += bool( _hexNodes[iN]._node );
-      if ( _hexNodes[iN]._intPoint )
-      {
-        ++_nbBndNodes;
-        _hexNodes[iN]._intPoint->_node = _hexNodes[iN]._node;
-      }
+      _nbBndNodes    += bool( _hexNodes[iN]._intPoint );
     }
 
     _sideLength[0] = _grid->_coords[0][i+1] - _grid->_coords[0][i];
     _sideLength[1] = _grid->_coords[1][j+1] - _grid->_coords[1][j];
     _sideLength[2] = _grid->_coords[2][k+1] - _grid->_coords[2][k];
 
-    if ( _nbCornerNodes < 8 && _nbIntNodes + _nbCornerNodes + _edgeIntPnts.size() > 3)
+    if ( _nbIntNodes + _edgeIntPnts.size() > 0 &&
+         _nbIntNodes + _nbCornerNodes + _edgeIntPnts.size() > 3)
     {
       _Link split;
       // create sub-links (_splits) by splitting links with _intNodes
@@ -1701,11 +1678,9 @@ namespace
 
     // create polygons from quadrangles and get their nodes
 
-    vector<_Node*> chainNodes;
-    //vector<_Node*> nodes; // nodes of a face
-    //nodes.reserve( _nbCornerNodes + _nbIntNodes );
-
     _Link polyLink;
+    vector< _OrientedLink > splits;
+    vector<_Node*> chainNodes;
 
     bool hasEdgeIntersections = !_edgeIntPnts.empty();
 
@@ -1713,73 +1688,135 @@ namespace
     {
       _Face& quad = _hexQuads[ iF ] ;
 
-      // if ( !quad._edgeNodes.empty() )
-      //   hasEdgeIntersections = true;
-
       _polygons.resize( _polygons.size() + 1 );
-      _Face& polygon = _polygons.back();
-      polygon._polyLinks.reserve( 20 );
+      _Face* polygon = &_polygons.back();
+      polygon->_polyLinks.reserve( 20 );
+
+      splits.clear();
+      for ( int iE = 0; iE < 4; ++iE ) // loop on 4 sides of a quadrangle
+        for ( int iS = 0; iS < quad._links[ iE ].NbResultLinks(); ++iS )
+          splits.push_back( quad._links[ iE ].ResultLink( iS ));
 
       // add splits of links to a polygon and add _polyLinks to make
       // polygon's boundary closed
-      for ( int iE = 0; iE < 4; ++iE ) // loop on 4 sides of a quadrangle
+
+      int nbSplits = splits.size();
+      if ( nbSplits < 2 && quad._edgeNodes.empty() )
+        nbSplits = 0;
+
+      while ( nbSplits > 0 )
       {
-        int nbSpits = quad._links[ iE ].NbResultLinks();
-        for ( int iS = 0; iS < nbSpits; ++iS )
+        size_t iS = 0;
+        while ( !splits[ iS ] )
+          ++iS;
+
+        if ( !polygon->_links.empty() )
         {
-          _OrientedLink split = quad._links[ iE ].ResultLink( iS );
-          _Node* n1 = split.FirstNode();
-          if ( !polygon._links.empty() )
+          _polygons.resize( _polygons.size() + 1 );
+          polygon = &_polygons.back();
+          polygon->_polyLinks.reserve( 20 );
+        }
+        polygon->_links.push_back( splits[ iS ] );
+        splits[ iS++ ]._link = 0;
+        --nbSplits;
+
+        _Node* nFirst = polygon->_links.back().FirstNode();
+        _Node *n1,*n2 = polygon->_links.back().LastNode();
+        for ( ; nFirst != n2 && iS < splits.size(); ++iS )
+        {
+          _OrientedLink& split = splits[ iS ];
+          if ( !split ) continue;
+
+          n1 = split.FirstNode();
+          if ( n1 != n2 )
           {
-            _Node* nPrev = polygon._links.back().LastNode();
-            if ( nPrev != n1 )
+            // try to connect to intersections with EDGES
+            if ( quad._edgeNodes.size() > 0  &&
+                 findChain( n2, n1, quad, chainNodes ))
             {
-              findChain( nPrev, n1, quad, chainNodes );
               for ( size_t i = 1; i < chainNodes.size(); ++i )
               {
                 polyLink._nodes[0] = chainNodes[i-1];
                 polyLink._nodes[1] = chainNodes[i];
-                polygon._polyLinks.push_back( polyLink );
-                polygon._links.push_back( _OrientedLink( &polygon._polyLinks.back() ));
+                polygon->_polyLinks.push_back( polyLink );
+                polygon->_links.push_back( _OrientedLink( &polygon->_polyLinks.back() ));
+              }
+            }
+            // try to connect to a split ending on the same FACE
+            else
+            {
+              _OrientedLink foundSplit;
+              for ( int i = iS; i < splits.size() && !foundSplit; ++i )
+                if (( foundSplit = splits[ i ]) &&
+                    ( n2->IsLinked( foundSplit.FirstNode()->_intPoint )))
+                {
+                  polyLink._nodes[0] = n2;
+                  polyLink._nodes[1] = foundSplit.FirstNode();
+                  polygon->_polyLinks.push_back( polyLink );
+                  polygon->_links.push_back( _OrientedLink( &polygon->_polyLinks.back() ));
+                  iS = i - 1;
+                }
+                else
+                {
+                  foundSplit._link = 0;
+                }
+              if ( foundSplit )
+              {
+                n2 = foundSplit.FirstNode();
+                continue;
+              }
+              else
+              {
+                polyLink._nodes[0] = n2;
+                polyLink._nodes[1] = n1;
+                polygon->_polyLinks.push_back( polyLink );
+                polygon->_links.push_back( _OrientedLink( &polygon->_polyLinks.back() ));
               }
             }
           }
-          polygon._links.push_back( split );
-        }
-      }
-      if ( !polygon._links.empty() && polygon._links.size() + quad._edgeNodes.size() > 1 )
-      {
-        _Node* n1 = polygon._links.back().LastNode();
-        _Node* n2 = polygon._links.front().FirstNode();
-        if ( n1 != n2 )
+          polygon->_links.push_back( split );
+          split._link = 0;
+          --nbSplits;
+          n2 = polygon->_links.back().LastNode();
+
+        } // loop on splits
+
+        if ( nFirst != n2 ) // close a polygon
         {
-          findChain( n1, n2, quad, chainNodes );
+          findChain( n2, nFirst, quad, chainNodes );
           for ( size_t i = 1; i < chainNodes.size(); ++i )
           {
             polyLink._nodes[0] = chainNodes[i-1];
             polyLink._nodes[1] = chainNodes[i];
-            polygon._polyLinks.push_back( polyLink );
-            polygon._links.push_back( _OrientedLink( &polygon._polyLinks.back() ));
+            polygon->_polyLinks.push_back( polyLink );
+            polygon->_links.push_back( _OrientedLink( &polygon->_polyLinks.back() ));
           }
         }
-      }
-      if ( polygon._links.size() >= 3 )
-      {
-        // add polygon to its links
-        for ( size_t iL = 0; iL < polygon._links.size(); ++iL )
+
+        if ( polygon->_links.size() < 3 && nbSplits > 0 )
         {
-          polygon._links[ iL ]._link->_faces.reserve( 2 );
-          polygon._links[ iL ]._link->_faces.push_back( &polygon );
+          polygon->_polyLinks.clear();
+          polygon->_links.clear();
         }
-      }
-      else
-      {
-        _polygons.resize( _polygons.size() - 1 );
-      }
-    }
+      } // while ( nbSplits > 0 )
+
+      if ( polygon->_links.size() < 3 )
+        _polygons.pop_back();
+
+    }  // loop on 6 sides of a hexahedron
 
     // create polygons closing holes in a polyhedron
 
+    // add polygons to their links
+    for ( size_t iP = 0; iP < _polygons.size(); ++iP )
+    {
+      _Face& polygon = _polygons[ iP ];
+      for ( size_t iL = 0; iL < polygon._links.size(); ++iL )
+      {
+        polygon._links[ iL ]._link->_faces.reserve( 2 );
+        polygon._links[ iL ]._link->_faces.push_back( &polygon );
+      }
+    }
     // find free links
     vector< _OrientedLink* > freeLinks;
     freeLinks.reserve(20);
@@ -1793,23 +1830,8 @@ namespace
     int nbFreeLinks = freeLinks.size();
     if ( 0 < nbFreeLinks && nbFreeLinks < 3 ) return;
 
-     set<TGeomID> usedFaceIDs;
-    // if ( hasEdgeIntersections )
-    // {
-    // // detect FACEs supporting remaining polygons
-    //   map<TGeomID,int> nbUsesOfFace;
-    //   map<TGeomID,int>::iterator f2nb;
-    //   for ( size_t iL = 0; iL < freeLinks.size(); ++iL )
-    //     if ( const B_IntersectPoint* ip = freeLinks[ iL ]->FirstNode()->_intPoint )
-    //       for ( size_t i = 0; i < ip->_faceIDs.size(); ++i )
-    //       {
-    //         f2nb = nbUsesOfFace.insert( make_pair( ip->_faceIDs[i], 0 )).first;
-    //         f2nb->second++;
-    //       }
-    //   for ( f2nb = nbUsesOfFace.begin(); f2nb != nbUsesOfFace.end(); ++f2nb )
-    //     if ( f2nb->second >= 3 )
-    //       usefulFaceIDs.insert( usefulFaceIDs.end(), f2nb->first );
-    // }
+    set<TGeomID> usedFaceIDs;
+
     // make closed chains of free links
     while ( nbFreeLinks > 0 )
     {

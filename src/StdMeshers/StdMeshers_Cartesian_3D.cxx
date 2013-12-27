@@ -696,7 +696,7 @@ namespace
     {
       tranSet.clear();
       ip1 = ip2++;
-      while ( ip2->_paramOnLine - ip1->_paramOnLine <= tol  && ip2 != _intPoints.end())
+      while ( ip2 != _intPoints.end() && ip2->_paramOnLine - ip1->_paramOnLine <= tol )
       {
         tranSet.insert( ip1->_transition );
         tranSet.insert( ip2->_transition );
@@ -1552,23 +1552,33 @@ namespace
         _Link& link = _hexLinks[ iLink ];
         link._splits.clear();
         split._nodes[ 0 ] = link._nodes[0];
+        bool isOut = ( ! link._nodes[0]->Node() );
+        //int iEnd = link._intNodes.size() - bool( link._nodes[1]->_intPoint );
         for ( size_t i = 0; i < link._intNodes.size(); ++i )
         {
-          if ( split._nodes[ 0 ]->Node() )
+          if ( link._intNodes[i].Node() )
           {
-            split._nodes[ 1 ] = &link._intNodes[i];
-            link._splits.push_back( split );
+            if ( split._nodes[ 0 ]->Node() && !isOut )
+            {
+              split._nodes[ 1 ] = &link._intNodes[i];
+              link._splits.push_back( split );
+            }
+            split._nodes[ 0 ] = &link._intNodes[i];
           }
-          split._nodes[ 0 ] = &link._intNodes[i];
+          switch ( link._intNodes[i].FaceIntPnt()->_transition ) {
+          case Trans_OUT: isOut = true; break;
+          case Trans_IN : isOut = false; break;
+          default:; // isOut remains the same
+          }
         }
-        if ( link._nodes[ 1 ]->Node() && split._nodes[ 0 ]->Node() )
+        if ( link._nodes[ 1 ]->Node() && split._nodes[ 0 ]->Node() && !isOut )
         {
           split._nodes[ 1 ] = link._nodes[1];
           link._splits.push_back( split );
         }
       }
 
-      // create _Node's at intersections with EDGEs
+      // Create _Node's at intersections with EDGEs.
 
       const double tol2 = _grid->_tol * _grid->_tol;
       int facets[3], nbFacets, subEntity;
@@ -1683,7 +1693,7 @@ namespace
     if ( _nbCornerNodes + _nbIntNodes < 4 )
       return;
 
-    if ( _nbBndNodes == _nbCornerNodes && isInHole() )
+    if ( _nbBndNodes == _nbCornerNodes && _nbIntNodes == 0 && isInHole() )
       return;
 
     _polygons.clear();
@@ -1719,21 +1729,6 @@ namespace
         {
           _OrientedLink split = quad._links[ iE ].ResultLink( iS );
           _Node* n1 = split.FirstNode();
-          _Node* n2 = split.LastNode();
-          if ( !n1->IsLinked( n2->_intPoint ))
-          {
-            if ( findChain( n1, n2, quad, chainNodes ))
-            {
-              for ( size_t i = 1; i < chainNodes.size(); ++i )
-              {
-                polyLink._nodes[0] = chainNodes[i-1];
-                polyLink._nodes[1] = chainNodes[i];
-                polygon._polyLinks.push_back( polyLink );
-                polygon._links.push_back( _OrientedLink( &polygon._polyLinks.back() ));
-              }
-              continue;
-            }
-          }
           if ( !polygon._links.empty() )
           {
             _Node* nPrev = polygon._links.back().LastNode();
@@ -1821,6 +1816,7 @@ namespace
       _polygons.resize( _polygons.size() + 1 );
       _Face& polygon = _polygons.back();
       polygon._polyLinks.reserve( 20 );
+      polygon._links.reserve( 20 );
 
       _OrientedLink* curLink = 0;
       _Node*         curNode;
@@ -2019,7 +2015,7 @@ namespace
         multiset< F_IntersectPoint >::const_iterator ip = line._intPoints.begin();
         for ( ; ip != line._intPoints.end(); ++ip )
         {
-          if ( !ip->_node ) continue;
+          //if ( !ip->_node ) continue;
           lineInd.SetIndexOnLine( ip->_indexOnLine );
           for ( int iL = 0; iL < 4; ++iL ) // loop on 4 cells sharing a link
           {
@@ -2042,7 +2038,7 @@ namespace
             }
             const int iLink = iL + iDir * 4;
             hex->_hexLinks[iLink]._intNodes.push_back( _Node( 0, &(*ip) ));
-            hex->_nbIntNodes++;
+            hex->_nbIntNodes += bool( ip->_node );
           }
         }
       }
@@ -2534,6 +2530,9 @@ namespace
    */
   bool Hexahedron::isInHole() const
   {
+    if ( !_vertexNodes.empty() )
+      return false;
+
     const int ijk[3] = { _i, _j, _k };
     F_IntersectPoint curIntPnt;
 

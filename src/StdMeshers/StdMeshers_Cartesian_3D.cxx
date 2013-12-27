@@ -1704,6 +1704,21 @@ namespace
       if ( nbSplits < 2 && quad._edgeNodes.empty() )
         nbSplits = 0;
 
+      if ( nbSplits == 0 && !quad._edgeNodes.empty() )
+      {
+        // make _vertexNodes from _edgeNodes of an empty quad
+        const double tol2 = _grid->_tol * _grid->_tol;
+        for ( size_t iP = 0; iP < quad._edgeNodes.size(); ++iP )
+        {
+          _Node* equalNode =
+            FindEqualNode( _vertexNodes, quad._edgeNodes[ iP ].EdgeIntPnt(), tol2 );
+          if ( equalNode )
+            equalNode->Add( quad._edgeNodes[ iP ].EdgeIntPnt() );
+          else
+            _vertexNodes.push_back( quad._edgeNodes[ iP ]);
+        }
+      }
+
       while ( nbSplits > 0 )
       {
         size_t iS = 0;
@@ -1767,6 +1782,8 @@ namespace
               }
               else
               {
+                if ( n2->IsLinked( nFirst->_intPoint ))
+                  break;
                 polyLink._nodes[0] = n2;
                 polyLink._nodes[1] = n1;
                 polygon->_polyLinks.push_back( polyLink );

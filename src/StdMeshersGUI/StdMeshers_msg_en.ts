@@ -15,6 +15,18 @@
         <source>TO_IGNORE_EDGES</source>
         <translation>Edges without layers (inlets and oulets)</translation>
     </message>
+    <message>
+        <source>TO_IGNORE_FACES_OR_NOT</source>
+        <translation>Specified faces are</translation>
+    </message>
+    <message>
+        <source>NOT_TO_IGNORE_FACES</source>
+        <translation>Faces with layers (walls)</translation>
+    </message>
+    <message>
+        <source>TO_IGNORE_FACES</source>
+        <translation>Faces without layers (inlets and oulets)</translation>
+    </message>
 </context>
 <context>
     <name>@default</name>

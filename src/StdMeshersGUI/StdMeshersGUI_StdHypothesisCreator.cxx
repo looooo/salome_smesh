@@ -721,9 +721,9 @@ QString StdMeshersGUI_StdHypothesisCreator::storeParams() const
       h->SetStretchFactor ( params[2].myValue.toDouble() );
 
       if ( StdMeshersGUI_SubShapeSelectorWdg* idsWg = 
-           widget< StdMeshersGUI_SubShapeSelectorWdg >( 3 ))
+           widget< StdMeshersGUI_SubShapeSelectorWdg >( 4 ))
       {
-        h->SetIgnoreFaces( idsWg->GetListOfIDs() );
+        h->SetFaces( idsWg->GetListOfIDs(), params[3].myValue.toInt() );
       }
     }
     else if( hypType()=="ViscousLayers2D" )
@@ -1244,7 +1244,19 @@ bool StdMeshersGUI_StdHypothesisCreator::stdParams( ListOfStdParams& p ) const
     QString aMainEntry = SMESHGUI_GenericHypothesisCreator::getMainShapeEntry();
     if ( !aMainEntry.isEmpty() )
     {
-      item.myName = tr( "SMESH_FACES_WO_LAYERS" );
+      item.myName = tr( "TO_IGNORE_FACES_OR_NOT" );
+      p.append( item );
+
+      StdMeshersGUI_RadioButtonsGrpWdg* ignoreWdg = new StdMeshersGUI_RadioButtonsGrpWdg("");
+      ignoreWdg->setButtonLabels ( QStringList()
+                                   << tr("NOT_TO_IGNORE_FACES")
+                                   << tr("TO_IGNORE_FACES") );
+      ignoreWdg->setChecked( h->GetIsToIgnoreFaces() );
+      connect(ignoreWdg->getButtonGroup(),SIGNAL(buttonClicked(int)),this,SLOT(onValueChanged()));
+      customWidgets()->append( ignoreWdg );
+
+      item.myName =
+        tr( h->GetIsToIgnoreFaces() ? "SMESH_FACES_WO_LAYERS" : "SMESH_FACES_WITH_LAYERS" );
       p.append( item );
 
       StdMeshersGUI_SubShapeSelectorWdg* idsWg =
@@ -1252,7 +1264,7 @@ bool StdMeshersGUI_StdHypothesisCreator::stdParams( ListOfStdParams& p ) const
 
       idsWg->SetGeomShapeEntry( aMainEntry );
       idsWg->SetMainShapeEntry( aMainEntry );
-      idsWg->SetListOfIDs( h->GetIgnoreFaces() );
+      idsWg->SetListOfIDs( h->GetFaces() );
       idsWg->showPreview( true );
       customWidgets()->append ( idsWg );
     }
@@ -1656,12 +1668,15 @@ void StdMeshersGUI_StdHypothesisCreator::valueChanged( QWidget* paramWidget)
       toCopyGroups->setEnabled( true );
     }
   }
-  else if ( hypType() == "ViscousLayers2D" && paramWidget->inherits("QButtonGroup"))
+  else if ( hypType().startsWith( "ViscousLayers" ) && paramWidget->inherits("QButtonGroup"))
   {
     if ( QLabel* label = getLabel(4) )
     {
       bool toIgnore = widget< StdMeshersGUI_RadioButtonsGrpWdg >( 3 )->checkedId();
-      label->setText( tr( toIgnore ? "SMESH_EDGES_WO_LAYERS" : "SMESH_EDGES_WITH_LAYERS" ));
+      if ( hypType() == "ViscousLayers2D" )
+        label->setText( tr( toIgnore ? "SMESH_EDGES_WO_LAYERS" : "SMESH_EDGES_WITH_LAYERS" ));
+      else
+        label->setText( tr( toIgnore ? "SMESH_FACES_WO_LAYERS" : "SMESH_FACES_WITH_LAYERS" ));
     }
   }
 }

@@ -872,6 +872,14 @@ module StdMeshers
     SMESH::long_array GetIgnoreFaces();
 
     /*!
+     * Set faces either to exclude from treatment or to make the Viscous Layers on.
+     */
+    void SetFaces(in SMESH::long_array faceIDs,
+                  in boolean           toIgnore) raises (SALOME::SALOME_Exception);
+    SMESH::long_array GetFaces();
+    boolean           GetIsToIgnoreFaces();
+
+    /*!
      * Set total thickness of layers of prisms
      */
     void SetTotalThickness(in double thickness) raises (SALOME::SALOME_Exception);

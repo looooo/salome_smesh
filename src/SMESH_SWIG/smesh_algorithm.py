@@ -318,7 +318,7 @@ class Mesh_Algorithm:
         hyp.SetEdges(edges, isEdgesToIgnore)
         return hyp
 
-    ## Transform a list of ether edges or tuples (edge, 1st_vertex_of_edge)
+    ## Transform a list of either edges or tuples (edge, 1st_vertex_of_edge)
     #  into a list acceptable to SetReversedEdges() of some 1D hypotheses
     #  @ingroup l3_hypos_1dhyps
     def ReversedEdgeIndices(self, reverseList):

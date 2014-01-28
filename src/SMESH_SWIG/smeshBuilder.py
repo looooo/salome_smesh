@@ -93,6 +93,16 @@ import SALOME
 import SALOMEDS
 import os
 
+class MeshMeta(type):
+    def __instancecheck__(cls, inst):
+        """Implement isinstance(inst, cls)."""
+        return any(cls.__subclasscheck__(c)
+                   for c in {type(inst), inst.__class__})
+
+    def __subclasscheck__(cls, sub):
+        """Implement issubclass(sub, cls)."""
+        return type.__subclasscheck__(cls, sub) or (cls.__name__ == sub.__name__ and cls.__module__ == sub.__module__)
+
 ## @addtogroup l1_auxiliary
 ## @{
 
@@ -1140,6 +1150,7 @@ def New( study, instance=None):
 #  new nodes and elements and by changing the existing entities), to get information
 #  about a mesh and to export a mesh into different formats.
 class Mesh:
+    __metaclass__ = MeshMeta
 
     geom = 0
     mesh = 0

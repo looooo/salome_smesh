@@ -95,7 +95,7 @@ protected:
 
   virtual bool                   isValid( SUIT_Operation* theOp ) const;
     
-protected slots:
+protected Q_SLOTS:
   virtual bool                   onApply();
   void                           onPreviewShape();
   void                           onPublishShape();
@@ -133,7 +133,7 @@ public:
 protected:
   virtual void                   startOperation();
 
-protected slots:
+protected Q_SLOTS:
 };
 
 class SMESHGUI_MeshOrderMgr;
@@ -164,10 +164,10 @@ protected:
 
   virtual void                   initDialog();
 
-protected slots:
+protected Q_SLOTS:
   virtual void                   onCancel();
 
-private slots:
+private Q_SLOTS:
   void                           onPreview();
   void                           onCompute();
 
@@ -200,7 +200,7 @@ public:
 protected:
   virtual void                   startOperation();
 
-protected slots:
+protected Q_SLOTS:
 };
 
 /*!
@@ -256,7 +256,7 @@ public:
   
   SMESHGUI_MeshOrderBox*       getMeshOrderBox() const;
 
-signals:
+Q_SIGNALS:
   void                         preview();
 
 private:
@@ -310,7 +310,7 @@ protected:
   void timerEvent(QTimerEvent *timer);
   void closeEvent(QCloseEvent *event);
   
-private slots:
+private Q_SLOTS:
   void onCancel();
   
 private:

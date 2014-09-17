@@ -64,10 +64,10 @@ protected:
 
   bool                           isValid( QString& );
 
-protected slots:
+protected Q_SLOTS:
   virtual bool                   onApply();
 
-private slots:
+private Q_SLOTS:
   void                           onSelectionDone();
   void                           redisplayPreview();
   void                           onTextChange( const QString& );
@@ -131,7 +131,7 @@ private:
 
   friend class SMESHGUI_MakeNodeAtPointOp;
 
-private slots:
+private Q_SLOTS:
   void                          ButtonToggled( bool );
   void                          ConstructorsClicked( int );
 };

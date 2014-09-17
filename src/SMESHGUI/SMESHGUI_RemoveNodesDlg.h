@@ -94,10 +94,10 @@ private:
 
   SMESHGUI_FilterDlg*    myFilterDlg;
   
-protected slots:
+protected Q_SLOTS:
   virtual void           reject();
 
-private slots:
+private Q_SLOTS:
   void                   ClickOnOk();
   void                   ClickOnApply();
   void                   ClickOnHelp();

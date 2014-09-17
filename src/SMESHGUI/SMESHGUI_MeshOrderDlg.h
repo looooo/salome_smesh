@@ -69,7 +69,7 @@ class SMESHGUI_EXPORT SMESHGUI_MeshOrderBox : public QGroupBox
   //! Returns result (ordered by user) mesh indeces
   ListListName GetMeshNames() const;
  
- private slots:
+ private Q_SLOTS:
   /*! Private slots */
   //! update state of arrow buttons according to selection
   void         onSelectionChanged();

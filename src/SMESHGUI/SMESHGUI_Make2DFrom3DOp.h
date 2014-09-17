@@ -65,7 +65,7 @@ public:
 
   bool                 copySource() const;
 
-private slots:
+private Q_SLOTS:
   void                 onTargetChanged();
   void                 onGroupChecked();
 
@@ -103,7 +103,7 @@ protected:
   virtual SUIT_SelectionFilter*      createFilter( const int ) const;
   bool                               isValid( QString& ) const;
 
-protected slots:
+protected Q_SLOTS:
   virtual bool                       onApply();
   void                               onModeChanged();
 

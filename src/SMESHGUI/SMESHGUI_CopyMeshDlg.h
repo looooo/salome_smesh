@@ -112,10 +112,10 @@ private:
 
   bool                   myIsApplyAndClose;
 
-protected slots:
+protected Q_SLOTS:
   virtual void           reject();
 
-private slots:
+private Q_SLOTS:
   void                   ClickOnOk();
   bool                   ClickOnApply();
   void                   ClickOnHelp();

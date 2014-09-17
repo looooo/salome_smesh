@@ -56,12 +56,12 @@ protected:
 
   virtual void                   activateSelection();
 
-protected slots:
+protected Q_SLOTS:
 
   virtual void                   onFind();
   virtual bool                   onApply();
 
-private slots:
+private Q_SLOTS:
 
   void                           onRejectedDlg();
   void                           onSelectionDone();
@@ -107,13 +107,13 @@ private:
 
   friend class SMESHGUI_FindElemByPointOp;
 
-signals:
+Q_SIGNALS:
   void                           rejectedDlg();
 
-protected slots:
+protected Q_SLOTS:
   virtual void                   reject();
 
-private slots:
+private Q_SLOTS:
 //void                          ButtonToggled( bool );
 };
 

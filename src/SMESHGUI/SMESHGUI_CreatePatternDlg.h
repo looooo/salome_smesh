@@ -69,7 +69,7 @@ public:
   SMESH::SMESH_Pattern_ptr GetPattern();
   void                     SetMesh( SMESH::SMESH_Mesh_ptr );
 
-signals:
+Q_SIGNALS:
   void                     NewPattern();
   void                     Close();
 
@@ -77,7 +77,7 @@ private:
   void                     enterEvent( QEvent* );
   void                     keyPressEvent( QKeyEvent* );
  
-private slots:
+private Q_SLOTS:
   void                     onOk();
   void                     onSave();
   void                     reject();

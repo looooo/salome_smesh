@@ -50,7 +50,7 @@ public:
     virtual LightApp_Dialog*    dlg() const;  
     static QString              GetDefaultName(const QString& theOperation);
 
-public slots:
+public Q_SLOTS:
 
 protected:
   
@@ -59,7 +59,7 @@ protected:
   virtual SUIT_SelectionFilter* createFilter( const int ) const;
   //virtual bool                  isValid( SUIT_Operation* ) const;
 
-private slots:
+private Q_SLOTS:
 
     bool                        onApply();
     void                        onButtonClick();
@@ -96,7 +96,7 @@ public:
     SMESHGUI_GroupOnShapeDlg();
     virtual ~SMESHGUI_GroupOnShapeDlg();
 
-public slots:
+public Q_SLOTS:
 
   void                          updateButtons();
   void                          init();

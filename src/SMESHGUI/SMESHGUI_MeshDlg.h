@@ -79,12 +79,12 @@ public:
   int                          currentMeshType();
   void                         setCurrentMeshType( const int );
 
-signals:
+Q_SIGNALS:
   void                         hypoSet( const QString& );
   void                         geomSelectionByMesh( bool );
   void                         selectMeshType( const int, const int );
 
-private slots:  
+private Q_SLOTS:
   void                         onHypoSetPopup( QAction* );
   void                         onGeomPopup( QAction* );
   void                         onGeomSelectionButton( bool );
@@ -132,7 +132,7 @@ public:
   int                          nbAddHypTypes() const;
   void                         reset();
 
-signals:  
+Q_SIGNALS:
   void                         createHyp( const int, const int );
   //!< Emited when "Create hypothesis" button clicked
   void                         editHyp( const int, const int );
@@ -140,7 +140,7 @@ signals:
   void                         selectAlgo( const int );
   //!< Emited when an algorithm is selected
   
-private slots:  
+private Q_SLOTS:
   void                         onCreateHyp();  
   void                         onEditHyp();
   void                         onHyp( int );

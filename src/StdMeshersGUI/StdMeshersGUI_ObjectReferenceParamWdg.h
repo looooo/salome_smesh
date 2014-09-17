@@ -93,7 +93,7 @@ public:
   
   void SetDefaultText(QString defaultText="", QString styleSheet="");
 
-public slots:
+public Q_SLOTS:
   /*!
    * \brief Activates selection (if not yet done), emits selectionActivated()
     *
@@ -103,7 +103,7 @@ public slots:
   void activateSelection();
   void deactivateSelection();
 
-signals:
+Q_SIGNALS:
   /*!
    * \brief Emitted when selection is activated
     *
@@ -113,7 +113,7 @@ signals:
   void selectionActivated();
   void contentModified();
   
-private slots:
+private Q_SLOTS:
   void onSelectionDone(); 
 
 private:

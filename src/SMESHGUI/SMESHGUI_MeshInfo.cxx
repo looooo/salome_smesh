@@ -792,7 +792,7 @@ void SMESHGUI_MeshInfo::setFieldsVisible( int start, int end, bool on )
   end   = qMin( end, (int)iElementsEnd );
   for ( int i = start; i < end; i++ ) {
     wlist wl = myWidgets[i];
-    foreach ( QWidget* w, wl ) w->setVisible( on );
+    Q_FOREACH ( QWidget* w, wl ) w->setVisible( on );
   }
 }
 
@@ -1020,7 +1020,7 @@ QString SMESHGUI_ElemInfo::formatConnectivity( Connectivity connectivity, int ty
   if ( connectivity.contains( type ) ) {
     QList<int> elements = connectivity[ type ];
     qSort( elements );
-    foreach( int id, elements )
+    Q_FOREACH( int id, elements )
       str << QString::number( id );
   }
   return str.join( " " );
@@ -1106,7 +1106,7 @@ void SMESHGUI_SimpleElemInfo::information( const QList<long>& ids )
     int cprecision = -1;
     if ( SMESHGUI::resourceMgr()->booleanValue( "SMESH", "use_precision", false ) ) 
       cprecision = SMESHGUI::resourceMgr()->integerValue( "SMESH", "controls_precision", -1 );
-    foreach ( long id, ids ) {
+    Q_FOREACH ( long id, ids ) {
       if ( !isElements() ) {
         //
         // show node info
@@ -1594,7 +1594,7 @@ void SMESHGUI_TreeElemInfo::information( const QList<long>& ids )
     int cprecision = -1;
     if ( SMESHGUI::resourceMgr()->booleanValue( "SMESH", "use_precision", false ) ) 
       cprecision = SMESHGUI::resourceMgr()->integerValue( "SMESH", "controls_precision", -1 );
-    foreach ( long id, ids ) {
+    Q_FOREACH ( long id, ids ) {
       if ( !isElements() ) {
         //
         // show node info
@@ -2163,9 +2163,9 @@ void SMESHGUI_TreeElemInfo::contextMenuEvent( QContextMenuEvent* e )
   QMenu menu;
   QAction* a = menu.addAction( tr( "SHOW_ITEM_INFO" ) );
   if ( type == ElemConnectivity && id > 0 && menu.exec( e->globalPos() ) == a )
-    emit( itemInfo( id ) );
+    Q_EMIT( itemInfo( id ) );
   else if ( type == NodeConnectivity && menu.exec( e->globalPos() ) == a )
-    emit( itemInfo( aTreeItem->text( 1 ) ) );
+    Q_EMIT( itemInfo( aTreeItem->text( 1 ) ) );
 }
 
 void  SMESHGUI_TreeElemInfo::itemDoubleClicked( QTreeWidgetItem* theItem, int theColumn )
@@ -2174,9 +2174,9 @@ void  SMESHGUI_TreeElemInfo::itemDoubleClicked( QTreeWidgetItem* theItem, int th
     int type = theItem->data( 1, TypeRole ).toInt();
     int id   = theItem->data( 1, IdRole ).toInt();
     if ( type == ElemConnectivity && id > 0 )
-      emit( itemInfo( id ) );
+      Q_EMIT( itemInfo( id ) );
     else if ( type == NodeConnectivity )
-      emit( itemInfo( theItem->text( 1 ) ) );
+      Q_EMIT( itemInfo( theItem->text( 1 ) ) );
   }
 }
 
@@ -2816,7 +2816,7 @@ void SMESHGUI_MeshInfoDlg::showInfo( const Handle(SALOME_InteractiveObject)& IO 
       myID->setText( ID.trimmed() );
       QSet<long> ids;
       QStringList idTxt = ID.split( " ", QString::SkipEmptyParts );
-      foreach ( ID, idTxt )
+      Q_FOREACH ( ID, idTxt )
         ids << ID.trimmed().toLong();
       myElemInfo->showInfo( ids, myMode->checkedId() == ElemMode );
     }
@@ -2973,7 +2973,7 @@ void SMESHGUI_MeshInfoDlg::idChanged()
     TColStd_MapOfInteger ID;
     QSet<long> ids;
     QStringList idTxt = myID->text().split( " ", QString::SkipEmptyParts );
-    foreach ( QString tid, idTxt ) {
+    Q_FOREACH ( QString tid, idTxt ) {
       long id = tid.trimmed().toLong();
       const SMDS_MeshElement* e = myMode->checkedId() == ElemMode ? 
         myActor->GetObject()->GetMesh()->FindElement( id ) :

@@ -73,7 +73,7 @@ protected:
   virtual SUIT_SelectionFilter*  createFilter( const int ) const;
   virtual bool                   isValid( SUIT_Operation* ) const;
 
-protected slots:
+protected Q_SLOTS:
   virtual bool                   onApply();
   void                           onCreateHyp( const int, const int );
   void                           onEditHyp( const int, const int );

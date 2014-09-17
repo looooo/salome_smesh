@@ -149,7 +149,7 @@ void SMESHGUI_GenericHypothesisCreator::editHypothesis( SMESH::SMESH_Hypothesis_
     Dlg->resize( Dlg->minimumSizeHint() );
   }
   else {
-    emit finished( QDialog::Accepted );
+    Q_EMIT finished( QDialog::Accepted );
         delete myDlg;
   }
 }
@@ -309,7 +309,7 @@ void SMESHGUI_GenericHypothesisCreator::onDialogFinished( int result )
   myDlg->close();
   //delete myDlg; since WA_DeleteOnClose==true
   myDlg = 0;
-  emit finished( result );
+  Q_EMIT finished( result );
 }
 
 bool SMESHGUI_GenericHypothesisCreator::stdParams( ListOfStdParams& ) const

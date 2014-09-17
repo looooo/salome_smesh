@@ -245,10 +245,10 @@ private:
 
   SMESH::Mode             CurrentMode;
 
-protected slots:
+protected Q_SLOTS:
   virtual void reject();
 
-public slots:
+public Q_SLOTS:
   void onModeAbsolute();
   void onModeRelative();
   void ClickOnNew();

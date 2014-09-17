@@ -465,7 +465,7 @@ namespace SMESH
     rows.clear();
     QList<QTableWidgetSelectionRange> selRanges = table->selectedRanges();
     QTableWidgetSelectionRange range;
-    foreach( range, selRanges )
+    Q_FOREACH( range, selRanges )
     {
       for ( int row = range.topRow(); row <= range.bottomRow(); ++row )
         if ( !rows.count( row ))
@@ -1225,7 +1225,7 @@ void SMESHGUI_BaseComputeOp::onPublishShape()
   QList<int> rows;
   SMESH::getSelectedRows( table(), rows );
   int row;
-  foreach ( row, rows )
+  Q_FOREACH ( row, rows )
   {
     int curSub = table()->item(row, COL_SHAPEID)->text().toInt();
     GEOM::GEOM_Object_wrap shape = SMESH::getSubShape( curSub, myMainShape );
@@ -1310,7 +1310,7 @@ void SMESHGUI_BaseComputeOp::onGroupOfBadMesh()
   QList<int> rows;
   SMESH::getSelectedRows( table(), rows );
   int row;
-  foreach ( row, rows )
+  Q_FOREACH ( row, rows )
   {
     bool hasBadMesh = ( !table()->item(row, COL_BAD_MESH)->text().isEmpty() );
     if ( hasBadMesh ) {
@@ -1352,7 +1352,7 @@ void SMESHGUI_BaseComputeOp::currentCellChanged()
   QList<int> rows;
   int nbSelected = SMESH::getSelectedRows( table(), rows );
   int row;
-  foreach ( row, rows )
+  Q_FOREACH ( row, rows )
   {
     bool hasData     = ( !table()->item( row, COL_SHAPE )->text().isEmpty() );
     bool isPublished = ( !table()->item( row, COL_PUBLISHED )->text().isEmpty() );
@@ -1394,7 +1394,7 @@ void SMESHGUI_BaseComputeOp::onPreviewShape()
 
     bool showOnly = true;
     int row;
-    foreach ( row, rows )
+    Q_FOREACH ( row, rows )
     {
       int curSub = table()->item( row, COL_SHAPEID )->text().toInt();
       if ( curSub > 0 ) {

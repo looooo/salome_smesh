@@ -89,7 +89,7 @@ private:
   void                           setFilter();
   void                           updateButtons();
 
-private slots:
+private Q_SLOTS:
   void                           onAdd(); 
   void                           onRemove(); 
   void                           onPrevious(); 

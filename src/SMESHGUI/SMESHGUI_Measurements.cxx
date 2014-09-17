@@ -1003,7 +1003,7 @@ void SMESHGUI_BoundingBox::sourceEdited()
       if ( !mySource->isReadOnly() )
         myIDs = mySource->text();
       QStringList ids = myIDs.split( " ", QString::SkipEmptyParts );
-      foreach ( QString id, ids )
+      Q_FOREACH ( QString id, ids )
         ID.Add( id.trimmed().toLong() );
       selector->AddOrRemoveIndex( IO, ID, false );
     }

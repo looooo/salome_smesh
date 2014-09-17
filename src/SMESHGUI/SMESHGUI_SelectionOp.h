@@ -135,7 +135,7 @@ protected:
   //! Return actor according to selected mesh if selection mode isn't ActorSelection
   SMESH_Actor*                  actor() const;
   
-protected slots:
+protected Q_SLOTS:
   //! Installs filter corresponding to certain object selection widget
   virtual void                  onActivateObject( int );
 

@@ -1231,7 +1231,7 @@ void SMESHGUI_GroupDlg::onListSelectionChanged()
     TColStd_MapOfInteger aIndexes;
     QList<QListWidgetItem*> selItems = myElements->selectedItems();
     QListWidgetItem* anItem;
-    foreach(anItem, selItems) aIndexes.Add(anItem->text().toInt());
+    Q_FOREACH(anItem, selItems) aIndexes.Add(anItem->text().toInt());
     mySelector->AddOrRemoveIndex(myActorsList.first()->getIO(), aIndexes, false);
     SALOME_ListIO aList;
     aList.Append(myActorsList.first()->getIO());
@@ -1527,13 +1527,13 @@ void SMESHGUI_GroupDlg::onObjectSelectionChanged()
         QStringList anElements = aListStr.split( " ", QString::SkipEmptyParts);
         for (QStringList::iterator it = anElements.begin(); it != anElements.end(); ++it) {
           QList<QListWidgetItem*> found = myElements->findItems(*it, Qt::MatchExactly);
-          foreach(anItem, found)
+          Q_FOREACH(anItem, found)
             if (!anItem->isSelected())
               listItemsToSel.push_back(anItem);
         }
         bool blocked = myElements->signalsBlocked();
         myElements->blockSignals(true);
-        foreach(anItem, listItemsToSel) anItem->setSelected(true);
+        Q_FOREACH(anItem, listItemsToSel) anItem->setSelected(true);
         myElements->blockSignals(blocked);
         onListSelectionChanged();
         listItemsToSel.clear();
@@ -1876,14 +1876,14 @@ void SMESHGUI_GroupDlg::onAdd()
             listItemsToSel.push_back(anItem);
         }
         else {
-          foreach(anItem, found)
+        	Q_FOREACH(anItem, found)
             if (!anItem->isSelected())
               listItemsToSel.push_back(anItem);
         }
       }
       bool blocked = myElements->signalsBlocked();
       myElements->blockSignals(true);
-      foreach(anItem, listItemsToSel) anItem->setSelected(true);
+      Q_FOREACH(anItem, listItemsToSel) anItem->setSelected(true);
       myElements->blockSignals(blocked);
       onListSelectionChanged();
       listItemsToSel.clear();
@@ -1914,14 +1914,14 @@ void SMESHGUI_GroupDlg::onAdd()
                   listItemsToSel.push_back(anItem);
               }
               else {
-                foreach(anItem, found)
+                Q_FOREACH(anItem, found)
                   if (!anItem->isSelected())
                     listItemsToSel.push_back(anItem);
               }
             }
             bool blocked = myElements->signalsBlocked();
             myElements->blockSignals(true);
-            foreach(anItem, listItemsToSel) anItem->setSelected(true);
+            Q_FOREACH(anItem, listItemsToSel) anItem->setSelected(true);
             myElements->blockSignals(blocked);
             onListSelectionChanged();
             listItemsToSel.clear();
@@ -1960,14 +1960,14 @@ void SMESHGUI_GroupDlg::onAdd()
                 listItemsToSel.push_back(anItem);
             }
             else {
-              foreach(anItem, found)
+              Q_FOREACH(anItem, found)
                 if (!anItem->isSelected())
                   listItemsToSel.push_back(anItem);
             }
           }
           bool blocked = myElements->signalsBlocked();
           myElements->blockSignals(true);
-          foreach(anItem, listItemsToSel) anItem->setSelected(true);
+          Q_FOREACH(anItem, listItemsToSel) anItem->setSelected(true);
           myElements->blockSignals(blocked);
           onListSelectionChanged();
           listItemsToSel.clear();
@@ -2018,14 +2018,14 @@ void SMESHGUI_GroupDlg::onAdd()
             listItemsToSel.push_back(anItem);
         }
         else {
-          foreach(anItem, found)
+          Q_FOREACH(anItem, found)
             if (!anItem->isSelected())
               listItemsToSel.push_back(anItem);
         }
       }
       bool blocked = myElements->signalsBlocked();
       myElements->blockSignals(true);
-      foreach(anItem, listItemsToSel) anItem->setSelected(true);
+      Q_FOREACH(anItem, listItemsToSel) anItem->setSelected(true);
       myElements->blockSignals(blocked);
       onListSelectionChanged();
       listItemsToSel.clear();
@@ -2054,7 +2054,7 @@ void SMESHGUI_GroupDlg::onRemove()
   if (myCurrentLineEdit == 0) {
     QList<QListWidgetItem*> selItems = myElements->selectedItems();
     QListWidgetItem* item;
-    foreach(item, selItems) delete item;
+    Q_FOREACH(item, selItems) delete item;
   } else {
     SALOME_ListIO aList;
     mySelectionMgr->selectedObjects( aList );
@@ -2092,7 +2092,7 @@ void SMESHGUI_GroupDlg::onRemove()
                   QList<QListWidgetItem*> found = 
                     myElements->findItems(QString::number(anElements[i]), Qt::MatchExactly);
                   QListWidgetItem* anItem;
-                  foreach(anItem, found) delete anItem;
+                  Q_FOREACH(anItem, found) delete anItem;
                 }
               }
               catch (const SALOME::SALOME_Exception& ex) {
@@ -2107,7 +2107,7 @@ void SMESHGUI_GroupDlg::onRemove()
                   QList<QListWidgetItem*> found = 
                     myElements->findItems(QString::number(anElements[i]), Qt::MatchExactly);
                   QListWidgetItem* anItem;
-                  foreach(anItem, found) delete anItem;
+                  Q_FOREACH(anItem, found) delete anItem;
                 }
               }
               catch (const SALOME::SALOME_Exception& ex) {
@@ -2136,7 +2136,7 @@ void SMESHGUI_GroupDlg::onRemove()
               QList<QListWidgetItem*> found = 
                 myElements->findItems(QString::number(anElements[i]), Qt::MatchExactly);
               QListWidgetItem* anItem;
-              foreach(anItem, found) delete anItem;
+              Q_FOREACH(anItem, found) delete anItem;
             }
           }
         }
@@ -2185,7 +2185,7 @@ void SMESHGUI_GroupDlg::onSort()
     }
     bool blocked = myElements->signalsBlocked();
     myElements->blockSignals(true);
-    foreach(anItem, listItemsToSel) anItem->setSelected(true);
+    Q_FOREACH(anItem, listItemsToSel) anItem->setSelected(true);
     myElements->blockSignals(blocked);
     listItemsToSel.clear();
     myIsBusy = false;

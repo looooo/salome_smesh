@@ -156,13 +156,13 @@ public :
 
   SMESHGUI_ClippingPlaneInfoMap&  getClippingPlaneInfoMap() { return myClippingPlaneInfoMap; }
 
-public slots:
+public Q_SLOTS:
   virtual bool                    deactivateModule( SUIT_Study* );
   virtual bool                    activateModule( SUIT_Study* );
   virtual void                    studyClosed( SUIT_Study* );
   void                            onViewClosed( SUIT_ViewWindow* );
 
-private slots:
+private Q_SLOTS:
   void                            OnGUIEvent();
   void                            onViewManagerActivated( SUIT_ViewManager* );
   void                            onViewManagerRemoved( SUIT_ViewManager* );
@@ -170,7 +170,7 @@ private slots:
   void                            onOperationAborted( SUIT_Operation* );
   void                            onHypothesisEdit( int result );
 
-signals:
+Q_SIGNALS:
   void                            SignalDeactivateActiveDialog();
   void                            SignalStudyFrameChanged();
   void                            SignalCloseAllDialogs();

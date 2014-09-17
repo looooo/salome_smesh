@@ -152,7 +152,7 @@ void StdMeshersGUI_ObjectReferenceParamWdg::activateSelection()
       mySelectionMgr->installFilter( myFilter );
     connect(mySelectionMgr, SIGNAL(currentSelectionChanged()), SLOT(onSelectionDone()));
   }
-  emit selectionActivated();
+  Q_EMIT selectionActivated();
   onSelectionDone();
 
   mySelButton->setChecked( mySelectionActivated );
@@ -211,7 +211,7 @@ void StdMeshersGUI_ObjectReferenceParamWdg::SetObject(CORBA::Object_ptr obj)
     myObjects.push_back( CORBA::Object::_duplicate( obj ));
     myParamValue = sobj->GetID().c_str();
   }
-  emit contentModified();
+  Q_EMIT contentModified();
 }
 
 //================================================================================
@@ -251,7 +251,7 @@ void StdMeshersGUI_ObjectReferenceParamWdg::SetObjects(SMESH::string_array_var& 
     }
   }
   if (selChanged)
-    emit contentModified();
+    Q_EMIT contentModified();
 }
 
 //================================================================================

@@ -101,7 +101,7 @@ public:
 
   void              showControls( int, bool );
 
-private slots:
+private Q_SLOTS:
   void              onHelp();
 
 private:

@@ -144,7 +144,7 @@ StdMeshersGUI_SubShapeSelectorWdg::~StdMeshersGUI_SubShapeSelectorWdg()
   delete myFilter; myFilter=0;
 
   SUIT_SelectionFilter* filter;
-  foreach( filter, myGeomFilters )
+  Q_FOREACH( filter, myGeomFilters )
     delete filter;
 }
 
@@ -312,7 +312,7 @@ void StdMeshersGUI_SubShapeSelectorWdg::SelectionIntoArgument()
       QString anID = QString(" %1").arg( mySelectedIDs.at(i) );
       QList<QListWidgetItem*> anItems = myListWidget->findItems ( anID, Qt::MatchExactly );
       QListWidgetItem* item;
-      foreach(item, anItems)
+      Q_FOREACH(item, anItems)
         item->setSelected(true);
     }
   }
@@ -356,7 +356,7 @@ void StdMeshersGUI_SubShapeSelectorWdg::onRemove()
   myListWidget->blockSignals( true );
   QList<QListWidgetItem*> selItems = myListWidget->selectedItems();
   QListWidgetItem* item;
-  foreach(item, selItems) {
+  Q_FOREACH(item, selItems) {
     QString idStr = item->text();
     int id = idStr.toInt();
 
@@ -406,7 +406,7 @@ void StdMeshersGUI_SubShapeSelectorWdg::onListSelectionChanged()
   TColStd_MapOfInteger aIndexes;
   QList<QListWidgetItem*> selItems = myListWidget->selectedItems();
   QListWidgetItem* anItem;
-  foreach(anItem, selItems)
+  Q_FOREACH(anItem, selItems)
     myPreviewActor->HighlightID( anItem->text().toInt() );
 
   // update remove button

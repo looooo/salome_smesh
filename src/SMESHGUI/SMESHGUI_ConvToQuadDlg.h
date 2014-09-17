@@ -58,7 +58,7 @@ public:
   bool          isWarningShown();
   bool          IsBiQuadratic() const;
 
-signals:
+Q_SIGNALS:
   void          onClicked( int );
 
 private:

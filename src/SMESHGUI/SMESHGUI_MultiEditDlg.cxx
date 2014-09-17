@@ -386,7 +386,7 @@ void SMESHGUI_MultiEditDlg::Init()
   myIds.Clear();
   myBusy = false;
   myActor = 0;
-  emit ListContensChanged();
+  Q_EMIT ListContensChanged();
 
   // main buttons
   connect(myOkBtn,    SIGNAL(clicked()), SLOT(onOk()));
@@ -550,7 +550,7 @@ void SMESHGUI_MultiEditDlg::onSelectionDone()
       for (QStringList::iterator it = anElements.begin(); it != anElements.end(); ++it) {
         QList<QListWidgetItem*> items = myListBox->findItems(*it, Qt::MatchExactly);
         QListWidgetItem* anItem;
-        foreach(anItem, items)
+        Q_FOREACH(anItem, items)
           anItem->setSelected(true);
       }
     }
@@ -627,7 +627,7 @@ void SMESHGUI_MultiEditDlg::onFilterAccepted()
   for (int i = 0, n = myListBox->count(); i < n; i++)
     myIds.Add(myListBox->item(i)->text().toInt());
 
-  emit ListContensChanged();
+  Q_EMIT ListContensChanged();
 
   if (mySubmeshChk->isChecked() || myGroupChk->isChecked()) {
     mySubmeshChk->blockSignals(true);
@@ -718,7 +718,7 @@ void SMESHGUI_MultiEditDlg::onAddBtn()
   myListBox->selectAll();
   myBusy = false;
 
-  emit ListContensChanged();
+  Q_EMIT ListContensChanged();
 
   if (isGroupOrSubmesh)
     onListSelectionChanged();
@@ -780,7 +780,7 @@ void SMESHGUI_MultiEditDlg::onRemoveBtn()
 
   QList<QListWidgetItem*> selItems = myListBox->selectedItems();
   QListWidgetItem* item;
-  foreach(item, selItems)
+  Q_FOREACH(item, selItems)
   {
     myIds.Remove(item->text().toInt());
     delete item;
@@ -788,7 +788,7 @@ void SMESHGUI_MultiEditDlg::onRemoveBtn()
 
   myBusy = false;
 
-  emit ListContensChanged();
+  Q_EMIT ListContensChanged();
   updateButtons();
 }
 
@@ -913,7 +913,7 @@ void SMESHGUI_MultiEditDlg::onToAllChk()
 
   myIds.Clear();
 
-  emit ListContensChanged();
+  Q_EMIT ListContensChanged();
 
   updateButtons();
   setSelectionMode();
@@ -992,7 +992,7 @@ bool SMESHGUI_MultiEditDlg::onApply()
 
     myListBox->clear();
     myIds.Clear();
-    emit ListContensChanged();
+    Q_EMIT ListContensChanged();
 
     updateButtons();
   }
@@ -1014,7 +1014,7 @@ void SMESHGUI_MultiEditDlg::on3d2dChanged (int type)
     myListBox->clear();
     myIds.Clear();
 
-    emit ListContensChanged();
+    Q_EMIT ListContensChanged();
 
     if (type)
       myFilterType = SMESH::VolumeFilter;

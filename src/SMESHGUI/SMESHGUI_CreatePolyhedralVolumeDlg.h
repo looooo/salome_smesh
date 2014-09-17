@@ -119,14 +119,14 @@ private:
 
   QString                  myHelpFileName;
        
-public slots:
+public Q_SLOTS:
   void                     onAdd();
   void                     onRemove();
 
-protected slots:
+protected Q_SLOTS:
   virtual void             reject();
 
-private slots:
+private Q_SLOTS:
   void                     ConstructorsClicked( int );
   void                     ClickOnPreview( bool );
   void                     ClickOnOk();

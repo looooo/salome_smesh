@@ -53,12 +53,12 @@ class SMESHGUI_EXPORT SMESHGUI_Add0DElemsOnAllNodesDlg : public SMESHGUI_Dialog
   int                            getSelectionType() const;
   bool                           isValid();
 
-signals:
+Q_SIGNALS:
 
   void                           selTypeChanged( int selType );
 
 
- private slots:
+ private Q_SLOTS:
 
   void                           onGroupChecked ( bool on );
   void                           onSelTypeChange( int selType );
@@ -95,7 +95,7 @@ class SMESHGUI_EXPORT SMESHGUI_Add0DElemsOnAllNodesOp : public SMESHGUI_Selectio
   virtual void                   selectionDone();
   virtual SUIT_SelectionFilter*  createFilter( const int ) const;
 
- protected slots:
+ protected Q_SLOTS:
   virtual bool                   onApply();
   void                           onSelTypeChange(int);
   void                           onSetFilter();

@@ -59,7 +59,7 @@ public:
 
   void                    Init();
 
-protected slots:
+protected Q_SLOTS:
   void                    onOk();
   virtual bool            onApply();
   virtual void            reject();

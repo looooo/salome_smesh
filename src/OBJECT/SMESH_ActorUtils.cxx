@@ -203,7 +203,7 @@ namespace SMESH
     aType = aHistogram->getPointList().empty() ? RemoveFrom2dViewer : aType;
     
     SUIT_ViewManager* aViewManager;
-    foreach( aViewManager, aViewManagerList ) {
+    Q_FOREACH( aViewManager, aViewManagerList ) {
       if (Plot2d_ViewManager* aManager = dynamic_cast<Plot2d_ViewManager*>(aViewManager)) {
         if (SPlot2d_Viewer* aViewer = dynamic_cast<SPlot2d_Viewer*>(aManager->getViewModel())) {
           if (Plot2d_ViewFrame* aViewFrame = aViewer->getActiveViewFrame()) {

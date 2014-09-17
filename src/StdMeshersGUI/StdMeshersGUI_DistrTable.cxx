@@ -59,7 +59,7 @@ static void sortData( QList<double>& d )
   d.append( prevX );
   d.append( pairs.count() > 0 ? pairs[0].second : prevY );
 
-  foreach( p, pairs ) {
+  Q_FOREACH( p, pairs ) {
     if ( p.first > prevX ) {
       d.append( p.first  );
       d.append( p.second );
@@ -495,7 +495,7 @@ selectedRows()
   QList<int> l;
   QList<QTableWidgetItem*> selItems = selectedItems();
   QTableWidgetItem* i;
-  foreach( i, selItems )
+  Q_FOREACH( i, selItems )
     if ( !l.contains( i->row() ) ) l.append( i->row() );
   qSort( l );
   return l;

@@ -56,7 +56,7 @@ protected:
   virtual void setIsApplyAndClose( const bool theFlag );
   virtual bool isApplyAndClose() const;
 
-protected slots:
+protected Q_SLOTS:
  void                      toDisplaySimulation();
  virtual void              onDisplaySimulation( bool );
 
@@ -85,7 +85,7 @@ protected:
   virtual void setIsApplyAndClose( const bool theFlag );
   virtual bool isApplyAndClose() const;
 
-protected slots:
+protected Q_SLOTS:
  void                      toDisplaySimulation();
  virtual void              onDisplaySimulation( bool );
 

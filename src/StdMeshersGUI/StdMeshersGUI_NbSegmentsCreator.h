@@ -72,7 +72,7 @@ protected:
   virtual void     retrieveParams() const;
   virtual QString  storeParams() const;
 
-protected slots:
+protected Q_SLOTS:
   virtual void     onValueChanged();
 
 private:

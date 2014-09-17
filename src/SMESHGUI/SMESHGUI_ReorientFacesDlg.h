@@ -61,10 +61,10 @@ protected:
 
   bool                           isValid( QString& );
 
-protected slots:
+protected Q_SLOTS:
   virtual bool                   onApply();
 
-private slots:
+private Q_SLOTS:
   virtual void                   onActivateObject( int );
   void                           redisplayPreview();
   void                           onTextChange( const QString& );
@@ -91,7 +91,7 @@ class SMESHGUI_EXPORT SMESHGUI_ReorientFacesDlg : public SMESHGUI_Dialog
 public:
   SMESHGUI_ReorientFacesDlg();
 
-public slots:
+public Q_SLOTS:
   void constructorChange(int id);
 
 private:
@@ -116,7 +116,7 @@ private:
 
   friend class SMESHGUI_ReorientFacesOp;
 
-  //private slots:
+  //private Q_SLOTS:
   //void                          ButtonToggled( bool );
 };
 

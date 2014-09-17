@@ -170,5 +170,5 @@ void SMESHGUI_ConvToQuadDlg::SetEnabledRB( const int idx, const bool theCheck )
 
   myMedNdsOnGeom->setEnabled( theCheck );
 
-  emit onClicked( myBG->checkedId() );
+  Q_EMIT onClicked( myBG->checkedId() );
 }

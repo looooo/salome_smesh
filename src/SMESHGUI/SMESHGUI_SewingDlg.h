@@ -116,10 +116,10 @@ private:
 
   QString                 myHelpFileName;
 
-protected slots:
+protected Q_SLOTS:
   virtual void            reject();
 
-private slots:
+private Q_SLOTS:
   void                    ConstructorsClicked( int );
   void                    ClickOnOk();
   bool                    ClickOnApply();

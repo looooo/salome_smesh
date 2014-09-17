@@ -1002,9 +1002,9 @@ namespace SMESH
     //
     ViewManagerList vmList;
     app->viewManagers( SVTK_Viewer::Type(), vmList );
-    foreach ( SUIT_ViewManager* vm, vmList ) {
+    Q_FOREACH ( SUIT_ViewManager* vm, vmList ) {
       QVector<SUIT_ViewWindow*> views = vm->getViews();
-      foreach ( SUIT_ViewWindow* vw, views ) {
+      Q_FOREACH ( SUIT_ViewWindow* vw, views ) {
         // update VTK viewer properties
         if ( SVTK_ViewWindow* aVtkView = GetVtkViewWindow( vw ) ) {
           // update actors

@@ -94,10 +94,10 @@ protected:
   void                     activateSelection();
   void                     setElementID( const QString& );
 
-protected slots:
+protected Q_SLOTS:
   virtual bool             onApply();
 
-private slots:
+private Q_SLOTS:
   void                     onSelectionDone();
   void                     onTypeChanged( int );
   void                     onElemIdChanged( const QString& );

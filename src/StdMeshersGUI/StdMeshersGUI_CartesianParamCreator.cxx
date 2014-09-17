@@ -289,7 +289,7 @@ namespace StdMeshersGUI
     {
       QList<QTreeWidgetItem *> selItems = mySpacingTreeWdg->selectedItems();
       QTreeWidgetItem * item;
-      foreach ( item, selItems )
+      Q_FOREACH ( item, selItems )
       {
         int i = mySpacingTreeWdg->indexOfTopLevelItem( item );
         if ( i == 0 ) continue; 

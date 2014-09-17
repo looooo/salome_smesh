@@ -143,11 +143,11 @@ private:
   QPushButton*                     myFilterBtn;
   SMESHGUI_FilterDlg*              myFilterDlg;
 
-protected slots:
+protected Q_SLOTS:
   virtual void                    onDisplaySimulation( bool );
   virtual void                    reject();
    
-private slots:
+private Q_SLOTS:
   void                            ConstructorsClicked( int );
   void                            CheckIsEnable();
   void                            ClickOnOk();

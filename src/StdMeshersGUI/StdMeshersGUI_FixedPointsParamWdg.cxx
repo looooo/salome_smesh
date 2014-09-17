@@ -285,7 +285,7 @@ void StdMeshersGUI_FixedPointsParamWdg::removePoints()
 {
   QList<QListWidgetItem*> selItems = myListWidget->selectedItems();
   QListWidgetItem* item;
-  foreach ( item, selItems ) {
+  Q_FOREACH ( item, selItems ) {
     int idx = myListWidget->row( item );
     delete myTreeWidget->topLevelItem( idx );
     delete item;

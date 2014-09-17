@@ -68,11 +68,11 @@ public:
 private:
   QPushButton* button( const TableButton ) const;
 
-private slots:
+private Q_SLOTS:
   void onInsert();
   void onRemove();
 
-signals:
+Q_SIGNALS:
   void         valueChanged( int, int );
   void         currentChanged( int, int );
 

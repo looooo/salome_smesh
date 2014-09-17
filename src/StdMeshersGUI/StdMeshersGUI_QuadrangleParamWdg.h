@@ -63,7 +63,7 @@ class STDMESHERSGUI_EXPORT StdMeshersGUI_QuadrangleParamCreator : public StdMesh
   virtual void     retrieveParams() const;
   virtual QString  storeParams() const;
 
- private slots:
+ private Q_SLOTS:
 
   void onTypeChanged(int type);
   void onAddShape();
@@ -104,7 +104,7 @@ class STDMESHERSGUI_EXPORT StdMeshersGUI_QuadrangleParamWdg : public QWidget
   SMESH::nodes_array* GetPoints();
   void                Set( GEOM::ListOfGO_var shapes, SMESH::nodes_array_var points );
 
- signals:
+ Q_SIGNALS:
 
   void typeChanged(int);
 

@@ -72,7 +72,7 @@ public:
   QString                      getMainShapeEntry() const { return myMainShapeEntry; }
   void                         setMainShapeEntry( const QString& theEntry ) { myMainShapeEntry = theEntry; }
 
-signals:
+Q_SIGNALS:
   void                         finished( int );
 
 protected:
@@ -120,10 +120,10 @@ protected:
   virtual QPixmap              icon() const;
   virtual QString              type() const;
 
-protected slots:
+protected Q_SLOTS:
   virtual void                 onValueChanged();
 
-private slots:
+private Q_SLOTS:
   virtual void                 onDialogFinished( int );
 
 private:
@@ -154,7 +154,7 @@ public:
   void setCustomFrame( QFrame* );
   void setType( const QString& );
 
-protected slots:
+protected Q_SLOTS:
   virtual void accept();
   virtual void reject();
   void onHelp(); 

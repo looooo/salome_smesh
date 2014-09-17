@@ -70,10 +70,10 @@ public:
                                              const double );
   void                     initScalarBarFromResources();
 
-protected slots:
+protected Q_SLOTS:
   virtual void             reject();
 
-protected slots:
+protected Q_SLOTS:
   void                     onOk();
   bool                     onApply();
   void                     onHelp();

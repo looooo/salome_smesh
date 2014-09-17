@@ -1087,7 +1087,7 @@ void SMESHGUI_CreatePolyhedralVolumeDlg::onRemove()
 
   if ( selItems.count() > 0 ) myNbOkElements = 1;
 
-  foreach( anItem, selItems )
+  Q_FOREACH( anItem, selItems )
     delete anItem;
 
   RemoveButton->setEnabled( myFacesByNodes->count() > 0 );
@@ -1113,7 +1113,7 @@ void SMESHGUI_CreatePolyhedralVolumeDlg::onListSelectionChanged()
 
   QList<QListWidgetItem*> selItems = myFacesByNodes->selectedItems();
   QListWidgetItem* anItem;
-  foreach( anItem, selItems ) {
+  Q_FOREACH( anItem, selItems ) {
     QStringList anIds = anItem->text().split( " ", QString::SkipEmptyParts );
     for (QStringList::iterator it = anIds.begin(); it != anIds.end(); ++it)
       aIndexes.Add((*it).toInt());

@@ -61,7 +61,7 @@ public:
   QString           GetString() const;
   QLineEdit*        editor() const;
 
-public slots:
+public Q_SLOTS:
   void              SetStep( double );
 };
 

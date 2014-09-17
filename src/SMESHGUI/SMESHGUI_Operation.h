@@ -74,7 +74,7 @@ protected:
   QString           myHelpFileName;
   bool              myIsApplyAndClose;
 
-protected slots:
+protected Q_SLOTS:
   virtual void      onOk();
   virtual bool      onApply();
   virtual void      onCancel();

@@ -846,7 +846,7 @@ QList<int> SMESHGUI_FilterTable::Table::selectedRows()
   QTableWidgetItem* anItem;
   QList<int> rows;
 
-  foreach( anItem, selItems ) {
+  Q_FOREACH( anItem, selItems ) {
     int r = row( anItem );
     if ( !rows.contains( r ) ) rows.append( r );
   }
@@ -1090,7 +1090,7 @@ void SMESHGUI_FilterTable::onEntityType (int theType)
     return;
 
   myIsValid = true;
-  emit NeedValidation();
+  Q_EMIT NeedValidation();
   if (!myIsValid)
   {
     myEntityTypeGrp->button(myEntityType)->setChecked(true);
@@ -1113,7 +1113,7 @@ void SMESHGUI_FilterTable::onEntityType (int theType)
   myTables[ myEntityType ]->updateGeometry();
   adjustSize();
 
-  emit EntityTypeChanged(theType);
+  Q_EMIT EntityTypeChanged(theType);
 }
 
 //=======================================================================
@@ -1428,7 +1428,7 @@ void SMESHGUI_FilterTable::SetCriterion (const int                       theRow,
     myAddWidgets[ anItem ]->SetDouble(AdditionalWidget::Tolerance, theCriterion.Tolerance);
   }
 
-  emit CriterionChanged(theRow, aType);
+  Q_EMIT CriterionChanged(theRow, aType);
 }
 
 //=======================================================================
@@ -1527,7 +1527,7 @@ void SMESHGUI_FilterTable::onRemoveBtn()
   
   QList<int> aRows = aTable->selectedRows(); // already sorted
   int i;
-  foreach( i, aRows )
+  Q_FOREACH( i, aRows )
   {
     removeAdditionalWidget(aTable, i);
     aTable->removeRow(i);
@@ -1662,7 +1662,7 @@ void SMESHGUI_FilterTable::onCurrentChanged (int theRow, int theCol)
 {
   if( !myIsLocked )
     updateAdditionalWidget();
-  emit CurrentChanged(theRow, theCol);
+  Q_EMIT CurrentChanged(theRow, theCol);
 }
 
 //=======================================================================
@@ -1982,7 +1982,7 @@ void SMESHGUI_FilterTable::onCriterionChanged (const int row, const int col, con
 
   updateAdditionalWidget();
 
-  emit CriterionChanged(row, entityType);
+  Q_EMIT CriterionChanged(row, entityType);
 }
 
 //=======================================================================
@@ -1995,7 +1995,7 @@ void SMESHGUI_FilterTable::onCriterionChanged (int row, int col)
   if( col == 0 )
     onCriterionChanged(row, col, -1);
   else if ( col == 2 )
-    emit ThresholdChanged(row, GetType());
+	Q_EMIT ThresholdChanged(row, GetType());
 }
 
 //=======================================================================
@@ -2943,7 +2943,7 @@ void SMESHGUI_FilterDlg::onOk()
     disconnect(mySelectionMgr, 0, this, 0);
     mySMESHGUI->ResetState();
     accept();
-    emit Accepted();
+    Q_EMIT Accepted();
   }
 }
 
@@ -3100,7 +3100,7 @@ void SMESHGUI_FilterDlg::setIdsToWg (QWidget* theWg, const QList<int>& theIds)
     return;
 
   QStringList aStrList;
-  foreach(int id, theIds)
+  Q_FOREACH(int id, theIds)
     aStrList << QString::number(id);
 
   if (theWg->inherits("QListWidget"))

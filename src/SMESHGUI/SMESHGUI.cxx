@@ -2188,7 +2188,7 @@ void SMESHGUI::ResetState()
 //=============================================================================
 void SMESHGUI::EmitSignalDeactivateDialog()
 {
-  emit SignalDeactivateActiveDialog();
+  Q_EMIT SignalDeactivateActiveDialog();
 }
 
 //=============================================================================
@@ -2198,7 +2198,7 @@ void SMESHGUI::EmitSignalDeactivateDialog()
 //=============================================================================
 void SMESHGUI::EmitSignalStudyFrameChanged()
 {
-  emit SignalStudyFrameChanged();
+  Q_EMIT SignalStudyFrameChanged();
 }
 
 //=============================================================================
@@ -2208,7 +2208,7 @@ void SMESHGUI::EmitSignalStudyFrameChanged()
 //=============================================================================
 void SMESHGUI::EmitSignalCloseAllDialogs()
 {
-  emit SignalCloseAllDialogs();
+  Q_EMIT SignalCloseAllDialogs();
 }
 
 //=============================================================================
@@ -2218,7 +2218,7 @@ void SMESHGUI::EmitSignalCloseAllDialogs()
 //=============================================================================
 void SMESHGUI::EmitSignalVisibilityChanged()
 {
-  emit SignalVisibilityChanged();
+  Q_EMIT SignalVisibilityChanged();
 }
 
 //=============================================================================
@@ -4705,7 +4705,7 @@ bool SMESHGUI::activateModule( SUIT_Study* study )
   if ( aDesk ) {
     QList<SUIT_ViewWindow*> wndList = aDesk->windows();
     SUIT_ViewWindow* wnd;
-    foreach ( wnd, wndList )
+    Q_FOREACH ( wnd, wndList )
       connectView( wnd );
   }
 

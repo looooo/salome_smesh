@@ -179,7 +179,7 @@ void SMESHGUI_Add0DElemsOnAllNodesDlg::onSelTypeChange( int selType )
 
   myFilterBtn->setEnabled( selType != SEL_OBJECT );
 
-  emit selTypeChanged( selType );
+  Q_EMIT selTypeChanged( selType );
 }
 
 //================================================================================

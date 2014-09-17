@@ -62,7 +62,7 @@ private:
   void displayPreview();
   void createPreview( double, double, double, double, double, double );
 
-private slots:
+private Q_SLOTS:
   void selectionChanged();
   void firstChanged();
   void secondChanged();
@@ -108,7 +108,7 @@ private:
   void displayPreview();
   void createPreview( double, double, double, double, double, double );
 
-private slots:
+private Q_SLOTS:
   void selectionChanged();
   void sourceChanged();
   void sourceEdited();
@@ -152,7 +152,7 @@ public:
   void updateSelection();
   void deactivate();
 
-private slots:
+private Q_SLOTS:
   void selectionChanged();
   void modeChanged( int);
   void compute();
@@ -192,7 +192,7 @@ protected:
   void keyPressEvent( QKeyEvent* );
   void enterEvent( QEvent* );
 
-private slots:
+private Q_SLOTS:
   void help();
   void updateSelection();
   void activate();

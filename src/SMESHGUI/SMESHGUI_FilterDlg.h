@@ -135,7 +135,7 @@ public:
 
   void                      Update();
 
-signals:
+Q_SIGNALS:
   void                      CopyFromClicked();
   void                      AddToClicked();
   void                      EntityTypeChanged( const int );
@@ -144,7 +144,7 @@ signals:
   void                      ThresholdChanged( const int, const int );
   void                      CurrentChanged( int, int );
 
-private slots:
+private Q_SLOTS:
   void                      onAddBtn();
   void                      onInsertBtn();
   void                      onRemoveBtn();
@@ -237,14 +237,14 @@ public:
   void                      SetFilter(SMESH::Filter_var filter, int type);
   void                      UnRegisterFilters();
 
-signals:
+Q_SIGNALS:
 
   void                      Accepted();
 
-protected slots:
+protected Q_SLOTS:
   virtual void              reject();
 
-private slots:
+private Q_SLOTS:
 
   void                      onOk();
   bool                      onApply();

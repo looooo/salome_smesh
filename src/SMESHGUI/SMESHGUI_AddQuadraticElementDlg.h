@@ -126,10 +126,10 @@ private:
   
   QString                     myHelpFileName;
   
-protected slots:
+protected Q_SLOTS:
   virtual void                reject();
 
-private slots:
+private Q_SLOTS:
   void                        onTextChange( const QString& );
   void                        onCellTextChange( int, int );
   void                        onReverse( int );

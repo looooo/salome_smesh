@@ -80,10 +80,10 @@ public:
 
   bool                      eventFilter( QObject*, QEvent* );
 
-signals:
+Q_SIGNALS:
   void                      ListContensChanged();
 
-protected slots:
+protected Q_SLOTS:
   void                      onOk();
   virtual bool              onApply();
   virtual void              reject();
@@ -204,7 +204,7 @@ protected:
                              SMESH::SMESH_IDSource_ptr obj );
   virtual int       nbElemsInMesh();
 
-protected slots:
+protected Q_SLOTS:
    virtual void     onDisplaySimulation( bool );
 
 private:
@@ -229,7 +229,7 @@ protected:
                          SMESH::SMESH_IDSource_ptr obj);
   virtual int   nbElemsInMesh();
 
-protected slots:
+protected Q_SLOTS:
   virtual void  reject();
   void          onCriterionRB();
   void          onPreviewChk();
@@ -255,7 +255,7 @@ public:
   SMESHGUI_SplitVolumesDlg( SMESHGUI* );
   virtual ~SMESHGUI_SplitVolumesDlg();
 
-protected slots:
+protected Q_SLOTS:
 
   virtual void on3d2dChanged(int);
   virtual void onSelectionDone();

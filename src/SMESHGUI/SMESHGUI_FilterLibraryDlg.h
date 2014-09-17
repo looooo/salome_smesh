@@ -80,10 +80,10 @@ private:
   void                        enterEvent( QEvent* );            
   void                        keyPressEvent( QKeyEvent* );
   
-protected slots:
+protected Q_SLOTS:
   virtual void                reject();
 
-private slots:
+private Q_SLOTS:
   void                        onOk();
   bool                        onApply();
   void                        onHelp();

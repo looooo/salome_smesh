@@ -61,7 +61,7 @@ public:
 
   QString                        GetValue() const { return myParamValue; }
 
-private slots:
+private Q_SLOTS:
   void                           onAdd(); 
   void                           onRemove(); 
   void                           onCheckBoxChanged();

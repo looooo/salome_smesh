@@ -81,10 +81,10 @@ namespace StdMeshersGUI
     SMESH::double_array* getCoordinates();
     void getSpacing(SMESH::string_array_out funs, SMESH::double_array_out points) const;
 
-  signals:
+  Q_SIGNALS:
     void gridModeChanged(int);
 
-  private slots:
+  private Q_SLOTS:
     void onInsert();
     void onDelete();
     void onMode(int);
@@ -139,7 +139,7 @@ protected:
   virtual void     retrieveParams() const;
   virtual QString  storeParams() const;
 
-private slots:
+private Q_SLOTS:
   bool             updateAxesPreview();
   void             onOrthogonalAxes(bool);
   void             onAxisDirChange(const QString&);

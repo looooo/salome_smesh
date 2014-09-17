@@ -657,7 +657,7 @@ void SMESH_Swig::EraseActor( const char* Mesh_Entry, const bool allViewers )
       else {
         aManagers = anApp->viewManagers();
       }
-      foreach( SUIT_ViewManager* aMgr, aManagers ) {
+      Q_FOREACH( SUIT_ViewManager* aMgr, aManagers ) {
         if ( aMgr && aMgr->getType() == VTKViewer_Viewer::Type() ) {
           SALOME_View* aSalomeView = dynamic_cast<SALOME_View*>(aMgr->getViewModel());
           if (aSalomeView) {

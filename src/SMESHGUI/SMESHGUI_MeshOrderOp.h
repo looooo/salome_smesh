@@ -81,7 +81,7 @@ protected:
   //! sets the dialog widgets to state just after operation start
   virtual void           initDialog();
 
- protected slots:
+ protected Q_SLOTS:
   virtual bool           onApply();
   virtual void           onCancel();
 

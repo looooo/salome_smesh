@@ -63,7 +63,7 @@ public:
 
   bool IsOk() const { return !myHyp->_is_nil(); }
 
-private slots:
+private Q_SLOTS:
   void onCreate(); 
   void onEdit(); 
   void onHypTypePopup( QAction* );

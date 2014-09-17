@@ -367,7 +367,7 @@ void SMESHGUI_FindElemByPointOp::onElemTypeChange(int index)
 
 void SMESHGUI_FindElemByPointDlg::reject()
 {
-  emit rejectedDlg();
+  Q_EMIT rejectedDlg();
   QtxDialog::reject();
 }
 

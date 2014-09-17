@@ -81,14 +81,14 @@ public:
   
   static QString                GetDefaultName( const QString& );
   
-public slots:
+public Q_SLOTS:
   void onAdd();
   void onRemove();
 
-protected slots:
+protected Q_SLOTS:
   virtual void                  reject();
 
-private slots:
+private Q_SLOTS:
   void                          onTypeChanged( int );
   void                          onGrpTypeChanged( int );
   void                          onColorChanged( QColor );

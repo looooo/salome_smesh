@@ -54,7 +54,7 @@ SMESH_LogicalFilter::~SMESH_LogicalFilter()
 bool SMESH_LogicalFilter::isOk (const SUIT_DataOwner* owner) const
 {
   SUIT_SelectionFilter* filter;
-  foreach( filter, myFilters )
+  Q_FOREACH( filter, myFilters )
   {
     if (myOperation == LO_OR && filter->isOk(owner))
       return true;
@@ -114,7 +114,7 @@ void SMESH_LogicalFilter::deleteFilters()
   if ( myOwnership )
   {
     SUIT_SelectionFilter* filter;
-    foreach( filter, myFilters )
+    Q_FOREACH( filter, myFilters )
       delete filter;
   }
 }

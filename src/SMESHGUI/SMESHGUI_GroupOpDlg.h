@@ -65,7 +65,7 @@ public:
 
   void                      Init();
 
-protected slots:
+protected Q_SLOTS:
 
   virtual bool              onApply();
   virtual void              onSelectionDone();
@@ -95,10 +95,10 @@ private:
   void                      enterEvent( QEvent* );            
   void                      keyPressEvent( QKeyEvent* );
   
-protected slots:
+protected Q_SLOTS:
   virtual void              reject();
 
-private slots:
+private Q_SLOTS:
   void                      onOk();
   void                      onHelp();
 
@@ -141,7 +141,7 @@ public:
   SMESHGUI_UnionGroupsDlg( SMESHGUI* );
   virtual ~SMESHGUI_UnionGroupsDlg();
 
-protected slots:
+protected Q_SLOTS:
   virtual bool                      onApply();
   virtual void                      onSelectionDone();
 
@@ -167,7 +167,7 @@ public:
   SMESHGUI_IntersectGroupsDlg( SMESHGUI* );
   virtual ~SMESHGUI_IntersectGroupsDlg();
 
-protected slots:
+protected Q_SLOTS:
   virtual bool                      onApply();
   virtual void                      onSelectionDone();
 
@@ -193,7 +193,7 @@ public:
   SMESHGUI_CutGroupsDlg( SMESHGUI* );
   virtual ~SMESHGUI_CutGroupsDlg();
 
-protected slots:
+protected Q_SLOTS:
   virtual bool                      onApply();
   virtual void                      onSelectionDone();
 
@@ -230,7 +230,7 @@ public:
 protected:
   virtual void                      reset();
 
-protected slots:
+protected Q_SLOTS:
   virtual bool                      onApply();
   virtual void                      onSelectionDone();
 

@@ -862,7 +862,7 @@ void SMESHGUI_MergeDlg::onSelectGroup()
 
   ListEdit->clear();
 
-  foreach(anItem, selItems) {
+  Q_FOREACH(anItem, selItems) {
     aListIds = anItem->text().split(" ", QString::SkipEmptyParts);
     for (int i = 0; i < aListIds.count(); i++)
       anIndices.Add(aListIds[i].toInt());
@@ -921,7 +921,7 @@ void SMESHGUI_MergeDlg::onSelectElementFromGroup()
   QList<QListWidgetItem*> selItems = ListEdit->selectedItems();
   QListWidgetItem* anItem;
 
-  foreach(anItem, selItems)
+  Q_FOREACH(anItem, selItems)
     anIndices.Add(anItem->text().toInt());
 
   SetFirstButton->setEnabled(selItems.count() == 1);
@@ -991,7 +991,7 @@ void SMESHGUI_MergeDlg::onRemoveGroup()
   QList<QListWidgetItem*> selItems = ListCoincident->selectedItems();
   QListWidgetItem* anItem;
 
-  foreach(anItem, selItems)
+  Q_FOREACH(anItem, selItems)
     delete anItem;
 
   ListEdit->clear();
@@ -1034,7 +1034,7 @@ void SMESHGUI_MergeDlg::onAddElement()
     }
     else {
       QListWidgetItem* anItem;
-      foreach(anItem, found) anItem->setSelected(true);
+      Q_FOREACH(anItem, found) anItem->setSelected(true);
     }
   }
 
@@ -1055,7 +1055,7 @@ void SMESHGUI_MergeDlg::onRemoveElement()
   QList<QListWidgetItem*> selItems = ListEdit->selectedItems();
   QListWidgetItem* anItem;
 
-  foreach(anItem, selItems)
+  Q_FOREACH(anItem, selItems)
     delete anItem;
   
   myIsBusy = false;
@@ -1080,7 +1080,7 @@ void SMESHGUI_MergeDlg::onSetFirst()
   QList<QListWidgetItem*> selItems = ListEdit->selectedItems();
   QListWidgetItem* anItem;
   
-  foreach(anItem, selItems) {
+  Q_FOREACH(anItem, selItems) {
     ListEdit->takeItem(ListEdit->row(anItem));
     ListEdit->insertItem(0, anItem);
   }

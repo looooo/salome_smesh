@@ -69,7 +69,7 @@ private:
 
   QString                 myHelpFileName;
 
-public slots:
+public Q_SLOTS:
   void                    ClickOnOk();
   void                    ClickOnHelp();
   void                    ValueHasChanged();

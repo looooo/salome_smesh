@@ -59,7 +59,7 @@ protected:
   MeshDestinationType            DestinationMesh( const SMESH::SMESH_IDSource_var& ,
                                                   bool* isMixOrder = 0) const;
 
-protected slots:
+protected Q_SLOTS:
   virtual bool                   onApply();
   void                           ConnectRadioButtons( int );
   void                           onWarningWinFinished();

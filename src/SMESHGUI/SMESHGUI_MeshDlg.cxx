@@ -403,7 +403,7 @@ void SMESHGUI_MeshTab::onCreateHyp()
 
   QAction* a = aPopup.exec( QCursor::pos() );
   if ( a )
-    emit createHyp( isMainHyp ? MainHyp : AddHyp, actions.indexOf( a ) );
+    Q_EMIT createHyp( isMainHyp ? MainHyp : AddHyp, actions.indexOf( a ) );
 }
 
 //================================================================================
@@ -421,7 +421,7 @@ void SMESHGUI_MeshTab::onEditHyp()
   for ( ; aHypType <= MoreAddHyp; ++aHypType )
     if ( aSender == myEditHypBtn[ aHypType ])
       break;
-  emit editHyp( Min( aHypType, AddHyp ),
+  Q_EMIT editHyp( Min( aHypType, AddHyp ),
                 getCurrentIndex( aHypType ) - 1 );  // - 1 because there is NONE on the top
 }
 
@@ -439,7 +439,7 @@ void SMESHGUI_MeshTab::onHyp( int theIndex )
   const QObject* aSender = sender();
   if ( aSender == myHypCombo[ Algo ] )
   {
-    emit selectAlgo( theIndex - 1 ); // - 1 because there is NONE on the top
+    Q_EMIT selectAlgo( theIndex - 1 ); // - 1 because there is NONE on the top
   }
   else if ( aSender == myAddHypList )
   {
@@ -719,7 +719,7 @@ void SMESHGUI_MeshDlg::setHypoSets( const QStringList& theSets )
 
 void SMESHGUI_MeshDlg::onHypoSetPopup( QAction* a )
 {
-  emit hypoSet( a->text() );
+  Q_EMIT hypoSet( a->text() );
 }
   
 //================================================================================
@@ -798,7 +798,7 @@ void SMESHGUI_MeshDlg::onGeomSelectionButton(bool isBtnOn)
 
 void SMESHGUI_MeshDlg::onGeomPopup( QAction* a )
 {
-  emit geomSelectionByMesh( a->data().toInt() == GEOM_BY_MESH_INDEX );
+  Q_EMIT geomSelectionByMesh( a->data().toInt() == GEOM_BY_MESH_INDEX );
 }
 
 int SMESHGUI_MeshDlg::getActiveObject()
@@ -829,7 +829,7 @@ void SMESHGUI_MeshDlg::setAvailableMeshType( const QStringList& theTypeMesh )
 //================================================================================
 void SMESHGUI_MeshDlg::onChangedMeshType( const int isIndex )
 {
-  emit selectMeshType( Dim3D - myTabWg->currentIndex(), isIndex );
+  Q_EMIT selectMeshType( Dim3D - myTabWg->currentIndex(), isIndex );
 }
 //================================================================================
 /*!

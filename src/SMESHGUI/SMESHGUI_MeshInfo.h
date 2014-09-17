@@ -131,7 +131,7 @@ private:
   void     setFontAttributes( QWidget*, int, bool = true );
   void     setFieldsVisible( int, int, bool );
 
-private slots:
+private Q_SLOTS:
   void loadMesh();
 
 private:
@@ -177,11 +177,11 @@ protected:
   QString      formatConnectivity( Connectivity, int );
   XYZ          gravityCenter( const SMDS_MeshElement* );
 
-signals:
+Q_SIGNALS:
   void         itemInfo( int );
   void         itemInfo( const QString& );
 
-private slots:
+private Q_SLOTS:
   void         showPrevious();
   void         showNext();
   void         updateControls();
@@ -229,7 +229,7 @@ protected:
   void             nodeInfo( const SMDS_MeshNode*, int, int, QTreeWidgetItem* );
   void             clearInternal();
 
-private slots:
+private Q_SLOTS:
   void             itemDoubleClicked( QTreeWidgetItem*, int );
   
 private:
@@ -247,7 +247,7 @@ public:
   GrpComputor( SMESH::SMESH_GroupBase_ptr, QTreeWidgetItem*, QObject* );
   QTreeWidgetItem* getItem() { return myItem; }
 
-public slots:
+public Q_SLOTS:
   void compute();
 
 private:
@@ -269,7 +269,7 @@ public:
   //  void             clear();
   void             saveInfo( QTextStream &out );
 
-private slots:
+private Q_SLOTS:
   void             changeLoadToCompute();
   void             showPreviousGroups();
   void             showNextGroups();
@@ -311,7 +311,7 @@ private:
   Plot2d_Histogram*     getHistogram( SMESH::NumericalFunctor_ptr functor );
   void                  computeNb( int ft, int iBut, int iWdg );
 
-private slots:
+private Q_SLOTS:
   void                  computeAspectRatio();
   void                  computeAspectRatio3D();
   void                  computeFreeNodesInfo();
@@ -364,7 +364,7 @@ protected:
   void keyPressEvent( QKeyEvent* );
   void enterEvent( QEvent* );
 
-private slots:
+private Q_SLOTS:
   void help();
   void updateSelection();
   void updateInfo();
@@ -398,7 +398,7 @@ public:
   void showInfo( const Handle(SALOME_InteractiveObject)& );
   void reject();
 
-private slots:
+private Q_SLOTS:
   void updateInfo();
   void activate();
   void deactivate();

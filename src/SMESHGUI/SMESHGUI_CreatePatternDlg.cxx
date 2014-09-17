@@ -418,7 +418,7 @@ void SMESHGUI_CreatePatternDlg::onSave()
       disconnect( mySMESHGUI, 0, this, 0 );
       mySMESHGUI->ResetState();
       accept();
-      emit NewPattern();
+      Q_EMIT NewPattern();
     }
   } 
   catch ( const SALOME::SALOME_Exception& S_ex ) {
@@ -471,7 +471,7 @@ void SMESHGUI_CreatePatternDlg::onOk()
       disconnect( mySMESHGUI, 0, this, 0 );
       mySMESHGUI->ResetState();
       accept();
-      emit NewPattern();
+      Q_EMIT NewPattern();
     }
   } 
   catch ( const SALOME::SALOME_Exception& S_ex ) {
@@ -493,7 +493,7 @@ void SMESHGUI_CreatePatternDlg::reject()
   disconnect( mySMESHGUI, 0, this, 0 );
   mySMESHGUI->ResetState();
   QDialog::reject();
-  emit Close();
+  Q_EMIT Close();
 }
 
 //=================================================================================

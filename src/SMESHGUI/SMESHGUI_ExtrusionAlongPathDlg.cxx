@@ -1096,7 +1096,7 @@ void SMESHGUI_ExtrusionAlongPathDlg::OnAngleRemoved()
 {
   QList<QListWidgetItem*> aList = AnglesList->selectedItems();
   QListWidgetItem* anItem;
-  foreach(anItem, aList) {
+  Q_FOREACH(anItem, aList) {
     myAnglesList.removeAt(AnglesList->row(anItem));
     delete anItem;
   }

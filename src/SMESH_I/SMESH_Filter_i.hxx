@@ -952,7 +952,7 @@ namespace SMESH
     virtual SMESH::array_of_ElementType* GetTypes();
     virtual SMESH::SMESH_Mesh_ptr        GetMesh();
     virtual bool                         IsMeshInfoCorrect() { return true; }
-
+    virtual SALOMEDS::TMPFile* GetVtkUgStream(){ return NULL; }
     /*!
      * \brief Object notified on change of predicate
      */

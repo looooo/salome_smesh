@@ -779,6 +779,7 @@ struct SMESH_MeshEditor_i::_IDSource : public virtual POA_SMESH::SMESH_IDSource,
     }
     return types._retn();
   }
+  SALOMEDS::TMPFile* GetVtkUgStream(){ return NULL; }
 };
 
 SMESH::SMESH_IDSource_ptr SMESH_MeshEditor_i::MakeIDSource(const SMESH::long_array& ids,

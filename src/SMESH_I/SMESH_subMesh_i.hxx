@@ -110,6 +110,10 @@ public:
    * happen if mesh data is not yet fully loaded from the file of study.
    */
   virtual bool IsMeshInfoCorrect();
+  /*!
+   * Returns mesh unstructed grid information.
+   */
+  virtual SALOMEDS::TMPFile* GetVtkUgStream(){ return NULL; }
 
 
 protected:

@@ -98,7 +98,7 @@ class SMESH_I_EXPORT SMESH_GroupBase_i:
   /*!
    * Returns mesh unstructed grid information.
    */
-  virtual SALOMEDS::TMPFile* GetVtkUgStream(){ return NULL; }
+  virtual SALOMEDS::TMPFile* GetVtkUgStream(){ SALOMEDS::TMPFile_var SeqFile; return SeqFile._retn(); }
 
   // Internal C++ interface
   int GetLocalID() const { return myLocalID; }

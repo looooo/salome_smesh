@@ -5058,34 +5058,28 @@ void SMESH_Mesh_i::CollectMeshInfo(const SMDS_ElemIteratorPtr theItr,
 
 SALOMEDS::TMPFile* SMESH_Mesh_i::GetVtkUgStream()
 {
-	if ( SMESHDS_Mesh* aMeshDS = _impl->GetMeshDS() )
-	{
-		vtkUnstructuredGrid* aCopy;
-		SMDS_UnstructuredGrid* aGrid = aMeshDS->getGrid();
-		if(aGrid)
-		{
-			aCopy = aGrid->NewInstance();
-			aCopy->ShallowCopy(aGrid);
-			vtkUnstructuredGridWriter* aWriter = vtkUnstructuredGridWriter::New();
-			aWriter->WriteToOutputStringOn();
-			aWriter->SetInputData(aCopy);
-			aWriter->SetFileTypeToBinary();
-			aWriter->Write();
-			char* str = aWriter->GetOutputString();
-			int size = aWriter->GetOutputStringLength();
-
-			//Allocate octect buffer of required size
-			CORBA::Octet* OctetBuf = SALOMEDS::TMPFile::allocbuf(size);
-			//Copy ostrstream content to the octect buffer
-			memcpy(OctetBuf, str, size);
-			//Create and return TMPFile
-			SALOMEDS::TMPFile_var SeqFile = new SALOMEDS::TMPFile(size, size, OctetBuf, 1);
-
-			aWriter->Delete();
-			return SeqFile._retn();
-		}
-	}
- return NULL;
+  SALOMEDS::TMPFile_var SeqFile;
+  if ( SMESHDS_Mesh* aMeshDS = _impl->GetMeshDS() ) {
+    SMDS_UnstructuredGrid* aGrid = aMeshDS->getGrid();
+    if(aGrid) {
+      vtkUnstructuredGridWriter* aWriter = vtkUnstructuredGridWriter::New();
+      aWriter->WriteToOutputStringOn();
+      aWriter->SetInputData(aGrid);
+      aWriter->SetFileTypeToBinary();
+      aWriter->Write();
+      char* str = aWriter->GetOutputString();
+      int size = aWriter->GetOutputStringLength();
+      
+      //Allocate octect buffer of required size
+      CORBA::Octet* OctetBuf = SALOMEDS::TMPFile::allocbuf(size);
+      //Copy ostrstream content to the octect buffer
+      memcpy(OctetBuf, str, size);
+      //Create and return TMPFile
+      SeqFile = new SALOMEDS::TMPFile(size, size, OctetBuf, 1);
+      aWriter->Delete();
+    }
+  }
+  return SeqFile._retn();
 }
 
 //=============================================================================

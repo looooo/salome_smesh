@@ -113,7 +113,7 @@ public:
   /*!
    * Returns mesh unstructed grid information.
    */
-  virtual SALOMEDS::TMPFile* GetVtkUgStream(){ return NULL; }
+  virtual SALOMEDS::TMPFile* GetVtkUgStream(){ SALOMEDS::TMPFile_var SeqFile; return SeqFile._retn(); }
 
 
 protected:

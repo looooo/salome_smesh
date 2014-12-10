@@ -27,6 +27,14 @@
       <source>TO_IGNORE_FACES</source>
       <translation>レイヤ（入出口）を伴わない面</translation>
     </message>
+    <message>
+      <source>BAD_FACES_WARNING</source>
+      <translation>BAD_FACES_WARNING</translation>
+    </message>
+    <message>
+      <source>BAD_EDGES_WARNING</source>
+      <translation>BAD_EDGES_WARNING</translation>
+    </message>
   </context>
   <context>
     <name>@default</name>

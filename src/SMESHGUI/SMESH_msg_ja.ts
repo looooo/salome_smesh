@@ -397,7 +397,7 @@
     </message>
     <message>
       <source>MEN_CHOOSE</source>
-      <translation>MEN_CHOOSE</translation>
+      <translation type="unfinished">Choose...</translation>
     </message>
     <message>
       <source>MEN_EDIT</source>
@@ -5432,7 +5432,7 @@
     </message>
     <message>
       <source>ID</source>
-      <translation>ID</translation>
+      <translation type="unfinished">ID</translation>
     </message>
     <message>
       <source>INSERT</source>
@@ -7590,11 +7590,11 @@
     </message>
     <message>
       <source>VOLUMES</source>
-      <translation>VOLUMES</translation>
+      <translation type="unfinished">Volumes</translation>
     </message>
     <message>
       <source>OUTSIDE_VOLUME_NORMAL</source>
-      <translation>OUTSIDE_VOLUME_NORMAL</translation>
+      <translation type="unfinished">Face normal outside volume</translation>
     </message>
   </context>
   <context>
@@ -7605,7 +7605,7 @@
     </message>
     <message>
       <source>NO_VOLUME_OBJECT_SELECTED</source>
-      <translation>NO_VOLUME_OBJECT_SELECTED</translation>
+      <translation type="unfinished">No volume object selected</translation>
     </message>
     <message>
       <source>NO_FACES</source>
@@ -7613,7 +7613,7 @@
     </message>
     <message>
       <source>NO_VOLUMES</source>
-      <translation>NO_VOLUMES</translation>
+      <translation type="unfinished">Volume object includes no volumes</translation>
     </message>
     <message>
       <source>ZERO_SIZE_VECTOR</source>
@@ -7711,7 +7711,7 @@
     <name>SMESHGUI_DisplayEntitiesDlg</name>
     <message>
       <source>WRN_AT_LEAST_ONE</source>
-      <translation>WRN_AT_LEAST_ONE</translation>
+      <translation type="unfinished">At least one entity type should be chosen!</translation>
     </message>
   </context>
 </TS>

@@ -28,7 +28,7 @@ selected criterion. The \b Remove button deletes the selected
 criterion. The \b Clear button deletes all criteria.
 \n Each <b>Entity type</b> has its specific list of criteria, however all
 filters have common syntax. The <b>Threshold Value</b> should be specified 
-for each criterion. For numerical criteria it is necessary to indicate if 
+for most criteria. For numerical criteria it is necessary to indicate if 
 the found elements should be \b More, \b Less or \b Equal to this
 \b Value. You can also reverse the sense of a criterion using \b Unary
 operator \a Not and you should specify logical relations between
@@ -102,7 +102,7 @@ defined by the <b>Threshold Value</b>. The list of available geometric
 types depends on the current entity type.
 </li><li>
 <b>Entity type</b> allows selection of elements by their type defined
-as a combination of geometry type amd the number of nodes.
+as a combination of geometry type and the number of nodes.
 </li>
 </ul>
 

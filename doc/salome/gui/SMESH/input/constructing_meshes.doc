@@ -101,9 +101,10 @@ creation and computing) of the following steps:
     3D sub-shapes (solids) and generate 3D mesh elements
     (tetrahedra, hexahedra etc.)
 
-    As soon as you have selected an algorithm, you can create a hypothesis (or
-    select an already created one). A set of accessible
-    hypotheses includes only the hypotheses that can be used by the selected algorithm.
+    As soon as you have selected an algorithm, you can create a
+    hypothesis (or select an already created one). A set of accessible
+    hypotheses includes only the hypotheses that can be used by the
+    selected algorithm.
 
     \note
     - Some page(s) can be disabled if the geometrical
@@ -115,7 +116,7 @@ creation and computing) of the following steps:
     dialog pages related to the corresponding lower dimensions are
     disabled.
     - \b 0D page refers to 0D geometry (vertices) rather than
-	to 0D elements. Mesh module does not provide algorithms that
+    to 0D elements. Mesh module does not provide algorithms that
     produce 0D elements. Currently \b 0D page provides only one
     algorithm "Segments around vertex" that allows specifying the required
     size of mesh edges about the selected vertex (or vertices).
@@ -123,8 +124,8 @@ creation and computing) of the following steps:
     For example, you need to mesh a 3D object.
 
     First, you can change a default name of your mesh in the \b Name
-    box. Then check that the selected geometrical object
-	indicated in \b Geometry field, is what you wish to mesh; if not, select
+    box. Then check that the selected geometrical object indicated in
+    \b Geometry field, is what you wish to mesh; if not, select
     the correct object in the Object Browser. Click "Select" button
     near \b Geometry field if the name of the object has not yet
     appeared in \b Geometry field.
@@ -221,9 +222,9 @@ creation and computing) of the following steps:
       </center>
 
       \note 
-      - \a "Automatic" in the names of predefined sets of
-        hypotheses does not actually mean that they are suitable for
-        meshing any geometry.
+      - \a "Automatic" in the names of predefined sets of hypotheses
+      does not actually mean that they are suitable for meshing any
+      geometry.
       - The list of sets of hypotheses can be shorter than in the
         above image depending on the geometry dimension.
   </li>
@@ -376,13 +377,13 @@ click "Compute" button of the toolbar.
 
 After the mesh computation finishes, the Mesh Computation information
 box appears. If you close this box and click "Compute" button again,
-without previously changing meshing parameters, the mesh will
-NOT be re-computed and the Mesh Computation information box will be shown with
-the same contents. (To fully re-compute the mesh, invoke \ref
-clear_mesh_anchor "Clear Mesh Data" command before).
+without previously changing meshing parameters, the mesh will NOT be
+re-computed and the Mesh Computation information box will be shown
+with the same contents. (To fully re-compute the mesh, invoke 
+\ref clear_mesh_anchor "Clear Mesh Data" command before). 
 
-If the mesh computation has been a success, the box shows information on the number of entities
-of different types in the mesh.
+If the mesh computation has been a success, the box shows information
+on the number of entities of different types in the mesh.
 
 \image html meshcomputationsucceed.png
 

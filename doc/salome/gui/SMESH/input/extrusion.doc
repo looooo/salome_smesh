@@ -58,7 +58,8 @@ The following dialog will appear:
   <li>If the <b>Extrusion to Distance</b> radio button is selected
     - specify the translation vector by which the elements will be extruded.
   </li>
-  
+  <p><br></p>
+
 \image html extrusionalongaline2.png  
 
  <li>If the <b>Extrusion Along Vector</b> radio button is selected
@@ -70,7 +71,8 @@ The following dialog will appear:
         be negative).</li>
     </ul>
   </li>
-  
+  <p><br></p>
+
 \image html extrusionalongaline3.png  
   
   <li>If the <b>Extrusion By Normal</b> radio button is selected,

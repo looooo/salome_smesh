@@ -36,7 +36,8 @@ using the same hypothesis assigned to only one edge.<br>
 Thus you define a sub-mesh on the edge where you define 1D meshing
 parameters and the \b Propagation hypothesis. These local meshing
 parameters will be propagated via opposite sides of quadrangles to the
-whole geometry, or to an edge with other local meshing parameters.
+whole geometry, and this propagation stops at an edge with other local
+meshing parameters.
 
 This hypothesis can be taken into account by 
 \ref a1d_algos_anchor "Wire Discretization" and 
@@ -168,8 +169,13 @@ for more information about quadratic meshes.
 This additional hypothesis can be used together with 2D triangulation algorithms.
 It allows 2D triangulation algorithms to build quadrangular meshes.
 
-This hypothesis cannot be used with "Quadrangle (Mapping)" meshing algorithm, 
- since \ref hypo_quad_params_anchor "Quadrangle parameters" 
-hypothesis has a restriction: the total quantity of 
-segments on all four sides of the face must be even (divisible by 2).
+Usage of this hypothesis with "Quadrangle (Mapping)" meshing algorithm
+is obsolete since introducing
+\ref hypo_quad_params_anchor "Quadrangle parameters" hypothesis.
+Usage of this hypothesis with "Quadrangle (Mapping)" meshing algorithm
+corresponds to specifying "Quadrangle Preference" transition type of
+\ref hypo_quad_params_anchor "Quadrangle parameters" hypothesis.
+\note "Quadrangle Preference" transition type can be used only if the
+total quantity of segments on all sides of the face is even (divisible
+by 2), else "Standard" transition type is used.
 */

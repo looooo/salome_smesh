@@ -32,10 +32,11 @@ The following dialog box will appear:
   <li><b>Processing identical groups</b> - allows selecting the method
     of processing the namesake groups existing in the input meshes.
     They can be either <ul>
-      <li>\b United - all elements of \em Group1 \em of Mesh_1 and \em Group1 of \em Mesh_2
-        become the elements of \em Group1 of the \em Compound_Mesh, or</li>
-      <li>\b Renamed - \em Group1 of \em Mesh_1 becomes \em Group1_1 and \em Group1 of \em Mesh_2
-        becomes \em Group1_2.</li>
+      <li>\b United - all elements of \em Group1 of \em Mesh_1 and \em
+      Group1 of \em Mesh_2 become the elements of \em Group1 of the
+      \em Compound_Mesh, or</li>
+      <li>\b Renamed - \em Group1 of \em Mesh_1 becomes \em Group1_1
+      and \em Group1 of \em Mesh_2 becomes \em Group1_2.</li>
     </ul>
     See \ref grouping_elements_page "Creating Groups" for more information
     about groups.</li>

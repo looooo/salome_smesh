@@ -70,9 +70,9 @@ The created groups can be later:
 - \ref importing_exporting_meshes_page "Exported" into a file as a
   whole mesh.
 
-In the Object Browser, if an item contains more
-than one group, it is possible to sort its groups by name in
-ascending order using <b>Sort children</b> context menu item. 
+In the Object Browser, if an item contains more than one child group,
+it is possible to sort the groups by name in ascending order
+using <b>Sort children</b> context menu item. 
 
 \image html smesh_sort_groups.png "Sorting groups"
 

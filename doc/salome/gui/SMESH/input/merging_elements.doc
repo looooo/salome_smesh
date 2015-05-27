@@ -38,7 +38,8 @@ object selectable in the dialog box. Two elements are considered coincident if t
   in the selected object.</li>
 <li><b>Coincident elements</b> is a list of groups of elements for
   merging. After the operation all elements of each group will
-  be united into one element.
+  be united into one element. The first element of a group is kept and
+  the others are removed.
 <ul>
 <li>\b Remove button deletes the selected group from the list.</li>
 <li>\b Add button adds to the list a group of elements selected in the
@@ -57,7 +58,7 @@ object selectable in the dialog box. Two elements are considered coincident if t
 <br>
 \image html sort.png
 <center>moves the selected element to the first position in the
-  group.</center>
+  group in order to keep it in the mesh.</center>
 <br>
 </li>
 <li>To confirm your choice click \b Apply or <b>Apply and Close</b> button.</li>

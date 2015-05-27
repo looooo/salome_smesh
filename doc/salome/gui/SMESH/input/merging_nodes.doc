@@ -38,9 +38,10 @@ In this mode additional controls are available:
 <ul>
 <li>\b Detect button generates the list of coincident nodes for the given
 \b Tolerance.</li>
-<li><b>Coincident nodes</b>  is a list of groups of elements for
-  merging. After the operation all elements of each group will
-  be united into one element.
+<li><b>Coincident nodes</b> is a list of groups of nodes for
+  merging. After the operation all nodes of each group will
+  be united into one node. The first node of a group is kept and
+  the others are removed.
 <ul>
 <li>\b Remove button deletes the selected group from the list.</li>
 <li>\b Add button adds to the list a group of nodes selected in the
@@ -65,7 +66,7 @@ nodes of selected groups in the 3D viewer.</li>
   <br>
   \image html sort.png
   <center>moves the selected node to the first position in the
-    group.</center><br>
+    group in order to keep it in the mesh.</center><br>
 </li>
 </ul>
 </li>

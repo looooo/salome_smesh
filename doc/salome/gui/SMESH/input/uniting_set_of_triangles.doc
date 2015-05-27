@@ -2,7 +2,7 @@
 
 \page uniting_set_of_triangles_page Uniting a set of triangles
 
-\n It is possible to unite many neighboring triangles (cells) into
+\n It is possible to unite many neighboring triangles into
 quadrangles by deletion of the common edge.
 
 <em>To union several triangles:</em>

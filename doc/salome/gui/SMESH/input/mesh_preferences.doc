@@ -54,7 +54,7 @@ or in later sessions with this module according to the preferences.
     this operation will be carried out automatically.
 
 - <b>Mesh computation</b>
-  - <b>Show a computation result notification</b> combob-ox allows to
+  - <b>Show a computation result notification</b> combo-box allows to
     select the notification mode about a mesh computation result.
     There are 3 possible modes:
     - <b>Never</b> - do not show the result dialog at all;

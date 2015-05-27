@@ -337,7 +337,8 @@ parameter of the hypotheses depending on edge direction.
 geometrical model in the 3D Viewer, which can help to understand the
 location of a set of edges within the model.
 
-<b>Propagation chains</b> group allows splitting opposite edges of quadrilateral faces
+<b>Propagation chains</b> group allows defining <b>Reversed Edges</b>
+for splitting opposite edges of quadrilateral faces
 in a logically uniform direction. When this group is
 activated, the list is filled with propagation chains found within the
 model. When a chain is selected in the list its edges are

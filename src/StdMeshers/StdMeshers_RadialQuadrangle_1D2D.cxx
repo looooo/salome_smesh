@@ -913,10 +913,10 @@ bool StdMeshers_RadialQuadrangle_1D2D::Compute(SMESH_Mesh&         aMesh,
       aTrsf2d.Transforms( cx, cy );
       // set node on face
       meshDS->SetNodeOnFace( node, faceID, cx, cy );
-      tmpNodes[j-1] = node;
+      tmpNodes.push_back(node);
     }
     // create faces
-    tmpNodes[Points.Length()] = CNodes[i];
+    tmpNodes.push_back( CNodes[i] );
     // quad
     for(j=0; j<Nodes1.size()-1; j++) {
       SMDS_MeshFace* MF;

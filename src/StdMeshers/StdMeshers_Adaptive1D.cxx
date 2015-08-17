@@ -1307,7 +1307,7 @@ bool AdaptiveAlgo::Compute(SMESH_Mesh &         theMesh,
               //      << "\t SetSize " << allowedSize << " at "
               //      << pIt1->myP.X() <<", "<< pIt1->myP.Y()<<", "<<pIt1->myP.Z() << endl;
               pIt2 = pIt1;
-              if ( --pIt2 != eData.myPoints.end() && pIt2->mySegSize > allowedSize )
+              if ( pIt2 != eData.myPoints.begin() && --pIt2 != eData.myPoints.end() && pIt2->mySegSize > allowedSize )
                 sizeTree.SetSize( eData.myC3d.Value( 0.6*pIt2->myU + 0.4*pIt1->myU ), allowedSize );
               pIt2 = pIt1;
               if ( ++pIt2 != eData.myPoints.end() && pIt2->mySegSize > allowedSize )
@@ -1316,7 +1316,7 @@ bool AdaptiveAlgo::Compute(SMESH_Mesh &         theMesh,
             pIt1->mySegSize = allowedSize;
           }
           ++pIt1;
-          if ( & (*pIt1) == & eData.Last() )
+          if ( pIt1 != eData.myPoints.end() && ( & (*pIt1) == & eData.Last() ) )
             avoidPnt = & eData.Last().myP;
           else
             avoidPnt = NULL;

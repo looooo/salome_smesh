@@ -267,7 +267,7 @@ SMESHGUI_MeshInfo::SMESHGUI_MeshInfo( QWidget* parent )
   QLabel*  aNbQuad     = createField();
   aNbQuad->setObjectName("totalNbQuadraticElems");
   QLabel*  aNbBiQuad   = createField();
-  aNbQuad->setObjectName("totalNbBiQuadraticElems");
+  aNbBiQuad->setObjectName("totalNbBiQuadraticElems");
   myWidgets[ index++ ] << aNbLine;
   myWidgets[ index++ ] << new QLabel( "", this ) << aNbTotal << aNbLin << aNbQuad << aNbBiQuad;
 

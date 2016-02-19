@@ -2675,8 +2675,16 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
   case SMESHOp::OpCopyMesh:
     {
       if (checkLock(aStudy)) break;
-      EmitSignalDeactivateDialog();
-      ( new SMESHGUI_CopyMeshDlg( this ) )->show();
+      if ( vtkwnd ) {
+        EmitSignalDeactivateDialog();
+
+        ( new SMESHGUI_CopyMeshDlg( this ) )->show();
+      }
+      else {
+        SUIT_MessageBox::warning(desktop(),
+                                 tr("SMESH_WRN_WARNING"),
+                                 tr("SMESH_WRN_VIEWER_VTK"));
+      }
     }
     break;
   case SMESHOp::OpBuildCompoundMesh:
@@ -3105,12 +3113,6 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
       break;
     }
 
-  case SMESHOp::OpFindElementByPoint:
-    {
-      startOperation( theCommandID );
-      break;
-    }
-
   case SMESHOp::OpEditHypothesis:
     {
       if(checkLock(aStudy)) break;
@@ -3493,10 +3495,6 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
       break;
     }
 
-  case SMESHOp::OpMoveNode: // MAKE MESH PASS THROUGH POINT
-    startOperation( SMESHOp::OpMoveNode );
-    break;
-
   case SMESHOp::OpDuplicateNodes:
     {
       if(checkLock(aStudy)) break;
@@ -3511,9 +3509,21 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
       break;
     }
 
+  case SMESHOp::OpFindElementByPoint:
+  case SMESHOp::OpMoveNode: // MAKE MESH PASS THROUGH POINT
   case SMESHOp::OpElem0DOnElemNodes: // 0D_ON_ALL_NODES
-    startOperation( SMESHOp::OpElem0DOnElemNodes );
-    break;
+    {
+      if(checkLock(aStudy)) break;
+      if ( vtkwnd ) {
+        EmitSignalDeactivateDialog();
+        startOperation( theCommandID );
+      }
+      else {
+        SUIT_MessageBox::warning(SMESHGUI::desktop(),
+                                 tr("SMESH_WRN_WARNING"), tr("SMESH_WRN_VIEWER_VTK"));
+      }
+      break;
+    }
 
   case SMESHOp::OpSelectFiltersLibrary: // Library of selection filters
   {
@@ -3631,10 +3641,15 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
         page = SMESHGUI_MeasureDlg::Area;
       else if ( theCommandID == SMESHOp::OpPropertiesVolume )
         page = SMESHGUI_MeasureDlg::Volume;
-
-      EmitSignalDeactivateDialog();
-      SMESHGUI_MeasureDlg* dlg = new SMESHGUI_MeasureDlg( SMESHGUI::desktop(), page );
-      dlg->show();
+      if ( vtkwnd ) {
+        EmitSignalDeactivateDialog();
+        SMESHGUI_MeasureDlg* dlg = new SMESHGUI_MeasureDlg( SMESHGUI::desktop(), page );
+        dlg->show();
+      }
+      else {
+        SUIT_MessageBox::warning(SMESHGUI::desktop(),
+                                 tr("SMESH_WRN_WARNING"), tr("SMESH_WRN_VIEWER_VTK"));
+      }
       break;
     }
   case SMESHOp::OpSortChild:

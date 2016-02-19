@@ -78,13 +78,13 @@ SMESHGUI_Add0DElemsOnAllNodesDlg::SMESHGUI_Add0DElemsOnAllNodesDlg()
 
   // Seletction type radio buttons
 
-  QGroupBox* selTypeGrBox = new QGroupBox( mainFrame() );
+  mySelTypeGrBox = new QGroupBox( mainFrame() );
   //
-  QRadioButton*    objBtn = new QRadioButton( tr( "SMESH_SUBMESH_GROUP"),selTypeGrBox );
-  QRadioButton*   elemBtn = new QRadioButton( tr( "SMESH_ELEMENTS" ),selTypeGrBox );
-  QRadioButton*   nodeBtn = new QRadioButton( tr( "SMESH_NODES" ),selTypeGrBox );
+  QRadioButton*    objBtn = new QRadioButton( tr( "SMESH_SUBMESH_GROUP"),mySelTypeGrBox );
+  QRadioButton*   elemBtn = new QRadioButton( tr( "SMESH_ELEMENTS" ),mySelTypeGrBox );
+  QRadioButton*   nodeBtn = new QRadioButton( tr( "SMESH_NODES" ),mySelTypeGrBox );
   //
-  QHBoxLayout* selTypeLay = new QHBoxLayout( selTypeGrBox );
+  QHBoxLayout* selTypeLay = new QHBoxLayout( mySelTypeGrBox );
   selTypeLay->setMargin(MARGIN);
   selTypeLay->setSpacing(SPACING);
   selTypeLay->addWidget( objBtn  );
@@ -126,7 +126,7 @@ SMESHGUI_Add0DElemsOnAllNodesDlg::SMESHGUI_Add0DElemsOnAllNodesDlg()
   aLay->setMargin(MARGIN);
   aLay->setSpacing(SPACING);
   //
-  aLay->addWidget( selTypeGrBox,          0, 0, 1, 5  );
+  aLay->addWidget( mySelTypeGrBox,        0, 0, 1, 5  );
   //
   aLay->addWidget( objectWg( 0, Label  ), 1, 0 );
   aLay->addWidget( objectWg( 0, Btn    ), 1, 1 );
@@ -137,9 +137,10 @@ SMESHGUI_Add0DElemsOnAllNodesDlg::SMESHGUI_Add0DElemsOnAllNodesDlg()
 
   // Signals
 
-  connect( myGroupBox,      SIGNAL( toggled( bool )),     SLOT( onGroupChecked() ));
+  connect( myGroupBox,      SIGNAL( toggled( bool )),     SLOT( onGroupChecked( bool ) ));
   connect( mySelTypeBtnGrp, SIGNAL( buttonClicked(int) ), SLOT( onSelTypeChange(int)));
-
+  connect( SMESHGUI::GetSMESHGUI(), SIGNAL( SignalDeactivateActiveDialog() ),
+           this,                    SLOT( DeactivateActiveDialog() ) );
   onSelTypeChange( SEL_OBJECT );
 }
 
@@ -193,6 +194,67 @@ int SMESHGUI_Add0DElemsOnAllNodesDlg::getSelectionType() const
   return mySelTypeBtnGrp->checkedId();
 }
 
+//=================================================================================
+/*!
+  \brief Reactivate dialog box, when mouse pointer goes into it.
+*/
+//=================================================================================
+void SMESHGUI_Add0DElemsOnAllNodesDlg::enterEvent( QEvent* event)
+{
+  ActivateThisDialog();
+}
+
+//=================================================================================
+/*!
+ * \brief SLOT to deactivate dialog
+ */
+//=================================================================================
+
+void SMESHGUI_Add0DElemsOnAllNodesDlg::DeactivateActiveDialog()
+{
+  if (myGroupBox->isEnabled()) {
+    mySelTypeGrBox->setEnabled(false);
+    myGroupBox->setEnabled(false);
+    myGroupLabel->setEnabled(false);
+    myGroupListCmBox->setEnabled(false);
+    myFilterBtn->setEnabled(false);
+    objectWg( 0, Label )->setEnabled(false);
+    objectWg( 0, Btn )->setEnabled(false);
+    objectWg( 0, Control )->setEnabled(false);
+    button( QtxDialog::OK )->setEnabled(false);
+    button( QtxDialog::Apply )->setEnabled(false);
+    button( QtxDialog::Close )->setEnabled(false);
+    button( QtxDialog::Help )->setEnabled(false);
+    setObjectText( 0, "" );
+    SMESHGUI::GetSMESHGUI()->ResetState();
+    SMESHGUI::GetSMESHGUI()->SetActiveDialogBox(0);
+  }
+}
+//=================================================================================
+/*!
+ * \brief SLOT to activate dialog
+ */
+//=================================================================================
+
+void SMESHGUI_Add0DElemsOnAllNodesDlg::ActivateThisDialog()
+{
+  if (!myGroupBox->isEnabled()) {
+    SMESHGUI::GetSMESHGUI()->SetActiveDialogBox( this );
+    mySelTypeGrBox->setEnabled(true);
+    myGroupBox->setEnabled(true);
+    myGroupLabel->setEnabled(true);
+    myGroupListCmBox->setEnabled(true);
+    myFilterBtn->setEnabled(true);
+    objectWg( 0, Label )->setEnabled(true);
+    objectWg( 0, Btn )->setEnabled(true);
+    objectWg( 0, Control )->setEnabled(true);
+    button( QtxDialog::OK )->setEnabled(true);
+    button( QtxDialog::Apply )->setEnabled(true);
+    button( QtxDialog::Close )->setEnabled(true);
+    button( QtxDialog::Help )->setEnabled(true);
+  }
+  emit selTypeChanged( getSelectionType() );
+}
 //================================================================================
 /*!
  * \brief Checks consistency of data
@@ -270,15 +332,16 @@ void SMESHGUI_Add0DElemsOnAllNodesOp::selectionDone()
   if (!myDlg->myGroupBox->isEnabled())         return; // inactive
 
   myIO.Nullify();
-  myDlg->setObjectText( 0, "");
   updateButtons();
 
   SALOME_ListIO aList;
   selectionMgr()->selectedObjects( aList );
   if ( aList.Extent() == 1 )
     myIO = aList.First();
-  else
+  else {
+    myDlg->setObjectText( 0, "" );
     return;
+  }
 
   QString ids;
   switch ( myDlg->getSelectionType() ) {

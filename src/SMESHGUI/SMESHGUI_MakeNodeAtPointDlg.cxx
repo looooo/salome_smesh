@@ -122,15 +122,15 @@ QWidget* SMESHGUI_MakeNodeAtPointDlg::createMainFrame (QWidget* theParent)
   QPixmap iconSelect          (rm->loadPixmap("SMESH", tr("ICON_SELECT")));
 
   // constructor
-  QGroupBox* aPixGrp = new QGroupBox(tr("MOVE_NODE"), this);
-  aPixGrp->setSizePolicy( QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Fixed ) );
+  myGroupBox = new QGroupBox(tr("MOVE_NODE"), this);
+  myGroupBox->setSizePolicy( QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Fixed ) );
   myButtonGroup = new QButtonGroup(this);
-  QHBoxLayout* aPixGrpLayout = new QHBoxLayout(aPixGrp);
+  QHBoxLayout* aPixGrpLayout = new QHBoxLayout(myGroupBox);
   aPixGrpLayout->setMargin(MARGIN);
   aPixGrpLayout->setSpacing(SPACING);
 
-  myRButNodeToMove = new QRadioButton(aPixGrp);
-  myRButMoveWithoutNode = new QRadioButton(aPixGrp);
+  myRButNodeToMove = new QRadioButton(myGroupBox);
+  myRButMoveWithoutNode = new QRadioButton(myGroupBox);
   myRButNodeToMove->setIcon(iconMoveNode);
   myRButMoveWithoutNode->setIcon(iconMoveWithoutNode);
   myRButNodeToMove->setChecked(true);
@@ -260,14 +260,16 @@ QWidget* SMESHGUI_MakeNodeAtPointDlg::createMainFrame (QWidget* theParent)
   myPreviewChkBox = new QCheckBox( tr("PREVIEW"), aFrame);
 
   QVBoxLayout* aLay = new QVBoxLayout(aFrame);
-  aLay->addWidget(aPixGrp);
+  aLay->addWidget(myGroupBox);
   aLay->addWidget(myNodeToMoveGrp);
   aLay->addWidget(myDestinationGrp);
   aLay->addWidget(myPreviewChkBox);
 
-  connect(myDestBtn,          SIGNAL (toggled(bool)), this, SLOT(ButtonToggled(bool)));
-  connect(myIdBtn,            SIGNAL (toggled(bool)), this, SLOT(ButtonToggled(bool)));
-  connect(myButtonGroup,      SIGNAL (buttonClicked(int)),  SLOT(ConstructorsClicked(int)));
+  connect(myDestBtn,               SIGNAL (toggled(bool)), this, SLOT(ButtonToggled(bool)));
+  connect(myIdBtn,                 SIGNAL (toggled(bool)), this, SLOT(ButtonToggled(bool)));
+  connect(myButtonGroup,           SIGNAL (buttonClicked(int)),  SLOT(ConstructorsClicked(int)));
+  connect(SMESHGUI::GetSMESHGUI(), SIGNAL (SignalDeactivateActiveDialog()),
+          this,                    SLOT(DeactivateActiveDialog()));
 
   myIdBtn->setChecked(true);
 
@@ -343,6 +345,59 @@ void SMESHGUI_MakeNodeAtPointDlg::ConstructorsClicked (int constructorId)
   resize(minimumSizeHint());
 }
 
+//=================================================================================
+/*!
+  \brief Reactivate dialog box, when mouse pointer goes into it.
+*/
+//=================================================================================
+void SMESHGUI_MakeNodeAtPointDlg::enterEvent( QEvent* event)
+{
+  ActivateThisDialog();
+}
+
+//=================================================================================
+/*!
+ * \brief SLOT to deactivate dialog
+ */
+//=================================================================================
+
+void SMESHGUI_MakeNodeAtPointDlg::DeactivateActiveDialog()
+{
+  if (myGroupBox->isEnabled()) {
+    myGroupBox->setEnabled(false);
+    myNodeToMoveGrp->setEnabled(false);
+    myDestinationGrp->setEnabled(false);
+    myPreviewChkBox->setEnabled(false);
+    button( QtxDialog::OK )->setEnabled(false);
+    button( QtxDialog::Apply )->setEnabled(false);
+    button( QtxDialog::Close )->setEnabled(false);
+    button( QtxDialog::Help )->setEnabled(false);
+    SMESHGUI::GetSMESHGUI()->ResetState();
+    SMESHGUI::GetSMESHGUI()->SetActiveDialogBox(0);
+    emit deactivatedDialog();
+  }
+}
+//=================================================================================
+/*!
+ * \brief SLOT to activate dialog
+ */
+//=================================================================================
+
+void SMESHGUI_MakeNodeAtPointDlg::ActivateThisDialog()
+{
+  if (!myGroupBox->isEnabled()) {
+    myGroupBox->setEnabled(true);
+    myNodeToMoveGrp->setEnabled(true);
+    myDestinationGrp->setEnabled(true);
+    myPreviewChkBox->setEnabled(true);
+    button( QtxDialog::OK )->setEnabled(true);
+    button( QtxDialog::Apply )->setEnabled(true);
+    button( QtxDialog::Close )->setEnabled(true);
+    button( QtxDialog::Help )->setEnabled(true);
+    emit activatedDialog();
+  }
+}
+
 //================================================================================
 /*!
  * \brief Constructor
@@ -376,6 +431,8 @@ SMESHGUI_MakeNodeAtPointOp::SMESHGUI_MakeNodeAtPointOp()
   // note: this slot seems to be lost together with removed obsolete SMESHGUI_MoveNodesDlg class
   connect(myDlg->myId,SIGNAL (textChanged(const QString&)),SLOT(onTextChange(const QString&)));
   connect(myDlg->myUpdateBtn, SIGNAL (clicked()), this, SLOT(onUpdateDestination()));
+  connect(myDlg, SIGNAL (activatedDialog()), this, SLOT(onActivatedDialog()));
+  connect(myDlg, SIGNAL (deactivatedDialog()), this, SLOT(onDeactivatedDialog()));
 }
 
 void SMESHGUI_MakeNodeAtPointOp::onUpdateDestination()
@@ -605,7 +662,6 @@ void SMESHGUI_MakeNodeAtPointOp::onSelectionDone()
 {
   if ( !myDlg->isVisible() || !myDlg->isEnabled() )
     return;
-
   myNoPreview = true;
   try {
     SALOME_ListIO aList;
@@ -699,7 +755,7 @@ void SMESHGUI_MakeNodeAtPointOp::redisplayPreview()
   bool moveShown = false;
   if ( myMeshActor)
   {
-    const bool  isPreview = myDlg->myPreviewChkBox->isChecked();
+    const bool  isPreview = myDlg->myPreviewChkBox->isChecked() && myDlg->myPreviewChkBox->isEnabled();
     const bool isMoveNode = myDlg->myRButMoveWithoutNode->isChecked();
     QString msg;
     if ( isValid( msg ) )
@@ -848,6 +904,46 @@ void SMESHGUI_MakeNodeAtPointOp::onCloseView()
 {
   delete mySimulation;
   mySimulation = 0;
+}
+
+//=================================================================================
+/*!
+ * \brief SLOT called when the activated dialog
+ */
+//=================================================================================
+void SMESHGUI_MakeNodeAtPointOp::onActivatedDialog()
+{
+  mySimulation = new SMESHGUI_MeshEditPreview(SMESH::GetViewWindow( getSMESHGUI() ) );
+  vtkProperty* aProp = vtkProperty::New();
+  aProp->SetRepresentationToWireframe();
+  aProp->SetColor(250, 0, 250);
+  aProp->SetPointSize(5);
+  aProp->SetLineWidth( SMESH::GetFloat("SMESH:element_width",1) + 1);
+  mySimulation->GetActor()->SetProperty(aProp);
+  aProp->Delete();
+  SMESHGUI_SelectionOp::startOperation();
+  SMESH::SetPointRepresentation( true );
+  onSelectionDone();
+}
+
+//=================================================================================
+/*!
+ * \brief SLOT called when the deactivated dialog
+ */
+//=================================================================================
+void SMESHGUI_MakeNodeAtPointOp::onDeactivatedDialog()
+{
+  if ( mySimulation )
+  {
+    mySimulation->SetVisibility(false);
+    delete mySimulation;
+    mySimulation = 0;
+  }
+  if ( myMeshActor ) {
+    myMeshActor = 0;
+  }
+  SMESH::SetPointRepresentation( false );
+  SMESHGUI_SelectionOp::stopOperation();
 }
 
 //================================================================================

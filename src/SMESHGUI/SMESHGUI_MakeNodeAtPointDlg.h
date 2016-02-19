@@ -75,6 +75,8 @@ private slots:
   void                           onDestCoordChanged();
   void                           onOpenView();
   void                           onCloseView();
+  void                           onActivatedDialog();
+  void                           onDeactivatedDialog();
 
 private:
   int                           GetConstructorId();
@@ -107,6 +109,7 @@ private:
 
   QWidget*                      myMainFrame;
 
+  QGroupBox*                    myGroupBox;
   QButtonGroup*                 myButtonGroup;
   QRadioButton*                 myRButNodeToMove;
   QRadioButton*                 myRButMoveWithoutNode;
@@ -134,9 +137,18 @@ private:
 
   friend class SMESHGUI_MakeNodeAtPointOp;
 
+protected:
+  virtual void                  enterEvent( QEvent* );
+
+signals:
+  void                          activatedDialog();
+  void                          deactivatedDialog();
+
 private slots:
   void                          ButtonToggled( bool );
   void                          ConstructorsClicked( int );
+  void                          ActivateThisDialog();
+  void                          DeactivateActiveDialog();
 };
 
 #endif // SMESHGUI_MAKENODEATPOINTDLG_H

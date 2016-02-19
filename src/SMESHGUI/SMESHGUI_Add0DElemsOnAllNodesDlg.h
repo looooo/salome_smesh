@@ -57,11 +57,17 @@ signals:
 
   void                           selTypeChanged( int selType );
 
+ protected:
+
+  virtual void enterEvent( QEvent* );
 
  private slots:
 
   void                           onGroupChecked ( bool on );
   void                           onSelTypeChange( int selType );
+
+  void                           ActivateThisDialog();
+  void                           DeactivateActiveDialog();
 
  private:
 
@@ -69,6 +75,7 @@ signals:
 
   QButtonGroup* mySelTypeBtnGrp;
   QPushButton*  myFilterBtn;
+  QGroupBox*    mySelTypeGrBox;
   QGroupBox*    myGroupBox;
   QLabel*       myGroupLabel;
   QComboBox*    myGroupListCmBox;

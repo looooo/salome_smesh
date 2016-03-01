@@ -30,10 +30,10 @@ CREATE_SUBDIRS         = NO
 OUTPUT_LANGUAGE        = English
 USE_WINDOWS_ENCODING   = NO
 BRIEF_MEMBER_DESC      = YES
-REPEAT_BRIEF           = YES
+REPEAT_BRIEF           = NO
 ABBREVIATE_BRIEF       = 
 ALWAYS_DETAILED_SEC    = YES
-INLINE_INHERITED_MEMB  = YES
+INLINE_INHERITED_MEMB  = NO
 FULL_PATH_NAMES        = YES
 STRIP_FROM_PATH        = @PROJECT_SOURCE_DIR@ @PROJECT_BINARY_DIR@
 STRIP_FROM_INC_PATH    = 
@@ -46,8 +46,8 @@ INHERIT_DOCS           = YES
 SEPARATE_MEMBER_PAGES  = NO
 TAB_SIZE               = 5
 ALIASES                = 
-OPTIMIZE_OUTPUT_FOR_C  = YES
-OPTIMIZE_OUTPUT_JAVA   = YES
+OPTIMIZE_OUTPUT_FOR_C  = NO
+OPTIMIZE_OUTPUT_JAVA   = NO
 BUILTIN_STL_SUPPORT    = @DOXYGEN_SUPPORT_STL@
 DISTRIBUTE_GROUP_DOC   = NO
 SUBGROUPING            = YES
@@ -71,14 +71,14 @@ SHOW_INCLUDE_FILES     = YES
 INLINE_INFO            = YES
 SORT_MEMBER_DOCS       = YES
 SORT_BRIEF_DOCS        = NO
-SORT_BY_SCOPE_NAME     = NO
+SORT_BY_SCOPE_NAME     = YES
 GENERATE_TODOLIST      = YES
 GENERATE_TESTLIST      = YES
 GENERATE_BUGLIST       = YES
 GENERATE_DEPRECATEDLIST= YES
 ENABLED_SECTIONS       = 
 MAX_INITIALIZER_LINES  = 25
-SHOW_USED_FILES        = NO
+SHOW_USED_FILES        = YES
 SHOW_DIRECTORIES       = NO
 FILE_VERSION_FILTER    = 
 
@@ -107,8 +107,8 @@ EXCLUDE                =
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       = 
 EXAMPLE_PATH           = 
-EXAMPLE_PATTERNS       = 
-EXAMPLE_RECURSIVE      = NO
+EXAMPLE_PATTERNS       = *
+EXAMPLE_RECURSIVE      = YES
 IMAGE_PATH             = @CMAKE_CURRENT_SOURCE_DIR@/images
 INPUT_FILTER           = 
 FILTER_PATTERNS        = 
@@ -118,11 +118,11 @@ FILTER_SOURCE_FILES    = YES
 # configuration options related to source browsing
 #---------------------------------------------------------------------------
 SOURCE_BROWSER         = NO
-INLINE_SOURCES         = NO
+INLINE_SOURCES         = YES
 STRIP_CODE_COMMENTS    = YES
 REFERENCED_BY_RELATION = YES
 REFERENCES_RELATION    = YES
-#USE_HTAGS              = NO
+USE_HTAGS              = NO
 VERBATIM_HEADERS       = YES
 
 #---------------------------------------------------------------------------
@@ -138,20 +138,20 @@ IGNORE_PREFIX          =
 GENERATE_HTML          = YES
 HTML_OUTPUT            = .
 HTML_FILE_EXTENSION    = .html
-HTML_HEADER            = @CMAKE_CURRENT_BINARY_DIR@/static/header.html
-HTML_FOOTER            = @CMAKE_CURRENT_SOURCE_DIR@/static/footer.html
-HTML_EXTRA_STYLESHEET  = @CMAKE_CURRENT_SOURCE_DIR@/static/salome_extra.css
+HTML_HEADER            = 
+HTML_FOOTER            = 
+HTML_EXTRA_STYLESHEET  = 
 HTML_ALIGN_MEMBERS     = YES
 GENERATE_HTMLHELP      = NO
 CHM_FILE               = 
 HHC_LOCATION           = 
 GENERATE_CHI           = NO
-BINARY_TOC             = NO
-TOC_EXPAND             = NO
+BINARY_TOC             = YES
+TOC_EXPAND             = YES
 DISABLE_INDEX          = NO
 ENUM_VALUES_PER_LINE   = 4
 GENERATE_TREEVIEW      = YES
-TREEVIEW_WIDTH         = 250
+TREEVIEW_WIDTH         = 300
 
 #---------------------------------------------------------------------------
 # configuration options related to the LaTeX output
@@ -220,7 +220,7 @@ INCLUDE_PATH           =
 INCLUDE_FILE_PATTERNS  = 
 PREDEFINED             = 
 EXPAND_AS_DEFINED      = 
-SKIP_FUNCTION_MACROS   = YES
+SKIP_FUNCTION_MACROS   = NO
 
 #---------------------------------------------------------------------------
 # Configuration::additions related to external references   
@@ -240,13 +240,13 @@ HAVE_DOT               = YES
 CLASS_GRAPH            = YES
 COLLABORATION_GRAPH    = NO
 GROUP_GRAPHS           = YES
-UML_LOOK               = NO
+UML_LOOK               = YES
 TEMPLATE_RELATIONS     = YES
-INCLUDE_GRAPH          = YES
-INCLUDED_BY_GRAPH      = YES
+INCLUDE_GRAPH          = NO
+INCLUDED_BY_GRAPH      = NO
 CALL_GRAPH             = NO
 GRAPHICAL_HIERARCHY    = YES
-DIRECTORY_GRAPH        = YES
+DIRECTORY_GRAPH        = NO
 DOT_IMAGE_FORMAT       = png
 DOT_FONTNAME           = Arial
 DOT_PATH               = 
@@ -262,6 +262,6 @@ DOT_CLEANUP            = YES
 #---------------------------------------------------------------------------
 # Configuration::additions related to the search engine   
 #---------------------------------------------------------------------------
-SEARCHENGINE           = NO
+SEARCHENGINE           = YES
 
 

@@ -23,8 +23,7 @@
 #ifndef MED_Wrapper_HeaderFile
 #define MED_Wrapper_HeaderFile
 
-#include "MED_WrapperBase.hxx"
-
+#include "MED_WrapperDef.hxx"
 #include "MED_Structures.hxx"
 #include "MED_Algorithm.hxx"
 
@@ -32,7 +31,6 @@
 
 namespace MED
 {
-
   //----------------------------------------------------------------------------
   //! Define a base class that wraps the MED API
   struct MEDWRAPPER_EXPORT TWrapper
@@ -44,12 +42,6 @@ namespace MED
     virtual
     ~TWrapper();
 
-    //----------------------------------------------------------------------------
-    //! Gets version of the MED library used for the MED file
-    virtual 
-    EVersion
-    GetVersion() = 0;
-    
     //----------------------------------------------------------------------------
     //! Creates a MEDWrapper MED Mesh representation
     virtual 
@@ -87,7 +79,6 @@ namespace MED
     PMeshInfo
     GetPMeshInfo(TInt theId,
                  TErr* theErr = NULL);
-
 
     //----------------------------------------------------------------------------
     //! Read number of MED Family entities in the defined MED file
@@ -650,7 +641,6 @@ namespace MED
     SetFieldInfo(const TFieldInfo& theInfo,
                  TErr* theErr = NULL) = 0;
     
-
     //! Creates a MEDWrapper MED FIELD representation
     virtual 
     PFieldInfo
@@ -672,7 +662,6 @@ namespace MED
     GetPFieldInfo(const PMeshInfo& theMeshInfo, 
                   TInt theId,
                   TErr* theErr = NULL);
-
 
     //----------------------------------------------------------------------------
     //! Read number of MED GAUSS in defined MED Mesh
@@ -709,7 +698,6 @@ namespace MED
     PGaussInfo
     CrGaussInfo(const TGaussInfo::TInfo& theInfo,
                 EModeSwitch theMode = eFULL_INTERLACE) = 0;
-
 
     //----------------------------------------------------------------------------
     //! Read number of MED TIMESTAMPS in defined MED Mesh
@@ -759,7 +747,6 @@ namespace MED
                       const TGeom2Size& theGeom2Size,
                       TInt theId,
                       TErr* theErr = NULL);
-    
 
     //----------------------------------------------------------------------------
     //! Read number of MED PROFILES in defined MED Mesh
@@ -797,7 +784,6 @@ namespace MED
     GetPProfileInfo(TInt theId,
                     EModeProfil theMode = eCOMPACT,
                     TErr* theErr = NULL);
-
 
     //----------------------------------------------------------------------------
     //! Read the values for MEDWrapper MED TIEMSTAMP from defined MED file
@@ -967,9 +953,7 @@ namespace MED
                   TErr* theErr = NULL)
     {
     }
-    
   };
-
 
   //----------------------------------------------------------------------------
   //! This class provide thread-safety for MEDWrapper interaction
@@ -985,7 +969,6 @@ namespace MED
 
     TWrapper * operator-> () const;
   };
-
 
   //----------------------------------------------------------------------------
   //! To specialize the SharedPtr for TWrapper
@@ -1049,4 +1032,4 @@ namespace MED
   typedef SharedPtr<TWrapper> PWrapper;
 }
 
-#endif
+#endif // MED_Wrapper_HeaderFile

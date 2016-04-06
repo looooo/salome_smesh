@@ -19,6 +19,7 @@
 //
 // See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 //
+
 #ifndef MED_TWrapper_HeaderFile
 #define MED_TWrapper_HeaderFile
 
@@ -27,20 +28,9 @@
 
 namespace MED
 {
-
-  template<EVersion eVersion>
   class TTWrapper: public TWrapper
   {
   public:
-    //----------------------------------------------------------------------------
-    //! Gets version of the MED library used for the MED file
-    virtual 
-    EVersion
-    GetVersion()
-    {
-      return eVersion;
-    }
-    
     //----------------------------------------------------------------------------
     virtual 
     PMeshInfo
@@ -49,7 +39,7 @@ namespace MED
                EMaillage theType = eNON_STRUCTURE,
                const std::string& theDesc = "")
     {
-      return PMeshInfo(new TTMeshInfo<eVersion>
+      return PMeshInfo(new TTMeshInfo
                        (theDim,
                         theSpaceDim,
                         theValue,
@@ -57,13 +47,13 @@ namespace MED
                         theDesc));
     }
 
+    //----------------------------------------------------------------------------
     virtual 
     PMeshInfo
     CrMeshInfo(const PMeshInfo& theInfo)
     {
-      return PMeshInfo(new TTMeshInfo<eVersion>(theInfo));
+      return PMeshInfo(new TTMeshInfo(theInfo));
     }
-    
 
     //----------------------------------------------------------------------------
     virtual
@@ -74,7 +64,7 @@ namespace MED
                  TInt theId = 0,
                  const std::string& theValue = "")
     {
-      return PFamilyInfo(new TTFamilyInfo<eVersion>
+      return PFamilyInfo(new TTFamilyInfo
                          (theMeshInfo,
                           theNbGroup,
                           theNbAttr,
@@ -82,6 +72,7 @@ namespace MED
                           theValue));
     }
 
+    //----------------------------------------------------------------------------
     virtual
     PFamilyInfo
     CrFamilyInfo(const PMeshInfo& theMeshInfo,
@@ -92,7 +83,7 @@ namespace MED
                  const MED::TIntVector& theAttrIds = MED::TIntVector(), 
                  const MED::TIntVector& theAttrVals = MED::TIntVector())
     {
-      return PFamilyInfo(new TTFamilyInfo<eVersion>
+      return PFamilyInfo(new TTFamilyInfo
                          (theMeshInfo,
                           theValue,
                           theId,
@@ -102,12 +93,13 @@ namespace MED
                           theAttrVals));
     }
 
+    //----------------------------------------------------------------------------
     virtual
     PFamilyInfo
     CrFamilyInfo(const PMeshInfo& theMeshInfo,
                  const PFamilyInfo& theInfo)
     {
-      return PFamilyInfo(new TTFamilyInfo<eVersion>
+      return PFamilyInfo(new TTFamilyInfo
                          (theMeshInfo,
                           theInfo));
     }
@@ -120,13 +112,14 @@ namespace MED
                EBooleen theIsElemNum = eVRAI,
                EBooleen theIsElemNames = eVRAI)
     {
-      return PElemInfo(new TTElemInfo<eVersion>
+      return PElemInfo(new TTElemInfo
                        (theMeshInfo,
                         theNbElem,
                         theIsElemNum,
                         theIsElemNames));
     }
 
+    //----------------------------------------------------------------------------
     virtual
     PElemInfo
     CrElemInfo(const PMeshInfo& theMeshInfo, 
@@ -135,7 +128,7 @@ namespace MED
                const TIntVector& aElemNum,
                const TStringVector& aElemNames)
     {
-      return PElemInfo(new TTElemInfo<eVersion>
+      return PElemInfo(new TTElemInfo
                        (theMeshInfo,
                         theNbElem,
                         theFamNum,
@@ -153,7 +146,7 @@ namespace MED
                EBooleen theIsElemNum = eVRAI,
                EBooleen theIsElemNames = eVRAI)
     {
-      return PNodeInfo(new TTNodeInfo<eVersion>
+      return PNodeInfo(new TTNodeInfo
                        (theMeshInfo,
                         theNbElem,
                         theMode,
@@ -162,6 +155,7 @@ namespace MED
                         theIsElemNames));
     }
 
+    //----------------------------------------------------------------------------
     virtual 
     PNodeInfo
     CrNodeInfo(const PMeshInfo& theMeshInfo, 
@@ -174,7 +168,7 @@ namespace MED
                const TIntVector& theElemNums = TIntVector(),
                const TStringVector& theElemNames = TStringVector())
     {
-      return PNodeInfo(new TTNodeInfo<eVersion>
+      return PNodeInfo(new TTNodeInfo
                        (theMeshInfo,
                         theNodeCoords,
                         theMode,
@@ -186,12 +180,13 @@ namespace MED
                         theElemNames));
     }
 
+    //----------------------------------------------------------------------------
     virtual 
     PNodeInfo
     CrNodeInfo(const PMeshInfo& theMeshInfo,
                const PNodeInfo& theInfo)
     {
-      return PNodeInfo(new TTNodeInfo<eVersion>
+      return PNodeInfo(new TTNodeInfo
                        (theMeshInfo,
                         theInfo));
     }
@@ -208,7 +203,7 @@ namespace MED
                    EBooleen theIsElemNum = eVRAI,
                    EBooleen theIsElemNames = eVRAI)
     {
-      return PPolygoneInfo(new TTPolygoneInfo<eVersion>
+      return PPolygoneInfo(new TTPolygoneInfo
                            (theMeshInfo,
                             theEntity,
                             theGeom,
@@ -219,6 +214,7 @@ namespace MED
                             theIsElemNames));
     }
 
+    //----------------------------------------------------------------------------
     virtual
     PPolygoneInfo
     CrPolygoneInfo(const PMeshInfo& theMeshInfo, 
@@ -231,7 +227,7 @@ namespace MED
                    const TIntVector& theElemNums = TIntVector(),
                    const TStringVector& theElemNames = TStringVector())
     {
-      return PPolygoneInfo(new TTPolygoneInfo<eVersion>
+      return PPolygoneInfo(new TTPolygoneInfo
                            (theMeshInfo,
                             theEntity,
                             theGeom,
@@ -243,12 +239,13 @@ namespace MED
                             theElemNames));
     }
 
+    //----------------------------------------------------------------------------
     virtual
     PPolygoneInfo
     CrPolygoneInfo(const PMeshInfo& theMeshInfo,
                    const PPolygoneInfo& theInfo)
     {
-      return PPolygoneInfo(new TTPolygoneInfo<eVersion>
+      return PPolygoneInfo(new TTPolygoneInfo
                            (theMeshInfo,
                             theInfo));
     }
@@ -266,7 +263,7 @@ namespace MED
                    EBooleen theIsElemNum = eVRAI,
                    EBooleen theIsElemNames = eVRAI)
     {
-      return PPolyedreInfo(new TTPolyedreInfo<eVersion>
+      return PPolyedreInfo(new TTPolyedreInfo
                            (theMeshInfo,
                             theEntity,
                             theGeom,
@@ -278,6 +275,7 @@ namespace MED
                             theIsElemNames));
     }
 
+    //----------------------------------------------------------------------------
     virtual
     PPolyedreInfo
     CrPolyedreInfo(const PMeshInfo& theMeshInfo, 
@@ -291,7 +289,7 @@ namespace MED
                    const TIntVector& theElemNums = TIntVector(),
                    const TStringVector& theElemNames = TStringVector())
     {
-      return PPolyedreInfo(new TTPolyedreInfo<eVersion>
+      return PPolyedreInfo(new TTPolyedreInfo
                            (theMeshInfo,
                             theEntity,
                             theGeom,
@@ -304,12 +302,13 @@ namespace MED
                             theElemNames));
     }
 
+    //----------------------------------------------------------------------------
     virtual
     PPolyedreInfo
     CrPolyedreInfo(const PMeshInfo& theMeshInfo,
                    const PPolyedreInfo& theInfo)
     {
-      return PPolyedreInfo(new TTPolyedreInfo<eVersion>
+      return PPolyedreInfo(new TTPolyedreInfo
                            (theMeshInfo,
                             theInfo));
     }
@@ -326,7 +325,7 @@ namespace MED
                EBooleen theIsElemNames = eVRAI,
                EModeSwitch theMode = eFULL_INTERLACE)
     {
-      return PCellInfo(new TTCellInfo<eVersion>
+      return PCellInfo(new TTCellInfo
                        (theMeshInfo,
                         theEntity,
                         theGeom,
@@ -337,6 +336,7 @@ namespace MED
                         theMode));
     }
 
+    //----------------------------------------------------------------------------
     virtual
     PCellInfo
     CrCellInfo(const PMeshInfo& theMeshInfo, 
@@ -349,7 +349,7 @@ namespace MED
                const TStringVector& theElemNames = TStringVector(),
                EModeSwitch theMode = eFULL_INTERLACE)
     {
-      return PCellInfo(new TTCellInfo<eVersion>
+      return PCellInfo(new TTCellInfo
                        (theMeshInfo,
                         theEntity,
                         theGeom,
@@ -361,12 +361,13 @@ namespace MED
                         theMode));
     }
 
+    //----------------------------------------------------------------------------
     virtual
     PCellInfo
     CrCellInfo(const PMeshInfo& theMeshInfo,
                const PCellInfo& theInfo)
     {
-      return PCellInfo(new TTCellInfo<eVersion>
+      return PCellInfo(new TTCellInfo
                        (theMeshInfo,
                         theInfo));
     }
@@ -377,9 +378,10 @@ namespace MED
                                  TInt             theNbBalls,
                                  EBooleen         theIsElemNum = eVRAI)
     {
-      return PBallInfo( new TTBallInfo<eVersion>( theMeshInfo, theNbBalls, theIsElemNum ));
+      return PBallInfo( new TTBallInfo( theMeshInfo, theNbBalls, theIsElemNum ));
     }
 
+    //----------------------------------------------------------------------------
     //! Creates a MEDWrapper MED Balls representation
     virtual PBallInfo CrBallInfo(const PMeshInfo&  theMeshInfo, 
                                  const TIntVector& theNodes,
@@ -387,15 +389,16 @@ namespace MED
                                  const TIntVector& theFamilyNums = TIntVector(),
                                  const TIntVector& theElemNums = TIntVector())
     {
-      return PBallInfo( new TTBallInfo<eVersion>( theMeshInfo, theNodes, theDiameters,
+      return PBallInfo( new TTBallInfo( theMeshInfo, theNodes, theDiameters,
                                                   theFamilyNums, theElemNums));
     }
 
+    //----------------------------------------------------------------------------
     //! A copy-constructor for the MEDWrapper MED Balls representation
     virtual PBallInfo CrBallInfo(const PMeshInfo& theMeshInfo,
                                  const PBallInfo& theInfo)
     {
-      return PBallInfo( new TTBallInfo<eVersion>( theMeshInfo, theInfo ));
+      return PBallInfo( new TTBallInfo( theMeshInfo, theInfo ));
     }
 
     //----------------------------------------------------------------------------
@@ -408,7 +411,7 @@ namespace MED
                 EBooleen theIsLocal = eVRAI,
                 TInt theNbRef = 1)
     {
-      return PFieldInfo(new TTFieldInfo<eVersion>
+      return PFieldInfo(new TTFieldInfo
                         (theMeshInfo,
                          theNbComp,
                          theType,
@@ -417,16 +420,16 @@ namespace MED
                          theNbRef));
     }
 
+    //----------------------------------------------------------------------------
     virtual
     PFieldInfo
     CrFieldInfo(const PMeshInfo& theMeshInfo,
                 const PFieldInfo& theInfo)
     {
-      return PFieldInfo(new TTFieldInfo<eVersion>
+      return PFieldInfo(new TTFieldInfo
                         (theMeshInfo,
                          theInfo));
     }
-    
 
     //----------------------------------------------------------------------------
     virtual
@@ -441,7 +444,7 @@ namespace MED
                     const std::string& theUnitDt = "",
                     const TGeom2Gauss& theGeom2Gauss = TGeom2Gauss())
     {
-      return PTimeStampInfo(new TTTimeStampInfo<eVersion>
+      return PTimeStampInfo(new TTTimeStampInfo
                             (theFieldInfo,
                              theEntity,
                              theGeom2Size,
@@ -453,16 +456,16 @@ namespace MED
                              theGeom2Gauss));
     }
 
+    //----------------------------------------------------------------------------
     virtual
     PTimeStampInfo
     CrTimeStampInfo(const PFieldInfo& theFieldInfo,
                     const PTimeStampInfo& theInfo)
     {
-      return PTimeStampInfo(new TTTimeStampInfo<eVersion>
+      return PTimeStampInfo(new TTTimeStampInfo
                             (theFieldInfo,
                              theInfo));
     }
-
 
     //----------------------------------------------------------------------------
     virtual
@@ -470,11 +473,10 @@ namespace MED
     CrGaussInfo(const TGaussInfo::TInfo& theInfo,
                 EModeSwitch theMode = eFULL_INTERLACE)
     {
-      return PGaussInfo(new TTGaussInfo<eVersion>
+      return PGaussInfo(new TTGaussInfo
                         (theInfo,
                          theMode));
     }
-    
 
     //----------------------------------------------------------------------------
     virtual
@@ -482,11 +484,10 @@ namespace MED
     CrProfileInfo(const TProfileInfo::TInfo& theInfo,
                   EModeProfil theMode = eCOMPACT)
     {
-      return PProfileInfo(new TTProfileInfo<eVersion>
+      return PProfileInfo(new TTProfileInfo
                            (theInfo,
                             theMode));
     }
-    
 
     //----------------------------------------------------------------------------
     virtual
@@ -497,18 +498,19 @@ namespace MED
                      EModeSwitch theMode = eFULL_INTERLACE)
     {
       if(theTypeChamp == eFLOAT64)
-        return PTimeStampValueBase(new TTTimeStampValue<eVersion, TFloatMeshValue>
+        return PTimeStampValueBase(new TTTimeStampValue<TFloatMeshValue>
                                    (theTimeStampInfo,
                                     theTypeChamp,
                                     theGeom2Profile,
                                     theMode));
-      return PTimeStampValueBase(new TTTimeStampValue<eVersion, TIntMeshValue>
+      return PTimeStampValueBase(new TTTimeStampValue<TIntMeshValue>
                                  (theTimeStampInfo,
                                   theTypeChamp,
                                   theGeom2Profile,
                                   theMode));
     }
 
+    //----------------------------------------------------------------------------
     virtual
     PTimeStampValueBase
     CrTimeStampValue(const PTimeStampInfo& theTimeStampInfo,
@@ -516,11 +518,11 @@ namespace MED
                      ETypeChamp theTypeChamp)
     {
       if(theTypeChamp == eFLOAT64)
-        return PTimeStampValueBase(new TTTimeStampValue<eVersion, TFloatMeshValue>
+        return PTimeStampValueBase(new TTTimeStampValue<TFloatMeshValue>
                                    (theTimeStampInfo,
                                     theInfo,
                                     theTypeChamp));
-      return PTimeStampValueBase(new TTTimeStampValue<eVersion, TIntMeshValue>
+      return PTimeStampValueBase(new TTTimeStampValue<TIntMeshValue>
                                  (theTimeStampInfo,
                                   theInfo,
                                   theTypeChamp));
@@ -532,47 +534,48 @@ namespace MED
     CrGrilleInfo(const PMeshInfo& theMeshInfo,
                  const PGrilleInfo& theInfo)
     {
-      return PGrilleInfo(new TTGrilleInfo<eVersion>
+      return PGrilleInfo(new TTGrilleInfo
                             (theMeshInfo,
                              theInfo));
     }
+
+    //----------------------------------------------------------------------------
     virtual
     PGrilleInfo
     CrGrilleInfo(const PMeshInfo& theMeshInfo,
                  const EGrilleType& type)
     {
-      return PGrilleInfo(new TTGrilleInfo<eVersion>
+      return PGrilleInfo(new TTGrilleInfo
                             (theMeshInfo,
                              type));
     }
 
+    //----------------------------------------------------------------------------
     virtual
     PGrilleInfo
     CrGrilleInfo(const PMeshInfo& theMeshInfo,
                  const EGrilleType& type,
                  const TInt& nbNodes)
     {
-      return PGrilleInfo(new TTGrilleInfo<eVersion>
+      return PGrilleInfo(new TTGrilleInfo
                             (theMeshInfo,
                              type,
                              nbNodes));
     }
 
+    //----------------------------------------------------------------------------
     virtual
     PGrilleInfo
     CrGrilleInfo(const PMeshInfo& theMeshInfo,
                  const EGrilleType& type,
                  const MED::TIntVector& nbNodeVec)
     {
-      return PGrilleInfo(new TTGrilleInfo<eVersion>
+      return PGrilleInfo(new TTGrilleInfo
                             (theMeshInfo,
                              type,
                              nbNodeVec));
     }
-    //----------------------------------------------------------------------------
   };
-
 }
 
-
-#endif
+#endif // MED_TWrapper_HeaderFile

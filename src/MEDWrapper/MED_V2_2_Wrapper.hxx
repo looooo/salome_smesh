@@ -19,59 +19,43 @@
 //
 // See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 //
+
 #ifndef MED_V2_2_Wrapper_HeaderFile
 #define MED_V2_2_Wrapper_HeaderFile
 
-#ifdef WIN32
- #if defined MEDWRAPPER_V2_2_EXPORTS || defined MEDWrapper_V2_2_EXPORTS
-  #if defined WIN32
-   #define MED_V22_WRAPPER_EXPORT __declspec( dllexport )
-  #else
-   #define MED_V22_WRAPPER_EXPORT
-  #endif
- #else
-  #if defined WIN32
-   #define MED_V22_WRAPPER_EXPORT __declspec( dllimport )
-  #else
-   #define MED_V22_WRAPPER_EXPORT
-  #endif
- #endif
-#else
- #define MED_V22_WRAPPER_EXPORT
-#endif
-
+#include "MED_WrapperDef.hxx"
 #include "MED_Structures.hxx"
 #include "MED_TWrapper.hxx"
 
 namespace MED
 {
-  template<>
-  TInt MED_V22_WRAPPER_EXPORT
-  GetDESCLength<eV2_2>();
+  MEDWRAPPER_EXPORT
+  TInt
+  GetDESCLength();
   
-  template<>
-  TInt MED_V22_WRAPPER_EXPORT
-  GetIDENTLength<eV2_2>();
+  MEDWRAPPER_EXPORT
+  TInt
+  GetIDENTLength();
   
-  template<>
-  TInt MED_V22_WRAPPER_EXPORT
-  GetNOMLength<eV2_2>();
+  MEDWRAPPER_EXPORT
+  TInt
+  GetNOMLength();
   
-  template<>
-  TInt MED_V22_WRAPPER_EXPORT
-  GetLNOMLength<eV2_2>();
+  MEDWRAPPER_EXPORT
+  TInt
+  GetLNOMLength();
   
-  template<>
-  TInt MED_V22_WRAPPER_EXPORT
-  GetPNOMLength<eV2_2>();
+  MEDWRAPPER_EXPORT
+  TInt
+  GetPNOMLength();
 
-  template<>
-  void MED_V22_WRAPPER_EXPORT
-  GetVersionRelease<eV2_2>(TInt& majeur, TInt& mineur, TInt& release);
+  MEDWRAPPER_EXPORT
+  void
+  GetVersionRelease(TInt& majeur, TInt& mineur, TInt& release);
 
-  template<>
-  TInt MED_V22_WRAPPER_EXPORT
-  GetNbConn<eV2_2>(EGeometrieElement typmai,
+  MEDWRAPPER_EXPORT
+  TInt
+  GetNbConn(EGeometrieElement typmai,
                    EEntiteMaillage typent,
                    TInt mdim);
 
@@ -84,7 +68,7 @@ namespace MED
     typedef enum {eLECTURE, eLECTURE_ECRITURE, eLECTURE_AJOUT, eCREATION} EModeAcces; 
 
     //----------------------------------------------------------------------------
-    class MED_V22_WRAPPER_EXPORT TVWrapper: public MED::TTWrapper<eV2_2>
+    class MEDWRAPPER_EXPORT TVWrapper: public MED::TTWrapper
     {
       TVWrapper();
       TVWrapper(const TVWrapper&);
@@ -486,4 +470,4 @@ namespace MED
   }
 }
 
-#endif
+#endif // MED_V2_2_Wrapper_HeaderFile

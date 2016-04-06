@@ -19,9 +19,9 @@
 //
 // See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 //
+
 #include "MED_Algorithm.hxx"
 #include "MED_Wrapper.hxx"
-
 #include "MED_Utilities.hxx"
  
 #ifdef _DEBUG_

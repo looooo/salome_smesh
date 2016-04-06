@@ -19,12 +19,12 @@
 //
 // See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 //
+
 #include "MED_CoordUtils.hxx"
 #include "MED_Utilities.hxx"
  
 namespace MED
 {
-
   enum ECoordName{eX, eY, eZ, eNone};
 
   template<ECoordName TCoordId>

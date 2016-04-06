@@ -16,34 +16,31 @@
 //
 // See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 //
-// File   : MED_GaussDef.hxx
-// Author : Edward AGAPOV (eap)
-//
+
 #include "MED_GaussDef.hxx"
 #include "MED_Utilities.hxx"
 #include "MED_GaussUtils.hxx"
 
 namespace MED
 {
-  using namespace std;
   using namespace MED;
   //---------------------------------------------------------------
 
   void TGaussDef::add(const double x, const double weight)
   {
     if ( dim() != 1 )
-      EXCEPTION( logic_error,"dim() != 1");
+      EXCEPTION( std::logic_error,"dim() != 1");
     if ( myWeights.capacity() == myWeights.size() )
-      EXCEPTION( logic_error,"Extra gauss point");
+      EXCEPTION( std::logic_error,"Extra gauss point");
     myCoords.push_back( x );
     myWeights.push_back( weight );
   }
   void TGaussDef::add(const double x, const double y, const double weight)
   {
     if ( dim() != 2 )
-      EXCEPTION( logic_error,"dim() != 2");
+      EXCEPTION( std::logic_error,"dim() != 2");
     if ( myWeights.capacity() == myWeights.size() )
-      EXCEPTION( logic_error,"Extra gauss point");
+      EXCEPTION( std::logic_error,"Extra gauss point");
     myCoords.push_back( x );
     myCoords.push_back( y );
     myWeights.push_back( weight );
@@ -51,9 +48,9 @@ namespace MED
   void TGaussDef::add(const double x, const double y, const double z, const double weight)
   {
     if ( dim() != 3 )
-      EXCEPTION( logic_error,"dim() != 3");
+      EXCEPTION( std::logic_error,"dim() != 3");
     if ( myWeights.capacity() == myWeights.size() )
-      EXCEPTION( logic_error,"Extra gauss point");
+      EXCEPTION( std::logic_error,"Extra gauss point");
     myCoords.push_back( x );
     myCoords.push_back( y );
     myCoords.push_back( z );
@@ -111,7 +108,7 @@ namespace MED
         add( -b,  P2 ); break;
       }
       default:
-        EXCEPTION( logic_error,"Invalid nb of gauss points for SEG"<<nbGauss);
+        EXCEPTION( std::logic_error,"Invalid nb of gauss points for SEG"<<nbGauss);
       }
       break;
 
@@ -181,7 +178,7 @@ namespace MED
           add(     D, 1-C-D, P3 ); break;
         }
         default:
-          EXCEPTION( logic_error,"Invalid nb of gauss points for TRIA, variant 1: "
+          EXCEPTION( std::logic_error,"Invalid nb of gauss points for TRIA, variant 1: "
                      <<nbGauss);
         }
       }
@@ -208,7 +205,7 @@ namespace MED
           add( 2*A-1, 2*A-1, 4*P1 ); break;
         }
         default:
-          EXCEPTION( logic_error,"Invalid nb of gauss points for TRIA, variant 2: "
+          EXCEPTION( std::logic_error,"Invalid nb of gauss points for TRIA, variant 2: "
                      <<nbGauss);
         }
       }
@@ -223,7 +220,7 @@ namespace MED
           add( 0.2 , 0.6 ,  25/96 ); break;
         }
         default:
-          EXCEPTION( logic_error,"Invalid nb of gauss points for TRIA, variant 3: "
+          EXCEPTION( std::logic_error,"Invalid nb of gauss points for TRIA, variant 3: "
                      <<nbGauss);
         }
       }
@@ -258,7 +255,7 @@ namespace MED
           add( 0., 0.,  64/81. ); break;
         }
         default:
-          EXCEPTION( logic_error,"Invalid nb of gauss points for QUAD, variant 1: "
+          EXCEPTION( std::logic_error,"Invalid nb of gauss points for QUAD, variant 1: "
                      <<nbGauss);
         }
       }
@@ -286,7 +283,7 @@ namespace MED
           add( 0., 0.,  64/81. ); break;
         }
         default:
-          EXCEPTION( logic_error,"Invalid nb of gauss points for QUAD, variant 1: "
+          EXCEPTION( std::logic_error,"Invalid nb of gauss points for QUAD, variant 1: "
                      <<nbGauss);
         }
       }
@@ -315,7 +312,7 @@ namespace MED
           add(  a,  a,  c12  ); break;
         }
         default:
-          EXCEPTION( logic_error,"Invalid nb of gauss points for QUAD, variant 3: "
+          EXCEPTION( std::logic_error,"Invalid nb of gauss points for QUAD, variant 3: "
                      <<nbGauss);
         }
       }
@@ -365,7 +362,7 @@ namespace MED
         break;
       }
       default:
-        EXCEPTION( logic_error,"Invalid nb of gauss points for TETRA: "<<nbGauss);
+        EXCEPTION( std::logic_error,"Invalid nb of gauss points for TETRA: "<<nbGauss);
       }
       break;
 
@@ -444,7 +441,7 @@ namespace MED
         break;
       }
       default:
-        EXCEPTION( logic_error,"Invalid nb of gauss points for PYRA: "<<nbGauss);
+        EXCEPTION( std::logic_error,"Invalid nb of gauss points for PYRA: "<<nbGauss);
       }
       break;
     case ePENTA6:
@@ -502,7 +499,7 @@ namespace MED
         break;
       }
       default:
-        EXCEPTION( logic_error,"Invalid nb of gauss points for PENTA: " <<nbGauss);
+        EXCEPTION( std::logic_error,"Invalid nb of gauss points for PENTA: " <<nbGauss);
       }
       break;
 
@@ -556,15 +553,15 @@ namespace MED
         break;
       }
       default:
-        EXCEPTION( logic_error,"Invalid nb of gauss points for PENTA: " <<nbGauss);
+        EXCEPTION( std::logic_error,"Invalid nb of gauss points for PENTA: " <<nbGauss);
       }
       break;
 
     default:
-      EXCEPTION( logic_error,"unexpected EGeometrieElement: "<< geom);
+      EXCEPTION( std::logic_error,"unexpected EGeometrieElement: "<< geom);
     }
 
     if ( myWeights.capacity() != myWeights.size() )
-      EXCEPTION( logic_error,"Not all gauss points defined");
+      EXCEPTION( std::logic_error,"Not all gauss points defined");
   }
 }

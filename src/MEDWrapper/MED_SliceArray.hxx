@@ -19,10 +19,11 @@
 //
 // See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 //
+
 #ifndef MED_SliceArray_HeaderFile
 #define MED_SliceArray_HeaderFile
 
-#ifdef WIN32 // for correctly compiling "valarray" in modules, which are includes this file
+#ifdef WIN32 // for correct compiling of "valarray" in modules, which include this file
   #undef max
   #undef min
 #endif
@@ -177,9 +178,8 @@ namespace MED
       return *(myValuePtr + this->get_id_at(theId));
     }
   };
-
 }
 
 #undef MED_TCSLICE_CHECK_RANGE
 
-#endif
+#endif // MED_SliceArray_HeaderFile

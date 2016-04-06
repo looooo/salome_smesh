@@ -2965,14 +2965,17 @@ SMESH::SMESH_Mesh_ptr SMESH_Gen_i::CopyMesh(SMESH::SMESH_IDSource_ptr meshPart,
 CORBA::Boolean SMESH_Gen_i::GetMEDVersion(const char* theFileName,
                                           SMESH::MED_VERSION& theVersion)
 {
-  theVersion = SMESH::MED_V2_1;
-  MED::EVersion aVersion = MED::GetVersionId( theFileName );
-  switch( aVersion ) {
-    case MED::eV2_1     : theVersion = SMESH::MED_V2_1; return true;
-    case MED::eV2_2     : theVersion = SMESH::MED_V2_2; return true;
-    case MED::eVUnknown : return false;
+  theVersion = SMESH::MED_V2_2;
+
+  int major, minor, release;
+  bool result = MED::GetMEDVersion( theFileName, major, minor, release );
+  if ( result ) {
+    int version = major * 100 + minor;
+    if ( version < 202 ) theVersion = SMESH::MED_V2_1;
+    else theVersion = SMESH::MED_V2_2;
   }
-  return false;
+
+  return result;
 }
 
 //================================================================================
@@ -2985,7 +2988,7 @@ CORBA::Boolean SMESH_Gen_i::GetMEDVersion(const char* theFileName,
 SMESH::string_array* SMESH_Gen_i::GetMeshNames(const char* theFileName)
 {
   SMESH::string_array_var aResult = new SMESH::string_array();
-  MED::PWrapper aMed = MED::CrWrapper( theFileName );
+  MED::PWrapper aMed = MED::CrWrapperR( theFileName );
   MED::TErr anErr;
   MED::TInt aNbMeshes = aMed->GetNbMeshes( &anErr );
   if( anErr >= 0 ) {

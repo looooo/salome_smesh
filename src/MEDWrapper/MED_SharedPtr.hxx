@@ -19,6 +19,7 @@
 //
 // See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 //
+
 #ifndef MED_SharedPtr_HeaderFile
 #define MED_SharedPtr_HeaderFile
 
@@ -26,7 +27,6 @@
 
 namespace MED
 {
-
   //! To extend the boost::shared_ptr to support such features automatic dynamic cast
   /*!
     All entities of the MEDWrapper package are handled as pointer.
@@ -88,8 +88,6 @@ namespace MED
       return *(this->get());
     }
   };
-
 }
 
-
-#endif
+#endif // MED_SharedPtr_HeaderFile

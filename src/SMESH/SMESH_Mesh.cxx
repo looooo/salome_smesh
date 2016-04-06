@@ -1393,7 +1393,7 @@ bool SMESH_Mesh::HasDuplicatedGroupNamesMED()
 void SMESH_Mesh::ExportMED(const char *        file, 
                            const char*         theMeshName, 
                            bool                theAutoGroups,
-                           int                 theVersion,
+                           int                 /*theVersion*/,
                            const SMESHDS_Mesh* meshPart,
                            bool                theAutoDimension,
                            bool                theAddODOnVertices)
@@ -1402,7 +1402,7 @@ void SMESH_Mesh::ExportMED(const char *        file,
   SMESH_TRY;
 
   DriverMED_W_SMESHDS_Mesh myWriter;
-  myWriter.SetFile         ( file, MED::EVersion(theVersion) );
+  myWriter.SetFile         ( file );
   myWriter.SetMesh         ( meshPart ? (SMESHDS_Mesh*) meshPart : _myMeshDS   );
   myWriter.SetAutoDimension( theAutoDimension );
   myWriter.AddODOnVertices ( theAddODOnVertices );

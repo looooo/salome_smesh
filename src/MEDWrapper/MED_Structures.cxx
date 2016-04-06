@@ -19,9 +19,7 @@
 //
 // See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 //
-//  File   : MED_Structure.cxx
-//  Author : Eugeny NIKOLAEV
-//
+
 #include "MED_Structures.hxx"
 #include "MED_Utilities.hxx"
 

@@ -406,7 +406,7 @@ SMESH_Mesh_i::ImportMEDFile( const char* theFileName, const char* theMeshName )
   CreateGroupServants();
 
   int major, minor, release;
-  if( !MED::getMEDVersion( theFileName, major, minor, release ) )
+  if( !MED::GetMEDVersion( theFileName, major, minor, release ) )
     major = minor = release = -1;
   _medFileInfo           = new SMESH::MedFileInfo();
   _medFileInfo->fileName = theFileName;
@@ -455,8 +455,7 @@ SMESH::DriverMED_ReadStatus SMESH_Mesh_i::ImportCGNSFile( const char*  theFileNa
 
 char* SMESH_Mesh_i::GetVersionString(SMESH::MED_VERSION version, CORBA::Short nbDigits)
 {
-  string ver = DriverMED_W_SMESHDS_Mesh::GetVersionString(MED::EVersion(version),
-                                                          nbDigits);
+  string ver = DriverMED_W_SMESHDS_Mesh::GetVersionString(nbDigits);
   return CORBA::string_dup( ver.c_str() );
 }
 

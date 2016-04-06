@@ -23,6 +23,7 @@
 #ifndef MED_Structures_HeaderFile
 #define MED_Structures_HeaderFile
 
+#include "MED_WrapperDef.hxx"
 #include "MED_Common.hxx"
 #include "MED_Utilities.hxx"
 
@@ -32,7 +33,6 @@
 
 namespace MED
 {
-
   //---------------------------------------------------------------
   //! Defines a type for managing sequence of strings
   typedef TVector<char> TString; 
@@ -65,7 +65,6 @@ namespace MED
     virtual ~TBase() {} 
   };
 
-
   //---------------------------------------------------------------
   //! Define a parent class for all named MED entities
   struct MEDWRAPPER_EXPORT TNameInfo: virtual TBase
@@ -75,7 +74,6 @@ namespace MED
     virtual void SetName(const std::string& theValue) = 0; //!< Set a new name
     virtual void SetName(const TString& theValue) = 0; //!< Set a new name
   };
-
 
   //---------------------------------------------------------------
   //! Define a parent class for all MED entities that contains a sequence of numbers
@@ -99,7 +97,6 @@ namespace MED
     EModeSwitch GetModeSwitch() const { return myModeSwitch;}
   };
 
-
   //---------------------------------------------------------------
   //! Define a base class which represents MED Mesh entity
   struct MEDWRAPPER_EXPORT TMeshInfo: virtual TNameInfo
@@ -116,10 +113,7 @@ namespace MED
     TString myDesc; //!< Description of the mesh
     virtual std::string GetDesc() const = 0; //!< Get description for the mesh
     virtual void SetDesc(const std::string& theValue) = 0; //!< Sets description for the mesh
-
-    
   };
-  
 
   //---------------------------------------------------------------
   typedef TVector<TInt> TIntVector;
@@ -176,7 +170,6 @@ namespace MED
     virtual void SetAttrDesc(TInt theId, const std::string& theValue) = 0;
   };
 
-
   //---------------------------------------------------------------
   typedef TIntVector TElemNum;
   typedef SharedPtr<TElemNum> PElemNum;
@@ -229,7 +222,6 @@ namespace MED
     virtual void SetElemName(TInt theId, const std::string& theValue) = 0;
   };
 
-
   //---------------------------------------------------------------
   typedef TVector<TFloat> TFloatVector;
   typedef TSlice<TFloat> TFloatVecSlice;
@@ -271,7 +263,6 @@ namespace MED
     //! Set name of unit for the coordinate dimension by its order number
     virtual void SetCoordUnit(TInt theId, const std::string& theValue) = 0;
   };
-
 
   //---------------------------------------------------------------
   typedef TIntVecSlice TConnSlice;
@@ -423,9 +414,7 @@ namespace MED
     virtual std::string GetUnitName(TInt theId) const = 0;
     //! Set unit for the component by its order number
     virtual void SetUnitName(TInt theId, const std::string& theValue) = 0;
-
   };
-
 
   //---------------------------------------------------------------
   //! Get dimension of the Gauss coordinates for the defined type of mesh cell
@@ -490,7 +479,6 @@ namespace MED
     TInt GetNbGauss() const { return (TInt)(myGaussCoord.size()/GetDim());}
   };
 
-
   //---------------------------------------------------------------
   typedef std::map<EGeometrieElement,PGaussInfo> TGeom2Gauss;
   typedef std::map<EGeometrieElement,TInt> TGeom2NbGauss;
@@ -536,7 +524,6 @@ namespace MED
     //! Set unit of time for the MED TimeStamp
     virtual void SetUnitDt(const std::string& theValue) = 0;
   };
-  
 
   //---------------------------------------------------------------
   //! The class represents MED Profile entity
@@ -564,7 +551,6 @@ namespace MED
     //! Let known size of the MED Profile
     TInt GetSize() const { return (TInt)myElemNum->size();}
   };
-
 
   //---------------------------------------------------------------
   //! The class is a helper one. It provide safe and flexible way to get access to values for a MED TimeStamp
@@ -818,7 +804,6 @@ namespace MED
     GetValuePtr(EGeometrieElement theGeom) = 0;
   };
 
-
   //---------------------------------------------------------------
   //! The class implements a container for MED TimeStamp values
   template<class TMeshValueType>
@@ -886,7 +871,6 @@ namespace MED
     }
   };
 
-
   //---------------------------------------------------------------
   typedef TTimeStampValue<TFloatMeshValue> TFloatTimeStampValue;
   typedef SharedPtr<TFloatTimeStampValue> PFloatTimeStampValue;
@@ -899,7 +883,6 @@ namespace MED
   
   PIntTimeStampValue MEDWRAPPER_EXPORT
   CastToIntTimeStampValue(const PTimeStampValueBase& theTimeStampValue);
-
 
   //---------------------------------------------------------------
   template<class TMeshValueTypeFrom, class TMeshValueTypeTo>
@@ -964,7 +947,6 @@ namespace MED
     }
   }
 
-
   //---------------------------------------------------------------
   // Backward compatibility  declarations
   typedef TFloatTimeStampValue TTimeStampVal;
@@ -978,7 +960,6 @@ namespace MED
   struct MEDWRAPPER_EXPORT TGrilleInfo:
     virtual TModeSwitchInfo
   {
-
     PMeshInfo myMeshInfo;
     const PMeshInfo& GetMeshInfo() const { return myMeshInfo;} 
 
@@ -999,8 +980,6 @@ namespace MED
     //!Sets grille type
     void SetGrilleType(EGrilleType theGrilleType);
 
-
-    
     TString myCoordNames; //!< Contains names for the coordinate dimensions
     //! Get name of the coordinate dimension by its order number
     virtual std::string GetCoordName(TInt theId) const = 0 ;
@@ -1012,7 +991,6 @@ namespace MED
     virtual std::string GetCoordUnit(TInt theId) const = 0;
     //! Set name of unit for the coordinate dimension by its order number
     virtual void SetCoordUnit(TInt theId, const std::string& theValue) = 0;
-
 
     //! Map of index of axes and Table of indexes for certain axe, now used for eGRILLE_CARTESIENNE and eGRILLE_POLAIRE
     TIndexes myIndixes;
@@ -1072,10 +1050,7 @@ namespace MED
     TInt GetFamNumNode(TInt theId) const;
     //! Set number of a MED FAMILY for the mesh node with the  order number
     void SetFamNumNode(TInt theId, TInt theVal);
-
   };
-
-
 }
 
-#endif
+#endif // MED_Structures_HeaderFile

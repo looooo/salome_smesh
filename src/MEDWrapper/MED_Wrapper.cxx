@@ -19,9 +19,7 @@
 //
 // See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 //
-//  File   : MED_Wrapper.cxx
-//  Author : Alexey PETROV
-//
+
 #include "MED_Wrapper.hxx"
 #include "MED_Utilities.hxx"
  

@@ -19,6 +19,7 @@
 //
 // See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 //
+
 #include "MED_GaussUtils.hxx"
 #include "MED_Utilities.hxx"
  
@@ -29,8 +30,6 @@ static int MYVALUEDEBUG = 0;
 // static int MYDEBUG = 0;
 // static int MYVALUEDEBUG = 0;
 #endif
-
-//#define _DEBUG_REF_COORDS_
 
 namespace MED
 {

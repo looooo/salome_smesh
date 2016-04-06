@@ -19,28 +19,35 @@
 //
 // See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 //
-//  File   : MED_WrapperFactory.hxx
-//  Author : Alexander A. BORODIN
-//
-#ifndef _MED_WrapperFactory_HXX_
-#define _MED_WrapperFactory_HXX_
 
-#ifdef WIN32
- #if defined MEDWRAPPER_FACTORY_EXPORTS || defined MEDWrapper_EXPORTS
-  #if defined WIN32
-   #define MEDWRAPPER_FACTORY_EXPORT __declspec( dllexport )
-  #else
-   #define MEDWRAPPER_FACTORY_EXPORT
-  #endif
- #else
-  #if defined WIN32
-   #define MEDWRAPPER_FACTORY_EXPORT __declspec( dllimport )
-  #else
-   #define MEDWRAPPER_FACTORY_EXPORT
-  #endif
- #endif
-#else
- #define MEDWRAPPER_FACTORY_EXPORT
-#endif
+#ifndef MED_CoordUtils_HeaderFile
+#define MED_CoordUtils_HeaderFile
 
-#endif
+#include "MED_WrapperDef.hxx"
+#include "MED_Structures.hxx"
+
+namespace MED
+{
+  typedef TFloat (*TGetCoord)(const TCCoordSlice& theCoordSlice);
+
+  //---------------------------------------------------------------
+  class MEDWRAPPER_EXPORT TCoordHelper
+  {
+    TGetCoord* myGetCoord;
+    
+  public:
+    TCoordHelper(TGetCoord* theGetCoord);
+
+    TFloat 
+    GetCoord(TCCoordSlice& theCoordSlice, 
+             TInt theCoordId);
+  };
+  typedef SharedPtr<TCoordHelper> PCoordHelper;
+
+  //---------------------------------------------------------------
+  MEDWRAPPER_EXPORT 
+  PCoordHelper
+  GetCoordHelper(PNodeInfo theNodeInfo);
+}
+
+#endif // MED_CoordUtils_HeaderFile

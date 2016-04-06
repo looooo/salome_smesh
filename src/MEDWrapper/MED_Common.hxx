@@ -23,7 +23,10 @@
 #ifndef MED_Common_HeaderFile
 #define MED_Common_HeaderFile
 
-#include "MED_WrapperBase.hxx"
+#include "MED_WrapperDef.hxx"
+#include "MED_Vector.hxx"
+#include "MED_SharedPtr.hxx"
+#include "MED_SliceArray.hxx"
 
 #include <string>
 #include <set>
@@ -33,20 +36,12 @@
 
 #include <boost/tuple/tuple.hpp>
 
-#include "SALOMEconfig.h"
-
-#include "MED_Vector.hxx"
-#include "MED_SharedPtr.hxx"
-#include "MED_SliceArray.hxx"
-
 #ifdef WIN32
 #pragma warning(disable:4099)
 #endif
 
-namespace MED{
-
-  enum EVersion {eVUnknown = -1, eV2_1, eV2_2};
-  
+namespace MED
+{
   typedef enum {eFAUX, eVRAI} EBooleen ; 
   typedef double TFloat;
 #if defined(HAVE_F77INT64)
@@ -98,31 +93,24 @@ namespace MED{
   const TEntity2GeomSet& 
   GetEntity2GeomSet();
 
-  template<EVersion>
   TInt MEDWRAPPER_EXPORT
   GetDESCLength();
   
-  template<EVersion>
   TInt MEDWRAPPER_EXPORT
   GetIDENTLength();
   
-  template<EVersion>
   TInt MEDWRAPPER_EXPORT
   GetNOMLength();
   
-  template<EVersion>
   TInt MEDWRAPPER_EXPORT
   GetLNOMLength();
   
-  template<EVersion>
   TInt MEDWRAPPER_EXPORT
   GetPNOMLength();
   
-  template<EVersion>
   void MEDWRAPPER_EXPORT
   GetVersionRelease(TInt& majeur, TInt& mineur, TInt& release);
   
-  template<EVersion>
   MEDWRAPPER_EXPORT
   TInt
   GetNbConn(EGeometrieElement typmai,
@@ -182,5 +170,4 @@ namespace MED{
   typedef SharedPtr<TWrapper> PWrapper;
 }
 
-
-#endif
+#endif // MED_Common_HeaderFile

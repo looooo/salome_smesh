@@ -16,21 +16,19 @@
 //
 // See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 //
-// File   : MED_GaussDef.hxx
-// Author : Edward AGAPOV (eap)
-//
+
 #ifndef MED_GaussDef_HeaderFile
 #define MED_GaussDef_HeaderFile
 
-#include "MED_WrapperBase.hxx"
+#include "MED_WrapperDef.hxx"
 
-//#include "MED_GaussUtils.hxx" <<<---- avoid dependence on boost
 #include <vector>
 
 namespace MED
 {
   class TShapeFun;
   typedef std::vector<double> TDoubleVector;
+
   /*!
    * \brief Description of family of integration points
    */
@@ -66,4 +64,4 @@ namespace MED
   };
 }
 
-#endif
+#endif // MED_GaussDef_HeaderFile

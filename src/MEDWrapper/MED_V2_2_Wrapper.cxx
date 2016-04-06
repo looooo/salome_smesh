@@ -33,57 +33,48 @@ static int MYDEBUG = 0;
 // static int MYDEBUG = 0;
 #endif
 
-
-
 namespace MED
 {
-  template<>
   TInt
-  GetDESCLength<eV2_2>()
+  GetDESCLength()
   {
     return 200;
   }
 
-  template<>
   TInt
-  GetIDENTLength<eV2_2>()
+  GetIDENTLength()
   {
     return 8;
   }
 
-  template<>
   TInt
-  GetNOMLength<eV2_2>()
+  GetNOMLength()
   {
     return 64;
   }
 
-  template<>
   TInt
-  GetLNOMLength<eV2_2>()
+  GetLNOMLength()
   {
     return 80;
   }
 
-  template<>
   TInt
-  GetPNOMLength<eV2_2>()
+  GetPNOMLength()
   {
     return 16;
   }
 
-  template<>
   void
-  GetVersionRelease<eV2_2>(TInt& majeur, TInt& mineur, TInt& release)
+  GetVersionRelease(TInt& majeur, TInt& mineur, TInt& release)
   {
     majeur=MED_MAJOR_NUM;
     mineur=MED_MINOR_NUM;
     release=MED_RELEASE_NUM;
   }
 
-  template<>
   TInt
-  GetNbConn<eV2_2>(EGeometrieElement typmai,
+  GetNbConn(EGeometrieElement typmai,
                    EEntiteMaillage typent,
                    TInt mdim)
   {
@@ -92,7 +83,6 @@ namespace MED
 
   namespace V2_2
   {
-
     //---------------------------------------------------------------
     class TFile{
       TFile();
@@ -142,7 +132,6 @@ namespace MED
       std::string myFileName;
     };
 
-
     //---------------------------------------------------------------
     class TFileWrapper
     {
@@ -160,7 +149,6 @@ namespace MED
         myFile->Close();
       }
     };
-
 
     //---------------------------------------------------------------
     TVWrapper::TVWrapper(const std::string& theFileName):
@@ -182,7 +170,6 @@ namespace MED
       }
     }
 
-
     //----------------------------------------------------------------------------
     TInt
     TVWrapper
@@ -195,7 +182,6 @@ namespace MED
       
       return MEDnMesh(myFile->Id());
     }
-    
     
     //----------------------------------------------------------------------------
     void
@@ -238,7 +224,6 @@ namespace MED
       if(aRet < 0)
         EXCEPTION(std::runtime_error,"GetMeshInfo - MEDmeshInfo(...)");
     }
-    
     
     //----------------------------------------------------------------------------
     void
@@ -289,7 +274,6 @@ namespace MED
         EXCEPTION(std::runtime_error,"SetMeshInfo - MEDmeshCr(...)");
     }
     
-    
     //----------------------------------------------------------------------------
     void 
     TVWrapper
@@ -309,7 +293,6 @@ namespace MED
         *theErr = aRet;
     }
     
-    
     //----------------------------------------------------------------------------
     TInt
     TVWrapper
@@ -325,7 +308,6 @@ namespace MED
       TValueHolder<TString, char> aName(anInfo.myName);
       return MEDnFamily(myFile->Id(),&aName);
     }
-    
     
     //----------------------------------------------------------------------------
     TInt
@@ -346,7 +328,6 @@ namespace MED
       return MEDnFamily23Attribute(myFile->Id(),&aName,theFamId);
     }
     
-    
     //----------------------------------------------------------------------------
     TInt
     TVWrapper
@@ -365,7 +346,6 @@ namespace MED
 
       return MEDnFamilyGroup(myFile->Id(),&aName,theFamId);
     }
-    
     
     //----------------------------------------------------------------------------
     void
@@ -409,7 +389,6 @@ namespace MED
                   "; theInfo.myNbAttr = "<<theInfo.myNbAttr);
     }
     
-    
     //----------------------------------------------------------------------------
     void
     TVWrapper
@@ -449,7 +428,6 @@ namespace MED
       else if(aRet < 0)
         EXCEPTION(std::runtime_error,"SetFamilyInfo - MEDfamilyCr(...)");
     }
-    
     
     //----------------------------------------------------------------------------
     void
@@ -591,7 +569,6 @@ namespace MED
         *theErr = aRet;
     }
 
-
     //----------------------------------------------------------------------------
     void
     TVWrapper
@@ -602,7 +579,6 @@ namespace MED
     { 
       SetNames(theInfo,eLECTURE_ECRITURE,theEntity,theGeom,theErr);
     }
-
 
     //----------------------------------------------------------------------------
     void
@@ -647,7 +623,6 @@ namespace MED
       }
     }
 
-
     //----------------------------------------------------------------------------
     void
     TVWrapper
@@ -658,7 +633,6 @@ namespace MED
     { 
       SetNumeration(theInfo,eLECTURE_ECRITURE,theEntity,theGeom,theErr);
     }
-
 
     //----------------------------------------------------------------------------
     void 
@@ -783,7 +757,6 @@ namespace MED
                             &trsf);
     }
     
-    
     //----------------------------------------------------------------------------
     void
     TVWrapper
@@ -859,7 +832,6 @@ namespace MED
         EXCEPTION(std::runtime_error,"GetNodeInfo - MEDmeshNodeCoordinateRd(...)");
     }
     
-    
     //----------------------------------------------------------------------------
     void
     TVWrapper
@@ -929,7 +901,6 @@ namespace MED
         EXCEPTION(std::runtime_error,"SetNodeInfo - MEDmeshNodeCoordinateWr(...)");
     }
     
-    
     //----------------------------------------------------------------------------
     void
     TVWrapper
@@ -945,7 +916,6 @@ namespace MED
       if(theErr) 
         *theErr = aRet;
     }
-    
 
     //-----------------------------------------------------------------
     void
@@ -1423,7 +1393,6 @@ namespace MED
       return anInfo;
     }
 
-
     //-----------------------------------------------------------------
     TInt TVWrapper::GetNbCells(const MED::TMeshInfo& theMeshInfo,
                                EEntiteMaillage theEntity,
@@ -1473,7 +1442,6 @@ namespace MED
       }
       return 0;
     }
-
 
     //----------------------------------------------------------------------------
     void TVWrapper::GetCellInfo(MED::TCellInfo& theInfo, TErr* theErr)
@@ -1528,7 +1496,6 @@ namespace MED
         }
       
     }
-    
     
     //----------------------------------------------------------------------------
     void
@@ -1603,7 +1570,6 @@ namespace MED
       else if(aRet < 0)
         EXCEPTION(std::runtime_error,"SetCellInfo - MEDmeshElementWr(...)");
     }
-    
 
     //----------------------------------------------------------------------------
     void
@@ -1675,7 +1641,6 @@ namespace MED
       else if ( aRet < 0 )
         EXCEPTION(std::runtime_error,"GetBallInfo - pb at reading diameters");
     }
-
 
     //----------------------------------------------------------------------------
     //! Write a MEDWrapped representation of MED_BALL to the MED file
@@ -1777,7 +1742,6 @@ namespace MED
       return MEDnField(myFile->Id());
     }
     
-    
     //----------------------------------------------------------------------------
     TInt
     TVWrapper
@@ -1791,7 +1755,6 @@ namespace MED
       
       return MEDfieldnComponent(myFile->Id(),theFieldId);
     }
-    
     
     //----------------------------------------------------------------------------
     void
@@ -1842,7 +1805,6 @@ namespace MED
         EXCEPTION(std::runtime_error,"GetFieldInfo - MEDfieldInfo(...)");
     }
     
-    
     //----------------------------------------------------------------------------
     void
     TVWrapper
@@ -1879,7 +1841,6 @@ namespace MED
         EXCEPTION(std::runtime_error,"SetFieldInfo - MEDfieldCr(...)");
     }
     
-    
     //----------------------------------------------------------------------------
     void
     TVWrapper
@@ -1896,7 +1857,6 @@ namespace MED
         *theErr = aRet;
     }
     
-    
     //----------------------------------------------------------------------------
     TInt
     TVWrapper
@@ -1910,7 +1870,6 @@ namespace MED
       return MEDnLocalization(myFile->Id());
     }
 
-
     //----------------------------------------------------------------------------
     TGaussInfo::TInfo
     TVWrapper
@@ -1923,7 +1882,7 @@ namespace MED
         return TGaussInfo::TInfo( TGaussInfo::TKey(ePOINT1,""),0 );
       
       med_int aNbGaussPoints = med_int();
-      TVector<char> aName(GetNOMLength<eV2_2>()+1);
+      TVector<char> aName(GetNOMLength()+1);
       med_geometry_type aGeom = MED_NONE;
 
       TErr aRet;
@@ -1949,7 +1908,6 @@ namespace MED
       return TGaussInfo::TInfo(TGaussInfo::TKey(EGeometrieElement(aGeom),&aName[0]),
                                TInt(aNbGaussPoints));
     }
-
 
     //----------------------------------------------------------------------------
     void
@@ -1983,7 +1941,6 @@ namespace MED
         EXCEPTION(std::runtime_error,"GetGaussInfo - MEDlocalizationRd(...)");
     }
 
-
     //----------------------------------------------------------------------------
     TInt
     TVWrapper
@@ -2008,7 +1965,7 @@ namespace MED
         return TProfileInfo::TInfo();
       
       med_int aSize = -1;
-      TVector<char> aName(GetNOMLength<eV2_2>()+1);
+      TVector<char> aName(GetNOMLength()+1);
 
       TErr aRet;
       aRet = MEDprofileInfo(myFile->Id(),
@@ -2217,7 +2174,6 @@ namespace MED
       return aNbTimeStamps;
     }
     
-    
     //----------------------------------------------------------------------------
     void
     TVWrapper
@@ -2310,7 +2266,6 @@ namespace MED
           EXCEPTION(std::runtime_error,"GetTimeStampInfo - MEDfieldnValueWithProfile(...)");
       }      
     }
-    
 
     //----------------------------------------------------------------------------
     void 
@@ -2343,11 +2298,11 @@ namespace MED
       TValueHolder<TString, char> aMeshName(aMeshInfo->myName);
       
       TGeom2Gauss& aGeom2Gauss = aTimeStampInfo->myGeom2Gauss;
-      TVector<char> aGaussName(GetNOMLength<eV2_2>()+1);
+      TVector<char> aGaussName(GetNOMLength()+1);
 
       med_storage_mode aProfileMode = med_storage_mode(boost::get<0>(theMKey2Profile));
       MED::TKey2Profile aKey2Profile = boost::get<1>(theMKey2Profile);
-      TVector<char> aProfileName(GetNOMLength<eV2_2>()+1);
+      TVector<char> aProfileName(GetNOMLength()+1);
 
       TGeom2Size& aGeom2Size = aTimeStampInfo->myGeom2Size;
       TGeom2Size::iterator anIter = aGeom2Size.begin();
@@ -2480,7 +2435,6 @@ namespace MED
       }
     }
     
-    
     //----------------------------------------------------------------------------
     void
     TVWrapper
@@ -2518,14 +2472,14 @@ namespace MED
       for(; anIter != aGeomSet.end(); anIter++){
         EGeometrieElement aGeom = *anIter;
 
-        TVector<char> aGaussName(GetNOMLength<eV2_2>()+1);
+        TVector<char> aGaussName(GetNOMLength()+1);
         MED::TGeom2Gauss::const_iterator aGaussIter = aGeom2Gauss.find(aGeom);
         if(aGaussIter != aGeom2Gauss.end()){
           MED::PGaussInfo aGaussInfo = aGaussIter->second;
           strcpy(&aGaussName[0],&aGaussInfo->myName[0]);
         }
 
-        TVector<char> aProfileName(GetNOMLength<eV2_2>()+1);
+        TVector<char> aProfileName(GetNOMLength()+1);
         med_storage_mode aProfileMode = med_storage_mode(eNO_PFLMOD);
         MED::TGeom2Profile::const_iterator aProfileIter = aGeom2Profile.find(aGeom);
         if(aProfileIter != aGeom2Profile.end()){
@@ -2562,7 +2516,6 @@ namespace MED
       
       INITMSG(MYDEBUG,"TVWrapper::SetTimeStampValue - MED_MODE_ACCES = "<<theMode<<"; aRet = "<<aRet<<std::endl);
     }
-
     
     //----------------------------------------------------------------------------
     void 
@@ -2877,6 +2830,5 @@ namespace MED
       else if(aRet < 0)
         EXCEPTION(std::runtime_error,"GetGrilleInfo - MEDmeshGridStructRd(...)");
     }
-
   }
 }

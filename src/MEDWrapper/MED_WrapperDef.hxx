@@ -19,28 +19,18 @@
 //
 // See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 //
-//  File   : MED_WrapperBase.hxx
-//  Author : Alexander A. BORODIN
-//
-#ifndef _MED_WrapperBase_HXX_
-#define _MED_WrapperBase_HXX_
+
+#ifndef MED_WrapperDef_HeaderFile
+#define MED_WrapperDef_HeaderFile
 
 #ifdef WIN32
- #if defined MEDWRAPPER_BASE_EXPORTS || defined MEDWrapperBase_EXPORTS
-  #if defined WIN32
-   #define MEDWRAPPER_EXPORT __declspec( dllexport )
-  #else
-   #define MEDWRAPPER_EXPORT
-  #endif
- #else
-  #if defined WIN32
-   #define MEDWRAPPER_EXPORT __declspec( dllimport )
-  #else
-   #define MEDWRAPPER_EXPORT
-  #endif
- #endif
+#  if defined(MEDWRAPPER_EXPORTS) || defined(MEDWrapper_EXPORTS)
+#    define MEDWRAPPER_EXPORT __declspec( dllexport )
+#  else
+#    define MEDWRAPPER_EXPORT __declspec( dllimport )
+#  endif // WIN32
 #else
- #define MEDWRAPPER_EXPORT
+#  define MEDWRAPPER_EXPORT
 #endif
 
-#endif
+#endif // MED_WrapperDef_HeaderFile

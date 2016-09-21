@@ -29,6 +29,7 @@
 #include "SMESHGUI_HypothesesUtils.h"
 #include "SMESHGUI_Utils.h"
 #include "SMESHGUI_SpinBox.h"
+#include "SMESHGUI_VTKUtils.h"
 
 // SALOME KERNEL includes
 #include <SALOMEDSClient_Study.hxx>
@@ -40,8 +41,15 @@
 #include <SUIT_OverrideCursor.h>
 #include <SUIT_ResourceMgr.h>
 #include <SUIT_Session.h>
+#include <SVTK_ViewWindow.h>
 #include <SalomeApp_IntSpinBox.h>
 #include <SalomeApp_Tools.h>
+
+#include <SMESH_Actor.h>
+#include <VTKViewer_Algorithm.h>
+
+// VTK includes
+#include <vtkRenderer.h>
 
 // Qt includes
 #include <QFrame>
@@ -324,6 +332,23 @@ void SMESHGUI_GenericHypothesisCreator::onDialogFinished( int result )
   myDlg->close();
   //delete myDlg; since WA_DeleteOnClose==true
   myDlg = 0;
+  //imn: to fix the bug 23357. Workaround for fixed problem with repaint in VTK_viewer object.
+  if (SVTK_ViewWindow* vf = SMESH::GetCurrentVtkView()) {
+    VTK::ActorCollectionCopy aCopy( vf->getRenderer()->GetActors() );
+    vtkActorCollection* anAllActors = aCopy.GetActors();
+    if( anAllActors ) {
+      anAllActors->InitTraversal();
+      while( vtkActor* aVTKActor = anAllActors->GetNextActor() ) {
+        if( SMESH_Actor* anActor = SMESH_Actor::SafeDownCast( aVTKActor ) ) {
+          if( anActor->GetVisibility() && anActor->GetMapper() ) {
+            anActor->Highlight( true );
+            anActor->Highlight( false );
+          }
+        }
+      }
+    }
+    vf->Repaint( false );
+  }
   emit finished( result );
 }
 

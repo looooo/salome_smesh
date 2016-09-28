@@ -22,7 +22,7 @@ from CreeDocuments.jobHtml       import Document
 
 
 class Base:
-  def __init__(self,file):    
+  def __init__(self,file):
        self.db  = QSqlDatabase.addDatabase("QSQLITE")
        self.db.setDatabaseName(file)
        self.db.setHostName("localhost");
@@ -33,7 +33,7 @@ class Base:
        else:
          print "dataBase Open"
        self.file=file
-        
+
   def create(self):
       self.maTableMailleurs=TableMailleurs()
       self.maTableMailleurs.createSqlTable()
@@ -59,7 +59,7 @@ class Base:
       self.maTableGroupeRatios.createSqlTable()
       self.maTableGroupeTailles=TableGroupeTailles()
       self.maTableGroupeTailles.createSqlTable()
-    
+
   def initialise(self):
       self.maTableMaillages=TableMaillages()
       self.maTableMailleurs=TableMailleurs()
@@ -73,7 +73,7 @@ class Base:
       self.maTableRatios=TableRatios()
       self.maTableGroupeRatios=TableGroupeRatios()
       self.maTableGroupeTailles=TableGroupeTailles()
- 
+
   def remplit(self):
       self.maTableMailleurs.remplit()
       self.maTableMaillages.remplit()
@@ -83,7 +83,7 @@ class Base:
 
   def close(self):
        self.db.close()
-       
+
   def exportToCSV(self,partiel):
       aujourdhui=datetime.date.today()
       monFolder="ExportDB"+str(aujourdhui)
@@ -107,7 +107,7 @@ class Base:
       self.maTableGroupesRef.exportToCSV()
 
   def importFromCSV(self,folder,partiel,force):
-      if partiel==False: 
+      if partiel==False:
          self.maTableMailleurs.importFromCSV(folder,force)
          self.maTableVersions.importFromCSV(folder,force)
          self.maTableMaillages.importFromCSV(folder,force)
@@ -120,6 +120,7 @@ class Base:
       self.maTableGroupesRef.importFromCSV(folder,force)
       self.maTableGroupeRatios.importFromCSV(folder,force)
       self.maTableGroupeTailles.importFromCSV(folder,force)
+      self.maTableTailles.importFromCSV(folder,force)
 
   def Structure(self):
       # jamais appelee. juste pour memoire
@@ -152,11 +153,11 @@ class Base:
 
 
       for params in paramMaillage:
-        
+
          print "___________________________________________"
          print ""
          print " Job : ", params[1]
-         print " Version de salome : ", versionName 
+         print " Version de salome : ", versionName
 
 
          idJob=params[0]
@@ -169,7 +170,7 @@ class Base:
          print ""
          print "  Debut d execution"
          monjob.execute()
-      
+
          # remplit Perfs
          self.maTablePerfs.insereOuRemplaceLigne((idJob,versionId,nomMachine,int(monjob.getCPU()),0),False)
 
@@ -215,10 +216,10 @@ class Base:
          monjob.menage()
 
 
-  
-  def compare(self,version,ListeVersionRefString,fichier):    
+
+  def compare(self,version,ListeVersionRefString,fichier):
       print "_________________________________________________________________"
-      print "Generation du rapport de comparaison" 
+      print "Generation du rapport de comparaison"
       print version
       bOk,versionId,versionName = self.maTableVersions.chercheVersion(version)
       if bOk==False :
@@ -247,7 +248,7 @@ class Base:
       if len(maillagesIdListe) != len (listeVersionRefId):
          print "Pas assez de version de reference"
          exit()
-      
+
       allEntitySurMaille=self.maTableMailles.getAllEntity()
       allEntitySurGroupe=self.maTableGroupes.getAllEntity()
 
@@ -272,7 +273,7 @@ class Base:
           dicoMaillage["NBCPU"]=self.maTablePerfs.getVal(idMaillage,versionCompId,nomMachine)
           dicoMaillage["REFCPU"]=self.maTablePerfs.getVal(idMaillage,versionRefId,nomMachine)
           dicoMaillage["DIFCPU"],dicoMaillage["DIFREL"],dicoMaillage["WARNING"]=self.calculDiffCPU(dicoMaillage["NBCPU"],dicoMaillage["REFCPU"],monSeuilCPU)
-          monDocument.initMaillage(maillagesNameListe[idMaillage-1],mailleurName,versionRefName,dicoMaillage) 
+          monDocument.initMaillage(maillagesNameListe[idMaillage-1],mailleurName,versionRefName,dicoMaillage)
 
           # Boucle sur les Mailles
 
@@ -317,7 +318,7 @@ class Base:
           dicoMaillage["R3Q"]=self.maTableRatios.getVal(idMaillage,versionCompId,'Q3')
           dicoMaillage["R3QREF"]=self.maTableRatios.getVal(idMaillage,versionRefId,'Q3')
           dicoMaillage["DIFAR3Q"],dicoMaillage["DIFRR3Q"],dicoMaillage["WRR3Q"]=self.calculDiff(dicoMaillage["R3Q"],dicoMaillage["R3QREF"],monSeuilRatio)
- 
+
           dicoMaillage["TMAX"]=self.maTableTailles.getVal(idMaillage,versionCompId,'TailleMax')
           dicoMaillage["TMAXREF"]=self.maTableTailles.getVal(idMaillage,versionRefId,'TailleMax')
           dicoMaillage["DIFATMAX"],dicoMaillage["DIFRTMAX"],dicoMaillage["WTMAX"]=self.calculDiff(dicoMaillage["TMAX"],dicoMaillage["TMAXREF"],monSeuilTaille)
@@ -365,7 +366,7 @@ class Base:
 
               #
               dico={}
-    
+
               if self.maTableGroupeRatios.getVal(idMaillage,versionCompId,groupeId,'RatioMax') != 0 :
                  dico["RMAX"]=self.maTableGroupeRatios.getVal(idMaillage,versionCompId,groupeId,'RatioMax')
                  dico["RMAXREF"]=self.maTableGroupeRatios.getVal(idMaillage,versionRefId,groupeId,'RatioMax')
@@ -386,7 +387,7 @@ class Base:
                  dico["R3QREF"]=self.maTableGroupeRatios.getVal(idMaillage,versionRefId,groupeId,'Q3')
                  dico["DIFAR3Q"],dico["DIFRR3Q"],dico["WRR3Q"]=self.calculDiff(dico["R3Q"],dico["R3QREF"],monSeuilRatio)
                  monDocument.CreeGroupeRatios(dico)
-     
+
               dico={}
               if self.maTableGroupeTailles.getVal(idMaillage,versionCompId,groupeId,'TailleMax') != 0:
                  dico["TMAX"]=self.maTableGroupeTailles.getVal(idMaillage,versionCompId,groupeId,'TailleMax')
@@ -408,14 +409,14 @@ class Base:
                  dico["T3QREF"]=self.maTableGroupeTailles.getVal(idMaillage,versionRefId,groupeId,'Q3')
                  dico["DIFAT3Q"],dico["DIFRT3Q"],dico["WT3Q"]=self.calculDiffCPU(dico["T3Q"],dico["T3QREF"],monSeuilTaille)
                  monDocument.CreeGroupeTaille(dico)
-    
-    
-    
+
+
+
 
 
       monDocument.creeDocument(fichier)
 
-  def calculDiffCPU(self,nb,nbRef,seuil):    
+  def calculDiffCPU(self,nb,nbRef,seuil):
          # different de calculDiff : si on est inferieur a la reference
          # on n a pas de warning
          diff=nb-nbRef
@@ -426,8 +427,8 @@ class Base:
             warning=""
          diffRelStr=str(diffRel)+"%"
          return diff,diffRelStr,warning
-         
-  def calculDiff(self,nb,nbRef,seuil):    
+
+  def calculDiff(self,nb,nbRef,seuil):
          #print nb,nbRef,seuil
          diff=nb-nbRef
          diffRel=((nb-nbRef)*100)/(nbRef*1.00)
@@ -437,4 +438,4 @@ class Base:
             warning=""
          diffRelStr=str(diffRel)+"%"
          return diff,diffRelStr,warning
-         
+

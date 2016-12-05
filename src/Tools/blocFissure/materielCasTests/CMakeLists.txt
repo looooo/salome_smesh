@@ -1,4 +1,4 @@
-# Copyright (C) 2012-2015  EDF R&D
+# Copyright (C) 2012-2016  EDF R&D
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -23,6 +23,7 @@
 SET(plugin_SCRIPTS
   __init__.py
   cubeAngle.py
+  cubeFin.py
   decoupeCylindre.py
   disque_perce.py
   ellipse_disque.py
@@ -38,4 +39,4 @@ SET(plugin_SCRIPTS
 
 # --- rules ---
 
-SALOME_INSTALL_SCRIPTS("${plugin_SCRIPTS}" ${SALOME_SMESH_INSTALL_PLUGINS}/blocFissure/materielCasTests)
+SALOME_INSTALL_SCRIPTS("${plugin_SCRIPTS}" ${SALOME_INSTALL_PYTHON}/blocFissure/materielCasTests)

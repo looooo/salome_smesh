@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -112,8 +112,8 @@ SMESHGUI_MultiEditDlg
                         const bool the3d2d,
                         bool       theDoInit):
   SMESHGUI_PreviewDlg(theModule),
-  mySelector(SMESH::GetViewWindow(theModule)->GetSelector()),
   mySelectionMgr(SMESH::GetSelectionMgr(theModule)),
+  mySelector(SMESH::GetViewWindow(theModule)->GetSelector()),
   mySMESHGUI(theModule)
 {
   setModal(false);
@@ -1572,7 +1572,6 @@ SMESHGUI_SplitVolumesDlg::SMESHGUI_SplitVolumesDlg(SMESHGUI* theModule)
   QLabel* dXLbl = new QLabel( tr("SMESH_DX"), myFacetSelGrp);
   QLabel* dYLbl = new QLabel( tr("SMESH_DY"), myFacetSelGrp);
   QLabel* dZLbl = new QLabel( tr("SMESH_DZ"), myFacetSelGrp);
-  QPushButton* axisBtn[3];
   for ( int i = 0; i < 3; ++i )
   {
     myPointSpin[i] = new SMESHGUI_SpinBox( myFacetSelGrp );
@@ -1853,7 +1852,7 @@ void SMESHGUI_SplitVolumesDlg::showFacetByElement( int elemID )
   gp_XYZ bc( 0,0,0 );
   Bnd_B3d bbox;
   SMDS_NodeIteratorPtr nIt = elem->nodeIterator();
-  vector< const SMDS_MeshNode* > nodes;
+  std::vector< const SMDS_MeshNode* > nodes;
   nodes.reserve( elem->NbNodes() );
   while ( nIt->more() )
   {
@@ -1983,7 +1982,7 @@ void SMESHGUI_SplitVolumesDlg::onSetDir()
     if ( sender() == myAxisBtn[i] )
       break;
   if ( i == 3 )
-    i == 0;
+    i = 0;
   myDirSpin[i]->SetValue(1.);
 
   if ( myActor && !myMesh->_is_nil() && myMesh->NbNodes() > 0 )

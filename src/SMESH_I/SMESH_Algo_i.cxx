@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -48,7 +48,6 @@ SMESH_Algo_i::SMESH_Algo_i( PortableServer::POA_ptr thePOA )
      : SALOME::GenericObj_i( thePOA ), 
        SMESH_Hypothesis_i( thePOA )
 {
-  MESSAGE( "SMESH_Algo_i::SMESH_Algo_i" );
 }
 
 //=============================================================================
@@ -61,7 +60,6 @@ SMESH_Algo_i::SMESH_Algo_i( PortableServer::POA_ptr thePOA )
 
 SMESH_Algo_i::~SMESH_Algo_i()
 {
-  MESSAGE( "SMESH_Algo_i::~SMESH_Algo_i" );
 }
 
 //=============================================================================
@@ -74,7 +72,6 @@ SMESH_Algo_i::~SMESH_Algo_i()
 
 SMESH::ListOfHypothesisName* SMESH_Algo_i::GetCompatibleHypothesis()
 {
-  MESSAGE( "SMESH_Algo_i::GetCompatibleHypothesis" );
   SMESH::ListOfHypothesisName_var listOfHypothesis = new SMESH::ListOfHypothesisName;
   const vector<string>& hypList = ( ( ::SMESH_Algo* )myBaseImpl )->GetCompatibleHypothesis();
   int nbHyp = hypList.size();

@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -88,10 +88,10 @@
 //================================================================================
 SMESHGUI_MeshOp::SMESHGUI_MeshOp( const bool theToCreate, const bool theIsMesh )
 : SMESHGUI_SelectionOp(),
-  myToCreate( theToCreate ),
-  myIsMesh( theIsMesh ),
   myDlg( 0 ),
   myShapeByMeshOp( 0 ),
+  myToCreate( theToCreate ),
+  myIsMesh( theIsMesh ),
   myHypoSet( 0 )
 {
   if ( GeometryGUI::GetGeomGen()->_is_nil() )// check that GEOM_Gen exists
@@ -224,7 +224,7 @@ void SMESHGUI_MeshOp::startOperation()
     }
   }
   SMESHGUI_SelectionOp::startOperation();
-  // iterate through dimensions and get available algoritms, set them to the dialog
+  // iterate through dimensions and get available algorithms, set them to the dialog
   _PTR(SComponent) aFather = SMESH::GetActiveStudyDocument()->FindComponent( "SMESH" );
   for ( int i = SMESH::DIM_0D; i <= SMESH::DIM_3D; i++ )
   {
@@ -576,7 +576,7 @@ void SMESHGUI_MeshOp::selectionDone()
 
       if (aSeq->length() > 0) {
         shapeDim = -1;
-        for (int iss = 0; iss < aSeq->length() && shapeDim < 3; iss++) {
+        for ( CORBA::ULong iss = 0; iss < aSeq->length() && shapeDim < 3; iss++) {
           GEOM::GEOM_Object_var aGeomVar = aSeq[iss];
           switch ( aGeomVar->GetShapeType() ) {
           case GEOM::SOLID:  shapeDim = 3; break;
@@ -1481,14 +1481,6 @@ void SMESHGUI_MeshOp::onAlgoSelected( const int theIndex,
   if (aDim == -1)
     return;
 
-  // find highest available dimension, all algos of this dimension are available for choice
-  int aTopDim = -1;
-  for (int i = SMESH::DIM_0D; i <= SMESH::DIM_3D; i++)
-    if (isAccessibleDim( i ))
-      aTopDim = i;
-  if (aTopDim == -1)
-    return;
-
   const bool isSubmesh = ( myToCreate ? !myIsMesh : myDlg->isObjectShown( SMESHGUI_MeshDlg::Mesh ));
 
   HypothesisData* algoData = hypData( aDim, Algo, theIndex );
@@ -1497,32 +1489,25 @@ void SMESHGUI_MeshOp::onAlgoSelected( const int theIndex,
 
   QStringList anAvailable;
 
-  // check that tab enabled of one less dimension
-  if ( aDim > SMESH::DIM_0D )
-  {
-    if ( isAccessibleDim( aDim - 1 ) ) {
-      if ( algoData && myIsOnGeometry ) {
-        for (int i = aDim - 1; i >= SMESH::DIM_0D; i--) {
-          if ( isAccessibleDim( i ) && ( currentHyp( i, Algo ) < 0 ||
-             algoData->InputTypes.isEmpty() ) ) {
-            myDlg->disableTab( i );
-            setCurrentHyp(i, Algo, -1);
-          }
-        }
+  // enable / disable tabs
+  if ( myIsOnGeometry ) {
+    for (int i = SMESH::DIM_3D; i >= SMESH::DIM_0D; i--) {
+      if ( i > aDim ) {
+        if ( i > myMaxShapeDim ) myDlg->disableTab( i );
+        else                     myDlg->enableTab( i );
       }
-    }
-    if ( algoData && myIsOnGeometry && !algoData->InputTypes.isEmpty() ) {
-      myDlg->enableTab( aDim - 1 );
-    }
-    if ( !algoData ) {
-      if ( aDim != SMESH::DIM_2D || ( aDim == SMESH::DIM_2D &&
-         currentHyp( SMESH::DIM_2D, Algo ) < 0) ) {
-        for (int i = aDim - 1; i >= SMESH::DIM_0D; i--)
-          myDlg->enableTab( i );
+      else if ( i == aDim ) {
+        continue;
       }
-      else {
-        for (int i = aDim - 1; i >= SMESH::DIM_0D; i--)
+      else {//( i < aDim )
+        if ( algoData && algoData->InputTypes.isEmpty() ) {
           myDlg->disableTab( i );
+          for ( int type = Algo, nbTypes = nbDlgHypTypes(i); type < nbTypes; type++ )
+            setCurrentHyp(i, type, -1);
+        }
+        else {
+          myDlg->enableTab( i );
+        }
       }
     }
   }
@@ -1566,7 +1551,7 @@ void SMESHGUI_MeshOp::onAlgoSelected( const int theIndex,
         nextAlgo = 0;
       }
 
-      // set new available algoritms
+      // set new available algorithms
       availableHyps( dim, Algo, anAvailable, myAvailableHypData[dim][Algo], prevAlgo, nextAlgo, anCurrentCompareType);
       HypothesisData* soleCompatible = 0;
       if ( anAvailable.count() == 1 )
@@ -1576,13 +1561,15 @@ void SMESHGUI_MeshOp::onAlgoSelected( const int theIndex,
       algoIndex = myAvailableHypData[dim][Algo].indexOf( curAlgo );
       if ( !isSubmesh && algoIndex < 0 && soleCompatible && !forward && dim != SMESH::DIM_0D) {
         // select the sole compatible algo
-        algoIndex = myAvailableHypData[dim][Algo].indexOf( soleCompatible );
+        algoIndex = 0;
       }
-      setCurrentHyp( dim, Algo, algoIndex);
+      setCurrentHyp( dim, Algo, algoIndex );
 
       // remember current algo
       prevAlgo = algoByDim[ dim ] = hypData( dim, Algo, algoIndex );
-    }
+
+    } // loop on dims
+
     if ( myMaxShapeDim == SMESH::DIM_3D && forward && algoDim == SMESH::DIM_1D )
     {
       algoDim = SMESH::DIM_3D;
@@ -1590,9 +1577,10 @@ void SMESHGUI_MeshOp::onAlgoSelected( const int theIndex,
       a3DAlgo = prevAlgo;
       continue;
     }
-  }
+  } // loops backward and forward
 
-  // set hypotheses corresponding to the found algoritms
+
+  // set hypotheses corresponding to the found algorithms
 
   _PTR(SObject) pObj = SMESH::GetActiveStudyDocument()->FindComponent("SMESH");
 
@@ -2022,6 +2010,9 @@ int SMESHGUI_MeshOp::currentHyp( const int theDim, const int theHypType ) const
 
 bool SMESHGUI_MeshOp::isSelectedHyp( int theDim, int theHypType, int theIndex) const
 {
+  if ( theIndex < 0 )
+    return false;
+
   if ( theHypType < AddHyp ) // only one hyp can be selected
     return currentHyp( theDim, theHypType ) == theIndex;
 
@@ -2062,17 +2053,28 @@ bool SMESHGUI_MeshOp::isAccessibleDim( const int theDim ) const
   * \param theDim - dimension of hypothesis or algorithm
   * \param theHypType - Type of hypothesis (Algo, MainHyp, AddHyp)
   * \param theIndex - Index of hypothesis
+  * \param updateHypsOnAlgoDeselection - to clear and disable hyps if algo deselected
  *
  * Gets current hypothesis or algorithms
  */
 //================================================================================
-void SMESHGUI_MeshOp::setCurrentHyp( const int theDim,
-                                     const int theHypType,
-                                     const int theIndex )
+void SMESHGUI_MeshOp::setCurrentHyp( const int  theDim,
+                                     const int  theHypType,
+                                     const int  theIndex,
+                                     const bool updateHypsOnAlgoDeselection)
 {
   myIgnoreAlgoSelection = true;
   myDlg->tab( theDim )->setCurrentHyp( theHypType, theIndex + 1 );
   myIgnoreAlgoSelection = false;
+
+  if ( updateHypsOnAlgoDeselection && theHypType == Algo && theIndex < 0 )
+  {
+    const QStringList noHyps;
+    myDlg->tab( theDim )->setAvailableHyps( MainHyp, noHyps );
+    myDlg->tab( theDim )->setExistingHyps ( MainHyp, noHyps );
+    myDlg->tab( theDim )->setAvailableHyps( AddHyp,  noHyps );
+    myDlg->tab( theDim )->setExistingHyps ( AddHyp,  noHyps );
+  }
 }
 
 //================================================================================
@@ -2126,7 +2128,7 @@ SMESH::SMESH_Hypothesis_var SMESHGUI_MeshOp::getAlgo( const int theDim )
     return anAlgoVar;
   QString aHypName = dataList[ aHypIndex ]->TypeName;
 
-  // get existing algoritms
+  // get existing algorithms
   _PTR(SObject) pObj = SMESH::GetActiveStudyDocument()->FindComponent("SMESH");
   QStringList tmp;
   existingHyps( theDim, Algo, pObj, tmp, myExistingHyps[ theDim ][ Algo ]);
@@ -2263,6 +2265,9 @@ void SMESHGUI_MeshOp::readMesh()
     {
       // get hypotheses
       existingHyps( dim, hypType, pObj, anExisting, myObjHyps[ dim ][ hypType ] );
+      if ( myObjHyps[ dim ][ hypType ].count() == 0 ) {
+        setCurrentHyp( dim, hypType, -1 );
+      }
       for ( int i = 0, nb = myObjHyps[ dim ][ hypType ].count(); i < nb; ++i )
       {
         // find index of required hypothesis among existing ones for this dimension and type
@@ -2403,7 +2408,7 @@ bool SMESHGUI_MeshOp::editMeshOrSubMesh( QString& theMess )
   // Assign new algorithms and hypotheses
   for ( int dim = aDim; dim <= SMESH::DIM_3D; dim++ )
   {
-    if ( !isAccessibleDim( dim )) continue;
+    //if ( !isAccessibleDim( dim )) continue;
 
     // find or create algorithm
     SMESH::SMESH_Hypothesis_var anAlgoVar = getAlgo( dim );
@@ -2654,7 +2659,7 @@ void SMESHGUI_MeshOp::setAvailableMeshType( const QStringList& theTypeMesh )
   * \param theIndex - Index of current type of mesh
  */
 //================================================================================
-void SMESHGUI_MeshOp::onAlgoSetByMeshType( const int theTabIndex, const int theIndex)
+void SMESHGUI_MeshOp::onAlgoSetByMeshType( const int theTabIndex, const int theIndex )
 {
   setFilteredAlgoData( theTabIndex, theIndex);
 }
@@ -2666,7 +2671,7 @@ void SMESHGUI_MeshOp::onAlgoSetByMeshType( const int theTabIndex, const int theI
   * \param theIndex - Index of current type of mesh
  */
 //================================================================================
-void SMESHGUI_MeshOp::setFilteredAlgoData( const int theTabIndex, const int theIndex)
+void SMESHGUI_MeshOp::setFilteredAlgoData( const int theTabIndex, const int theIndex )
 {
   QStringList anAvailableAlgs;
   QString anCompareType = currentMeshTypeName( theIndex );
@@ -2684,7 +2689,7 @@ void SMESHGUI_MeshOp::setFilteredAlgoData( const int theTabIndex, const int theI
       anCurrentAvailableAlgo = -1;
       isNone = currentHyp( dim, Algo ) < 0;
       //return current algo in current tab and set new algorithm list
-      HypothesisData* algoCur;
+      HypothesisData* algoCur = 0;
       if ( !isNone && !myAvailableHypData[dim][Algo].empty() ) {
         algoCur = myAvailableHypData[dim][Algo].at( currentHyp( dim, Algo ) );
       }
@@ -2702,8 +2707,6 @@ void SMESHGUI_MeshOp::setFilteredAlgoData( const int theTabIndex, const int theI
       setCurrentHyp( dim, Algo, anCurrentAvailableAlgo );
       if ( anCurrentAvailableAlgo > -1 )
         isReqDisBound = algoCur->InputTypes.isEmpty();
-      else if ( dim != SMESH::DIM_3D && currentHyp( SMESH::DIM_3D, Algo ) >= 0 )
-        isReqDisBound = true;
       if ( isReqDisBound ) {
         aReqDim = dim;
         break;
@@ -2723,7 +2726,7 @@ void SMESHGUI_MeshOp::setFilteredAlgoData( const int theTabIndex, const int theI
   }
   else
   {
-    HypothesisData* anCurrentAlgo;
+    HypothesisData* anCurrentAlgo = 0;
     bool isReqDisBound = true;
     QString anCurrentCompareType = anCompareType;
     isNone = currentHyp( aDim, Algo ) < 0;
@@ -2751,43 +2754,35 @@ void SMESHGUI_MeshOp::setFilteredAlgoData( const int theTabIndex, const int theI
       //set new algorithm list and select the current algorithm
       myDlg->tab( dim )->setAvailableHyps( Algo, anAvailableAlgs );
       anCurrentCompareType = ( anCompareType == "HEXA" || anCompareType == "QUAD" ) ? "QUAD" : "TRIA";
-      setCurrentHyp( dim, Algo, anCurrentAvailableAlgo );
+      setCurrentHyp( dim, Algo, anCurrentAvailableAlgo, /*updateHyps=*/true );
     }
 
-    if ( isNone || isReqDisBound ) {
-      for ( int i = SMESH::DIM_0D; i <= myMaxShapeDim; i++ ) {
-        if ( aDim != i ) {
-          myDlg->disableTab( i );
-        }
-      }
-    }
-    else if ( !isNone ) {
-      if ( aDim == SMESH::DIM_2D) {
-        myDlg->disableTab( SMESH::DIM_3D );
-        setCurrentHyp( SMESH::DIM_3D, Algo, -1);
-      }
-      for ( int i = myMaxShapeDim; i > SMESH::DIM_0D; i-- ) {
-        bool isNoneAlg = currentHyp( i, Algo ) < 0;
-        if ( !isNoneAlg )
-          isReqDisBound = myAvailableHypData[i][Algo].at( currentHyp( i, Algo ) )->InputTypes.isEmpty();
-        else
-          isReqDisBound = true;
-        if ( isReqDisBound && isNoneAlg ) {
-          for (int j = i - 1; j >= SMESH::DIM_0D; j--) {
-            if ( j < aDim && currentHyp( j+1, Algo ) < 0 ) {
-              myDlg->disableTab( j );
-              setCurrentHyp( j , Algo, -1 );
-            }
+    for ( int i = myMaxShapeDim; i >= SMESH::DIM_0D; i-- ) {
+      bool isNoneAlg = currentHyp( i, Algo ) < 0;
+      if ( !isNoneAlg )
+        isReqDisBound = myAvailableHypData[i][Algo].at( currentHyp( i, Algo ) )->InputTypes.isEmpty();
+      else
+        isReqDisBound = true;
+      if ( isReqDisBound && !isNoneAlg && i <= aDim) {
+        for (int j = myMaxShapeDim; j >= SMESH::DIM_0D; j--) {
+          if ( currentHyp( j, Algo ) < 0 ) {
+            myDlg->disableTab( j );
+            setCurrentHyp( j , Algo, -1, /*updateHyps=*/true );
           }
-          break;
         }
-        else if ( isNoneAlg ) {
-          myDlg->disableTab( i );
-        }
+        break;
+      }
+      else {
+        myDlg->enableTab( i );
       }
     }
-    myDlg->enableTab( aDim );
-    myDlg->setCurrentTab( aDim );
+    if ( aDim == SMESH::DIM_2D) {
+      setCurrentHyp( SMESH::DIM_3D, Algo, -1, /*updateHyps=*/true );
+      myDlg->disableTab( SMESH::DIM_3D );
+    }
+
+    int currentTab = ( theTabIndex <= aDim ) ? theTabIndex : aDim;
+    myDlg->setCurrentTab( currentTab );
   }
   THypDataList anAvailableAlgsData;
   QStringList aHypothesesSetsList = SMESH::GetHypothesesSets( aDim );

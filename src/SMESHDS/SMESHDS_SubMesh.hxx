@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -52,6 +52,8 @@ class SMESHDS_EXPORT SMESHDS_SubMesh
   virtual bool RemoveElement(const SMDS_MeshElement * ME, bool isElemDeleted); // ret true if ME was in
   virtual void AddNode(const SMDS_MeshNode * ME);
   virtual bool RemoveNode(const SMDS_MeshNode * ME, bool isNodeDeleted);       // ret true if ME was in
+  virtual const SMDS_MeshElement* GetElement( size_t idInShape ) const;
+  virtual const SMDS_MeshNode*    GetNode   ( size_t idInShape ) const;
 
   // if IsComplexSubmesh()
   void AddSubMesh( const SMESHDS_SubMesh* theSubMesh );

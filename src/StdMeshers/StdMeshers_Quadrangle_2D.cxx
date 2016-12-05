@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -132,8 +132,7 @@ bool StdMeshers_Quadrangle_2D::CheckHypothesis
   myParams               = NULL;
   myQuadList.clear();
 
-  bool isOk = true;
-  aStatus   = SMESH_Hypothesis::HYP_OK;
+  aStatus = SMESH_Hypothesis::HYP_OK;
 
   const list <const SMESHDS_Hypothesis * >& hyps =
     GetUsedHypothesis(aMesh, aShape, false);
@@ -520,7 +519,7 @@ bool StdMeshers_Quadrangle_2D::computeQuadDominant(SMESH_Mesh&         aMesh,
     // for each node of the down edge find nearest node
     // in the first row of the regular grid and link them
     for (i = 0; i < stop; i++) {
-      const SMDS_MeshNode *a, *b, *c, *d;
+      const SMDS_MeshNode *a, *b, *c=0, *d;
       a = uv_e0[i].node;
       b = uv_e0[i + 1].node;
       gp_Pnt pb (b->X(), b->Y(), b->Z());
@@ -534,6 +533,7 @@ bool StdMeshers_Quadrangle_2D::computeQuadDominant(SMESH_Mesh&         aMesh,
       }
       else {
         // find in the grid node c, nearest to the b
+        c = 0;
         double mind = RealLast();
         for (int k = g; k <= iup; k++) {
           
@@ -735,6 +735,7 @@ bool StdMeshers_Quadrangle_2D::computeQuadDominant(SMESH_Mesh&         aMesh,
       gp_Pnt pb (b->X(), b->Y(), b->Z());
 
       // find node c in the grid, nearest to the b
+      c = 0;
       int near = g;
       if (i == stop - 1) { // up bondary reached
         c = quad->uv_grid[nbhoriz*(jup + 1) - 2].node;
@@ -1782,10 +1783,10 @@ bool StdMeshers_Quadrangle_2D::computeQuadPref (SMESH_Mesh &        aMesh,
   //       0  bottom  1
 
 
-  const int bfrom = quad->side[0].from;
-  const int rfrom = quad->side[1].from;
+  //const int bfrom = quad->side[0].from;
+  //const int rfrom = quad->side[1].from;
   const int tfrom = quad->side[2].from;
-  const int lfrom = quad->side[3].from;
+  //const int lfrom = quad->side[3].from;
   {
     const vector<UVPtStruct>& uv_eb_vec = quad->side[0].GetUVPtStruct(true,0);
     const vector<UVPtStruct>& uv_er_vec = quad->side[1].GetUVPtStruct(false,1);
@@ -1926,10 +1927,10 @@ bool StdMeshers_Quadrangle_2D::computeQuadPref (SMESH_Mesh &        aMesh,
 
     } // if ( dv != 0 && dh != 0 )
 
-    const int db = quad->side[0].IsReversed() ? -1 : +1;
-    const int dr = quad->side[1].IsReversed() ? -1 : +1;
+    //const int db = quad->side[0].IsReversed() ? -1 : +1;
+    //const int dr = quad->side[1].IsReversed() ? -1 : +1;
     const int dt = quad->side[2].IsReversed() ? -1 : +1;
-    const int dl = quad->side[3].IsReversed() ? -1 : +1;
+    //const int dl = quad->side[3].IsReversed() ? -1 : +1;
 
     // Case dv == 0,  here possibly myQuadList.size() > 1
     //
@@ -2139,7 +2140,7 @@ bool StdMeshers_Quadrangle_2D::computeQuadPref (SMESH_Mesh &        aMesh,
     npl.Append(uv_el[i].normParam);
   }
 
-  int dl,dr;
+  int dl = 0, dr = 0;
   if (OldVersion) {
     // add some params to right and left after the first param
     // insert to right
@@ -2381,7 +2382,7 @@ bool StdMeshers_Quadrangle_2D::computeQuadPref (SMESH_Mesh &        aMesh,
         TColgp_SequenceOfXY UVtmp;
         double drparam = npr.Value(nr) - npr.Value(nnn-1);
         double dlparam = npl.Value(nnn) - npl.Value(nnn-1);
-        double y0,y1;
+        double y0 = 0, y1 = 0;
         for (i=1; i<=drl; i++) {
           // add existed nodes from right edge
           NodesC.SetValue(nb,i+1,uv_er[nnn+i-2].node);
@@ -2971,7 +2972,8 @@ bool StdMeshers_Quadrangle_2D::computeReduced (SMESH_Mesh &        aMesh,
     const vector<UVPtStruct>& uv_et = quad->side[2].GetUVPtStruct(true,1);
     const vector<UVPtStruct>& uv_el = quad->side[3].GetUVPtStruct(false,0);
 
-    if (uv_eb.size() != nb || uv_er.size() != nr || uv_et.size() != nt || uv_el.size() != nl)
+    if ((int) uv_eb.size() != nb || (int) uv_er.size() != nr ||
+        (int) uv_et.size() != nt || (int) uv_el.size() != nl)
       return error(COMPERR_BAD_INPUT_MESH);
 
     // arrays for normalized params
@@ -3284,7 +3286,8 @@ bool StdMeshers_Quadrangle_2D::computeReduced (SMESH_Mesh &        aMesh,
     const vector<UVPtStruct>& uv_et = quad->side[2].GetUVPtStruct(true,1);
     const vector<UVPtStruct>& uv_el = quad->side[3].GetUVPtStruct(false,0);
 
-    if (uv_eb.size() != nb || uv_er.size() != nr || uv_et.size() != nt || uv_el.size() != nl)
+    if ((int) uv_eb.size() != nb || (int) uv_er.size() != nr ||
+        (int) uv_et.size() != nt || (int) uv_el.size() != nl)
       return error(COMPERR_BAD_INPUT_MESH);
 
     gp_UV uv[ UV_SIZE ];
@@ -3295,7 +3298,11 @@ bool StdMeshers_Quadrangle_2D::computeReduced (SMESH_Mesh &        aMesh,
 
     vector<UVPtStruct> curr_base = uv_eb, next_base;
 
-    UVPtStruct nullUVPtStruct; nullUVPtStruct.node = 0;
+    UVPtStruct nullUVPtStruct;
+    nullUVPtStruct.node = 0;
+    nullUVPtStruct.x = nullUVPtStruct.y = nullUVPtStruct.u = nullUVPtStruct.v = 0;
+    nullUVPtStruct.param = 0;
+    
 
     int curr_base_len = nb;
     int next_base_len = 0;
@@ -4107,7 +4114,7 @@ bool StdMeshers_Quadrangle_2D::check()
     StdMeshers_FaceSidePtr wire = wireVec[0];
 
     // find a right angle VERTEX
-    int iVertex;
+    int     iVertex = 0;
     double maxAngle = -1e100;
     for ( int i = 0; i < wire->NbEdges(); ++i )
     {
@@ -4219,7 +4226,7 @@ bool StdMeshers_Quadrangle_2D::check()
   return isOK;
 }
 
-/*//================================================================================
+//================================================================================
 /*!
  * \brief Finds vertices at the most sharp face corners
  *  \param [in] theFace - the FACE
@@ -4338,7 +4345,7 @@ int StdMeshers_Quadrangle_2D::getCorners(const TopoDS_Face&          theFace,
 
   // check if there are possible variations in choosing corners
   bool haveVariants = false;
-  if ( vertexByAngle.size() > nbCorners )
+  if ((int) vertexByAngle.size() > nbCorners )
   {
     double lostAngle = a2v->first;
     double lastAngle = ( --a2v, a2v->first );
@@ -4346,7 +4353,7 @@ int StdMeshers_Quadrangle_2D::getCorners(const TopoDS_Face&          theFace,
   }
 
   const double angleTol = 5.* M_PI/180;
-  myCheckOri = ( vertexByAngle.size() > nbCorners ||
+  myCheckOri = ( (int)vertexByAngle.size() > nbCorners ||
                  vertexByAngle.begin()->first < angleTol );
 
   // make theWire begin from a corner vertex or triaVertex
@@ -4476,7 +4483,7 @@ int StdMeshers_Quadrangle_2D::getCorners(const TopoDS_Face&          theFace,
       {
         // select two halfDivider's as corners
         TGeoIndex hd1, hd2 = -1;
-        int iC2;
+        size_t iC2;
         for ( iC2 = 0; iC2 < cornerInd.size() && hd2 < 0; ++iC2 )
         {
           hd1 = cornerInd[ iC2 ];
@@ -4522,10 +4529,10 @@ int StdMeshers_Quadrangle_2D::getCorners(const TopoDS_Face&          theFace,
         vector< double > accuLength;
         double totalLen = 0;
         vector< TGeoIndex > evVec( equVerts.begin(), equVerts.end() );
-        int          iEV = 0;
+        size_t      iEV = 0;
         TGeoIndex    iE = cornerInd[ helper.WrapIndex( iC - nbC[0] - 1, cornerInd.size() )];
         TGeoIndex iEEnd = cornerInd[ helper.WrapIndex( iC + nbC[1] + 1, cornerInd.size() )];
-        while ( accuLength.size() < nbEqualV + int( !allCornersSame ) )
+        while ((int) accuLength.size() < nbEqualV + int( !allCornersSame ) )
         {
           // accumulate length of edges before iEV-th equal vertex
           accuLength.push_back( totalLen );
@@ -4604,7 +4611,7 @@ int StdMeshers_Quadrangle_2D::getCorners(const TopoDS_Face&          theFace,
 //================================================================================
 
 FaceQuadStruct::Side::Side(StdMeshers_FaceSidePtr theGrid)
-  : grid(theGrid), nbNodeOut(0), from(0), to(theGrid ? theGrid->NbPoints() : 0 ), di(1)
+  : grid(theGrid), from(0), to(theGrid ? theGrid->NbPoints() : 0 ), di(1), nbNodeOut(0)
 {
 }
 
@@ -4781,8 +4788,6 @@ bool StdMeshers_Quadrangle_2D::addEnforcedNodes()
       quadsBySide[ (*quadIt)->side[iSide] ].push_back( *quadIt );
     }
 
-  SMESH_Mesh*          mesh = myHelper->GetMesh();
-  SMESHDS_Mesh*      meshDS = myHelper->GetMeshDS();
   const TopoDS_Face&   face = TopoDS::Face( myHelper->GetSubShape() );
   Handle(Geom_Surface) surf = BRep_Tool::Surface( face );
 
@@ -4962,8 +4967,8 @@ bool StdMeshers_Quadrangle_2D::addEnforcedNodes()
           continue;
         const vector<UVPtStruct>& oGrid = side.contacts[iC].other_side->grid->GetUVPtStruct();
         const UVPtStruct&         uvPt  = points[ side.contacts[iC].point ];
-        if ( side.contacts[iC].other_point >= oGrid .size() ||
-             side.contacts[iC].point       >= points.size() )
+        if ( side.contacts[iC].other_point >= (int) oGrid .size() ||
+             side.contacts[iC].point       >= (int) points.size() )
           throw SALOME_Exception( "StdMeshers_Quadrangle_2D::addEnforcedNodes(): wrong contact" );
         if ( oGrid[ side.contacts[iC].other_point ].node )
           (( UVPtStruct& ) uvPt).node = oGrid[ side.contacts[iC].other_point ].node;
@@ -5119,9 +5124,9 @@ void StdMeshers_Quadrangle_2D::updateSideUV( FaceQuadStruct::Side&  side,
     return;
   }
 
-  const int iFrom    = Min ( iForced, *iNext );
-  const int iTo      = Max ( iForced, *iNext ) + 1;
-  const int sideSize = iTo - iFrom;
+  const int    iFrom    = Min ( iForced, *iNext );
+  const int    iTo      = Max ( iForced, *iNext ) + 1;
+  const size_t sideSize = iTo - iFrom;
 
   vector<UVPtStruct> points[4]; // side points of a temporary quad
 
@@ -5131,7 +5136,7 @@ void StdMeshers_Quadrangle_2D::updateSideUV( FaceQuadStruct::Side&  side,
   for ( int is2nd = 0; is2nd < 2; ++is2nd )
   {
     points[ is2nd ].reserve( sideSize );
-    int nbLoops = 0;
+    size_t nbLoops = 0;
     while ( points[is2nd].size() < sideSize )
     {
       int iCur = iFrom + points[is2nd].size() - int( !points[is2nd].empty() );
@@ -5146,6 +5151,8 @@ void StdMeshers_Quadrangle_2D::updateSideUV( FaceQuadStruct::Side&  side,
         for ( iS = 0; iS < q->side.size(); ++iS )
           if ( side.grid == q->side[ iS ].grid )
             break;
+        if ( iS == q->side.size() )
+          continue;
         bool isOut;
         if ( !q->side[ iS ].IsReversed() )
           isOut = ( q->side[ iS ].from > iCur || q->side[ iS ].to-1 <= iCur );
@@ -5625,8 +5632,8 @@ bool FaceQuadStruct::Side::IsForced( int nodeIndex ) const
 
 void FaceQuadStruct::Side::AddContact( int ip, Side* side, int iop )
 {
-  if ( ip  >= GetUVPtStruct().size()      ||
-       iop >= side->GetUVPtStruct().size() )
+  if ( ip  >= (int) GetUVPtStruct().size()      ||
+       iop >= (int) side->GetUVPtStruct().size() )
     throw SALOME_Exception( "FaceQuadStruct::Side::AddContact(): wrong point" );
   if ( ip < from || ip >= to )
     return;

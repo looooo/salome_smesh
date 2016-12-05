@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -55,11 +55,11 @@ SMESH_GroupBase_i::SMESH_GroupBase_i( PortableServer::POA_ptr thePOA,
                                       SMESH_Mesh_i*           theMeshServant,
                                       const int               theLocalID )
 : SALOME::GenericObj_i( thePOA ),
-  myMeshServant( theMeshServant ), 
-  myLocalID( theLocalID ),
+  myPreMeshInfo(NULL),
   myNbNodes(-1),
   myGroupDSTic(0),
-  myPreMeshInfo(NULL)
+  myMeshServant( theMeshServant ), 
+  myLocalID( theLocalID )
 {
   // PAL7962: san -- To ensure correct mapping of servant and correct reference counting in GenericObj_i,
   // servant activation is performed by SMESH_Mesh_i::createGroup()
@@ -69,19 +69,17 @@ SMESH_GroupBase_i::SMESH_GroupBase_i( PortableServer::POA_ptr thePOA,
 SMESH_Group_i::SMESH_Group_i( PortableServer::POA_ptr thePOA,
                               SMESH_Mesh_i*           theMeshServant,
                               const int               theLocalID )
-     : SALOME::GenericObj_i( thePOA ),
-       SMESH_GroupBase_i( thePOA, theMeshServant, theLocalID )
+  : SALOME::GenericObj_i( thePOA ),
+    SMESH_GroupBase_i( thePOA, theMeshServant, theLocalID )
 {
-  //MESSAGE("SMESH_Group_i; this = "<<this );
 }
 
 SMESH_GroupOnGeom_i::SMESH_GroupOnGeom_i( PortableServer::POA_ptr thePOA,
                                           SMESH_Mesh_i*           theMeshServant,
                                           const int               theLocalID )
-     : SALOME::GenericObj_i( thePOA ),
-       SMESH_GroupBase_i( thePOA, theMeshServant, theLocalID )
+  : SALOME::GenericObj_i( thePOA ),
+    SMESH_GroupBase_i( thePOA, theMeshServant, theLocalID )
 {
-  //MESSAGE("SMESH_GroupOnGeom_i; this = "<<this );
 }
 
 SMESH_GroupOnFilter_i::SMESH_GroupOnFilter_i( PortableServer::POA_ptr thePOA,
@@ -90,7 +88,6 @@ SMESH_GroupOnFilter_i::SMESH_GroupOnFilter_i( PortableServer::POA_ptr thePOA,
   : SALOME::GenericObj_i( thePOA ),
     SMESH_GroupBase_i( thePOA, theMeshServant, theLocalID )
 {
-  //MESSAGE("SMESH_GroupOnGeom_i; this = "<<this );
 }
 
 //=============================================================================
@@ -176,7 +173,6 @@ char* SMESH_GroupBase_i::GetName()
   ::SMESH_Group* aGroup = GetSmeshGroup();
   if (aGroup)
     return CORBA::string_dup (aGroup->GetName());
-  MESSAGE("get name of a vague group");
   return CORBA::string_dup( "NO_NAME" );
 }
 
@@ -203,7 +199,6 @@ SMESH::ElementType SMESH_GroupBase_i::GetType()
     }
     return aType;
   }
-  MESSAGE("get type of a vague group");
   return SMESH::ALL;
 }
 
@@ -222,7 +217,6 @@ CORBA::Long SMESH_GroupBase_i::Size()
   SMESHDS_GroupBase* aGroupDS = GetGroupDS();
   if (aGroupDS)
     return aGroupDS->Extent();
-  MESSAGE("get size of a vague group");
   return 0;
 }
 
@@ -240,7 +234,6 @@ CORBA::Boolean SMESH_GroupBase_i::IsEmpty()
   SMESHDS_GroupBase* aGroupDS = GetGroupDS();
   if (aGroupDS)
     return aGroupDS->IsEmpty();
-  MESSAGE("checking IsEmpty of a vague group");
   return true;
 }
 
@@ -280,8 +273,6 @@ void SMESH_Group_i::Clear()
     return;
   }
   Modified(); // notify dependent Filter with FT_BelongToMeshGroup criterion
-
-  MESSAGE("attempt to clear a vague group");
 }
 
 //=============================================================================
@@ -298,7 +289,6 @@ CORBA::Boolean SMESH_GroupBase_i::Contains( CORBA::Long theID )
   SMESHDS_GroupBase* aGroupDS = GetGroupDS();
   if (aGroupDS)
     return aGroupDS->Contains(theID);
-  MESSAGE("attempt to check contents of a vague group");
   return false;
 }
 
@@ -320,9 +310,9 @@ CORBA::Long SMESH_Group_i::Add( const SMESH::long_array& theIDs )
   SMESHDS_Group* aGroupDS = dynamic_cast<SMESHDS_Group*>( GetGroupDS() );
   if (aGroupDS) {
     int nbAdd = 0;
-    for (int i = 0; i < theIDs.length(); i++) {
+    for ( CORBA::ULong i = 0; i < theIDs.length(); i++) {
       int anID = (int) theIDs[i];
-      if (aGroupDS->Add(anID))
+      if ( aGroupDS->Add( anID ))
         nbAdd++;
     }
     if ( nbAdd )
@@ -335,7 +325,7 @@ CORBA::Long SMESH_Group_i::Add( const SMESH::long_array& theIDs )
 
 //=============================================================================
 /*!
- *  
+ *
  */
 //=============================================================================
 
@@ -352,9 +342,9 @@ CORBA::Long SMESH_Group_i::Remove( const SMESH::long_array& theIDs )
   SMESHDS_Group* aGroupDS = dynamic_cast<SMESHDS_Group*>( GetGroupDS() );
   if (aGroupDS) {
     int nbDel = 0;
-    for (int i = 0; i < theIDs.length(); i++) {
+    for ( CORBA::ULong i = 0; i < theIDs.length(); i++ ) {
       int anID = (int) theIDs[i];
-      if (aGroupDS->Remove(anID))
+      if ( aGroupDS->Remove( anID ))
         nbDel++;
     }
     if ( nbDel )
@@ -367,7 +357,7 @@ CORBA::Long SMESH_Group_i::Remove( const SMESH::long_array& theIDs )
 
 //=============================================================================
 /*!
- *  
+ *
  */
 //=============================================================================
 
@@ -502,8 +492,8 @@ namespace
    */
   //================================================================================
 
-  void getNodesOfElements(SMDS_ElemIteratorPtr        elemIt,
-                          set<const SMDS_MeshNode* >& nodes)
+  void getNodesOfElements(SMDS_ElemIteratorPtr             elemIt,
+                          std::set<const SMDS_MeshNode* >& nodes)
   {
     while ( elemIt->more() )
     {
@@ -531,7 +521,7 @@ CORBA::Long SMESH_GroupBase_i::GetNumberOfNodes()
   {
     if ( myNbNodes < 0 || g->GetTic() != myGroupDSTic )
     {      
-      set<const SMDS_MeshNode* > nodes;
+      std::set<const SMDS_MeshNode* > nodes;
       getNodesOfElements( g->GetElements(), nodes );
       myNbNodes = nodes.size();
       myGroupDSTic = g->GetTic();
@@ -574,10 +564,10 @@ SMESH::long_array* SMESH_GroupBase_i::GetNodeIDs()
   SMESH::long_array_var aRes = new SMESH::long_array();
   if ( SMESHDS_GroupBase* g = GetGroupDS())
   {
-    set<const SMDS_MeshNode* > nodes;
+    std::set<const SMDS_MeshNode* > nodes;
     getNodesOfElements( g->GetElements(), nodes );
     aRes->length( nodes.size() );
-    set<const SMDS_MeshNode*>::iterator nIt = nodes.begin(), nEnd = nodes.end();
+    std::set<const SMDS_MeshNode*>::iterator nIt = nodes.begin(), nEnd = nodes.end();
     for ( int i = 0; nIt != nEnd; ++nIt, ++i )
       aRes[i] = (*nIt)->GetID();
   }
@@ -631,7 +621,6 @@ SALOMEDS::Color SMESH_GroupBase_i::GetColor()
 
     return aColor;
   }
-  MESSAGE("get color of a group");
   return SALOMEDS::Color();
 }
 
@@ -708,7 +697,7 @@ SMESH::long_array* SMESH_GroupBase_i::GetMeshInfo()
 
   if ( SMESHDS_GroupBase* g = GetGroupDS())
   {
-    if ( g->GetType() == SMDSAbs_Node || ( myNbNodes > -1 && g->GetTic() == myGroupDSTic))
+    if ( g->GetType() == SMDSAbs_Node /*|| ( myNbNodes > -1 && g->GetTic() == myGroupDSTic)*/)
       aRes[ SMDSEntity_Node ] = GetNumberOfNodes();
 
     if ( g->GetType() != SMDSAbs_Node )
@@ -889,7 +878,6 @@ SMESH::long_array* SMESH_GroupOnFilter_i::GetListOfID()
     if ( 0 < aRes->length() && aRes->length() < 100 ) // for comfortable testing ;)
       std::sort( &aRes[0], &aRes[0] + aRes->length() );
   }
-  MESSAGE("get list of IDs of a vague group");
   return aRes._retn();
 }
 
@@ -913,12 +901,12 @@ SMESH::long_array* SMESH_GroupOnFilter_i::GetMeshInfo()
 
   if ( SMESHDS_GroupBase* g = GetGroupDS())
   {
-    if ( g->GetType() == SMDSAbs_Node || ( myNbNodes > -1 && g->GetTic() == myGroupDSTic))
+    if ( g->GetType() == SMDSAbs_Node /*|| ( myNbNodes > -1 && g->GetTic() == myGroupDSTic)*/)
       aRes[ SMDSEntity_Node ] = GetNumberOfNodes();
 
     if ( g->GetType() != SMDSAbs_Node )
     {
-      vector< int > nbElems = static_cast< SMESHDS_GroupOnFilter* >( g )->GetMeshInfo();
+      std::vector< int > nbElems = static_cast< SMESHDS_GroupOnFilter* >( g )->GetMeshInfo();
       for ( size_t i = SMESH::Entity_Node; i < SMESH::Entity_Last; i++)
         if ( i < nbElems.size() )
           aRes[i] = nbElems[ i ];

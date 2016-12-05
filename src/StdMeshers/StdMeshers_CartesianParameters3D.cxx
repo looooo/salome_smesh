@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -240,6 +240,7 @@ bool StdMeshers_CartesianParameters3D::GetFixedPoint(double p[3]) const
   if ( Precision::IsInfinite( _fixedPoint[0] ))
     return false;
   std::copy( &_fixedPoint[0], &_fixedPoint[0]+3, &p[0] );
+  return true;
 }
 
 
@@ -371,7 +372,7 @@ void StdMeshers_CartesianParameters3D::ComputeCoordinates(const double    x0,
   // correct coords if a forced point is too close to a neighbor node
   if ( forced )
   {
-    int iF = 0;
+    size_t iF = 0;
     double minLen = ( x1 - x0 );
     for ( size_t i = 1; i < coords.size(); ++i )
     {
@@ -522,9 +523,8 @@ ComputeOptimalAxesDirs(const TopoDS_Shape& shape,
   const TCooTriple*           norm1 = 0;
   double                      sumArea = 0;
   vector< const TCooTriple* > norms;
-  for ( int iF = 1; norm2a != areasByNormal.end(); ++norm2a, ++iF )
+  for ( size_t iF = 1; norm2a != areasByNormal.end(); ++norm2a, ++iF )
   {
-
     if ( !norm1 || !sameDir( *norm1, norm2a->first ))
     {
       if ( !norms.empty() )
@@ -799,51 +799,51 @@ std::istream & StdMeshers_CartesianParameters3D::LoadFrom(std::istream & load)
 {
   bool ok;
 
-  ok = ( load >> _sizeThreshold );
+  ok = static_cast<bool>( load >> _sizeThreshold );
   for ( int ax = 0; ax < 3; ++ax )
   {
     if (ok)
     {
       size_t i = 0;
-      ok = (load >> i  );
+      ok = static_cast<bool>(load >> i  );
       if ( i > 0 && ok )
       {
         _coords[ax].resize( i );
         for ( i = 0; i < _coords[ax].size() && ok; ++i )
-          ok = (load >> _coords[ax][i]  );
+          ok = static_cast<bool>(load >> _coords[ax][i]  );
       }
     }
     if (ok)
     {
       size_t i = 0;
-      ok = (load >> i  );
+      ok = static_cast<bool>(load >> i  );
       if ( i > 0 && ok )
       {
         _internalPoints[ax].resize( i );
         for ( i = 0; i < _internalPoints[ax].size() && ok; ++i )
-          ok = (load >> _internalPoints[ax][i]  );
+          ok = static_cast<bool>(load >> _internalPoints[ax][i]  );
       }
     }
     if (ok)
     {
       size_t i = 0;
-      ok = (load >> i  );
+      ok = static_cast<bool>(load >> i  );
       if ( i > 0 && ok )
       {
         _spaceFunctions[ax].resize( i );
         for ( i = 0; i < _spaceFunctions[ax].size() && ok; ++i )
-          ok = (load >> _spaceFunctions[ax][i]  );
+          ok = static_cast<bool>(load >> _spaceFunctions[ax][i]  );
       }
     }
   }
 
-  ok = ( load >> _toAddEdges );
+  ok = static_cast<bool>( load >> _toAddEdges );
 
   for ( int i = 0; i < 9 && ok; ++i )
-    ok = ( load >> _axisDirs[i]);
+    ok = static_cast<bool>( load >> _axisDirs[i]);
 
   for ( int i = 0; i < 3 && ok ; ++i )
-    ok = ( load >> _fixedPoint[i]);
+    ok = static_cast<bool>( load >> _fixedPoint[i]);
 
   return load;
 }

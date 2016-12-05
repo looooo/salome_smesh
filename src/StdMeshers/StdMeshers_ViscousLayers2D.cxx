@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -113,6 +113,7 @@ namespace VISCOUS_2D
       //virtual int NbElements() const { return _elements.size()+1; }
       virtual int NbNodes() const { return Max( 0, _uvPtStructVec.size()-2 ); }
       void SetUVPtStructVec(UVPtStructVec& vec) { _uvPtStructVec.swap( vec ); }
+      UVPtStructVec& GetUVPtStructVec() { return _uvPtStructVec; }
     };
     _ProxyMeshOfFace(const SMESH_Mesh& mesh): SMESH_ProxyMesh(mesh) {}
     _EdgeSubMesh* GetEdgeSubMesh(int ID) { return (_EdgeSubMesh*) getProxySubMesh(ID); }
@@ -298,6 +299,8 @@ namespace VISCOUS_2D
     gp_XY    _vec21;           // Vec( _seg2.p1(), _seg1.p1() )
     double   _D;               // _vec1.Crossed( _vec2 )
     double   _param1, _param2; // intersection param on _seg1 and _seg2
+
+    _SegmentIntersection(): _D(0), _param1(0), _param2(0) {}
 
     bool Compute(const _Segment& seg1, const _Segment& seg2, bool seg2IsRay = false )
     {
@@ -515,27 +518,51 @@ SMESH_ProxyMesh::Ptr
 StdMeshers_ViscousLayers2D::Compute(SMESH_Mesh&        theMesh,
                                     const TopoDS_Face& theFace)
 {
-  SMESH_ProxyMesh::Ptr pm;
-
+  using namespace VISCOUS_2D;
   vector< const StdMeshers_ViscousLayers2D* > hyps;
   vector< TopoDS_Shape >                      hypShapes;
-  if ( VISCOUS_2D::findHyps( theMesh, theFace, hyps, hypShapes ))
+
+  SMESH_ProxyMesh::Ptr pm = _ProxyMeshHolder::FindProxyMeshOfFace( theFace, theMesh );
+  if ( !pm )
   {
-    VISCOUS_2D::_ViscousBuilder2D builder( theMesh, theFace, hyps, hypShapes );
-    pm = builder.Compute();
-    SMESH_ComputeErrorPtr error = builder.GetError();
-    if ( error && !error->IsOK() )
-      theMesh.GetSubMesh( theFace )->GetComputeError() = error;
-    else if ( !pm )
+    if ( findHyps( theMesh, theFace, hyps, hypShapes ))
+    {
+      VISCOUS_2D::_ViscousBuilder2D builder( theMesh, theFace, hyps, hypShapes );
+      pm = builder.Compute();
+      SMESH_ComputeErrorPtr error = builder.GetError();
+      if ( error && !error->IsOK() )
+        theMesh.GetSubMesh( theFace )->GetComputeError() = error;
+      else if ( !pm )
+        pm.reset( new SMESH_ProxyMesh( theMesh ));
+      if ( getenv("__ONLY__VL2D__"))
+        pm.reset();
+    }
+    else
+    {
       pm.reset( new SMESH_ProxyMesh( theMesh ));
-    if ( getenv("__ONLY__VL2D__"))
-      pm.reset();
-  }
-  else
-  {
-    pm.reset( new SMESH_ProxyMesh( theMesh ));
+    }
   }
   return pm;
+}
+// --------------------------------------------------------------------------------
+void StdMeshers_ViscousLayers2D::SetProxyMeshOfEdge( const StdMeshers_FaceSide& edgeNodes )
+{
+  using namespace VISCOUS_2D;
+  SMESH_ProxyMesh::Ptr pm =
+    _ProxyMeshHolder::FindProxyMeshOfFace( edgeNodes.Face(), *edgeNodes.GetMesh() );
+  if ( !pm ) {
+    _ProxyMeshOfFace* proxyMeshOfFace = new _ProxyMeshOfFace( *edgeNodes.GetMesh() );
+    pm.reset( proxyMeshOfFace );
+    new _ProxyMeshHolder( edgeNodes.Face(), pm );
+  }
+  _ProxyMeshOfFace*  proxyMeshOfFace = static_cast<_ProxyMeshOfFace*>( pm.get() );
+  _ProxyMeshOfFace::_EdgeSubMesh* sm = proxyMeshOfFace->GetEdgeSubMesh( edgeNodes.EdgeID(0) );
+  sm->GetUVPtStructVec() = edgeNodes.GetUVPtStruct();
+}
+// --------------------------------------------------------------------------------
+bool StdMeshers_ViscousLayers2D::HasProxyMesh( const TopoDS_Face& face, SMESH_Mesh& mesh )
+{
+  return VISCOUS_2D::_ProxyMeshHolder::FindProxyMeshOfFace( face, mesh ).get();
 }
 // --------------------------------------------------------------------------------
 SMESH_ComputeErrorPtr
@@ -817,7 +844,7 @@ bool _ViscousBuilder2D::findEdgesWithLayers()
                   {
                     hasVL = false;
                     for ( hyp = allHyps.begin(); hyp != allHyps.end() && !hasVL; ++hyp )
-                      if ( viscHyp = dynamic_cast<const THypVL*>( *hyp ))
+                      if (( viscHyp = dynamic_cast<const THypVL*>( *hyp )))
                         hasVL = viscHyp->IsShapeWithLayers( neighbourID );
                   }
                   if ( !hasVL )
@@ -1438,7 +1465,7 @@ bool _ViscousBuilder2D::inflate()
       _PolyLine::TEdgeIterator eIt = isR ? L._lEdges.end()-1 : L._lEdges.begin();
       if ( eIt->_length2D == 0 ) continue;
       _Segment seg1( eIt->_uvOut, eIt->_uvIn );
-      for ( eIt += deltaIt; nbRemove < L._lEdges.size()-1; eIt += deltaIt )
+      for ( eIt += deltaIt; nbRemove < (int)L._lEdges.size()-1; eIt += deltaIt )
       {
         _Segment seg2( eIt->_uvOut, eIt->_uvIn );
         if ( !intersection.Compute( seg1, seg2 ))
@@ -1446,7 +1473,7 @@ bool _ViscousBuilder2D::inflate()
         ++nbRemove;
       }
       if ( nbRemove > 0 ) {
-        if ( nbRemove == L._lEdges.size()-1 ) // 1st and last _LayerEdge's intersect
+        if ( nbRemove == (int)L._lEdges.size()-1 ) // 1st and last _LayerEdge's intersect
         {
           --nbRemove;
           _LayerEdge& L0 = L._lEdges.front();
@@ -1794,7 +1821,7 @@ bool _ViscousBuilder2D::shrink()
     //  x-x-x-x-----x-----x----
     //  | | | |  e1    e2    e3
 
-    int isRShrinkedForAdjacent;
+    int isRShrinkedForAdjacent = 0;
     UVPtStructVec nodeDataForAdjacent;
     for ( int isR = 0; isR < 2; ++isR )
     {
@@ -2131,7 +2158,7 @@ bool _ViscousBuilder2D::refine()
   // store a proxyMesh in a sub-mesh
   // make faces on each _PolyLine
   vector< double > layersHeight;
-  double prevLen2D = -1;
+  //double prevLen2D = -1;
   for ( size_t iL = 0; iL < _polyLineVec.size(); ++iL )
   {
     _PolyLine& L = _polyLineVec[ iL ];
@@ -2669,7 +2696,7 @@ _SegmentTree::box_type* _SegmentTree::buildRootBox()
 
 void _SegmentTree::buildChildrenData()
 {
-  for ( int i = 0; i < _segments.size(); ++i )
+  for ( size_t i = 0; i < _segments.size(); ++i )
     for (int j = 0; j < nbChildren(); j++)
       if ( !myChildren[j]->getBox()->IsOut( *_segments[i]._seg->_uv[0],
                                             *_segments[i]._seg->_uv[1] ))
@@ -2680,7 +2707,7 @@ void _SegmentTree::buildChildrenData()
   for (int j = 0; j < nbChildren(); j++)
   {
     _SegmentTree* child = static_cast<_SegmentTree*>( myChildren[j]);
-    child->myIsLeaf = ( child->_segments.size() <= maxNbSegInLeaf() );
+    child->myIsLeaf = ((int) child->_segments.size() <= maxNbSegInLeaf() );
   }
 }
 
@@ -2698,7 +2725,7 @@ void _SegmentTree::GetSegmentsNear( const _Segment&            seg,
 
   if ( isLeaf() )
   {
-    for ( int i = 0; i < _segments.size(); ++i )
+    for ( size_t i = 0; i < _segments.size(); ++i )
       if ( !_segments[i].IsOut( seg ))
         found.push_back( _segments[i]._seg );
   }
@@ -2724,7 +2751,7 @@ void _SegmentTree::GetSegmentsNear( const gp_Ax2d&             ray,
 
   if ( isLeaf() )
   {
-    for ( int i = 0; i < _segments.size(); ++i )
+    for ( size_t i = 0; i < _segments.size(); ++i )
       if ( !_segments[i].IsOut( ray ))
         found.push_back( _segments[i]._seg );
   }

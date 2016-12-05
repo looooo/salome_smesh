@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -148,13 +148,13 @@ istream & StdMeshers_LocalLength::LoadFrom(istream & load)
   bool isOK = true;
   double a;
 
-  isOK = (load >> a);
+  isOK = static_cast<bool>(load >> a);
   if (isOK)
     this->_length = a;
   else
     load.clear(ios::badbit | load.rdstate());
 
-  isOK = (load >> a);
+  isOK = static_cast<bool>(load >> a);
   if (isOK)
     this->_precision = a;
   else
@@ -224,7 +224,7 @@ bool StdMeshers_LocalLength::SetParametersByMesh(const SMESH_Mesh*   theMesh,
     SMESHDS_Mesh* aMeshDS = const_cast< SMESH_Mesh* >( theMesh )->GetMeshDS();
     if ( SMESH_Algo::GetNodeParamOnEdge( aMeshDS, edge, params ))
     {
-      for ( int i = 1; i < params.size(); ++i )
+      for ( size_t i = 1; i < params.size(); ++i )
         _length += GCPnts_AbscissaPoint::Length( AdaptCurve, params[ i-1 ], params[ i ]);
       nbEdges += params.size() - 1;
     }

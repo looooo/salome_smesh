@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -88,6 +88,7 @@ protected:
   SMESH::ListOfGroups*      convert( const QList<SMESH::SMESH_GroupBase_var>& );
 
   SALOMEDS::Color           getColor() const;
+  void                      setDefaultGroupColor();
 
   void                      setIsApplyAndClose( const bool theFlag );
   bool                      isApplyAndClose() const;

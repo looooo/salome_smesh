@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -72,8 +72,8 @@
 StdMeshersGUI_SubShapeSelectorWdg
 ::StdMeshersGUI_SubShapeSelectorWdg( QWidget * parent, TopAbs_ShapeEnum aSubShType ): 
   QWidget( parent ),
-  myPreviewActor( 0 ),
-  myMaxSize( -1 )
+  myMaxSize( -1 ),
+  myPreviewActor( 0 )
 {
   QPixmap image0( SMESH::GetResourceMgr( mySMESHGUI )->loadPixmap( "SMESH", tr( "ICON_SELECT" ) ) );
 
@@ -418,11 +418,14 @@ void StdMeshersGUI_SubShapeSelectorWdg::onListSelectionChanged()
     return;
 
   //mySelectionMgr->clearSelected();
-  TColStd_MapOfInteger aIndexes;
+  myPreviewActor->HighlightAll( false );
   QList<QListWidgetItem*> selItems = myListWidget->selectedItems();
   QListWidgetItem* anItem;
   foreach(anItem, selItems)
     myPreviewActor->HighlightID( anItem->text().toInt() );
+
+  if ( SVTK_ViewWindow* aViewWindow = SMESH::GetViewWindow( mySMESHGUI ))
+    aViewWindow->Repaint();
 
   // update remove button
   myRemoveButton->setEnabled( selItems.size() > 0 );

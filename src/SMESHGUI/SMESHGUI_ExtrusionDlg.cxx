@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -397,7 +397,7 @@ void SMESHGUI_3TypesSelector::addTmpIdSource( SMESH::long_array_var& ids, int iT
   SMESH::SMESH_IDSource_var idSrc =
     aMeshEditor->MakeIDSource( ids, SMESH::ElementType( iType+1 ));
 
-  if ( myIDSource[ iType ]->length() <= index )
+  if ( (int) myIDSource[ iType ]->length() <= index )
     myIDSource[ iType ]->length( index + 1 );
   myIDSource[ iType ][ index ] = idSrc;
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2011-2015  EDF R&D
+// Copyright (C) 2011-2016  EDF R&D
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -656,7 +656,7 @@ std::vector<std::string> * MeshJobManager_i::_getResourceNames() {
   LOG("### resource list:");
   std::vector<std::string>* resourceNames = new std::vector<std::string>();
   if (resourceList) {
-    for (int i = 0; i < resourceList->length(); i++) {
+    for ( size_t i = 0; i < resourceList->length(); i++) {
       const char* aResourceName = (*resourceList)[i];
       resourceNames->push_back(std::string(aResourceName));
       LOG("resource["<<i<<"] = "<<aResourceName);

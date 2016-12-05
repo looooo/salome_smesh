@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -79,7 +79,7 @@ void StdMeshers_Reversible1D_i::SetReversedEdges( const SMESH::long_array& theId
 
 void StdMeshers_Reversible1D_i::SetObjectEntry( const char* theEntry )
 {
-  string entry(theEntry); // actually needed as theEntry is spoiled by moment of dumping
+  std::string entry(theEntry); // actually needed as theEntry is spoiled by moment of dumping
   try {
     this->GetImpl()->SetObjectEntry( entry.c_str() );
     // Update Python script
@@ -123,7 +123,7 @@ SMESH::long_array* StdMeshers_Reversible1D_i::GetReversedEdges()
   SMESH::long_array_var anArray = new SMESH::long_array;
   std::vector<int> ids = this->GetImpl()->GetReversedEdges();
   anArray->length( ids.size() );
-  for ( CORBA::Long i = 0; i < ids.size(); i++)
+  for ( CORBA::ULong i = 0; i < ids.size(); i++)
     anArray [ i ] = ids [ i ];
 
   return anArray._retn();

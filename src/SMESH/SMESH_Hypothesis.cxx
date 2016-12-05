@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -59,7 +59,6 @@ SMESH_Hypothesis::SMESH_Hypothesis(int hypId,
 
 SMESH_Hypothesis::~SMESH_Hypothesis()
 {
-  MESSAGE("SMESH_Hypothesis::~SMESH_Hypothesis");
   StudyContextStruct* myStudyContext = _gen->GetStudyContext(_studyId);
   myStudyContext->mapHypothesis[_hypId] = 0;
 }
@@ -78,6 +77,7 @@ int SMESH_Hypothesis::GetDim() const
     case ALGO_1D: dim = 1; break;
     case ALGO_2D: dim = 2; break;
     case ALGO_3D: dim = 3; break;
+    case ALGO_0D: dim = 0; break;
     case PARAM_ALGO:
       dim = ( _param_algo_dim < 0 ) ? -_param_algo_dim : _param_algo_dim; break;
     }
@@ -114,8 +114,6 @@ int SMESH_Hypothesis::GetStudyId() const
 
 void SMESH_Hypothesis::NotifySubMeshesHypothesisModification()
 {
-  MESSAGE("SMESH_Hypothesis::NotifySubMeshesHypothesisModification");
-
   // for all meshes in study
 
   StudyContextStruct* myStudyContext = _gen->GetStudyContext(_studyId);
@@ -159,7 +157,7 @@ void SMESH_Hypothesis::SetLibName(const char* theLibName)
 SMESH_Mesh* SMESH_Hypothesis::GetMeshByPersistentID(int id)
 {
   StudyContextStruct* myStudyContext = _gen->GetStudyContext(_studyId);
-  map<int, SMESH_Mesh*>::iterator itm = itm = myStudyContext->mapMesh.begin();
+  map<int, SMESH_Mesh*>::iterator itm = myStudyContext->mapMesh.begin();
   for ( ; itm != myStudyContext->mapMesh.end(); itm++)
   {
     SMESH_Mesh* mesh = (*itm).second;

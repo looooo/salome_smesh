@@ -1,4 +1,4 @@
-# Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+# Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -1100,7 +1100,7 @@ class StdMeshersBuilder_Prism3D(Mesh_Algorithm):
 
     pass # end of StdMeshersBuilder_Prism3D class
 
-## Defines a Prism 3D algorithm
+## Defines Radial Prism 3D algorithm
 # 
 #  It is created by calling smeshBuilder.Mesh.Prism(geom=0)
 #
@@ -1417,10 +1417,13 @@ class StdMeshersBuilder_UseExistingElements_1D2D(Mesh_Algorithm):
     #  @param UseExisting if ==true - searches for the existing hypothesis created with
     #                     the same parameters, else (default) - creates a new one
     def SourceFaces(self, groups, toCopyMesh=False, toCopyGroups=False, UseExisting=False):
+        import SMESH
         compFun = lambda hyp, args: ( hyp.GetSourceFaces() == args[0] and \
                                       hyp.GetCopySourceMesh() == args[1], args[2] )
         hyp = self.Hypothesis("ImportSource2D", [groups, toCopyMesh, toCopyGroups],
                               UseExisting=UseExisting, CompareMethod=compFun, toAdd=False)
+        if groups and isinstance( groups, SMESH._objref_SMESH_GroupBase ):
+            groups = [groups]
         hyp.SetSourceFaces(groups)
         hyp.SetCopySourceMesh(toCopyMesh, toCopyGroups)
         self.mesh.AddHypothesis(hyp, self.geom)

@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -112,7 +112,7 @@ SMESH_Mesh::SMESH_Mesh(int               theLocalId,
                        SMESHDS_Document* theDocument):
   _groupId( 0 ), _nbSubShapes( 0 )
 {
-  MESSAGE("SMESH_Mesh::SMESH_Mesh(int localId)");
+  if(MYDEBUG) MESSAGE("SMESH_Mesh::SMESH_Mesh(int localId)");
   _id            = theLocalId;
   _studyId       = theStudyId;
   _gen           = theGen;
@@ -179,7 +179,7 @@ namespace
 
 SMESH_Mesh::~SMESH_Mesh()
 {
-  MESSAGE("SMESH_Mesh::~SMESH_Mesh");
+  if(MYDEBUG) MESSAGE("SMESH_Mesh::~SMESH_Mesh");
 
   // avoid usual removal of elements while processing RemoveHypothesis( algo ) event
   SMESHDS_SubMeshIteratorPtr smIt = _myMeshDS->SubMeshes();
@@ -361,10 +361,19 @@ double SMESH_Mesh::GetShapeDiagonalSize(const TopoDS_Shape & aShape)
     int nbFaces = 0;
     for ( TopExp_Explorer f( aShape, TopAbs_FACE ); f.More() && nbFaces < maxNbFaces; f.Next() )
       ++nbFaces;
+    bool isPrecise = false;
     if ( nbFaces < maxNbFaces )
-      GEOMUtils::PreciseBoundingBox(aShape, Box);
-    else
-      BRepBndLib::Add( aShape, Box);
+      try {
+        GEOMUtils::PreciseBoundingBox( aShape, Box );
+        isPrecise = true;
+      }
+      catch (...) {
+        isPrecise = false;
+      }
+    if ( !isPrecise )
+    {
+      BRepBndLib::Add( aShape, Box );
+    }
     if ( !Box.IsVoid() )
       return sqrt( Box.SquareExtent() );
   }
@@ -536,6 +545,10 @@ int SMESH_Mesh::MEDToMesh(const char* theFileName, const char* theMeshName)
     MESSAGE("MEDToMesh - _myMeshDS->NbFaces() = "<<_myMeshDS->NbFaces());
     MESSAGE("MEDToMesh - _myMeshDS->NbVolumes() = "<<_myMeshDS->NbVolumes());
   }
+#ifdef _DEBUG_
+  SMESH_ComputeErrorPtr er = myReader.GetError();
+  if ( er && !er->IsOK() ) cout << er->myComment << endl;
+#endif
 
   // Reading groups (sub-meshes are out of scope of MED import functionality)
   list<TNameAndType> aGroupNames = myReader.GetGroupNamesAndTypes();
@@ -675,8 +688,8 @@ SMESH_Mesh::AddHypothesis(const TopoDS_Shape & aSubShape,
 
   // shape
 
-  bool isAlgo = ( anHyp->GetType() != SMESHDS_Hypothesis::PARAM_ALGO );
-  int   event = isAlgo ? SMESH_subMesh::ADD_ALGO : SMESH_subMesh::ADD_HYP;
+  bool                     isAlgo = ( anHyp->GetType() != SMESHDS_Hypothesis::PARAM_ALGO );
+  SMESH_subMesh::algo_event event = isAlgo ? SMESH_subMesh::ADD_ALGO : SMESH_subMesh::ADD_HYP;
 
   SMESH_Hypothesis::Hypothesis_Status ret = subMesh->AlgoStateEngine(event, anHyp);
 
@@ -751,8 +764,8 @@ SMESH_Hypothesis::Hypothesis_Status
   
   // shape 
   
-  bool isAlgo = ( !anHyp->GetType() == SMESHDS_Hypothesis::PARAM_ALGO );
-  int   event = isAlgo ? SMESH_subMesh::REMOVE_ALGO : SMESH_subMesh::REMOVE_HYP;
+  bool                     isAlgo = ( !anHyp->GetType() == SMESHDS_Hypothesis::PARAM_ALGO );
+  SMESH_subMesh::algo_event event = isAlgo ? SMESH_subMesh::REMOVE_ALGO : SMESH_subMesh::REMOVE_HYP;
 
   SMESH_subMesh *subMesh = GetSubMesh(aSubShape);
 
@@ -1349,6 +1362,8 @@ bool SMESH_Mesh::HasModificationsToDiscard() const
         hasNotComputed = true;
       if ( hasComputed && hasNotComputed)
         return true;
+
+    default:;
     }
   }
   if ( NbNodes() < 1 )
@@ -2010,7 +2025,7 @@ SMESH_Group* SMESH_Mesh::AddGroup (SMESHDS_GroupBase* groupDS) throw(SALOME_Exce
 
 bool SMESH_Mesh::SynchronizeGroups()
 {
-  int nbGroups = _mapGroup.size();
+  size_t nbGroups = _mapGroup.size();
   const set<SMESHDS_GroupBase*>& groups = _myMeshDS->GetGroups();
   set<SMESHDS_GroupBase*>::const_iterator gIt = groups.begin();
   for ( ; gIt != groups.end(); ++gIt )

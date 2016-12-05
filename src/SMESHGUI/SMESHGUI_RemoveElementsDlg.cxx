@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -42,6 +42,7 @@
 #include <SUIT_Desktop.h>
 #include <SUIT_Session.h>
 #include <SUIT_MessageBox.h>
+#include <SUIT_OverrideCursor.h>
 
 #include <LightApp_Application.h>
 #include <LightApp_SelectionMgr.h>
@@ -80,8 +81,8 @@
 SMESHGUI_RemoveElementsDlg
 ::SMESHGUI_RemoveElementsDlg(SMESHGUI* theModule)
   : QDialog(SMESH::GetDesktop(theModule)),
-    mySelector(SMESH::GetViewWindow(theModule)->GetSelector()),
     mySelectionMgr(SMESH::GetSelectionMgr(theModule)),
+    mySelector(SMESH::GetViewWindow(theModule)->GetSelector()),
     mySMESHGUI(theModule),
     myBusy(false),
     myFilterDlg(0)
@@ -225,7 +226,10 @@ void SMESHGUI_RemoveElementsDlg::ClickOnApply()
   if (mySMESHGUI->isActiveStudyLocked())
     return;
 
-  if (myNbOkElements) {
+  if (myNbOkElements)
+  {
+    SUIT_OverrideCursor wc;
+
     QStringList aListId = myEditCurrentArgument->text().split(" ", QString::SkipEmptyParts);
     SMESH::long_array_var anArrayOfIdeces = new SMESH::long_array;
     anArrayOfIdeces->length(aListId.count());
@@ -233,7 +237,8 @@ void SMESHGUI_RemoveElementsDlg::ClickOnApply()
       anArrayOfIdeces[i] = aListId[ i ].toInt();
 
     bool aResult = false;
-    try {
+    try
+    {
       SMESH::SMESH_MeshEditor_var aMeshEditor = myMesh->GetMeshEditor();
       aResult = aMeshEditor->RemoveElements(anArrayOfIdeces.in());
 
@@ -377,7 +382,7 @@ void SMESHGUI_RemoveElementsDlg::onTextChange(const QString& theNewText)
 void SMESHGUI_RemoveElementsDlg::SelectionIntoArgument()
 {
   if (myBusy) return;                                  // busy
-  if (myFilterDlg && myFilterDlg->isVisible()) return; // filter digl active
+  if (myFilterDlg && myFilterDlg->isVisible()) return; // filter dlg active
   if (!GroupButtons->isEnabled()) return;              // inactive
 
   // clear

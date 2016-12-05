@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -445,7 +445,7 @@ deleteRow()
 {
   QList<int> selRows = selectedRows();
   for ( int r = selRows.count()-1; r >= 0; r-- )
-    removeRow( r );
+    removeRow( selRows.at(r) );
 }
 
 void
@@ -574,7 +574,7 @@ StdMeshersGUI_DistrTableFrame::
 setData( const DataArray& array )
 {
   QList<double> d;
-  for ( int i = 0; i < array.length(); i++ )
+  for ( CORBA::ULong i = 0; i < array.length(); i++ )
     d.append( array[i] );
 
   sortData( d );

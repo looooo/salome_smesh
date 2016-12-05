@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -44,6 +44,8 @@
 
 #include <sstream>
 #include <set>
+
+using namespace std;
 
 using SMESH::TPythonDump;
 using SMESH::TVar;
@@ -284,7 +286,7 @@ SMESH::point_array*
 
   list<const gp_XYZ *> xyzList;
   set<const SMDS_MeshFace*> fset;
-  for (int i = 0; i < theFacesIDs.length(); i++)
+  for ( CORBA::ULong i = 0; i < theFacesIDs.length(); i++)
   {
     CORBA::Long index = theFacesIDs[i];
     const SMDS_MeshElement * elem = aMesh->GetMeshDS()->FindElement(index);
@@ -345,7 +347,7 @@ SMESH::point_array*
 
   list<const gp_XYZ *> xyzList;
   set<const SMDS_MeshVolume*> vset;
-  for (int i = 0; i < theVolumesIDs.length(); i++)
+  for ( CORBA::ULong i = 0; i < theVolumesIDs.length(); i++)
   {
     CORBA::Long index = theVolumesIDs[i];
     const SMDS_MeshElement * elem = aMesh->GetMeshDS()->FindElement(index);

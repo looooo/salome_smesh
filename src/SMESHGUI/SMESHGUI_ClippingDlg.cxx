@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -601,12 +601,12 @@ SMESHGUI_ClippingDlg::~SMESHGUI_ClippingDlg()
   if (myViewWindow)
     SMESH::RenderViewWindow(myViewWindow);
 
-  for( int i=0; i< myPlanes.size(); i++ ) {
+  for ( size_t i = 0; i < myPlanes.size(); i++ ) {
     SMESH::TPlaneData aPlaneData = myPlanes[i];
     aPlaneData.Plane->Delete();
   }
 
-  if (myPreviewWidget) {
+  if ( myPreviewWidget ) {
     myPreviewWidget->Off();
     myPreviewWidget->Delete();
   }
@@ -766,7 +766,7 @@ bool SMESHGUI_ClippingDlg::AddPlane ( SMESH::TActorList       theActorList,
   double aDir[2][3] = {{0, 0, 0}, {0, 0, 0}};
   static double aCoeff = vtkMath::Pi()/180.0;
 
-  int anOrientation;
+  int anOrientation = 0;
   if ( thePlane->PlaneMode == SMESH::Absolute )
     anOrientation = thePlane->myAbsoluteOrientation;
   else if ( thePlane->PlaneMode == SMESH::Relative )
@@ -1134,9 +1134,10 @@ void SMESHGUI_ClippingDlg::updateActorItem( QListWidgetItem* theItem,
           anActorList.remove( anActor );
 
         if( SMESH::ComputeBounds( anActorList, myBounds ) ) {
-          myPreviewWidget->On();
           myPreviewWidget->PlaceWidget( myBounds[0], myBounds[1], myBounds[2],
                                         myBounds[3], myBounds[4], myBounds[5] );
+          if( PreviewCheckBox->isChecked() )
+            myPreviewWidget->On();
         }
         else
           myPreviewWidget->Off();
@@ -1249,9 +1250,10 @@ void SMESHGUI_ClippingDlg::ClickOnNew()
     bool anIsBlocked = ActorList->blockSignals( true );
 
     if( SMESH::ComputeBounds( anActorList, myBounds ) ) {
-      myPreviewWidget->On();
       myPreviewWidget->PlaceWidget( myBounds[0], myBounds[1], myBounds[2],
                                     myBounds[3], myBounds[4], myBounds[5] );
+      if( PreviewCheckBox->isChecked() )
+        myPreviewWidget->On();
     }
     else
       myPreviewWidget->Off();
@@ -1342,9 +1344,10 @@ void SMESHGUI_ClippingDlg::onSelectPlane ( int theIndex )
   myIsSelectPlane = false;
 
   if( SMESH::ComputeBounds( aPlaneData.ActorList, myBounds ) ) {
-    myPreviewWidget->On();
     myPreviewWidget->PlaceWidget( myBounds[0], myBounds[1], myBounds[2],
                                   myBounds[3], myBounds[4], myBounds[5] );
+    if( PreviewCheckBox->isChecked() )
+      myPreviewWidget->On();
   }
   else
     myPreviewWidget->Off();
@@ -1433,7 +1436,7 @@ void SMESHGUI_ClippingDlg::SetCurrentPlaneParam()
   static double aCoeff = vtkMath::Pi()/180.0;
 
   double aRot[2] = { getRotation1(), getRotation2() };
-  int anOrient;
+  int anOrient = 0;
   if ( aPlane->PlaneMode == SMESH::Absolute )
     anOrient = CBAbsoluteOrientation->currentIndex();
   else if ( aPlane->PlaneMode == SMESH::Relative )
@@ -1620,8 +1623,8 @@ void SMESHGUI_ClippingDlg::absolutePlaneToRelative ( double theOrigin[3], double
   double eps = 0.0001;
 
   int anOrientation = CBRelativeOrientation->currentIndex();
-  double aDirection[3];
-  double aRotation1, aRotation2;
+  double aDirection[3] = { 0.,0.,0. };
+  double aRotation1 = 0, aRotation2 = 0;
   switch( anOrientation ) {
   case 0:
     aDirection[0] = theDir[0] + eps;

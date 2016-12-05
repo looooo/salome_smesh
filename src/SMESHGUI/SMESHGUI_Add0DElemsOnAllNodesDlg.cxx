@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -496,6 +496,9 @@ void SMESHGUI_Add0DElemsOnAllNodesOp::onSelTypeChange(int selType)
   else
     disconnect( myDlg, SIGNAL( objectChanged( int, const QStringList& )),
                 this,  SLOT  ( onTextChanged( int, const QStringList& )));
+
+  connect( myDlg->myGroupListCmBox, SIGNAL( editTextChanged(const QString & )),
+           this,                    SLOT(   updateButtons() ));
 
   selectionDone();
 }

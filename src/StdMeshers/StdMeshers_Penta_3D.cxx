@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -360,7 +360,7 @@ void StdMeshers_Penta_3D::MakeNodes()
     // set XYZ on horizontal edges and get node columns of faces:
     // 2 columns for each face, between which a base node is located
     vector<const SMDS_MeshNode*>* nColumns[8];
-    double ratio[ NB_WALL_FACES ]; // base node position between columns [0.-1.]
+    double ratio[ NB_WALL_FACES ] = {0,0,0,0}; // base node position between columns [0.-1.]
     if ( createNode ) {
       for ( k = 0; k < NB_WALL_FACES ; ++k ) {
         ratio[ k ] = SetHorizEdgeXYZ (aBNXYZ, wallFaceID[ k ],
@@ -674,7 +674,7 @@ void StdMeshers_Penta_3D::MakeVolumeMesh()
     int nbFaceNodes = pE0->NbNodes();
     if(myCreateQuadratic)
       nbFaceNodes = nbFaceNodes/2;
-    if ( aN.size() < nbFaceNodes * 2 )
+    if ( (int) aN.size() < nbFaceNodes * 2 )
       aN.resize( nbFaceNodes * 2 );
     //
     for ( k=0; k<nbFaceNodes; ++k ) {
@@ -806,7 +806,7 @@ void StdMeshers_Penta_3D::MakeMeshOnFxy1()
     aNbNodes = pE0->NbNodes();
     if(myCreateQuadratic)
       aNbNodes = aNbNodes/2;
-    if ( aNodes1.size() < aNbNodes )
+    if ( (int) aNodes1.size() < aNbNodes )
       aNodes1.resize( aNbNodes );
     //
     k = aNbNodes-1; // reverse a face
@@ -1367,7 +1367,7 @@ bool StdMeshers_Penta_3D::LoadIJNodes(StdMeshers_IJNodeMap & theIJNodes,
 
   // find the other edges of theFace and orientation of e1
   TopoDS_Edge e1, e2, eTop;
-  bool rev1, CumOri = false;
+  bool rev1 = false, CumOri = false;
   TopExp_Explorer exp( theFace, TopAbs_EDGE );
   int nbEdges = 0;
   for ( ; exp.More(); exp.Next() ) {
@@ -1476,7 +1476,7 @@ bool StdMeshers_Penta_3D::LoadIJNodes(StdMeshers_IJNodeMap & theIJNodes,
     nVec.resize( vsize, nullNode );
     loadedNodes.insert( nVec[ 0 ] = node );
   }
-  if ( theIJNodes.size() != hsize ) {
+  if ( (int) theIJNodes.size() != hsize ) {
     MESSAGE( "Wrong node positions on theBaseEdge" );
     return false;
   }

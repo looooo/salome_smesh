@@ -1,4 +1,4 @@
-// Copyright (C) 2006-2015  EDF R&D
+// Copyright (C) 2006-2016  EDF R&D
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -72,13 +72,13 @@ int main(int argc, char *argv[])
   debug = false;
   string ficMEDin;
   string ficMEDout;
-  float xNormal;
-  float yNormal;
-  float zNormal;
-  float xm;
-  float ym;
-  float zm;
-  float tolerance;
+  float xNormal = 0;
+  float yNormal = 0;
+  float zNormal = 0;
+  float xm = 0;
+  float ym = 0;
+  float zm = 0;
+  float tolerance = 0;
   try
     {
       if (argc != 13)

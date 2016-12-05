@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2010-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -278,7 +278,7 @@ const std::vector<int>& SMDS_MeshCell::reverseSmdsOrder(SMDSAbs_EntityType smdsT
       reverseInterlaces[ smdsType ][pos++] = 0;
       for ( int i = nbNodes / 2 - 1; i > 0 ; --i ) // 3,2,1
         reverseInterlaces[ smdsType ][pos++] = i;
-      for ( int i = nbNodes - 1; i >= nbNodes / 2; --i ) // 7,6,5,4
+      for ( int i = nbNodes - 1, nb = nbNodes / 2; i >= nb; --i ) // 7,6,5,4
         reverseInterlaces[ smdsType ][pos++] = i;
     }
   }

@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -215,7 +215,7 @@ void StdMeshersGUI_QuadrangleParamCreator::retrieveParams() const
     GEOM::ListOfGO_var     shapes;
     SMESH::nodes_array_var points;
     h->GetEnforcedNodes( shapes, points );
-    for ( int i = 0; i < shapes->length(); ++i )
+    for ( size_t i = 0; i < shapes->length(); ++i )
     {
       CORBA::String_var name  = shapes[i]->GetName();
       CORBA::String_var entry = shapes[i]->GetStudyEntry();
@@ -223,7 +223,7 @@ void StdMeshersGUI_QuadrangleParamCreator::retrieveParams() const
       item->setData( Qt::UserRole, entry.in() );
       myShapesList->addItem( item );
     }
-    for ( int i = 0; i < points->length(); ++i )
+    for ( size_t i = 0; i < points->length(); ++i )
     {
       QTreeWidgetItem* item = new QTreeWidgetItem
         ( QStringList()

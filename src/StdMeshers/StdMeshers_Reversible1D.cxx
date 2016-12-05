@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -66,7 +66,7 @@ std::ostream & StdMeshers_Reversible1D::SaveTo(std::ostream & save)
 
   if ( !_edgeIDs.empty() )
   {
-    for ( size_t i = 0; i < _edgeIDs.size(); i++)
+    for ( size_t i = 0; i < _edgeIDs.size(); i++ )
       save << " " << _edgeIDs[i];
     save << " " << _objEntry << " ";
   }
@@ -76,7 +76,7 @@ std::ostream & StdMeshers_Reversible1D::SaveTo(std::ostream & save)
 
 //=============================================================================
 /*!
- *  
+ *
  */
 //=============================================================================
 
@@ -85,14 +85,14 @@ std::istream & StdMeshers_Reversible1D::LoadFrom(std::istream & load)
   bool isOK;
   int intVal;
 
-  isOK = (load >> intVal);
+  isOK = static_cast<bool>(load >> intVal);
   if (isOK && intVal > 0) {
     _edgeIDs.reserve( intVal );
-    for (int i = 0; i < _edgeIDs.capacity() && isOK; i++) {
-      isOK = (load >> intVal);
+    for ( size_t i = 0; i < _edgeIDs.capacity() && isOK; i++ ) {
+      isOK = static_cast<bool>(load >> intVal);
       if ( isOK ) _edgeIDs.push_back( intVal );
     }
-    isOK = (load >> _objEntry);
+    isOK = static_cast<bool>(load >> _objEntry);
   }
 
   return load;

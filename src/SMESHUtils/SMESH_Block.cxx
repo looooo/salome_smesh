@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -166,7 +166,7 @@ void SMESH_Block::TFace::Set( const int          faceID,
   // pcurves
   vector< int > edgeIdVec;
   GetFaceEdgesIDs( faceID, edgeIdVec );
-  for ( int iE = 0; iE < edgeIdVec.size(); iE++ ) // loop on 4 edges
+  for ( size_t iE = 0; iE < edgeIdVec.size(); iE++ ) // loop on 4 edges
   {
     myCoordInd[ iE ] = GetCoordIndOnEdge( edgeIdVec[ iE ] );
     if ( myC2d[ iE ]) delete myC2d[ iE ];
@@ -930,6 +930,7 @@ void SMESH_Block::refineParametersOnFace( const gp_Pnt& thePoint,
 {
   // find UV of thePoint on the FACE
   Standard_Real U,V;
+  U=V=0;
 
   const TFace& tface = myFace[ theFaceID - ID_FirstF ];
   if ( !tface.Surface() ) return;
@@ -1778,7 +1779,7 @@ bool SMESH_Block::FindBlockShapes(const TopoDS_Shell&         theShell,
 
   if ( V000.IsNull() ) {
     // find vertex 000 - the one with smallest coordinates
-    double minVal = DBL_MAX, minX, val;
+    double minVal = DBL_MAX, minX = DBL_MAX, val;
     for ( int i = 1; i <= 8; i++ ) {
       const TopoDS_Vertex& v = TopoDS::Vertex( vfMap.FindKey( i ));
       gp_Pnt P = BRep_Tool::Pnt( v );
@@ -1822,7 +1823,7 @@ bool SMESH_Block::FindBlockShapes(const TopoDS_Shell&         theShell,
     return false;
   }
   TopTools_ListIteratorOfListOfShape f001It, f000It ( f000List );
-  int i, j, iFound1, iFound2;
+  int i, j, iFound1=0, iFound2=0;
   for ( j = 0; f000It.More(); f000It.Next(), j++ )
   {
     if ( NB_FACES_BY_VERTEX == 6 && j % 2 ) continue; // each face encounters twice
@@ -2083,7 +2084,7 @@ bool SMESH_Block::LoadFace(const TopoDS_Face& theFace,
   bool isForward[4];
   vector< int > edgeIdVec;
   GetFaceEdgesIDs( theFaceID, edgeIdVec );
-  for ( int iE = 0; iE < edgeIdVec.size(); iE++ ) // loop on 4 edges
+  for ( size_t iE = 0; iE < edgeIdVec.size(); iE++ ) // loop on 4 edges
   {
     if ( edgeIdVec[ iE ] > theShapeIDMap.Extent() )
       return false;

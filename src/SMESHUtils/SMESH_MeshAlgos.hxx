@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -89,6 +89,13 @@ struct SMESHUtils_EXPORT SMESH_ElementSearcher
                                     SMDSAbs_ElementType                     type,
                                     std::vector< const SMDS_MeshElement* >& foundElems) = 0;
   /*!
+   * \brief Return elements whose bounding box intersects a sphere
+   */
+  virtual void GetElementsInSphere( const gp_XYZ&                           center,
+                                    const double                            radius,
+                                    SMDSAbs_ElementType                     type,
+                                    std::vector< const SMDS_MeshElement* >& foundElems) = 0;
+  /*!
    * \brief Find out if the given point is out of closed 2D mesh.
    */
   virtual TopAbs_State GetPointState(const gp_Pnt& point) = 0;
@@ -151,6 +158,9 @@ namespace SMESH_MeshAlgos
    */
   SMESHUtils_EXPORT
   SMESH_NodeSearcher* GetNodeSearcher( SMDS_Mesh& mesh );
+
+  SMESHUtils_EXPORT
+  SMESH_NodeSearcher* GetNodeSearcher( SMDS_ElemIteratorPtr elemIt );
 
   /*!
    * \brief Return SMESH_ElementSearcher. The caller is responsible for deleting it

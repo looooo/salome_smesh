@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -64,19 +64,19 @@ Plot2d_QwtLegendLabel* getLegendLabel( QwtPlotCurve* plotCurve )
   QwtLegend* legend = dynamic_cast<QwtLegend*>( plotCurve->plot()->legend() );
   QWidget* widget = legend->legendWidget( itemInfo );
   QwtLegendLabel* label = dynamic_cast<QwtLegendLabel*>( widget );
-  if( Plot2d_QwtLegendLabel* anItem = (Plot2d_QwtLegendLabel*)label )
-    return anItem;
+  Plot2d_QwtLegendLabel* anItem = (Plot2d_QwtLegendLabel*)label;
+  return anItem;
 }
 
 StdMeshersGUI_DistrPreview::StdMeshersGUI_DistrPreview( QWidget* p, StdMeshers::StdMeshers_NumberOfSegments_ptr h )
-: QwtPlot( p ),
-  myPoints( 50 ),
-  myIsTable( false ),
-  myVars( 1, 1 ),
-  myValues( 1, 1 ),
-  myConv( CUT_NEGATIVE ),
-  myIsDone( true ),
-  myNbSeg( 1 )
+  : QwtPlot( p ),
+    myPoints( 50 ),
+    myNbSeg( 1 ),
+    myIsTable( false ),
+    myConv( CUT_NEGATIVE ),
+    myVars( 1, 1 ),
+    myValues( 1, 1 ),
+    myIsDone( true )
 {
   Kernel_Utils::Localizer loc;
   myHypo = StdMeshers::StdMeshers_NumberOfSegments::_duplicate( h );
@@ -293,7 +293,7 @@ void StdMeshersGUI_DistrPreview::update()
 
   int size = graph.length()/2;
   double* x = new double[size], *y = new double[size];
-  double min_x, max_x, min_y, max_y;
+  double min_x = 0, max_x = 0, min_y = 0, max_y = 0;
   for( int i=0; i<size; i++ )
   {
     x[i] = graph[2*i];

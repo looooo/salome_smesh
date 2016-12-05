@@ -1,4 +1,4 @@
-// Copyright (C) 2006-2015  EDF R&D
+// Copyright (C) 2006-2016  EDF R&D
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -534,7 +534,7 @@ int MESHCUT::copieFichier(std::string source, std::string cible)
 
 med_geometry_type MESHCUT::InstanceMGE(TYPE_MAILLE TYPE)
 {
-  med_geometry_type typeBanaliseMED;
+  med_geometry_type typeBanaliseMED = MED_NONE;
 
   switch (TYPE)
   {

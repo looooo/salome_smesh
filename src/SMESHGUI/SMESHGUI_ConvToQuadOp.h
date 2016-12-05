@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -52,12 +52,12 @@ public:
   
   virtual LightApp_Dialog*       dlg() const;  
 
+  static MeshDestinationType     DestinationMesh( const SMESH::SMESH_IDSource_var& ,
+                                                  bool* isMixOrder = 0);
 protected:
   virtual void                   startOperation();
   virtual void                   selectionDone();
   virtual SUIT_SelectionFilter*  createFilter( const int ) const;
-  MeshDestinationType            DestinationMesh( const SMESH::SMESH_IDSource_var& ,
-                                                  bool* isMixOrder = 0) const;
 
 protected slots:
   virtual bool                   onApply();

@@ -2,6 +2,9 @@
 
 import logging
 from geomsmesh import geompy
+from geomsmesh import geomPublish
+from geomsmesh import geomPublishInFather
+import initLog
 
 # -----------------------------------------------------------------------------
 # --- crée zone géométrique défaut a partir d'un filling
@@ -9,7 +12,7 @@ from geomsmesh import geompy
 def creeZoneDefautFilling(filling, shapeDefaut, lgExtrusion=50):
   """
   Construction CAO de la zone à remailler, quand on utilise un filling,
-  après appel creeZoneDefautMaillage et quadranglesToShape
+  après appel creeZoneDefautMaillage et quadranglesToShapeNoCorner
   @param filling : la CAO de la peau du défaut reconstituée
   @param shapeDefaut : objet géométrique représentant la fissure
   (selon les cas, un point central, ou une shape plus complexe,
@@ -21,15 +24,15 @@ def creeZoneDefautFilling(filling, shapeDefaut, lgExtrusion=50):
   trace = True
   facesDefaut = filling
   centreSphere = geompy.MakeCDG(shapeDefaut)
-  geompy.addToStudy(centreSphere, "cdg_defaut")
+  geomPublish(initLog.debug, centreSphere, "cdg_defaut")
   centreDefaut = geompy.MakeProjection(centreSphere, filling)
   if trace:
-    geompy.addToStudy(centreDefaut, "centreDefaut")
+    geomPublish(initLog.debug, centreDefaut, "centreDefaut")
   normalDefaut = geompy.GetNormal(filling, centreDefaut)
   if trace:
-    geompy.addToStudy(normalDefaut, "normalDefaut")
+    geomPublish(initLog.debug, normalDefaut, "normalDefaut")
   extrusionDefaut = geompy.MakePrismVecH(filling, normalDefaut, -lgExtrusion)
   if trace:
-    geompy.addToStudy(extrusionDefaut, "extrusionDefaut")
+    geomPublish(initLog.debug, extrusionDefaut, "extrusionDefaut")
 
   return facesDefaut, centreDefaut, normalDefaut, extrusionDefaut

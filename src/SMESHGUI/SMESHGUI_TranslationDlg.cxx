@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -745,6 +745,8 @@ void SMESHGUI_TranslationDlg::onTextChange (const QString& theNewText)
 void SMESHGUI_TranslationDlg::SelectionIntoArgument()
 {
   if (myBusy) return;
+  if (myFilterDlg && myFilterDlg->isVisible()) return; // filter dlg active
+
   BusyLocker lock( myBusy );
   // clear
   myActor = 0;
@@ -770,13 +772,15 @@ void SMESHGUI_TranslationDlg::SelectionIntoArgument()
     return;
 
   int aNbUnits = 0;
-  if (myEditCurrentArgument == (QWidget*)LineEditElements) {
+  if (myEditCurrentArgument == (QWidget*)LineEditElements)
+  {
     myElementsId = "";
     myObjects.clear();
     myObjectsNames.clear();
     myMeshes.clear();
 
-    for ( SALOME_ListIteratorOfListIO it( aList ); it.More(); it.Next() ) {
+    for ( SALOME_ListIteratorOfListIO it( aList ); it.More(); it.Next() )
+    {
       Handle(SALOME_InteractiveObject) IO = it.Value();
       SMESH::SMESH_Mesh_var aMesh = SMESH::GetMeshByIO( IO );
       if ( aMesh->_is_nil() )
@@ -786,25 +790,24 @@ void SMESHGUI_TranslationDlg::SelectionIntoArgument()
       if ( !anActor )
         anActor = SMESH::FindActorByEntry( IO->getEntry() );
 
-      if ( !anActor && !CheckBoxMesh->isChecked() )
-        return;
+      // if ( !anActor && !CheckBoxMesh->isChecked() )  -- elems can be selected by Filter
+      //   return;
 
-      if ( !SMESH::IObjectToInterface<SMESH::SMESH_IDSource>( IO )->_is_nil() ) {
-        if ( _PTR(Study) aStudy = SMESH::GetActiveStudyDocument() ) {
-          _PTR(SObject) obj = aStudy->FindObjectID( qPrintable( QString( IO->getEntry() ) ) );
-          _PTR(GenericAttribute) anAttr;
-          if ( obj && obj->FindAttribute( anAttr, "AttributeName" ) ) {
-            _PTR(AttributeName) aNameAttr( anAttr );
-            myObjects << SMESH::IObjectToInterface<SMESH::SMESH_IDSource>( IO );
-            myObjectsNames << aNameAttr->Value().c_str();
-            myMeshes << aMesh;
-          }
+      SMESH::SMESH_IDSource_var idSrc = SMESH::IObjectToInterface<SMESH::SMESH_IDSource>( IO );
+      if ( _PTR(SObject) obj = SMESH::FindSObject( idSrc ))
+      {
+        std::string name = obj->GetName();
+        if ( !name.empty() )
+        {
+          myObjects << idSrc;
+          myObjectsNames << name.c_str();
+          myMeshes << aMesh;
         }
       }
-
-      myActor = anActor;
+      if ( anActor )
+        myActor = anActor;
     }
-    
+
     // MakeGroups is available if there are groups and "Copy"
     int aNbGroups = 0;
     for ( int i = 0; i < myMeshes.count(); i++ )
@@ -819,10 +822,11 @@ void SMESHGUI_TranslationDlg::SelectionIntoArgument()
     }
 
     if (CheckBoxMesh->isChecked()) {
-      SMESH::GetNameOfSelectedIObjects( mySelectionMgr, aString );
       if (myMeshes.isEmpty())
         return;
-    } else {
+      SMESH::GetNameOfSelectedIObjects( mySelectionMgr, aString );
+    }
+    else {
       aNbUnits = SMESH::GetNameOfSelectedElements(mySelector, aList.First(), aString);
       myElementsId = aString;
       if (aNbUnits < 1)
@@ -830,16 +834,15 @@ void SMESHGUI_TranslationDlg::SelectionIntoArgument()
     }
 
     myNbOkElements = true;
-  } else {
+  }
+  else  // set coordinates by a picked node
+  {
     Handle(SALOME_InteractiveObject) IO = aList.First();
-    if ((SMESH::GetMeshByIO(IO))->_is_nil())
+
+    SMESH_Actor* anActor = SMESH::FindActorByEntry( IO->getEntry() );
+    if (!anActor)
       return;
 
-    SMESH_Actor* anActor = SMESH::FindActorByObject(SMESH::GetMeshByIO(IO));
-    if (!anActor)
-      anActor = SMESH::FindActorByEntry(IO->getEntry());
-    if (!anActor && !CheckBoxMesh->isChecked())
-      return;
     aNbUnits = SMESH::GetNameOfSelectedNodes(mySelector, IO, aString);
     if (aNbUnits != 1)
       return;
@@ -1097,20 +1100,46 @@ void SMESHGUI_TranslationDlg::keyPressEvent( QKeyEvent* e )
 //=================================================================================
 void SMESHGUI_TranslationDlg::setFilters()
 {
-  if(myMeshes.isEmpty()) {
-    SUIT_MessageBox::critical(this,
-                              tr("SMESH_ERROR"),
-                              tr("NO_MESH_SELECTED"));
-   return;
+  if ( myMeshes.isEmpty() ) {
+    SUIT_MessageBox::critical(this, tr("SMESH_ERROR"), tr("NO_MESH_SELECTED"));
+    return;
   }
-  if ( !myFilterDlg )
+  if ( !myFilterDlg ) {
     myFilterDlg = new SMESHGUI_FilterDlg( mySMESHGUI, SMESH::ALL );
+    connect(myFilterDlg, SIGNAL(Accepted()), SLOT(onFilterAccepted()));
+  }
 
+  QList<int> types;
+  if ( myMeshes[0]->NbEdges()     ) types << SMESH::EDGE;
+  if ( myMeshes[0]->NbFaces()     ) types << SMESH::FACE;
+  if ( myMeshes[0]->NbVolumes()   ) types << SMESH::VOLUME;
+  if ( myMeshes[0]->NbBalls()     ) types << SMESH::BALL;
+  if ( myMeshes[0]->Nb0DElements()) types << SMESH::ELEM0D;
+  if ( types.count() > 1 )          types << SMESH::ALL;
+
+  myFilterDlg->Init( types );
   myFilterDlg->SetSelection();
   myFilterDlg->SetMesh( myMeshes[0] );
   myFilterDlg->SetSourceWg( LineEditElements );
 
   myFilterDlg->show();
+}
+
+//=======================================================================
+// name    : onFilterAccepted()
+// Purpose : SLOT. Called when Filter dlg closed with OK button.
+//           Activate [Apply] if no Actor is available
+//=======================================================================
+void SMESHGUI_TranslationDlg::onFilterAccepted()
+{
+  if ( myMeshes.length() > 0 && !buttonOk->isEnabled() )
+  {
+    myElementsId = LineEditElements->text();
+    QStringList aListElementsId = myElementsId.split(" ", QString::SkipEmptyParts);
+    myNbOkElements = aListElementsId.count();
+    buttonOk->setEnabled( myNbOkElements );
+    buttonApply->setEnabled( myNbOkElements );
+  }
 }
 
 //=================================================================================
@@ -1147,9 +1176,10 @@ bool SMESHGUI_TranslationDlg::isValid()
 //=================================================================================
 void SMESHGUI_TranslationDlg::onDisplaySimulation( bool toDisplayPreview )
 {
-  if (myPreviewCheckBox->isChecked() && toDisplayPreview) {
-
-    if (isValid() && myNbOkElements) {
+  if (myPreviewCheckBox->isChecked() && toDisplayPreview)
+  {
+    if (isValid() && myNbOkElements)
+    {
       QStringList aListElementsId = myElementsId.split(" ", QString::SkipEmptyParts);
 
       SMESH::long_array_var anElementsId = new SMESH::long_array;

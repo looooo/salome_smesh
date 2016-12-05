@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -132,8 +132,8 @@ ostream & StdMeshers_Geometric1D::SaveTo(ostream & save)
 istream & StdMeshers_Geometric1D::LoadFrom(istream & load)
 {
   bool isOK = true;
-  isOK = (load >> _begLength);
-  isOK = (load >> _ratio);
+  isOK = static_cast<bool>(load >> _begLength);
+  isOK = static_cast<bool>(load >> _ratio);
 
   if (isOK)
     StdMeshers_Reversible1D::LoadFrom( load );
@@ -166,7 +166,7 @@ bool StdMeshers_Geometric1D::SetParametersByMesh(const SMESH_Mesh*   theMesh,
     const TopoDS_Edge& edge = TopoDS::Edge( edgeMap( i ));
     BRepAdaptor_Curve C( edge );
 
-    vector< double > params;
+    std::vector< double > params;
     if ( SMESH_Algo::GetNodeParamOnEdge( theMesh->GetMeshDS(), edge, params ))
     {
       nbEdges++;

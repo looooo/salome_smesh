@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -25,7 +25,6 @@
 #define SMDS_MeshInfo_HeaderFile
 
 #include <vector>
-using namespace std;
 
 #include "SMESH_SMDS.hxx"
 
@@ -192,7 +191,7 @@ inline SMDS_MeshInfo::SMDS_MeshInfo():
 
 inline SMDS_MeshInfo& // operator=
 SMDS_MeshInfo::operator=(const SMDS_MeshInfo& other)
-{ for ( int i=0; i<myNb.size(); ++i ) if ( myNb[i] ) (*myNb[i])=(*other.myNb[i]);
+{ for ( size_t i=0; i<myNb.size(); ++i ) if ( myNb[i] ) (*myNb[i])=(*other.myNb[i]);
   myNbPolygons     = other.myNbPolygons;
   myNbQuadPolygons = other.myNbQuadPolygons;
   myNbPolyhedrons  = other.myNbPolyhedrons;
@@ -201,7 +200,7 @@ SMDS_MeshInfo::operator=(const SMDS_MeshInfo& other)
 
 inline void // Clear
 SMDS_MeshInfo::Clear()
-{ for ( int i=0; i<myNb.size(); ++i ) if ( myNb[i] ) (*myNb[i])=0;
+{ for ( size_t i=0; i<myNb.size(); ++i ) if ( myNb[i] ) (*myNb[i])=0;
   myNbPolygons=myNbQuadPolygons=myNbPolyhedrons=0;
 }
 
@@ -293,7 +292,7 @@ SMDS_MeshInfo::NbElements(SMDSAbs_ElementType type) const
   int nb = 0;
   switch (type) {
   case SMDSAbs_All:
-    for ( int i=1+index( SMDSAbs_Node,1 ); i<myNb.size(); ++i ) if ( myNb[i] ) nb += *myNb[i];
+    for ( size_t i=1+index( SMDSAbs_Node,1 ); i<myNb.size(); ++i ) if ( myNb[i] ) nb += *myNb[i];
     nb += myNbPolygons + myNbQuadPolygons + myNbPolyhedrons;
     break;
   case SMDSAbs_Volume:
@@ -352,6 +351,7 @@ SMDS_MeshInfo::NbEntities(SMDSAbs_EntityType type) const
   case SMDSEntity_Ball:             return myNbBalls;
   case SMDSEntity_Quad_Polygon:     return myNbQuadPolygons;
   case SMDSEntity_Quad_Polyhedra:
+  case SMDSEntity_Last:
     break;
   }
   return 0;
@@ -424,6 +424,7 @@ SMDS_MeshInfo::setNb(const SMDSAbs_EntityType geomType, const int nb)
   case SMDSEntity_Triangle:         myNbTriangles         = nb; break;
   case SMDSEntity_Quad_Polygon:     myNbQuadPolygons      = nb; break;
   case SMDSEntity_Quad_Polyhedra:
+  case SMDSEntity_Last:
     break;
   }
 }

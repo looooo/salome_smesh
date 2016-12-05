@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -79,23 +79,9 @@ using namespace std;
 #define RETURN_BAD_RESULT(msg) { MESSAGE(")-: Error: " << msg); return false; }
 #define CONT_BAD_RESULT(msg) { MESSAGE(")-: Error: " << msg); continue; }
 #define SHOW_SHAPE(v,msg) \
-// { \
-//  if ( (v).IsNull() ) cout << msg << " NULL SHAPE" << endl; \
-// else if ((v).ShapeType() == TopAbs_VERTEX) {\
-//   gp_Pnt p = BRep_Tool::Pnt( TopoDS::Vertex( (v) ));\
-//   cout<<msg<<" "<<shapeIndex((v))<<" ( "<<p.X()<<", "<<p.Y()<<", "<<p.Z()<<" )"<<endl;} \
-// else {\
-//   cout << msg << " "; TopAbs::Print((v).ShapeType(),cout) <<" "<<shapeIndex((v))<<endl;}\
-// }
+  // { show_shape((v),(msg)); }
 #define SHOW_LIST(msg,l) \
-// { \
-//     cout << msg << " ";\
-//     list< TopoDS_Edge >::const_iterator e = l.begin();\
-//     for ( int i = 0; e != l.end(); ++e, ++i ) {\
-//       cout << i << "V (" << TopExp::FirstVertex( *e, true ).TShape().operator->() << ") "\
-//            << i << "E (" << e->TShape().operator->() << "); "; }\
-//     cout << endl;\
-//   }
+  // { show_list((msg),(l)); }
 
 namespace HERE = StdMeshers_ProjectionUtils;
 
@@ -108,7 +94,24 @@ namespace {
       return max(theMeshDS[0]->ShapeToIndex(S), theMeshDS[1]->ShapeToIndex(S) );
     return long(S.TShape().operator->());
   }
-
+  void show_shape( TopoDS_Shape v, const char* msg ) // debug
+  {
+    if ( v.IsNull() ) cout << msg << " NULL SHAPE" << endl;
+    else if (v.ShapeType() == TopAbs_VERTEX) {
+      gp_Pnt p = BRep_Tool::Pnt( TopoDS::Vertex( v ));
+      cout<<msg<<" "<<shapeIndex((v))<<" ( "<<p.X()<<", "<<p.Y()<<", "<<p.Z()<<" )"<<endl;}
+    else {
+      cout << msg << " "; TopAbs::Print((v).ShapeType(),cout) <<" "<<shapeIndex((v))<<endl;}
+  }
+  void show_list( const char* msg, const list< TopoDS_Edge >& l ) // debug
+  {
+    cout << msg << " ";
+    list< TopoDS_Edge >::const_iterator e = l.begin();
+    for ( int i = 0; e != l.end(); ++e, ++i ) {
+      cout << i << "V (" << TopExp::FirstVertex( *e, true ).TShape().operator->() << ") "
+           << i << "E (" << e->TShape().operator->() << "); "; }
+    cout << endl;
+  }
   //================================================================================
   /*!
    * \brief Write shape for debug purposes
@@ -1865,7 +1868,7 @@ StdMeshers_ProjectionUtils::GetPropagationEdge( SMESH_Mesh*                 aMes
             int prevChainSize = aChain.Extent();
             if ( aChain.Add(anOppE) > prevChainSize ) { // ... anOppE is not in aChain
               // Add found edge to the chain oriented so that to
-              // have it co-directed with a forward MainEdge
+              // have it co-directed with a fromEdge
               TopAbs_Orientation ori = anE.Orientation();
               if ( anOppE.Orientation() == fourEdges[found].Orientation() )
                 ori = TopAbs::Reverse( ori );
@@ -1928,7 +1931,7 @@ FindMatchingNodesOnFaces( const TopoDS_Face&     face1,
 
   helper1.SetSubShape( face1 );
   helper2.SetSubShape( face2 );
-  if ( helper1.HasSeam() != helper2.HasSeam() )
+  if ( helper1.HasRealSeam() != helper2.HasRealSeam() )
     RETURN_BAD_RESULT("Different faces' geometry");
 
   // Data to call SMESH_MeshEditor::FindMatchingNodes():
@@ -2180,7 +2183,7 @@ FindMatchingNodesOnFaces( const TopoDS_Face&     face1,
           static_cast<const SMDS_EdgePosition*>(node->GetPosition());
         pos2nodes.insert( make_pair( pos->GetUParameter(), node ));
       }
-      if ( pos2nodes.size() != edgeSM->NbNodes() )
+      if ((int) pos2nodes.size() != edgeSM->NbNodes() )
         RETURN_BAD_RESULT("Equal params of nodes on edge "
                           << smDS->ShapeToIndex( edge ) << " of face " << is2 );
     }

@@ -1,4 +1,4 @@
-# Copyright (C) 2012-2015  EDF R&D
+# Copyright (C) 2012-2016  EDF R&D
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -26,6 +26,8 @@ SET(plugin_SCRIPTS
   __init__.py
   fissureCoude_ihm.py
   fissureCoude_plugin.py
+  fissureGenerale_plugin.py
+  dialogFissureCoude.dic
 )
 
 # --- resources ---
@@ -41,6 +43,6 @@ PYQT4_WRAP_UIC(_pyuic_SCRIPTS ${_pyuic_files})
 
 # --- rules ---
 
-SALOME_INSTALL_SCRIPTS("${plugin_SCRIPTS}" ${SALOME_SMESH_INSTALL_PLUGINS}/blocFissure/ihm)
+SALOME_INSTALL_SCRIPTS("${plugin_SCRIPTS}" ${SALOME_INSTALL_PYTHON}/blocFissure/ihm)
 
-SALOME_INSTALL_SCRIPTS("${_pyuic_SCRIPTS}" ${SALOME_SMESH_INSTALL_PLUGINS}/blocFissure/ihm)
+SALOME_INSTALL_SCRIPTS("${_pyuic_SCRIPTS}" ${SALOME_INSTALL_PYTHON}/blocFissure/ihm)

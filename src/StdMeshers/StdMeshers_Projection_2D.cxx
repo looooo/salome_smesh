@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -423,15 +423,13 @@ namespace {
                   TAssocTool::TNodeNodeMap&          src2tgtNodes,
                   bool&                              is1DComputed)
   {
-    SMESHDS_Mesh* tgtMeshDS = tgtMesh->GetMeshDS();
-    SMESHDS_Mesh* srcMeshDS = srcMesh->GetMeshDS();
-
     src2tgtNodes.clear();
 
     // get ordered src EDGEs
     TError err;
     srcWires = StdMeshers_FaceSide::GetFaceWires( srcFace, *srcMesh,/*skipMediumNodes=*/0, err);
-    if ( err && !err->IsOK() || srcWires.empty() )
+    if (( err && !err->IsOK() ) ||
+        ( srcWires.empty() ))
       return err;
 
     SMESH_MesherHelper srcHelper( *srcMesh );
@@ -591,7 +589,7 @@ namespace {
         const double minSegLen = srcWires[iW]->Length() / totNbSeg;
         for ( int iE = 0; iE < srcWires[iW]->NbEdges(); ++iE )
         {
-          int nbSeg    = Max( 1, int( srcWires[iW]->EdgeLength( iE ) / minSegLen ));
+          size_t nbSeg = Max( 1, int( srcWires[iW]->EdgeLength( iE ) / minSegLen ));
           double srcU  = srcWires[iW]->FirstParameter( iE );
           double tgtU  = tgtWires[iW]->FirstParameter( iE );
           double srcDu = ( srcWires[iW]->LastParameter( iE )- srcU ) / nbSeg;
@@ -823,14 +821,14 @@ namespace {
         // find trsf
         const int totNbSeg = 50;
         vector< gp_XY > srcPnts, tgtPnts;
-        srcPnts.resize( totNbSeg );
-        tgtPnts.resize( totNbSeg );
+        srcPnts.reserve( totNbSeg );
+        tgtPnts.reserve( totNbSeg );
         for ( size_t iW = 0; iW < srcWires.size(); ++iW )
         {
           const double minSegLen = srcWires[iW]->Length() / totNbSeg;
           for ( int iE = 0; iE < srcWires[iW]->NbEdges(); ++iE )
           {
-            int nbSeg    = Max( 1, int( srcWires[iW]->EdgeLength( iE ) / minSegLen ));
+            size_t nbSeg = Max( 1, int( srcWires[iW]->EdgeLength( iE ) / minSegLen ));
             double srcU  = srcWires[iW]->FirstParameter( iE );
             double tgtU  = tgtWires[iW]->FirstParameter( iE );
             double srcDu = ( srcWires[iW]->LastParameter( iE )- srcU ) / nbSeg;
@@ -920,6 +918,7 @@ namespace {
             tgtMeshDS->SetNodeOnVertex( n, TopoDS::Vertex( tgtV ));
             break;
           }
+          default:;
           }
           srcN_tgtN->second = n;
         }
@@ -952,7 +951,7 @@ namespace {
   {
     SMESH_Mesh * tgtMesh = tgtWires[0]->GetMesh();
     SMESH_Mesh * srcMesh = srcWires[0]->GetMesh();
-    SMESHDS_Mesh * tgtMeshDS = tgtMesh->GetMeshDS();
+    //SMESHDS_Mesh * tgtMeshDS = tgtMesh->GetMeshDS();
     SMESHDS_Mesh * srcMeshDS = srcMesh->GetMeshDS();
 
     if ( srcWires[0]->NbEdges() != 4 )
@@ -1148,6 +1147,51 @@ namespace {
     return true;
   }
 
+  //=======================================================================
+  /*
+   * Set initial association of VERTEXes for the case of projection
+   * from a quadrangle FACE to a closed FACE, where opposite src EDGEs
+   * have different nb of segments
+   */
+  //=======================================================================
+
+  void initAssoc4Quad2Closed(const TopoDS_Shape&          tgtFace,
+                             SMESH_MesherHelper&          tgtHelper,
+                             const TopoDS_Shape&          srcFace,
+                             SMESH_Mesh*                  srcMesh,
+                             TAssocTool::TShapeShapeMap & assocMap)
+  {
+    if ( !tgtHelper.HasRealSeam() || srcFace.ShapeType() != TopAbs_FACE )
+      return; // no seam edge
+    list< TopoDS_Edge > tgtEdges, srcEdges;
+    list< int > tgtNbEW, srcNbEW;
+    int tgtNbW = SMESH_Block::GetOrderedEdges( TopoDS::Face( tgtFace ), tgtEdges, tgtNbEW );
+    int srcNbW = SMESH_Block::GetOrderedEdges( TopoDS::Face( srcFace ), srcEdges, srcNbEW );
+    if ( tgtNbW != 1 || srcNbW != 1 ||
+         tgtNbEW.front() != 4 || srcNbEW.front() != 4 )
+      return; // not quads
+
+    int srcNbSeg[4];
+    list< TopoDS_Edge >::iterator edgeS = srcEdges.begin(), edgeT = tgtEdges.begin();
+    for ( int i = 0; edgeS != srcEdges.end(); ++i, ++edgeS )
+      if ( SMESHDS_SubMesh* sm = srcMesh->GetMeshDS()->MeshElements( *edgeS ))
+        srcNbSeg[ i ] = sm->NbNodes();
+      else
+        return; // not meshed
+    if ( srcNbSeg[0] == srcNbSeg[2] && srcNbSeg[1] == srcNbSeg[3] )
+      return; // same nb segments
+    if ( srcNbSeg[0] != srcNbSeg[2] && srcNbSeg[1] != srcNbSeg[3] )
+      return; // all different nb segments
+
+    edgeS = srcEdges.begin();
+    if ( srcNbSeg[0] != srcNbSeg[2] )
+      ++edgeS;
+    TAssocTool::InsertAssociation( tgtHelper.IthVertex( 0,*edgeT ),
+                                   tgtHelper.IthVertex( 0,*edgeS ), assocMap );
+    TAssocTool::InsertAssociation( tgtHelper.IthVertex( 1,*edgeT ),
+                                   tgtHelper.IthVertex( 1,*edgeS ), assocMap );
+  }
+
 } // namespace
 
 
@@ -1160,7 +1204,6 @@ bool StdMeshers_Projection_2D::Compute(SMESH_Mesh& theMesh, const TopoDS_Shape& 
 {
   _src2tgtNodes.clear();
 
-  MESSAGE("Projection_2D Compute");
   if ( !_sourceHypo )
     return false;
 
@@ -1179,8 +1222,12 @@ bool StdMeshers_Projection_2D::Compute(SMESH_Mesh& theMesh, const TopoDS_Shape& 
   TopoDS_Face   tgtFace = TopoDS::Face( theShape.Oriented(TopAbs_FORWARD));
   TopoDS_Shape srcShape = _sourceHypo->GetSourceFace().Oriented(TopAbs_FORWARD);
 
+  helper.SetSubShape( tgtFace );
+
   TAssocTool::TShapeShapeMap shape2ShapeMap;
   TAssocTool::InitVertexAssociation( _sourceHypo, shape2ShapeMap );
+  if ( shape2ShapeMap.IsEmpty() )
+    initAssoc4Quad2Closed( tgtFace, helper, srcShape, srcMesh, shape2ShapeMap );
   if ( !TAssocTool::FindSubShapeAssociation( tgtFace, tgtMesh, srcShape, srcMesh,
                                              shape2ShapeMap)  ||
        !shape2ShapeMap.IsBound( tgtFace ))
@@ -1258,7 +1305,7 @@ bool StdMeshers_Projection_2D::Compute(SMESH_Mesh& theMesh, const TopoDS_Shape& 
   {
     // projection in case if the faces are similar in 2D space
     projDone = projectBy2DSimilarity( tgtFace, srcFace, tgtWires, srcWires,
-                                      shape2ShapeMap, _src2tgtNodes, is1DComputed);
+                                      shape2ShapeMap, _src2tgtNodes, is1DComputed );
   }
   if ( !projDone )
   {
@@ -1266,8 +1313,6 @@ bool StdMeshers_Projection_2D::Compute(SMESH_Mesh& theMesh, const TopoDS_Shape& 
     // projDone = projectQuads( tgtFace, srcFace, tgtWires, srcWires,
     //                          shape2ShapeMap, _src2tgtNodes, is1DComputed);
   }
-
-  helper.SetSubShape( tgtFace );
 
   // it will remove mesh built on edges and vertices in failure case
   MeshCleaner cleaner( tgtSubMesh );
@@ -1393,10 +1438,19 @@ bool StdMeshers_Projection_2D::Compute(SMESH_Mesh& theMesh, const TopoDS_Shape& 
         }
       }
     }
-    else if ( nbEdgesInWires.front() == 1 )
+    else if ( nbEdgesInWires.front() == 1 ) // a sole edge in a wire
     {
-      // TODO::Compare orientation of curves in a sole edge
-      //RETURN_BAD_RESULT("Not implemented case");
+      TopoDS_Edge srcE1 = srcEdges.front(), tgtE1 = tgtEdges.front();
+      for ( size_t iW = 0; iW < srcWires.size(); ++iW )
+      {
+        StdMeshers_FaceSidePtr srcWire = srcWires[iW];
+        for ( int iE = 0; iE < srcWire->NbEdges(); ++iE )
+          if ( srcE1.IsSame( srcWire->Edge( iE )))
+          {
+            reverse = ( tgtE1.Orientation() != tgtWires[iW]->Edge( iE ).Orientation() );
+            break;
+          }
+      }
     }
     else
     {
@@ -1429,6 +1483,9 @@ bool StdMeshers_Projection_2D::Compute(SMESH_Mesh& theMesh, const TopoDS_Shape& 
     if ( mapper.GetErrorCode() != SMESH_Pattern::ERR_OK )
       return error("Can't make mesh by source mesh pattern");
 
+  } // end of projection using Pattern mapping
+
+  {
     // -------------------------------------------------------------------------
     // mapper doesn't take care of nodes already existing on edges and vertices,
     // so we must merge nodes created by it with existing ones
@@ -1468,7 +1525,7 @@ bool StdMeshers_Projection_2D::Compute(SMESH_Mesh& theMesh, const TopoDS_Shape& 
         continue; // do not treat sm of degen VERTEX
       }
 
-      // Sort new and old nodes of a submesh separately
+      // Sort new and old nodes of a sub-mesh separately
 
       bool isSeam = helper.IsRealSeam( sm->GetId() );
 
@@ -1592,6 +1649,7 @@ bool StdMeshers_Projection_2D::Compute(SMESH_Mesh& theMesh, const TopoDS_Shape& 
     // The mapper can't create quadratic elements, so convert if needed
     // ----------------------------------------------------------------
 
+    SMDS_ElemIteratorPtr faceIt;
     faceIt         = srcSubMesh->GetSubMeshDS()->GetElements();
     bool srcIsQuad = faceIt->next()->IsQuadratic();
     faceIt         = tgtSubMesh->GetSubMeshDS()->GetElements();
@@ -1605,8 +1663,7 @@ bool StdMeshers_Projection_2D::Compute(SMESH_Mesh& theMesh, const TopoDS_Shape& 
 
       editor.ConvertToQuadratic(/*theForce3d=*/false, tgtFaces, false);
     }
-
-  } // end of projection using Pattern mapping
+  } // end of coincident nodes and quadratic elements treatment
 
 
   if ( !projDone || is1DComputed )

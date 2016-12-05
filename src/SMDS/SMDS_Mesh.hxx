@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -747,7 +747,7 @@ public:
   void incrementNodesCapacity(int nbNodes);
   void incrementCellsCapacity(int nbCells);
   void adjustStructure();
-  void dumpGrid(string ficdump="dumpGrid");
+  void dumpGrid(std::string ficdump="dumpGrid");
   static int chunkSize;
 
   //! low level modification: add, change or remove node or element
@@ -789,7 +789,7 @@ protected:
   {
     assert(ID >= 0);
     myElementIDFactory->adjustMaxId(ID);
-    if (ID >= myCells.size())
+    if (ID >= (int)myCells.size())
       myCells.resize(ID+SMDS_Mesh::chunkSize,0);
   }
 
@@ -838,6 +838,8 @@ protected:
   SMDS_MeshElementIDFactory *myElementIDFactory;
   SMDS_MeshInfo          myInfo;
 
+  //! any add, remove or change of node or cell
+  bool myModified;
   //! use a counter to keep track of modifications
   unsigned long myModifTime, myCompactTime;
 
@@ -847,9 +849,6 @@ protected:
   bool myHasConstructionEdges;
   bool myHasConstructionFaces;
   bool myHasInverseElements;
-
-  //! any add, remove or change of node or cell
-  bool myModified;
 
   double xmin;
   double xmax;

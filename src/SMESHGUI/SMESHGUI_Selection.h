@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -56,11 +56,13 @@ public:
   virtual bool            isAutoColor( int ) const;
   virtual int             numberOfNodes( int ) const;
   virtual int             dim( int ) const;
-  virtual QVariant        isComputable( int ) const;
-  virtual QVariant        isPreComputable( int ) const;
-  virtual QVariant        hasGeomReference( int ) const;
-  virtual QVariant        isVisible( int ) const;
+  virtual bool            isComputable( int ) const;
+  virtual bool            isPreComputable( int ) const;
+  virtual bool            hasGeomReference( int ) const;
+  virtual bool            isEditableHyp( int ) const;
+  virtual bool            isVisible( int ) const;
 
+  virtual bool            isQuadratic( int ) const;
   virtual QString         quadratic2DMode( int ) const;
 
   virtual bool            isDistributionVisible( int ) const;

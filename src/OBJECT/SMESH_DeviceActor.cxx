@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -297,7 +297,7 @@ SMESH_DeviceActor
                  SMESH_ScalarBarActor* theScalarBarActor,
                  vtkLookupTable* theLookupTable)
 {
-  bool anIsInitialized = theFunctor;
+  bool anIsInitialized = theFunctor != NULL;
   if(anIsInitialized){
     vtkUnstructuredGrid* aDataSet = vtkUnstructuredGrid::New();
 
@@ -311,7 +311,7 @@ SMESH_DeviceActor
     vtkIdType aNbCells = aGrid->GetNumberOfCells();
     aScalars->SetNumberOfComponents(1);
     aScalars->SetNumberOfTuples(aNbCells);
-    double* range;// = aScalars->GetRange();
+    double* range = 0;// = aScalars->GetRange();
     
     myVisualObj->UpdateFunctor(theFunctor);
 
@@ -363,7 +363,7 @@ SMESH_DeviceActor
                     SMESH_ScalarBarActor* theScalarBarActor,
                     vtkLookupTable* theLookupTable)
 {
-  bool anIsInitialized = theFunctor;
+  bool anIsInitialized = theFunctor != NULL;
   myExtractUnstructuredGrid->ClearRegisteredCells();
   myExtractUnstructuredGrid->ClearRegisteredCellsWithType();
   myExtractUnstructuredGrid->SetModeOfChanging(VTKViewer_ExtractUnstructuredGrid::ePassAll);

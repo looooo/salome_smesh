@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -125,7 +125,7 @@ public:
     int                 _algoDim;
     bool                _isGlobalAlgo;
 
-    TAlgoStateError(): _algoDim(0),_algo(0),_name(SMESH_Hypothesis::HYP_OK) {}
+    TAlgoStateError(): _name(SMESH_Hypothesis::HYP_OK), _algo(0), _algoDim(0) {}
     void Set(TAlgoStateErrorName name, const SMESH_Algo* algo, bool isGlobal)
     { _name = name; _algo = algo; _algoDim = algo->GetDim(); _isGlobalAlgo = isGlobal; }
     void Set(TAlgoStateErrorName name, const int algoDim,      bool isGlobal)

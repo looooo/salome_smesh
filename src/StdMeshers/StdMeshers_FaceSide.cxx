@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -56,6 +56,8 @@
 
 #include "utilities.h"
 
+using namespace std;
+
 //================================================================================
 /*!
  * \brief Constructor of a side of one edge
@@ -71,7 +73,7 @@ StdMeshers_FaceSide::StdMeshers_FaceSide(const TopoDS_Face&   theFace,
                                          const bool           theIgnoreMediumNodes,
                                          SMESH_ProxyMesh::Ptr theProxyMesh)
 {
-  list<TopoDS_Edge> edges(1,theEdge);
+  std::list<TopoDS_Edge> edges(1,theEdge);
   *this = StdMeshers_FaceSide( theFace, edges, theMesh, theIsForward,
                                theIgnoreMediumNodes, theProxyMesh );
 }
@@ -82,12 +84,12 @@ StdMeshers_FaceSide::StdMeshers_FaceSide(const TopoDS_Face&   theFace,
  */
 //================================================================================
 
-StdMeshers_FaceSide::StdMeshers_FaceSide(const TopoDS_Face&   theFace,
-                                         list<TopoDS_Edge>&   theEdges,
-                                         SMESH_Mesh*          theMesh,
-                                         const bool           theIsForward,
-                                         const bool           theIgnoreMediumNodes,
-                                         SMESH_ProxyMesh::Ptr theProxyMesh)
+StdMeshers_FaceSide::StdMeshers_FaceSide(const TopoDS_Face&      theFace,
+                                         std::list<TopoDS_Edge>& theEdges,
+                                         SMESH_Mesh*             theMesh,
+                                         const bool              theIsForward,
+                                         const bool              theIgnoreMediumNodes,
+                                         SMESH_ProxyMesh::Ptr    theProxyMesh)
 {
   int nbEdges = theEdges.size();
   myEdge.resize      ( nbEdges );
@@ -112,7 +114,7 @@ StdMeshers_FaceSide::StdMeshers_FaceSide(const TopoDS_Face&   theFace,
   SMESHDS_Mesh* meshDS = myProxyMesh->GetMeshDS();
 
   int nbDegen = 0;
-  list<TopoDS_Edge>::iterator edge = theEdges.begin();
+  std::list<TopoDS_Edge>::iterator edge = theEdges.begin();
   for ( int index = 0; edge != theEdges.end(); ++index, ++edge )
   {
     int i = theIsForward ? index : nbEdges-index-1;
@@ -142,7 +144,6 @@ StdMeshers_FaceSide::StdMeshers_FaceSide(const TopoDS_Face&   theFace,
         double p4 = myFirst[i]+(myLast[i]-myFirst[i])/4.;
         double d2 = GCPnts_AbscissaPoint::Length( A2dC, myFirst[i], p2 );
         double d4 = GCPnts_AbscissaPoint::Length( A2dC, myFirst[i], p4 );
-        //cout<<"len = "<<len<<"  d2 = "<<d2<<"  fabs(2*d2/len-1.0) = "<<fabs(2*d2/len-1.0)<<endl;
         myIsUniform[i] = !( fabs(2*d2/myEdgeLength[i]-1.0) > 0.01 || fabs(2*d4/d2-1.0) > 0.01 );
         Handle(Geom_Curve) C3d = BRep_Tool::Curve(myEdge[i],d2,d4);
         myC3dAdaptor[i].Load( C3d, d2,d4 );
@@ -230,9 +231,11 @@ StdMeshers_FaceSide::StdMeshers_FaceSide(const StdMeshers_FaceSide*  theSide,
 //================================================================================
 
 StdMeshers_FaceSide::StdMeshers_FaceSide(UVPtStructVec&     theSideNodes,
-                                         const TopoDS_Face& theFace)
+                                         const TopoDS_Face& theFace,
+                                         const TopoDS_Edge& theEdge,
+                                         SMESH_Mesh*        theMesh)
 {
-  myEdge.resize( 1 );
+  myEdge.resize( 1, theEdge );
   myEdgeID.resize( 1, -1 );
   myC2d.resize( 1 );
   myC3dAdaptor.resize( 1 );
@@ -242,6 +245,17 @@ StdMeshers_FaceSide::StdMeshers_FaceSide(UVPtStructVec&     theSideNodes,
   myIsUniform.resize( 1, 1 );
   myMissingVertexNodes = myIgnoreMediumNodes = false;
   myDefaultPnt2d.SetCoord( 1e100, 1e100 );
+  if ( theMesh ) myProxyMesh.reset( new SMESH_ProxyMesh( *theMesh ));
+  if ( !theEdge.IsNull() )
+  {
+    if ( theMesh ) myEdgeID[0] = theMesh->GetMeshDS()->ShapeToIndex( theEdge );
+    if ( theFace.IsNull() )
+      BRep_Tool::Range( theEdge, myFirst[0], myLast[0] );
+    else
+      myC2d[0] = BRep_Tool::CurveOnSurface( theEdge, theFace, myFirst[0], myLast[0] );
+    if ( theEdge.Orientation() == TopAbs_REVERSED )
+      std::swap( myFirst[0], myLast[0] );
+  }
 
   myFace       = theFace;
   myPoints     = theSideNodes;
@@ -302,22 +316,22 @@ StdMeshers_FaceSide::StdMeshers_FaceSide(UVPtStructVec&     theSideNodes,
  */
 //================================================================================
 
-const vector<UVPtStruct>& StdMeshers_FaceSide::GetUVPtStruct(bool   isXConst,
-                                                             double constValue) const
+const std::vector<UVPtStruct>& StdMeshers_FaceSide::GetUVPtStruct(bool   isXConst,
+                                                                  double constValue) const
 {
   if ( myPoints.empty() )
   {
     if ( NbEdges() == 0 ) return myPoints;
 
     StdMeshers_FaceSide* me = const_cast< StdMeshers_FaceSide* >( this );
-    SMESHDS_Mesh*    meshDS = myProxyMesh->GetMeshDS();
+    //SMESHDS_Mesh*    meshDS = myProxyMesh->GetMeshDS();
     SMESH_MesherHelper eHelper( *myProxyMesh->GetMesh() );
     SMESH_MesherHelper fHelper( *myProxyMesh->GetMesh() );
     fHelper.SetSubShape( myFace );
     bool paramOK;
     double eps = 1e-100;
 
-    // sort nodes of all edges putting them into a map
+    // sort nodes of all edges by putting them into a map
 
     map< double, const SMDS_MeshNode*>            u2node;
     vector< pair< double, const SMDS_MeshNode*> > u2nodeVec;
@@ -428,8 +442,8 @@ const vector<UVPtStruct>& StdMeshers_FaceSide::GetUVPtStruct(bool   isXConst,
       u2node.insert( u2node.end(), make_pair( 1., node ));
     }
 
-    if ( u2node.size() + nbProxyNodes != myNbPonits &&
-         u2node.size() + nbProxyNodes != NbPoints( /*update=*/true ))
+    if ((int) u2node.size() + nbProxyNodes != myNbPonits &&
+        (int) u2node.size() + nbProxyNodes != NbPoints( /*update=*/true ))
     {
       MESSAGE("Wrong node parameters on edges, u2node.size():"
               <<u2node.size()<<" !=  myNbPonits:"<<myNbPonits);
@@ -513,9 +527,9 @@ const vector<UVPtStruct>& StdMeshers_FaceSide::GetUVPtStruct(bool   isXConst,
 
     // set <constValue>
     if ( isXConst )
-      for ( iPt = 0; iPt < points.size(); ++iPt ) points[ iPt ].x = constValue;
+      for ( iPt = 0; iPt < (int)points.size(); ++iPt ) points[ iPt ].x = constValue;
     else
-      for ( iPt = 0; iPt < points.size(); ++iPt ) points[ iPt ].y = constValue;
+      for ( iPt = 0; iPt < (int)points.size(); ++iPt ) points[ iPt ].y = constValue;
 
   } // if ( myPoints.empty())
 
@@ -543,7 +557,7 @@ const vector<UVPtStruct>& StdMeshers_FaceSide::SimulateUVPtStruct(int    nbSeg,
 
     int EdgeIndex = 0;
     double prevNormPar = 0, paramSize = myNormPar[ EdgeIndex ];
-    for (int i = 0 ; i < myFalsePoints.size(); ++i ) {
+    for ( size_t i = 0 ; i < myFalsePoints.size(); ++i ) {
       double normPar = double(i) / double(nbSeg);
       UVPtStruct & uvPt = (*points)[i];
       uvPt.node = 0;
@@ -582,7 +596,7 @@ std::vector<const SMDS_MeshNode*> StdMeshers_FaceSide::GetOrderedNodes(int theEd
   {
     if ( NbEdges() == 0 ) return resultNodes;
 
-    SMESHDS_Mesh* meshDS = myProxyMesh->GetMeshDS();
+    //SMESHDS_Mesh* meshDS = myProxyMesh->GetMeshDS();
     SMESH_MesherHelper eHelper( *myProxyMesh->GetMesh() );
     SMESH_MesherHelper fHelper( *myProxyMesh->GetMesh() );
     fHelper.SetSubShape( myFace );
@@ -682,8 +696,8 @@ std::vector<const SMDS_MeshNode*> StdMeshers_FaceSide::GetOrderedNodes(int theEd
     // Fill the result vector
 
     if ( theEdgeInd < 0 &&
-         u2node.size() != myNbPonits &&
-         u2node.size() != NbPoints( /*update=*/true ))
+         (int) u2node.size() != myNbPonits &&
+         (int) u2node.size() != NbPoints( /*update=*/true ))
     {
       u2node.clear();
     }
@@ -810,7 +824,7 @@ const SMDS_MeshNode* StdMeshers_FaceSide::VertexNode(std::size_t i, bool* isMove
     n = SMESH_Algo::VertexNode( V, sm, myProxyMesh->GetMesh(), /*checkV=*/false );
 
     if (( !n ) &&
-        (( i > 0 && i < NbEdges() ) || IsClosed() ))
+        (( i > 0 && (int) i < NbEdges() ) || IsClosed() ))
     {
       iE = SMESH_MesherHelper::WrapIndex( int(i)-1, NbEdges() );
       sm = myProxyMesh->GetMeshDS()->MeshElements( myEdgeID[ iE ]);
@@ -1051,7 +1065,7 @@ void StdMeshers_FaceSide::dump(const char* msg) const
   if (msg) MESSAGE ( std::endl << msg );
   MESSAGE_BEGIN ("NB EDGES: "<< myEdge.size() );
   MESSAGE_ADD ( "nbPoints: "<<myNbPonits<<" vecSize: " << myPoints.size()<<" "<<myFalsePoints.size() );
-  for ( int i=0; i<myEdge.size(); ++i)
+  for ( size_t i = 0; i < myEdge.size(); ++i )
   {
     MESSAGE_ADD ( "\t"<<i+1 );
     MESSAGE_ADD ( "\tEDGE: " );
@@ -1061,17 +1075,17 @@ void StdMeshers_FaceSide::dump(const char* msg) const
     else {
       TopAbs::Print(myEdge[i].Orientation(),cout)<<" "<<myEdge[i].TShape().operator->()<<endl;
       MESSAGE_ADD ( "\tV1: " << TopExp::FirstVertex( myEdge[i], 1).TShape().operator->()
-                 << "  V2: " << TopExp::LastVertex( myEdge[i], 1).TShape().operator->() );
+                    << "  V2: " << TopExp::LastVertex( myEdge[i], 1).TShape().operator->() );
     }
     MESSAGE_ADD ( "\tC2d: ");
-    
+
     if (myC2d[i].IsNull()) {
       MESSAGE_ADD ( "NULL" );
     }
     else {
       MESSAGE_ADD ( myC2d[i].operator->() );
     }
-      
+
     MESSAGE_ADD ( "\tF: "<<myFirst[i]<< " L: "<< myLast[i] );
     MESSAGE_END ( "\tnormPar: "<<myNormPar[i]<<endl );
   }
@@ -1113,7 +1127,7 @@ BRepAdaptor_CompCurve* StdMeshers_FaceSide::GetCurve3d() const
   TopoDS_Wire aWire;
   BRep_Builder aBuilder;
   aBuilder.MakeWire(aWire);
-  for ( int i=0; i<myEdge.size(); ++i )
+  for ( size_t i = 0; i < myEdge.size(); ++i )
     aBuilder.Add( aWire, myEdge[i] );
 
   if ( myEdge.size() == 2 && IsClosed() )
@@ -1157,7 +1171,7 @@ gp_Pnt2d StdMeshers_FaceSide::Value2d(double U) const
     int i = U * double( myPoints.size()-1 );
     while ( i > 0 && myPoints[ i ].normParam > U )
       --i;
-    while ( i+1 < myPoints.size() && myPoints[ i+1 ].normParam < U )
+    while ( i+1 < (int)myPoints.size() && myPoints[ i+1 ].normParam < U )
       ++i;
     double r = (( U - myPoints[ i ].normParam ) /
                 ( myPoints[ i+1 ].normParam - myPoints[ i ].normParam ));

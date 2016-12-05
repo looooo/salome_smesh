@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -118,8 +118,8 @@ namespace
   static int FirstHexahedronIds[] = {0,1,2,3,4,5,6,7,0,1,2,3};
   static int LastHexahedronIds[] =  {1,2,3,0,5,6,7,4,4,5,6,7};
 
-  static vector<int> FirstPolygonIds;
-  static vector<int> LastPolygonIds;
+  static std::vector<int> FirstPolygonIds;
+  static std::vector<int> LastPolygonIds;
 
   void ReverseConnectivity( std::vector<vtkIdType> & ids, SMDSAbs_EntityType type,
                             bool toReverse, // inverse element
@@ -338,8 +338,8 @@ SMESHGUI_AddQuadraticElementDlg::SMESHGUI_AddQuadraticElementDlg( SMESHGUI* theM
   : QDialog( SMESH::GetDesktop( theModule ) ),
     mySMESHGUI( theModule ),
     mySelectionMgr( SMESH::GetSelectionMgr( theModule ) ),
-    myGeomType( theType ),
-    myBusy( false )
+    myBusy( false ),
+    myGeomType( theType )
 {
   setModal( false );
   setAttribute( Qt::WA_DeleteOnClose, true );
@@ -537,7 +537,7 @@ void SMESHGUI_AddQuadraticElementDlg::Init()
   myNbMidFaceNodes = 0;
   myNbCenterNodes = 0;
 
-  int aNumRows;
+  int aNumRows = 0;
 
   switch (myGeomType) {
   case SMDSEntity_Quad_Edge:
@@ -599,6 +599,7 @@ void SMESHGUI_AddQuadraticElementDlg::Init()
     myNbCenterNodes = 1;
     myHelpFileName = "adding_quadratic_elements_page.html#?"; //Adding_hexahedrons
     break;
+  default:;
   }
 
   myMidFaceLabel       ->setVisible( myNbMidFaceNodes );
@@ -724,6 +725,7 @@ bool SMESHGUI_AddQuadraticElementDlg::ClickOnApply()
       anIds.push_back( aListId[ 0 ].toInt() );
     }
     break;
+  default:;
   }
   if ( myReverseCB->isChecked())
     ReverseConnectivity( anIds, myGeomType, /*toReverse=*/true, /*toVtkOrder=*/false );
@@ -766,7 +768,7 @@ bool SMESHGUI_AddQuadraticElementDlg::ClickOnApply()
     }
   }
 
-  SMESH::ElementType anElementType;
+  SMESH::ElementType anElementType = SMESH::ALL;
   long anElemId = -1, nbElemsBefore = 0;
   SMESH::SMESH_MeshEditor_var aMeshEditor = myMesh->GetMeshEditor();
   switch (myGeomType) {
@@ -849,6 +851,7 @@ bool SMESHGUI_AddQuadraticElementDlg::ClickOnApply()
     case SMESH::VOLUME:
       myActor->SetRepresentation(SMESH_Actor::eSurface);
       myActor->SetEntityMode( aMode |= SMESH_Actor::eVolumes ); break;
+    default:;
     }
   }
 
@@ -1052,7 +1055,7 @@ void SMESHGUI_AddQuadraticElementDlg::SelectionIntoArgument()
 
   // process groups
   if ( !myMesh->_is_nil() && myEntry != aCurrentEntry ) {
-    SMESH::ElementType anElementType;
+    SMESH::ElementType anElementType = SMESH::ALL;
     switch ( myGeomType ) {
     case SMDSEntity_Quad_Edge:
       anElementType = SMESH::EDGE; break;
@@ -1068,6 +1071,7 @@ void SMESHGUI_AddQuadraticElementDlg::SelectionIntoArgument()
     case SMDSEntity_Quad_Hexa:
     case SMDSEntity_TriQuad_Hexa:
       anElementType = SMESH::VOLUME; break;
+    default:;
     }
     myGroups.clear();
     ComboBox_GroupName->clear();
@@ -1309,7 +1313,7 @@ bool SMESHGUI_AddQuadraticElementDlg::IsValid()
     okIDs.insert( anID );
   }
 
-  return okIDs.size() == myTable->rowCount() + myNbMidFaceNodes + myNbCenterNodes;
+  return (int) okIDs.size() == myTable->rowCount() + myNbMidFaceNodes + myNbCenterNodes;
 }
 
 //=================================================================================
@@ -1367,8 +1371,8 @@ void SMESHGUI_AddQuadraticElementDlg::UpdateTable( bool theConersValidity )
     for ( int row = 0; row < myTable->rowCount(); row++ )
       myTable->item( row, 1 )->setText("");
 
-    int* aFirstColIds;
-    int* aLastColIds;
+    int* aFirstColIds = 0;
+    int* aLastColIds  = 0;
 
     switch (myGeomType) {
     case SMDSEntity_Quad_Edge:
@@ -1406,6 +1410,7 @@ void SMESHGUI_AddQuadraticElementDlg::UpdateTable( bool theConersValidity )
       aFirstColIds = FirstHexahedronIds;
       aLastColIds  = LastHexahedronIds;
       break;
+    default:;
     }
 
     // fill the First and the Last columns

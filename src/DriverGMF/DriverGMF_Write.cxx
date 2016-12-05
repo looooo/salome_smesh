@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -70,9 +70,9 @@ extern "C"
   elem->getshapeId() );                         \
   }}
 
-#define END_ELEM_WRITE_ADD_TO_MAP( elem, e2id )         \
-  elem->getshapeId() );                                 \
-  e2id.insert( e2id.end(), make_pair( elem, gmfID ));   \
+#define END_ELEM_WRITE_ADD_TO_MAP( elem, e2id )            \
+  elem->getshapeId() );                                    \
+  e2id.insert( e2id.end(), std::make_pair( elem, gmfID )); \
   }}
 
 #define END_EXTRA_VERTICES_WRITE()           \
@@ -145,7 +145,7 @@ Driver_Mesh::Status DriverGMF_Write::Perform()
     const SMDS_MeshNode* n = nodeIt->next();
     n->GetXYZ( xyz );
     GmfSetLin( meshID, GmfVertices, xyz[0], xyz[1], xyz[2], n->getshapeId() );
-    node2IdMap.insert( node2IdMap.end(), make_pair( n, ++iN ));
+    node2IdMap.insert( node2IdMap.end(), std::make_pair( n, ++iN ));
   }
   if ( iN != nbNodes )
     return addMessage("Wrong nb of nodes returned by nodesIterator", /*fatal=*/true);
@@ -296,19 +296,19 @@ Driver_Mesh::Status DriverGMF_Write::Perform()
       SMDSAbs_EntityType smdsEntity;
       std::string entity = groupName.substr( pos + strlen("_required_"));
       if      ( entity == "Vertices" ) {
-        gmfKwd   = GmfRequiredVertices;
+        gmfKwd     = GmfRequiredVertices;
         smdsEntity = SMDSEntity_Node;
       }
       else if ( entity == "Edges" ) {
-        gmfKwd   = GmfRequiredEdges;
+        gmfKwd     = GmfRequiredEdges;
         smdsEntity = SMDSEntity_Edge;
       }
       else if ( entity == "Triangles" ) {
-        gmfKwd   = GmfRequiredTriangles;
+        gmfKwd     = GmfRequiredTriangles;
         smdsEntity = SMDSEntity_Triangle;
       }
       else if ( entity == "Quadrilaterals" ) {
-        gmfKwd   = GmfRequiredQuadrilaterals;
+        gmfKwd     = GmfRequiredQuadrilaterals;
         smdsEntity = SMDSEntity_Quadrangle;
       }
       else {
@@ -330,11 +330,11 @@ Driver_Mesh::Status DriverGMF_Write::Perform()
 
       // choose a TElem2IDMap
       TElem2IDMap* elem2IDMap = 0;
-      if ( smdsEntity == SMDSEntity_Quadrangle && nbOkElems != myMesh->NbFaces() )
+      if ( smdsEntity == SMDSEntity_Quadrangle    && nbOkElems != myMesh->NbFaces() )
         elem2IDMap = & quad2IDMap;
       else if ( smdsEntity == SMDSEntity_Triangle && nbOkElems != myMesh->NbFaces() )
         elem2IDMap = & tria2IDMap;
-      else if ( smdsEntity == SMDSEntity_Edge && nbOkElems != myMesh->NbEdges() )
+      else if ( smdsEntity == SMDSEntity_Edge     && nbOkElems != myMesh->NbEdges() )
         elem2IDMap = & edge2IDMap;
 
       // write the group

@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -93,11 +93,11 @@ public:
     SMESH_EXPORT ElemFeatures& Init( double diameter )
     { myType = SMDSAbs_Ball; myBallDiameter = diameter; return *this; }
 
-    SMESH_EXPORT ElemFeatures& Init( vector<int>& quanities, bool isQuad=false )
+    SMESH_EXPORT ElemFeatures& Init( std::vector<int>& quanities, bool isQuad=false )
     { myType = SMDSAbs_Volume; myIsPoly = 1; myIsQuad = isQuad;
       myPolyhedQuantities.swap( quanities ); return *this; }
 
-    SMESH_EXPORT ElemFeatures& Init( const vector<int>& quanities, bool isQuad=false )
+    SMESH_EXPORT ElemFeatures& Init( const std::vector<int>& quanities, bool isQuad=false )
     { myType = SMDSAbs_Volume; myIsPoly = 1; myIsQuad = isQuad;
       myPolyhedQuantities = quanities; return *this; }
 
@@ -730,7 +730,7 @@ public:
   void sweepElement(const SMDS_MeshElement*                    elem,
                     const std::vector<TNodeOfNodeListMapItr> & newNodesItVec,
                     std::list<const SMDS_MeshElement*>&        newElems,
-                    const int                                  nbSteps,
+                    const size_t                               nbSteps,
                     SMESH_SequenceOfElemPtr&                   srcElements);
 
   /*!
@@ -777,8 +777,8 @@ public:
                                    const bool                             theHasRefPoint,
                                    const gp_Pnt&                          theRefPoint,
                                    const bool                             theMakeGroups);
-  void LinearAngleVariation(const int     NbSteps,
-                            list<double>& theAngles);
+  void LinearAngleVariation(const int          NbSteps,
+                            std::list<double>& theAngles);
 
   bool doubleNodes( SMESHDS_Mesh*           theMeshDS,
                     const TIDSortedElemSet& theElems,

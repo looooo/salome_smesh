@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -449,7 +449,7 @@ bool SMESH_Algo::GetSortedNodesOnEdge(const SMESHDS_Mesh*                   theM
   if ( n2 && ++nbNodes )
     theNodes.insert( make_pair( l, n2 ));
 
-  return theNodes.size() == nbNodes;
+  return (int)theNodes.size() == nbNodes;
 }
 
 //================================================================================
@@ -469,7 +469,7 @@ SMESH_Algo::GetCompatibleHypoFilter(const bool ignoreAuxiliary) const
     {
       SMESH_HypoFilter* filter = new SMESH_HypoFilter();
       filter->Init( filter->HasName( _compatibleHypothesis[0] ));
-      for ( int i = 1; i < _compatibleHypothesis.size(); ++i )
+      for ( size_t i = 1; i < _compatibleHypothesis.size(); ++i )
         filter->Or( filter->HasName( _compatibleHypothesis[ i ] ));
 
       SMESH_HypoFilter* filterNoAux = new SMESH_HypoFilter( filter );

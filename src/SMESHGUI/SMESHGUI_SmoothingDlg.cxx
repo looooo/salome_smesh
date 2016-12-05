@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -111,8 +111,8 @@ SMESHGUI_SmoothingDlg::SMESHGUI_SmoothingDlg( SMESHGUI* theModule )
   : QDialog( SMESH::GetDesktop( theModule ) ),
     mySMESHGUI( theModule ),
     mySelectionMgr( SMESH::GetSelectionMgr( theModule ) ),
-    myFilterDlg(0),
-    mySelectedObject(SMESH::SMESH_IDSource::_nil())
+    mySelectedObject(SMESH::SMESH_IDSource::_nil()),
+    myFilterDlg(0)
 {
   QPixmap image0 (SMESH::GetResourceMgr( mySMESHGUI )->loadPixmap("SMESH", tr("ICON_DLG_SMOOTHING")));
   QPixmap image1 (SMESH::GetResourceMgr( mySMESHGUI )->loadPixmap("SMESH", tr("ICON_SELECT")));
@@ -566,6 +566,7 @@ void SMESHGUI_SmoothingDlg::onTextChange (const QString& theNewText)
 void SMESHGUI_SmoothingDlg::SelectionIntoArgument()
 {
   if (myBusy) return;
+  if (myFilterDlg && myFilterDlg->isVisible()) return; // filter dlg active
 
   // clear
   QString aString = "";
@@ -574,7 +575,8 @@ void SMESHGUI_SmoothingDlg::SelectionIntoArgument()
   BusyLocker lock( myBusy );
 
   if (myEditCurrentArgument == LineEditElements ||
-      myEditCurrentArgument == LineEditNodes) {
+      myEditCurrentArgument == LineEditNodes)
+  {
     myEditCurrentArgument->setText(aString);
     if (myEditCurrentArgument == LineEditElements) {
       myNbOkElements = 0;

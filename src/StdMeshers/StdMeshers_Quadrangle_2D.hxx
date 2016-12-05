@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -82,7 +82,7 @@ struct FaceQuadStruct
       return GetUVPtStruct()[ to-nbNodeOut-(IsReversed() ? -1 : +1)];
     }
     // some sortcuts
-    const vector<UVPtStruct>& GetUVPtStruct(bool isXConst=0, double constValue=0) const
+    const std::vector<UVPtStruct>& GetUVPtStruct(bool isXConst=0, double constValue=0) const
     { return nbNodeOut ?
         grid->SimulateUVPtStruct( NbPoints()-nbNodeOut-1, isXConst, constValue ) :
         grid->GetUVPtStruct( isXConst, constValue );

@@ -1,4 +1,4 @@
-# Copyright (C) 2012-2015  EDF R&D
+# Copyright (C) 2012-2016  EDF R&D
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -21,6 +21,10 @@ ADD_SUBDIRECTORY(CasTests)
 ADD_SUBDIRECTORY(gmu)
 ADD_SUBDIRECTORY(materielCasTests)
 
+IF(SALOME_BUILD_DOC)
+  ADD_SUBDIRECTORY(doc)
+ENDIF(SALOME_BUILD_DOC)
+
 IF(SALOME_BUILD_GUI)
   ADD_SUBDIRECTORY(ihm)
 ENDIF(SALOME_BUILD_GUI)
@@ -30,11 +34,10 @@ ENDIF(SALOME_BUILD_GUI)
 # scripts / static
 SET(plugin_SCRIPTS
   __init__.py
-  casStandard.py
   exemple.py
   exemple2.py
 )
 
 # --- rules ---
 
-SALOME_INSTALL_SCRIPTS("${plugin_SCRIPTS}" ${SALOME_SMESH_INSTALL_PLUGINS}/blocFissure)
+SALOME_INSTALL_SCRIPTS("${plugin_SCRIPTS}" ${SALOME_INSTALL_PYTHON}/blocFissure)

@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -773,8 +773,9 @@ module SMESH
       SEW_DIFF_NB_OF_ELEMENTS,
       SEW_TOPO_DIFF_SETS_OF_ELEMENTS,
       SEW_BAD_SIDE1_NODES,
-      SEW_BAD_SIDE2_NODES
-      };
+      SEW_BAD_SIDE2_NODES,
+      SEW_INTERNAL_ERROR
+    };
 
     Sew_Error SewFreeBorders (in long FirstNodeID1,
                               in long SecondNodeID1,

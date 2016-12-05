@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -102,7 +102,7 @@ QPixmap SMESHGUI_MergeDlg::IconFirst()
     "  ..   ...   ...  ",
     "  ..    ..    ..  ",
     "         .     .  "};
-  return iconFirst;
+  return QPixmap( iconFirst );
 }
 
 //=================================================================================
@@ -797,11 +797,11 @@ void SMESHGUI_MergeDlg::onDetect()
       break;
     }
     
-    for (int i = 0; i < aGroupsArray->length(); i++) {
+    for (int i = 0; i < (int)aGroupsArray->length(); i++) {
       SMESH::long_array& aGroup = aGroupsArray[i];
 
       QStringList anIDs;
-      for (int j = 0; j < aGroup.length(); j++)
+      for (int j = 0; j < (int)aGroup.length(); j++)
         anIDs.append(QString::number(aGroup[j]));
 
       ListCoincident->addItem(anIDs.join(" "));

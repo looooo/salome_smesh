@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -94,9 +94,10 @@ bool StdMeshersGUI_NbSegmentsCreator::checkParams( QString& msg ) const
   readParamsFromHypo( data_old );
   readParamsFromWidgets( data_new );
   bool res = storeParamsToHypo( data_new );
-  storeParamsToHypo( data_old );
   res = myNbSeg->isValid( msg, true ) && res;
   res = myScale->isValid( msg, true ) && res;
+  if ( !res )
+    storeParamsToHypo( data_old );
   return res;
 }
 
@@ -294,13 +295,13 @@ QString StdMeshersGUI_NbSegmentsCreator::storeParams() const
   case Regular :
     valStr += tr("SMESH_DISTR_REGULAR");
     break;
-  case Scale   : 
-    valStr += tr("SMESH_NB_SEGMENTS_SCALE_PARAM") + " = " + QString::number( data.myScale );\
+  case Scale   :
+    valStr += tr("SMESH_NB_SEGMENTS_SCALE_PARAM") + " = " + QString::number( data.myScale );
     break;
   case TabFunc : {
     //valStr += tr("SMESH_TAB_FUNC");
     bool param = true;
-    for( int i=0; i < data.myTable.length(); i++, param = !param ) {
+    for( CORBA::ULong i = 0; i < data.myTable.length(); i++, param = !param ) {
       if ( param )
         valStr += "[";
       valStr += QString::number( data.myTable[ i ]);
@@ -382,9 +383,10 @@ bool StdMeshersGUI_NbSegmentsCreator::storeParamsToHypo( const NbSegmentsHypothe
 
     h->SetVarParameter( h_data.myNbSegVarName.toLatin1().constData(), "SetNumberOfSegments" );
     h->SetNumberOfSegments( h_data.myNbSeg );
-    int distr = h_data.myDistrType;
-    h->SetDistrType( distr );
     
+    int distr = h_data.myDistrType;
+    if ( distr == 0 )
+      h->SetDistrType( distr ); // this is actually needed at non-uniform -> uniform switch
     if( distr==1 ) {
       h->SetVarParameter( h_data.myScaleVarName.toLatin1().constData(), "SetScaleFactor" );
       h->SetScaleFactor( h_data.myScale );
@@ -445,25 +447,25 @@ void StdMeshersGUI_NbSegmentsCreator::onValueChanged()
     myTable->setData( arr ); //update data in table
   }
 
-  myScale->setShown( distr==1 );
-  myLScale->setShown( distr==1 );
-  myReversedEdgesBox->setShown( distr!=0 );
+  myScale->setVisible( distr==1 );
+  myLScale->setVisible( distr==1 );
+  myReversedEdgesBox->setVisible( distr!=0 );
   if ( myReversedEdgesHelper ) {
     myReversedEdgesHelper->Clear();
-    myReversedEdgesHelper->setShown( distr!=0 );
+    myReversedEdgesHelper->setVisible( distr!=0 );
   }
   myDirectionWidget->ShowPreview( distr!=0 );
 
   bool isFunc = distr==2 || distr==3;
 #ifndef DISABLE_PLOT2DVIEWER
-  myPreview->setShown( isFunc );
+  myPreview->setVisible( isFunc );
 #endif
-  myConvBox->setShown( isFunc );
+  myConvBox->setVisible( isFunc );
   
-  myTable->setShown( distr==2 );
-  myExpr->setShown( distr==3 );
-  myLExpr->setShown( distr==3 );
-  myInfo->setShown( distr==3);
+  myTable->setVisible( distr==2 );
+  myExpr->setVisible( distr==3 );
+  myLExpr->setVisible( distr==3 );
+  myInfo->setVisible( distr==3);
 
 #ifndef DISABLE_PLOT2DVIEWER
   //change of preview

@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -319,10 +319,10 @@ namespace StdMeshersGUI
 
   void GridAxisTab::onMode(int isSpacing)
   {
-    mySpacingTreeWdg->setShown( isSpacing );
-    myCoordList->setShown( !isSpacing );
-    myStepSpin->setShown( !isSpacing );
-    myStepLabel->setShown( !isSpacing );
+    mySpacingTreeWdg->setVisible( isSpacing );
+    myCoordList->setVisible( !isSpacing );
+    myStepSpin->setVisible( !isSpacing );
+    myStepLabel->setVisible( !isSpacing );
     if ( isSpacing )
     {
       if ( mySpacingTreeWdg->topLevelItemCount() == 0 )

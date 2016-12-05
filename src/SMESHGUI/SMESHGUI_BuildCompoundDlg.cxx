@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -228,7 +228,7 @@ void SMESHGUI_BuildCompoundDlg::Init()
   ComboBoxUnion->addItem(tr("RENAME"));
   ComboBoxUnion->setCurrentIndex(0);
 
-  CheckBoxMerge->setChecked(false);
+  CheckBoxMerge->setChecked(true);
 
   TextLabelTol->setEnabled(CheckBoxMerge->isChecked());
   SpinBoxTol->SetValue(1e-05);

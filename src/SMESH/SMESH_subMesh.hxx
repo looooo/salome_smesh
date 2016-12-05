@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -81,6 +81,7 @@ class SMESH_EXPORT SMESH_subMesh
 
   const std::map < int, SMESH_subMesh * >& DependsOn();
   bool DependsOn( const SMESH_subMesh* other ) const;
+  bool DependsOn( const int shapeID ) const;
   /*!
    * \brief Return iterator on the sub-meshes this one depends on. By default
    *        most simple sub-meshes go first.
@@ -95,8 +96,7 @@ class SMESH_EXPORT SMESH_subMesh
 
   enum compute_state
   {
-    NOT_READY, READY_TO_COMPUTE,
-    COMPUTE_OK, FAILED_TO_COMPUTE
+    NOT_READY, READY_TO_COMPUTE, COMPUTE_OK, FAILED_TO_COMPUTE
   };
   enum algo_state
   {
@@ -122,7 +122,7 @@ class SMESH_EXPORT SMESH_subMesh
   };
 
   // ==================================================================
-  // Members to track non hierarchical dependencies between submeshes 
+  // Members to track non hierarchical dependencies between sub-meshes 
   // ==================================================================
 
   /*!
@@ -215,10 +215,10 @@ protected:
 public:
 
   SMESH_Hypothesis::Hypothesis_Status
-    AlgoStateEngine(int event, SMESH_Hypothesis * anHyp);
+    AlgoStateEngine(algo_event event, SMESH_Hypothesis * anHyp);
 
   SMESH_Hypothesis::Hypothesis_Status
-    SubMeshesAlgoStateEngine(int event, SMESH_Hypothesis * anHyp, bool exitOnFatal=false);
+    SubMeshesAlgoStateEngine(algo_event event, SMESH_Hypothesis * anHyp, bool exitOnFatal=false);
 
   algo_state             GetAlgoState() const    { return _algoState; }
   compute_state          GetComputeState() const { return _computeState; }
@@ -226,8 +226,8 @@ public:
 
   void DumpAlgoState(bool isMain);
 
-  bool ComputeStateEngine(int event);
-  void ComputeSubMeshStateEngine(int event, const bool includeSelf=false);
+  bool ComputeStateEngine(compute_event event);
+  void ComputeSubMeshStateEngine(compute_event event, const bool includeSelf=false);
 
   bool Evaluate(MapShapeNbElems& aResMap);
 
@@ -280,7 +280,9 @@ public:
 
 protected:
   // ==================================================================
-  void insertDependence(const TopoDS_Shape aShape, TopAbs_ShapeEnum aSubType );
+  void insertDependence(const TopoDS_Shape aShape,
+                        TopAbs_ShapeEnum   aSubType,
+                        TopAbs_ShapeEnum   avoidType=TopAbs_SHAPE);
 
   void removeSubMeshElementsAndNodes();
   void updateDependantsState(const compute_event theEvent);

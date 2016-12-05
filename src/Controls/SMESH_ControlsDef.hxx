@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -1088,7 +1088,7 @@ namespace SMESH{
       TMeshModifTracer     myMeshModifTracer;
       long                 myFaceID;
       double               myToler;
-      std::set< long >     myCoplanarIDs;
+      TColStd_MapOfInteger myCoplanarIDs;
     };
     typedef boost::shared_ptr<CoplanarFaces> CoplanarFacesPtr;
 

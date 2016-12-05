@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -21,6 +21,10 @@
 //
 //  File   : SMESH_Measurements_i.cxx
 //  Author : Pavel TELKOV, Open CASCADE S.A.S. (pavel.telkov@opencascade.com)
+
+#ifdef WIN32
+#define NOMINMAX
+#endif
 
 #include "SMESH_Measurements_i.hxx"
 
@@ -132,7 +136,8 @@ static bool isNodeType (SMESH::array_of_ElementType_var theTypes)
   return theTypes->length() > 0 && theTypes[0] == SMESH::NODE;
 }
 
-static double getNumericalValue(SMESH::SMESH_IDSource_ptr theSource, SMESH::Controls::NumericalFunctorPtr theFunctor)
+static double getNumericalValue(SMESH::SMESH_IDSource_ptr            theSource,
+                                SMESH::Controls::NumericalFunctorPtr theFunctor)
 {
   double value = 0;
 
@@ -142,7 +147,7 @@ static double getNumericalValue(SMESH::SMESH_IDSource_ptr theSource, SMESH::Cont
       theFunctor->SetMesh( aMesh );
       
       SMESH::long_array_var anElementsId = theSource->GetIDs();
-      for (int i = 0; i < anElementsId->length(); i++) {
+      for ( CORBA::ULong i = 0; i < anElementsId->length(); i++) {
         value += theFunctor->GetValue( anElementsId[i] );
       }
     }
@@ -220,12 +225,12 @@ static void enlargeBoundingBox(const SMDS_MeshNode* theNode,
     theMeasure.node1 = theNode->GetID();
   }
   else {
-    theMeasure.minX = min( theMeasure.minX, theNode->X() );
-    theMeasure.maxX = max( theMeasure.maxX, theNode->X() );
-    theMeasure.minY = min( theMeasure.minY, theNode->Y() );
-    theMeasure.maxY = max( theMeasure.maxY, theNode->Y() );
-    theMeasure.minZ = min( theMeasure.minZ, theNode->Z() );
-    theMeasure.maxZ = max( theMeasure.maxZ, theNode->Z() );
+    theMeasure.minX = std::min( theMeasure.minX, theNode->X() );
+    theMeasure.maxX = std::max( theMeasure.maxX, theNode->X() );
+    theMeasure.minY = std::min( theMeasure.minY, theNode->Y() );
+    theMeasure.maxY = std::max( theMeasure.maxY, theNode->Y() );
+    theMeasure.minZ = std::min( theMeasure.minZ, theNode->Z() );
+    theMeasure.maxZ = std::max( theMeasure.maxZ, theNode->Z() );
   }
 }
 

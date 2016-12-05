@@ -1,4 +1,4 @@
-# Copyright (C) 2012-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+# Copyright (C) 2012-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -62,6 +62,7 @@ SET(_link_LIBRARIES
   ${CAS_TKAdvTools}
   ${CAS_TKTopAlgo}
   ${CAS_TKG3d}
+  ${CAS_TKOffset}
   ${GEOM_GEOMUtils}
   SMESHimpl
   SMESHDS

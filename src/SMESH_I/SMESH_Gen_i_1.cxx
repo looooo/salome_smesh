@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -47,11 +47,11 @@
 
 #ifdef _DEBUG_
 static int MYDEBUG = 0;
-//static int VARIABLE_DEBUG = 0;
 #else
 static int MYDEBUG = 0;
-//static int VARIABLE_DEBUG = 0;
 #endif
+
+using namespace std;
 
 //=============================================================================
 /*!
@@ -281,7 +281,8 @@ static SALOMEDS::SObject_ptr publish(SALOMEDS::Study_ptr   theStudy,
       SALOMEDS::SObject_wrap curObj;
       if ( theFatherObject->GetLastChildTag() > theTag )
       {
-        SALOMEDS::UseCaseIterator_wrap anUseCaseIter = useCaseBuilder->GetUseCaseIterator(theFatherObject);
+        SALOMEDS::UseCaseIterator_wrap
+          anUseCaseIter = useCaseBuilder->GetUseCaseIterator(theFatherObject);
         for ( ; anUseCaseIter->More(); anUseCaseIter->Next() ) {
           curObj = anUseCaseIter->Value();
           if ( curObj->Tag() > theTag  ) {
@@ -294,21 +295,29 @@ static SALOMEDS::SObject_ptr publish(SALOMEDS::Study_ptr   theStudy,
   }
 
   SALOMEDS::GenericAttribute_wrap anAttr;
-  if ( !CORBA::is_nil( theIOR )) {
+  if ( !CORBA::is_nil( theIOR ))
+  {
     anAttr = aStudyBuilder->FindOrCreateAttribute( SO, "AttributeIOR" );
     CORBA::String_var objStr = SMESH_Gen_i::GetORB()->object_to_string( theIOR );
     SALOMEDS::AttributeIOR_wrap iorAttr = anAttr;
-    iorAttr->SetValue( objStr.in() );
-    // UnRegister() !!!
-    SALOME::GenericObj_var genObj = SALOME::GenericObj::_narrow( theIOR );
-    if ( !genObj->_is_nil() )
-      genObj->UnRegister();
+    CORBA::String_var objStrCur = iorAttr->Value();
+    bool sameIOR = ( objStrCur.in() && strcmp( objStr.in(), objStrCur.in() ) == 0 );
+    if ( !sameIOR )
+    {
+      iorAttr->SetValue( objStr.in() );
+      // UnRegister() !!!
+      SALOME::GenericObj_var genObj = SALOME::GenericObj::_narrow( theIOR );
+      if ( !genObj->_is_nil() )
+        genObj->UnRegister();
+    }
   }
+
   if ( thePixMap ) {
     anAttr  = aStudyBuilder->FindOrCreateAttribute( SO, "AttributePixMap" );
     SALOMEDS::AttributePixMap_wrap pm = anAttr;
     pm->SetPixMap( thePixMap );
   }
+
   if ( !theSelectable ) {
     anAttr = aStudyBuilder->FindOrCreateAttribute( SO, "AttributeSelectable" );
     SALOMEDS::AttributeSelectable_wrap selAttr = anAttr;
@@ -585,7 +594,7 @@ SALOMEDS::SObject_ptr SMESH_Gen_i::PublishMesh (SALOMEDS::Study_ptr   theStudy,
     // Publish global hypotheses
 
     SMESH::ListOfHypothesis_var hypList = theMesh->GetHypothesisList( aShapeObject );
-    for ( int i = 0; i < hypList->length(); i++ )
+    for ( CORBA::ULong i = 0; i < hypList->length(); i++ )
     {
       SMESH::SMESH_Hypothesis_var aHyp = SMESH::SMESH_Hypothesis::_narrow( hypList[ i ]);
       SALOMEDS::SObject_wrap so = PublishHypothesis( theStudy, aHyp );
@@ -710,7 +719,7 @@ SALOMEDS::SObject_ptr SMESH_Gen_i::PublishSubMesh (SALOMEDS::Study_ptr      theS
   // Publish hypothesis
 
   SMESH::ListOfHypothesis_var hypList = theMesh->GetHypothesisList( theShapeObject );
-  for ( int i = 0; i < hypList->length(); i++ ) {
+  for ( CORBA::ULong i = 0; i < hypList->length(); i++ ) {
     SMESH::SMESH_Hypothesis_var aHyp = SMESH::SMESH_Hypothesis::_narrow( hypList[ i ]);
     SALOMEDS::SObject_wrap so = PublishHypothesis( theStudy, aHyp );
     AddHypothesisToShape( theStudy, theMesh, theShapeObject, aHyp );
@@ -742,7 +751,7 @@ SALOMEDS::SObject_ptr SMESH_Gen_i::PublishGroup (SALOMEDS::Study_ptr    theStudy
       if ( aMeshSO->_is_nil())
         return SALOMEDS::SObject::_nil();
     }
-    int aType = (int)theGroup->GetType();
+    size_t aType = (int)theGroup->GetType();
     const char* aRootNames[] = {
       "Compound Groups", "Groups of Nodes", "Groups of Edges",
       "Groups of Faces", "Groups of Volumes", "Groups of 0D Elements",
@@ -762,8 +771,7 @@ SALOMEDS::SObject_ptr SMESH_Gen_i::PublishGroup (SALOMEDS::Study_ptr    theStudy
         SetName( aRootSO, aRootNames[aType] );
 
       // Add new group to corresponding sub-tree
-      SMESH::array_of_ElementType_var elemTypes = theGroup->GetTypes();
-      int isEmpty = ( elemTypes->length() == 0 );
+      int isEmpty = false;
       std::string pm[2] = { "ICON_SMESH_TREE_GROUP", "ICON_SMESH_TREE_MESH_WARN" };
       if ( SMESH::DownCast< SMESH_GroupOnFilter_i* > ( theGroup ))
       {

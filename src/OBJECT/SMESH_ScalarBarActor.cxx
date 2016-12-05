@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -320,20 +320,20 @@ int SMESH_ScalarBarActor::RenderOpaqueGeometry(vtkViewport *viewport)
 
     // rnv begin
     // Customization of the vtkScalarBarActor to show distribution histogram.
-    bool distrVisibility =  (numColors == this->myNbValues.size());
-    vtkPoints *distrPts;
-    vtkCellArray *distrPolys;
+    bool distrVisibility =  (numColors == (int)this->myNbValues.size());
+    vtkPoints *distrPts = 0;
+    vtkCellArray *distrPolys = 0;
     vtkUnsignedCharArray *distColors = 0;
     int numDistrPts = 0, numPositiveVal=0, maxValue=0;
     if(!distrVisibility)
       vtkDebugMacro(<<" Distribution invisible, because numColors == this->myNbValues.size()");
 
-    if (distrVisibility && GetDistributionVisibility()) {
-      for( i=0 ;i<myNbValues.size();i++ ) {
-        if(myNbValues[i]) {
+    if ( distrVisibility && GetDistributionVisibility() ) {
+      for ( i = 0 ; i < (int)myNbValues.size(); i++ ) {
+        if ( myNbValues[i] ) {
           numPositiveVal++;
           maxValue = std::max(maxValue,myNbValues[i]);
-        } 
+        }
       }
       numDistrPts = 4*(numPositiveVal);
       distrPts = vtkPoints::New();
@@ -820,7 +820,7 @@ void SMESH_ScalarBarActor::AllocateAndSizeLabels(int *labelSize,
     int targetWidth, targetHeight;
     // rnv begin
     // Customization of the vtkScalarBarActor to show distribution histogram.
-    bool distrVisibility = this->MaximumNumberOfColors == this->myNbValues.size();
+    bool distrVisibility = ( this->MaximumNumberOfColors == (int) this->myNbValues.size() );
     double coef;
     if( GetDistributionVisibility() && distrVisibility )
       if(this->Orientation == VTK_ORIENT_VERTICAL)
@@ -856,40 +856,39 @@ void SMESH_ScalarBarActor::AllocateAndSizeLabels(int *labelSize,
 }
 
 //----------------------------------------------------------------------------
-void SMESH_ScalarBarActor::SizeTitle(int *titleSize, 
-                                  int *size, 
-                                  vtkViewport *viewport)
+void SMESH_ScalarBarActor::SizeTitle(int *titleSize,
+                                     int *size,
+                                     vtkViewport *viewport)
 {
   titleSize[0] = titleSize[1] = 0;
 
   if (this->Title == NULL || !strlen(this->Title))
-    {
+  {
     return;
-    }
+  }
 
   int targetWidth, targetHeight;
-  
+
   targetWidth = size[0];
   // rnv begin
   // Customization of the vtkScalarBarActor to show distribution histogram.
-  bool distrVisibility =  this->MaximumNumberOfColors == this->myNbValues.size();
+  bool distrVisibility = ( this->MaximumNumberOfColors == (int) this->myNbValues.size() );
   double coef;
-  if( GetDistributionVisibility() && distrVisibility ) 
+  if ( GetDistributionVisibility() && distrVisibility )
     coef=0.18;
-  else 
+  else
     coef=0.25;
 
   if ( this->Orientation == VTK_ORIENT_VERTICAL )
-    {
-      targetHeight = (int)(0.1*size[1]);
-    }
+  {
+    targetHeight = (int)(0.1*size[1]);
+  }
   else
-    {
-      targetHeight = (int)(coef*size[1]);
-    }
+  {
+    targetHeight = (int)(coef*size[1]);
+  }
 
-  this->TitleMapper->SetConstrainedFontSize(
-    viewport, targetWidth, targetHeight);
+  this->TitleMapper->SetConstrainedFontSize(viewport, targetWidth, targetHeight);
 
   this->TitleMapper->GetSize(viewport, titleSize);
 }

@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -104,7 +104,7 @@ bool SMESHGUI_XmlHandler::startElement (const QString&, const QString&,
       QString aResName = atts.value("resources");
       if (aResName != "")
       {
-        MESSAGE("Loading Resources " << aResName.toLatin1().data());
+        //MESSAGE("Loading Resources " << aResName.toLatin1().data());
         SUIT_ResourceMgr* resMgr = SMESHGUI::resourceMgr();
         QString lang = resMgr->stringValue( resMgr->langSection(), "language", "en" );
         resMgr->loadTranslator( "resources", QString( "%1_msg_%2.qm" ).arg( aResName, lang ) );

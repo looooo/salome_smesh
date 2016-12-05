@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -264,6 +264,7 @@ bool SMESH_TypeFilter::isOk (const SUIT_DataOwner* theDataOwner) const
           Ok = isIDSourceOfType( obj, SMESH::VOLUME );
           break;
         }
+    default:;
     }
   }
   return Ok;

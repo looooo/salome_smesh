@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -1227,7 +1227,7 @@ void SMESHGUI_SimpleElemInfo::information( const QList<long>& ids )
           int shapeID = pos->shapeID;
           if ( shapeID > 0 ) {
             QString shapeType;
-            double u, v;
+            double u = 0, v = 0;
             switch ( pos->shapeType ) {
             case GEOM::EDGE:
               shapeType = SMESHGUI_ElemInfo::tr( "GEOM_EDGE" );
@@ -1268,7 +1268,7 @@ void SMESHGUI_SimpleElemInfo::information( const QList<long>& ids )
           SMESH::ListOfGroups_var groups = aMesh->GetGroups();
           myInfo->append( "" ); // separator
           bool top_created = false;
-          for ( int i = 0; i < groups->length(); i++ ) {
+          for ( CORBA::ULong i = 0; i < groups->length(); i++ ) {
             SMESH::SMESH_GroupBase_var aGrp = groups[i];
             if ( CORBA::is_nil( aGrp ) ) continue;
             QString aName = aGrp->GetName();
@@ -1528,7 +1528,7 @@ void SMESHGUI_SimpleElemInfo::information( const QList<long>& ids )
           SMESH::ListOfGroups_var  groups = aMesh->GetGroups();
           myInfo->append( "" ); // separator
           bool top_created = false;
-          for ( int i = 0; i < groups->length(); i++ ) {
+          for ( CORBA::ULong i = 0; i < groups->length(); i++ ) {
             SMESH::SMESH_GroupBase_var aGrp = groups[i];
             if ( CORBA::is_nil( aGrp ) ) continue;
             QString aName = aGrp->GetName();
@@ -1747,7 +1747,7 @@ void SMESHGUI_TreeElemInfo::information( const QList<long>& ids )
           int shapeID = pos->shapeID;
           if ( shapeID > 0 ) {
             QString shapeType;
-            double u, v;
+            double u = 0, v = 0;
             switch ( pos->shapeType ) {
             case GEOM::EDGE:
               shapeType = SMESHGUI_ElemInfo::tr( "GEOM_EDGE" );
@@ -1788,7 +1788,7 @@ void SMESHGUI_TreeElemInfo::information( const QList<long>& ids )
         if ( !CORBA::is_nil( aMesh ) ) {
           SMESH::ListOfGroups_var groups = aMesh->GetGroups();
           QTreeWidgetItem* groupsItem = 0;
-          for ( int i = 0; i < groups->length(); i++ ) {
+          for ( CORBA::ULong i = 0; i < groups->length(); i++ ) {
             SMESH::SMESH_GroupBase_var aGrp = groups[i];
             if ( CORBA::is_nil( aGrp ) ) continue;
             QString aName = aGrp->GetName();
@@ -2086,7 +2086,7 @@ void SMESHGUI_TreeElemInfo::information( const QList<long>& ids )
         if ( !CORBA::is_nil( aMesh ) ) {
           SMESH::ListOfGroups_var  groups = aMesh->GetGroups();
           QTreeWidgetItem* groupsItem = 0;
-          for ( int i = 0; i < groups->length(); i++ ) {
+          for ( CORBA::ULong i = 0; i < groups->length(); i++ ) {
             SMESH::SMESH_GroupBase_var aGrp = groups[i];
             if ( CORBA::is_nil( aGrp ) ) continue;
             QString aName = aGrp->GetName();
@@ -2320,6 +2320,7 @@ GrpComputor::GrpComputor( SMESH::SMESH_GroupBase_ptr grp,
 void GrpComputor::compute()
 {
   if ( !CORBA::is_nil( myGroup ) && myItem ) {
+    SUIT_OverrideCursor wc;
     QTreeWidgetItem* item = myItem;
     myItem = 0;
     int nb = myToComputeSize ? myGroup->Size() : myGroup->GetNumberOfNodes();
@@ -2643,7 +2644,7 @@ void SMESHGUI_AddInfo::showGroups()
       itemGroups->setData( 0, Qt::UserRole, GROUPS_ID );
 
       // total number of groups > 10, show extra widgets for info browsing
-      if ( myGroups->length() > MAXITEMS ) {
+      if ((int) myGroups->length() > MAXITEMS ) {
         ExtraWidget* extra = new ExtraWidget( this, true );
         connect( extra->prev, SIGNAL( clicked() ), this, SLOT( showPreviousGroups() ) );
         connect( extra->next, SIGNAL( clicked() ), this, SLOT( showNextGroups() ) );
@@ -2704,7 +2705,7 @@ void SMESHGUI_AddInfo::showSubMeshes()
       itemSubMeshes->setData( 0, Qt::UserRole, SUBMESHES_ID );
 
       // total number of sub-meshes > 10, show extra widgets for info browsing
-      if ( mySubMeshes->length() > MAXITEMS ) {
+      if ((int) mySubMeshes->length() > MAXITEMS ) {
         ExtraWidget* extra = new ExtraWidget( this, true );
         connect( extra->prev, SIGNAL( clicked() ), this, SLOT( showPreviousSubMeshes() ) );
         connect( extra->next, SIGNAL( clicked() ), this, SLOT( showNextSubMeshes() ) );
@@ -2917,7 +2918,7 @@ void SMESHGUI_MeshInfoDlg::showInfo( const Handle(SALOME_InteractiveObject)& IO 
     myCtrlInfo->showInfo( obj );
 
     myActor = SMESH::FindActorByEntry( IO->getEntry() );
-    SVTK_Selector* selector = SMESH::GetViewWindow()->GetSelector();
+    SVTK_Selector* selector = SMESH::GetSelector();
     QString ID;
     int nb = 0;
     if ( myActor && selector ) {
@@ -3081,7 +3082,7 @@ void SMESHGUI_MeshInfoDlg::modeChanged()
 */
 void SMESHGUI_MeshInfoDlg::idChanged()
 {
-  SVTK_Selector* selector = SMESH::GetViewWindow()->GetSelector();
+  SVTK_Selector* selector = SMESH::GetSelector();
   if ( myActor && selector ) {
     Handle(SALOME_InteractiveObject) IO = myActor->getIO();
     TColStd_MapOfInteger ID;
@@ -3147,7 +3148,7 @@ void SMESHGUI_MeshInfoDlg::dump()
 
   DumpFileDlg fd( this );
   fd.setWindowTitle( tr( "SAVE_INFO" ) );
-  fd.setFilters( aFilters );
+  fd.setNameFilters( aFilters );
   fd.myBaseChk->setChecked( anIsBase );
   fd.myElemChk->setChecked( anIsElem );
   fd.myAddChk ->setChecked( anIsAdd );
@@ -3858,7 +3859,7 @@ void SMESHGUI_CtrlInfoDlg::dump()
 
   DumpFileDlg fd( this );
   fd.setWindowTitle( tr( "SAVE_INFO" ) );
-  fd.setFilters( aFilters );
+  fd.setNameFilters( aFilters );
   fd.myBaseChk->hide();
   fd.myElemChk->hide();
   fd.myAddChk ->hide();

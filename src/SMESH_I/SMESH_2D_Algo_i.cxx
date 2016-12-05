@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -45,7 +45,6 @@ SMESH_2D_Algo_i::SMESH_2D_Algo_i( PortableServer::POA_ptr thePOA )
        SMESH_Hypothesis_i( thePOA ), 
        SMESH_Algo_i( thePOA ) 
 {
-  MESSAGE( "SMESH_2D_Algo_i::SMESH_2D_Algo_i" );
 }
 
 //=============================================================================
@@ -58,7 +57,6 @@ SMESH_2D_Algo_i::SMESH_2D_Algo_i( PortableServer::POA_ptr thePOA )
 
 SMESH_2D_Algo_i::~SMESH_2D_Algo_i()
 {
-  MESSAGE( "SMESH_2D_Algo_i::~SMESH_2D_Algo_i" );
 }
 
 //================================================================================

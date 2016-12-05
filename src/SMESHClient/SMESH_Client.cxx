@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -54,13 +54,14 @@
 #endif
 
 #ifdef _DEBUG_
-static int MYDEBUG = 1;
+static int MYDEBUG = 0;
 #else
 static int MYDEBUG = 0;
 #endif
 
 namespace
 {
+  using std::runtime_error;
 
   //=======================================================================
   //function : FindNode
@@ -90,7 +91,7 @@ namespace
     const SMESH::double_array& aCoords = theSeq[theId].coords;
     const SMESH::long_array& anIndexes = theSeq[theId].indexes;
     CORBA::Long anElemId = 0, aNbElems = theSeq[theId].number;
-    if(3*aNbElems != aCoords.length())
+    if(3*aNbElems != (CORBA::Long) aCoords.length())
       EXCEPTION(runtime_error,"AddNodesWithID - 3*aNbElems != aCoords.length()");
     for(CORBA::Long aCoordId = 0; anElemId < aNbElems; anElemId++, aCoordId+=3){
       SMDS_MeshElement* anElem = theMesh->AddNodeWithID(aCoords[aCoordId],
@@ -112,7 +113,7 @@ namespace
   {
     const SMESH::long_array& anIndexes = theSeq[theId].indexes;
     CORBA::Long anElemId = 0, aNbElems = theSeq[theId].number;
-    if (2*aNbElems != anIndexes.length())
+    if (2*aNbElems != (CORBA::Long) anIndexes.length())
       EXCEPTION(runtime_error,"AddEdgeWithID - 2*aNbElems != aCoords.length()");
     CORBA::Long anIndexId = 0;
     for (; anElemId < aNbElems; anElemId++, anIndexId+=2)
@@ -135,9 +136,9 @@ namespace
     const SMESH::double_array& aDiameter = theSeq[theId].coords;
     const SMESH::long_array& anIndexes   = theSeq[theId].indexes;
     CORBA::Long anElemId = 0, aNbElems   = theSeq[theId].number;
-    if (2*aNbElems != anIndexes.length() )
+    if (2*aNbElems != (CORBA::Long) anIndexes.length() )
       EXCEPTION(runtime_error,"AddEdgeWithID - 2*aNbElems != anIndexes.length()");
-    if (aNbElems != aDiameter.length())
+    if (aNbElems != (CORBA::Long) aDiameter.length())
       EXCEPTION(runtime_error,"AddEdgeWithID - aNbElems != aDiameter.length()");
     CORBA::Long anIndexId = 0;
     for (; anElemId < aNbElems; anElemId++, anIndexId+=2)
@@ -160,7 +161,7 @@ namespace
   {
     const SMESH::long_array& anIndexes = theSeq[theId].indexes;
     CORBA::Long anElemId = 0, aNbElems = theSeq[theId].number;
-    if(3*aNbElems != anIndexes.length())
+    if(3*aNbElems != (CORBA::Long) anIndexes.length())
       EXCEPTION(runtime_error,"AddEdgeWithID - 3*aNbElems != aCoords.length()");
     for(CORBA::Long anIndexId = 0; anElemId < aNbElems; anElemId++, anIndexId+=3){
       SMDS_MeshElement* anElem = theMesh->AddEdgeWithID(anIndexes[anIndexId+1],
@@ -181,7 +182,7 @@ namespace
   {
     const SMESH::long_array& anIndexes = theSeq[theId].indexes;
     CORBA::Long anElemId = 0, aNbElems = theSeq[theId].number;
-    if(4*aNbElems != anIndexes.length())
+    if(4*aNbElems != (CORBA::Long) anIndexes.length())
       EXCEPTION(runtime_error,"AddTriasWithID - 4*aNbElems != anIndexes.length()");
     for(CORBA::Long anIndexId = 0; anElemId < aNbElems; anElemId++, anIndexId+=4){
       SMDS_MeshElement* anElem = theMesh->AddFaceWithID(anIndexes[anIndexId+1],
@@ -203,7 +204,7 @@ namespace
   {
     const SMESH::long_array& anIndexes = theSeq[theId].indexes;
     CORBA::Long anElemId = 0, aNbElems = theSeq[theId].number;
-    if(5*aNbElems != anIndexes.length())
+    if(5*aNbElems != (CORBA::Long) anIndexes.length())
       EXCEPTION(runtime_error,"AddQuadsWithID - 4*aNbElems != anIndexes.length()");
     for(CORBA::Long anIndexId = 0; anElemId < aNbElems; anElemId++, anIndexId+=5){
       SMDS_MeshElement* anElem = theMesh->AddFaceWithID(anIndexes[anIndexId+1],
@@ -280,7 +281,7 @@ namespace
   {
     const SMESH::long_array& anIndexes = theSeq[theId].indexes;
     CORBA::Long anElemId = 0, aNbElems = theSeq[theId].number;
-    if(5*aNbElems != anIndexes.length())
+    if(5*aNbElems != (CORBA::Long) anIndexes.length())
       EXCEPTION(runtime_error,"AddTetrasWithID - 5*aNbElems != anIndexes.length()");
     for(CORBA::Long anIndexId = 0; anElemId < aNbElems; anElemId++, anIndexId+=5){
       SMDS_MeshElement* anElem = theMesh->AddVolumeWithID(anIndexes[anIndexId+1],
@@ -303,7 +304,7 @@ namespace
   {
     const SMESH::long_array& anIndexes = theSeq[theId].indexes;
     CORBA::Long anElemId = 0, aNbElems = theSeq[theId].number;
-    if(6*aNbElems != anIndexes.length())
+    if(6*aNbElems != (CORBA::Long) anIndexes.length())
       EXCEPTION(runtime_error,"AddPiramidsWithID - 6*aNbElems != anIndexes.length()");
     for(CORBA::Long anIndexId = 0; anElemId < aNbElems; anElemId++, anIndexId+=6){
       SMDS_MeshElement* anElem = theMesh->AddVolumeWithID(anIndexes[anIndexId+1],
@@ -327,7 +328,7 @@ namespace
   {
     const SMESH::long_array& anIndexes = theSeq[theId].indexes;
     CORBA::Long anElemId = 0, aNbElems = theSeq[theId].number;
-    if(7*aNbElems != anIndexes.length())
+    if(7*aNbElems != (CORBA::Long) anIndexes.length())
       EXCEPTION(runtime_error,"AddPrismsWithID - 7*aNbElems != anIndexes.length()");
     for(CORBA::Long anIndexId = 0; anElemId < aNbElems; anElemId++, anIndexId+=7){
       SMDS_MeshElement* anElem = theMesh->AddVolumeWithID(anIndexes[anIndexId+1],
@@ -352,7 +353,7 @@ namespace
   {
     const SMESH::long_array& anIndexes = theSeq[theId].indexes;
     CORBA::Long anElemId = 0, aNbElems = theSeq[theId].number;
-    if(9*aNbElems != anIndexes.length())
+    if(9*aNbElems != (CORBA::Long) anIndexes.length())
       EXCEPTION(runtime_error,"AddHexasWithID - 9*aNbElems != anIndexes.length()");
     for(CORBA::Long anIndexId = 0; anElemId < aNbElems; anElemId++, anIndexId+=9){
       SMDS_MeshElement* anElem = theMesh->AddVolumeWithID(anIndexes[anIndexId+1],
@@ -378,7 +379,7 @@ namespace
   {
     const SMESH::long_array& anIndexes = theSeq[theId].indexes;
     CORBA::Long anElemId = 0, aNbElems = theSeq[theId].number;
-    if(13*aNbElems != anIndexes.length())
+    if(13*aNbElems != (CORBA::Long) anIndexes.length())
       EXCEPTION(runtime_error,"AddHexPrismWithID - 13*aNbElems != anIndexes.length()");
     for(CORBA::Long anIndexId = 0; anElemId < aNbElems; anElemId++, anIndexId+=13){
       SMDS_MeshElement* anElem = theMesh->AddVolumeWithID(anIndexes[anIndexId+1],
@@ -443,7 +444,7 @@ namespace
   {
     const SMESH::long_array& anIndexes = theSeq[theId].indexes;
     CORBA::Long anElemId = 0, aNbElems = theSeq[theId].number;
-    if(4*aNbElems != anIndexes.length())
+    if(4*aNbElems != (CORBA::Long) anIndexes.length())
       EXCEPTION(runtime_error,"AddQuadEdgeWithID - 4*aNbElems != aCoords.length()");
     for(CORBA::Long anIndexId = 0; anElemId < aNbElems; anElemId++, anIndexId+=4){
       SMDS_MeshElement* anElem = theMesh->AddEdgeWithID(anIndexes[anIndexId+1],
@@ -465,7 +466,7 @@ namespace
   {
     const SMESH::long_array& anIndexes = theSeq[theId].indexes;
     CORBA::Long anElemId = 0, aNbElems = theSeq[theId].number;
-    if(7*aNbElems != anIndexes.length())
+    if(7*aNbElems != (CORBA::Long) anIndexes.length())
       EXCEPTION(runtime_error,"AddQuadTriasWithID - 7*aNbElems != anIndexes.length()");
     for(CORBA::Long anIndexId = 0; anElemId < aNbElems; anElemId++, anIndexId+=7){
       SMDS_MeshElement* anElem = theMesh->AddFaceWithID(anIndexes[anIndexId+1],
@@ -490,7 +491,7 @@ namespace
   {
     const SMESH::long_array& anIndexes = theSeq[theId].indexes;
     CORBA::Long anElemId = 0, aNbElems = theSeq[theId].number;
-    if(9*aNbElems != anIndexes.length())
+    if(9*aNbElems != (CORBA::Long) anIndexes.length())
       EXCEPTION(runtime_error,"AddQuadQuadsWithID - 9*aNbElems != anIndexes.length()");
     for(CORBA::Long anIndexId = 0; anElemId < aNbElems; anElemId++, anIndexId+=9){
       SMDS_MeshElement* anElem = theMesh->AddFaceWithID(anIndexes[anIndexId+1],
@@ -516,7 +517,7 @@ namespace
   {
     const SMESH::long_array& anIndexes = theSeq[theId].indexes;
     CORBA::Long anElemId = 0, aNbElems = theSeq[theId].number;
-    if(10*aNbElems != anIndexes.length())
+    if(10*aNbElems != (CORBA::Long) anIndexes.length())
       EXCEPTION(runtime_error,"AddBiQuadQuadsWithID - 10*aNbElems != anIndexes.length()");
     for(CORBA::Long anIndexId = 0; anElemId < aNbElems; anElemId++, anIndexId+=10){
       SMDS_MeshElement* anElem = theMesh->AddFaceWithID(anIndexes[anIndexId+1],
@@ -543,7 +544,7 @@ namespace
   {
     const SMESH::long_array& anIndexes = theSeq[theId].indexes;
     CORBA::Long anElemId = 0, aNbElems = theSeq[theId].number;
-    if(8*aNbElems != anIndexes.length())
+    if(8*aNbElems != (CORBA::Long) anIndexes.length())
       EXCEPTION(runtime_error,"AddBiQuadTriasWithID - 8*aNbElems != anIndexes.length()");
     for(CORBA::Long anIndexId = 0; anElemId < aNbElems; anElemId++, anIndexId+=8){
       SMDS_MeshElement* anElem = theMesh->AddFaceWithID(anIndexes[anIndexId+1],
@@ -569,7 +570,7 @@ namespace
   {
     const SMESH::long_array& anIndexes = theSeq[theId].indexes;
     CORBA::Long anElemId = 0, aNbElems = theSeq[theId].number;
-    if(11*aNbElems != anIndexes.length())
+    if(11*aNbElems != (CORBA::Long) anIndexes.length())
       EXCEPTION(runtime_error,"AddQuadTetrasWithID - 11*aNbElems != anIndexes.length()");
     for(CORBA::Long anIndexId = 0; anElemId < aNbElems; anElemId++, anIndexId+=11){
       SMDS_MeshElement* anElem = theMesh->AddVolumeWithID(anIndexes[anIndexId+1],
@@ -598,7 +599,7 @@ namespace
   {
     const SMESH::long_array& anIndexes = theSeq[theId].indexes;
     CORBA::Long anElemId = 0, aNbElems = theSeq[theId].number;
-    if(14*aNbElems != anIndexes.length())
+    if(14*aNbElems != (CORBA::Long) anIndexes.length())
       EXCEPTION(runtime_error,"AddQuadPiramidsWithID - 14*aNbElems != anIndexes.length()");
     for(CORBA::Long anIndexId = 0; anElemId < aNbElems; anElemId++, anIndexId+=14){
       SMDS_MeshElement* anElem = theMesh->AddVolumeWithID(anIndexes[anIndexId+1],
@@ -630,7 +631,7 @@ namespace
   {
     const SMESH::long_array& anIndexes = theSeq[theId].indexes;
     CORBA::Long anElemId = 0, aNbElems = theSeq[theId].number;
-    if(16*aNbElems != anIndexes.length())
+    if(16*aNbElems != (CORBA::Long) anIndexes.length())
       EXCEPTION(runtime_error,"AddQuadPentasWithID - 16*aNbElems != anIndexes.length()");
     for(CORBA::Long anIndexId = 0; anElemId < aNbElems; anElemId++, anIndexId+=16){
       SMDS_MeshElement* anElem = theMesh->AddVolumeWithID(anIndexes[anIndexId+1],
@@ -664,7 +665,7 @@ namespace
   {
     const SMESH::long_array& anIndexes = theSeq[theId].indexes;
     CORBA::Long anElemId = 0, aNbElems = theSeq[theId].number;
-    if(21*aNbElems != anIndexes.length())
+    if(21*aNbElems != (CORBA::Long) anIndexes.length())
       EXCEPTION(runtime_error,"AddQuadHexasWithID - 21*aNbElems != anIndexes.length()");
     for(CORBA::Long anIndexId = 0; anElemId < aNbElems; anElemId++, anIndexId+=21){
       SMDS_MeshElement* anElem = theMesh->AddVolumeWithID(anIndexes[anIndexId+1],
@@ -702,7 +703,7 @@ namespace
   {
     const SMESH::long_array& anIndexes = theSeq[theId].indexes;
     CORBA::Long anElemId = 0, aNbElems = theSeq[theId].number;
-    if(28*aNbElems != anIndexes.length())
+    if(28*aNbElems != (CORBA::Long) anIndexes.length())
       EXCEPTION(runtime_error,"AddTriQuadHexasWithID - 28*aNbElems != anIndexes.length()");
     for(CORBA::Long anIndexId = 0; anElemId < aNbElems; anElemId++, anIndexId+=28){
       SMDS_MeshElement* anElem = theMesh->AddVolumeWithID(anIndexes[anIndexId+1],
@@ -885,20 +886,22 @@ bool
 SMESH_Client::Update(bool theIsClear)
 {
   bool anIsModified = true;
-  if(mySMESHDSMesh){
-        MESSAGE("Update mySMESHDSMesh");
+  if(mySMESHDSMesh)
+  {
+    if ( MYDEBUG ) MESSAGE("Update mySMESHDSMesh");
     SMESHDS_Script* aScript = mySMESHDSMesh->GetScript();
     anIsModified = aScript->IsModified();
     aScript->SetModified(false);
-  }else{
-        MESSAGE("Update CORBA");
+  }
+  else
+  {
+    if ( MYDEBUG ) MESSAGE("Update CORBA");
     SMESH::log_array_var aSeq = myMeshServer->GetLog( theIsClear );
     CORBA::Long aLength = aSeq->length();
     anIsModified = aLength > 0;
-    if( MYDEBUG )
-      MESSAGE( "Update: length of the script is "<<aLength );
+    if ( MYDEBUG ) MESSAGE( "Update: length of the script is "<<aLength );
 
-    if(!anIsModified)
+    if ( !anIsModified )
       return false;
 
     // update client mesh structure by logged changes commands
@@ -972,7 +975,7 @@ SMESH_Client::Update(bool theIsClear)
             int nbNodes = anIndexes[i++];
             // nodes
             //ASSERT( nbNodes < 9 );
-            vector<const SMDS_MeshNode*> aNodes( nbNodes );
+            std::vector<const SMDS_MeshNode*> aNodes( nbNodes );
             for ( int iNode = 0; iNode < nbNodes; iNode++ )
               aNodes[ iNode ] = FindNode( mySMDSMesh, anIndexes[i++] );
             // change

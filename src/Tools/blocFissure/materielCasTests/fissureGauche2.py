@@ -1,4 +1,4 @@
-# -*- coding: iso-8859-1 -*-
+# -*- coding: utf-8 -*-
 
 import sys
 import salome
@@ -36,16 +36,18 @@ Extrusion_2 = geompy.MakePrismVecH(Circle_3, OZ, 1000)
 Partition_1 = geompy.MakePartition([Extrusion_1], [Extrusion_2], [], [], geompy.ShapeType["FACE"], 0, [], 0)
 [Face_1,Face_2] = geompy.SubShapes(Partition_1, [18, 13])
 FaceFissExt = geompy.MakeFuse(Face_2, Face_1)
-geompy.Export(FaceFissExt, os.path.join(gmu.pathBloc, "materielCasTests/faceGauche2Fiss.brep"), "BREP")
+geompy.ExportBREP(FaceFissExt, os.path.join(gmu.pathBloc, "materielCasTests/faceGauche2Fiss.brep"))
 Vertex_2 = geompy.MakeVertex(0, -500, 0)
 Vertex_3 = geompy.MakeVertex(400, 500, 800)
 objetSain = geompy.MakeBoxTwoPnt(Vertex_3, Vertex_2)
 Rotation_1 = geompy.MakeRotation(Extrusion_1, OX, 180*math.pi/180.0)
 Partition_2 = geompy.MakePartition([Rotation_1], [Extrusion_2], [], [], geompy.ShapeType["FACE"], 0, [], 0)
+geompy.addToStudy( Partition_2, 'Partition_2' )
 [FaceFissExtSimple] = geompy.SubShapes(Partition_2, [13])
+geompy.addToStudyInFather( Partition_2, FaceFissExtSimple, 'FaceFissExtSimple' )
 Plane_1 = geompy.MakePlaneLCS(None, 2000, 3)
 FaceFissExtCoupe = geompy.MakePartition([FaceFissExtSimple], [Plane_1], [], [], geompy.ShapeType["FACE"], 0, [], 0)
-geompy.Export(FaceFissExtCoupe, os.path.join(gmu.pathBloc, "materielCasTests/faceGauche2FissCoupe.brep"), "BREP")
+geompy.ExportBREP(FaceFissExtCoupe, os.path.join(gmu.pathBloc, "materielCasTests/faceGauche2FissCoupe.brep"))
 geompy.addToStudy( O, 'O' )
 geompy.addToStudy( OX, 'OX' )
 geompy.addToStudy( OY, 'OY' )
@@ -63,8 +65,6 @@ geompy.addToStudy( Vertex_2, 'Vertex_2' )
 geompy.addToStudy( Vertex_3, 'Vertex_3' )
 geompy.addToStudy( objetSain, 'objetSain' )
 geompy.addToStudy( Rotation_1, 'Rotation_1' )
-geompy.addToStudy( Partition_2, 'Partition_2' )
-geompy.addToStudyInFather( Partition_2, FaceFissExtSimple, 'FaceFissExtSimple' )
 geompy.addToStudy( Plane_1, 'Plane_1' )
 geompy.addToStudy( FaceFissExtCoupe, 'FaceFissExtCoupe' )
 

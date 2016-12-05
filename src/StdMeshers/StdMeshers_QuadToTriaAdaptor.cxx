@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -24,6 +24,7 @@
 
 #include "StdMeshers_QuadToTriaAdaptor.hxx"
 
+#include "SMDS_IteratorOnIterators.hxx"
 #include "SMDS_SetIterator.hxx"
 #include "SMESHDS_GroupBase.hxx"
 #include "SMESH_Algo.hxx"
@@ -33,9 +34,9 @@
 
 #include <IntAna_IntConicQuad.hxx>
 #include <IntAna_Quadric.hxx>
-#include <TColgp_HArray1OfPnt.hxx>
-#include <TColgp_HArray1OfVec.hxx>
-#include <TColgp_HSequenceOfPnt.hxx>
+#include <TColgp_Array1OfPnt.hxx>
+#include <TColgp_Array1OfVec.hxx>
+#include <TColgp_SequenceOfPnt.hxx>
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
 #include <gp_Lin.hxx>
@@ -115,20 +116,20 @@ namespace
     gp_Vec nJ = baseVec.Crossed( baJ );
 
     // Check angle between normals
-    double angle = nI.Angle( nJ );
+    double  angle = nI.Angle( nJ );
     bool tooClose = ( angle < 15. * M_PI / 180. );
 
     // Check if pyramids collide
     if ( !tooClose && ( baI * baJ > 0 ) && ( nI * nJ > 0 ))
     {
       // find out if nI points outside of PrmI or inside
-      int dInd = baseNodesIndI[1] - baseNodesIndI[0];
+      int    dInd = baseNodesIndI[1] - baseNodesIndI[0];
       bool isOutI = ( abs(dInd)==1 ) ? dInd < 0 : dInd > 0;
 
-      // find out sign of projection of nJ to baI
+      // find out sign of projection of baI to nJ
       double proj = baI * nJ;
 
-      tooClose = isOutI ? proj > 0 : proj < 0;
+      tooClose = ( isOutI ? proj > 0 : proj < 0 );
     }
 
     // Check if PrmI and PrmJ are in same domain
@@ -170,8 +171,9 @@ namespace
           continue; // f is a base quadrangle
 
         // check projections of face direction (baOFN) to triange normals (nI and nJ)
-        gp_Vec baOFN( base1, SMESH_TNodeXYZ( otherFaceNode ));
-        if ( nI * baOFN > 0 && nJ * baOFN > 0 )
+        gp_Vec baOFN( base2, SMESH_TNodeXYZ( otherFaceNode ));
+        if ( nI * baOFN > 0 && nJ * baOFN > 0 &&
+             baI* baOFN > 0 && baJ* baOFN > 0 ) // issue 0023212
         {
           tooClose = false; // f is between pyramids
           break;
@@ -253,7 +255,6 @@ namespace
       }
     }
   }
-
 }
 
 //================================================================================
@@ -266,6 +267,8 @@ void StdMeshers_QuadToTriaAdaptor::MergePiramids( const SMDS_MeshElement*     Pr
                                                   const SMDS_MeshElement*     PrmJ,
                                                   set<const SMDS_MeshNode*> & nodesToMove)
 {
+  // cout << endl << "Merge " << PrmI->GetID() << " " << PrmJ->GetID() << " "
+  //      << PrmI->GetNode(4) << PrmJ->GetNode(4) << endl;
   const SMDS_MeshNode* Nrem = PrmJ->GetNode(4); // node to remove
   //int nbJ = Nrem->NbInverseElements( SMDSAbs_Volume );
   SMESH_TNodeXYZ Pj( Nrem );
@@ -288,7 +291,7 @@ void StdMeshers_QuadToTriaAdaptor::MergePiramids( const SMDS_MeshElement*     Pr
   vector< const SMDS_MeshElement* > inverseElems
     // copy inverse elements to avoid iteration on changing container
     ( TStdElemIterator( CommonNode->GetInverseElementIterator(SMDSAbs_Face)), itEnd);
-  for ( unsigned i = 0; i < inverseElems.size(); ++i )
+  for ( size_t i = 0; i < inverseElems.size(); ++i )
   {
     const SMDS_MeshElement* FI = inverseElems[i];
     const SMDS_MeshElement* FJEqual = 0;
@@ -309,11 +312,12 @@ void StdMeshers_QuadToTriaAdaptor::MergePiramids( const SMDS_MeshElement*     Pr
   }
 
   // set the common apex node to pyramids and triangles merged with J
+  vector< const SMDS_MeshNode* > nodes;
   inverseElems.assign( TStdElemIterator( Nrem->GetInverseElementIterator()), itEnd );
-  for ( unsigned i = 0; i < inverseElems.size(); ++i )
+  for ( size_t i = 0; i < inverseElems.size(); ++i )
   {
     const SMDS_MeshElement* elem = inverseElems[i];
-    vector< const SMDS_MeshNode* > nodes( elem->begin_nodes(), elem->end_nodes() );
+    nodes.assign( elem->begin_nodes(), elem->end_nodes() );
     nodes[ elem->GetType() == SMDSAbs_Volume ? PYRAM_APEX : TRIA_APEX ] = CommonNode;
     GetMeshDS()->ChangeElementNodes( elem, &nodes[0], nodes.size());
   }
@@ -330,33 +334,34 @@ void StdMeshers_QuadToTriaAdaptor::MergePiramids( const SMDS_MeshElement*     Pr
 //================================================================================
 
 void StdMeshers_QuadToTriaAdaptor::MergeAdjacent(const SMDS_MeshElement*    PrmI,
-                                                 set<const SMDS_MeshNode*>& nodesToMove)
+                                                 set<const SMDS_MeshNode*>& nodesToMove,
+                                                 const bool                 isRecursion)
 {
   TIDSortedElemSet adjacentPyrams;
   bool mergedPyrams = false;
-  for(int k=0; k<4; k++) // loop on 4 base nodes of PrmI
+  for ( int k=0; k<4; k++ ) // loop on 4 base nodes of PrmI
   {
-    const SMDS_MeshNode* n = PrmI->GetNode(k);
+    const SMDS_MeshNode*   n = PrmI->GetNode(k);
     SMDS_ElemIteratorPtr vIt = n->GetInverseElementIterator( SMDSAbs_Volume );
     while ( vIt->more() )
     {
       const SMDS_MeshElement* PrmJ = vIt->next();
-      if ( PrmJ->NbCornerNodes() != 5 || !adjacentPyrams.insert( PrmJ ).second  )
+      if ( PrmJ == PrmI || PrmJ->NbCornerNodes() != 5 || !adjacentPyrams.insert( PrmJ ).second  )
         continue;
-      if ( PrmI != PrmJ && TooCloseAdjacent( PrmI, PrmJ, GetMesh()->HasShapeToMesh() ))
+      if ( TooCloseAdjacent( PrmI, PrmJ, GetMesh()->HasShapeToMesh() ))
       {
         MergePiramids( PrmI, PrmJ, nodesToMove );
         mergedPyrams = true;
         // container of inverse elements can change
-        vIt = n->GetInverseElementIterator( SMDSAbs_Volume );
+        // vIt = n->GetInverseElementIterator( SMDSAbs_Volume ); -- iterator re-implemented
       }
     }
   }
-  if ( mergedPyrams )
+  if ( mergedPyrams && !isRecursion )
   {
     TIDSortedElemSet::iterator prm;
     for (prm = adjacentPyrams.begin(); prm != adjacentPyrams.end(); ++prm)
-      MergeAdjacent( *prm, nodesToMove );
+      MergeAdjacent( *prm, nodesToMove, true );
   }
 }
 
@@ -414,79 +419,58 @@ static gp_Pnt FindBestPoint(const gp_Pnt& P1, const gp_Pnt& P2,
 
 //=======================================================================
 //function : HasIntersection3
-//purpose  : Auxilare for HasIntersection()
-//           find intersection point between triangle (P1,P2,P3)
-//           and segment [PC,P]
+//purpose  : Find intersection point between a triangle (P1,P2,P3)
+//           and a segment [PC,P]
 //=======================================================================
 
 static bool HasIntersection3(const gp_Pnt& P, const gp_Pnt& PC, gp_Pnt& Pint,
                              const gp_Pnt& P1, const gp_Pnt& P2, const gp_Pnt& P3)
 {
-  //cout<<"HasIntersection3"<<endl;
-  //cout<<"  PC("<<PC.X()<<","<<PC.Y()<<","<<PC.Z()<<")"<<endl;
-  //cout<<"  P("<<P.X()<<","<<P.Y()<<","<<P.Z()<<")"<<endl;
-  //cout<<"  P1("<<P1.X()<<","<<P1.Y()<<","<<P1.Z()<<")"<<endl;
-  //cout<<"  P2("<<P2.X()<<","<<P2.Y()<<","<<P2.Z()<<")"<<endl;
-  //cout<<"  P3("<<P3.X()<<","<<P3.Y()<<","<<P3.Z()<<")"<<endl;
-  gp_Vec VP1(P1,P2);
-  gp_Vec VP2(P1,P3);
-  IntAna_Quadric IAQ(gp_Pln(P1,VP1.Crossed(VP2)));
-  IntAna_IntConicQuad IAICQ(gp_Lin(PC,gp_Dir(gp_Vec(PC,P))),IAQ);
-  if(IAICQ.IsDone()) {
-    if( IAICQ.IsInQuadric() )
-      return false;
-    if( IAICQ.NbPoints() == 1 ) {
-      gp_Pnt PIn = IAICQ.Point(1);
-      const double preci = 1.e-10 * P.Distance(PC);
-      // check if this point is internal for segment [PC,P]
-      bool IsExternal =
-        ( (PC.X()-PIn.X())*(P.X()-PIn.X()) > preci ) ||
-        ( (PC.Y()-PIn.Y())*(P.Y()-PIn.Y()) > preci ) ||
-        ( (PC.Z()-PIn.Z())*(P.Z()-PIn.Z()) > preci );
-      if(IsExternal) {
-        return false;
-      }
-      // check if this point is internal for triangle (P1,P2,P3)
-      gp_Vec V1(PIn,P1);
-      gp_Vec V2(PIn,P2);
-      gp_Vec V3(PIn,P3);
-      if( V1.Magnitude()<preci ||
-          V2.Magnitude()<preci ||
-          V3.Magnitude()<preci ) {
-        Pint = PIn;
-        return true;
-      }
-      const double angularTol = 1e-6;
-      gp_Vec VC1 = V1.Crossed(V2);
-      gp_Vec VC2 = V2.Crossed(V3);
-      gp_Vec VC3 = V3.Crossed(V1);
-      if(VC1.Magnitude()<gp::Resolution()) {
-        if(VC2.IsOpposite(VC3,angularTol)) {
-          return false;
-        }
-      }
-      else if(VC2.Magnitude()<gp::Resolution()) {
-        if(VC1.IsOpposite(VC3,angularTol)) {
-          return false;
-        }
-      }
-      else if(VC3.Magnitude()<gp::Resolution()) {
-        if(VC1.IsOpposite(VC2,angularTol)) {
-          return false;
-        }
-      }
-      else {
-        if( VC1.IsOpposite(VC2,angularTol) || VC1.IsOpposite(VC3,angularTol) ||
-            VC2.IsOpposite(VC3,angularTol) ) {
-          return false;
-        }
-      }
-      Pint = PIn;
-      return true;
-    }
-  }
+  const double EPSILON = 1e-6;
+  double segLen = P.Distance( PC );
 
-  return false;
+  gp_XYZ  orig = PC.XYZ();
+  gp_XYZ   dir = ( P.XYZ() - PC.XYZ() ) / segLen;
+  gp_XYZ vert0 = P1.XYZ();
+  gp_XYZ vert1 = P2.XYZ();
+  gp_XYZ vert2 = P3.XYZ();
+
+  /* calculate distance from vert0 to ray origin */
+  gp_XYZ  tvec = orig - vert0;
+
+  gp_XYZ edge1 = vert1 - vert0;
+  gp_XYZ edge2 = vert2 - vert0;
+
+  /* begin calculating determinant - also used to calculate U parameter */
+  gp_XYZ pvec = dir ^ edge2;
+
+  /* if determinant is near zero, ray lies in plane of triangle */
+  double det = edge1 * pvec;
+
+  if (det > -EPSILON && det < EPSILON)
+    return false;
+
+  /* calculate U parameter and test bounds */
+  double u = ( tvec * pvec ) / det;
+  //if (u < 0.0 || u > 1.0)
+  if (u < -EPSILON || u > 1.0 + EPSILON)
+    return false;
+
+  /* prepare to test V parameter */
+  gp_XYZ qvec = tvec ^ edge1;
+
+  /* calculate V parameter and test bounds */
+  double v = (dir * qvec) / det;
+  //if ( v < 0.0 || u + v > 1.0 )
+  if ( v < -EPSILON || u + v > 1.0 + EPSILON)
+    return false;
+
+  /* calculate t, ray intersects triangle */
+  double t = (edge2 * qvec) / det;
+
+  Pint = orig + dir * t;
+
+  return ( t > 0.  &&  t < segLen );
 }
 
 //=======================================================================
@@ -495,26 +479,23 @@ static bool HasIntersection3(const gp_Pnt& P, const gp_Pnt& PC, gp_Pnt& Pint,
 //=======================================================================
 
 static bool HasIntersection(const gp_Pnt& P, const gp_Pnt& PC, gp_Pnt& Pint,
-                            Handle(TColgp_HSequenceOfPnt)& aContour)
+                            TColgp_SequenceOfPnt& aContour)
 {
-  if(aContour->Length()==3) {
-    return HasIntersection3( P, PC, Pint, aContour->Value(1),
-                             aContour->Value(2), aContour->Value(3) );
+  if ( aContour.Length() == 3 ) {
+    return HasIntersection3( P, PC, Pint, aContour(1), aContour(2), aContour(3) );
   }
   else {
     bool check = false;
-    if( (aContour->Value(1).Distance(aContour->Value(2)) > 1.e-6) &&
-        (aContour->Value(1).Distance(aContour->Value(3)) > 1.e-6) &&
-        (aContour->Value(2).Distance(aContour->Value(3)) > 1.e-6) ) {
-      check = HasIntersection3( P, PC, Pint, aContour->Value(1),
-                                aContour->Value(2), aContour->Value(3) );
+    if( (aContour(1).Distance(aContour(2)) > 1.e-6) &&
+        (aContour(1).Distance(aContour(3)) > 1.e-6) &&
+        (aContour(2).Distance(aContour(3)) > 1.e-6) ) {
+      check = HasIntersection3( P, PC, Pint, aContour(1), aContour(2), aContour(3) );
     }
     if(check) return true;
-    if( (aContour->Value(1).Distance(aContour->Value(4)) > 1.e-6) &&
-        (aContour->Value(1).Distance(aContour->Value(3)) > 1.e-6) &&
-        (aContour->Value(4).Distance(aContour->Value(3)) > 1.e-6) ) {
-      check = HasIntersection3( P, PC, Pint, aContour->Value(1),
-                                aContour->Value(3), aContour->Value(4) );
+    if( (aContour(1).Distance(aContour(4)) > 1.e-6) &&
+        (aContour(1).Distance(aContour(3)) > 1.e-6) &&
+        (aContour(4).Distance(aContour(3)) > 1.e-6) ) {
+      check = HasIntersection3( P, PC, Pint, aContour(1), aContour(3), aContour(4) );
     }
     if(check) return true;
   }
@@ -524,55 +505,99 @@ static bool HasIntersection(const gp_Pnt& P, const gp_Pnt& PC, gp_Pnt& Pint,
 
 //================================================================================
 /*!
- * \brief Checks if a line segment (P,PC) intersects any mesh face.
- *  \param P - first segment end
- *  \param PC - second segment end (it is a gravity center of quadrangle)
- *  \param Pint - (out) intersection point
+ * \brief Return allowed height of a pyramid
+ *  \param Papex - optimal pyramid apex
+ *  \param PC - gravity center of a quadrangle
+ *  \param PN - four nodes of the quadrangle
  *  \param aMesh - mesh
- *  \param aShape - shape to check faces on
- *  \param NotCheckedFace - mesh face not to check
- *  \retval bool - true if there is an intersection
+ *  \param NotCheckedFace - the quadrangle face
+ *  \retval double - pyramid height
  */
 //================================================================================
 
-bool StdMeshers_QuadToTriaAdaptor::CheckIntersection (const gp_Pnt&       P,
-                                                      const gp_Pnt&       PC,
-                                                      gp_Pnt&             Pint,
-                                                      SMESH_Mesh&         aMesh,
-                                                      const TopoDS_Shape& aShape,
-                                                      const SMDS_MeshElement* NotCheckedFace)
+void StdMeshers_QuadToTriaAdaptor::LimitHeight (gp_Pnt&                             Papex,
+                                                const gp_Pnt&                       PC,
+                                                const TColgp_Array1OfPnt&           PN,
+                                                const vector<const SMDS_MeshNode*>& FNodes,
+                                                SMESH_Mesh&                         aMesh,
+                                                const SMDS_MeshElement*             NotCheckedFace,
+                                                const bool                          UseApexRay)
 {
   if ( !myElemSearcher )
     myElemSearcher = SMESH_MeshAlgos::GetElementSearcher( *aMesh.GetMeshDS() );
   SMESH_ElementSearcher* searcher = const_cast<SMESH_ElementSearcher*>(myElemSearcher);
 
-  //SMESHDS_Mesh * meshDS = aMesh.GetMeshDS();
-  //cout<<"    CheckIntersection: meshDS->NbFaces() = "<<meshDS->NbFaces()<<endl;
-  bool res = false;
-  double dist = RealLast(); // find intersection closest to the segment
-  gp_Pnt Pres;
+  // Find intersection of faces with (P,PC) segment elongated 3 times
 
-  gp_Ax1 line( P, gp_Vec(P,PC));
-  vector< const SMDS_MeshElement* > suspectElems;
-  searcher->GetElementsNearLine( line, SMDSAbs_Face, suspectElems);
+  double height = Papex.Distance( PC );
+  gp_Ax1 line( PC, gp_Vec( PC, Papex ));
+  gp_Pnt Pint, Ptest;
+  vector< const SMDS_MeshElement* > suspectFaces;
+  TColgp_SequenceOfPnt aContour;
 
-  for ( int i = 0; i < suspectElems.size(); ++i )
+  if ( UseApexRay )
   {
-    const SMDS_MeshElement* face = suspectElems[i];
-    if ( face == NotCheckedFace ) continue;
-    Handle(TColgp_HSequenceOfPnt) aContour = new TColgp_HSequenceOfPnt;
-    for ( int i = 0; i < face->NbCornerNodes(); ++i )
-      aContour->Append( SMESH_TNodeXYZ( face->GetNode(i) ));
-    if( HasIntersection(P, PC, Pres, aContour) ) {
-      res = true;
-      double tmp = PC.Distance(Pres);
-      if(tmp<dist) {
-        Pint = Pres;
-        dist = tmp;
+    // find intersection closest to PC
+    Ptest = PC.XYZ() + line.Direction().XYZ() * height * 3;
+
+    searcher->GetElementsNearLine( line, SMDSAbs_Face, suspectFaces );
+    for ( size_t iF = 0; iF < suspectFaces.size(); ++iF )
+    {
+      const SMDS_MeshElement* face = suspectFaces[iF];
+      if ( face == NotCheckedFace ) continue;
+
+      aContour.Clear();
+      for ( int i = 0, nb = face->NbCornerNodes(); i < nb; ++i )
+        aContour.Append( SMESH_TNodeXYZ( face->GetNode(i) ));
+
+      if ( HasIntersection( Ptest, PC, Pint, aContour ))
+      {
+        double dInt = PC.Distance( Pint );
+        height = Min( height, dInt / 3. );
       }
     }
   }
-  return res;
+
+  // Find faces intersecting triangular facets of the pyramid (issue 23212)
+
+  gp_XYZ center   = PC.XYZ() + line.Direction().XYZ() * height * 0.5;
+  double diameter = Max( PN(1).Distance(PN(3)), PN(2).Distance(PN(4)));
+  suspectFaces.clear();
+  searcher->GetElementsInSphere( center, diameter * 0.6, SMDSAbs_Face, suspectFaces);
+
+  const double upShift = 1.5;
+  Ptest = PC.XYZ() + line.Direction().XYZ() * height * upShift; // tmp apex
+
+  for ( size_t iF = 0; iF < suspectFaces.size(); ++iF )
+  {
+    const SMDS_MeshElement* face = suspectFaces[iF];
+    if ( face == NotCheckedFace ) continue;
+    if ( face->GetNodeIndex( FNodes[0] ) >= 0 ||
+         face->GetNodeIndex( FNodes[1] ) >= 0 ||
+         face->GetNodeIndex( FNodes[2] ) >= 0 ||
+         face->GetNodeIndex( FNodes[3] ) >= 0 )
+      continue; // neighbor face of the quadrangle
+
+    // limit height using points of intersection of face links with pyramid facets
+    int   nbN = face->NbCornerNodes();
+    gp_Pnt P1 = SMESH_TNodeXYZ( face->GetNode( nbN-1 )); // 1st link end
+    for ( int i = 0; i < nbN; ++i )
+    {
+      gp_Pnt P2 = SMESH_TNodeXYZ( face->GetNode(i) );    // 2nd link end
+
+      for ( int iN = 1; iN <= 4; ++iN ) // loop on pyramid facets
+      {
+        if ( HasIntersection3( P1, P2, Pint, PN(iN), PN(iN+1), Ptest ))
+        {
+          height = Min( height, gp_Vec( PC, Pint ) * line.Direction() );
+          //Ptest = PC.XYZ() + line.Direction().XYZ() * height * upShift; // new tmp apex
+        }
+      }
+      P1 = P2;
+    }
+  }
+
+  Papex  = PC.XYZ() + line.Direction().XYZ() * height;
 }
 
 //================================================================================
@@ -591,8 +616,8 @@ bool StdMeshers_QuadToTriaAdaptor::CheckIntersection (const gp_Pnt&       P,
 //================================================================================
 
 int StdMeshers_QuadToTriaAdaptor::Preparation(const SMDS_MeshElement*       face,
-                                              Handle(TColgp_HArray1OfPnt)&  PN,
-                                              Handle(TColgp_HArray1OfVec)&  VN,
+                                              TColgp_Array1OfPnt&           PN,
+                                              TColgp_Array1OfVec&           VN,
                                               vector<const SMDS_MeshNode*>& FNodes,
                                               gp_Pnt&                       PC,
                                               gp_Vec&                       VNorm,
@@ -608,7 +633,7 @@ int StdMeshers_QuadToTriaAdaptor::Preparation(const SMDS_MeshElement*       face
   for ( i = 0; i < 4; ++i )
   {
     gp_XYZ p = SMESH_TNodeXYZ( FNodes[i] = face->GetNode(i) );
-    PN->SetValue( i+1, p );
+    PN.SetValue( i+1, p );
     xyzC += p;
   }
   PC = xyzC/4;
@@ -619,7 +644,7 @@ int StdMeshers_QuadToTriaAdaptor::Preparation(const SMDS_MeshElement*       face
   for(i=1; i<4; i++) {
     j = i+1;
     for(; j<=4; j++) {
-      if( PN->Value(i).Distance(PN->Value(j)) < 1.e-6 )
+      if( PN(i).Distance(PN(j)) < 1.e-6 )
         break;
     }
     if(j<=4) break;
@@ -630,7 +655,7 @@ int StdMeshers_QuadToTriaAdaptor::Preparation(const SMDS_MeshElement*       face
   if(i<4) {
     //cout<<"find degeneration"<<endl;
     hasdeg = true;
-    gp_Pnt Pdeg = PN->Value(i);
+    gp_Pnt Pdeg = PN(i);
 
     list< const SMDS_MeshNode* >::iterator itdg = myDegNodes.begin();
     const SMDS_MeshNode* DegNode = 0;
@@ -651,24 +676,24 @@ int StdMeshers_QuadToTriaAdaptor::Preparation(const SMDS_MeshElement*       face
       FNodes[i-1] = DegNode;
     }
     for(i=j; i<4; i++) {
-      PN->SetValue(i,PN->Value(i+1));
+      PN.SetValue(i,PN.Value(i+1));
       FNodes[i-1] = FNodes[i];
     }
     nbp = 3;
   }
 
-  PN->SetValue(nbp+1,PN->Value(1));
+  PN.SetValue(nbp+1,PN(1));
   FNodes[nbp] = FNodes[0];
   // find normal direction
-  gp_Vec V1(PC,PN->Value(nbp));
-  gp_Vec V2(PC,PN->Value(1));
+  gp_Vec V1(PC,PN(nbp));
+  gp_Vec V2(PC,PN(1));
   VNorm = V1.Crossed(V2);
-  VN->SetValue(nbp,VNorm);
+  VN.SetValue(nbp,VNorm);
   for(i=1; i<nbp; i++) {
-    V1 = gp_Vec(PC,PN->Value(i));
-    V2 = gp_Vec(PC,PN->Value(i+1));
+    V1 = gp_Vec(PC,PN(i));
+    V2 = gp_Vec(PC,PN(i+1));
     gp_Vec Vtmp = V1.Crossed(V2);
-    VN->SetValue(i,Vtmp);
+    VN.SetValue(i,Vtmp);
     VNorm += Vtmp;
   }
 
@@ -724,25 +749,36 @@ bool StdMeshers_QuadToTriaAdaptor::Compute(SMESH_Mesh&         aMesh,
 
   vector<const SMDS_MeshElement*> myPyramids;
 
+  const SMESHDS_SubMesh * aSubMeshDSFace;
   SMESHDS_Mesh * meshDS = aMesh.GetMeshDS();
   SMESH_MesherHelper helper(aMesh);
   helper.IsQuadraticSubMesh(aShape);
   helper.SetElementsOnShape( true );
 
   if ( myElemSearcher ) delete myElemSearcher;
+  vector< SMDS_ElemIteratorPtr > itVec;
   if ( aProxyMesh )
-    myElemSearcher = SMESH_MeshAlgos::GetElementSearcher( *meshDS, aProxyMesh->GetFaces(aShape));
+  {
+    itVec.push_back( aProxyMesh->GetFaces( aShape ));
+  }
   else
-    myElemSearcher = SMESH_MeshAlgos::GetElementSearcher( *meshDS );
+  {
+    for ( TopExp_Explorer exp(aShape,TopAbs_FACE); exp.More(); exp.Next() )
+      if (( aSubMeshDSFace = meshDS->MeshElements( exp.Current() )))
+        itVec.push_back( aSubMeshDSFace->GetElements() );
+  }
+  typedef
+    SMDS_IteratorOnIterators< const SMDS_MeshElement*, vector< SMDS_ElemIteratorPtr > > TIter;
+  SMDS_ElemIteratorPtr faceIt( new TIter( itVec ));
+  myElemSearcher = SMESH_MeshAlgos::GetElementSearcher( *meshDS, faceIt );
 
-  const SMESHDS_SubMesh * aSubMeshDSFace;
-  Handle(TColgp_HArray1OfPnt) PN = new TColgp_HArray1OfPnt(1,5);
-  Handle(TColgp_HArray1OfVec) VN = new TColgp_HArray1OfVec(1,4);
+  TColgp_Array1OfPnt PN(1,5);
+  TColgp_Array1OfVec VN(1,4);
   vector<const SMDS_MeshNode*> FNodes(5);
   gp_Pnt PC;
   gp_Vec VNorm;
 
-  for (TopExp_Explorer exp(aShape,TopAbs_FACE);exp.More();exp.Next())
+  for ( TopExp_Explorer exp(aShape,TopAbs_FACE); exp.More(); exp.Next() )
   {
     const TopoDS_Shape& aShapeFace = exp.Current();
     if ( aProxyMesh )
@@ -796,9 +832,9 @@ bool StdMeshers_QuadToTriaAdaptor::Compute(SMESH_Mesh&         aMesh,
             for(; i<=4; i++) {
               gp_Pnt Pbest;
               if(!isRev)
-                Pbest = FindBestPoint(PN->Value(i), PN->Value(i+1), PC, VN->Value(i).Reversed());
+                Pbest = FindBestPoint(PN(i), PN(i+1), PC, VN(i).Reversed());
               else
-                Pbest = FindBestPoint(PN->Value(i), PN->Value(i+1), PC, VN->Value(i));
+                Pbest = FindBestPoint(PN(i), PN(i+1), PC, VN(i));
               xc += Pbest.X();
               yc += Pbest.Y();
               zc += Pbest.Z();
@@ -807,33 +843,13 @@ bool StdMeshers_QuadToTriaAdaptor::Compute(SMESH_Mesh&         aMesh,
 
             // check PCbest
             double height = PCbest.Distance(PC);
-            if(height<1.e-6) {
+            if ( height < 1.e-6 ) {
               // create new PCbest using a bit shift along VNorm
               PCbest = PC.XYZ() + VNorm.XYZ() * 0.001;
             }
             else {
               // check possible intersection with other faces
-              gp_Pnt Pint;
-              bool check = CheckIntersection(PCbest, PC, Pint, aMesh, aShape, face);
-              if(check) {
-                //cout<<"--PC("<<PC.X()<<","<<PC.Y()<<","<<PC.Z()<<")"<<endl;
-                //cout<<"  PCbest("<<PCbest.X()<<","<<PCbest.Y()<<","<<PCbest.Z()<<")"<<endl;
-                double dist = PC.Distance(Pint)/3.;
-                gp_Dir aDir(gp_Vec(PC,PCbest));
-                PCbest = PC.XYZ() + aDir.XYZ() * dist;
-              }
-              else {
-                gp_Vec VB(PC,PCbest);
-                gp_Pnt PCbestTmp = PC.XYZ() + VB.XYZ() * 3.0;
-                check = CheckIntersection(PCbestTmp, PC, Pint, aMesh, aShape, face);
-                if(check) {
-                  double dist = PC.Distance(Pint)/3.;
-                  if(dist<height) {
-                    gp_Dir aDir(gp_Vec(PC,PCbest));
-                    PCbest = PC.XYZ() + aDir.XYZ() * dist;
-                  }
-                }
-              }
+              LimitHeight( PCbest, PC, PN, FNodes, aMesh, face, /*UseApexRay=*/true );
             }
             // create node for PCbest
             SMDS_MeshNode* NewNode = helper.AddNode( PCbest.X(), PCbest.Y(), PCbest.Z() );
@@ -945,15 +961,17 @@ bool StdMeshers_QuadToTriaAdaptor::Compute(SMESH_Mesh& aMesh)
     myElemSearcher = SMESH_MeshAlgos::GetElementSearcher( *meshDS );
   SMESH_ElementSearcher* searcher = const_cast<SMESH_ElementSearcher*>(myElemSearcher);
 
+  TColgp_Array1OfPnt PN(1,5);
+  TColgp_Array1OfVec VN(1,4);
+  vector<const SMDS_MeshNode*> FNodes(5);
+  TColgp_SequenceOfPnt aContour;
+
   SMDS_FaceIteratorPtr fIt = meshDS->facesIterator(/*idInceasingOrder=*/true);
   while( fIt->more())
   {
     const SMDS_MeshElement* face = fIt->next();
     if ( !face ) continue;
     // retrieve needed information about a face
-    Handle(TColgp_HArray1OfPnt) PN = new TColgp_HArray1OfPnt(1,5);
-    Handle(TColgp_HArray1OfVec) VN = new TColgp_HArray1OfVec(1,4);
-    vector<const SMDS_MeshNode*> FNodes(5);
     gp_Pnt PC;
     gp_Vec VNorm;
     const SMDS_MeshElement* volumes[2];
@@ -970,7 +988,7 @@ bool StdMeshers_QuadToTriaAdaptor::Compute(SMESH_Mesh& aMesh)
       SMDS_MeshFace* NewFace;
 
       // check orientation
-      double tmp = PN->Value(1).Distance(PN->Value(2)) + PN->Value(2).Distance(PN->Value(3));
+      double tmp = PN(1).Distance(PN(2)) + PN(2).Distance(PN(3));
       // far points in VNorm direction
       gp_Pnt Ptmp1 = PC.XYZ() + VNorm.XYZ() * tmp * 1.e6;
       gp_Pnt Ptmp2 = PC.XYZ() - VNorm.XYZ() * tmp * 1.e6;
@@ -983,28 +1001,28 @@ bool StdMeshers_QuadToTriaAdaptor::Compute(SMESH_Mesh& aMesh)
       gp_Pnt Pres1,Pres2;
 
       gp_Ax1 line( PC, VNorm );
-      vector< const SMDS_MeshElement* > suspectElems;
-      searcher->GetElementsNearLine( line, SMDSAbs_Face, suspectElems);
+      vector< const SMDS_MeshElement* > suspectFaces;
+      searcher->GetElementsNearLine( line, SMDSAbs_Face, suspectFaces);
 
-      for ( int iF = 0; iF < suspectElems.size(); ++iF ) {
-        const SMDS_MeshElement* F = suspectElems[iF];
-        if(F==face) continue;
-        Handle(TColgp_HSequenceOfPnt) aContour = new TColgp_HSequenceOfPnt;
+      for ( size_t iF = 0; iF < suspectFaces.size(); ++iF ) {
+        const SMDS_MeshElement* F = suspectFaces[iF];
+        if ( F == face ) continue;
+        aContour.Clear();
         for ( int i = 0; i < 4; ++i )
-          aContour->Append( SMESH_TNodeXYZ( F->GetNode(i) ));
+          aContour.Append( SMESH_TNodeXYZ( F->GetNode(i) ));
         gp_Pnt PPP;
-        if( !volumes[0] && HasIntersection(Ptmp1, PC, PPP, aContour) ) {
+        if ( !volumes[0] && HasIntersection( Ptmp1, PC, PPP, aContour )) {
           IsOK1 = true;
           double tmp = PC.Distance(PPP);
-          if(tmp<dist1) {
+          if ( tmp < dist1 ) {
             Pres1 = PPP;
             dist1 = tmp;
           }
         }
-        if( !volumes[1] && HasIntersection(Ptmp2, PC, PPP, aContour) ) {
+        if ( !volumes[1] && HasIntersection( Ptmp2, PC, PPP, aContour )) {
           IsOK2 = true;
           double tmp = PC.Distance(PPP);
-          if(tmp<dist2) {
+          if ( tmp < dist2 ) {
             Pres2 = PPP;
             dist2 = tmp;
           }
@@ -1038,14 +1056,16 @@ bool StdMeshers_QuadToTriaAdaptor::Compute(SMESH_Mesh& aMesh)
       continue;
     }
 
+    // -----------------------------------
     // Case of non-degenerated quadrangle
+    // -----------------------------------
 
     // Find pyramid peak
 
     gp_XYZ PCbest(0., 0., 0.); // pyramid peak
     int i = 1;
-    for(; i<=4; i++) {
-      gp_Pnt Pbest = FindBestPoint(PN->Value(i), PN->Value(i+1), PC, VN->Value(i));
+    for ( ; i <= 4; i++ ) {
+      gp_Pnt Pbest = FindBestPoint(PN(i), PN(i+1), PC, VN(i));
       PCbest += Pbest.XYZ();
     }
     PCbest /= 4;
@@ -1061,7 +1081,7 @@ bool StdMeshers_QuadToTriaAdaptor::Compute(SMESH_Mesh& aMesh)
 
     // Restrict pyramid height by intersection with other faces
     gp_Vec tmpDir(PC,PCbest); tmpDir.Normalize();
-    double tmp = PN->Value(1).Distance(PN->Value(3)) + PN->Value(2).Distance(PN->Value(4));
+    double tmp = PN(1).Distance(PN(3)) + PN(2).Distance(PN(4));
     // far points: in (PC, PCbest) direction and vice-versa
     gp_Pnt farPnt[2] = { PC.XYZ() + tmpDir.XYZ() * tmp * 1.e6,
                          PC.XYZ() - tmpDir.XYZ() * tmp * 1.e6 };
@@ -1071,17 +1091,17 @@ bool StdMeshers_QuadToTriaAdaptor::Compute(SMESH_Mesh& aMesh)
     gp_Pnt intPnt[2];
 
     gp_Ax1 line( PC, tmpDir );
-    vector< const SMDS_MeshElement* > suspectElems;
-    searcher->GetElementsNearLine( line, SMDSAbs_Face, suspectElems);
+    vector< const SMDS_MeshElement* > suspectFaces;
+    searcher->GetElementsNearLine( line, SMDSAbs_Face, suspectFaces);
 
-    for ( int iF = 0; iF < suspectElems.size(); ++iF )
+    for ( size_t iF = 0; iF < suspectFaces.size(); ++iF )
     {
-      const SMDS_MeshElement* F = suspectElems[iF];
-      if(F==face) continue;
-      Handle(TColgp_HSequenceOfPnt) aContour = new TColgp_HSequenceOfPnt;
-      int nbN = F->NbNodes() / ( F->IsQuadratic() ? 2 : 1 );
+      const SMDS_MeshElement* F = suspectFaces[iF];
+      if ( F == face ) continue;
+      aContour.Clear();
+      int nbN = F->NbCornerNodes();
       for ( i = 0; i < nbN; ++i )
-        aContour->Append( SMESH_TNodeXYZ( F->GetNode(i) ));
+        aContour.Append( SMESH_TNodeXYZ( F->GetNode(i) ));
       gp_Pnt intP;
       for ( int isRev = 0; isRev < 2; ++isRev )
       {
@@ -1121,13 +1141,15 @@ bool StdMeshers_QuadToTriaAdaptor::Compute(SMESH_Mesh& aMesh)
     {
       if( !intersected[isRev] ) continue;
       double pyramidH = Min( height, PC.Distance(intPnt[isRev])/3.);
-      PCbest = PC.XYZ() + tmpDir.XYZ() * (isRev ? -pyramidH : pyramidH);
+      gp_Pnt Papex = PC.XYZ() + tmpDir.XYZ() * (isRev ? -pyramidH : pyramidH);
 
-      // create node for PCbest
-      SMDS_MeshNode* NewNode = helper.AddNode( PCbest.X(), PCbest.Y(), PCbest.Z() );
+      LimitHeight( Papex, PC, PN, FNodes, aMesh, face, /*UseApexRay=*/false );
+
+      // create node for Papex
+      SMDS_MeshNode* NewNode = helper.AddNode( Papex.X(), Papex.Y(), Papex.Z() );
 
       // add triangles to result map
-      for(i=0; i<4; i++) {
+      for ( i = 0; i < 4; i++) {
         SMDS_MeshFace* NewFace;
         if(isRev)
           NewFace = meshDS->AddFace( NewNode, FNodes[i], FNodes[i+1] );
@@ -1158,15 +1180,19 @@ bool StdMeshers_QuadToTriaAdaptor::Compute(SMESH_Mesh& aMesh)
 bool StdMeshers_QuadToTriaAdaptor::Compute2ndPart(SMESH_Mesh&                            aMesh,
                                                   const vector<const SMDS_MeshElement*>& myPyramids)
 {
-  if(myPyramids.empty())
+  if ( myPyramids.empty() )
     return true;
 
   SMESHDS_Mesh * meshDS = aMesh.GetMeshDS();
-  int i, j, k, myShapeID = myPyramids[0]->GetNode(4)->getshapeId();
-
-  if ( myElemSearcher ) delete myElemSearcher;
-  myElemSearcher = SMESH_MeshAlgos::GetElementSearcher( *meshDS );
-  SMESH_ElementSearcher* searcher = const_cast<SMESH_ElementSearcher*>(myElemSearcher);
+  size_t i, j, k;
+  //int myShapeID = myPyramids[0]->GetNode(4)->getshapeId();
+  {
+    SMDS_ElemIteratorPtr
+      pyramIt( new SMDS_ElementVectorIterator( myPyramids.begin(), myPyramids.end() ));
+    if ( myElemSearcher ) delete myElemSearcher;
+    myElemSearcher = SMESH_MeshAlgos::GetElementSearcher( *meshDS, pyramIt );
+  }
+  SMESH_ElementSearcher* searcher = const_cast<SMESH_ElementSearcher*>( myElemSearcher );
 
   set<const SMDS_MeshNode*> nodesToMove;
 
@@ -1178,17 +1204,19 @@ bool StdMeshers_QuadToTriaAdaptor::Compute2ndPart(SMESH_Mesh&                   
     MergeAdjacent( PrmI, nodesToMove );
   }
 
-  // iterate on all pyramids
+  // iterate on all new pyramids
+  vector< const SMDS_MeshElement* > suspectPyrams;
   for ( i = 0; i <  myPyramids.size(); ++i )
   {
-    const SMDS_MeshElement* PrmI = myPyramids[i];
+    const SMDS_MeshElement*  PrmI = myPyramids[i];
+    const SMDS_MeshNode*    apexI = PrmI->GetNode( PYRAM_APEX );
 
     // compare PrmI with all the rest pyramids
 
     // collect adjacent pyramids and nodes coordinates of PrmI
     set<const SMDS_MeshElement*> checkedPyrams;
-    vector<gp_Pnt> PsI(5);
-    for(k=0; k<5; k++) // loop on 4 base nodes of PrmI
+    gp_Pnt PsI[5];
+    for ( k = 0; k < 5; k++ )
     {
       const SMDS_MeshNode* n = PrmI->GetNode(k);
       PsI[k] = SMESH_TNodeXYZ( n );
@@ -1201,70 +1229,77 @@ bool StdMeshers_QuadToTriaAdaptor::Compute2ndPart(SMESH_Mesh&                   
       }
     }
 
+    // get pyramids to check
+    gp_XYZ       PC = ( PsI[0].XYZ() + PsI[1].XYZ() + PsI[2].XYZ() + PsI[3].XYZ() ) / 4.;
+    gp_XYZ      ray = PsI[4].XYZ() - PC;
+    gp_XYZ   center = PC + 0.5 * ray;
+    double diameter = Max( PsI[0].Distance(PsI[2]), PsI[1].Distance(PsI[3]));
+    suspectPyrams.clear();
+    searcher->GetElementsInSphere( center, diameter * 0.6, SMDSAbs_Volume, suspectPyrams);
+
     // check intersection with distant pyramids
-    for(k=0; k<4; k++) // loop on 4 base nodes of PrmI
+    for ( j = 0; j < suspectPyrams.size(); ++j )
     {
-      gp_Vec Vtmp(PsI[k],PsI[4]);
-      gp_Ax1 line( PsI[k], Vtmp );
-      vector< const SMDS_MeshElement* > suspectPyrams;
-      searcher->GetElementsNearLine( line, SMDSAbs_Volume, suspectPyrams);
+      const SMDS_MeshElement* PrmJ = suspectPyrams[j];
+      if ( PrmJ == PrmI )
+        continue;
+      if ( apexI == PrmJ->GetNode( PYRAM_APEX ))
+        continue; // pyramids PrmI and PrmJ already merged
+      if ( !checkedPyrams.insert( PrmJ ).second )
+        continue; // already checked
 
-      for ( j = 0; j < suspectPyrams.size(); ++j )
+      gp_Pnt PsJ[5];
+      for ( k = 0; k < 5; k++ )
+        PsJ[k] = SMESH_TNodeXYZ( PrmJ->GetNode(k) );
+
+      if ( ray * ( PsJ[4].XYZ() - PC ) < 0. )
+        continue; // PrmJ is below PrmI
+
+      for ( k = 0; k < 4; k++ ) // loop on 4 base nodes of PrmI
       {
-        const SMDS_MeshElement* PrmJ = suspectPyrams[j];
-        if ( PrmJ == PrmI || PrmJ->NbCornerNodes() != 5 )
-          continue;
-        if ( myShapeID != PrmJ->GetNode(4)->getshapeId())
-          continue; // pyramid from other SOLID
-        if ( PrmI->GetNode(4) == PrmJ->GetNode(4) )
-          continue; // pyramids PrmI and PrmJ already merged
-        if ( !checkedPyrams.insert( PrmJ ).second )
-          continue; // already checked
-
-        TXyzIterator xyzIt( PrmJ->nodesIterator() );
-        vector<gp_Pnt> PsJ( xyzIt, TXyzIterator() );
-
         gp_Pnt Pint;
         bool hasInt=false;
-        for(k=0; k<4 && !hasInt; k++) {
-          gp_Vec Vtmp(PsI[k],PsI[4]);
+        for ( k = 0; k < 4  &&  !hasInt; k++ )
+        {
+          gp_Vec Vtmp( PsI[k], PsI[ PYRAM_APEX ]);
           gp_Pnt Pshift = PsI[k].XYZ() + Vtmp.XYZ() * 0.01; // base node moved a bit to apex
           hasInt =
-          ( HasIntersection3( Pshift, PsI[4], Pint, PsJ[0], PsJ[1], PsJ[4]) ||
-            HasIntersection3( Pshift, PsI[4], Pint, PsJ[1], PsJ[2], PsJ[4]) ||
-            HasIntersection3( Pshift, PsI[4], Pint, PsJ[2], PsJ[3], PsJ[4]) ||
-            HasIntersection3( Pshift, PsI[4], Pint, PsJ[3], PsJ[0], PsJ[4]) );
+          ( HasIntersection3( Pshift, PsI[4], Pint, PsJ[0], PsJ[1], PsJ[PYRAM_APEX]) ||
+            HasIntersection3( Pshift, PsI[4], Pint, PsJ[1], PsJ[2], PsJ[PYRAM_APEX]) ||
+            HasIntersection3( Pshift, PsI[4], Pint, PsJ[2], PsJ[3], PsJ[PYRAM_APEX]) ||
+            HasIntersection3( Pshift, PsI[4], Pint, PsJ[3], PsJ[0], PsJ[PYRAM_APEX]) );
         }
-        for(k=0; k<4 && !hasInt; k++) {
-          gp_Vec Vtmp(PsJ[k],PsJ[4]);
+        for ( k = 0; k < 4  &&  !hasInt; k++ )
+        {
+          gp_Vec Vtmp( PsJ[k], PsJ[ PYRAM_APEX ]);
           gp_Pnt Pshift = PsJ[k].XYZ() + Vtmp.XYZ() * 0.01;
           hasInt =
-            ( HasIntersection3( Pshift, PsJ[4], Pint, PsI[0], PsI[1], PsI[4]) ||
-              HasIntersection3( Pshift, PsJ[4], Pint, PsI[1], PsI[2], PsI[4]) ||
-              HasIntersection3( Pshift, PsJ[4], Pint, PsI[2], PsI[3], PsI[4]) ||
-              HasIntersection3( Pshift, PsJ[4], Pint, PsI[3], PsI[0], PsI[4]) );
+            ( HasIntersection3( Pshift, PsJ[4], Pint, PsI[0], PsI[1], PsI[PYRAM_APEX]) ||
+              HasIntersection3( Pshift, PsJ[4], Pint, PsI[1], PsI[2], PsI[PYRAM_APEX]) ||
+              HasIntersection3( Pshift, PsJ[4], Pint, PsI[2], PsI[3], PsI[PYRAM_APEX]) ||
+              HasIntersection3( Pshift, PsJ[4], Pint, PsI[3], PsI[0], PsI[PYRAM_APEX]) );
         }
 
         if ( hasInt )
         {
           // count common nodes of base faces of two pyramids
           int nbc = 0;
-          for (k=0; k<4; k++)
+          for ( k = 0; k < 4; k++ )
             nbc += int ( PrmI->GetNodeIndex( PrmJ->GetNode(k) ) >= 0 );
 
           if ( nbc == 4 )
             continue; // pyrams have a common base face
 
-          if(nbc>0)
+          if ( nbc > 0 )
           {
             // Merge the two pyramids and others already merged with them
             MergePiramids( PrmI, PrmJ, nodesToMove );
           }
-          else { // nbc==0
-
+          else  // nbc==0
+          {
             // decrease height of pyramids
             gp_XYZ PCi(0,0,0), PCj(0,0,0);
-            for(k=0; k<4; k++) {
+            for ( k = 0; k < 4; k++ ) {
               PCi += PsI[k].XYZ();
               PCj += PsJ[k].XYZ();
             }
@@ -1283,9 +1318,9 @@ bool StdMeshers_QuadToTriaAdaptor::Compute2ndPart(SMESH_Mesh&                   
 
             VN1.Scale(coef1);
             VN2.Scale(coef2);
-            SMDS_MeshNode* aNode1 = const_cast<SMDS_MeshNode*>(PrmI->GetNode(4));
+            SMDS_MeshNode* aNode1 = const_cast<SMDS_MeshNode*>( apexI );
             aNode1->setXYZ( PCi.X()+VN1.X(), PCi.Y()+VN1.Y(), PCi.Z()+VN1.Z() );
-            SMDS_MeshNode* aNode2 = const_cast<SMDS_MeshNode*>(PrmJ->GetNode(4));
+            SMDS_MeshNode* aNode2 = const_cast<SMDS_MeshNode*>(PrmJ->GetNode( PYRAM_APEX ));
             aNode2->setXYZ( PCj.X()+VN2.X(), PCj.Y()+VN2.Y(), PCj.Z()+VN2.Z() );
             nodesToMove.insert( aNode1 );
             nodesToMove.insert( aNode2 );

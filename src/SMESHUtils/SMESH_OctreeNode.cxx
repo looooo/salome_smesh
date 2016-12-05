@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -102,7 +102,7 @@ Bnd_B3d* SMESH_OctreeNode::buildRootBox()
     gp_XYZ p1( n1->X(), n1->Y(), n1->Z() );
     box->Add(p1);
   }
-  if ( myNodes.size() <= getMaxNbNodes() )
+  if ((int) myNodes.size() <= getMaxNbNodes() )
     myIsLeaf = true;
 
   return box;
@@ -151,7 +151,7 @@ void SMESH_OctreeNode::buildChildrenData()
   for (int i = 0; i < 8; i++)
   {
     SMESH_OctreeNode* myChild = dynamic_cast<SMESH_OctreeNode*> (myChildren[i]);
-    if ( myChild->myNodes.size() <= getMaxNbNodes() )
+    if ((int) myChild->myNodes.size() <= getMaxNbNodes() )
       myChild->myIsLeaf = true;
   }
 }

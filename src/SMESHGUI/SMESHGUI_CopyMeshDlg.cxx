@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -109,8 +109,8 @@ SMESHGUI_CopyMeshDlg::SMESHGUI_CopyMeshDlg( SMESHGUI* theModule )
   : QDialog( SMESH::GetDesktop( theModule ) ),
     mySMESHGUI( theModule ),
     mySelectionMgr( SMESH::GetSelectionMgr( theModule ) ),
-    myFilterDlg(0),
     mySelectedObject(SMESH::SMESH_IDSource::_nil()),
+    myFilterDlg(0),
     myIsApplyAndClose( false )
 {
   QPixmap image (SMESH::GetResourceMgr( mySMESHGUI )->loadPixmap("SMESH", tr("ICON_COPY_MESH")));
@@ -494,6 +494,9 @@ void SMESHGUI_CopyMeshDlg::onTextChange (const QString& theNewText)
 void SMESHGUI_CopyMeshDlg::SelectionIntoArgument()
 {
   if (myBusy) return;
+  if (myFilterDlg && myFilterDlg->isVisible()) return; // filter dlg active
+  if (!GroupButtons->isEnabled()) return;              // inactive
+
   BusyLocker lock( myBusy );
 
   // clear
@@ -677,6 +680,15 @@ void SMESHGUI_CopyMeshDlg::setFilters()
   if ( !myFilterDlg )
     myFilterDlg = new SMESHGUI_FilterDlg( mySMESHGUI, SMESH::ALL );
 
+  QList<int> types;
+  if ( myMesh->NbEdges()     ) types << SMESH::EDGE;
+  if ( myMesh->NbFaces()     ) types << SMESH::FACE;
+  if ( myMesh->NbVolumes()   ) types << SMESH::VOLUME;
+  if ( myMesh->NbBalls()     ) types << SMESH::BALL;
+  if ( myMesh->Nb0DElements()) types << SMESH::ELEM0D;
+  if ( types.count() > 1 )     types << SMESH::ALL;
+
+  myFilterDlg->Init( types );
   myFilterDlg->SetSelection();
   myFilterDlg->SetMesh( myMesh );
   myFilterDlg->SetSourceWg( myLineEditElements );

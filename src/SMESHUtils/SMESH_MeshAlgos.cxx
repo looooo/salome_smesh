@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -60,7 +60,8 @@ struct SMESH_NodeSearcherImpl: public SMESH_NodeSearcher
   /*!
    * \brief Constructor
    */
-  SMESH_NodeSearcherImpl( const SMDS_Mesh* theMesh )
+  SMESH_NodeSearcherImpl( const SMDS_Mesh*     theMesh   = 0,
+                          SMDS_ElemIteratorPtr theElemIt = SMDS_ElemIteratorPtr() )
   {
     myMesh = ( SMDS_Mesh* ) theMesh;
 
@@ -69,6 +70,14 @@ struct SMESH_NodeSearcherImpl: public SMESH_NodeSearcher
       SMDS_NodeIteratorPtr nIt = theMesh->nodesIterator(/*idInceasingOrder=*/true);
       while ( nIt->more() )
         nodes.insert( nodes.end(), nIt->next() );
+    }
+    else if ( theElemIt )
+    {
+      while ( theElemIt->more() )
+      {
+        const SMDS_MeshElement* e = theElemIt->next();
+        nodes.insert( e->begin_nodes(), e->end_nodes() );
+      }
     }
     myOctreeNode = new SMESH_OctreeNode(nodes) ;
 
@@ -270,7 +279,7 @@ namespace // Utils used in SMESH_ElementSearcherImpl::FindElementsByPoint()
 
   ElementBndBoxTree::~ElementBndBoxTree()
   {
-    for ( int i = 0; i < _elements.size(); ++i )
+    for ( size_t i = 0; i < _elements.size(); ++i )
       if ( --_elements[i]->_refCount <= 0 )
         delete _elements[i];
   }
@@ -284,7 +293,7 @@ namespace // Utils used in SMESH_ElementSearcherImpl::FindElementsByPoint()
   Bnd_B3d* ElementBndBoxTree::buildRootBox()
   {
     Bnd_B3d* box = new Bnd_B3d;
-    for ( int i = 0; i < _elements.size(); ++i )
+    for ( size_t i = 0; i < _elements.size(); ++i )
       box->Add( *_elements[i] );
     return box;
   }
@@ -297,7 +306,7 @@ namespace // Utils used in SMESH_ElementSearcherImpl::FindElementsByPoint()
 
   void ElementBndBoxTree::buildChildrenData()
   {
-    for ( int i = 0; i < _elements.size(); ++i )
+    for ( size_t i = 0; i < _elements.size(); ++i )
     {
       for (int j = 0; j < 8; j++)
       {
@@ -315,7 +324,7 @@ namespace // Utils used in SMESH_ElementSearcherImpl::FindElementsByPoint()
     for (int j = 0; j < 8; j++)
     {
       ElementBndBoxTree* child = static_cast<ElementBndBoxTree*>( myChildren[j]);
-      if ( child->_elements.size() <= MaxNbElemsInLeaf )
+      if ((int) child->_elements.size() <= MaxNbElemsInLeaf )
         child->myIsLeaf = true;
 
       if ( child->_elements.capacity() - child->_elements.size() > 1000 )
@@ -337,7 +346,7 @@ namespace // Utils used in SMESH_ElementSearcherImpl::FindElementsByPoint()
 
     if ( isLeaf() )
     {
-      for ( int i = 0; i < _elements.size(); ++i )
+      for ( size_t i = 0; i < _elements.size(); ++i )
         if ( !_elements[i]->IsOut( point.XYZ() ))
           foundElems.insert( _elements[i]->_element );
     }
@@ -362,7 +371,7 @@ namespace // Utils used in SMESH_ElementSearcherImpl::FindElementsByPoint()
 
     if ( isLeaf() )
     {
-      for ( int i = 0; i < _elements.size(); ++i )
+      for ( size_t i = 0; i < _elements.size(); ++i )
         if ( !_elements[i]->IsOut( line ))
           foundElems.insert( _elements[i]->_element );
     }
@@ -388,7 +397,7 @@ namespace // Utils used in SMESH_ElementSearcherImpl::FindElementsByPoint()
 
     if ( isLeaf() )
     {
-      for ( int i = 0; i < _elements.size(); ++i )
+      for ( size_t i = 0; i < _elements.size(); ++i )
         if ( !_elements[i]->IsOut( center, radius ))
           foundElems.insert( _elements[i]->_element );
     }
@@ -458,6 +467,10 @@ struct SMESH_ElementSearcherImpl: public SMESH_ElementSearcher
   void GetElementsNearLine( const gp_Ax1&                      line,
                             SMDSAbs_ElementType                type,
                             vector< const SMDS_MeshElement* >& foundElems);
+  void GetElementsInSphere( const gp_XYZ&                      center,
+                            const double                       radius,
+                            SMDSAbs_ElementType                type,
+                            vector< const SMDS_MeshElement* >& foundElems);
   double getTolerance();
   bool getIntersParamOnLine(const gp_Lin& line, const SMDS_MeshElement* face,
                             const double tolerance, double & param);
@@ -466,6 +479,7 @@ struct SMESH_ElementSearcherImpl: public SMESH_ElementSearcher
   {
     return _outerFaces.empty() || _outerFaces.count(face);
   }
+
   struct TInters //!< data of intersection of the line and the mesh face (used in GetPointState())
   {
     const SMDS_MeshElement* _face;
@@ -646,6 +660,7 @@ void SMESH_ElementSearcherImpl::findOuterBoundary(const SMDS_MeshElement* outerF
         set< const SMDS_MeshElement*, TIDCompare >::const_iterator face = faces.begin();
         for ( ; face != faces.end(); ++face )
         {
+          if ( *face == outerFace ) continue;
           if ( !SMESH_MeshAlgos::FaceNormal( *face, fNorm, /*normalized=*/false ))
             continue;
           gp_Vec dirInF = gp_Vec( fNorm ) ^ n1n2;
@@ -660,8 +675,8 @@ void SMESH_ElementSearcherImpl::findOuterBoundary(const SMDS_MeshElement* outerF
     // store the found outer face and add its links to continue seaching from
     if ( outerFace2 )
     {
-      _outerFaces.insert( outerFace );
-      int nbNodes = outerFace2->NbNodes()/( outerFace2->IsQuadratic() ? 2 : 1 );
+      _outerFaces.insert( outerFace2 );
+      int nbNodes = outerFace2->NbCornerNodes();
       for ( int i = 0; i < nbNodes; ++i )
       {
         SMESH_TLink link2( outerFace2->GetNode(i), outerFace2->GetNode((i+1)%nbNodes));
@@ -708,8 +723,12 @@ FindElementsByPoint(const gp_Pnt&                      point,
   if ( type == SMDSAbs_Node || type == SMDSAbs_0DElement || type == SMDSAbs_Ball)
   {
     if ( !_nodeSearcher )
-      _nodeSearcher = new SMESH_NodeSearcherImpl( _mesh );
-
+    {
+      if ( _meshPartIt )
+        _nodeSearcher = new SMESH_NodeSearcherImpl( 0, _meshPartIt );
+      else
+        _nodeSearcher = new SMESH_NodeSearcherImpl( _mesh );
+    }
     std::vector< const SMDS_MeshNode* > foundNodes;
     _nodeSearcher->FindNearPoint( point, tolerance, foundNodes );
 
@@ -1079,6 +1098,27 @@ void SMESH_ElementSearcherImpl::GetElementsNearLine( const gp_Ax1&              
 }
 
 //=======================================================================
+/*
+ * Return elements whose bounding box intersects a sphere
+ */
+//=======================================================================
+
+void SMESH_ElementSearcherImpl::GetElementsInSphere( const gp_XYZ&                      center,
+                                                     const double                       radius,
+                                                     SMDSAbs_ElementType                type,
+                                                     vector< const SMDS_MeshElement* >& foundElems)
+{
+  if ( !_ebbTree || _elementType != type )
+  {
+    if ( _ebbTree ) delete _ebbTree;
+    _ebbTree = new ElementBndBoxTree( *_mesh, _elementType = type, _meshPartIt );
+  }
+  TIDSortedElemSet suspectFaces; // elements possibly intersecting the line
+  _ebbTree->getElementsInSphere( center, radius, suspectFaces );
+  foundElems.assign( suspectFaces.begin(), suspectFaces.end() );
+}
+
+//=======================================================================
 /*!
  * \brief Return true if the point is IN or ON of the element
  */
@@ -1154,7 +1194,7 @@ bool SMESH_MeshAlgos::IsOut( const SMDS_MeshElement* element, const gp_Pnt& poin
     dist.back() = dist.front();
     // find the closest intersection
     int    iClosest = -1;
-    double rClosest, distClosest = 1e100;;
+    double rClosest = 0, distClosest = 1e100;;
     gp_Pnt pClosest;
     for ( i = 0; i < nbNodes; ++i )
     {
@@ -1232,7 +1272,7 @@ bool SMESH_MeshAlgos::IsOut( const SMDS_MeshElement* element, const gp_Pnt& poin
   // Node or 0D element -------------------------------------------------------------------------
   {
     gp_Vec n2p ( xyz[0], point );
-    return n2p.SquareMagnitude() <= tol * tol;
+    return n2p.SquareMagnitude() > tol * tol;
   }
   return true;
 }
@@ -1325,6 +1365,7 @@ double SMESH_MeshAlgos::GetDistance( const SMDS_MeshElement* elem,
     return GetDistance( dynamic_cast<const SMDS_MeshEdge*>( elem ), point);
   case SMDSAbs_Node:
     return point.Distance( SMESH_TNodeXYZ( elem ));
+  default:;
   }
   return -1;
 }
@@ -1421,6 +1462,7 @@ double SMESH_MeshAlgos::GetDistance( const SMDS_MeshFace* face,
     // cout << distVec.Magnitude()  << " VERTEX " << face->GetNode(pos._index)->GetID() << endl;
     return distVec.Magnitude();
   }
+  default:;
   }
   return badDistance;
 }
@@ -1431,9 +1473,35 @@ double SMESH_MeshAlgos::GetDistance( const SMDS_MeshFace* face,
  */
 //=======================================================================
 
-double SMESH_MeshAlgos::GetDistance( const SMDS_MeshEdge* edge, const gp_Pnt& point )
+double SMESH_MeshAlgos::GetDistance( const SMDS_MeshEdge* seg, const gp_Pnt& point )
 {
-  throw SALOME_Exception(LOCALIZED("not implemented so far"));
+  double dist = Precision::Infinite();
+  if ( !seg ) return dist;
+
+  int i = 0, nbNodes = seg->NbNodes();
+
+  vector< SMESH_TNodeXYZ > xyz( nbNodes );
+  SMDS_ElemIteratorPtr nodeIt = seg->interlacedNodesElemIterator();
+  while ( nodeIt->more() )
+    xyz[ i++ ].Set( nodeIt->next() );
+
+  for ( i = 1; i < nbNodes; ++i )
+  {
+    gp_Vec edge( xyz[i-1], xyz[i] );
+    gp_Vec n1p ( xyz[i-1], point  );
+    double u = ( edge * n1p ) / edge.SquareMagnitude(); // param [0,1] on the edge
+    if ( u <= 0. ) {
+      dist = Min( dist, n1p.SquareMagnitude() );
+    }
+    else if ( u >= 1. ) {
+      dist = Min( dist, point.SquareDistance( xyz[i] ));
+    }
+    else {
+      gp_XYZ proj = ( 1. - u ) * xyz[i-1] + u * xyz[i]; // projection of the point on the edge
+      dist = Min( dist, point.SquareDistance( proj ));
+    }
+  }
+  return Sqrt( dist );
 }
 
 //=======================================================================
@@ -1537,7 +1605,7 @@ SMESH_MeshAlgos::FindFaceInSet(const SMDS_MeshNode*    n1,
                                int*                    n2ind)
 
 {
-  int i1, i2;
+  int i1 = 0, i2 = 0;
   const SMDS_MeshElement* face = 0;
 
   SMDS_ElemIteratorPtr invElemIt = n1->GetInverseElementIterator(SMDSAbs_Face);
@@ -1638,6 +1706,17 @@ vector< const SMDS_MeshNode*> SMESH_MeshAlgos::GetCommonNodes(const SMDS_MeshEle
 SMESH_NodeSearcher* SMESH_MeshAlgos::GetNodeSearcher(SMDS_Mesh& mesh)
 {
   return new SMESH_NodeSearcherImpl( &mesh );
+}
+
+//=======================================================================
+/*!
+ * \brief Return SMESH_NodeSearcher
+ */
+//=======================================================================
+
+SMESH_NodeSearcher* SMESH_MeshAlgos::GetNodeSearcher(SMDS_ElemIteratorPtr elemIt)
+{
+  return new SMESH_NodeSearcherImpl( 0, elemIt );
 }
 
 //=======================================================================

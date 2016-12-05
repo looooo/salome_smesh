@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -326,7 +326,7 @@ void SMESHGUI_ConvToQuadOp::onWarningWinFinished()
 
 SMESHGUI_ConvToQuadOp::MeshDestinationType
 SMESHGUI_ConvToQuadOp::DestinationMesh( const SMESH::SMESH_IDSource_var& idSource,
-                                        bool*                            isMixOrder) const
+                                        bool*                            isMixOrder)
 {
   SMESH::long_array_var nbElemOfType = idSource->GetMeshInfo();
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2006-2015  EDF R&D
+// Copyright (C) 2006-2016  EDF R&D
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -84,7 +84,7 @@ int MESHCUT::positionNoeudPlan(int indiceNoeud)
 int MESHCUT::intersectionSegmentPlan(int it4, int na)
 {
 
-  int ngA, ngB; // Numéros des noeuds extrémités AB
+  int ngA = -1, ngB = -1; // Numéros des noeuds extrémités AB
   float lambda, ps; //, ab; // ab = longueur AB
   float A[3], B[3];
 

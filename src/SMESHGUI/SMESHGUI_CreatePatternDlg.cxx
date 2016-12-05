@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -378,7 +378,7 @@ void SMESHGUI_CreatePatternDlg::onSave()
     SUIT_FileDlg* aDlg = new SUIT_FileDlg( this, false );
     aDlg->setWindowTitle( tr( "SAVE_PATTERN" ) );
     aDlg->setFileMode( QFileDialog::AnyFile );
-    aDlg->setFilter( tr( "PATTERN_FILT" ) );
+    aDlg->setNameFilter( tr( "PATTERN_FILT" ) );
     if ( myName->text() != "" )
       aDlg->selectFile( myName->text() );
 
@@ -392,7 +392,7 @@ void SMESHGUI_CreatePatternDlg::onSave()
     if ( QFileInfo( fName ).suffix().isEmpty() )
       fName = autoExtension( fName );
 
-    fName = QDir::convertSeparators( fName );
+    fName = QDir::toNativeSeparators( fName );
 
     QString aData( myPattern->GetString() );
     long aLen = aData.length();

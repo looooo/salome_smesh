@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -826,12 +826,13 @@ bool SMESHGUI_SewingDlg::haveBorders()
 
 QString SMESHGUI_SewingDlg::getPartText(const SMESH::FreeBorderPart& aPART)
 {
+  typedef CORBA::Long TInt;
   QString text;
-  if ( 0 <= aPART.border && aPART.border < myBorders->borders.length() )
+  if ( 0 <= aPART.border && aPART.border < (TInt)myBorders->borders.length() )
   {
     const SMESH::FreeBorder& aBRD = myBorders->borders[ aPART.border ];
-    if ( 0 <= aPART.node1    && aPART.node1 < aBRD.nodeIDs.length() &&
-         0 <= aPART.nodeLast && aPART.nodeLast < aBRD.nodeIDs.length() )
+    if ( 0 <= aPART.node1    && aPART.node1    < (TInt)aBRD.nodeIDs.length() &&
+         0 <= aPART.nodeLast && aPART.nodeLast < (TInt)aBRD.nodeIDs.length() )
     {
       text += QString("( %1 %2 %3 ) ")
         .arg( aBRD.nodeIDs[ aPART.node1 ] )
@@ -853,7 +854,7 @@ QString SMESHGUI_SewingDlg::getGroupText(int groupIndex)
 
   if ( haveBorders()   &&
        groupIndex >= 0 &&
-       groupIndex < myBorders->coincidentGroups.length() )
+       groupIndex < (int)myBorders->coincidentGroups.length() )
   {
     const SMESH::FreeBordersGroup& aGRP = myBorders->coincidentGroups[ groupIndex ];
 
@@ -934,7 +935,7 @@ void SMESHGUI_SewingDlg::onRemoveGroupClicked()
     delete item;
     if ( myBorderDisplayers[ groupIndex ])
       myBorderDisplayers[ groupIndex ]->Hide();
-    SMESH::FreeBordersGroup& aGRP = myBorders->coincidentGroups[ myCurGroupIndex ];
+    SMESH::FreeBordersGroup& aGRP = myBorders->coincidentGroups[ groupIndex ];
     aGRP.length( 0 );
   }
   myBusy = false;
@@ -958,7 +959,7 @@ void SMESHGUI_SewingDlg::showGroup( QListWidgetItem* item )
   int    groupIndex = item->data( GROUP_INDEX ).toInt();
   QColor groupColor = item->data( GROUP_COLOR ).value<QColor>();
   if ( groupIndex >= 0       &&
-       groupIndex < myBorders->coincidentGroups.length() )
+       groupIndex < (int)myBorders->coincidentGroups.length() )
   {
     if ( !myBorderDisplayers[ groupIndex ] && SMESH::GetCurrentVtkView())
       myBorderDisplayers[ groupIndex ] = new BorderGroupDisplayer( myBorders, groupIndex, groupColor, myMesh );
@@ -984,7 +985,7 @@ bool SMESHGUI_SewingDlg::setCurrentGroup()
   
   myCurGroupIndex = selItems[0]->data( GROUP_INDEX ).toInt();
 
-  return ( myCurGroupIndex >= 0 && myCurGroupIndex < myBorders->coincidentGroups.length() );
+  return ( myCurGroupIndex >= 0 && myCurGroupIndex < (int)myBorders->coincidentGroups.length() );
 }
 
 //=======================================================================
@@ -1003,7 +1004,7 @@ bool SMESHGUI_SewingDlg::setCurrentPart()
   myCurPartIndex = ListEdit->currentRow();
   const SMESH::FreeBordersGroup& aGRP = myBorders->coincidentGroups[ myCurGroupIndex ];
 
-  return ( myCurPartIndex >= 0 && myCurPartIndex < aGRP.length() );
+  return ( myCurPartIndex >= 0 && myCurPartIndex < (int)aGRP.length() );
 }
 
 //=======================================================================
@@ -1192,15 +1193,18 @@ void SMESHGUI_SewingDlg::onRemoveElemClicked()
 
   SMESH::FreeBordersGroup& aGRP = myBorders->coincidentGroups[ myCurGroupIndex ];
 
+  myBusy = true;
   QList<QListWidgetItem*> selItems = ListEdit->selectedItems();
   for ( int i = 0; i < selItems.count(); ++i )
   {
     int part = ListEdit->row( selItems[i] );
-    for ( ; part + 1 < aGRP.length(); ++part )
+    for ( ; part + 1 < (int)aGRP.length(); ++part )
       aGRP[ part ] = aGRP[ part + 1 ];
-    aGRP.length( aGRP.length() - 1 );
+    if ( aGRP.length() > 0 )
+      aGRP.length( aGRP.length() - 1 );
     delete selItems[i];
   }
+  myBusy = false;
 
   if ( aGRP.length() == 0 )
     onRemoveGroupClicked();
@@ -1304,7 +1308,7 @@ bool SMESHGUI_SewingDlg::ClickOnApply()
       SMESH::SMESH_MeshEditor_var aMeshEditor = myMesh->GetMeshEditor();
 
       int aConstructorId = GetConstructorId();
-      SMESH::SMESH_MeshEditor::Sew_Error anError;
+      SMESH::SMESH_MeshEditor::Sew_Error anError = SMESH::SMESH_MeshEditor::SEW_OK;
 
       if (aConstructorId == 0)
       {
@@ -1944,16 +1948,21 @@ void SMESHGUI_SewingDlg::BorderGroupDisplayer::getPartEnds( int                p
                                                             std::vector<int> & ids,
                                                             std::list<gp_XYZ>& coords)
 {
+  if ( partIndex >= (int)myGroup.length() ) return;
   const SMESH::FreeBorderPart& aPART = myGroup  [ partIndex ];
   const SMESH::FreeBorder&      aBRD = myBorders[ aPART.border ];
 
   ids.push_back( aBRD.nodeIDs[ aPART.node1 ]);
   ids.push_back( aBRD.nodeIDs[ aPART.nodeLast ]);
+  if ( aPART.node1 == aPART.nodeLast )
+    ids.push_back( aBRD.nodeIDs[ aPART.node2 ]);
 
   SMDS_Mesh* mesh = myPartActors[ partIndex ]->GetObject()->GetMesh();
 
   coords.push_back( SMESH_TNodeXYZ( mesh->FindNode( aPART.node1+1 )));
   coords.push_back( SMESH_TNodeXYZ( mesh->FindNode( aPART.nodeLast+1 )));
+  if ( aPART.node1 == aPART.nodeLast )
+    coords.push_back( SMESH_TNodeXYZ( mesh->FindNode( aPART.node2+1 )));
 }
 
 void SMESHGUI_SewingDlg::BorderGroupDisplayer::Update()

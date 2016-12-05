@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -41,6 +41,7 @@
 #include <SUIT_ResourceMgr.h>
 #include <SUIT_Session.h>
 #include <SalomeApp_IntSpinBox.h>
+#include <SalomeApp_Tools.h>
 
 // Qt includes
 #include <QFrame>
@@ -239,7 +240,9 @@ QFrame* SMESHGUI_GenericHypothesisCreator::buildStdFrame()
           }
         }
         break;
-      }
+
+      default:;
+      } // switch( (*anIt).myValue.type() )
 
     if( w )
     {
@@ -271,13 +274,20 @@ void SMESHGUI_GenericHypothesisCreator::onDialogFinished( int result )
   bool res = result==QDialog::Accepted;
   if( res )
   {
-    SUIT_OverrideCursor wc;
-      /*QString paramValues = */storeParams();
+    try
+    {
+      SUIT_OverrideCursor wc;
+      storeParams();
       // No longer needed since NoteBook appears and "Value" OB field shows names of variable
-//       if ( !paramValues.isEmpty() ) {
-//         if ( _PTR(SObject) SHyp = SMESH::FindSObject( myHypo ))
-//           SMESH::SetValue( SHyp, paramValues );
-//       }
+      // QString paramValues = storeParams();
+      // if ( !paramValues.isEmpty() ) {
+      //   if ( _PTR(SObject) SHyp = SMESH::FindSObject( myHypo ))
+      //     SMESH::SetValue( SHyp, paramValues );
+      // }
+    }
+    catch ( const SALOME::SALOME_Exception& S_ex ) {
+      SalomeApp_Tools::QtCatchCorbaException( S_ex );
+    }
   }
 
   changeWidgets().clear();
@@ -297,7 +307,7 @@ void SMESHGUI_GenericHypothesisCreator::onDialogFinished( int result )
   {
     SMESH::SObjectList listSOmesh = SMESH::GetMeshesUsingAlgoOrHypothesis( myHypo );
     if( listSOmesh.size() > 0 )
-      for( int i = 0; i < listSOmesh.size(); i++ )
+      for( size_t i = 0; i < listSOmesh.size(); i++ )
       {
         _PTR(SObject) submSO = listSOmesh[i];
         SMESH::SMESH_Mesh_var aMesh = SMESH::SObjectToInterface<SMESH::SMESH_Mesh>( submSO );
@@ -391,8 +401,8 @@ QString SMESHGUI_GenericHypothesisCreator::stdParamValues( const ListOfStdParams
 {
   QString valueStr = "";
   ListOfStdParams::const_iterator param = params.begin(), aLast = params.end();
-  uint len0 = 0;
-  for( int i=0; param!=aLast; param++, i++ )
+  int len0 = 0;
+  for ( ; param != aLast; param++ )
   {
     if ( valueStr.length() > len0 ) {
       valueStr += "; ";
@@ -749,12 +759,12 @@ HypothesisData::HypothesisData( const QString& theTypeName,
     Context( theContext ),
     Dim( theDim ),
     IsAuxOrNeedHyp( theIsAuxOrNeedHyp ),
+    IsNeedGeometry( theIsNeedGeometry ),
+    IsSupportSubmeshes( supportSub ),
     BasicHypos( theBasicHypos ),
     OptionalHypos( theOptionalHypos ),
     InputTypes( theInputTypes ),
-    OutputTypes( theOutputTypes ),
-    IsNeedGeometry( theIsNeedGeometry ),
-    IsSupportSubmeshes( supportSub )
+    OutputTypes( theOutputTypes )
 {
 }
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -45,8 +45,8 @@
 // purpose  :
 //=================================================================================
 SMESHGUI_PreviewDlg::SMESHGUI_PreviewDlg(SMESHGUI* theModule) :
-  mySMESHGUI(theModule),
   QDialog(SMESH::GetDesktop( theModule )),
+  mySMESHGUI(theModule),
   myIsApplyAndClose( false )
 {
   mySimulation = new SMESHGUI_MeshEditPreview(SMESH::GetViewWindow( mySMESHGUI ));
@@ -151,8 +151,8 @@ void SMESHGUI_PreviewDlg::onOpenView()
 // purpose  :
 //=================================================================================
 SMESHGUI_MultiPreviewDlg::SMESHGUI_MultiPreviewDlg( SMESHGUI* theModule ) :
-  mySMESHGUI( theModule ),
   QDialog( SMESH::GetDesktop( theModule ) ),
+  mySMESHGUI( theModule ),
   myIsApplyAndClose( false )
 {
   mySimulationList.clear();

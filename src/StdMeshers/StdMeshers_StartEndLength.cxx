@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -146,22 +146,22 @@ istream & StdMeshers_StartEndLength::LoadFrom(istream & load)
 {
   bool isOK = true;
   int intVal;
-  isOK = (load >> _begLength);
+  isOK = static_cast<bool>(load >> _begLength);
   if (!isOK)
     load.clear(ios::badbit | load.rdstate());
-  isOK = (load >> _endLength);
+  isOK = static_cast<bool>(load >> _endLength);
 
   if (!isOK)
     load.clear(ios::badbit | load.rdstate());
-  
-  isOK = (load >> intVal);
+
+  isOK = static_cast<bool>(load >> intVal);
   if (isOK && intVal > 0) {
     _edgeIDs.reserve( intVal );
-    for (int i = 0; i < _edgeIDs.capacity() && isOK; i++) {
-      isOK = (load >> intVal);
+    for ( size_t i = 0; i < _edgeIDs.capacity() && isOK; i++) {
+      isOK = static_cast<bool>(load >> intVal);
       if ( isOK ) _edgeIDs.push_back( intVal );
     }
-    isOK = (load >> _objEntry);
+    isOK = static_cast<bool>(load >> _objEntry);
   }
 
   return load;
@@ -169,7 +169,7 @@ istream & StdMeshers_StartEndLength::LoadFrom(istream & load)
 
 //=============================================================================
 /*!
- *  
+ *
  */
 //=============================================================================
 

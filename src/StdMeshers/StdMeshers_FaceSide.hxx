@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -97,7 +97,9 @@ public:
    * \brief Create a side from an UVPtStructVec
    */
   StdMeshers_FaceSide(UVPtStructVec&     theSideNodes,
-                      const TopoDS_Face& theFace = TopoDS_Face());
+                      const TopoDS_Face& theFace = TopoDS_Face(),
+                      const TopoDS_Edge& theEdge = TopoDS_Edge(),
+                      SMESH_Mesh*        theMesh = 0);
 
   // static "consrtuctors"
   static StdMeshers_FaceSidePtr New(const TopoDS_Face&   Face,
@@ -245,6 +247,10 @@ public:
    * \brief Return all edges
    */
   const std::vector<TopoDS_Edge>& Edges() const { return myEdge; }
+  /*!
+   * \brief Return the FACE
+   */
+  const TopoDS_Face& Face() const { return myFace; }
   /*!
    * \brief Return 1st vertex of the i-th edge (count starts from zero)
    */

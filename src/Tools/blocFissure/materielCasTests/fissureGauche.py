@@ -1,4 +1,4 @@
-# -*- coding: iso-8859-1 -*-
+# -*- coding: utf-8 -*-
 
 import sys
 import salome
@@ -42,7 +42,9 @@ Partition_1 = geompy.MakePartition([Box_1], [Fillet_1], [], [], geompy.ShapeType
 geomObj_3 = geompy.MakeCylinderRH(1450, 8000)
 Cylinder_3 = geompy.MakeRotation(geomObj_3, OZ, 180*math.pi/180.0)
 Cut_1 = geompy.MakeCut(Partition_1, Cylinder_3)
+geompy.addToStudy( Cut_1, 'Cut_1' )
 [faceFiss1] = geompy.SubShapes(Cut_1, [61])
+geompy.addToStudyInFather( Cut_1, faceFiss1, 'faceFiss1' )
 [Vertex_3,geomObj_4] = geompy.SubShapes(faceFiss1, [4, 5])
 Cylinder_4 = geompy.MakeCylinderRH(2000, 4000)
 Cylinder_5 = geompy.MakeCylinderRH(1500, 4000)
@@ -57,7 +59,7 @@ Box_2 = geompy.MakeBoxTwoPnt(Vertex_7, Vertex_6)
 Common_1 = geompy.MakeCommon(Box_2, Cut_2)
 objetSain = geompy.MakePartition([Common_1], [Plane_1, Plane_2, Plane_3], [], [], geompy.ShapeType["SOLID"], 0, [], 0)
 [hauteurs, epaisseurs, Compound_3, Compound_4, Compound_5, Compound_6] = geompy.Propagate(objetSain)
-geompy.Export(faceFiss1, os.path.join(gmu.pathBloc, "materielCasTests/faceGaucheFiss.brep"), "BREP")
+geompy.ExportBREP(faceFiss1, os.path.join(gmu.pathBloc, "materielCasTests/faceGaucheFiss.brep"))
 geompy.addToStudy( O, 'O' )
 geompy.addToStudy( OX, 'OX' )
 geompy.addToStudy( OY, 'OY' )
@@ -72,8 +74,6 @@ geompy.addToStudy( Vertex_2, 'Vertex_2' )
 geompy.addToStudy( Box_1, 'Box_1' )
 geompy.addToStudy( Partition_1, 'Partition_1' )
 geompy.addToStudy( Cylinder_3, 'Cylinder_3' )
-geompy.addToStudy( Cut_1, 'Cut_1' )
-geompy.addToStudyInFather( Cut_1, faceFiss1, 'faceFiss1' )
 geompy.addToStudyInFather( faceFiss1, Vertex_3, 'Vertex_3' )
 geompy.addToStudy( Cylinder_4, 'Cylinder_4' )
 geompy.addToStudy( Cylinder_5, 'Cylinder_5' )

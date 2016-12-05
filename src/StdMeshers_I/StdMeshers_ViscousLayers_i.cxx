@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -53,7 +53,6 @@ StdMeshers_ViscousLayers_i::StdMeshers_ViscousLayers_i( PortableServer::POA_ptr 
   : SALOME::GenericObj_i( thePOA ), 
     SMESH_Hypothesis_i( thePOA )
 {
-  MESSAGE( "StdMeshers_ViscousLayers_i::StdMeshers_ViscousLayers_i" );
   myBaseImpl = new ::StdMeshers_ViscousLayers( theGenImpl->GetANewId(),
                                                theStudyId,
                                                theGenImpl );
@@ -69,7 +68,6 @@ StdMeshers_ViscousLayers_i::StdMeshers_ViscousLayers_i( PortableServer::POA_ptr 
 
 StdMeshers_ViscousLayers_i::~StdMeshers_ViscousLayers_i()
 {
-  MESSAGE( "StdMeshers_ViscousLayers_i::~StdMeshers_ViscousLayers_i" );
 }
 
 //================================================================================
@@ -265,7 +263,6 @@ void StdMeshers_ViscousLayers_i::SetMethod( ::StdMeshers::VLExtrusionMethod how 
 
 ::StdMeshers_ViscousLayers* StdMeshers_ViscousLayers_i::GetImpl()
 {
-  MESSAGE( "StdMeshers_ViscousLayers_i::GetImpl" );
   return ( ::StdMeshers_ViscousLayers* )myBaseImpl;
 }
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2010-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -95,7 +95,7 @@ void SMDS_VtkVolume::initPoly(const std::vector<vtkIdType>& nodeIds,
   SMDS_UnstructuredGrid* grid = mesh->getGrid();
   //double center[3];
   //this->gravityCenter(grid, &nodeIds[0], nodeIds.size(), &center[0]);
-  vector<vtkIdType> ptIds;
+  std::vector<vtkIdType> ptIds;
   vtkIdType nbFaces = nbNodesPerFace.size();
   int k = 0;
   for (int i = 0; i < nbFaces; i++)
@@ -165,7 +165,7 @@ bool SMDS_VtkVolume::vtkOrder(const SMDS_MeshNode* nodes[], const int nbNodes)
   const std::vector<int>& interlace = SMDS_MeshCell::toVtkOrder( VTKCellType( aVtkType ));
   if ( !interlace.empty() )
   {
-    ASSERT( interlace.size() == nbNodes );
+    ASSERT( (int)interlace.size() == nbNodes );
     std::vector<const SMDS_MeshNode*> initNodes( nodes, nodes+nbNodes );
     for ( size_t i = 0; i < interlace.size(); ++i )
       nodes[i] = initNodes[ interlace[i] ];
@@ -365,7 +365,7 @@ const SMDS_MeshNode* SMDS_VtkVolume::GetFaceNode(const int face_ind, const int n
  */
 std::vector<int> SMDS_VtkVolume::GetQuantities() const
 {
-  vector<int> quantities;
+  std::vector<int> quantities;
   SMDS_Mesh *mesh = SMDS_Mesh::_meshList[myMeshId];
   vtkUnstructuredGrid* grid = mesh->getGrid();
   vtkIdType aVtkType = grid->GetCellType(this->myVtkID);

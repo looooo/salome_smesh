@@ -4,6 +4,8 @@ import logging
 from geomsmesh import geompy
 import math
 from distance2 import distance2
+import traceback
+from fissError import fissError
 
 # -----------------------------------------------------------------------------
 # --- zone de defaut extraite du maillage
@@ -12,7 +14,7 @@ def creeZoneDefautMaillage(maillagesSains, shapeDefaut, tailleDefaut,
                            nomZones, coordsNoeudsFissure):
   """
   Identification de la zone à remailler, opérations sur le maillage
-  de l'objet sain
+  de l'objet sain.
   La zone à remailler est définie à partir d'un objet géométrique
   ou à partir d'un jeu de points et d'une distance d'influence.
   @param maillagesSains : (le maillage de l'objet initial, booleen isHexa)
@@ -59,6 +61,13 @@ def creeZoneDefautMaillage(maillagesSains, shapeDefaut, tailleDefaut,
       pass
     verticesShapes.append(vertices)
     pass
+
+  if (nb == 0) :
+    texte = "La zone à remailler n'est pas détectée correctement.<br>"
+    texte += "Cause possible :<ul>"
+    texte += "<li>La distance d'influence est trop petite. "
+    texte += "L'ordre de grandeur minimal correspond à la taille des mailles du maillage sain dans la zone à remailler.</li></ul>"
+    raise fissError(traceback.extract_stack(),texte)
 
   dmoyen = math.sqrt(cumul/nb) # ~ taille de l'arête moyenne du maillage global
   return origShapes, verticesShapes, dmoyen

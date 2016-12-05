@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -111,7 +111,7 @@ public:
       std::string str;
       if (stream >> str) {
         if ( StudyContext* myStudyContext = gen->GetCurrentStudyContext() ) {
-          string ior = myStudyContext->getIORbyOldId( atoi( str.c_str() ));
+          std::string ior = myStudyContext->getIORbyOldId( atoi( str.c_str() ));
           if ( !ior.empty() )
              return TInterface::_narrow(gen->GetORB()->string_to_object( ior.c_str() ));
         }

@@ -51,7 +51,6 @@ class fissureCoude_5(fissureCoude):
     pointIn_x   : optionnel coordonnées x d'un point dans le solide, pas trop loin du centre du fond de fissure (idem y,z)
     externe     : True : fissure face externe, False : fissure face interne
     """
-    print "setParamShapeFissure", self.nomCas
     self.shapeFissureParams = dict(profondeur  = 10,
                                    rayonPipe   = 2.5,
                                    lenSegPipe  = 2.5,
@@ -76,7 +75,7 @@ class fissureCoude_5(fissureCoude):
                                       nomFicSain    = self.nomCas,
                                       nomFicFissure = 'fissure_' + self.nomCas,
                                       nbsegRad      = 5,
-                                      nbsegCercle   = 6,
+                                      nbsegCercle   = 8,
                                       areteFaceFissure = 5)
 
   # ---------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -42,7 +42,7 @@
 //#include <stdlib.h>
 
 #ifdef _DEBUG_
-static int MYDEBUG = 1;
+static int MYDEBUG = 0;
 //#define _DEXCEPT_
 #else
 static int MYDEBUG = 0;
@@ -172,7 +172,7 @@ Driver_Mesh::Status DriverMED_R_SMESHDS_Mesh::Perform()
       //------------------------------------------------------
       PNodeInfo aNodeInfo = aMed->GetPNodeInfo(aMeshInfo);
       if (!aNodeInfo) {
-        aResult = DRS_FAIL;
+        aResult = addMessage("No nodes", /*isFatal=*/true );
         continue;
       }
       aMeshInfo->myDim=aMeshInfo->mySpaceDim;// ignore meshdim in MEDFile because it can be false
@@ -365,9 +365,9 @@ Driver_Mesh::Status DriverMED_R_SMESHDS_Mesh::Perform()
                 }
 #ifndef _DEXCEPT_
               } catch(const std::exception& exc) {
-                aResult = DRS_FAIL;
+                aResult = addMessage( exc.what(), /*isFatal=*/true );
               } catch (...) {
-                aResult = DRS_FAIL;
+                aResult = addMessage( "Unknown exception", /*isFatal=*/true );
               }
 #endif
               if ( !anElement ) {
@@ -500,7 +500,8 @@ Driver_Mesh::Status DriverMED_R_SMESHDS_Mesh::Perform()
             default:;
             }
             vector<TInt> aNodeIds(aNbNodes);
-            for(int iElem = 0; iElem < aNbElems; iElem++){
+            for ( int iElem = 0; iElem < aNbElems; iElem++ )
+            {
               bool anIsValidConnect = false;
               TCConnSlice aConnSlice = aCellInfo->GetConnSlice(iElem);
 #ifndef _DEXCEPT_
@@ -521,10 +522,10 @@ Driver_Mesh::Status DriverMED_R_SMESHDS_Mesh::Perform()
 #ifndef _DEXCEPT_
               }catch(const std::exception& exc){
                 INFOS("Following exception was caught:\n\t"<<exc.what());
-                aResult = DRS_FAIL;
+                aResult = addMessage( exc.what(), /*isFatal=*/true );
               }catch(...){
                 INFOS("Unknown exception was caught !!!");
-                aResult = DRS_FAIL;
+                aResult = addMessage( "Unknown exception", /*isFatal=*/true );
               }
 #endif          
               if(!anIsValidConnect)
@@ -950,17 +951,19 @@ Driver_Mesh::Status DriverMED_R_SMESHDS_Mesh::Perform()
                   }
                   break;
 
+                default:;
+
                 } // switch(aGeom)
 
 #ifndef _DEXCEPT_
-              }catch(const std::exception& exc){
+              } catch(const std::exception& exc) {
                 INFOS("The following exception was caught:\n\t"<<exc.what());
-                aResult = DRS_FAIL;
-              }catch(...){
+                aResult = addMessage( exc.what(), /*isFatal=*/true );
+              } catch(...) {
                 INFOS("Unknown exception was caught !!!");
-                aResult = DRS_FAIL;
+                aResult = addMessage( "Unknown exception", /*isFatal=*/true );
               }
-#endif          
+#endif
               if (!anElement) {
                 aResult = DRS_WARN_SKIP_ELEM;
               }
@@ -973,27 +976,29 @@ Driver_Mesh::Status DriverMED_R_SMESHDS_Mesh::Perform()
                 }
                 if ( DriverMED::checkFamilyID ( aFamily, aFamNum, myFamilies )) {
                   // Save reference to this element from its family
-                  myFamilies[aFamNum]->AddElement(anElement);
-                  myFamilies[aFamNum]->SetType(anElement->GetType());
+                  aFamily->AddElement(anElement);
+                  aFamily->SetType(anElement->GetType());
                 }
               }
-            }
-          }}
-        }
-      }
+            } // loop on aNbElems
+          }} // switch(aGeom)
+        } // loop on aGeom2Size
+      } // loop on aEntityInfo
+
       if (aDescendingEntitiesMap.Extent()) isDescConn = true; // Mantis issue 0020483
+
     } // for(int iMesh = 0; iMesh < aNbMeshes; iMesh++)
 #ifndef _DEXCEPT_
   }
   catch(const std::exception& exc)
   {
     INFOS("The following exception was caught:\n\t"<<exc.what());
-    aResult = DRS_FAIL;
+    aResult = addMessage( exc.what(), /*isFatal=*/true );
   }
   catch(...)
   {
     INFOS("Unknown exception was caught !!!");
-    aResult = DRS_FAIL;
+    aResult = addMessage( "Unknown exception", /*isFatal=*/true );
   }
 #endif
   if (myMesh)
@@ -1076,8 +1081,8 @@ void DriverMED_R_SMESHDS_Mesh::GetGroup(SMESHDS_Group* theGroup)
     DriverMED_FamilyPtr aFamily = (*aFamsIter).second;
     if (aFamily->GetTypes().count( theGroup->GetType() ) && aFamily->MemberOf(aGroupName))
     {
-      const set<const SMDS_MeshElement *>& anElements = aFamily->GetElements();
-      set<const SMDS_MeshElement *>::const_iterator anElemsIter = anElements.begin();
+      const ElementsSet&           anElements = aFamily->GetElements();
+      ElementsSet::const_iterator anElemsIter = anElements.begin();
       for (; anElemsIter != anElements.end(); anElemsIter++)
       {
         const SMDS_MeshElement * element = *anElemsIter;
@@ -1105,8 +1110,8 @@ void DriverMED_R_SMESHDS_Mesh::GetSubMesh (SMESHDS_SubMesh* theSubMesh,
     DriverMED_FamilyPtr aFamily = (*aFamsIter).second;
     if (aFamily->MemberOf(aName))
     {
-      const set<const SMDS_MeshElement *>& anElements = aFamily->GetElements();
-      set<const SMDS_MeshElement *>::const_iterator anElemsIter = anElements.begin();
+      const ElementsSet&           anElements = aFamily->GetElements();
+      ElementsSet::const_iterator anElemsIter = anElements.begin();
       if (aFamily->GetType() == SMDSAbs_Node)
       {
         for (; anElemsIter != anElements.end(); anElemsIter++)
@@ -1141,14 +1146,13 @@ void DriverMED_R_SMESHDS_Mesh::CreateAllSubMeshes ()
       if (aName.substr(0, 7) == string("SubMesh"))
       {
         int Id = atoi(string(aName).substr(7).c_str());
-        set<const SMDS_MeshElement *> anElements = aFamily->GetElements();
-        set<const SMDS_MeshElement *>::iterator anElemsIter = anElements.begin();
+        const ElementsSet&           anElements = aFamily->GetElements();
+        ElementsSet::const_iterator anElemsIter = anElements.begin();
         if (aFamily->GetType() == SMDSAbs_Node)
         {
           for (; anElemsIter != anElements.end(); anElemsIter++)
           {
-            SMDS_MeshNode* node = const_cast<SMDS_MeshNode*>
-              ( static_cast<const SMDS_MeshNode*>( *anElemsIter ));
+            const SMDS_MeshNode* node = static_cast<const SMDS_MeshNode*>( *anElemsIter );
             // find out a shape type
             TopoDS_Shape aShape = myMesh->IndexToShape( Id );
             int aShapeType = ( aShape.IsNull() ? -1 : aShape.ShapeType() );

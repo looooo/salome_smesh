@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -150,37 +150,37 @@ istream & StdMeshers_FixedPoints1D::LoadFrom(istream & load)
   int intVal;
   double dblVal;
 
-  isOK = (load >> intVal);
+  isOK = static_cast<bool>(load >> intVal);
   if (isOK && intVal > 0) {
     _params.clear();
     _params.reserve( intVal );
-    for (int i = 0; i < _params.capacity() && isOK; i++) {
-      isOK = (load >> dblVal);
+    for ( size_t i = 0; i < _params.capacity() && isOK; i++) {
+      isOK = static_cast<bool>(load >> dblVal);
       if ( isOK ) _params.push_back( dblVal );
     }
   }
 
-  isOK = (load >> intVal);
+  isOK = static_cast<bool>(load >> intVal);
   if (isOK && intVal > 0) {
     _nbsegs.clear();
     _nbsegs.reserve( intVal );
-    for (int i = 0; i < _nbsegs.capacity() && isOK; i++) {
-      isOK = (load >> intVal);
+    for ( size_t i = 0; i < _nbsegs.capacity() && isOK; i++) {
+      isOK = static_cast<bool>(load >> intVal);
       if ( isOK ) _nbsegs.push_back( intVal );
     }
   }
 
-  isOK = (load >> intVal);
+  isOK = static_cast<bool>(load >> intVal);
   if (isOK && intVal > 0) {
     _edgeIDs.clear();
     _edgeIDs.reserve( intVal );
-    for (int i = 0; i < _edgeIDs.capacity() && isOK; i++) {
-      isOK = (load >> intVal);
+    for ( size_t i = 0; i < _edgeIDs.capacity() && isOK; i++) {
+      isOK = static_cast<bool>(load >> intVal);
       if ( isOK ) _edgeIDs.push_back( intVal );
     }
   }
 
-  isOK = (load >> _objEntry);
+  isOK = static_cast<bool>(load >> _objEntry);
 
   return load;
 }

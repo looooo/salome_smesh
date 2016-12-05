@@ -2,6 +2,9 @@
 
 import logging
 from geomsmesh import geompy
+from geomsmesh import geomPublish
+from geomsmesh import geomPublishInFather
+import initLog
 
 # --- origine et vecteurs de base
 
@@ -23,11 +26,11 @@ def triedreBase():
     OX = geompy.MakeVectorDXDYDZ(1, 0, 0)
     OY = geompy.MakeVectorDXDYDZ(0, 1, 0)
     OZ = geompy.MakeVectorDXDYDZ(0, 0, 1)
-
+  
     if not geompy.myStudy.FindObjectByName( 'OX', geompy.ComponentDataType() ):
-      geompy.addToStudy( O, 'O' )
-      geompy.addToStudy( OX, 'OX' )
-      geompy.addToStudy( OY, 'OY' )
-      geompy.addToStudy( OZ, 'OZ' )
+      geomPublish(initLog.debug,  O, 'O' )
+      geomPublish(initLog.debug,  OX, 'OX' )
+      geomPublish(initLog.debug,  OY, 'OY' )
+      geomPublish(initLog.debug,  OZ, 'OZ' )
 
   return O, OX, OY, OZ

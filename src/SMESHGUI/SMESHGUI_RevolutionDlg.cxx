@@ -1,4 +1,4 @@
-// Copyright (C) 2007-2015  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2016  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
 // CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
@@ -612,9 +612,7 @@ void SMESHGUI_RevolutionDlg::SelectionIntoArgument()
     if ( !aMesh )
       return;
 
-    int aNbUnits = 0;
-
-    bool isNodeSelected = (myEditCurrentArgument == (QWidget*)SpinBox_X ||
+    bool isNodeSelected = ((myEditCurrentArgument == (QWidget*)SpinBox_X ) ||
                            (myEditCurrentArgument == (QWidget*)SpinBox_DX &&
                             myVectorDefinition==POINT_SELECT));
 

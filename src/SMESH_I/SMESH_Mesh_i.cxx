@@ -406,8 +406,8 @@ SMESH_Mesh_i::ImportMEDFile( const char* theFileName, const char* theMeshName )
   CreateGroupServants();
 
   int major, minor, release;
-  if( !MED::GetMEDVersion( theFileName, major, minor, release ) )
-    major = minor = release = -1;
+  major = minor = release = 0;
+  MED::GetMEDVersion(theFileName, major, minor, release);
   _medFileInfo           = new SMESH::MedFileInfo();
   _medFileInfo->fileName = theFileName;
   _medFileInfo->fileSize = 0;
@@ -445,18 +445,6 @@ SMESH::DriverMED_ReadStatus SMESH_Mesh_i::ImportCGNSFile( const char*  theFileNa
   CreateGroupServants();
 
   return ConvertDriverMEDReadStatus(status);
-}
-
-//================================================================================
-/*!
- * \brief Return string representation of a MED file version comprising nbDigits
- */
-//================================================================================
-
-char* SMESH_Mesh_i::GetVersionString(SMESH::MED_VERSION version, CORBA::Short nbDigits)
-{
-  string ver = DriverMED_W_SMESHDS_Mesh::GetVersionString(nbDigits);
-  return CORBA::string_dup( ver.c_str() );
 }
 
 //=============================================================================
@@ -3010,7 +2998,6 @@ string SMESH_Mesh_i::prepareMeshNameAndGroups(const char*    file,
 
 void SMESH_Mesh_i::ExportToMEDX (const char*        file,
                                  CORBA::Boolean     auto_groups,
-                                 SMESH::MED_VERSION theVersion,
                                  CORBA::Boolean     overwrite,
                                  CORBA::Boolean     autoDimension)
   throw(SALOME::SALOME_Exception)
@@ -3020,11 +3007,11 @@ void SMESH_Mesh_i::ExportToMEDX (const char*        file,
     _preMeshInfo->FullLoadFromFile();
 
   string aMeshName = prepareMeshNameAndGroups(file, overwrite);
-  _impl->ExportMED( file, aMeshName.c_str(), auto_groups, theVersion, 0, autoDimension );
+  _impl->ExportMED( file, aMeshName.c_str(), auto_groups, 0, autoDimension );
 
   TPythonDump() << SMESH::SMESH_Mesh_var(_this()) << ".ExportToMEDX( r'"
                 << file << "', " << auto_groups << ", "
-                << theVersion << ", " << overwrite << ", "
+                << overwrite << ", "
                 << autoDimension << " )";
 
   SMESH_CATCH( SMESH::throwCorbaException );
@@ -3037,11 +3024,10 @@ void SMESH_Mesh_i::ExportToMEDX (const char*        file,
 //================================================================================
 
 void SMESH_Mesh_i::ExportToMED (const char*        file,
-                                CORBA::Boolean     auto_groups,
-                                SMESH::MED_VERSION theVersion)
+                                CORBA::Boolean     auto_groups)
   throw(SALOME::SALOME_Exception)
 {
-  ExportToMEDX(file,auto_groups,theVersion,true);
+  ExportToMEDX(file, auto_groups, true);
 }
 
 //================================================================================
@@ -3054,7 +3040,7 @@ void SMESH_Mesh_i::ExportMED (const char* file,
                               CORBA::Boolean auto_groups)
   throw(SALOME::SALOME_Exception)
 {
-  ExportToMEDX(file,auto_groups,SMESH::MED_V2_2,true);
+  ExportToMEDX(file, auto_groups, true);
 }
 
 //================================================================================
@@ -3157,7 +3143,6 @@ void SMESH_Mesh_i::ExportSTL (const char *file, const bool isascii)
 void SMESH_Mesh_i::ExportPartToMED(SMESH::SMESH_IDSource_ptr meshPart,
                                    const char*               file,
                                    CORBA::Boolean            auto_groups,
-                                   SMESH::MED_VERSION        version,
                                    CORBA::Boolean            overwrite,
                                    CORBA::Boolean            autoDimension,
                                    const GEOM::ListOfFields& fields,
@@ -3211,7 +3196,7 @@ void SMESH_Mesh_i::ExportPartToMED(SMESH::SMESH_IDSource_ptr meshPart,
   {
     aMeshName = prepareMeshNameAndGroups(file, overwrite);
     _impl->ExportMED( file, aMeshName.c_str(), auto_groups,
-                      version, 0, autoDimension, /*addODOnVertices=*/have0dField);
+                      0, autoDimension, /*addODOnVertices=*/have0dField);
     meshDS = _impl->GetMeshDS();
   }
   else
@@ -3231,7 +3216,7 @@ void SMESH_Mesh_i::ExportPartToMED(SMESH::SMESH_IDSource_ptr meshPart,
     }
     SMESH_MeshPartDS* partDS = new SMESH_MeshPartDS( meshPart );
     _impl->ExportMED( file, aMeshName.c_str(), auto_groups,
-                      version, partDS, autoDimension, /*addODOnVertices=*/have0dField);
+                      partDS, autoDimension, /*addODOnVertices=*/have0dField);
     meshDS = tmpDSDeleter._obj = partDS;
   }
 
@@ -3257,7 +3242,7 @@ void SMESH_Mesh_i::ExportPartToMED(SMESH::SMESH_IDSource_ptr meshPart,
   }
   TPythonDump() << _this() << ".ExportPartToMED( "
                 << meshPart << ", r'" << file << "', "
-                << auto_groups << ", " << version << ", " << overwrite << ", "
+                << auto_groups << ", " << overwrite << ", "
                 << autoDimension << ", " << goList
                 << ", '" << ( geomAssocFields ? geomAssocFields : "" ) << "'" << " )";
 

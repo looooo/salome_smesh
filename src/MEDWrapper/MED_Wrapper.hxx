@@ -978,6 +978,10 @@ namespace MED
   public:
     SharedPtr() {}
 
+    SharedPtr(TWrapper* p):
+      boost::shared_ptr<TWrapper>(p)
+    {}
+
     template<class Y>
     explicit SharedPtr(Y * p): 
       boost::shared_ptr<TWrapper>(p) 

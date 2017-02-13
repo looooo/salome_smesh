@@ -68,21 +68,6 @@ void DriverMED_W_SMESHDS_Mesh::SetFile(const std::string& theFileName)
   Driver_SMESHDS_Mesh::SetFile(theFileName);
 }
 
-string DriverMED_W_SMESHDS_Mesh::GetVersionString(int theNbDigits)
-{
-  TInt majeur, mineur, release;
-  majeur =  mineur = release = 0;
-  MED::GetVersionRelease(majeur, mineur, release);
-  ostringstream name;
-  if ( theNbDigits > 0 )
-    name << majeur;
-  if ( theNbDigits > 1 )
-    name << "." << mineur;
-  if ( theNbDigits > 2 )
-    name << "." << release;
-  return name.str();
-}
-
 void DriverMED_W_SMESHDS_Mesh::AddGroup(SMESHDS_GroupBase* theGroup)
 {
   myGroups.push_back(theGroup);

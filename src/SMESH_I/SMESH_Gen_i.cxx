@@ -131,6 +131,7 @@
 
 #include <map>
 #include <fstream>
+#include <sstream>
 #include <cstdio>
 #include <cstdlib>
 
@@ -2957,25 +2958,43 @@ SMESH::SMESH_Mesh_ptr SMESH_Gen_i::CopyMesh(SMESH::SMESH_IDSource_ptr meshPart,
 
 //================================================================================
 /*!
+ * \brief Get version of MED format being used.
+ */
+//================================================================================
+
+char* SMESH_Gen_i::GetMEDFileVersion()
+{
+  MED::TInt majeur, mineur, release;
+  majeur =  mineur = release = 0;
+  MED::GetVersionRelease(majeur, mineur, release);
+  std::ostringstream version;
+  version << majeur << "." << mineur << "." << release;
+  return CORBA::string_dup( version.str().c_str() );
+}
+
+//================================================================================
+/*!
  *  SMESH_Gen_i::GetMEDVersion
  *
  *  Get MED version of the file by its name
  */
 //================================================================================
-CORBA::Boolean SMESH_Gen_i::GetMEDVersion(const char* theFileName,
-                                          SMESH::MED_VERSION& theVersion)
+char* SMESH_Gen_i::GetMEDVersion(const char* theFileName)
 {
-  theVersion = SMESH::MED_V2_2;
+  std::string version = MED::GetMEDVersion( theFileName );
+  return CORBA::string_dup( version.c_str() );
+}
 
-  int major, minor, release;
-  bool result = MED::GetMEDVersion( theFileName, major, minor, release );
-  if ( result ) {
-    int version = major * 100 + minor;
-    if ( version < 202 ) theVersion = SMESH::MED_V2_1;
-    else theVersion = SMESH::MED_V2_2;
-  }
-
-  return result;
+//================================================================================
+/*!
+ *  SMESH_Gen_i::CheckCompatibility
+ *
+ *  Check compatibility of file with MED format being used.
+ */
+//================================================================================
+CORBA::Boolean SMESH_Gen_i::CheckCompatibility(const char* theFileName)
+{
+  return MED::CheckCompatibility( theFileName );
 }
 
 //================================================================================

@@ -26,10 +26,18 @@
 #include "MED_WrapperDef.hxx"
 #include "MED_Wrapper.hxx"
 
+#include <string>
+
 namespace MED
 {
   MEDWRAPPER_EXPORT
+  std::string GetMEDVersion( const std::string& );
+
+  MEDWRAPPER_EXPORT
   bool GetMEDVersion( const std::string&, int&, int&, int& );
+  
+  MEDWRAPPER_EXPORT
+  bool CheckCompatibility( const std::string& );
   
   MEDWRAPPER_EXPORT
   PWrapper CrWrapperR( const std::string& );

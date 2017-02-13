@@ -27,18 +27,22 @@
 
 int main (int argc, char **argv)
 {
-  med_idt aFid = MEDfileOpen(argv[1],MED_ACC_RDONLY);
-  if(aFid < 0)
-    exit(1);
+  if ( argc < 2 )
+    return -1;
 
-  med_int aMajor, aMinor, aRelease;
-  med_err aRet = MEDfileNumVersionRd(aFid,&aMajor,&aMinor,&aRelease);
-  MEDfileClose(aFid);
-  if(aRet < 0) {
-    // VSR: simulate med 2.3.6 behavior, med file version is assumed to 2.1
-    aMajor=2;
-    aMinor=aRelease=-1;
+  med_idt fid = MEDfileOpen(argv[1], MED_ACC_RDONLY);
+  if (fid < 0)
+    return 1;
+
+  med_int major, minor, release;
+  med_err aRet = MEDfileNumVersionRd(fid, &major, &minor, &release);
+  MEDfileClose(fid);
+  if (aRet < 0) {
+    // VSR: simulate med 2.3.6 behavior, med file version is assumed to be 2.1 or older
+    major = 2;
+    minor = release = -1;
   }
 
-  printf("%d.%d.%d\n",aMajor,aMinor,aRelease);
+  printf("%d.%d.%d\n", major, minor, release);
+  return 0;
 }

@@ -228,19 +228,13 @@ public:
    *  Consider maximum group name length stored in MED file.
    */
   CORBA::Boolean HasDuplicatedGroupNamesMED();
-  /*!
-   * Return string representation of a MED file version comprising nbDigits
-   */
-  char* GetVersionString(SMESH::MED_VERSION version, CORBA::Short nbDigits);
 
   void ExportToMEDX( const char*        file,
                      CORBA::Boolean     auto_groups,
-                     SMESH::MED_VERSION version,
                      CORBA::Boolean     overwrite,
                      CORBA::Boolean     autoDimension=true) throw (SALOME::SALOME_Exception);
   void ExportToMED ( const char*        file,
-                     CORBA::Boolean     auto_groups,
-                     SMESH::MED_VERSION version ) throw (SALOME::SALOME_Exception);
+                     CORBA::Boolean     auto_groups ) throw (SALOME::SALOME_Exception);
   void ExportMED   ( const char*        file,
                      CORBA::Boolean     auto_groups ) throw (SALOME::SALOME_Exception);
 
@@ -259,7 +253,6 @@ public:
   void ExportPartToMED(SMESH::SMESH_IDSource_ptr meshPart,
                        const char*               file,
                        CORBA::Boolean            auto_groups,
-                       SMESH::MED_VERSION        version,
                        CORBA::Boolean            overwrite,
                        CORBA::Boolean            autoDim,
                        const GEOM::ListOfFields& fields,

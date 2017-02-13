@@ -36,110 +36,89 @@ extern "C"
 #endif
 }
 
-#ifdef _DEBUG_
-static int MYDEBUG = 0;
-#else
-static int MYDEBUG = 0;
-#endif
-
 namespace MED
 {
-  enum EStatus { eBad, eDeprecated, eGood };
-
-  EStatus GetVersionId(const std::string& theFileName)
+  bool exists(const std::string& fileName)
   {
-    INITMSG(MYDEBUG,"GetVersionId - theFileName = '"<<theFileName<<"'"<<std::endl);
-
-    EStatus status = eBad;    
-
-    bool ok = true;
-    // 1. Check that file is accessible
 #ifdef WIN32
-    ok = (GetFileAttributes(xmlPath.c_str()) != INVALID_FILE_ATTRIBUTES);
+    return (GetFileAttributes(xmlPath.c_str()) != INVALID_FILE_ATTRIBUTES);
 #else
-    ok = (access(theFileName.c_str(), F_OK) == 0);
+    return (access(fileName.c_str(), F_OK) == 0);
 #endif
-    // 2. Check compatibility of hdf and med versions
-    if ( ok ) {
-      med_bool hdfok, medok;
-      MEDfileCompatibility(theFileName.c_str(), &hdfok, &medok);
-      ok = hdfok /*&& medok*/; // med-2.1 is KO since med-3.0.0
-    }
-    // 3. Try to open the file with MED API
-    if ( ok ) {
-      med_idt aFid = MEDfileOpen(theFileName.c_str(), MED_ACC_RDONLY);
+  }
 
-      MSG(MYDEBUG,"GetVersionId - theFileName = '"<<theFileName<<"'; aFid = "<<aFid<<std::endl);
-      if (aFid >= 0) {
-        med_int aMajor, aMinor, aRelease;
-        med_err aRet = MEDfileNumVersionRd(aFid, &aMajor, &aMinor, &aRelease);
-        INITMSG(MYDEBUG,"GetVersionId - theFileName = '"<<theFileName<<"'; aRet = "<<aRet<<std::endl);
-        if (aRet >= 0) {
-          if (aMajor == 2 && aMinor == 1)
-            status = eDeprecated;
-          else
-            status = eGood;
+  bool CheckCompatibility(const std::string& fileName)
+  {
+    bool ok = false;
+    // check that file is accessible
+    if ( exists(fileName) ) {
+      // check HDF5 && MED compatibility
+      med_bool hdfok, medok;
+      MEDfileCompatibility(fileName.c_str(), &hdfok, &medok);
+      if ( hdfok && medok ) {
+        med_idt aFid = MEDfileOpen(fileName.c_str(), MED_ACC_RDONLY);
+        if (aFid >= 0) {
+          med_int major, minor, release;
+          med_err ret = MEDfileNumVersionRd(aFid, &major, &minor, &release);
+          if (ret >= 0) {
+            int version = 100*major + minor;
+            if (version >= 202)
+              ok = true;
+          }
         }
-        else {
-          // VSR: simulate med 2.3.6 behavior, med file version is assumed to 2.1
-          status = eDeprecated;
-        }
+        MEDfileClose(aFid);
+      }
+    }
+    return ok;
+  }
+
+  bool GetMEDVersion(const std::string& fileName, int& major, int& minor, int& release)
+  {
+    bool ok = false;
+    major = minor = release = 0;
+    med_idt aFid = MEDfileOpen(fileName.c_str(), MED_ACC_RDONLY);
+    if (aFid >= 0) {
+      med_int _major, _minor, _release;
+      med_err ret = MEDfileNumVersionRd(aFid, &_major, &_minor, &_release);
+      if (ret == 0) {
+        major = _major;
+        minor = _minor;
+        release = _release;
+        ok = true;
       }
       MEDfileClose(aFid);
-      ok = true;
-      BEGMSG(MYDEBUG,"GetVersionId - theFileName = '"<<theFileName<<"'; status = "<<status<<std::endl);
     }
-    return status;
+    return ok;
   }
 
-  bool GetMEDVersion(const std::string& fname, int& major, int& minor, int& release)
+  std::string GetMEDVersion(const std::string& fileName)
   {
-    med_idt f = MEDfileOpen(fname.c_str(), MED_ACC_RDONLY);
-    if ( f<0 )
-      return false;
-
-    med_int aMajor, aMinor, aRelease;
-    med_err aRet = MEDfileNumVersionRd(f, &aMajor, &aMinor, &aRelease);
-    major = aMajor;
-    minor = aMinor;
-    release = aRelease;
-    MEDfileClose( f );
-    if ( aRet<0 ) {
-      // VSR: simulate med 2.3.6 behavior, med file version is assumed to 2.1
-      major = 2; minor = release = -1;
-      //return false;
+    std::string version;
+    int major, minor, release;
+    if (GetMEDVersion(fileName, major, minor, release)) {
+      std::ostringstream os;
+      os << major << "." << minor << "." << release;
+      version = os.str();
     }
-    return true;
+    return version;
   }
 
-  PWrapper CrWrapperR(const std::string& theFileName)
+  PWrapper CrWrapperR(const std::string& fileName)
   {
     PWrapper aWrapper;
-    EStatus status = GetVersionId(theFileName);
-    switch (status) {
-    case eGood:
-      aWrapper.reset(new MED::V2_2::TVWrapper(theFileName));
-      break;
-    case eDeprecated:
-      EXCEPTION(std::runtime_error,"Cannot open file '"<<theFileName<<"'. Med version 2.1 is not supported any more.");
-      break;
-    default:
-      EXCEPTION(std::runtime_error,"MED::CrWrapper - theFileName = '"<<theFileName<<"'");
-      break;
+    if (!CheckCompatibility(fileName)) {
+      EXCEPTION(std::runtime_error, "Cannot open file '"<<fileName<<"'.");
+    }
+    else {
+      aWrapper = new MED::V2_2::TVWrapper(fileName);
     }
     return aWrapper;
   }
 
-  PWrapper CrWrapperW(const std::string& theFileName)
+  PWrapper CrWrapperW(const std::string& fileName)
   {
-    EStatus status = GetVersionId(theFileName);
-
-    if (status != eGood)
-      remove(theFileName.c_str());
-    
-    PWrapper aWrapper;
-    aWrapper.reset(new MED::V2_2::TVWrapper(theFileName));
-
-    return aWrapper;
+    if (!CheckCompatibility(fileName))
+      remove(fileName.c_str());
+    return new MED::V2_2::TVWrapper(fileName);
   }
 }

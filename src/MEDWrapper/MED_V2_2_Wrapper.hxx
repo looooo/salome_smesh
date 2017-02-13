@@ -29,36 +29,6 @@
 
 namespace MED
 {
-  MEDWRAPPER_EXPORT
-  TInt
-  GetDESCLength();
-  
-  MEDWRAPPER_EXPORT
-  TInt
-  GetIDENTLength();
-  
-  MEDWRAPPER_EXPORT
-  TInt
-  GetNOMLength();
-  
-  MEDWRAPPER_EXPORT
-  TInt
-  GetLNOMLength();
-  
-  MEDWRAPPER_EXPORT
-  TInt
-  GetPNOMLength();
-
-  MEDWRAPPER_EXPORT
-  void
-  GetVersionRelease(TInt& majeur, TInt& mineur, TInt& release);
-
-  MEDWRAPPER_EXPORT
-  TInt
-  GetNbConn(EGeometrieElement typmai,
-                   EEntiteMaillage typent,
-                   TInt mdim);
-
   namespace V2_2
   {
     //----------------------------------------------------------------------------

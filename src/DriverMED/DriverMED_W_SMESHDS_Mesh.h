@@ -50,8 +50,6 @@ class MESHDRIVERMED_EXPORT DriverMED_W_SMESHDS_Mesh: public Driver_SMESHDS_Mesh
   void SetFile(const std::string& theFileName);
   void SetAutoDimension(bool toFindOutDimension) { myAutoDimension = toFindOutDimension; }
 
-  static std::string GetVersionString(int theNbDigits=2);
-
   void AddGroupOfNodes();
   void AddGroupOfEdges();
   void AddGroupOfFaces();

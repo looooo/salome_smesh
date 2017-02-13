@@ -202,9 +202,6 @@ namespace SMESH
     operator<<(SMESH_MeshEditor_i* theArg);
 
     TPythonDump&
-    operator<<(SMESH::MED_VERSION theArg);
-
-    TPythonDump&
     operator<<(const SMESH::AxisStruct & theAxis);
 
     TPythonDump&

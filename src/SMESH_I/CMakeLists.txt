@@ -114,7 +114,7 @@ SET(SMESHEngine_HEADERS
 SET(SMESHEngine_SOURCES
   SMESH_Gen_i.cxx
   SMESH_Gen_i_1.cxx
-  SMESH_DumpPython.cxx
+  SMESH_PythonDump.cxx
   SMESH_Mesh_i.cxx
   SMESH_subMesh_i.cxx
   SMESH_MeshEditor_i.cxx

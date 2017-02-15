@@ -26,7 +26,7 @@
 #ifdef _DEBUG_
 static int MYDEBUG = 0;
 #else
-// static int MYDEBUG = 0;
+static int MYDEBUG = 0;
 #endif
 
 int MED::PrefixPrinter::myCounter = 0;
@@ -56,47 +56,4 @@ std::string MED::PrefixPrinter::GetPrefix()
     return std::string(myCounter*2,' ');
   }
   return "";
-}
-
-const MED::TEntity2GeomSet& MED::GetEntity2GeomSet()
-{
-  static MED::TEntity2GeomSet Entity2GeomSet;
-  using namespace MED;
-
-  if ( Entity2GeomSet.empty() ) {
-    TGeomSet& aGeomARETESet = Entity2GeomSet[eARETE];
-    aGeomARETESet.insert(eSEG2);
-    aGeomARETESet.insert(eSEG3);
-    
-    TGeomSet& aGeomFACESet = Entity2GeomSet[eFACE];
-    aGeomFACESet.insert(eTRIA3);
-    aGeomFACESet.insert(eQUAD4);
-    aGeomFACESet.insert(eTRIA6);
-    aGeomFACESet.insert(eTRIA7);
-    aGeomFACESet.insert(eQUAD8);
-    aGeomFACESet.insert(eQUAD9);
-    aGeomFACESet.insert(ePOLYGONE);
-    aGeomFACESet.insert(ePOLYGON2);
-    
-    TGeomSet& aGeomMAILLESet = Entity2GeomSet[eMAILLE];
-    aGeomMAILLESet.insert(ePOINT1);
-    aGeomMAILLESet.insert(aGeomARETESet.begin(),aGeomARETESet.end());
-    aGeomMAILLESet.insert(aGeomFACESet.begin(),aGeomFACESet.end());
-    aGeomMAILLESet.insert(eTETRA4);
-    aGeomMAILLESet.insert(ePYRA5);
-    aGeomMAILLESet.insert(ePENTA6);
-    aGeomMAILLESet.insert(eHEXA8);
-    aGeomMAILLESet.insert(eOCTA12);
-    aGeomMAILLESet.insert(eTETRA10);
-    aGeomMAILLESet.insert(ePYRA13);
-    aGeomMAILLESet.insert(ePENTA15);
-    aGeomMAILLESet.insert(eHEXA20);
-    aGeomMAILLESet.insert(eHEXA27);
-    aGeomMAILLESet.insert(ePOLYEDRE);
-    
-    /* This combination allows reading nb of models of structure elements */
-    Entity2GeomSet[eSTRUCT_ELEMENT].insert(eAllGeoType); 
-  }
-
-  return Entity2GeomSet;
 }

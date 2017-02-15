@@ -22,13 +22,13 @@
 
 #include "MED_GaussUtils.hxx"
 #include "MED_Utilities.hxx"
- 
+
 #ifdef _DEBUG_
 static int MYDEBUG = 0;
 static int MYVALUEDEBUG = 0;
 #else
-// static int MYDEBUG = 0;
-// static int MYVALUEDEBUG = 0;
+static int MYDEBUG = 0;
+static int MYVALUEDEBUG = 0;
 #endif
 
 namespace MED
@@ -62,28 +62,27 @@ namespace MED
     myGaussCoord.resize(theNbElem*myGaussStep);
   }
 
-
   TInt
   TGaussCoord
   ::GetNbElem() const
-  { 
-    return myNbElem; 
+  {
+    return myNbElem;
   }
-  
+
   TInt
   TGaussCoord
   ::GetNbGauss() const
-  { 
-    return myNbGauss; 
+  {
+    return myNbGauss;
   }
-  
+
   TInt
   TGaussCoord
   ::GetDim() const
-  { 
-    return myDim; 
+  {
+    return myDim;
   }
-  
+
   unsigned char*
   TGaussCoord
   ::GetValuePtr()
@@ -91,8 +90,7 @@ namespace MED
     return (unsigned char*)&(myGaussCoord[0]);
   }
 
-
-  TCCoordSliceArr 
+  TCCoordSliceArr
   TGaussCoord
   ::GetCoordSliceArr(TInt theElemId) const
   {
@@ -114,8 +112,7 @@ namespace MED
     return aCoordSliceArr;
   }
 
-
-  TCoordSliceArr 
+  TCoordSliceArr
   TGaussCoord
   ::GetCoordSliceArr(TInt theElemId)
   {
@@ -137,10 +134,9 @@ namespace MED
     return aCoordSliceArr;
   }
 
-
   //---------------------------------------------------------------
   inline
-  bool 
+  bool
   IsEqual(TFloat theLeft, TFloat theRight)
   {
     static TFloat EPS = 1.0E-3;
@@ -148,7 +144,6 @@ namespace MED
       return fabs(theLeft-theRight)/(fabs(theLeft)+fabs(theRight)) < EPS;
     return true;
   }
-
 
   //---------------------------------------------------------------
   class TShapeFun::TFun
@@ -166,7 +161,7 @@ namespace MED
       myNbRef = theNbRef;
     }
 
-    TCFloatVecSlice 
+    TCFloatVecSlice
     GetFunSlice(TInt theGaussId) const
     {
       return TCFloatVecSlice(myFun,std::slice(theGaussId*myNbRef,myNbRef,1));
@@ -187,7 +182,7 @@ namespace MED
     myNbRef(theNbRef)
   {}
 
-  TCCoordSlice 
+  TCCoordSlice
   TShapeFun::GetCoord(TInt theRefId) const
   {
     return TCCoordSlice(myRefCoord,std::slice(theRefId*myDim,myDim,1));
@@ -199,7 +194,7 @@ namespace MED
     return TCoordSlice(myRefCoord,std::slice(theRefId*myDim,myDim,1));
   }
 
-  void 
+  void
   TShapeFun::GetFun(const TCCoordSliceArr& theRef,
                     const TCCoordSliceArr& theGauss,
                     TFun& theFun) const
@@ -209,7 +204,7 @@ namespace MED
     theFun.Init(aNbGauss,aNbRef);
   }
 
-  bool 
+  bool
   TShapeFun::IsSatisfy(const TCCoordSliceArr& theRefCoord) const
   {
     TInt aNbRef = theRefCoord.size();
@@ -301,7 +296,7 @@ namespace MED
           TCFloatVecSlice aFunSlice = aFun.GetFunSlice(aGaussId);
 
           for(TInt aConnId = 0; aConnId < aConnDim; aConnId++){
-            TInt aNodeId = aConnSlice[aConnId] - 1;      
+            TInt aNodeId = aConnSlice[aConnId] - 1;
             TCCoordSlice aNodeCoordSlice = theNodeInfo.GetCoordSlice(aNodeId);
 
             for(TInt aDimId = 0; aDimId < aDim; aDimId++){
@@ -344,7 +339,6 @@ namespace MED
     return false;
   }
 
-
   //---------------------------------------------------------------
   TSeg2a::TSeg2a():TShapeFun(1,2)
   {
@@ -374,7 +368,6 @@ namespace MED
       aSlice[1] = 0.5*(1.0 + aCoord[0]);
     }
   }
-
 
   //---------------------------------------------------------------
   TSeg3a::TSeg3a():TShapeFun(1,3)
@@ -408,8 +401,6 @@ namespace MED
     }
   }
 
-
-
   //---------------------------------------------------------------
   TTria3a::TTria3a():
     TShapeFun(2,3)
@@ -442,8 +433,6 @@ namespace MED
       aSlice[2] = 0.5*(1.0 + aCoord[0]);
     }
   }
-
-
 
   //---------------------------------------------------------------
   TTria6a::TTria6a():TShapeFun(2,6)
@@ -485,8 +474,6 @@ namespace MED
     }
   }
 
-
-
   //---------------------------------------------------------------
   TTria3b::TTria3b():
     TShapeFun(2,3)
@@ -519,8 +506,6 @@ namespace MED
       aSlice[2] = aCoord[1];
     }
   }
-
-
 
   //---------------------------------------------------------------
   TTria6b::TTria6b():
@@ -563,8 +548,6 @@ namespace MED
     }
   }
 
-
-
   //---------------------------------------------------------------
   TQuad4a::TQuad4a():
     TShapeFun(2,4)
@@ -599,8 +582,6 @@ namespace MED
       aSlice[3] = 0.25*(1.0 + aCoord[0])*(1.0 + aCoord[1]);
     }
   }
-
-
 
   //---------------------------------------------------------------
   TQuad8a::TQuad8a():
@@ -646,8 +627,6 @@ namespace MED
       aSlice[7] = 0.5*(1.0 + aCoord[1])*(1.0 - aCoord[0])*(1.0 + aCoord[0]);
     }
   }
-
-
 
   //---------------------------------------------------------------
   TQuad9a::TQuad9a():
@@ -698,8 +677,6 @@ namespace MED
     }
   }
 
-
-
   //---------------------------------------------------------------
   TQuad4b::TQuad4b():
     TShapeFun(2,4)
@@ -734,8 +711,6 @@ namespace MED
       aSlice[3] = 0.25*(1.0 - aCoord[0])*(1.0 + aCoord[1]);
     }
   }
-
-
 
   //---------------------------------------------------------------
   TQuad8b::TQuad8b():
@@ -787,8 +762,6 @@ namespace MED
     }
   }
 
-
-
   //---------------------------------------------------------------
   TQuad9b::TQuad9b():
     TShapeFun(2,9)
@@ -838,8 +811,6 @@ namespace MED
     }
   }
 
-
-
   //---------------------------------------------------------------
   TTetra4a::TTetra4a():
     TShapeFun(3,4)
@@ -874,8 +845,6 @@ namespace MED
       aSlice[3] = aCoord[0];
     }
   }
-
-
 
   //---------------------------------------------------------------
   TTetra10a::TTetra10a():
@@ -928,10 +897,7 @@ namespace MED
     }
   }
 
-
-
   //---------------------------------------------------------------
-
 
   TTetra4b::TTetra4b():
     TShapeFun(3,4)
@@ -966,8 +932,6 @@ namespace MED
       aSlice[3] = aCoord[0];
     }
   }
-
-
 
   //---------------------------------------------------------------
   TTetra10b::TTetra10b():
@@ -1020,8 +984,6 @@ namespace MED
     }
   }
 
-
-
   //---------------------------------------------------------------
   THexa8a::THexa8a():
     TShapeFun(3,8)
@@ -1065,7 +1027,6 @@ namespace MED
       aSlice[7] = 0.125*(1.0 - aCoord[0])*(1.0 + aCoord[1])*(1.0 + aCoord[2]);
     }
   }
-
 
   //---------------------------------------------------------------
   THexa20a::THexa20a(TInt theDim, TInt theNbRef):
@@ -1144,8 +1105,6 @@ namespace MED
     }
   }
 
-
-
   //---------------------------------------------------------------
   THexa27a::THexa27a():
     THexa20a(3,27)
@@ -1208,8 +1167,6 @@ namespace MED
     }
   }
 
-
-
   //---------------------------------------------------------------
   THexa8b::THexa8b():
     TShapeFun(3,8)
@@ -1253,8 +1210,6 @@ namespace MED
       aSlice[5] = 0.125*(1.0 - aCoord[0])*(1.0 + aCoord[1])*(1.0 + aCoord[2]);
     }
   }
-
-
 
   //---------------------------------------------------------------
   THexa20b::THexa20b(TInt theDim, TInt theNbRef):
@@ -1333,8 +1288,6 @@ namespace MED
     }
   }
 
-
-
   //---------------------------------------------------------------
   TPenta6a::TPenta6a():
     TShapeFun(3,6)
@@ -1375,8 +1328,6 @@ namespace MED
     }
   }
 
-
-
   //---------------------------------------------------------------
   TPenta6b::TPenta6b():
     TShapeFun(3,6)
@@ -1416,8 +1367,6 @@ namespace MED
       aSlice[4] = 0.5*(1.0 - aCoord[1] - aCoord[2])*(1.0 + aCoord[0]);
     }
   }
-
-
 
   //---------------------------------------------------------------
   TPenta15a::TPenta15a():
@@ -1481,8 +1430,6 @@ namespace MED
     }
   }
 
-
-
   //---------------------------------------------------------------
   TPenta15b::TPenta15b():
     TShapeFun(3,15)
@@ -1545,8 +1492,6 @@ namespace MED
     }
   }
 
-
-
   //---------------------------------------------------------------
   TPyra5a::TPyra5a():
     TShapeFun(3,5)
@@ -1591,8 +1536,6 @@ namespace MED
     }
   }
 
-
-
   //---------------------------------------------------------------
   TPyra5b::TPyra5b():
     TShapeFun(3,5)
@@ -1600,7 +1543,7 @@ namespace MED
     TInt aNbRef = myRefCoord.size();
     for(TInt aRefId = 0; aRefId < aNbRef; aRefId++){
       TCoordSlice aCoord = GetCoord(aRefId);
-      switch(aRefId){        
+      switch(aRefId){
       case  0: aCoord[0] =  1.0;  aCoord[1] =  0.0;  aCoord[2] =  0.0; break;
       case  3: aCoord[0] =  0.0;  aCoord[1] =  1.0;  aCoord[2] =  0.0; break;
       case  2: aCoord[0] = -1.0;  aCoord[1] =  0.0;  aCoord[2] =  0.0; break;
@@ -1616,7 +1559,7 @@ namespace MED
                    TFun& theFun) const
   {
     GetFun(theRef,theGauss,theFun);
-    
+
     TInt aNbGauss = theGauss.size();
     for(TInt aGaussId = 0; aGaussId < aNbGauss; aGaussId++){
       const TCCoordSlice& aCoord = theGauss[aGaussId];
@@ -1636,8 +1579,6 @@ namespace MED
       aSlice[4] = aCoord[2];
     }
   }
-  
-
 
   //---------------------------------------------------------------
   TPyra13a::TPyra13a():
@@ -1708,8 +1649,6 @@ namespace MED
     }
   }
 
-
-
   //---------------------------------------------------------------
   TPyra13b::TPyra13b():
     TShapeFun(3,13)
@@ -1779,11 +1718,9 @@ namespace MED
     }
   }
 
-
-
   //---------------------------------------------------------------
   bool
-  GetGaussCoord3D(const TGaussInfo& theGaussInfo, 
+  GetGaussCoord3D(const TGaussInfo& theGaussInfo,
                   const TCellInfo& theCellInfo,
                   const TNodeInfo& theNodeInfo,
                   TGaussCoord& theGaussCoord,
@@ -1965,7 +1902,7 @@ namespace MED
 
         break;
       }
-      default: 
+      default:
         INITMSG(MYDEBUG,"eNONE"<<std::endl);
         return false;
       }
@@ -2014,7 +1951,7 @@ namespace MED
         TCoordSlice& aGaussCoordSlice = aCoordSliceArr[aGaussId];
 
         for(TInt aConnId = 0; aConnId < aConnDim; aConnId++){
-          TInt aNodeId = aConnSlice[aConnId] - 1;      
+          TInt aNodeId = aConnSlice[aConnId] - 1;
           TCCoordSlice aNodeCoordSlice = theNodeInfo.GetCoordSlice(aNodeId);
 
           for(TInt aDimId = 0; aDimId < aDim; aDimId++){
@@ -2046,7 +1983,6 @@ namespace MED
 
     return true;
   }
-
 
   //---------------------------------------------------------------
   bool
@@ -2089,7 +2025,7 @@ namespace MED
         TCoordSlice& aGaussCoordSlice = aCoordSliceArr[aGaussId];
 
         for(TInt aConnId = 0; aConnId < aNbConn; aConnId++){
-          TInt aNodeId = aConnSlice[aConnId] - 1;      
+          TInt aNodeId = aConnSlice[aConnId] - 1;
           TCCoordSlice aNodeCoordSlice = theNodeInfo.GetCoordSlice(aNodeId);
 
           for(TInt aDimId = 0; aDimId < aDim; aDimId++){
@@ -2105,7 +2041,6 @@ namespace MED
 
     return true;
   }
-
 
   //---------------------------------------------------------------
   bool
@@ -2152,7 +2087,7 @@ namespace MED
           TCConnSlice aConnSlice = aConnSliceArr[aFaceId];
           TInt aNbConn = aConnSlice.size();
           for(TInt aConnId = 0; aConnId < aNbConn; aConnId++){
-            TInt aNodeId = aConnSlice[aConnId] - 1;      
+            TInt aNodeId = aConnSlice[aConnId] - 1;
             TCCoordSlice aNodeCoordSlice = theNodeInfo.GetCoordSlice(aNodeId);
 
             for(TInt aDimId = 0; aDimId < aDim; aDimId++){

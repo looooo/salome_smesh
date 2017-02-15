@@ -22,7 +22,7 @@
 
 #include "MED_Factory.hxx"
 #include "MED_Utilities.hxx"
-#include "MED_V2_2_Wrapper.hxx"
+#include "MED_Wrapper.hxx"
 
 #include <stdio.h>
 #include <errno.h>
@@ -105,20 +105,16 @@ namespace MED
 
   PWrapper CrWrapperR(const std::string& fileName)
   {
-    PWrapper aWrapper;
     if (!CheckCompatibility(fileName)) {
       EXCEPTION(std::runtime_error, "Cannot open file '"<<fileName<<"'.");
     }
-    else {
-      aWrapper = new MED::V2_2::TVWrapper(fileName);
-    }
-    return aWrapper;
+    return new MED::TWrapper(fileName);
   }
 
   PWrapper CrWrapperW(const std::string& fileName)
   {
     if (!CheckCompatibility(fileName))
       remove(fileName.c_str());
-    return new MED::V2_2::TVWrapper(fileName);
+    return new MED::TWrapper(fileName);
   }
 }

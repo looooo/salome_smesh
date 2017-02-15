@@ -34,18 +34,18 @@ namespace MED
   class MEDWRAPPER_EXPORT TCoordHelper
   {
     TGetCoord* myGetCoord;
-    
+
   public:
     TCoordHelper(TGetCoord* theGetCoord);
 
-    TFloat 
-    GetCoord(TCCoordSlice& theCoordSlice, 
+    TFloat
+    GetCoord(TCCoordSlice& theCoordSlice,
              TInt theCoordId);
   };
   typedef SharedPtr<TCoordHelper> PCoordHelper;
 
   //---------------------------------------------------------------
-  MEDWRAPPER_EXPORT 
+  MEDWRAPPER_EXPORT
   PCoordHelper
   GetCoordHelper(PNodeInfo theNodeInfo);
 }

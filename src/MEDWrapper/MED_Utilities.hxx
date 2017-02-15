@@ -25,8 +25,8 @@
 
 #include "MED_WrapperDef.hxx"
 
-#include <iostream>     
-#include <sstream>      
+#include <iostream>
+#include <sstream>
 #include <string>
 #include <string.h>
 #include <stdexcept>

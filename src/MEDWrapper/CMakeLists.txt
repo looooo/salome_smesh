@@ -52,9 +52,7 @@ SET(MEDWrapper_HEADERS
   MED_SliceArray.hxx
   MED_Structures.hxx
   MED_TStructures.hxx
-  MED_TWrapper.hxx
   MED_Utilities.hxx
-  MED_V2_2_Wrapper.hxx
   MED_Vector.hxx
   MED_Wrapper.hxx
   MED_WrapperDef.hxx
@@ -65,18 +63,18 @@ SET(MEDWrapper_HEADERS
 # sources / static
 SET(MEDWrapper_SOURCES
   MED_Algorithm.cxx
+  MED_Common.cxx
   MED_CoordUtils.cxx
   MED_Factory.cxx
   MED_GaussDef.cxx
   MED_GaussUtils.cxx
   MED_Structures.cxx
   MED_Utilities.cxx
-  MED_V2_2_Wrapper.cxx
   MED_Wrapper.cxx
 )
 
 # --- rules ---
- 
+
 ADD_LIBRARY(MEDWrapper ${MEDWrapper_SOURCES})
 TARGET_LINK_LIBRARIES(MEDWrapper ${_link_LIBRARIES})
 INSTALL(TARGETS MEDWrapper EXPORT ${PROJECT_NAME}TargetGroup DESTINATION ${SALOME_INSTALL_LIBS})

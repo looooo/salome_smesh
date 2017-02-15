@@ -210,7 +210,7 @@ class PluginDialog(QDialog):
         name. This returns the filename.
         '''
         filename=str("/tmp/padder_inputfile_"+meshName+".med")
-        meshObject.ExportToMEDX( filename, 0, 1, 1 )
+        meshObject.ExportMED(filename, False, True, True)
         return filename
 
     def clear(self):

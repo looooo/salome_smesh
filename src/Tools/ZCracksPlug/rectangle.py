@@ -219,7 +219,7 @@ def generate(data_longueur,data_largeur,data_centre,
     Maillage.ExportMED(outFile)
     smesh.SetName(Maillage.GetMesh(), 'MAILLAGE_FISSURE')
   except:
-    print 'ExportToMEDX() failed. Invalid file name?'
+    print 'ExportMED() failed. Invalid file name?'
 
 
   if salome.sg.hasDesktop():

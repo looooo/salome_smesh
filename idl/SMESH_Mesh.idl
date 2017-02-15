@@ -619,9 +619,9 @@ module SMESH
     boolean HasDuplicatedGroupNamesMED();
 
     /*!
-     * Export Mesh to a MED Format file
+     * Export a Mesh to MED file.
      * @params
-     * - file : name of the MED file
+     * - fileName : name of the MED file
      * - auto_groups : boolean parameter for creating/not creating
      *                 the groups Group_On_All_Nodes, Group_On_All_Faces, ... ;
      *                 the typical use is auto_groups=false.
@@ -632,16 +632,16 @@ module SMESH
      *         - 3D in the rest cases.
      *         If @a autoDimension is @c false, the space dimension is always 3.
      */
-    void ExportToMEDX( in string      file, 
-                       in boolean     auto_groups, 
-                       in boolean     overwrite,
-                       in boolean     autoDimension) raises (SALOME::SALOME_Exception);
+    void ExportMED( in string      fileName, 
+		    in boolean     auto_groups, 
+		    in boolean     overwrite,
+		    in boolean     autoDimension) raises (SALOME::SALOME_Exception);
 
     /*!
      * Export a [part of] Mesh into a MED file
      * @params
      * - meshPart : a part of mesh to store
-     * - file : name of the MED file
+     * - fileName : name of the MED file
      * - overwrite : boolean parameter for overwriting/not overwriting the file, if it exists
      * - autoDimension : if @c True, a space dimension for export is defined by mesh 
      *                 configuration; for example a planar mesh lying on XOY plane
@@ -656,28 +656,12 @@ module SMESH
      *         - 's' stands for _solids_ field.
      */
     void ExportPartToMED( in SMESH_IDSource     meshPart,
-                          in string             file,
+                          in string             fileName,
                           in boolean            auto_groups,
                           in boolean            overwrite,
                           in boolean            autoDimension,
                           in GEOM::ListOfFields fields,
                           in string             geomAssocFields ) raises (SALOME::SALOME_Exception);
-
-    /*!
-     * Export Mesh to a MED file
-     * Works, just the same as ExportToMEDX, with overwrite parameter equal to true.
-     * The method is kept in order to support old functionality
-     */
-    void ExportToMED( in string file, in boolean auto_groups )
-      raises (SALOME::SALOME_Exception);
-
-    /*!
-     * Export Mesh to MED file.
-     * This method is deprecated; it is kept only to support old functionality.
-     * Works exactly as ExportToMED method.
-     */
-    void ExportMED( in string file, in boolean auto_groups )
-      raises (SALOME::SALOME_Exception);
 
     /*!
      * Export Mesh to SAUV formatted file

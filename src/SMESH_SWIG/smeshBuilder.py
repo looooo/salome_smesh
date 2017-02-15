@@ -1816,8 +1816,8 @@ class Mesh:
         # process positional arguments
         args = [i for i in args if i not in [SMESH.MED_V2_1, SMESH.MED_V2_2]] # backward compatibility
         fileName        = args[0]
-        auto_groups     = args[1] if len(args) > 1 else 0
-        overwrite       = args[2] if len(args) > 2 else 1
+        auto_groups     = args[1] if len(args) > 1 else False
+        overwrite       = args[2] if len(args) > 2 else True
         meshPart        = args[3] if len(args) > 3 else None
         autoDimension   = args[4] if len(args) > 4 else True
         fields          = args[5] if len(args) > 5 else []
@@ -1838,7 +1838,7 @@ class Mesh:
             self.mesh.ExportPartToMED( meshPart, fileName, auto_groups, overwrite, autoDimension,
                                        fields, geomAssocFields)
         else:
-            self.mesh.ExportToMEDX(fileName, auto_groups, overwrite, autoDimension)
+            self.mesh.ExportMED(fileName, auto_groups, overwrite, autoDimension)
 
     ## Export the mesh in a file in SAUV format
     #  @param f is the file name
@@ -1939,18 +1939,48 @@ class Mesh:
     #         If @a autoDimension is @c False, the space dimension is always 3.
     #  @ingroup l2_impexp
     def ExportToMED(self, *args, **kwargs):
+        print "WARNING: ExportToMED() is deprecated, use ExportMED() instead"
         # process positional arguments
         args = [i for i in args if i not in [SMESH.MED_V2_1, SMESH.MED_V2_2]] # backward compatibility
         fileName      = args[0]
-        opt           = args[1] if len(args) > 1 else 0
-        overwrite     = args[2] if len(args) > 2 else 1
+        auto_groups   = args[1] if len(args) > 1 else False
+        overwrite     = args[2] if len(args) > 2 else True
         autoDimension = args[3] if len(args) > 3 else True
         # process keywords arguments
-        opt           = kwargs.get("opt", opt)
+        auto_groups   = kwargs.get("opt", auto_groups)         # old keyword name
+        auto_groups   = kwargs.get("auto_groups", auto_groups) # new keyword name
         overwrite     = kwargs.get("overwrite", overwrite)
         autoDimension = kwargs.get("autoDimension", autoDimension)
         # invoke engine's function
-        self.mesh.ExportToMEDX(fileName, opt, overwrite, autoDimension)
+        self.mesh.ExportMED(fileName, auto_groups, overwrite, autoDimension)
+
+    ## Deprecated, used only for compatibility! Please, use ExportMED() method instead.
+    #  Export the mesh in a file in MED format
+    #  allowing to overwrite the file if it exists or add the exported data to its contents
+    #  @param fileName the file name
+    #  @param opt boolean parameter for creating/not creating
+    #         the groups Group_On_All_Nodes, Group_On_All_Faces, ...
+    #  @param overwrite boolean parameter for overwriting/not overwriting the file
+    #  @param autoDimension if @c True (default), a space dimension of a MED mesh can be either
+    #         - 1D if all mesh nodes lie on OX coordinate axis, or
+    #         - 2D if all mesh nodes lie on XOY coordinate plane, or
+    #         - 3D in the rest cases.<br>
+    #         If @a autoDimension is @c False, the space dimension is always 3.
+    #  @ingroup l2_impexp
+    def ExportToMEDX(self, *args, **kwargs):
+        print "WARNING: ExportToMEDX() is deprecated, use ExportMED() instead"
+        # process positional arguments
+        args = [i for i in args if i not in [SMESH.MED_V2_1, SMESH.MED_V2_2]] # backward compatibility
+        fileName      = args[0]
+        auto_groups   = args[1] if len(args) > 1 else False
+        overwrite     = args[2] if len(args) > 2 else True
+        autoDimension = args[3] if len(args) > 3 else True
+        # process keywords arguments
+        auto_groups   = kwargs.get("auto_groups", auto_groups)
+        overwrite     = kwargs.get("overwrite", overwrite)
+        autoDimension = kwargs.get("autoDimension", autoDimension)
+        # invoke engine's function
+        self.mesh.ExportMED(fileName, auto_groups, overwrite, autoDimension)
 
     # Operations with groups:
     # ----------------------

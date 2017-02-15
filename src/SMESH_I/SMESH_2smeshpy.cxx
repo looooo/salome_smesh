@@ -1986,8 +1986,9 @@ void _pyMesh::Process( const Handle(_pyCommand)& theCommand )
   // ----------------------------------------------------------------------
   else if ( theCommand->MethodStartsFrom( "Export" ))
   {
-    if ( method == "ExportToMED" ||  // ExportToMED()  --> ExportMED()
-         method == "ExportToMEDX" )  // ExportToMEDX() --> ExportMED()
+    if ( method == "ExportToMED"  || // ExportToMED()  --> ExportMED()
+         method == "ExportToMEDX" || // ExportToMEDX() --> ExportMED()
+         method == "ExportMED" )
     {
       theCommand->SetMethod( "ExportMED" );
       // filter out deprecated version parameter

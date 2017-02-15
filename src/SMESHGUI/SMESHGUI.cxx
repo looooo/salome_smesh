@@ -855,8 +855,8 @@ namespace
             const QString&            geoAssFields = aFieldList[ aMeshIndex ].second;
             const bool                   hasFields = ( fields.length() || !geoAssFields.isEmpty() );
             if ( !hasFields && aMeshOrGroup->_is_equivalent( aMeshItem ))
-              aMeshItem->ExportToMEDX( aFilename.toUtf8().data(), toCreateGroups,
-                                       toOverwrite && aMeshIndex == 0, toFindOutDim );
+              aMeshItem->ExportMED( aFilename.toUtf8().data(), toCreateGroups,
+                                    toOverwrite && aMeshIndex == 0, toFindOutDim );
             else
               aMeshItem->ExportPartToMED( aMeshOrGroup, aFilename.toUtf8().data(), toCreateGroups,
                                           toOverwrite && aMeshIndex == 0, toFindOutDim,

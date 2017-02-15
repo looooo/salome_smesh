@@ -229,14 +229,10 @@ public:
    */
   CORBA::Boolean HasDuplicatedGroupNamesMED();
 
-  void ExportToMEDX( const char*        file,
-                     CORBA::Boolean     auto_groups,
-                     CORBA::Boolean     overwrite,
-                     CORBA::Boolean     autoDimension=true) throw (SALOME::SALOME_Exception);
-  void ExportToMED ( const char*        file,
-                     CORBA::Boolean     auto_groups ) throw (SALOME::SALOME_Exception);
-  void ExportMED   ( const char*        file,
-                     CORBA::Boolean     auto_groups ) throw (SALOME::SALOME_Exception);
+  void ExportMED( const char*        file,
+                  CORBA::Boolean     auto_groups,
+                  CORBA::Boolean     overwrite,
+                  CORBA::Boolean     autoDimension = true) throw (SALOME::SALOME_Exception);
 
   void ExportSAUV( const char* file, CORBA::Boolean auto_groups ) throw (SALOME::SALOME_Exception);
 
@@ -312,7 +308,7 @@ public:
   CORBA::Long NbPolygons()
     throw (SALOME::SALOME_Exception);
 
-  CORBA::Long NbPolygonsOfOrder(SMESH::ElementOrder order=SMESH::ORDER_ANY)
+  CORBA::Long NbPolygonsOfOrder(SMESH::ElementOrder order = SMESH::ORDER_ANY)
     throw (SALOME::SALOME_Exception);
 
   CORBA::Long NbVolumes()

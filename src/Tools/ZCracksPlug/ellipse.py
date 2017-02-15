@@ -192,7 +192,7 @@ def generate(data_demi_grand_axe, data_centre, data_normale,
     Maillage.ExportMED(outFile)
     smesh.SetName(Maillage.GetMesh(), 'MAILLAGE_FISSURE')
   except:
-    print 'ExportToMEDX() failed. Invalid file name?'
+    print 'ExportMED() failed. Invalid file name?'
 
 
   ## Set names of Mesh objects

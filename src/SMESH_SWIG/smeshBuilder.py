@@ -5114,7 +5114,25 @@ class meshProxy(SMESH._objref_SMESH_Mesh):
     def CreateDimGroup(self,*args): # 2 args added: nbCommonNodes, underlyingOnly
         if len( args ) == 3:
             args += SMESH.ALL_NODES, True
-        return SMESH._objref_SMESH_Mesh.CreateDimGroup( self, *args )
+        return SMESH._objref_SMESH_Mesh.CreateDimGroup(self, *args)
+    def ExportToMEDX(self, *args): # function removed
+        print "WARNING: ExportToMEDX() is deprecated, use ExportMED() instead"
+        args = [i for i in args if i not in [SMESH.MED_V2_1, SMESH.MED_V2_2]]
+        SMESH._objref_SMESH_Mesh.ExportMED(self, *args)
+    def ExportToMED(self, *args): # function removed
+        print "WARNING: ExportToMED() is deprecated, use ExportMED() instead"
+        args = [i for i in args if i not in [SMESH.MED_V2_1, SMESH.MED_V2_2]]
+        while len(args) < 4:  # !!!! nb of parameters for ExportToMED IDL's method
+            args.append(True)
+        SMESH._objref_SMESH_Mesh.ExportMED(self, *args)
+    def ExportPartToMED(self, *args): # 'version' parameter removed
+        args = [i for i in args if i not in [SMESH.MED_V2_1, SMESH.MED_V2_2]]
+        SMESH._objref_SMESH_Mesh.ExportPartToMED(self, *args)
+    def ExportMED(self, *args): # signature of method changed
+        args = [i for i in args if i not in [SMESH.MED_V2_1, SMESH.MED_V2_2]]
+        while len(args) < 4:  # !!!! nb of parameters for ExportToMED IDL's method
+            args.append(True)
+        SMESH._objref_SMESH_Mesh.ExportMED(self, *args)
     pass
 omniORB.registerObjref(SMESH._objref_SMESH_Mesh._NP_RepositoryId, meshProxy)
 

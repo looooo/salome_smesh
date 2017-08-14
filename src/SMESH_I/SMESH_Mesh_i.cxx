@@ -6067,6 +6067,7 @@ SMESH_MeshPartDS::SMESH_MeshPartDS(SMESH::SMESH_IDSource_ptr meshPart):
   SMESH::SMESH_Mesh_var mesh = meshPart->GetMesh();
   SMESH_Mesh_i*       mesh_i = SMESH::DownCast<SMESH_Mesh_i*>( mesh );
 
+  mesh_i->Load();
   _meshDS = mesh_i->GetImpl().GetMeshDS();
 
   SetPersistentId( _meshDS->GetPersistentId() );

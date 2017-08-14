@@ -27,6 +27,7 @@
 #define __SMESH_MeshPartDS_HXX__
 
 #include "SMESHDS_Mesh.hxx"
+#include "SMESH_TypeDefs.hxx"
 
 #include <SALOMEconfig.h>
 #include CORBA_SERVER_HEADER(SMESH_Mesh)

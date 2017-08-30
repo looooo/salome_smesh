@@ -12921,8 +12921,7 @@ namespace // utils for MakePolyLine
     {
       ok = ( myDot1 != myDot2 );
       if ( ok && myFace )
-        ok = ( myFace->GetNodeIndex( myNode1._node ) < 0 &&
-               myFace->GetNodeIndex( myNode2._node ) < 0 );
+        ok = ( myFace->GetNodeIndex(( myDot1 == 0 ? myNode1 : myNode2 )._node ) < 0 );
     }
     if ( ok )
     {

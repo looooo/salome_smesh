@@ -100,6 +100,15 @@ struct SMESHUtils_EXPORT SMESH_ElementSearcher
    * \brief Find out if the given point is out of closed 2D mesh.
    */
   virtual TopAbs_State GetPointState(const gp_Pnt& point) = 0;
+
+  /*!
+   * \brief Return a projection of a given point to a 2D mesh.
+   *        Optionally return the closest face
+   */
+  virtual gp_XYZ Project(const gp_Pnt&            point,
+                         SMDSAbs_ElementType      type,
+                         const SMDS_MeshElement** closestFace= 0) = 0;
+
   virtual ~SMESH_ElementSearcher();
 };
 
@@ -112,16 +121,16 @@ namespace SMESH_MeshAlgos
   bool IsOut( const SMDS_MeshElement* element, const gp_Pnt& point, double tol );
 
   SMESHUtils_EXPORT
-  double GetDistance( const SMDS_MeshElement* elem, const gp_Pnt& point );
+  double GetDistance( const SMDS_MeshElement* elem, const gp_Pnt& point, gp_XYZ* closestPnt = 0 );
 
   SMESHUtils_EXPORT
-  double GetDistance( const SMDS_MeshEdge* edge, const gp_Pnt& point );
+  double GetDistance( const SMDS_MeshEdge* edge, const gp_Pnt& point, gp_XYZ* closestPnt = 0 );
 
   SMESHUtils_EXPORT
-  double GetDistance( const SMDS_MeshFace* face, const gp_Pnt& point );
+  double GetDistance( const SMDS_MeshFace* face, const gp_Pnt& point, gp_XYZ* closestPnt = 0 );
 
   SMESHUtils_EXPORT
-  double GetDistance( const SMDS_MeshVolume* volume, const gp_Pnt& point );
+  double GetDistance( const SMDS_MeshVolume* volume, const gp_Pnt& point, gp_XYZ* closestPnt = 0 );
 
   SMESHUtils_EXPORT
   void GetBarycentricCoords( const gp_XY& point,
@@ -206,6 +215,16 @@ namespace SMESH_MeshAlgos
                                  CoincidentFreeBorders & foundFreeBordes);
   
 
-} // SMESH_MeshAlgos
+  /*!
+   * \brief Find nodes whose merge makes the element invalid
+   *
+   * (Implemented in SMESH_DeMerge.cxx)
+   */
+  SMESHUtils_EXPORT
+  void DeMerge(const SMDS_MeshElement*              elem,
+               std::vector< const SMDS_MeshNode* >& newNodes,
+               std::vector< const SMDS_MeshNode* >& noMergeNodes);
+
+} // namespace SMESH_MeshAlgos
 
 #endif

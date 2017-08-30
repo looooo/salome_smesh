@@ -46,8 +46,10 @@
 class SMDS_MeshElement;
 class SMDS_MeshFace;
 class SMDS_MeshNode;
+class SMESHDS_Group;
 class SMESHDS_Mesh;
 class SMESHDS_SubMesh;
+class SMESH_ElementSearcher;
 class SMESH_Group;
 class SMESH_Mesh;
 class SMESH_MesherHelper;
@@ -83,11 +85,12 @@ public:
   // --------------------------------------------------------------------------------
   struct ElemFeatures //!< Features of element to create
   {
-    SMDSAbs_ElementType myType;
-    bool                myIsPoly, myIsQuad;
-    int                 myID;
-    double              myBallDiameter;
-    std::vector<int>    myPolyhedQuantities;
+    SMDSAbs_ElementType               myType;
+    bool                              myIsPoly, myIsQuad;
+    int                               myID;
+    double                            myBallDiameter;
+    std::vector<int>                  myPolyhedQuantities;
+    std::vector<const SMDS_MeshNode*> myNodes; // not managed by ElemFeatures
 
     SMESH_EXPORT ElemFeatures( SMDSAbs_ElementType type=SMDSAbs_All, bool isPoly=false, bool isQuad=false )
       :myType( type ), myIsPoly(isPoly), myIsQuad(isQuad), myID(-1), myBallDiameter(0) {}
@@ -471,7 +474,8 @@ public:
   // Return list of group of nodes close to each other within theTolerance.
   // Search among theNodes or in the whole mesh if theNodes is empty.
 
-  void MergeNodes (TListOfListOfNodes & theNodeGroups);
+  void MergeNodes (TListOfListOfNodes & theNodeGroups,
+                   const bool           theAvoidMakingHoles = false);
   // In each group, the cdr of nodes are substituted by the first one
   // in all elements.
 
@@ -540,7 +544,7 @@ public:
   // additional nodes are inserted on a link provided that no
   // volume elements share the splitted link.
   // The side 2 is a free border if theSide2IsFreeBorder == true.
-  // Sewing is peformed between the given first, second and last
+  // Sewing is performed between the given first, second and last
   // nodes on the sides.
   // theBorderFirstNode is merged with theSide2FirstNode.
   // if (!theSide2IsFreeBorder) then theSide2SecondNode gives
@@ -705,6 +709,42 @@ public:
                        bool                    toAddExistingBondary = false,
                        bool                    aroundElements = false);
 
+
+  // structure used in MakePolyLine() to define a cutting plane
+  struct PolySegment
+  {
+    // 2 points: if myNode2 != 0, then the point is the middle of a face edge defined
+    //           by two nodes, else it is at myNode1
+    const SMDS_MeshNode* myNode1[2];
+    const SMDS_MeshNode* myNode2[2];
+
+    gp_Vec myVector; // vector on the plane; to use a default plane set vector = (0,0,0)
+
+    // point to return coordinates of a middle of the two points, projected to mesh
+    gp_Pnt myMidProjPoint;
+  };
+  typedef std::vector<PolySegment> TListOfPolySegments;
+
+  /*!
+   * \brief Create a polyline consisting of 1D mesh elements each lying on a 2D element of
+   *        the initial mesh. Positions of new nodes are found by cutting the mesh by the
+   *        plane passing through pairs of points specified by each PolySegment structure.
+   *        If there are several paths connecting a pair of points, the shortest path is
+   *        selected by the module. Position of the cutting plane is defined by the two
+   *        points and an optional vector lying on the plane specified by a PolySegment.
+   *        By default the vector is defined by Mesh module as following. A middle point
+   *        of the two given points is computed. The middle point is projected to the mesh.
+   *        The vector goes from the middle point to the projection point. In case of planar
+   *        mesh, the vector is normal to the mesh.
+   *  \param [inout] segments - PolySegment's defining positions of cutting planes.
+   *        Return the used vector and position of the middle point.
+   *  \param [in] group - an optional group where created mesh segments will
+   *        be added.
+   */
+  void MakePolyLine( TListOfPolySegments&   segments,
+                     SMESHDS_Group*         group=0,
+                     SMESH_ElementSearcher* searcher=0);
+
  private:
 
   /*!
@@ -750,6 +790,20 @@ public:
                     SMESH_SequenceOfElemPtr&                   srcElements);
 
   /*!
+   * \brief Computes new connectivity of an element after merging nodes
+   *  \param [in] elems - the element
+   *  \param [out] newElemDefs - definition(s) of result element(s)
+   *  \param [inout] nodeNodeMap - nodes to merge
+   *  \param [in] avoidMakingHoles - if true and and the element becomes invalid
+   *             after merging (but not degenerated), removes nodes causing
+   *             the invalidity from \a nodeNodeMap.
+   *  \return bool - true if the element should be removed
+   */
+  bool applyMerge( const SMDS_MeshElement*      elems,
+                   std::vector< ElemFeatures >& newElemDefs,
+                   TNodeNodeMap&                nodeNodeMap,
+                   const bool                   avoidMakingHoles );
+  /*!
    * \brief Create 1D and 2D elements around swept elements
    * \param mapNewNodes - source nodes and ones generated from them
    * \param newElemsMap - source elements and ones generated from them
@@ -781,11 +835,11 @@ public:
     double        Angle       ()const               { return myAngle; }
     double        Parameter   ()const               { return myPrm; }
   };
-  Extrusion_Error MakeEdgePathPoints(std::list<double>&                     aPrms,
+  Extrusion_Error makeEdgePathPoints(std::list<double>&                     aPrms,
                                      const TopoDS_Edge&                     aTrackEdge,
                                      bool                                   aFirstIsStart,
                                      std::list<SMESH_MeshEditor_PathPoint>& aLPP);
-  Extrusion_Error MakeExtrElements(TIDSortedElemSet                       theElements[2],
+  Extrusion_Error makeExtrElements(TIDSortedElemSet                       theElements[2],
                                    std::list<SMESH_MeshEditor_PathPoint>& theFullList,
                                    const bool                             theHasAngles,
                                    std::list<double>&                     theAngles,
@@ -793,7 +847,7 @@ public:
                                    const bool                             theHasRefPoint,
                                    const gp_Pnt&                          theRefPoint,
                                    const bool                             theMakeGroups);
-  static void LinearAngleVariation(const int          NbSteps,
+  static void linearAngleVariation(const int          NbSteps,
                                    std::list<double>& theAngles);
 
   bool doubleNodes( SMESHDS_Mesh*           theMeshDS,
@@ -812,7 +866,7 @@ private:
   // Nodes and elements created during last operation
   SMESH_SequenceOfElemPtr myLastCreatedNodes, myLastCreatedElems;
 
-  // Description of error/warning occured during last operation
+  // Description of error/warning occurred during last operation
   SMESH_ComputeErrorPtr   myError;
 };
 

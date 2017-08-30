@@ -184,7 +184,7 @@ namespace MeshEditor_I {
 
   //=============================================================================
   /*!
-   * \brief Deleter of theNodeSearcher at any compute event occured
+   * \brief Deleter of theNodeSearcher at any compute event occurred
    */
   //=============================================================================
 
@@ -467,9 +467,9 @@ void SMESH_MeshEditor_i::initData(bool deleteSearchers)
 //================================================================================
 /*!
  * \brief Increment mesh modif time and optionally record that the performed
- *        modification may influence futher mesh re-compute.
+ *        modification may influence further mesh re-compute.
  *  \param [in] isReComputeSafe - true if the modification does not influence
- *              futher mesh re-compute
+ *              further mesh re-compute
  */
 //================================================================================
 
@@ -501,7 +501,7 @@ void SMESH_MeshEditor_i::declareMeshModified( bool isReComputeSafe )
  * \brief Initialize and return myPreviewMesh
  *  \param previewElements - type of elements to show in preview
  *
- *  WARNING: call it once par a method!
+ *  WARNING: call it once per method!
  */
 //================================================================================
 
@@ -669,7 +669,7 @@ void SMESH_MeshEditor_i::ClearLastCreated() throw (SALOME::SALOME_Exception)
 
 //=======================================================================
 /*
- * Returns description of an error/warning occured during the last operation
+ * Returns description of an error/warning occurred during the last operation
  * WARNING: ComputeError.code >= 100 and no corresponding enum in IDL API
  */
 //=======================================================================
@@ -4159,7 +4159,8 @@ FindCoincidentNodesOnPartBut(SMESH::SMESH_IDSource_ptr      theObject,
 //=======================================================================
 
 void SMESH_MeshEditor_i::MergeNodes (const SMESH::array_of_long_array& GroupsOfNodes,
-                                     const SMESH::ListOfIDSources&     NodesToKeep)
+                                     const SMESH::ListOfIDSources&     NodesToKeep,
+                                     CORBA::Boolean                    AvoidMakingHoles)
   throw (SALOME::SALOME_Exception)
 {
   SMESH_TRY;
@@ -4203,9 +4204,9 @@ void SMESH_MeshEditor_i::MergeNodes (const SMESH::array_of_long_array& GroupsOfN
     aTPythonDump << aNodeGroup;
   }
 
-  getEditor().MergeNodes( aListOfListOfNodes );
+  getEditor().MergeNodes( aListOfListOfNodes, AvoidMakingHoles );
 
-  aTPythonDump << "], " << NodesToKeep << ")";
+  aTPythonDump << "], " << NodesToKeep << ", " << AvoidMakingHoles << ")";
 
   declareMeshModified( /*isReComputeSafe=*/false );
 
@@ -5117,7 +5118,6 @@ CORBA::Boolean SMESH_MeshEditor_i::ChangeElemNodes(CORBA::Long ide,
   TPythonDump() << "isDone = " << this << ".ChangeElemNodes( "
                 << ide << ", " << newIDs << " )";
 
-  MESSAGE("ChangeElementNodes");
   bool res = getMeshDS()->ChangeElementNodes( elem, & aNodes[0], nbn1+1 );
 
   declareMeshModified( /*isReComputeSafe=*/ !res );
@@ -6280,7 +6280,6 @@ SMESH_MeshEditor_i::AffectedElemGroupsInRegion( const SMESH::ListOfGroups& theEl
   throw (SALOME::SALOME_Exception)
 {
   SMESH_TRY;
-  MESSAGE("AffectedElemGroupsInRegion");
   SMESH::ListOfGroups_var aListOfGroups = new SMESH::ListOfGroups();
   bool isEdgeGroup = false;
   bool isFaceGroup = false;
@@ -6309,7 +6308,6 @@ SMESH_MeshEditor_i::AffectedElemGroupsInRegion( const SMESH::ListOfGroups& theEl
   if (aResult)
   {
     int lg = anAffected.size();
-    MESSAGE("lg="<< lg);
     SMESH::long_array_var volumeIds = new SMESH::long_array;
     volumeIds->length(lg);
     SMESH::long_array_var faceIds = new SMESH::long_array;
@@ -6658,7 +6656,7 @@ SMESH_MeshEditor_i::MakeBoundaryMesh(SMESH::SMESH_IDSource_ptr idSource,
   else
     pyDump << mesh_var << ", ";
   if ( group_var->_is_nil() )
-    pyDump << "_NoneGroup = "; // assignment to None is forbiden
+    pyDump << "_NoneGroup = "; // assignment to None is forbidden
   else
     pyDump << group_var << " = ";
   pyDump << this << ".MakeBoundaryMesh( "
@@ -6722,7 +6720,7 @@ CORBA::Long SMESH_MeshEditor_i::MakeBoundaryElements(SMESH::Bnd_Dimension dim,
     else
       groupsOfThisMesh[ nbGroups++ ] = groups[i];
     if ( SMESH::DownCast<SMESH_Mesh_i*>( groups[i] ))
-      THROW_SALOME_CORBA_EXCEPTION("expect a group but recieve a mesh", SALOME::BAD_PARAM);
+      THROW_SALOME_CORBA_EXCEPTION("expected a group but received a mesh", SALOME::BAD_PARAM);
   }
   groupsOfThisMesh->length( nbGroups );
   groupsOfOtherMesh->length( nbGroupsOfOtherMesh );
@@ -6816,7 +6814,7 @@ CORBA::Long SMESH_MeshEditor_i::MakeBoundaryElements(SMESH::Bnd_Dimension dim,
   else
     pyDump << mesh_var << ", ";
   if ( group_var->_is_nil() )
-    pyDump << "_NoneGroup = "; // assignment to None is forbiden
+    pyDump << "_NoneGroup = "; // assignment to None is forbidden
   else
     pyDump << group_var << " = ";
   pyDump << this << ".MakeBoundaryElements( "
@@ -6832,4 +6830,129 @@ CORBA::Long SMESH_MeshEditor_i::MakeBoundaryElements(SMESH::Bnd_Dimension dim,
 
   SMESH_CATCH( SMESH::throwCorbaException );
   return 0;
+}
+
+//================================================================================
+/*!
+ * \brief Create a polyline consisting of 1D mesh elements each lying on a 2D element of
+ *        the initial mesh. Positions of new nodes are found by cutting the mesh by the
+ *        plane passing through pairs of points specified by each PolySegment structure.
+ *        If there are several paths connecting a pair of points, the shortest path is
+ *        selected by the module. Position of the cutting plane is defined by the two
+ *        points and an optional vector lying on the plane specified by a PolySegment.
+ *        By default the vector is defined by Mesh module as following. A middle point
+ *        of the two given points is computed. The middle point is projected to the mesh.
+ *        The vector goes from the middle point to the projection point. In case of planar
+ *        mesh, the vector is normal to the mesh.
+ *  \param [inout] segments - PolySegment's defining positions of cutting planes.
+ *        Return the used vector and position of the middle point.
+ *  \param [in] groupName - optional name of a group where created mesh segments will
+ *        be added.
+ */
+//================================================================================
+
+void SMESH_MeshEditor_i::MakePolyLine(SMESH::ListOfPolySegments& theSegments,
+                                      const char*                theGroupName)
+  throw (SALOME::SALOME_Exception)
+{
+  if ( theSegments.length() == 0 )
+    THROW_SALOME_CORBA_EXCEPTION("No segments given", SALOME::BAD_PARAM );
+  if ( myMesh->NbFaces() == 0 )
+    THROW_SALOME_CORBA_EXCEPTION("No faces in the mesh", SALOME::BAD_PARAM );
+
+  SMESH_TRY;
+  initData(/*deleteSearchers=*/false);
+
+  SMESHDS_Group* groupDS = 0;
+  if ( myIsPreviewMode ) // copy faces to the tmp mesh
+  {
+    TPreviewMesh * tmpMesh = getPreviewMesh( SMDSAbs_Edge );
+    SMDS_ElemIteratorPtr faceIt = getMeshDS()->elementsIterator( SMDSAbs_Face );
+    while ( faceIt->more() )
+      tmpMesh->Copy( faceIt->next() );
+  }
+  else if ( theGroupName[0] ) // find/create a group of segments
+  {
+    SMESH_Mesh::GroupIteratorPtr grpIt = myMesh->GetGroups();
+    while ( !groupDS && grpIt->more() )
+    {
+      SMESH_Group* group = grpIt->next();
+      if ( group->GetGroupDS()->GetType() == SMDSAbs_Edge &&
+           strcmp( group->GetName(), theGroupName ) == 0 )
+      {
+        groupDS = dynamic_cast< SMESHDS_Group* >( group->GetGroupDS() );
+      }
+    }
+    if ( !groupDS )
+    {
+      SMESH::SMESH_Group_var groupVar = myMesh_i->CreateGroup( SMESH::EDGE, theGroupName );
+
+      if ( SMESH_Group_i* groupImpl = SMESH::DownCast<SMESH_Group_i*>( groupVar ))
+        groupDS = dynamic_cast< SMESHDS_Group* >( groupImpl->GetGroupDS() );
+    }
+  }
+
+  // convert input polySegments
+  ::SMESH_MeshEditor::TListOfPolySegments segments( theSegments.length() );
+  for ( CORBA::ULong i = 0; i < theSegments.length(); ++i )
+  {
+    SMESH::PolySegment&               segIn = theSegments[ i ];
+    ::SMESH_MeshEditor::PolySegment& segOut = segments[ i ];
+    segOut.myNode1[0] = getMeshDS()->FindNode( segIn.node1ID1 );
+    segOut.myNode2[0] = getMeshDS()->FindNode( segIn.node1ID2 );
+    segOut.myNode1[1] = getMeshDS()->FindNode( segIn.node2ID1 );
+    segOut.myNode2[1] = getMeshDS()->FindNode( segIn.node2ID2 );
+    segOut.myVector.SetCoord( segIn.vector.PS.x,
+                              segIn.vector.PS.y,
+                              segIn.vector.PS.z );
+    if ( !segOut.myNode1[0] )
+      THROW_SALOME_CORBA_EXCEPTION( SMESH_Comment( "Invalid node ID: ") << segIn.node1ID1,
+                                    SALOME::BAD_PARAM );
+    if ( !segOut.myNode1[1] )
+      THROW_SALOME_CORBA_EXCEPTION( SMESH_Comment( "Invalid node ID: ") << segIn.node2ID1,
+                                    SALOME::BAD_PARAM );
+  }
+
+  // get a static ElementSearcher
+  SMESH::SMESH_IDSource_var idSource = SMESH::SMESH_IDSource::_narrow( myMesh_i->_this() );
+  theSearchersDeleter.Set( myMesh, getPartIOR( idSource, SMESH::FACE ));
+  if ( !theElementSearcher )
+    theElementSearcher = SMESH_MeshAlgos::GetElementSearcher( *getMeshDS() );
+
+  // compute
+  getEditor().MakePolyLine( segments, groupDS, theElementSearcher );
+
+  // return vectors
+  if ( myIsPreviewMode )
+  {
+    for ( CORBA::ULong i = 0; i < theSegments.length(); ++i )
+    {
+      SMESH::PolySegment&             segOut = theSegments[ i ];
+      ::SMESH_MeshEditor::PolySegment& segIn = segments[ i ];
+      segOut.vector.PS.x = segIn.myVector.X();
+      segOut.vector.PS.y = segIn.myVector.Y();
+      segOut.vector.PS.z = segIn.myVector.Z();
+    }
+  }
+  else
+  {
+    TPythonDump() << "_segments = []";
+    for ( CORBA::ULong i = 0; i < theSegments.length(); ++i )
+    {
+      SMESH::PolySegment& segIn = theSegments[ i ];
+      TPythonDump() << "_segments.append( SMESH.PolySegment( "
+                    << segIn.node1ID1 << ", "
+                    << segIn.node1ID2 << ", "
+                    << segIn.node2ID1 << ", "
+                    << segIn.node2ID2 << ", "
+                    << "smeshBuilder.MakeDirStruct( "
+                    << segIn.vector.PS.x << ", "
+                    << segIn.vector.PS.y << ", "
+                    << segIn.vector.PS.z << ")))";
+    }
+    TPythonDump() << this << ".MakePolyLine( _segments, '" << theGroupName << "')";
+  }
+
+  SMESH_CATCH( SMESH::throwCorbaException );
+  return;
 }

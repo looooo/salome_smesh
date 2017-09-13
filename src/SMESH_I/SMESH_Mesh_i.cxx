@@ -6137,6 +6137,21 @@ SMESH_MeshPartDS::SMESH_MeshPartDS(const std::list< const SMDS_MeshElement* > & 
   myInfo = tmpInfo;
 }
 // -------------------------------------------------------------------------------------
+const SMDS_MeshElement * SMESH_MeshPartDS::FindElement(int IDelem) const
+{
+  if ( _meshDS ) return _meshDS->FindElement( IDelem );
+
+  TElemID elem( IDelem );
+  for ( int iType = SMDSAbs_Edge; iType < SMDSAbs_NbElementTypes; ++iType )
+    if ( !_elements[ iType ].empty() )
+    {
+      TIDSortedElemSet::const_iterator it = _elements[ iType ].find( &elem );
+      if ( it != _elements[ iType ].end() )
+        return *it;
+    }
+  return 0;
+}
+// -------------------------------------------------------------------------------------
 SMDS_ElemIteratorPtr SMESH_MeshPartDS::elementGeomIterator(SMDSAbs_GeometryType geomType) const
 {
   if ( _meshDS ) return _meshDS->elementGeomIterator( geomType );

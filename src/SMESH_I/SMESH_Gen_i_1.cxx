@@ -277,6 +277,10 @@ static SALOMEDS::SObject_ptr publish(SALOMEDS::Study_ptr   theStudy,
       SO = aStudyBuilder->NewObjectToTag( theFatherObject, theTag );
       isNewSO = true;
     }
+    else
+    {
+      isInUseCaseTree = useCaseBuilder->IsUseCaseNode( SO );
+    }
   }
   else
   {
@@ -322,7 +326,7 @@ static SALOMEDS::SObject_ptr publish(SALOMEDS::Study_ptr   theStudy,
   {
     // define the next tag after given one in the data tree to insert SObject
     SALOMEDS::SObject_wrap curObj, objAfter;
-    if ( theFatherObject->GetLastChildTag() > theTag )
+    if ( theFatherObject->GetLastChildTag() > theTag && theTag > 0 )
     {
       SALOMEDS::UseCaseIterator_wrap
         anUseCaseIter = useCaseBuilder->GetUseCaseIterator(theFatherObject);
@@ -763,7 +767,7 @@ SALOMEDS::SObject_ptr SMESH_Gen_i::PublishGroup (SALOMEDS::Study_ptr    theStudy
       "Groups of Faces", "Groups of Volumes", "Groups of 0D Elements",
       "Groups of Balls" };
 
-    // Currently, groups with heterogenous content are not supported
+    // Currently, groups with heterogeneous content are not supported
     if ( aType != SMESH::ALL )
     {
       long aRootTag = GetNodeGroupsTag() + aType - 1;
@@ -917,7 +921,7 @@ bool SMESH_Gen_i::AddHypothesisToShape(SALOMEDS::Study_ptr         theStudy,
   if ( aMeshSO->_is_nil() || aHypSO->_is_nil())
     return false;
 
-  // Find a mesh or submesh refering to theShape
+  // Find a mesh or submesh referring to theShape
   SALOMEDS::SObject_wrap aMeshOrSubMesh =
     GetMeshOrSubmeshByShape( theStudy, theMesh, theShape );
   if ( aMeshOrSubMesh->_is_nil() )
@@ -1093,7 +1097,7 @@ void SMESH_Gen_i::UpdateParameters(CORBA::Object_ptr theObject, const char* theP
         if ( pos < varStr.size() )
         {
           varFound = ( varStr.compare( pos, myLastParameters[i].size(), myLastParameters[i] ) == 0 &&
-                       // same string begining but is length same?
+                       // same string beginning but is length same?
                        ( pos + myLastParameters[i].size() >= varStr.size() ||
                          separators.find( varStr[ pos+1 ]) != std::string::npos ));
           if ( varFound )

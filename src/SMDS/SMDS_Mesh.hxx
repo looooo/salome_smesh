@@ -69,7 +69,7 @@ public:
 
   SMDS_Mesh();
   
-  //! to retreive this SMDS_Mesh instance from its elements (index stored in SMDS_Elements)
+  //! to retrieve this SMDS_Mesh instance from its elements (index stored in SMDS_Elements)
   static std::vector<SMDS_Mesh*> _meshList;
 
   //! actual nodes coordinates, cells definition and reverse connectivity are stored in a vtkUnstructuredGrid
@@ -689,6 +689,9 @@ public:
   static const SMDS_MeshElement* FindElement(const std::vector<const SMDS_MeshNode *>& nodes,
                                              const SMDSAbs_ElementType                 type=SMDSAbs_All,
                                              const bool                                noMedium=true);
+  static int GetElementsByNodes(const std::vector<const SMDS_MeshNode *>& nodes,
+                                std::vector<const SMDS_MeshElement *>&    foundElems,
+                                const SMDSAbs_ElementType                 type=SMDSAbs_All);
 
   /*!
    * \brief Raise an exception if free memory (ram+swap) too low
@@ -705,6 +708,7 @@ public:
   const SMDS_MeshInfo& GetMeshInfo() const { return myInfo; }
 
   virtual int NbNodes() const;
+  virtual int NbElements() const;
   virtual int Nb0DElements() const;
   virtual int NbBalls() const;
   virtual int NbEdges() const;

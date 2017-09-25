@@ -56,7 +56,7 @@
 #include <iterator>
 using namespace std;
 
-#ifndef WIN32
+#if !defined WIN32 && !defined __APPLE__
 #include <sys/sysinfo.h>
 #endif
 
@@ -77,7 +77,7 @@ int SMDS_Mesh::chunkSize = 1024;
 
 int SMDS_Mesh::CheckMemory(const bool doNotRaise) throw (std::bad_alloc)
 {
-#ifndef WIN32
+#if !defined WIN32 && !defined __APPLE__
   struct sysinfo si;
   int err = sysinfo( &si );
   if ( err )
@@ -383,7 +383,7 @@ SMDS_MeshEdge* SMDS_Mesh::AddEdgeWithID(const SMDS_MeshNode * n1,
   if ( !n1 || !n2 ) return 0;
   SMDS_MeshEdge * edge = 0;
 
-  // --- retreive nodes ID
+  // --- retrieve nodes ID
   vector<vtkIdType> nodeIds;
   nodeIds.clear();
   nodeIds.push_back(n1->getVtkId());
@@ -2458,6 +2458,49 @@ const SMDS_MeshElement* SMDS_Mesh::FindElement (const vector<const SMDS_MeshNode
   return NULL;
 }
 
+//================================================================================
+/*!
+ * \brief Return elements including all given nodes
+ *  \param [in] nodes - nodes to find elements around
+ *  \param [out] foundElems - the found elements
+ *  \param [in] type - type of elements to find
+ *  \return int - a number of found elements
+ */
+//================================================================================
+
+int SMDS_Mesh::GetElementsByNodes(const std::vector<const SMDS_MeshNode *>& nodes,
+                                  std::vector<const SMDS_MeshElement *>&    foundElems,
+                                  const SMDSAbs_ElementType                 type)
+{
+  // chose a node with minimal number of inverse elements
+  const SMDS_MeshNode* n0 = nodes[0];
+  int minNbInverse = n0 ? n0->NbInverseElements( type ) : 1000;
+  for ( size_t i = 1; i < nodes.size(); ++i )
+    if ( nodes[i] && nodes[i]->NbInverseElements( type ) < minNbInverse )
+    {
+      n0 = nodes[i];
+      minNbInverse = n0->NbInverseElements( type );
+    }
+
+  foundElems.clear();
+  if ( n0 )
+  {
+    foundElems.reserve( minNbInverse );
+    SMDS_ElemIteratorPtr eIt = n0->GetInverseElementIterator( type );
+    while ( eIt->more() )
+    {
+      const SMDS_MeshElement* e = eIt->next();
+      bool includeAll = true;
+      for ( size_t i = 0; i < nodes.size() &&  includeAll; ++i )
+        if ( nodes[i] != n0 && e->GetNodeIndex( nodes[i] ) < 0 )
+          includeAll = false;
+      if ( includeAll )
+        foundElems.push_back( e );
+    }
+  }
+  return foundElems.size();
+}
+
 //=======================================================================
 //function : DumpNodes
 //purpose  :
@@ -2570,6 +2613,13 @@ int SMDS_Mesh::NbNodes() const
   return myInfo.NbNodes();
 }
 
+///////////////////////////////////////////////////////////////////////////////
+/// Return the number of elements
+///////////////////////////////////////////////////////////////////////////////
+int SMDS_Mesh::NbElements() const
+{
+  return myInfo.NbElements();
+}
 ///////////////////////////////////////////////////////////////////////////////
 /// Return the number of 0D elements
 ///////////////////////////////////////////////////////////////////////////////
@@ -2812,7 +2862,7 @@ namespace {
     IdSortedIterator(const SMDS_MeshElementIDFactory& fact,
                      const SMDSAbs_ElementType        type, // SMDSAbs_All NOT allowed!!! 
                      const int                        totalNb)
-      :myIDFact( fact ),
+      :myIDFact( const_cast<SMDS_MeshElementIDFactory&>(fact) ),
        myID(1), myMaxID( myIDFact.GetMaxID() ),myNbFound(0), myTotalNb( totalNb ),
        myType( type ),
        myElem(0)
@@ -3226,7 +3276,7 @@ void SMDS_Mesh::RemoveElement(const SMDS_MeshElement *        elem,
           if (const SMDS_VtkEdge* vtkElem = dynamic_cast<const SMDS_VtkEdge*>(*it))
             myEdgePool->destroy((SMDS_VtkEdge*) vtkElem);
           else {
-            ((SMDS_MeshElement*) *it)->init( -1, -1, -1 ); // avoid reuse
+            ((SMDS_MeshElement*) *it)->init( 0, -1, -1 ); // avoid reuse
             delete (*it);
           }
           break;
@@ -3241,7 +3291,7 @@ void SMDS_Mesh::RemoveElement(const SMDS_MeshElement *        elem,
           if (const SMDS_VtkFace* vtkElem = dynamic_cast<const SMDS_VtkFace*>(*it))
             myFacePool->destroy((SMDS_VtkFace*) vtkElem);
           else {
-            ((SMDS_MeshElement*) *it)->init( -1, -1, -1 ); // avoid reuse
+            ((SMDS_MeshElement*) *it)->init( 0, -1, -1 ); // avoid reuse
             delete (*it);
           }
           break;
@@ -3256,7 +3306,7 @@ void SMDS_Mesh::RemoveElement(const SMDS_MeshElement *        elem,
           if (const SMDS_VtkVolume* vtkElem = dynamic_cast<const SMDS_VtkVolume*>(*it))
             myVolumePool->destroy((SMDS_VtkVolume*) vtkElem);
           else {
-            ((SMDS_MeshElement*) *it)->init( -1, -1, -1 ); // avoid reuse
+            ((SMDS_MeshElement*) *it)->init( 0, -1, -1 ); // avoid reuse
             delete (*it);
           }
           break;
@@ -3271,7 +3321,7 @@ void SMDS_Mesh::RemoveElement(const SMDS_MeshElement *        elem,
           if (const SMDS_BallElement* vtkElem = dynamic_cast<const SMDS_BallElement*>(*it))
             myBallPool->destroy(const_cast<SMDS_BallElement*>( vtkElem ));
           else {
-            ((SMDS_MeshElement*) *it)->init( -1, -1, -1 ); // avoid reuse
+            ((SMDS_MeshElement*) *it)->init( 0, -1, -1 ); // avoid reuse
             delete (*it);
           }
           break;
@@ -3322,22 +3372,24 @@ void SMDS_Mesh::RemoveElement(const SMDS_MeshElement *        elem,
 void SMDS_Mesh::RemoveFreeElement(const SMDS_MeshElement * elem)
 {
   int elemId = elem->GetID();
-  int vtkId = elem->getVtkId();
+  int  vtkId = elem->getVtkId();
   SMDSAbs_ElementType aType = elem->GetType();
-  SMDS_MeshElement* todest = (SMDS_MeshElement*)(elem);
-  if (aType == SMDSAbs_Node) {
+  SMDS_MeshElement*  todest = (SMDS_MeshElement*)(elem);
+  if ( aType == SMDSAbs_Node )
+  {
     // only free node can be removed by this method
     const SMDS_MeshNode* n = static_cast<SMDS_MeshNode*>(todest);
-    SMDS_ElemIteratorPtr itFe = n->GetInverseElementIterator();
-    if (!itFe->more()) { // free node
+    if ( n->NbInverseElements() == 0 ) { // free node
       myNodes[elemId] = 0;
       myInfo.myNbNodes--;
       ((SMDS_MeshNode*) n)->SetPosition(SMDS_SpacePosition::originSpacePosition());
-      ((SMDS_MeshNode*) n)->SMDS_MeshElement::init( -1, -1, -1 ); // avoid reuse
+      ((SMDS_MeshNode*) n)->SMDS_MeshElement::init( 0, -1, -1 ); // avoid reuse
       myNodePool->destroy(static_cast<SMDS_MeshNode*>(todest));
       myNodeIDFactory->ReleaseID(elemId, vtkId);
     }
-  } else {
+  }
+  else
+  {
     if (hasConstructionEdges() || hasConstructionFaces())
       // this methods is only for meshes without descendants
       return;
@@ -3387,7 +3439,7 @@ void SMDS_Mesh::RemoveFreeElement(const SMDS_MeshElement * elem)
     // --- to do: keep vtkid in a list of reusable cells
 
     if ( elem )
-      ((SMDS_MeshElement*) elem)->init( -1, -1, -1 ); // avoid reuse
+      ((SMDS_MeshElement*) elem)->init( 0, -1, -1 ); // avoid reuse
   }
 }
 

@@ -40,13 +40,15 @@
 
 //std includes
 #include <vector>
+#include <utility>
 
 #include <SVTK_Selection.h>
 
 #include <SVTK_Selection.h>
 
-enum
+typedef enum
   {
+    Undefined  = -1,
     Node       = NodeSelection,
     Cell       = CellSelection,
     EdgeOfCell = EdgeOfCellSelection,
@@ -56,7 +58,7 @@ enum
     Actor      = ActorSelection,
     Elem0D     = Elem0DSelection,
     Ball       = BallSelection
-  };
+  } SelectionMode;
 
 class SMESH_SWIG_EXPORT SMESH_Swig
 {
@@ -94,10 +96,15 @@ public:
    */
   void                       SetMeshIcon( const char*, const bool, const bool );
 
+  void setSelectionMode( SelectionMode selectionMode );
+  std::vector<int> getSelected( const char* Mesh_Entry );
+  std::vector<std::pair<int, int> > getSelectedEdgeOfCell( const char* Mesh_Entry );
+
   // --------------------- for the test purposes -----------------------
-  int  getSelectionMode();
+  SelectionMode getSelectionMode();
   void select( const char *id, std::vector<int> ids, bool append = false );
   void select( const char *id, int id1, bool append = false );
+  void select( const char *id, std::vector<std::pair<int,int> >, bool apend = false );
 
 private:
   SALOMEDS::Study_var        myStudy;

@@ -12878,19 +12878,23 @@ namespace // utils for MakePolyLine
 
   void Path::Remove( std::vector< Path > & paths, size_t& i )
   {
-    size_t j = paths.size() - 1; // last item to be removed
-    if ( i < j )
+    if ( paths.size() > 1 )
     {
-      paths[ i ].myPoints.swap( paths[ j ].myPoints );
-      paths[ i ].myFace     = paths[ j ].myFace;
-      paths[ i ].myNodeInd1 = paths[ j ].myNodeInd1;
-      paths[ i ].myNodeInd2 = paths[ j ].myNodeInd2;
-      paths[ i ].myNode1    = paths[ j ].myNode1;
-      paths[ i ].myNode2    = paths[ j ].myNode2;
-      paths[ i ].myLength   = paths[ j ].myLength;
+      size_t j = paths.size() - 1; // last item to be removed
+      if ( i < j )
+      {
+        paths[ i ].myPoints.swap( paths[ j ].myPoints );
+        paths[ i ].myFace     = paths[ j ].myFace;
+        paths[ i ].myNodeInd1 = paths[ j ].myNodeInd1;
+        paths[ i ].myNodeInd2 = paths[ j ].myNodeInd2;
+        paths[ i ].myNode1    = paths[ j ].myNode1;
+        paths[ i ].myNode2    = paths[ j ].myNode2;
+        paths[ i ].myLength   = paths[ j ].myLength;
+      }
     }
     paths.pop_back();
-    --i;
+    if ( i > 0 )
+      --i;
   }
 
   //================================================================================
@@ -13183,7 +13187,7 @@ void SMESH_MeshEditor::MakePolyLine( TListOfPolySegments&   theSegments,
   SMESHUtils::Deleter<SMESH_ElementSearcher> delSearcher;
   if ( !searcher )
   {
-    searcher = SMESH_MeshAlgos::GetElementSearcher( *myMesh->GetMeshDS() );
+    searcher = SMESH_MeshAlgos::GetElementSearcher( *GetMeshDS() );
     delSearcher._obj = searcher;
   }
 
@@ -13216,6 +13220,9 @@ void SMESH_MeshEditor::MakePolyLine( TListOfPolySegments&   theSegments,
       }
     }
   }
+
+  // assure that inverse elements are constructed, avoid their concurrent building in threads
+  GetMeshDS()->nodesIterator()->next()->NbInverseElements();
 
   // find paths
 

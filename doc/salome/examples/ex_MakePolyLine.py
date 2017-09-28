@@ -23,8 +23,11 @@ Mesh_1.Compute()
 # define arguments for MakePolyLine
 
 segments = []
+# between nodes 20 and 1, default plane
 segments.append( SMESH.PolySegment( 20, 0, 1, 0, smesh.MakeDirStruct(0,0,0) ))
+# between nodes 1 and 100, default plane
 segments.append( SMESH.PolySegment( 1, 0, 200, 0, smesh.MakeDirStruct(0,0,0) ))
+# between nodes 200 and edge (578, 577), plane includes vector (1,1,1)
 segments.append( SMESH.PolySegment( 200, 0, 578, 577, smesh.MakeDirStruct(1,1,1) ))
 
 Mesh_1.MakePolyLine( segments, "1D group")

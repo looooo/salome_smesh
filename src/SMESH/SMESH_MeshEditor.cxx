@@ -12867,8 +12867,22 @@ namespace // utils for MakePolyLine
 
     bool Extend( const gp_XYZ& plnNorm, const gp_XYZ& plnOrig );
 
+    bool ReachSamePoint( const Path& other );
+
     static void Remove( std::vector< Path > & paths, size_t& i );
   };
+
+  //================================================================================
+  /*!
+   * \brief Return true if this Path meats another
+   */
+  //================================================================================
+
+  bool Path::ReachSamePoint( const Path& other )
+  {
+    return ( mySrcPntInd != other.mySrcPntInd &&
+             myFace == other.myFace );
+  }
 
   //================================================================================
   /*!
@@ -12884,12 +12898,15 @@ namespace // utils for MakePolyLine
       if ( i < j )
       {
         paths[ i ].myPoints.swap( paths[ j ].myPoints );
-        paths[ i ].myFace     = paths[ j ].myFace;
-        paths[ i ].myNodeInd1 = paths[ j ].myNodeInd1;
-        paths[ i ].myNodeInd2 = paths[ j ].myNodeInd2;
-        paths[ i ].myNode1    = paths[ j ].myNode1;
-        paths[ i ].myNode2    = paths[ j ].myNode2;
-        paths[ i ].myLength   = paths[ j ].myLength;
+        paths[ i ].myLength    = paths[ j ].myLength;
+        paths[ i ].mySrcPntInd = paths[ j ].mySrcPntInd;
+        paths[ i ].myFace      = paths[ j ].myFace;
+        paths[ i ].myNode1     = paths[ j ].myNode1;
+        paths[ i ].myNode2     = paths[ j ].myNode2;
+        paths[ i ].myNodeInd1  = paths[ j ].myNodeInd1;
+        paths[ i ].myNodeInd2  = paths[ j ].myNodeInd2;
+        paths[ i ].myDot1      = paths[ j ].myDot1;
+        paths[ i ].myDot2      = paths[ j ].myDot2;
       }
     }
     paths.pop_back();
@@ -13139,9 +13156,7 @@ namespace // utils for MakePolyLine
           // join paths that reach same point
           for ( size_t j = 0; j < paths.size(); ++j )
           {
-            if ( i != j &&
-                 paths[i].myFace == paths[j].myFace &&
-                 paths[i].mySrcPntInd != paths[j].mySrcPntInd )
+            if ( i != j && paths[i].ReachSamePoint( paths[j] ))
             {
               double   distLast = ( paths[i].myPoints.back() - paths[j].myPoints.back() ).Modulus();
               double fullLength = ( paths[i].myLength + paths[j].myLength + distLast );

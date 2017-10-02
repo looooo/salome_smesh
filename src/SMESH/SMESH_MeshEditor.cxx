@@ -13073,7 +13073,7 @@ namespace // utils for MakePolyLine
       if ( polySeg.myNode2[1] ) p2 = 0.5 * ( p2 + SMESH_NodeXYZ( polySeg.myNode2[1] ));
 
       gp_XYZ plnNorm = ( p1 - p2 ) ^ polySeg.myVector.XYZ();
-      gp_XYZ plnOrig = SMESH_NodeXYZ( polySeg.myNode1[0] );
+      gp_XYZ plnOrig = p2;
 
       // find paths connecting the 2 end points of polySeg
 

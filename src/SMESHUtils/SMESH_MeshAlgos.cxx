@@ -1641,7 +1641,7 @@ double SMESH_MeshAlgos::GetDistance( const SMDS_MeshFace* face,
   case POS_RIGHT:
   {
     // point is inside the face
-    double distToFacePlane = tmpPnt.Y();
+    double distToFacePlane = Abs( tmpPnt.Y() );
     if ( closestPnt )
     {
       if ( distToFacePlane < std::numeric_limits<double>::min() ) {
@@ -1653,7 +1653,7 @@ double SMESH_MeshAlgos::GetDistance( const SMDS_MeshFace* face,
         *closestPnt = tmpPnt;
       }
     }
-    return Abs( distToFacePlane );
+    return distToFacePlane;
   }
   case POS_VERTEX:
   {

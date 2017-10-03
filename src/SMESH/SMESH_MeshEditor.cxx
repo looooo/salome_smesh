@@ -13233,6 +13233,10 @@ void SMESH_MeshEditor::MakePolyLine( TListOfPolySegments&   theSegments,
         SMESH_MeshAlgos::FaceNormal( face, const_cast< gp_XYZ& >( polySeg.myVector.XYZ() ));
         polySeg.myMidProjPoint = pMid + polySeg.myVector.XYZ();
       }
+      else
+      {
+        polySeg.myVector = polySeg.myMidProjPoint.XYZ() - pMid;
+      }
     }
   }
 

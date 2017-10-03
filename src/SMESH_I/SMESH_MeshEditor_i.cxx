@@ -6864,12 +6864,14 @@ void SMESH_MeshEditor_i::MakePolyLine(SMESH::ListOfPolySegments& theSegments,
   initData(/*deleteSearchers=*/false);
 
   SMESHDS_Group* groupDS = 0;
+  SMESHDS_Mesh*   meshDS = getMeshDS();
   if ( myIsPreviewMode ) // copy faces to the tmp mesh
   {
     TPreviewMesh * tmpMesh = getPreviewMesh( SMDSAbs_Edge );
     SMDS_ElemIteratorPtr faceIt = getMeshDS()->elementsIterator( SMDSAbs_Face );
     while ( faceIt->more() )
       tmpMesh->Copy( faceIt->next() );
+    meshDS = tmpMesh->GetMeshDS();
   }
   else if ( theGroupName[0] ) // find/create a group of segments
   {
@@ -6898,10 +6900,10 @@ void SMESH_MeshEditor_i::MakePolyLine(SMESH::ListOfPolySegments& theSegments,
   {
     SMESH::PolySegment&               segIn = theSegments[ i ];
     ::SMESH_MeshEditor::PolySegment& segOut = segments[ i ];
-    segOut.myNode1[0] = getMeshDS()->FindNode( segIn.node1ID1 );
-    segOut.myNode2[0] = getMeshDS()->FindNode( segIn.node1ID2 );
-    segOut.myNode1[1] = getMeshDS()->FindNode( segIn.node2ID1 );
-    segOut.myNode2[1] = getMeshDS()->FindNode( segIn.node2ID2 );
+    segOut.myNode1[0] = meshDS->FindNode( segIn.node1ID1 );
+    segOut.myNode2[0] = meshDS->FindNode( segIn.node1ID2 );
+    segOut.myNode1[1] = meshDS->FindNode( segIn.node2ID1 );
+    segOut.myNode2[1] = meshDS->FindNode( segIn.node2ID2 );
     segOut.myVector.SetCoord( segIn.vector.PS.x,
                               segIn.vector.PS.y,
                               segIn.vector.PS.z );

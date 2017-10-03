@@ -13231,12 +13231,16 @@ void SMESH_MeshEditor::MakePolyLine( TListOfPolySegments&   theSegments,
       if ( polySeg.myMidProjPoint.Distance( pMid ) < Precision::Confusion() )
       {
         SMESH_MeshAlgos::FaceNormal( face, const_cast< gp_XYZ& >( polySeg.myVector.XYZ() ));
-        polySeg.myMidProjPoint = pMid + polySeg.myVector.XYZ();
+        polySeg.myMidProjPoint = pMid + polySeg.myVector.XYZ() * ( p1 - p2 ).Modulus() * 0.333;
       }
       else
       {
         polySeg.myVector = polySeg.myMidProjPoint.XYZ() - pMid;
       }
+    }
+    else
+    {
+      polySeg.myVector = plnNorm ^ ( p1 - p2 );
     }
   }
 

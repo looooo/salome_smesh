@@ -13209,6 +13209,7 @@ void SMESH_MeshEditor::MakePolyLine( TListOfPolySegments&   theSegments,
   // get cutting planes
 
   std::vector< bool > isVectorOK( theSegments.size(), true );
+  const double planarCoef = 0.333; // plane height in planar case
 
   for ( size_t iSeg = 0; iSeg < theSegments.size(); ++iSeg )
   {
@@ -13231,7 +13232,7 @@ void SMESH_MeshEditor::MakePolyLine( TListOfPolySegments&   theSegments,
       if ( polySeg.myMidProjPoint.Distance( pMid ) < Precision::Confusion() )
       {
         SMESH_MeshAlgos::FaceNormal( face, const_cast< gp_XYZ& >( polySeg.myVector.XYZ() ));
-        polySeg.myMidProjPoint = pMid + polySeg.myVector.XYZ() * ( p1 - p2 ).Modulus() * 0.333;
+        polySeg.myMidProjPoint = pMid + polySeg.myVector.XYZ() * ( p1 - p2 ).Modulus() * planarCoef;
       }
       else
       {
@@ -13288,6 +13289,7 @@ void SMESH_MeshEditor::MakePolyLine( TListOfPolySegments&   theSegments,
 
     // return a vector
 
+    gp_XYZ pMid = 0.5 * ( path.myPoints[0] + path.myPoints.back() );
     if ( isVectorOK[ iSeg ])
     {
       // find the most distance point of a path
@@ -13301,8 +13303,10 @@ void SMESH_MeshEditor::MakePolyLine( TListOfPolySegments&   theSegments,
           theSegments[iSeg].myMidProjPoint = path.myPoints[iP];
         }
       }
+      if ( maxDist < Precision::Confusion() ) // planar case
+        theSegments[iSeg].myMidProjPoint =
+          pMid + theSegments[iSeg].myVector.XYZ().Normalized() * path.myLength * planarCoef;
     }
-    gp_XYZ pMid = 0.5 * ( path.myPoints[0] + path.myPoints.back() );
     theSegments[iSeg].myVector = gp_Vec( pMid, theSegments[iSeg].myMidProjPoint );
   }
 

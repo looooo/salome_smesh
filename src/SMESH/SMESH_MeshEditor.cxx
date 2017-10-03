@@ -13294,7 +13294,7 @@ void SMESH_MeshEditor::MakePolyLine( TListOfPolySegments&   theSegments,
       double maxDist = 0;
       for ( size_t iP = 1; iP < path.myPoints.size(); ++iP )
       {
-        double dist = theSegments[iSeg].myVector * ( path.myPoints[iP] - path.myPoints[0] );
+        double dist = Abs( theSegments[iSeg].myVector * ( path.myPoints[iP] - path.myPoints[0] ));
         if ( dist > maxDist )
         {
           maxDist = dist;

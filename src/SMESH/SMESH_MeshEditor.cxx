@@ -13177,7 +13177,8 @@ namespace // utils for MakePolyLine
           throw SALOME_Exception(LOCALIZED( "Infinite loop in MakePolyLine()"));
       }
 
-      return;
+      if ( myPaths[ iSeg ].myPoints.empty() )
+        throw SALOME_Exception( SMESH_Comment("Can't find a full path for PolySegment #") << iSeg );
 
     } // PolyPathCompute::Compute()
 
@@ -13227,15 +13228,16 @@ void SMESH_MeshEditor::MakePolyLine( TListOfPolySegments&   theSegments,
       gp_XYZ pMid = 0.5 * ( p1 + p2 );
       const SMDS_MeshElement* face;
       polySeg.myMidProjPoint = searcher->Project( pMid, SMDSAbs_Face, &face );
+      polySeg.myVector       = polySeg.myMidProjPoint.XYZ() - pMid;
 
-      if ( polySeg.myMidProjPoint.Distance( pMid ) < Precision::Confusion() )
+      gp_XYZ faceNorm;
+      SMESH_MeshAlgos::FaceNormal( face, faceNorm );
+
+      if ( polySeg.myVector.Magnitude() < Precision::Confusion() ||
+           polySeg.myVector * faceNorm  < Precision::Confusion() )
       {
-        SMESH_MeshAlgos::FaceNormal( face, const_cast< gp_XYZ& >( polySeg.myVector.XYZ() ));
-        polySeg.myMidProjPoint = pMid + polySeg.myVector.XYZ() * ( p1 - p2 ).Modulus() * planarCoef;
-      }
-      else
-      {
-        polySeg.myVector = polySeg.myMidProjPoint.XYZ() - pMid;
+        polySeg.myVector = faceNorm;
+        polySeg.myMidProjPoint = pMid + faceNorm * ( p1 - p2 ).Modulus() * planarCoef;
       }
     }
     else

@@ -107,6 +107,10 @@ class SMESH_Swig
   std::vector<int> getSelected( const char* Mesh_Entry );
   std::vector<std::pair<int,int> > getSelectedEdgeOfCell( const char* Mesh_Entry );
 
+  void setSelectionMode( SelectionMode selectionMode);
+  std::vector<int> getSelected( const char* Mesh_Entry );
+  std::vector<std::pair<int,int> > getSelectedEdgeOfCell( const char* Mesh_Entry );
+
   // --------------------- for the test purposes -----------------------
   SelectionMode  getSelectionMode();
   void select( const char *id, std::vector<int> ids, bool append = false );

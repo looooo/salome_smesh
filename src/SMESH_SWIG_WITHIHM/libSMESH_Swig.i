@@ -101,6 +101,7 @@ class SMESH_Swig
 
   void CreateAndDisplayActor( const char* Mesh_Entry );
   void EraseActor( const char* Mesh_Entry, const bool allViewers = false );
+  void UpdateActor( const char* Mesh_Entry );
 
   void setSelectionMode( SelectionMode selectionMode);
   std::vector<int> getSelected( const char* Mesh_Entry );

@@ -89,6 +89,8 @@ public:
 
   void                       EraseActor( const char*, const bool allViewers = false );
 
+  void                       UpdateActor( const char* Mesh_Entry );
+
   /*!
    * \brief Set mesh icon according to compute status
     * \param Mesh_Entry - entry of a mesh

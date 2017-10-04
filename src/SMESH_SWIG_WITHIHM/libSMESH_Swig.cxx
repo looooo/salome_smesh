@@ -684,6 +684,25 @@ void SMESH_Swig::EraseActor( const char* Mesh_Entry, const bool allViewers )
   ProcessVoidEvent(new TEvent(Mesh_Entry, allViewers));
 }
 
+void SMESH_Swig::UpdateActor( const char* Mesh_Entry ) {
+  class TEvent: public SALOME_Event
+  {
+  private:
+    const char* _entry;
+  public:
+    TEvent( const char* Mesh_Entry ) {
+      _entry = Mesh_Entry;
+    }
+    virtual void Execute() {
+      Handle(SALOME_InteractiveObject) anIO = new SALOME_InteractiveObject
+        ( _entry, "SMESH", "" );
+      SMESH::Update( anIO, true );
+    }
+  };
+
+  ProcessVoidEvent( new TEvent(Mesh_Entry) );
+}
+
 void SMESH_Swig::SetName(const char* theEntry,
                          const char* theName)
 {

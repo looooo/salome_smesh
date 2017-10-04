@@ -13119,8 +13119,7 @@ namespace // utils for MakePolyLine
             if ( path.SetCutAtCorner( polySeg.myNode1[ iP ], fIt->next(), plnNorm, plnOrig ))
             {
               if (( path.myDot1 * path.myDot2 != 0 ) ||
-                  ( nodes.insert( path.myNode1._node ).second &&
-                    nodes.insert( path.myNode2._node ).second ))
+                  ( nodes.insert( path.myDot1 == 0 ? path.myNode1._node : path.myNode2._node ).second ))
                 paths.push_back( path );
             }
           }

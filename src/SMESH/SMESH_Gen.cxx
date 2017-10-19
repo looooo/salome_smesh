@@ -73,6 +73,19 @@ SMESH_Gen::SMESH_Gen()
   //vtkDebugLeaks::SetExitError(0);
 }
 
+namespace
+{
+  // a structure used to nullify SMESH_Gen field of SMESH_Hypothesis,
+  // which is needed for SMESH_Hypothesis not deleted before ~SMESH_Gen()
+  struct _Hyp : public SMESH_Hypothesis
+  {
+    void NullifyGen()
+    {
+      _gen = 0;
+    }
+  };
+}
+
 //=============================================================================
 /*!
  * Destructor
@@ -84,9 +97,16 @@ SMESH_Gen::~SMESH_Gen()
   std::map < int, StudyContextStruct * >::iterator i_sc = _mapStudyContext.begin();
   for ( ; i_sc != _mapStudyContext.end(); ++i_sc )
   {
-    delete i_sc->second->myDocument;
-    delete i_sc->second;
-  }  
+    StudyContextStruct* context = i_sc->second;
+    std::map < int, SMESH_Hypothesis * >::iterator i_hyp = context->mapHypothesis.begin();
+    for ( ; i_hyp != context->mapHypothesis.end(); ++i_hyp )
+    {
+      if ( _Hyp* h = static_cast< _Hyp*>( i_hyp->second ))
+        h->NullifyGen();
+    }
+    delete context->myDocument;
+    delete context;
+  }
 }
 
 //=============================================================================
@@ -148,6 +168,8 @@ bool SMESH_Gen::Compute(SMESH_Mesh &          aMesh,
   // one face only.
   SMESH_subMesh::compute_event computeEvent =
     aShapeOnly ? SMESH_subMesh::COMPUTE_SUBMESH : SMESH_subMesh::COMPUTE;
+  if ( !aMesh.HasShapeToMesh() )
+    computeEvent = SMESH_subMesh::COMPUTE_NOGEOM; // if several algos and no geometry
 
   if ( anUpward ) // is called from the below code in this method
   {
@@ -584,7 +606,6 @@ bool SMESH_Gen::Evaluate(SMESH_Mesh &          aMesh,
     ret = Evaluate( aMesh, aShape, aResMap, /*anUpward=*/true, aShapesId );
   }
 
-  MESSAGE( "VSR - SMESH_Gen::Evaluate() finished, OK = " << ret);
   return ret;
 }
 
@@ -1058,7 +1079,8 @@ SMESH_Algo *SMESH_Gen::GetAlgo(SMESH_subMesh * aSubMesh,
   SMESH_Mesh&          aMesh  = *aSubMesh->GetFather();
 
   SMESH_HypoFilter filter( SMESH_HypoFilter::IsAlgo() );
-  filter.And( filter.IsApplicableTo( aShape ));
+  if ( aMesh.HasShapeToMesh() )
+    filter.And( filter.IsApplicableTo( aShape ));
 
   typedef SMESH_Algo::Features AlgoData;
 
@@ -1166,7 +1188,7 @@ int SMESH_Gen::GetShapeDim(const TopAbs_ShapeEnum & aShapeType)
 
 //=============================================================================
 /*!
- * Genarate a new id unique withing this Gen
+ * Genarate a new id unique within this Gen
  */
 //=============================================================================
 

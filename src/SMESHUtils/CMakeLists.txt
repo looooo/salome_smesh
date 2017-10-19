@@ -47,7 +47,7 @@ SET(_link_LIBRARIES
   ${CAS_TKMesh}
   ${Boost_LIBRARIES}
   SMDS
-)
+  )
 
 # --- headers ---
 
@@ -83,6 +83,7 @@ SET(SMESHUtils_SOURCES
   SMESH_MAT2d.cxx
   SMESH_FreeBorders.cxx
   SMESH_ControlPnt.cxx
+  SMESH_FillHole.cxx
 )
 
 # --- rules ---

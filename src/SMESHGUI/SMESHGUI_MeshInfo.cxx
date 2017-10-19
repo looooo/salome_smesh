@@ -959,11 +959,13 @@ SMESHGUI_ElemInfo::~SMESHGUI_ElemInfo()
   \brief Set mesh data source (actor)
   \param actor mesh object actor
 */
-void SMESHGUI_ElemInfo::setSource( SMESH_Actor* actor )
+void SMESHGUI_ElemInfo::setSource( SMESH_Actor* actor, SMESH::SMESH_IDSource_var obj )
 {
   if ( myActor != actor ) {
     myActor = actor;
     myIsElement = -1;
+    SMESH::SMESH_Mesh_var mesh = obj->GetMesh();
+    myMeshHasShape = ( !mesh->_is_nil() && mesh->HasShapeToMesh() );
     clear();
   }
 }
@@ -1453,25 +1455,29 @@ void SMESHGUI_SimpleElemInfo::information( const QList<long>& ids )
           afunctor.reset( new SMESH::Controls::AspectRatio() );
           afunctor->SetMesh( actor()->GetObject()->GetMesh() );
           myInfo->append( QString( "- <b>%1:</b> %2" ).arg( tr( "ASPECTRATIO_ELEMENTS" ) ).arg( afunctor->GetValue( id ) ) );
-          //Minimum angle         
+          //Minimum angle
           afunctor.reset( new SMESH::Controls::MinimumAngle() );
           afunctor->SetMesh( actor()->GetObject()->GetMesh() );
           afunctor->SetPrecision( cprecision );
           myInfo->append( QString( "- <b>%1:</b> %2" ).arg( tr( "MINIMUMANGLE_ELEMENTS" ) ).arg( afunctor->GetValue( id ) ) );
-          //Wraping angle        
+          //Wraping angle
           afunctor.reset( new SMESH::Controls::Warping() );
           afunctor->SetMesh( actor()->GetObject()->GetMesh() );
           afunctor->SetPrecision( cprecision );
           myInfo->append( QString( "- <b>%1:</b> %2" ).arg( tr( "WARP_ELEMENTS" ) ).arg( afunctor->GetValue( id ) ) );
-          //Skew         
+          //Skew
           afunctor.reset( new SMESH::Controls::Skew() );
           afunctor->SetMesh( actor()->GetObject()->GetMesh() );
           afunctor->SetPrecision( cprecision );
           myInfo->append( QString( "- <b>%1:</b> %2" ).arg( tr( "SKEW_ELEMENTS" ) ).arg( afunctor->GetValue( id ) ) );
-          //ElemDiam2D   
+          //ElemDiam2D
           afunctor.reset( new SMESH::Controls::MaxElementLength2D() );
           afunctor->SetMesh( actor()->GetObject()->GetMesh() );
           myInfo->append( QString( "- <b>%1:</b> %2" ).arg( tr( "MAX_ELEMENT_LENGTH_2D" ) ).arg( afunctor->GetValue( id ) ) );
+          //min edge length
+          afunctor.reset( new SMESH::Controls::Length2D() );
+          afunctor->SetMesh( actor()->GetObject()->GetMesh() );
+          myInfo->append( QString( "- <b>%1:</b> %2" ).arg( tr( "MIN_ELEM_EDGE" )).arg( afunctor->GetValue( id )) );
         }
         if( e->GetType() == SMDSAbs_Volume ) {
           //AspectRatio3D
@@ -1998,20 +2004,29 @@ void SMESHGUI_TreeElemInfo::information( const QList<long>& ids )
           afunctor->SetPrecision( cprecision );
           QTreeWidgetItem* warpItem = createItem( cntrItem, Bold );
           warpItem->setText( 0, tr( "WARP_ELEMENTS" ));
-          warpItem->setText( 1, QString( "%1" ).arg( afunctor->GetValue( id ) ) );        
-          //Skew          
+          warpItem->setText( 1, QString( "%1" ).arg( afunctor->GetValue( id ) ) );
+          //Skew
           afunctor.reset( new SMESH::Controls::Skew() );
           afunctor->SetMesh( actor()->GetObject()->GetMesh() );
           afunctor->SetPrecision( cprecision );
           QTreeWidgetItem* skewItem = createItem( cntrItem, Bold );
           skewItem->setText( 0, tr( "SKEW_ELEMENTS" ) );
-          skewItem->setText( 1, QString( "%1" ).arg( afunctor->GetValue( id ) ) );       
-          //ElemDiam2D    
+          skewItem->setText( 1, QString( "%1" ).arg( afunctor->GetValue( id ) ) );
+          //Deflection
+          if ( hasShapeToMesh() )
+          {
+            afunctor.reset( new SMESH::Controls::Deflection2D() );
+            afunctor->SetMesh( actor()->GetObject()->GetMesh() );
+            QTreeWidgetItem* deflItem = createItem( cntrItem, Bold );
+            deflItem->setText( 0, tr( "DEFLECTION_2D" ));
+            deflItem->setText( 1, QString( "%1" ).arg( afunctor->GetValue( id )) );
+          }
+          //ElemDiam2D
           afunctor.reset( new SMESH::Controls::MaxElementLength2D() );
           afunctor->SetMesh( actor()->GetObject()->GetMesh() );
           QTreeWidgetItem* diamItem = createItem( cntrItem, Bold );
           diamItem->setText( 0, tr( "MAX_ELEMENT_LENGTH_2D" ));
-          diamItem->setText( 1, QString( "%1" ).arg( afunctor->GetValue( id ) ) );       
+          diamItem->setText( 1, QString( "%1" ).arg( afunctor->GetValue( id ) ) );
         }
         if( e->GetType() == SMDSAbs_Volume ) {
           //AspectRatio3D
@@ -2019,7 +2034,7 @@ void SMESHGUI_TreeElemInfo::information( const QList<long>& ids )
           afunctor->SetMesh( actor()->GetObject()->GetMesh() );
           QTreeWidgetItem* ratlItem3 = createItem( cntrItem, Bold );
           ratlItem3->setText( 0, tr( "ASPECTRATIO_3D_ELEMENTS" ) );
-          ratlItem3->setText( 1, QString( "%1" ).arg( afunctor->GetValue( id ) ) );      
+          ratlItem3->setText( 1, QString( "%1" ).arg( afunctor->GetValue( id ) ) );
           //Volume
           afunctor.reset( new SMESH::Controls::Volume() );
           afunctor->SetMesh( actor()->GetObject()->GetMesh() );
@@ -2033,6 +2048,13 @@ void SMESHGUI_TreeElemInfo::information( const QList<long>& ids )
           diam3Item->setText( 0, tr( "MAX_ELEMENT_LENGTH_3D" ) );
           diam3Item->setText( 1, QString( "%1" ).arg( afunctor->GetValue( id ) ) );     
         }
+
+        //min edge length
+        afunctor.reset( new SMESH::Controls::Length2D() );
+        afunctor->SetMesh( actor()->GetObject()->GetMesh() );
+        QTreeWidgetItem* minEdgeItem = createItem( cntrItem, Bold );
+        minEdgeItem->setText( 0, tr( "MIN_ELEM_EDGE" ));
+        minEdgeItem->setText( 1, QString( "%1" ).arg( afunctor->GetValue( id )) );
 
         // gravity center
         XYZ gc = gravityCenter( e );
@@ -2940,7 +2962,7 @@ void SMESHGUI_MeshInfoDlg::showInfo( const Handle(SALOME_InteractiveObject)& IO 
           SMESH::GetNameOfSelectedElements( selector, IO, ID ) :
           SMESH::GetNameOfSelectedNodes( selector, IO, ID );
       }
-      myElemInfo->setSource( myActor ) ;
+      myElemInfo->setSource( myActor, obj ) ;
       if ( nb > 0 ) {
         myID->setText( ID.trimmed() );
         QSet<long> ids;

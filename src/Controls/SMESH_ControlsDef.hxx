@@ -27,7 +27,6 @@
 
 #include "SMESH_TypeDefs.hxx"
 
-#include <BRepClass3d_SolidClassifier.hxx>
 #include <Bnd_B3d.hxx>
 #include <GeomAPI_ProjectPointOnCurve.hxx>
 #include <GeomAPI_ProjectPointOnSurf.hxx>
@@ -54,6 +53,9 @@ class SMESHDS_Mesh;
 class SMESHDS_SubMesh;
 class SMESHDS_GroupBase;
 
+class BRepClass3d_SolidClassifier;
+class ShapeAnalysis_Surface;
+class gp_Pln;
 class gp_Pnt;
 
 namespace SMESH{
@@ -293,7 +295,7 @@ namespace SMESH{
     */
     class SMESHCONTROLS_EXPORT Length2D: public virtual NumericalFunctor{
     public:
-      virtual double GetValue( long theElementId );
+      virtual double GetValue( const TSequenceOfXYZ& thePoints );
       virtual double GetBadRate( double Value, int nbNodes ) const;
       virtual SMDSAbs_ElementType GetType() const;
       struct Value{
@@ -306,6 +308,22 @@ namespace SMESH{
       void GetValues(TValues& theValues);
     };
     typedef boost::shared_ptr<Length2D> Length2DPtr;
+
+    /*
+      Class       : Deflection2D
+      Description : Functor for calculating distance between a face and geometry
+    */
+    class SMESHCONTROLS_EXPORT Deflection2D: public virtual NumericalFunctor{
+    public:
+      virtual void   SetMesh( const SMDS_Mesh* theMesh );
+      virtual double GetValue( const TSequenceOfXYZ& thePoints );
+      virtual double GetBadRate( double Value, int nbNodes ) const;
+      virtual SMDSAbs_ElementType GetType() const;
+    private:
+      Handle(ShapeAnalysis_Surface) mySurface;
+      int                           myShapeIndex;
+      boost::shared_ptr<gp_Pln>     myPlane;
+    };
 
     /*
       Class       : MultiConnection
@@ -902,6 +920,8 @@ namespace SMESH{
       bool    GetAllNodes() const { return myAllNodesFlag; }
       void    SetShape (const TopoDS_Shape& theShape,
                         const SMDSAbs_ElementType theType);
+      bool    IsSatisfy (const SMDS_MeshElement* elem);
+      bool    IsSatisfy (const SMDS_MeshNode* node, TopoDS_Shape* okShape=0);
 
     private:
 
@@ -1041,7 +1061,7 @@ namespace SMESH{
 
     /*
       Class       : GroupColor
-      Description : Functor for check color of group to whic mesh element belongs to
+      Description : Functor for check color of group to which mesh element belongs to
     */
     class SMESHCONTROLS_EXPORT GroupColor: public virtual Predicate{
     public:

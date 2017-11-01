@@ -736,7 +736,7 @@ namespace SMESH
               //MESSAGE("--- display " << anActor);
               anActor->Update();
               anActor->SetVisibility(true);
-              if (theAction == eDisplayOnly) aRenderer->ResetCameraClippingRange();
+	      aRenderer->ResetCameraClippingRange();
               aStudy->setVisibilityState(theEntry, Qtx::ShownState);
               break;
             case eErase:

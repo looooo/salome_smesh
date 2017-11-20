@@ -176,7 +176,10 @@ namespace
 
   void BEdge::ComputeAngle( bool theReverseAngle )
   {
-    myAngleWithPrev = acos( myDir.Dot( myPrev->myDir.Reversed() ));
+    double dot = myDir.Dot( myPrev->myDir.Reversed() );
+    if      ( dot >=  1 ) myAngleWithPrev = 0;
+    else if ( dot <= -1 ) myAngleWithPrev = M_PI;
+    else                  myAngleWithPrev = acos( dot );
 
     bool isObtuse;
     gp_XYZ inFaceDirNew = myDir - myPrev->myDir;

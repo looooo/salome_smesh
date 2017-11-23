@@ -40,13 +40,15 @@
 
 //std includes
 #include <vector>
+#include <utility>
 
 #include <SVTK_Selection.h>
 
 #include <SVTK_Selection.h>
 
-enum
+typedef enum
   {
+    Undefined  = -1,
     Node       = NodeSelection,
     Cell       = CellSelection,
     EdgeOfCell = EdgeOfCellSelection,
@@ -56,7 +58,7 @@ enum
     Actor      = ActorSelection,
     Elem0D     = Elem0DSelection,
     Ball       = BallSelection
-  };
+  } SelectionMode;
 
 typedef struct
 {
@@ -118,6 +120,8 @@ public:
 
   void                       EraseActor( const char*, const bool allViewers = false );
 
+  void                       UpdateActor( const char* Mesh_Entry );
+
   /*!
    * \brief Set mesh icon according to compute status
     * \param Mesh_Entry - entry of a mesh
@@ -128,10 +132,15 @@ public:
   actorAspect                GetActorAspect(const char* Mesh_Entry, int viewId = 0 );
   void                       SetActorAspect( const actorAspect& actorPres, const char* Mesh_Entry, int viewId = 0  );
 
+  void setSelectionMode( SelectionMode selectionMode );
+  std::vector<int> getSelected( const char* Mesh_Entry );
+  std::vector<std::pair<int, int> > getSelectedEdgeOfCell( const char* Mesh_Entry );
+
   // --------------------- for the test purposes -----------------------
-  int  getSelectionMode();
+  SelectionMode getSelectionMode();
   void select( const char *id, std::vector<int> ids, bool append = false );
   void select( const char *id, int id1, bool append = false );
+  void select( const char *id, std::vector<std::pair<int,int> >, bool apend = false );
 
 private:
   SALOMEDS::Study_var        myStudy;

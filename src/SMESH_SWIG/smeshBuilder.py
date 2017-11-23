@@ -1879,8 +1879,11 @@ class Mesh:
     #  @param f is the file name
     #  @param overwrite boolean parameter for overwriting/not overwriting the file
     #  @param meshPart a part of mesh (group, sub-mesh) to export instead of the mesh
+    #  @param groupElemsByType if true all elements of same entity type are exported at ones,
+    #         else elements are exported in order of their IDs which can cause creation
+    #         of multiple cgns sections
     #  @ingroup l2_impexp
-    def ExportCGNS(self, f, overwrite=1, meshPart=None):
+    def ExportCGNS(self, f, overwrite=1, meshPart=None, groupElemsByType=False):
         unRegister = genObjUnRegister()
         if isinstance( meshPart, list ):
             meshPart = self.GetIDSource( meshPart, SMESH.ALL )
@@ -1889,7 +1892,7 @@ class Mesh:
             meshPart = meshPart.mesh
         elif not meshPart:
             meshPart = self.mesh
-        self.mesh.ExportCGNS(meshPart, f, overwrite)
+        self.mesh.ExportCGNS(meshPart, f, overwrite, groupElemsByType)
 
     ## Export the mesh in a file in GMF format.
     #  GMF files must have .mesh extension for the ASCII format and .meshb for
@@ -2010,6 +2013,8 @@ class Mesh:
     #  @ingroup l2_grps_create
     def MakeGroupByIds(self, groupName, elementType, elemIDs):
         group = self.mesh.CreateGroup(elementType, groupName)
+        if isinstance( elemIDs, Mesh ):
+            elemIDs = elemIDs.GetMesh()
         if hasattr( elemIDs, "GetIDs" ):
             if hasattr( elemIDs, "SetMesh" ):
                 elemIDs.SetMesh( self.GetMesh() )
@@ -2687,8 +2692,13 @@ class Mesh:
 
     ## Return an element based on all given nodes.
     #  @ingroup l1_meshinfo
-    def FindElementByNodes(self,nodes):
+    def FindElementByNodes(self, nodes):
         return self.mesh.FindElementByNodes(nodes)
+
+    ## Return elements including all given nodes.
+    #  @ingroup l1_meshinfo
+    def GetElementsByNodes(self, nodes, elemType=SMESH.ALL):
+        return self.mesh.GetElementsByNodes( nodes, elemType )
 
     ## Return true if the given element is a polygon
     #  @ingroup l1_meshinfo
@@ -3882,6 +3892,7 @@ class Mesh:
     #         - a GEOM point
     #  @return the list of created groups (SMESH_GroupBase) if MakeGroups=True, empty list otherwise
     #  @ingroup l2_modif_extrurev
+    #  @ref tui_extrusion example
     def ExtrusionSweepObjects(self, nodes, edges, faces, StepVector, NbOfSteps, MakeGroups=False,
                               scaleFactors=[], linearVariation=False, basePoint=[] ):
         unRegister = genObjUnRegister()
@@ -3922,6 +3933,7 @@ class Mesh:
     #  @param IsNodes is True if elements with given ids are nodes
     #  @return the list of created groups (SMESH_GroupBase) if MakeGroups=True, empty list otherwise
     #  @ingroup l2_modif_extrurev
+    #  @ref tui_extrusion example
     def ExtrusionSweep(self, IDsOfElements, StepVector, NbOfSteps, MakeGroups=False, IsNodes = False):
         n,e,f = [],[],[]
         if IsNodes: n = IDsOfElements
@@ -3948,6 +3960,7 @@ class Mesh:
     #  @return the list of created groups (SMESH_GroupBase) if \a MakeGroups=True,
     #          empty list otherwise.
     #  @ingroup l2_modif_extrurev
+    #  @ref tui_extrusion example
     def ExtrusionByNormal(self, Elements, StepSize, NbOfSteps,
                           ByAverageNormal=False, UseInputElemsOnly=True, MakeGroups=False, Dim = 2):
         unRegister = genObjUnRegister()
@@ -3977,6 +3990,7 @@ class Mesh:
     #  @param IsNodes is True if elements to extrude are nodes
     #  @return list of created groups (SMESH_GroupBase) if MakeGroups=True, empty list otherwise
     #  @ingroup l2_modif_extrurev
+    #  @ref tui_extrusion example
     def ExtrusionSweepObject(self, theObject, StepVector, NbOfSteps, MakeGroups=False, IsNodes=False):
         n,e,f = [],[],[]
         if IsNodes: n    = theObject
@@ -3993,6 +4007,7 @@ class Mesh:
     #  @param MakeGroups to generate new groups from existing ones
     #  @return list of created groups (SMESH_GroupBase) if MakeGroups=True, empty list otherwise
     #  @ingroup l2_modif_extrurev
+    #  @ref tui_extrusion example
     def ExtrusionSweepObject1D(self, theObject, StepVector, NbOfSteps, MakeGroups=False):
         return self.ExtrusionSweepObjects([],theObject,[], StepVector, NbOfSteps, MakeGroups)
 
@@ -4006,6 +4021,7 @@ class Mesh:
     #  @param MakeGroups forces the generation of new groups from existing ones
     #  @return list of created groups (SMESH_GroupBase) if MakeGroups=True, empty list otherwise
     #  @ingroup l2_modif_extrurev
+    #  @ref tui_extrusion example
     def ExtrusionSweepObject2D(self, theObject, StepVector, NbOfSteps, MakeGroups=False):
         return self.ExtrusionSweepObjects([],[],theObject, StepVector, NbOfSteps, MakeGroups)
 
@@ -4050,6 +4066,7 @@ class Mesh:
     #  @param MakeGroups forces the generation of new groups from existing ones
     #  @return list of created groups (SMESH_GroupBase) and SMESH::Extrusion_Error
     #  @ingroup l2_modif_extrurev
+    #  @ref tui_extrusion_along_path example
     def ExtrusionAlongPathObjects(self, Nodes, Edges, Faces, PathMesh, PathShape=None,
                                   NodeStart=1, HasAngles=False, Angles=[], LinearVariation=False,
                                   HasRefPoint=False, RefPoint=[0,0,0], MakeGroups=False):
@@ -4093,6 +4110,7 @@ class Mesh:
     #  @return list of created groups (SMESH_GroupBase) and SMESH::Extrusion_Error if MakeGroups=True,
     #          only SMESH::Extrusion_Error otherwise
     #  @ingroup l2_modif_extrurev
+    #  @ref tui_extrusion_along_path example
     def ExtrusionAlongPathX(self, Base, Path, NodeStart,
                             HasAngles=False, Angles=[], LinearVariation=False,
                             HasRefPoint=False, RefPoint=[0,0,0], MakeGroups=False,
@@ -4125,6 +4143,7 @@ class Mesh:
     #  @return list of created groups (SMESH_GroupBase) and SMESH::Extrusion_Error if MakeGroups=True,
     #          only SMESH::Extrusion_Error otherwise
     #  @ingroup l2_modif_extrurev
+    #  @ref tui_extrusion_along_path example
     def ExtrusionAlongPath(self, IDsOfElements, PathMesh, PathShape, NodeStart,
                            HasAngles=False, Angles=[], HasRefPoint=False, RefPoint=[],
                            MakeGroups=False, LinearVariation=False):
@@ -4155,6 +4174,7 @@ class Mesh:
     #  @return list of created groups (SMESH_GroupBase) and SMESH::Extrusion_Error if MakeGroups=True,
     #          only SMESH::Extrusion_Error otherwise
     #  @ingroup l2_modif_extrurev
+    #  @ref tui_extrusion_along_path example
     def ExtrusionAlongPathObject(self, theObject, PathMesh, PathShape, NodeStart,
                                  HasAngles=False, Angles=[], HasRefPoint=False, RefPoint=[],
                                  MakeGroups=False, LinearVariation=False):
@@ -4184,6 +4204,7 @@ class Mesh:
     #  @return list of created groups (SMESH_GroupBase) and SMESH::Extrusion_Error if MakeGroups=True,
     #          only SMESH::Extrusion_Error otherwise
     #  @ingroup l2_modif_extrurev
+    #  @ref tui_extrusion_along_path example
     def ExtrusionAlongPathObject1D(self, theObject, PathMesh, PathShape, NodeStart,
                                    HasAngles=False, Angles=[], HasRefPoint=False, RefPoint=[],
                                    MakeGroups=False, LinearVariation=False):
@@ -4213,6 +4234,7 @@ class Mesh:
     #  @return list of created groups (SMESH_GroupBase) and SMESH::Extrusion_Error if MakeGroups=True,
     #          only SMESH::Extrusion_Error otherwise
     #  @ingroup l2_modif_extrurev
+    #  @ref tui_extrusion_along_path example
     def ExtrusionAlongPathObject2D(self, theObject, PathMesh, PathShape, NodeStart,
                                    HasAngles=False, Angles=[], HasRefPoint=False, RefPoint=[],
                                    MakeGroups=False, LinearVariation=False):
@@ -4912,6 +4934,32 @@ class Mesh:
     def CreateHoleSkin(self, radius, theShape, groupName, theNodesCoords):
         return self.editor.CreateHoleSkin( radius, theShape, groupName, theNodesCoords )
 
+    ## Create a polyline consisting of 1D mesh elements each lying on a 2D element of
+    #  the initial mesh. Positions of new nodes are found by cutting the mesh by the
+    #  plane passing through pairs of points specified by each PolySegment structure.
+    #  If there are several paths connecting a pair of points, the shortest path is
+    #  selected by the module. Position of the cutting plane is defined by the two
+    #  points and an optional vector lying on the plane specified by a PolySegment.
+    #  By default the vector is defined by Mesh module as following. A middle point
+    #  of the two given points is computed. The middle point is projected to the mesh.
+    #  The vector goes from the middle point to the projection point. In case of planar
+    #  mesh, the vector is normal to the mesh.
+    #  @param segments - PolySegment's defining positions of cutting planes.
+    #         Return the used vector which goes from the middle point to its projection.
+    #  @param groupName - optional name of a group where created mesh segments will
+    #         be added.
+    #  @ingroup l2_modif_duplicat
+    def MakePolyLine(self, segments, groupName='', isPreview=False ):
+        editor = self.editor
+        if isPreview:
+            editor = self.mesh.GetMeshEditPreviewer()
+        segmentsRes = editor.MakePolyLine( segments, groupName )
+        for i, seg in enumerate( segmentsRes ):
+            segments[i].vector = seg.vector
+        if isPreview:
+            return editor.GetPreviewData()
+        return None
+
     def _getFunctor(self, funcType ):
         fn = self.functors[ funcType._v ]
         if not fn:
@@ -5177,10 +5225,11 @@ omniORB.registerObjref(SMESH._objref_SMESH_Pattern._NP_RepositoryId, Pattern)
 ## Private class used to bind methods creating algorithms to the class Mesh
 #
 class algoCreator:
-    def __init__(self):
+    def __init__(self, method):
         self.mesh = None
         self.defaultAlgoType = ""
         self.algoTypeToClass = {}
+        self.method = method
 
     # Store a python class of algorithm
     def add(self, algoClass):
@@ -5194,25 +5243,48 @@ class algoCreator:
 
     # Create a copy of self and assign mesh to the copy
     def copy(self, mesh):
-        other = algoCreator()
+        other = algoCreator( self.method )
         other.defaultAlgoType = self.defaultAlgoType
-        other.algoTypeToClass  = self.algoTypeToClass
+        other.algoTypeToClass = self.algoTypeToClass
         other.mesh = mesh
         return other
 
     # Create an instance of algorithm
     def __call__(self,algo="",geom=0,*args):
-        algoType = self.defaultAlgoType
-        for arg in args + (algo,geom):
-            if isinstance( arg, geomBuilder.GEOM._objref_GEOM_Object ):
-                geom = arg
-            if isinstance( arg, str ) and arg:
+        algoType = ""
+        shape = 0
+        if isinstance( algo, str ):
+            algoType = algo
+        elif ( isinstance( algo, geomBuilder.GEOM._objref_GEOM_Object ) and \
+               not isinstance( geom, geomBuilder.GEOM._objref_GEOM_Object )):
+            shape = algo
+        elif algo:
+            args += (algo,)
+
+        if isinstance( geom, geomBuilder.GEOM._objref_GEOM_Object ):
+            shape = geom
+        elif not algoType and isinstance( geom, str ):
+            algoType = geom
+        elif geom:
+            args += (geom,)
+        for arg in args:
+            if isinstance( arg, geomBuilder.GEOM._objref_GEOM_Object ) and not shape:
+                shape = arg
+            elif isinstance( arg, str ) and not algoType:
                 algoType = arg
+            else:
+                import traceback, sys
+                msg = "Warning. Unexpected argument in mesh.%s() --->  %s" % ( self.method, arg )
+                sys.stderr.write( msg + '\n' )
+                tb = traceback.extract_stack(None,2)
+                traceback.print_list( [tb[0]] )
+        if not algoType:
+            algoType = self.defaultAlgoType
         if not algoType and self.algoTypeToClass:
             algoType = self.algoTypeToClass.keys()[0]
         if self.algoTypeToClass.has_key( algoType ):
             #print "Create algo",algoType
-            return self.algoTypeToClass[ algoType ]( self.mesh, geom )
+            return self.algoTypeToClass[ algoType ]( self.mesh, shape )
         raise RuntimeError, "No class found for algo type %s" % algoType
         return None
 
@@ -5294,7 +5366,7 @@ for pluginName in os.environ[ "SMESH_MeshersList" ].split( ":" ):
         if type( algo ).__name__ == 'classobj' and hasattr( algo, "meshMethod" ):
             #print "                     meshMethod:" , str(algo.meshMethod)
             if not hasattr( Mesh, algo.meshMethod ):
-                setattr( Mesh, algo.meshMethod, algoCreator() )
+                setattr( Mesh, algo.meshMethod, algoCreator( algo.meshMethod ))
                 pass
             getattr( Mesh, algo.meshMethod ).add( algo )
             pass

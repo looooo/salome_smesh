@@ -17,9 +17,9 @@
 # See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 #
 
-##
-# @package StdMeshersBuilder
-# Python API for the standard meshing plug-in module.
+"""
+Python API for the standard meshing plug-in module.
+"""
 
 LIBRARY = "libStdMeshersEngine.so"
 
@@ -30,24 +30,50 @@ import StdMeshers
 # Mesh algo type identifiers
 #----------------------------
 
-## Algorithm type: Regular 1D algorithm, see StdMeshersBuilder_Segment
 REGULAR     = "Regular_1D"
-## Algorithm type: Python 1D algorithm, see StdMeshersBuilder_Segment_Python
+"""
+Algorithm type: Regular 1D algorithm, see :class:`StdMeshersBuilder_Segment`
+"""
+
 PYTHON      = "Python_1D"
-## Algorithm type: Composite segment 1D algorithm, see StdMeshersBuilder_CompositeSegment
+"""
+Algorithm type: Python 1D algorithm, see StdMeshersBuilder_Segment_Python
+"""
+
 COMPOSITE   = "CompositeSegment_1D"
-## Algorithm type: Triangle MEFISTO 2D algorithm, see StdMeshersBuilder_Triangle_MEFISTO
+"""
+
+Algorithm type: Composite segment 1D algorithm, see StdMeshersBuilder_CompositeSegment
+"""
 MEFISTO     = "MEFISTO_2D"
-## Algorithm type: Hexahedron 3D (i-j-k) algorithm, see StdMeshersBuilder_Hexahedron
+"""
+Algorithm type: Triangle MEFISTO 2D algorithm, see StdMeshersBuilder_Triangle_MEFISTO
+"""
+
 Hexa        = "Hexa_3D"
-## Algorithm type: Quadrangle 2D algorithm, see StdMeshersBuilder_Quadrangle
+"""
+Algorithm type: Hexahedron 3D (i-j-k) algorithm, see StdMeshersBuilder_Hexahedron
+"""
+
 QUADRANGLE  = "Quadrangle_2D"
-## Algorithm type: Radial Quadrangle 1D-2D algorithm, see StdMeshersBuilder_RadialQuadrangle1D2D
+"""
+Algorithm type: Quadrangle 2D algorithm, see StdMeshersBuilder_Quadrangle
+"""
+
 RADIAL_QUAD = "RadialQuadrangle_1D2D"
-## Algorithm type: Quadrangle (Medial Axis Projection) 1D-2D algorithm, see StdMeshersBuilder_QuadMA_1D2D
+"""
+Algorithm type: Radial Quadrangle 1D-2D algorithm, see StdMeshersBuilder_RadialQuadrangle1D2D
+"""
+
 QUAD_MA_PROJ = "QuadFromMedialAxis_1D2D"
-## Algorithm type: Polygon Per Face 2D algorithm, see StdMeshersBuilder_PolygonPerFace
+"""
+Algorithm type: Quadrangle (Medial Axis Projection) 1D-2D algorithm, see StdMeshersBuilder_QuadMA_1D2D
+"""
+
 POLYGON     = "PolygonPerFace_2D"
+"""
+Algorithm type: Polygon Per Face 2D algorithm, see StdMeshersBuilder_PolygonPerFace
+"""
 
 # import items of enums
 for e in StdMeshers.QuadType._items: exec('%s = StdMeshers.%s'%(e,e))
@@ -57,52 +83,70 @@ for e in StdMeshers.VLExtrusionMethod._items: exec('%s = StdMeshers.%s'%(e,e))
 # Algorithms
 #----------------------
 
-## Defines segment 1D algorithm for edges discretization.
-#
-#  It can be created by calling smeshBuilder.Mesh.Segment(geom=0)
-#
-#  @ingroup l3_algos_basic
 class StdMeshersBuilder_Segment(Mesh_Algorithm):
-
-    ## name of the dynamic method in smeshBuilder.Mesh class
-    #  @internal
+    """
+    Defines segment 1D algorithm for edges discretization.
+    
+    It can be created by calling smeshBuilder.Mesh.Segment(geom=0)
+    """
+    #  @ingroup l3_algos_basic
+    
     meshMethod = "Segment"
-    ## type of algorithm used with helper function in smeshBuilder.Mesh class
-    #  @internal
-    algoType   = REGULAR
-    ## flag pointing whether this algorithm should be used by default in dynamic method
-    #  of smeshBuilder.Mesh class
-    #  @internal
-    isDefault  = True
-    ## doc string of the method
-    #  @internal
-    docHelper  = "Creates segment 1D algorithm for edges"
+    """
+    name of the dynamic method in smeshBuilder.Mesh class
+    """
 
-    ## Private constructor.
-    #  @param mesh parent mesh object algorithm is assigned to
-    #  @param geom geometry (shape/sub-shape) algorithm is assigned to;
-    #              if it is @c 0 (default), the algorithm is assigned to the main shape
+    algoType   = REGULAR
+    """
+    type of algorithm used with helper function in smeshBuilder.Mesh class
+    """
+
+    isDefault  = True
+    """
+    flag pointing whether this algorithm should be used by default in dynamic method
+    of smeshBuilder.Mesh class    
+    """
+
+    docHelper  = "Creates segment 1D algorithm for edges"
+    """
+    doc string of the method
+    """
+
     def __init__(self, mesh, geom=0):
+        """
+        Private constructor.
+        Parameters:
+            mesh: parent mesh object algorithm is assigned to
+            geom: geometry (shape/sub-shape) algorithm is assigned to;
+                if it is @c 0 (default), the algorithm is assigned to the main shape
+        """
         Mesh_Algorithm.__init__(self)
         self.Create(mesh, geom, self.algoType)
         pass
 
-    ## Defines "LocalLength" hypothesis to cut an edge in several segments with the same length
-    #  @param l for the length of segments that cut an edge
-    #  @param UseExisting if ==true - searches for an  existing hypothesis created with
-    #                    the same parameters, else (default) - creates a new one
-    #  @param p precision, used for calculation of the number of segments.
-    #           The precision should be a positive, meaningful value within the range [0,1].
-    #           In general, the number of segments is calculated with the formula:
-    #           nb = ceil((edge_length / l) - p)
-    #           Function ceil rounds its argument to the higher integer.
-    #           So, p=0 means rounding of (edge_length / l) to the higher integer,
-    #               p=0.5 means rounding of (edge_length / l) to the nearest integer,
-    #               p=1 means rounding of (edge_length / l) to the lower integer.
-    #           Default value is 1e-07.
-    #  @return an instance of StdMeshers_LocalLength hypothesis
-    #  @ingroup l3_hypos_1dhyps
     def LocalLength(self, l, UseExisting=0, p=1e-07):
+        """
+        Defines "LocalLength" hypothesis to cut an edge in several segments with the same length
+        
+        Parameters:
+            l : for the length of segments that cut an edge
+            UseExisting : if == true - searches for an  existing hypothesis created with
+                the same parameters, else (default) - creates a new one
+            p : precision, used for calculation of the number of segments.
+                The precision should be a positive, meaningful value within the range [0,1].
+                In general, the number of segments is calculated with the formula:
+                nb = ceil((edge_length / l) - p)
+                Function ceil rounds its argument to the higher integer.
+                So, p=0 means rounding of (edge_length / l) to the higher integer,
+                p=0.5 means rounding of (edge_length / l) to the nearest integer,
+                p=1 means rounding of (edge_length / l) to the lower integer.
+                Default value is 1e-07.
+                
+        Returns: 
+            an instance of StdMeshers_LocalLength hypothesis
+        """
+      # @ingroup l3_hypos_1dhyps
+
         from salome.smesh.smeshBuilder import IsEqual
         comFun=lambda hyp, args: IsEqual(hyp.GetLength(), args[0]) and IsEqual(hyp.GetPrecision(), args[1])
         hyp = self.Hypothesis("LocalLength", [l,p], UseExisting=UseExisting, CompareMethod=comFun)
@@ -110,14 +154,21 @@ class StdMeshersBuilder_Segment(Mesh_Algorithm):
         hyp.SetPrecision(p)
         return hyp
 
-    ## Defines "MaxSize" hypothesis to cut an edge into segments not longer than given value
-    #  @param length is optional maximal allowed length of segment, if it is omitted
-    #                the preestimated length is used that depends on geometry size
-    #  @param UseExisting if ==true - searches for an existing hypothesis created with
-    #                     the same parameters, else (default) - creates a new one
-    #  @return an instance of StdMeshers_MaxLength hypothesis
-    #  @ingroup l3_hypos_1dhyps
     def MaxSize(self, length=0.0, UseExisting=0):
+        """
+        Defines "MaxSize" hypothesis to cut an edge into segments not longer than given value
+
+        Parameters:
+            length : is optional maximal allowed length of segment, if it is omitted
+                the preestimated length is used that depends on geometry size
+            UseExisting : if ==true - searches for an existing hypothesis created with
+                the same parameters, else (default) - creates a new one
+        
+        Returns:
+            an instance of StdMeshers_MaxLength hypothesis
+        """
+        #  @ingroup l3_hypos_1dhyps
+
         hyp = self.Hypothesis("MaxLength", [length], UseExisting=UseExisting)
         if length > 0.0:
             # set given length

@@ -17,10 +17,10 @@
 # See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 #
 
-SALOME_CONFIGURE_FILE(doxyfile.in doxyfile)
-SALOME_CONFIGURE_FILE(doxyfile_py.in doxyfile_py)
+# SALOME_CONFIGURE_FILE(doxyfile.in doxyfile)
+# SALOME_CONFIGURE_FILE(doxyfile_py.in doxyfile_py)
 SALOME_CONFIGURE_FILE(static/header.html.in ${CMAKE_CURRENT_BINARY_DIR}/static/header.html)
-SALOME_CONFIGURE_FILE(static/header_py.html.in ${CMAKE_CURRENT_BINARY_DIR}/static/header_py.html)
+# SALOME_CONFIGURE_FILE(static/header_py.html.in ${CMAKE_CURRENT_BINARY_DIR}/static/header_py.html)
 
 SALOME_INSTALL_SCRIPTS(collect_mesh_methods.py ${SALOME_INSTALL_BINS})
             
@@ -29,30 +29,52 @@ SET(smesh_file "${CMAKE_CURRENT_SOURCE_DIR}/collect_mesh_methods.py")
 SET(kernel_file "${KERNEL_ROOT_DIR}/bin/salome/prepare_generating_doc.py")
 
 SALOME_ACCUMULATE_ENVIRONMENT(SMESH_MeshersList NOCHECK ${DOC_SMESH_MeshersList})
+SALOME_ACCUMULATE_ENVIRONMENT(PYTHONPATH NOCHECK ${CMAKE_CURRENT_BINARY_DIR}/tmp2)
 
 SET(_cmd_options ${smesh_file} -o tmp1/smeshBuilder.py StdMeshers)
 SALOME_GENERATE_ENVIRONMENT_SCRIPT(_cmd env_script "${PYTHON_EXECUTABLE}" "${_cmd_options}")
 
+# Sphinx 
+SET(SPHINXOPTS )
+SET(PAPEROPT_a4 -D latex_paper_size=a4)
+SET(ALLSPHINXOPTS -c ${CMAKE_CURRENT_BINARY_DIR} -d doctrees -b html ${PAPEROPT_a4} ${SPHINXOPTS} ${CMAKE_CURRENT_SOURCE_DIR} html)
+
+SALOME_CONFIGURE_FILE(conf.py.in conf.py)
+
+SALOME_GENERATE_ENVIRONMENT_SCRIPT(_cmd_sphinx env_script_sphinx "${SPHINX_EXECUTABLE}" "${ALLSPHINXOPTS}")
+
+# install user's documentation
+
 ADD_CUSTOM_TARGET(usr_docs ${CMAKE_COMMAND} -E make_directory tmp1
   COMMAND ${CMAKE_COMMAND} -E make_directory tmp2
-  COMMAND ${PYTHON_EXECUTABLE} ${kernel_file} -o tmp2/smeshBuilder.py ${CMAKE_SOURCE_DIR}/src/SMESH_SWIG/smeshBuilder.py
-  COMMAND ${PYTHON_EXECUTABLE} ${kernel_file} -o tmp2/smesh_algorithm.py ${CMAKE_SOURCE_DIR}/src/SMESH_SWIG/smesh_algorithm.py
-  COMMAND ${PYTHON_EXECUTABLE} ${kernel_file} -o tmp2/StdMeshersBuilder.py ${CMAKE_SOURCE_DIR}/src/SMESH_SWIG/StdMeshersBuilder.py
-  COMMAND ${PYTHON_EXECUTABLE} ${kernel_file} -o tmp2/smeshstudytools.py ${CMAKE_SOURCE_DIR}/src/SMESH_PY/smeshstudytools.py
+
+#  COMMAND ${PYTHON_EXECUTABLE} ${kernel_file} -o tmp2/smeshBuilder.py ${CMAKE_SOURCE_DIR}/src/SMESH_SWIG/smeshBuilder.py
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/src/SMESH_SWIG/smeshBuilder.py tmp2/smeshBuilder.py
+
+#  COMMAND ${PYTHON_EXECUTABLE} ${kernel_file} -o tmp2/smesh_algorithm.py ${CMAKE_SOURCE_DIR}/src/SMESH_SWIG/smesh_algorithm.py
+   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/src/SMESH_SWIG/smesh_algorithm.py tmp2/smesh_algorithm.py
+
+#  COMMAND ${PYTHON_EXECUTABLE} ${kernel_file} -o tmp2/StdMeshersBuilder.py ${CMAKE_SOURCE_DIR}/src/SMESH_SWIG/StdMeshersBuilder.py
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/src/SMESH_SWIG/StdMeshersBuilder.py ${CMAKE_CURRENT_BINARY_DIR}/tmp2/StdMeshersBuilder.py
+
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/src/SMESH_PY/smeshstudytools.py ${CMAKE_CURRENT_BINARY_DIR}/tmp2
   COMMAND ${_cmd}
-  COMMAND ${DOXYGEN_EXECUTABLE} doxyfile_py
-  COMMAND ${DOXYGEN_EXECUTABLE} doxyfile
-  COMMAND ${CMAKE_COMMAND} -E remove_directory tmp1
-  COMMAND ${CMAKE_COMMAND} -E remove_directory tmp2
-  VERBATIM
+#  COMMAND ${DOXYGEN_EXECUTABLE} doxyfile_py
+#  COMMAND ${DOXYGEN_EXECUTABLE} doxyfile
+  COMMAND ${CMAKE_COMMAND} -E make_directory html
+  COMMAND ${CMAKE_COMMAND} -E make_directory doctrees
+  COMMAND ${_cmd_sphinx}
+#  COMMAND ${CMAKE_COMMAND} -E remove_directory tmp1
+#  COMMAND ${CMAKE_COMMAND} -E remove_directory tmp2
+#  VERBATIM
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
 
 INSTALL(CODE "EXECUTE_PROCESS(COMMAND \"${CMAKE_COMMAND}\" --build ${PROJECT_BINARY_DIR} --target usr_docs)")
-INSTALL(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/SMESH DESTINATION ${SALOME_INSTALL_DOC}/gui)
-INSTALL(FILES images/head.png DESTINATION ${SALOME_INSTALL_DOC}/gui/SMESH)
-INSTALL(FILES images/head.png DESTINATION ${SALOME_INSTALL_DOC}/gui/SMESH/smeshpy_doc)
+INSTALL(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html DESTINATION ${SALOME_INSTALL_DOC}/gui)
+#INSTALL(FILES images/head.png DESTINATION ${SALOME_INSTALL_DOC}/gui/SMESH)
+#INSTALL(FILES images/head.png DESTINATION ${SALOME_INSTALL_DOC}/gui/SMESH/smeshpy_doc)
 
 FILE(GLOB tag_files ${CMAKE_CURRENT_BINARY_DIR}/*.tag)
-SET(make_clean_files SMESH ${tag_files})
+SET(make_clean_files SMESH ${tag_files} html doctrees)
 SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${make_clean_files}")

@@ -467,11 +467,13 @@ class smeshBuilder(object, SMESH._objref_SMESH_Gen):
         pnt = PointStruct(x,y,z)
         return DirStruct(pnt)
 
-    ## Get AxisStruct from object
-    #  @param theObj a GEOM object (line or plane)
-    #  @return SMESH.AxisStruct
-    #  @ingroup l1_auxiliary
     def GetAxisStruct(self,theObj):
+        """
+        Get AxisStruct from object
+        Parameters: 
+            theObj a GEOM object (line or plane)
+            SMESH.AxisStruct
+        """
         import GEOM
         edges = self.geompyD.SubShapeAll( theObj, geomBuilder.geomBuilder.ShapeType["EDGE"] )
         axis = None

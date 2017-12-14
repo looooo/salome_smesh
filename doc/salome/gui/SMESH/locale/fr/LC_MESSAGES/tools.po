@@ -1,0 +1,77 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the Mesh package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Mesh 8.3.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-12-11 15:10+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.0\n"
+
+# 911498a4e75442d396f47f2e9937f9f6
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/tools.rst:5
+msgid "Plugins"
+msgstr ""
+
+# 5beb9740c6d548fe8fc7fa625171e1ed
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/tools.rst:7
+msgid "The following plugins are accessible via **Mesh > SMESH pligins** menu:"
+msgstr ""
+
+# b024c48962fe4dbea0d0661a2565ac98
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/tools.rst:9
+msgid "`SpherePadder plugin <padder/padder_userguide_page.html>`_"
+msgstr ""
+
+# ca1cc4e3101e4bbdabb26c4c0056da25
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/tools.rst:10
+msgid "`MGSurfOpt plugin <yams/index.html>`_"
+msgstr ""
+
+# d9b9fcee623c4ef1895f87b0eb518f1e
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/tools.rst:11
+msgid "`MGCleaner plugin <MGCleaner/index.html>`_"
+msgstr ""
+
+# da594991eb7b443699156b57c3dff520
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/tools.rst:12
+msgid "`Z-cracks plugin <zcracks/index.html>`_"
+msgstr ""
+
+# 62fe19928a7949558d493a031b524468
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/tools.rst:13
+msgid "`MacMesh plugin <MacMesh/index.html>`_"
+msgstr ""
+
+# 57fbe83d92f044d3b0227a2106bcfe47
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/tools.rst:14
+msgid "`blocFissure plugin <blocFissure/index.html>`_"
+msgstr ""
+
+# 73a2bb92b4434ca3a6684d823594e4de
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/tools.rst:15
+msgid ""
+"**MeshCut plugin** - allows to cut a mesh constituted of linear "
+"tetrahedrons by a plane."
+msgstr ""
+
+# 4d26001be73042a6a7bb055871fa8cd1
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/tools.rst:16
+msgid ""
+"**Get min or max value of control** - a sample plugin whose sources are "
+"located in **${GUI_ROOT_DIR}/share/salome/plugins/gui/demo** directory "
+"(files **minmax_plugin.py, minmax_ui.py and smesh_plugins.py**). You can "
+"find a detailed description of how to create your own plugin in "
+"documentation: **Help > GUI module > User's Guide > How-To's and Best "
+"Practices > Extend SALOME gui functions using python plugins**."
+msgstr ""
+

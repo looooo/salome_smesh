@@ -1,0 +1,258 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the Mesh package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Mesh 8.3.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-12-11 15:10+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.0\n"
+
+# 4d1fc699b45a4f878e52c7605b8322ca
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/about_meshes.rst:5
+msgid "About meshes"
+msgstr ""
+
+# e8043eb95dac4ea4a0767e3fa3b58b45
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/about_meshes.rst:7
+msgid ""
+"**MESH** represents a discrete approximation of a subset of the three-"
+"dimensional space by `mesh_entities`_."
+msgstr ""
+
+# 8321ebeaab9043faa182c26fe0911bc8
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/about_meshes.rst:9
+msgid ""
+"A SALOME study can contain multiple meshes, but they do not implicitly "
+"compose one super-mesh, and finally each of them can be used (e.g. "
+"exported) only individually."
+msgstr ""
+
+# 23c971f7d15040dc95eab4e0ae89d5b0
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/about_meshes.rst:11
+msgid "Mesh module provides several ways to create the mesh:"
+msgstr ""
+
+# 2989d833cd714144a8ae3d9e4992b877
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/about_meshes.rst:13
+msgid ""
+"The main way is to :ref:`constructing_meshes_page` on the basis of the "
+"geometrical shape produced in the Geometry module. This way implies "
+"selection of"
+msgstr ""
+
+# 35efade632bb4879a46fd6cd44278484
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/about_meshes.rst:15
+msgid "a geometrical object (**main shape**) and"
+msgstr ""
+
+# fdaa5aa8068c496182844c56e241fae8
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/about_meshes.rst:16
+msgid ""
+"**meshing parameters** ( :ref:`basic_meshing_algos_page` and "
+"characteristics (e.g. element size) of a required mesh encapsulated in "
+":ref:`about_hypo_page` objects)."
+msgstr ""
+
+# e15fab3efed74adb97c1d0089916d41d
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/about_meshes.rst:18
+msgid ""
+"Construction of :ref:`constructing_submeshes_page` allows to discretize "
+"some sub-shapes of the main shape, for example a face, using the meshing "
+"parameters that differ from those used for other sub-shapes. Meshing "
+"parameters of meshes and sub-meshes can be :ref:`editing_meshes_page`. "
+"(Upon edition only mesh entities generated using changed meshing "
+"parameters are removed and will be re-computed)."
+msgstr ""
+
+# fb751257b4a84064a11760dd02a5907e
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/about_meshes.rst:22
+msgid ""
+"Algorithms and hypotheses used at mesh level are referred to as *global* "
+"ones and those used at sub-mesh level are referred to as *local* ones."
+msgstr ""
+
+# a2b706322b2b469dbc80aeb74934b6b1
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/about_meshes.rst:24
+msgid ""
+"Bottom-up way, using :ref:`modifying_meshes_page` operations, especially "
+":ref:`extrusion_page` and :ref:`revolution_page`. To create an empty mesh"
+" not based on geometry, use the same dialog as to "
+":ref:`constructing_meshes_page` but specify neither the geometry nor "
+"meshing algorithms."
+msgstr ""
+
+# cdf46a9df37e41aaa830339a214543f6
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/about_meshes.rst:26
+msgid ""
+"The mesh can be :ref:`importing_exporting_meshes_page` from (and exported"
+" to) the file in MED, UNV, STL, CGNS, DAT, GMF and SAUVE formats."
+msgstr ""
+
+# 25431364b01b4d468a1c81b914d02b14
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/about_meshes.rst:28
+msgid ""
+"The 3D mesh can be generated from the 2D mesh not based on geometry, "
+"which was either :ref:`importing_exporting_meshes_page` or created in "
+"other way. To setup the meshing parameters of a mesh not based on "
+"geometry, just invoke :ref:`editing_meshes_page` command on your 2D mesh."
+msgstr ""
+
+# f89d8cf3d8394cb3bf4f9afdd3a46a10
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/about_meshes.rst:30
+msgid "Several meshes can be :ref:`building_compounds_page` into a new mesh."
+msgstr ""
+
+# 84e2096bc7b540bc9b151ef8d5d29fdf
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/about_meshes.rst:32
+msgid ""
+"The whole mesh or its part (sub-mesh or group) can be "
+":ref:`copy_mesh_page` into a new mesh."
+msgstr ""
+
+# 41df5a060ce142d28ac9012357bca3bf
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/about_meshes.rst:34
+msgid ""
+"A new mesh can be created from a transformed, e.g. "
+":ref:`translation_page`, part of the mesh."
+msgstr ""
+
+# 1bd13b063f234f2ab911aab15fc77e8b
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/about_meshes.rst:37
+msgid ""
+"Meshes can be edited using the MESH functions destined for "
+":ref:`modifying_meshes_page` of meshes."
+msgstr ""
+
+# 1a495bd1909441f791b8c4af6af77daf
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/about_meshes.rst:39
+msgid "Attractive meshing capabilities include:"
+msgstr ""
+
+# 3fc08387ebb6405d9c85d75f844e603f
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/about_meshes.rst:41
+msgid ""
+"3D and 2D :ref:`viscous_layers_anchor` (boundary layers of highly "
+"stretched elements beneficial for high quality viscous computations);"
+msgstr ""
+
+# b6b1b4ece9224f91815088cb0326f298
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/about_meshes.rst:42
+msgid ""
+"automatic conformal transition between tetrahedral and hexahedral sub-"
+"meshes."
+msgstr ""
+
+# 0e42a35118cb43cbb7861b585c15e456
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/about_meshes.rst:44
+msgid ""
+"The **structure** of a SALOME mesh is described by nodes and elements "
+"based on these nodes. The geometry of an element is defined by the "
+"sequence of nodes constituting it and the :ref:`connectivity_page` "
+"(adopted from MED library). Definition of the element basing on the "
+"elements of a lower dimension is NOT supported."
+msgstr ""
+
+# 48a9d83fe5864165a43b9cda5ccec789
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/about_meshes.rst:48
+msgid "The mesh can include the following entities:"
+msgstr ""
+
+# 41715a8c8b4944ad9283f1677db8db6c
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/about_meshes.rst:50
+msgid ""
+"**Node** - a mesh entity defining a position in 3D space with coordinates"
+" (x, y, z)."
+msgstr ""
+
+# d2464cf5ff0142cdba950562f7afcc37
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/about_meshes.rst:51
+msgid "**Edge** (or segment) - 1D mesh element linking two nodes."
+msgstr ""
+
+# 00cd8648024543ac8206a95fc995fe39
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/about_meshes.rst:52
+msgid ""
+"**Face** - 2D mesh element representing a part of surface bound by links "
+"between face nodes. A face can be a triangle, quadrangle or polygon."
+msgstr ""
+
+# ea62f1fe6d5f4ec0877f2db2be3d5d0a
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/about_meshes.rst:53
+msgid ""
+"**Volume** - 3D mesh element representing a part of 3D space bound by "
+"volume facets. Nodes of a volume describing each facet are defined by the"
+" :ref:`connectivity_page`. A volume can be a tetrahedron, hexahedron, "
+"pentahedron, pyramid, hexagonal prism or polyhedron."
+msgstr ""
+
+# f424f7c0eeca4f3cb31588d550828135
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/about_meshes.rst:54
+msgid "**0D** element - mesh element defined by one node."
+msgstr ""
+
+# 06cddd27bb05463c924c67dda0bd0238
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/about_meshes.rst:55
+msgid "**Ball** element - discrete mesh element defined by a node and a diameter."
+msgstr ""
+
+# b4c0828b5ecf428e890c1d1b4420bca9
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/about_meshes.rst:58
+msgid ""
+"Every mesh entity has an attribute associating it to a sub-shape it is "
+"generated on (if any). The node generated on the geometrical edge or "
+"surface in addition stores its position in parametric space of the "
+"associated geometrical entity. This attribute is set up by meshing "
+"algorithms generating elements and nodes."
+msgstr ""
+
+# 2c1330d588ab4890b96c301737db8879
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/about_meshes.rst:60
+msgid ""
+"Mesh entities are identified by integer IDs starting from 1. Nodes and "
+"elements are counted separately, i.e. there can be a node and element "
+"with the same ID."
+msgstr ""
+
+# b8a53b5af2f749adbb602a84855af048
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/about_meshes.rst:63
+msgid ""
+"SALOME supports elements of second order, without a central node "
+"(quadratic triangle, quadrangle, polygon, tetrahedron, hexahedron, "
+"pentahedron and pyramid) and with central nodes (bi-quadratic triangle "
+"and quadrangle and tri-quadratic hexahedron)."
+msgstr ""
+
+# a54a2e9f8f3f4ac28f21822f4c9b3cd1
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/about_meshes.rst:66
+msgid "Quadratic mesh can be obtained in three ways:"
+msgstr ""
+
+# 86f954130aa5480c95b16aa3d1334d3e
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/about_meshes.rst:68
+msgid ""
+"Using a global :ref:`quadratic_mesh_anchor` hypothesis. (Elements with "
+"the central node are not generated in this way)."
+msgstr ""
+
+# 72ad53084bc94dff9576febf564d81dd
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/about_meshes.rst:69
+msgid "Using :ref:`convert_to_from_quadratic_mesh_page` operation."
+msgstr ""
+
+# debef161b6c84511ac236fdd2b303db3
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/about_meshes.rst:70
+msgid ""
+"Using an appropriate option of some meshing algorithms, which generate "
+"elements of several dimensions starting from mesh segments."
+msgstr ""
+

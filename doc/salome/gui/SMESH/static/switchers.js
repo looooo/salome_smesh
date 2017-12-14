@@ -6,9 +6,7 @@
   var all_languages = {
       'en': 'English',
       'fr': 'French',
-      'ja': 'Japanese',
   };
-
 
   function build_language_select(current_language) {
     var buf = ['<select>'];
@@ -24,45 +22,35 @@
     return buf.join('');
   }
 
-  function navigate_to_first_existing(urls) {
-    // Navigate to the first existing URL in urls.
-    var url = urls.shift();
-    if (urls.length == 0) {
-      window.location.href = url;
-      return;
-    }
-    $.ajax({
-      url: url,
-      success: function() {
-        window.location.href = url;
-      },
-      error: function() {
-        navigate_to_first_existing(urls);
-      }
-    });
-  }
-
   function on_language_switch() {
     var selected_language = $(this).children('option:selected').attr('value') + '/';
     var url = window.location.href;
+    
     var current_language = language_segment_from_url(url);
-    var current_version = version_segment_in_url(url);
-    if (selected_language == 'en/') // Special 'default' case for english.
+    var current_suffix = "";
+    if (current_language != "") {
+      current_suffix = "_";
+    } else {
+	current_language = "/";
+    }
+    
+    var selected_suffix = "_";
+    if (selected_language == 'en/') { // Special 'default' case for english.
       selected_language = '';
-    var new_url = url.replace('.org/' + current_language + current_version,
-                              '.org/' + selected_language + current_version);
+      selected_suffix = "/";
+    }
+    
+    var new_url = url.replace('/gui/SMESH' + current_suffix + current_language,
+                              '/gui/SMESH' + selected_suffix + selected_language);
     if (new_url != url) {
-      navigate_to_first_existing([
-        new_url,
-        'https://docs.python.org/'
-      ]);
+      window.open(new_url);
     }
   }
 
   // Returns the path segment of the language as a string, like 'fr/'
   // or '' if not found.
   function language_segment_from_url(url) {
-    var language_regexp = '\.org/([a-z]{2}(?:-[a-z]{2})?/)';
+    var language_regexp = '\/gui/SMESH_([a-z]{2}(?:-[a-z]{2})?/)';
     var match = url.match(language_regexp);
     if (match !== null)
         return match[1];

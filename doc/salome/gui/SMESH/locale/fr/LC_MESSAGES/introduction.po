@@ -1,0 +1,109 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the Mesh package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Mesh 8.3.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-12-11 15:10+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.0\n"
+
+# aa3a59a29626444eba00ec9b5a09b690
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/introduction.rst:3
+msgid "Introduction to Mesh module"
+msgstr ""
+
+# 47a0e89642fd4230b89853878a5e36e3
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/introduction.rst:8
+msgid "**Mesh** module of SALOME is destined for:"
+msgstr ""
+
+# d2c36cd2c8c443edab9f9e5683075b8b
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/introduction.rst:13
+msgid ":ref:`about_meshes_page` in different ways:"
+msgstr ""
+
+# e70b031df6814fd0915917eb239b4ff6
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/introduction.rst:11
+msgid ""
+"by meshing geometrical models previously created or imported by the "
+"Geometry component;"
+msgstr ""
+
+# d48790a91d0043b6a354bb374f5f5e7d
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/introduction.rst:12
+msgid ""
+"bottom-up, using :ref:`modifying_meshes_page`, especially "
+":ref:`extrusion_page` and :ref:`revolution_page`;"
+msgstr ""
+
+# 5926bf9327e24120a244c636d5871c8a
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/introduction.rst:13
+msgid ""
+"by generation of the 3D mesh from the 2D mesh not based on the geometry "
+"(:ref:`importing_exporting_meshes_page` for example);"
+msgstr ""
+
+# 05d5dda6b61e43ac82d7f73cebffdfe8
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/introduction.rst:15
+msgid ":ref:`importing_exporting_meshes_page` in various formats;"
+msgstr ""
+
+# 99295bfad6864b4db7833a8df5229de9
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/introduction.rst:16
+msgid ":ref:`modifying_meshes_page` with a vast array of dedicated operations;"
+msgstr ""
+
+# c5a3b231fed94968a755658504b0f22e
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/introduction.rst:17
+msgid ":ref:`grouping_elements_page` of mesh elements;"
+msgstr ""
+
+# 2edbb44f709f4a9c810e10d4f9140108
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/introduction.rst:18
+msgid ""
+"filtering mesh entities (nodes or elements) using :ref:`filters_page` "
+"functionality for :ref:`grouping_elements_page` and applying "
+":ref:`modifying_meshes_page`;"
+msgstr ""
+
+# 4133407a1b8346c1bdb4f8fa7db21fa1
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/introduction.rst:19
+msgid ""
+":ref:`viewing_meshes_overview_page` in the VTK viewer and "
+":ref:`mesh_infos_page` on mesh and its sub-objects;"
+msgstr ""
+
+# e0d1bee609904135872a14011880903d
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/introduction.rst:20
+msgid ""
+"applying to meshes :ref:`quality_page`, allowing to highlight important "
+"elements;"
+msgstr ""
+
+# d6a258d243c34f89a997584a79e2ca49
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/introduction.rst:21
+msgid "taking various :ref:`measurements_page` of the mesh objects."
+msgstr ""
+
+# 72ff294dab6f446bbeecc8ea6a6cad37
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/introduction.rst:24
+msgid ""
+"It is possible to use the variables predefined in "
+":ref:`using_notebook_mesh_page` to set parameters of operations. Mesh "
+"module preferences are described in the :ref:`mesh_preferences_page` "
+"section of SALOME Mesh Help. Almost all mesh module functionalities are "
+"accessible via :ref:`smeshpy_interface_page`. There is a set of "
+":ref:`tools_page` plugged-in the module to extend the basic functionality"
+" listed above."
+msgstr ""
+

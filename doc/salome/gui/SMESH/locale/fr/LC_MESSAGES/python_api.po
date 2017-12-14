@@ -1,0 +1,303 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C)
+# This file is distributed under the same license as the Mesh package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Mesh 8.3.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-12-13 20:23+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.0\n"
+
+# cfaa64cf620742ec844cdcfb79219496
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/python_api.rst:3
+msgid "Mesh Python interface"
+msgstr ""
+
+# af6d282509f548caa3dbba8e08725d1a
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/python_api.rst:6
+msgid "smeshstudytools module"
+msgstr ""
+
+# 3b7704a7507b46b0a083b1229a2fd5c9
+#: smeshstudytools:1
+msgid ""
+"This module provides a new class :class:`SMeshStudyTools` to facilitate "
+"the use of mesh objects in Salome study."
+msgstr ""
+
+# 7f1fc78ee70b476885d7d81e5b493478
+#: smeshstudytools.SMeshStudyTools:1
+msgid ""
+"This class provides several methods to manipulate mesh objects in Salome "
+"study. The parameter `studyEditor` defines a "
+":class:`~salome.kernel.studyedit.StudyEditor` object used to access the "
+"study. If :const:`None`, the method returns a "
+":class:`~salome.kernel.studyedit.StudyEditor` object on the current "
+"study."
+msgstr ""
+
+# d9649701800a474aa99a9e3b2785272a
+#: smeshstudytools.SMeshStudyTools:9
+msgid ""
+"This instance attribute contains the underlying "
+":class:`~salome.kernel.studyedit.StudyEditor` object. It can be used to "
+"access the study but the attribute itself should not be modified."
+msgstr ""
+
+# c1f26d93eb7548ed8c94ab291093eaf6
+#: smeshstudytools.SMeshStudyTools.displayMeshObjectFromEntry:1
+msgid ""
+"Display the SMESH object associated to the specified entry (the entry is "
+"the identifier of an item in the objects browser)."
+msgstr ""
+
+# 2fb6bab3f93e4bd9b3cb56843e11aaa7
+#: smeshstudytools.SMeshStudyTools.getMeshFromGroup:1
+msgid "Get the mesh item owning the mesh group `meshGroupItem`."
+msgstr ""
+
+# 76a67fdaec2a45fd9be9965c45821d08
+#: smeshstudytools.SMeshStudyTools.getMeshFromGroup:4
+msgid "Mesh group belonging to the searched mesh."
+msgstr ""
+
+# f25ed2b8104645bca1624bda2840ceb0
+#: smeshstudytools.SMeshStudyTools.getMeshFromGroup:6
+msgid "The SObject corresponding to the mesh, or None if it was not found."
+msgstr ""
+
+# 3b012a30bc954816877848917b5cdf72
+#: smeshstudytools.SMeshStudyTools.getMeshObjectFromEntry:1
+msgid ""
+"Returns the MESH object associated to the specified entry, (the entry is "
+"the identifier of an item in the objects browser)."
+msgstr ""
+
+# 5abf0ffed5ec4409b39dbc0855535df2
+#: smeshstudytools.SMeshStudyTools.getMeshObjectFromSObject:1
+msgid ""
+"Returns the SMESH object associated to the specified SObject, (the "
+"SObject is an item in the objects browser)."
+msgstr ""
+
+# 694eb90b071c40f79a2f904620a958da
+#: smeshstudytools.SMeshStudyTools.getMeshObjectSelected:1
+msgid "Returns the MESH object currently selected in the active study."
+msgstr ""
+
+# f16e9ad224a4460390604327a66b3b6f
+#: smeshstudytools.SMeshStudyTools.updateStudy:1
+msgid "This function updates the tools so that it works on the specified study."
+msgstr ""
+
+# 9d3933911cf640aca334f8a127392858
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/python_api.rst:11
+msgid "StdMeshersBuilder module"
+msgstr ""
+
+# bb78c7a9963849d386b88cd613093288
+#: StdMeshersBuilder:1
+msgid "Python API for the standard meshing plug-in module."
+msgstr ""
+
+# b11ea97a3fc74641b7414f019fb26aca
+#: StdMeshersBuilder.COMPOSITE:1
+msgid ""
+"*Algorithm type* -- Composite segment 1D algorithm, see "
+"StdMeshersBuilder_CompositeSegment"
+msgstr ""
+
+# 0a96516b295e465d976b6680dd4995dd
+#: StdMeshersBuilder.Hexa:1
+msgid ""
+"*Algorithm type* -- Hexahedron 3D (i-j-k) algorithm, see "
+"StdMeshersBuilder_Hexahedron"
+msgstr ""
+
+# e503b480ed5c426eadff18cc9d2cba03
+#: StdMeshersBuilder.MEFISTO:1
+msgid ""
+"*Algorithm type* -- Triangle MEFISTO 2D algorithm, see "
+"StdMeshersBuilder_Triangle_MEFISTO"
+msgstr ""
+
+# b19e30f54b2d4d5cab505c1d8a3a8c64
+#: StdMeshersBuilder.POLYGON:1
+msgid ""
+"*Algorithm type* -- Polygon Per Face 2D algorithm, see "
+"StdMeshersBuilder_PolygonPerFace"
+msgstr ""
+
+# 9e4273f529394e0eaa26b179646f2b37
+#: StdMeshersBuilder.PYTHON:1
+msgid ""
+"*Algorithm type* -- Python 1D algorithm, see "
+"StdMeshersBuilder_Segment_Python"
+msgstr ""
+
+# 3bc4bc5956ae44b3bf4c8049b5f1836e
+#: StdMeshersBuilder.QUADRANGLE:1
+msgid ""
+"*Algorithm type* -- Quadrangle 2D algorithm, see "
+"StdMeshersBuilder_Quadrangle"
+msgstr ""
+
+# 020c5701c42049c0b1b9d50409dfc1f7
+#: StdMeshersBuilder.QUAD_MA_PROJ:1
+msgid ""
+"*Algorithm type* -- Quadrangle (Medial Axis Projection) 1D-2D algorithm, "
+"see StdMeshersBuilder_QuadMA_1D2D"
+msgstr ""
+
+# cd1f3acc969143188aff8b262a8885c5
+#: StdMeshersBuilder.RADIAL_QUAD:1
+msgid ""
+"*Algorithm type* -- Radial Quadrangle 1D-2D algorithm, see "
+"StdMeshersBuilder_RadialQuadrangle1D2D"
+msgstr ""
+
+# 336122748e1043fe9ed9f3d33a42008b
+#: StdMeshersBuilder.REGULAR:1
+msgid ""
+"*Algorithm type* -- Regular 1D algorithm, see "
+":class:`StdMeshersBuilder_Segment`"
+msgstr ""
+
+# 42407d8a7213496d942e11721dad9587
+#: StdMeshersBuilder.StdMeshersBuilder_Segment:1
+msgid "Defines segment 1D algorithm for edges discretization."
+msgstr ""
+
+# 4bdfd953126b46b88c49bc9af12563f5
+#: StdMeshersBuilder.StdMeshersBuilder_Segment:3
+msgid "It can be created by calling smeshBuilder.Mesh.Segment(geom=0)"
+msgstr ""
+
+# 9c7c4d992d144bca99dd85c57936c954
+#: StdMeshersBuilder.StdMeshersBuilder_Segment.LocalLength:1
+msgid ""
+"Defines \"LocalLength\" hypothesis to cut an edge in several segments "
+"with the same length"
+msgstr ""
+
+# eb6d876d4b794e90a7612e7b1f8973ea
+#: StdMeshersBuilder.StdMeshersBuilder_Segment.LocalLength:3
+msgid "for the length of segments that cut an edge"
+msgstr ""
+
+# 88662917e80f4c17aab737f42c27a470
+#: StdMeshersBuilder.StdMeshersBuilder_Segment.LocalLength:4
+msgid ""
+"if == true - searches for an  existing hypothesis created with the same "
+"parameters, else (default) - creates a new one"
+msgstr ""
+
+# 5fb5f39fc4004e0e9ed2705deb79e00d
+#: StdMeshersBuilder.StdMeshersBuilder_Segment.LocalLength:6
+msgid ""
+"precision, used for calculation of the number of segments. The precision "
+"should be a positive, meaningful value within the range [0,1]. In "
+"general, the number of segments is calculated with the formula: nb = "
+"ceil((edge_length / l) - p) Function ceil rounds its argument to the "
+"higher integer. So, p=0 means rounding of (edge_length / l) to the higher"
+" integer, p=0.5 means rounding of (edge_length / l) to the nearest "
+"integer, p=1 means rounding of (edge_length / l) to the lower integer. "
+"Default value is 1e-07."
+msgstr ""
+
+# d12a452026ee4517a34db36ae76ff0c9
+#: StdMeshersBuilder.StdMeshersBuilder_Segment.LocalLength:16
+msgid "an instance of StdMeshers_LocalLength hypothesis"
+msgstr ""
+
+# aa2b68b565814ba99f101192ae865ef3
+#: StdMeshersBuilder.StdMeshersBuilder_Segment.MaxSize:1
+msgid ""
+"Defines \"MaxSize\" hypothesis to cut an edge into segments not longer "
+"than given value"
+msgstr ""
+
+# 9808ef58dd6a4e398ab7b388923e6ea0
+#: StdMeshersBuilder.StdMeshersBuilder_Segment.MaxSize:3
+msgid ""
+"is optional maximal allowed length of segment, if it is omitted the "
+"preestimated length is used that depends on geometry size"
+msgstr ""
+
+# d6790187a45546278fb5a0f628468054
+#: StdMeshersBuilder.StdMeshersBuilder_Segment.MaxSize:5
+msgid ""
+"if ==true - searches for an existing hypothesis created with the same "
+"parameters, else (default) - creates a new one"
+msgstr ""
+
+# e17402a497624b7eb8f814b7641ff838
+#: StdMeshersBuilder.StdMeshersBuilder_Segment.MaxSize:8
+msgid "an instance of StdMeshers_MaxLength hypothesis"
+msgstr ""
+
+# bdd902df1eca44c8a50a336b3efdba69
+#: StdMeshersBuilder.StdMeshersBuilder_Segment.algoType:1
+msgid "type of algorithm used with helper function in smeshBuilder.Mesh class"
+msgstr ""
+
+# 3cddccd977ca4724b74b108d49a486b6
+#: StdMeshersBuilder.StdMeshersBuilder_Segment.docHelper:1
+msgid "doc string of the method"
+msgstr ""
+
+# eafaef061ee54a6c86f9940f14c985e8
+#: StdMeshersBuilder.StdMeshersBuilder_Segment.isDefault:1
+msgid ""
+"flag pointing whether this algorithm should be used by default in dynamic"
+" method of smeshBuilder.Mesh class"
+msgstr ""
+
+# 2416bd6f91d1499b8e30f976a8963aeb
+#: StdMeshersBuilder.StdMeshersBuilder_Segment.meshMethod:1
+msgid "name of the dynamic method in smeshBuilder.Mesh class"
+msgstr ""
+
+# 7be8bc9774ef471dab2f0f4774d29735
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/python_api.rst:16
+msgid "smeshBuilder module"
+msgstr ""
+
+# d1144a04cbb6422e9b8ebdc59f54eab8
+#: smeshBuilder.New:1
+msgid ""
+"Create a new smeshBuilder instance.The smeshBuilder class provides the "
+"Python interface to create or load meshes."
+msgstr ""
+
+# 1f0be11ffa9f4c79ba388930b237db4b
+#: smeshBuilder.New:8
+msgid "Typical use is:"
+msgstr ""
+
+# 412ee7aacf90484ba9fefdfbdbb356b9
+#: smeshBuilder.New:5
+msgid ""
+"import salome salome.salome_init() from salome.smesh import smeshBuilder "
+"smesh = smeshBuilder.New(salome.myStudy)"
+msgstr ""
+
+# d9872284b77a459aa017e4baf9318ba5
+#: smeshBuilder.New:13
+msgid "smeshBuilder instance"
+msgstr ""
+
+# ab410f63988e44a19f910c78ed69c594
+#: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/python_api.rst:21
+msgid "smesh_algorithm module"
+msgstr ""
+

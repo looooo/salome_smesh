@@ -8,39 +8,39 @@ The following images show order of nodes in correctly defined elements.
 
 +------------------------------------------------------------------------------+
 | Edge (segment): linear and quadratic                                         |
-|     .. image:: ../images/connectivity_edge.png                                  |
+|     .. image:: ../images/connectivity_edge.png                               |
 |		:align: center                                                 |
 +------------------------------------------------------------------------------+
 | Triangle: linear, quadratic and bi-quadratic                                 |
-|     .. image:: ../images/connectivity_tria.png                                  |
+|     .. image:: ../images/connectivity_tria.png                               |
 |		:align: center                                                 |
 +------------------------------------------------------------------------------+
 | Quadrangle: linear, quadratic and bi-quadratic                               |
-|     .. image:: ../images/connectivity_quad.png                                  |
+|     .. image:: ../images/connectivity_quad.png                               |
 |		:align: center                                                 |
 +------------------------------------------------------------------------------+
 | Polygon: linear and quadratic                                                |
-|     .. image:: ../images/connectivity_polygon.png                               |
+|     .. image:: ../images/connectivity_polygon.png                            |
 |		:align: center                                                 |
 +------------------------------------------------------------------------------+
 | Tetrahedron: linear and quadratic                                            |
-|     .. image:: ../images/connectivity_tetra.png                                 |
+|     .. image:: ../images/connectivity_tetra.png                              |
 |		:align: center                                                 |
 +------------------------------------------------------------------------------+
 | Hexahedron: linear, quadratic and tri-quadratic                              |
-|	.. image:: ../images/connectivity_hexa.png                                |
+|	.. image:: ../images/connectivity_hexa.png                             |
 |		:align: center                                                 |
 +------------------------------------------------------------------------------+
 | Pentahedron: linear and quadratic                                            |
-|	.. image:: ../images/connectivity_penta.png                               |
+|	.. image:: ../images/connectivity_penta.png                            |
 |		:align: center                                                 |
 +------------------------------------------------------------------------------+
 | Pyramid: linear and quadratic                                                |
-|	.. image:: ../images/connectivity_pyramid.png                             |
+|	.. image:: ../images/connectivity_pyramid.png                          |
 |		:align: center                                                 |
 +------------------------------------------------------------------------------+
 | Hexagonal prism                                                              |
-|	.. image:: ../images/connectivity_hex_prism.png                           |
+|	.. image:: ../images/connectivity_hex_prism.png                        |
 |		:align: center                                                 |
 +------------------------------------------------------------------------------+
 | Polyhedron is defined by                                                     |
@@ -59,7 +59,7 @@ The following images show order of nodes in correctly defined elements.
 |      [ 1,2,3, 1,4,5,2, 2,5,6,3, 3,6,4,1, 4,7,9,5, 5,9,8,6, 6,8,7,4, 7,8,9 ]  |
 |      and quantities [ 3, 4, 4, 4, 4, 4, 4, 3 ]                               |
 |                                                                              |
-|	.. image:: ../images/connectivity_polyhedron.png                          |       
+|	.. image:: ../images/connectivity_polyhedron.png                       |
 |		:align: center                                                 |
 |                                                                              |
 |      Order of nodes of a facet must assure outward direction of its normal.  |

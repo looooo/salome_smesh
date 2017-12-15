@@ -9,9 +9,9 @@ be used for easy mesh creation and edition.
 
 Documentation of SALOME %Mesh module Python API is available in two forms:
 
-- `Structured documentation <smeshpy_doc/modules.html>`_, where all methods and classes are grouped by their functionality.
+- :ref:`Structured documentation <modules_page>`, where all methods and classes are grouped by their functionality.
 
-- `Linear documentation <smeshpy_doc/namespaces.html>`_ grouped only by classes, declared in the :ref:`smeshBuilder` and :ref:`StdMeshersBuilder` Python packages.
+- :ref:`Linear documentation <genindex>` grouped only by classes, declared in the :mod:`smeshBuilder` and :mod:`StdMeshersBuilder` Python packages.
 
 With SALOME 7.2, the Python interface for Mesh has been slightly modified to offer new functionality.
 
@@ -19,45 +19,45 @@ You may have to modify your scripts generated with SALOME 6 or older versions.
 
 Please see :ref:`smesh_migration_page`.
 
-Class :ref:`smeshBuilder.smeshBuilder` provides an interface to create and handle
+Class :class:`smeshBuilder.smeshBuilder` provides an interface to create and handle
 meshes. It can be used to create an empty mesh or to import mesh from the data file.
 
 As soon as a mesh is created, it is possible to manage it via its own
-methods, described in class :ref:`smeshBuilder.Mesh` documentation.
+methods, described in class :class:`smeshBuilder.Mesh` documentation.
 
-Class :ref:`smeshstudytools.SMeshStudyTools` provides several methods to manipulate mesh objects in Salome study. 
+Class :class:`smeshstudytools.SMeshStudyTools` provides several methods to manipulate mesh objects in Salome study. 
 
 A usual workflow to generate a mesh on geometry is following:
 
-#. Create an instance of :ref:`smeshBuilder.smeshBuilder`:
+#. Create an instance of :class:`smeshBuilder.smeshBuilder`:
 	.. code-block:: python
 		:linenos:
 
 		from salome.smesh import smeshBuilder
 		smesh = smeshBuilder.New( salome.myStudy )
 
-#. Create a :ref:`smeshBuilder.Mesh` object:
+#. Create a :class:`smeshBuilder.Mesh` object:
 
 	.. code-block:: python
 		:linenos:
 
-		mesh = :ref:`smeshBuilder.smeshBuilder.Mesh`smesh.Mesh( geometry )
+		mesh = smesh.Mesh( geometry )
 
 #. Create and assign :ref:`basic_meshing_algos_page` by calling corresponding methods of the mesh. If a sub-shape is provided as an argument, a :ref:`constructing_submeshes_page` is implicitly created on this sub-shape:
 	.. code-block:: python
 		:linenos:
 
-		regular1D = :ref:`smeshBuilder.Mesh.Segment` 
-		mefisto   = :ref:`smeshBuilder.Mesh.Triangle` ( smeshBuilder.MEFISTO )
+		regular1D = smeshBuilder.Mesh.Segment()
+		mefisto   = smeshBuilder.Mesh.Triangle( smeshBuilder.MEFISTO )
 		# use other triangle algorithm on a face -- a sub-mesh appears in the mesh
-		netgen    = :ref:`smeshBuilder.Mesh.Triangle` ( smeshBuilder.NETGEN_1D2D, face )
+		netgen    = smeshBuilder.Mesh.Triangle( smeshBuilder.NETGEN_1D2D, face )
 
 #. Create and assign :ref:`about_hypo_page` by calling corresponding methods of algorithms:
 	.. code-block:: python
 		:linenos:
 
-		segLen10 = :ref:`StdMeshersBuilder.StdMeshersBuilder_Segment.LocalLength`( 10. )
-		maxArea  = :ref:`StdMeshersBuilder.StdMeshersBuilder_Segment.LocalLength`( 100. )
+		segLen10 = StdMeshersBuilder.StdMeshersBuilder_Segment.LocalLength( 10. )
+		maxArea  = StdMeshersBuilder.StdMeshersBuilder_Segment.LocalLength( 100. )
 		netgen.SetMaxSize( 20. )
 		netgen.SetFineness( smeshBuilder.VeryCoarse )
   
@@ -65,7 +65,7 @@ A usual workflow to generate a mesh on geometry is following:
 	.. code-block:: python
 		:linenos:
 
-		:ref:`Mesh.Compute`()
+		Mesh.Compute()
 
 An easiest way to start with Python scripting is to do something in
 GUI and then to get a corresponding Python script via 

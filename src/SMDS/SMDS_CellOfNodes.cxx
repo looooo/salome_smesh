@@ -21,42 +21,42 @@
 //
 
 //  SMESH SMDS : implementaion of Salome mesh data structure
-//  File   : SMDS_MeshElementIDFactory.hxx
-//  Module : SMESH
 //
-#ifndef _SMDS_MeshElementIDFactory_HeaderFile
-#define _SMDS_MeshElementIDFactory_HeaderFile
 
-#include "SMESH_SMDS.hxx"
+#include "SMDS_CellOfNodes.hxx"
 
-#include "SMDS_MeshNodeIDFactory.hxx"
-
-#include <vector>
-
-class SMDS_MeshElement;
-class SMDS_Mesh;
-
-class SMDS_EXPORT SMDS_MeshElementIDFactory:public SMDS_MeshNodeIDFactory
+SMDS_CellOfNodes::SMDS_CellOfNodes( int id, int shapeID )
+  : myID( id )
 {
-public:
-  friend class SMDS_Mesh;
-  
-  SMDS_MeshElementIDFactory();
-  bool BindID(int ID, SMDS_MeshElement * elem);
-  int SetInVtkGrid(SMDS_MeshElement * elem);
-  SMDS_MeshElement * MeshElement(int ID);
-  virtual int GetFreeID();
-  virtual void ReleaseID(int ID, int vtkId = -1);
-  SMDS_ElemIteratorPtr elementsIterator() const;
-  virtual void Clear();
+  setShapeID( shapeID );
+}
 
-protected:
-  virtual void updateMinMax() const;
-  void updateMinMax(int id) const
-  {
-    if (id > myMax) myMax = id;
-    if (id < myMin) myMin = id;
-  }
-};
+void SMDS_CellOfNodes::setID(const int id)
+{
+  myID = id;
+}
 
-#endif
+int SMDS_CellOfNodes::GetID() const
+{
+  return myID;
+}
+
+void SMDS_CellOfNodes::setShapeID( const int shapeID )
+{
+  myShapeID = ( shapeID << BITS_SHIFT ) | ( myShapeID & BIT_IS_MARKED );
+}
+
+int SMDS_CellOfNodes::GetShapeID() const
+{
+  return myShapeID >> BITS_SHIFT;
+}
+
+void SMDS_CellOfNodes::setIsMarked( bool is ) const
+{
+  const_cast< SMDS_CellOfNodes* >( this )->myShapeID = ( myShapeID & ~BIT_IS_MARKED ) | is;
+}
+
+bool SMDS_CellOfNodes::isMarked() const
+{
+  return myShapeID & BIT_IS_MARKED;
+}

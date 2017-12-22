@@ -347,6 +347,7 @@ typedef _Range< bool > _UsedRange;    // range of used elements
 typedef _RangeSet< _ShapeIDRange > TSubIDRangeSet;
 typedef _RangeSet< _UsedRange >    TUsedRangeSet;
 typedef boost::dynamic_bitset<>    TBitSet;
+typedef float                       TParam;
 
 //------------------------------------------------------------------------------------
 /*!
@@ -364,7 +365,7 @@ class SMDS_ElementChunk
   TSubIDRangeSet       mySubIDRanges; // ranges of elements on the same sub-shape
   int                  myMinSubID;    // min sub-shape ID
   int                  myMaxSubID;    // max sub-shape ID
-  std::vector<double> myPositions;   // UV parameters on shape: 2*param_t per an element
+  std::vector<TParam>  myPositions;   // UV parameters on shape: 2*param_t per an element
 
 public:
 
@@ -396,7 +397,7 @@ public:
   int Get1stID() const { return my1stID; }
 
   //! Return pointer to on-shape-parameters of a node
-  double* GetPositionPtr( const SMDS_MeshElement* node, bool allocate=false );
+  TParam* GetPositionPtr( const SMDS_MeshElement* node, bool allocate=false );
 
   //! Return ranges of used/non-used elements
   const TUsedRangeSet&  GetUsedRanges() const { return myUsedRanges; }

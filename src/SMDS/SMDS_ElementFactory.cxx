@@ -43,25 +43,26 @@ namespace
 
   struct _EdgePosition : public SMDS_EdgePosition
   {
-    double* myUParameter;
+    TParam* myUParameter;
 
-    _EdgePosition( double* aUParam ) : myUParameter( aUParam ) {}
-    virtual void   SetUParameter(double aUparam) { *myUParameter = aUparam; }
-    virtual double GetUParameter() const { return myUParameter[0]; }
-    virtual const double* GetParameters() const { return myUParameter; }
+    _EdgePosition( TParam* aUParam ) : myUParameter( aUParam )
+    { SMDS_EdgePosition::SetUParameter( aUParam[0]); }
+    virtual void   SetUParameter(double aUparam)
+    { *myUParameter = (TParam) aUparam; SMDS_EdgePosition::SetUParameter( aUparam ); }
   };
+
   struct _FacePosition : public SMDS_FacePosition
   {
-    double* myParameter;
+    TParam* myParameter;
 
-    _FacePosition(double* aParam) : myParameter( aParam ) {}
-    virtual void SetUParameter(double aUparam) { myParameter[0] = aUparam; }
-    virtual void SetVParameter(double aVparam) { myParameter[1] = aVparam; }
-    virtual void SetParameters(double aUparam, double aVparam)
-    { myParameter[0] = aUparam; myParameter[1] = aVparam; }
-    virtual double GetUParameter() const { return myParameter[0]; }
-    virtual double GetVParameter() const { return myParameter[1]; }
-    virtual const double* GetParameters() const { return myParameter; }
+    _FacePosition(TParam* aParam) : myParameter( aParam )
+    { SMDS_FacePosition::SetParameters( aParam[0], aParam[1] ); }
+    virtual void SetUParameter(double aUparam)
+    { myParameter[0] = (TParam) aUparam; SMDS_FacePosition::SetUParameter( aUparam ); }
+    virtual void SetVParameter(double aVparam)
+    { myParameter[1] = (TParam) aVparam; SMDS_FacePosition::SetVParameter( aVparam ); }
+    virtual void SetParameters(double aU, double aV)
+    { myParameter[0] = aU; myParameter[1] = aV; SMDS_FacePosition::SetParameters( aU, aV ); }
   };
 }
 
@@ -411,8 +412,8 @@ void SMDS_NodeFactory::Compact( std::vector<int>& theVtkIDsOldToNew )
         if ( shapeDim == 2 || shapeDim == 1 )
         {
           int iChunkOld = oldID / theChunkSize;
-          double* oldPos = myChunks[ iChunkOld ].GetPositionPtr( oldNode );
-          double* newPos = myChunks[ iChunk    ].GetPositionPtr( newNode, /*allocate=*/true );
+          TParam* oldPos = myChunks[ iChunkOld ].GetPositionPtr( oldNode );
+          TParam* newPos = myChunks[ iChunk    ].GetPositionPtr( newNode, /*allocate=*/true );
           if ( oldPos )
           {
             newPos[0] = oldPos[0];
@@ -671,7 +672,7 @@ void SMDS_ElementChunk::SetShapeID( const SMDS_MeshElement* e, int shapeID ) con
   if ( oldShapeID == shapeID ) return;
 
   if ( const SMDS_MeshNode* n = dynamic_cast< const SMDS_MeshNode* >( e ))
-    if ( double* uv = me->GetPositionPtr( n ))
+    if ( TParam* uv = me->GetPositionPtr( n ))
     {
       uv[0] = 0.;
       uv[1] = 0.;
@@ -773,14 +774,14 @@ void SMDS_ElementChunk::SetPosition( const SMDS_MeshNode* n, const SMDS_Position
   switch ( shapeDim ) {
   case 2:
   {
-    double* uv = GetPositionPtr( n, /*allocate=*/true );
-    uv[0] = pos->GetParameters()[0];
-    uv[1] = pos->GetParameters()[1];
+    TParam* uv = GetPositionPtr( n, /*allocate=*/true );
+    uv[0] = (TParam) pos->GetParameters()[0];
+    uv[1] = (TParam) pos->GetParameters()[1];
     break;
   }
   case 1:
   {
-    GetPositionPtr( n, /*allocate=*/true )[0] = pos->GetParameters()[0];
+    GetPositionPtr( n, /*allocate=*/true )[0] = (TParam) pos->GetParameters()[0];
     break;
   }
   }
@@ -792,7 +793,7 @@ void SMDS_ElementChunk::SetPosition( const SMDS_MeshNode* n, const SMDS_Position
  */
 //================================================================================
 
-double* SMDS_ElementChunk::GetPositionPtr( const SMDS_MeshElement* n, bool allocate )
+TParam* SMDS_ElementChunk::GetPositionPtr( const SMDS_MeshElement* n, bool allocate )
 {
   if ( myPositions.empty() && !allocate )
     return 0;
@@ -833,7 +834,7 @@ void SMDS_ElementChunk::Compact()
     {
       int nbNodes = (it-1)->my1st;
       myPositions.resize( nbNodes * 2 );
-      std::vector<double> newPos( myPositions.begin(), myPositions.end() );
+      std::vector<TParam> newPos( myPositions.begin(), myPositions.end() );
       myPositions.swap( newPos );
     }
   }

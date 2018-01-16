@@ -1354,11 +1354,15 @@ class smeshBuilder(object, SMESH._objref_SMESH_Gen):
         aMeasurements.UnRegister()
         return value
 
-    ## Get gravity center of all nodes of the mesh object.
-    #  @param obj mesh, submesh or group
-    #  @return three components of the gravity center: x,y,z
-    #  @ingroup l1_measurements
     def GetGravityCenter(self, obj):
+    """
+    Get gravity center of all nodes of the mesh object.
+        
+    Parameters:            
+        obj: mesh, submesh or group
+    Returns:        
+        Three components of the gravity center: x,y,z
+    """
         if isinstance(obj, Mesh): obj = obj.mesh
         if isinstance(obj, Mesh_Algorithm): obj = obj.GetSubMesh()
         aMeasurements = self.CreateMeasurements()
@@ -6457,8 +6461,8 @@ class Mesh:
         mesh, the vector is normal to the mesh.
 
 	Parameters:        
-            segments - PolySegment's defining positions of cutting planes.
-            groupName - optional name of a group where created mesh segments will
+            segments: PolySegment's defining positions of cutting planes.
+            groupName: optional name of a group where created mesh segments will
             be added.
             
         Returns:    

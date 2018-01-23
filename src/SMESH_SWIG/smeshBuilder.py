@@ -1355,14 +1355,15 @@ class smeshBuilder(object, SMESH._objref_SMESH_Gen):
         return value
 
     def GetGravityCenter(self, obj):
-    """
-    Get gravity center of all nodes of the mesh object.
+        """
+        Get gravity center of all nodes of the mesh object.
         
-    Parameters:            
-        obj: mesh, submesh or group
-    Returns:        
-        Three components of the gravity center: x,y,z
-    """
+        Parameters:            
+            obj: mesh, submesh or group
+
+        Returns:        
+            Three components of the gravity center: x,y,z
+        """
         if isinstance(obj, Mesh): obj = obj.mesh
         if isinstance(obj, Mesh_Algorithm): obj = obj.GetSubMesh()
         aMeasurements = self.CreateMeasurements()

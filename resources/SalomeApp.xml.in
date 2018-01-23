@@ -118,7 +118,7 @@
   </section>
   <section name="smesh_help" >
     <parameter name="User's Guide/Mesh module/User's Guide"      value="%SMESH_ROOT_DIR%/share/doc/salome/gui/SMESH/index.html"/>
-    <parameter name="Developer's Guide/Mesh module" value="%SMESH_ROOT_DIR%/share/doc/salome/tui/SMESH/index.html"/>
+    <parameter name="Developer's Guide/Mesh module/Developer's Guide" value="%SMESH_ROOT_DIR%/share/doc/salome/tui/SMESH/index.html"/>
     <parameter name="User's Guide/Mesh module/Plug-ins/MGSurfOpt plugin" value="%SMESH_ROOT_DIR%/share/doc/salome/gui/SMESH/yams/index.html"/>
     <parameter name="User's Guide/Mesh module/Plug-ins/MGCleaner plugin" value="%SMESH_ROOT_DIR%/share/doc/salome/gui/SMESH/MGCleaner/index.html"/>
     <parameter name="User's Guide/Mesh module/Plug-ins/Z-cracks plugin" value="%SMESH_ROOT_DIR%/share/doc/salome/gui/SMESH/zcracks/index.html"/>

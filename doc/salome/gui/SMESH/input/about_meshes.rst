@@ -4,7 +4,7 @@
 About meshes
 ************ 
 
-**MESH** represents a discrete approximation of a subset of the three-dimensional space by `mesh_entities`_.
+**MESH** represents a discrete approximation of a subset of the three-dimensional space by `elementary geometrical elements`_.
 
 A SALOME study can contain multiple meshes, but they do not implicitly compose one super-mesh, and finally each of them can be used (e.g. exported) only individually.
 
@@ -43,7 +43,7 @@ Attractive meshing capabilities include:
 
 The **structure** of a SALOME mesh is described by nodes and elements based on these nodes. The geometry of an element is defined by the sequence of nodes constituting it and the :ref:`connectivity_page` (adopted from MED library). Definition of the element basing on the elements of a lower dimension is NOT supported.
 
-.. _mesh_entities:
+.. _elementary geometrical elements:
 
 The mesh can include the following entities:
 

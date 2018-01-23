@@ -25,7 +25,7 @@
   function on_language_switch() {
     var selected_language = $(this).children('option:selected').attr('value') + '/';
     var url = window.location.href;
-    
+
     var current_language = language_segment_from_url(url);
     var current_suffix = "";
     if (current_language != "") {
@@ -33,17 +33,17 @@
     } else {
 	current_language = "/";
     }
-    
+
     var selected_suffix = "_";
     if (selected_language == 'en/') { // Special 'default' case for english.
       selected_language = '';
       selected_suffix = "/";
     }
-    
+
     var new_url = url.replace('/gui/SMESH' + current_suffix + current_language,
                               '/gui/SMESH' + selected_suffix + selected_language);
     if (new_url != url) {
-      window.open(new_url);
+      window.location.href = new_url;
     }
   }
 

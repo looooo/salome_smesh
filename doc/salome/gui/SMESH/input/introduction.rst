@@ -7,7 +7,7 @@ Introduction to Mesh module
 
 **Mesh** module of SALOME is destined for:
 
-* :ref:`about_meshes_page` in different ways:
+* :ref:`creating meshes <about_meshes_page>` in different ways:
 	* by meshing geometrical models previously created or imported by the Geometry component; 
 	* bottom-up, using :ref:`modifying_meshes_page`, especially :ref:`extrusion_page` and :ref:`revolution_page`;
 	* by generation of the 3D mesh from the 2D mesh not based on the geometry (:ref:`importing_exporting_meshes_page` for example); 

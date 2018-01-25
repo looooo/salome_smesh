@@ -32,47 +32,47 @@ import StdMeshers
 
 REGULAR     = "Regular_1D"
 """
-Algorithm type: Regular 1D algorithm, see :class:`StdMeshersBuilder_Segment`
+Algorithm type: Regular 1D algorithm, see :class:`~StdMeshersBuilder.StdMeshersBuilder_Segment`
 """
 
 PYTHON      = "Python_1D"
 """
-Algorithm type: Python 1D algorithm, see StdMeshersBuilder_Segment_Python
+Algorithm type: Python 1D algorithm, see :class:`~StdMeshersBuilder.StdMeshersBuilder_Segment_Python`
 """
 
 COMPOSITE   = "CompositeSegment_1D"
 """
 
-Algorithm type: Composite segment 1D algorithm, see StdMeshersBuilder_CompositeSegment
+Algorithm type: Composite segment 1D algorithm, see :class:`~StdMeshersBuilder.StdMeshersBuilder_CompositeSegment`
 """
 MEFISTO     = "MEFISTO_2D"
 """
-Algorithm type: Triangle MEFISTO 2D algorithm, see StdMeshersBuilder_Triangle_MEFISTO
+Algorithm type: Triangle MEFISTO 2D algorithm, see :class:`~StdMeshersBuilder.StdMeshersBuilder_Triangle_MEFISTO`
 """
 
 Hexa        = "Hexa_3D"
 """
-Algorithm type: Hexahedron 3D (i-j-k) algorithm, see StdMeshersBuilder_Hexahedron
+Algorithm type: Hexahedron 3D (i-j-k) algorithm, see :class:`~StdMeshersBuilder.StdMeshersBuilder_Hexahedron`
 """
 
 QUADRANGLE  = "Quadrangle_2D"
 """
-Algorithm type: Quadrangle 2D algorithm, see StdMeshersBuilder_Quadrangle
+Algorithm type: Quadrangle 2D algorithm, see :class:`~StdMeshersBuilder.StdMeshersBuilder_Quadrangle`
 """
 
 RADIAL_QUAD = "RadialQuadrangle_1D2D"
 """
-Algorithm type: Radial Quadrangle 1D-2D algorithm, see StdMeshersBuilder_RadialQuadrangle1D2D
+Algorithm type: Radial Quadrangle 1D-2D algorithm, see :class:`~StdMeshersBuilder.StdMeshersBuilder_RadialQuadrangle1D2D`
 """
 
 QUAD_MA_PROJ = "QuadFromMedialAxis_1D2D"
 """
-Algorithm type: Quadrangle (Medial Axis Projection) 1D-2D algorithm, see StdMeshersBuilder_QuadMA_1D2D
+Algorithm type: Quadrangle (Medial Axis Projection) 1D-2D algorithm, see :class:`~StdMeshersBuilder.StdMeshersBuilder_QuadMA_1D2D`
 """
 
 POLYGON     = "PolygonPerFace_2D"
 """
-Algorithm type: Polygon Per Face 2D algorithm, see StdMeshersBuilder_PolygonPerFace
+Algorithm type: Polygon Per Face 2D algorithm, see :class:`~StdMeshersBuilder.StdMeshersBuilder_PolygonPerFace`
 """
 
 # import items of enums

@@ -35,7 +35,7 @@ class Mesh_Algorithm:
 
     For each meshing algorithm, a python class inheriting from class %Mesh_Algorithm
     should be defined. This descendant class should have two attributes defining the way
-    it is created by class Mesh (see e.g. class :ref:`StdMeshersBuilder.StdMeshersBuilder_Segment`
+    it is created by class Mesh (see e.g. class :class:`~StdMeshersBuilder.StdMeshersBuilder_Segment`
     in StdMeshersBuilder package):
 
     	- :code:`meshMethod` attribute defines name of method of class smesh.Mesh by calling which the

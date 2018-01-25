@@ -20,66 +20,6 @@
 #  Author : Francis KLOSS, OCC
 #  Module : SMESH
 
-## @package smeshBuilder
-#  Python API for SALOME %Mesh module
-
-## @defgroup l1_auxiliary Auxiliary methods and structures
-## @defgroup l1_creating  Creating meshes
-## @{
-##   @defgroup l2_impexp     Importing and exporting meshes
-##   @{
-##     @details
-##     These are methods of class \ref smeshBuilder.smeshBuilder "smeshBuilder"
-##   @}
-##   @defgroup l2_construct  Constructing meshes
-##   @defgroup l2_algorithms Defining Algorithms
-##   @{
-##     @defgroup l3_algos_basic   Basic meshing algorithms
-##     @defgroup l3_algos_proj    Projection Algorithms
-##     @defgroup l3_algos_segmarv Segments around Vertex
-##     @defgroup l3_algos_3dextr  3D extrusion meshing algorithm
-
-##   @}
-##   @defgroup l2_hypotheses Defining hypotheses
-##   @{
-##     @defgroup l3_hypos_1dhyps 1D Meshing Hypotheses
-##     @defgroup l3_hypos_2dhyps 2D Meshing Hypotheses
-##     @defgroup l3_hypos_maxvol Max Element Volume hypothesis
-##     @defgroup l3_hypos_quad Quadrangle Parameters hypothesis
-##     @defgroup l3_hypos_additi Additional Hypotheses
-
-##   @}
-##   @defgroup l2_submeshes Constructing sub-meshes
-##   @defgroup l2_editing   Editing Meshes
-
-## @}
-## @defgroup l1_meshinfo  Mesh Information
-## @defgroup l1_controls  Quality controls and Filtering
-## @defgroup l1_grouping  Grouping elements
-## @{
-##   @defgroup l2_grps_create Creating groups
-##   @defgroup l2_grps_operon Using operations on groups
-##   @defgroup l2_grps_delete Deleting Groups
-
-## @}
-## @defgroup l1_modifying Modifying meshes
-## @{
-##   @defgroup l2_modif_add      Adding nodes and elements
-##   @defgroup l2_modif_del      Removing nodes and elements
-##   @defgroup l2_modif_edit     Modifying nodes and elements
-##   @defgroup l2_modif_renumber Renumbering nodes and elements
-##   @defgroup l2_modif_trsf     Transforming meshes (Translation, Rotation, Symmetry, Sewing, Merging)
-##   @defgroup l2_modif_unitetri Uniting triangles
-##   @defgroup l2_modif_cutquadr Cutting elements
-##   @defgroup l2_modif_changori Changing orientation of elements
-##   @defgroup l2_modif_smooth   Smoothing
-##   @defgroup l2_modif_extrurev Extrusion and Revolution
-##   @defgroup l2_modif_tofromqu Convert to/from Quadratic Mesh
-##   @defgroup l2_modif_duplicat Duplication of nodes and elements (to emulate cracks)
-
-## @}
-## @defgroup l1_measurements Measurements
-
 import salome
 from salome.geom import geomBuilder
 
@@ -102,9 +42,6 @@ class MeshMeta(type):
     def __subclasscheck__(cls, sub):
         """Implement issubclass(sub, cls)."""
         return type.__subclasscheck__(cls, sub) or (cls.__name__ == sub.__name__ and cls.__module__ == sub.__module__)
-
-## @addtogroup l1_auxiliary
-## @{
 
 def DegreesToRadians(AngleInDegrees):
     """Convert an angle from degrees to radians
@@ -320,10 +257,6 @@ def FirstVertexOnCurve(mesh, edge):
         return vv[0]
     else:
         return vv[1]
-
-# end of l1_auxiliary
-## @}
-
 
 smeshInst = None
 """
@@ -1178,8 +1111,8 @@ class smeshBuilder(object, SMESH._objref_SMESH_Gen):
 	"""
 	Get minimum distance between two objects
 
-	If @a src2 is None, and @a id2 = 0, distance from @a src1 / @a id1 to the origin is computed.
-	If @a src2 is None, and @a id2 != 0, it is assumed that both @a id1 and @a id2 belong to @a src1.
+	If *src2* is None, and *id2* = 0, distance from *src1* / *id1* to the origin is computed.
+	If *src2* None, and *id2* != 0, it is assumed that both *id1* and *id2* belong to *src1*.
 
 	Parameters:
 		src1: first source object
@@ -1204,8 +1137,8 @@ class smeshBuilder(object, SMESH._objref_SMESH_Gen):
 	"""
 	Get measure structure specifying minimum distance data between two objects
 
-	If @a src2 is None, and @a id2 = 0, distance from @a src1 / @a id1 to the origin is computed.
-	If @a src2 is None, and @a id2 != 0, it is assumed that both @a id1 and @a id2 belong to @a src1.
+	If *src2* is None, and *id2*  = 0, distance from *src1* / *id1* to the origin is computed.
+	If *src2* is None, and *id2* != 0, it is assumed that both *id1* and *id2* belong to *src1*.
 
 
 	Parameters:
@@ -3556,9 +3489,9 @@ class Mesh:
 
 	Parameters:
 		id1: first node/element id
-		id2: second node/element id (if 0, distance from @a id1 to the origin is computed)
+		id2: second node/element id (if 0, distance from *id1* to the origin is computed)
 		isElem1: *True* if *id1* is element id, *False* if it is node id
-		isElem2: *True* if @a id2 is element id, *False* if it is node id
+		isElem2: *True* if *id2* is element id, *False* if it is node id
 
         Returns:
             minimum distance value **GetMinDistance()**
@@ -3573,7 +3506,7 @@ class Mesh:
 
 	Parameters:
 		id1: first node/element id
-		id2: second node/element id (if 0, distance from @a id1 to the origin is computed)
+		id2: second node/element id (if 0, distance from *id1* to the origin is computed)
 		isElem1: *True* if *id1* is element id, *False* if it is node id
 		isElem2: *True* if *id2* is element id, *False* if it is node id
 
@@ -3606,7 +3539,7 @@ class Mesh:
 	Parameters:
 		objects: single source object or list of source objects or list of nodes/elements IDs
 		isElem: if *objects* is a list of IDs, *True* value in this parameters specifies that *objects* are elements,
-			*False* specifies that @a objects are nodes
+			*False* specifies that *objects* are nodes
 
         Returns:
             tuple of six values (minX, minY, minZ, maxX, maxY, maxZ) **GetBoundingBox()**
@@ -3626,7 +3559,7 @@ class Mesh:
 	Parameters:
 		IDs: single source object or list of source objects or list of nodes/elements IDs
 		isElem: if *IDs* is a list of IDs, *True* value in this parameters specifies that *objects* are elements,
-			*False* specifies that @a objects are nodes
+			*False* specifies that *objects* are nodes
 
         Returns:
             Measure structure **BoundingBox()**
@@ -4024,7 +3957,7 @@ class Mesh:
 		y:  the Y coordinate of a point
 		z:  the Z coordinate of a point
 		NodeID: if specified (>0), the node with this ID is moved,
-			otherwise, the node closest to point (@a x,@a y,@a z) is moved
+			otherwise, the node closest to point (*x*, *y*, *z*) is moved
 
         Returns:
             the ID of a node
@@ -4306,7 +4239,7 @@ class Mesh:
 	Parameters:
 		IDsOfElements: the faces to be splitted.
 		theCriterion: is a numerical functor, in terms of enum SMESH.FunctorType, used to
-			choose a diagonal for splitting. If @a theCriterion is None, which is a default
+			choose a diagonal for splitting. If *theCriterion* is None, which is a default
 			value, then quadrangles will be split by the smallest diagonal.
 			Type SMESH.FunctorType._items in the Python Console to see all items.
 			Note that not all items correspond to numerical functors.
@@ -4329,7 +4262,7 @@ class Mesh:
 		theObject: the object from which the list of elements is taken,
 			this is mesh, submesh or group
 		theCriterion: is a numerical functor, in terms of enum SMESH.FunctorType, used to
-			choose a diagonal for splitting. If @a theCriterion is None, which is a default
+			choose a diagonal for splitting. If *theCriterion* is None, which is a default
 			value, then quadrangles will be split by the smallest diagonal.
 			Type SMESH.FunctorType._items in the Python Console to see all items.
 			Note that not all items correspond to numerical functors.
@@ -4464,17 +4397,17 @@ class Mesh:
 
 	Parameters:
 		elems: either a list of elements or a mesh or a group or a submesh or a filter
-		startHexPoint: a point used to find a hexahedron for which @a facetNormal
+		startHexPoint: a point used to find a hexahedron for which *facetNormal*
 			gives a normal vector defining facets to split into triangles.
 			**startHexPoint** can be either a triple of coordinates or a vertex.
 		facetNormal: a normal to a facet to split into triangles of a
-			hexahedron found by @a startHexPoint.
+			hexahedron found by *startHexPoint*.
 			**facetNormal** can be either a triple of coordinates or an edge.
 		method:  flags passing splitting method: smesh.Hex_2Prisms, smesh.Hex_4Prisms.
 			smesh.Hex_2Prisms - to split the hexahedron into 2 prisms, etc.
 		allDomains: if :code:`False`, only hexahedra adjacent to one closest
 			to **startHexPoint** are split, else **startHexPoint**
-			is used to find the facet to split in all domains present in @a elems.
+			is used to find the facet to split in all domains present in *elems*.
 	"""
         # IDSource
         unRegister = genObjUnRegister()
@@ -5054,7 +4987,7 @@ class Mesh:
             NbOfSteps: the number of steps
             MakeGroups: forces the generation of new groups from existing ones
             scaleFactors: optional scale factors to apply during extrusion
-            linearVariation: if *True*, scaleFactors are spread over all @a scaleFactors,
+            linearVariation: if *True*, scaleFactors are spread over all *scaleFactors*,
 		else scaleFactors[i] is applied to nodes at the i-th extrusion step
             basePoint: optional scaling center; if not provided, a gravity center of
 		nodes and elements being extruded is used as the scaling center.
@@ -6959,13 +6892,12 @@ class genObjUnRegister:
             if genObj and hasattr( genObj, "UnRegister" ):
                 genObj.UnRegister()
 
-
 for pluginName in os.environ[ "SMESH_MeshersList" ].split( ":" ):
     """
     Bind methods creating mesher plug-ins to the Mesh class
     """
 
-    #print "pluginName: ", pluginName
+    # print "pluginName: ", pluginName
     pluginBuilderName = pluginName + "Builder"
     try:
         exec( "from salome.%s.%s import *" % (pluginName, pluginBuilderName))
@@ -6975,19 +6907,21 @@ for pluginName in os.environ[ "SMESH_MeshersList" ].split( ":" ):
         continue
     exec( "from salome.%s import %s" % (pluginName, pluginBuilderName))
     plugin = eval( pluginBuilderName )
-    #print "  plugin:" , str(plugin)
+    # print "  plugin:" , str(plugin)
 
     # add methods creating algorithms to Mesh
     for k in dir( plugin ):
         if k[0] == '_': continue
         algo = getattr( plugin, k )
-        #print "             algo:", str(algo)
+        # print "             algo:", str(algo)
         if type( algo ).__name__ == 'classobj' and hasattr( algo, "meshMethod" ):
-            #print "                     meshMethod:" , str(algo.meshMethod)
+            # print "                     meshMethod:" , str(algo.meshMethod)
             if not hasattr( Mesh, algo.meshMethod ):
                 setattr( Mesh, algo.meshMethod, algoCreator( algo.meshMethod ))
                 pass
-            getattr( Mesh, algo.meshMethod ).add( algo )
+            _mmethod = getattr( Mesh, algo.meshMethod )
+            if hasattr(  _mmethod, "add" ):
+                _mmethod.add(algo)
             pass
         pass
     pass

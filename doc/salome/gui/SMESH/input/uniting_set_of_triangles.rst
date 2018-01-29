@@ -18,9 +18,10 @@ quadrangles by deletion of the common edge.
 	.. centered::
 		**"Union of triangles" button**
 
-	The following dialog box will appear:
+The following dialog box will appear:
 
 	.. image:: ../images/a-unionoftriangles.png
+		:align: center
 
 
 	* **The main list** shall contain the triangles which will be united. You can click on a triangle in the 3D viewer and it will be highlighted. After that click the **Add** button and the ID of this triangle will be added to the list. To remove a selected element or elements from the list click the **Remove** button. The **Sort** button allows to sort the list of IDs. The **Filter** button allows to apply a definite :ref:`filtering_elements` to selection of triangles.

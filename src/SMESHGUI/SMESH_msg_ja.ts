@@ -1852,7 +1852,7 @@
       <translation>六面体</translation>
     </message>
     <message>
-      <source>SMESH_HILIGHT_COLOR</source>
+      <source>SMESH_HIGHLIGHT_COLOR</source>
       <translation>選択色</translation>
     </message>
     <message>

@@ -83,11 +83,12 @@ public:
   // --------------------------------------------------------------------------------
   struct ElemFeatures //!< Features of element to create
   {
-    SMDSAbs_ElementType myType;
-    bool                myIsPoly, myIsQuad;
-    int                 myID;
-    double              myBallDiameter;
-    std::vector<int>    myPolyhedQuantities;
+    SMDSAbs_ElementType               myType;
+    bool                              myIsPoly, myIsQuad;
+    int                               myID;
+    double                            myBallDiameter;
+    std::vector<int>                  myPolyhedQuantities;
+    std::vector<const SMDS_MeshNode*> myNodes; // not managed by ElemFeatures
 
     SMESH_EXPORT ElemFeatures( SMDSAbs_ElementType type=SMDSAbs_All, bool isPoly=false, bool isQuad=false )
       :myType( type ), myIsPoly(isPoly), myIsQuad(isQuad), myID(-1), myBallDiameter(0) {}
@@ -461,6 +462,13 @@ public:
                        const bool         theMakeGroups,
                        SMESH_Mesh*        theTargetMesh=0);
   // Move or copy theElements applying theTrsf to their nodes
+
+  PGroupIDs Offset( TIDSortedElemSet & theElements,
+                    const double       theValue,
+                    SMESH_Mesh*        theTgtMesh,
+                    const bool         theMakeGroups,
+                    const bool         theFixSelfIntersection);
+  // Make an offset mesh from a source 2D mesh
 
   typedef std::list< std::list< const SMDS_MeshNode* > > TListOfListOfNodes;
 

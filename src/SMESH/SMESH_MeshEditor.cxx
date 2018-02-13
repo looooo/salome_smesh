@@ -104,17 +104,6 @@
 using namespace std;
 using namespace SMESH::Controls;
 
-namespace
-{
-  template < class ELEM_SET >
-  SMDS_ElemIteratorPtr elemSetIterator( const ELEM_SET& elements )
-  {
-    typedef SMDS_SetIterator
-      < SMDS_pElement, typename ELEM_SET::const_iterator> TSetIterator;
-    return SMDS_ElemIteratorPtr( new TSetIterator( elements.begin(), elements.end() ));
-  }
-}
-
 //=======================================================================
 //function : SMESH_MeshEditor
 //purpose  :
@@ -145,8 +134,8 @@ SMESHDS_Mesh * SMESH_MeshEditor::GetMeshDS()
 
 void SMESH_MeshEditor::ClearLastCreated()
 {
-  myLastCreatedNodes.Clear();
-  myLastCreatedElems.Clear();
+  SMESHUtils::FreeVector( myLastCreatedElems );
+  SMESHUtils::FreeVector( myLastCreatedNodes );
 }
 
 //================================================================================
@@ -378,7 +367,7 @@ SMESH_MeshEditor::AddElement(const vector<const SMDS_MeshNode*> & node,
 
   default:;
   }
-  if ( e ) myLastCreatedElems.Append( e );
+  if ( e ) myLastCreatedElems.push_back( e );
   return e;
 }
 
@@ -412,8 +401,7 @@ SMDS_MeshElement* SMESH_MeshEditor::AddElement(const vector<int> & nodeIDs,
 int SMESH_MeshEditor::Remove (const list< int >& theIDs,
                               const bool         isNodes )
 {
-  myLastCreatedElems.Clear();
-  myLastCreatedNodes.Clear();
+  ClearLastCreated();
 
   SMESHDS_Mesh* aMesh = GetMeshDS();
   set< SMESH_subMesh *> smmap;
@@ -493,7 +481,7 @@ void SMESH_MeshEditor::Create0DElementsOnAllNodes( const TIDSortedElemSet& eleme
   }
   else
   {
-    elemIt = elemSetIterator( elements );
+    elemIt = SMESHUtils::elemSetIterator( elements );
   }
 
   while ( elemIt->more() )
@@ -506,8 +494,8 @@ void SMESH_MeshEditor::Create0DElementsOnAllNodes( const TIDSortedElemSet& eleme
       SMDS_ElemIteratorPtr it0D = n->GetInverseElementIterator( SMDSAbs_0DElement );
       if ( duplicateElements || !it0D->more() )
       {
-        myLastCreatedElems.Append( GetMeshDS()->Add0DElement( n ));
-        all0DElems.insert( myLastCreatedElems.Last() );
+        myLastCreatedElems.push_back( GetMeshDS()->Add0DElement( n ));
+        all0DElems.insert( myLastCreatedElems.back() );
       }
       while ( it0D->more() )
         all0DElems.insert( it0D->next() );
@@ -523,8 +511,7 @@ void SMESH_MeshEditor::Create0DElementsOnAllNodes( const TIDSortedElemSet& eleme
 
 int SMESH_MeshEditor::FindShape (const SMDS_MeshElement * theElem)
 {
-  myLastCreatedElems.Clear();
-  myLastCreatedNodes.Clear();
+  ClearLastCreated();
 
   SMESHDS_Mesh * aMesh = GetMeshDS();
   if ( aMesh->ShapeToMesh().IsNull() )
@@ -691,8 +678,7 @@ static bool getNodesFromTwoTria(const SMDS_MeshElement * theTria1,
 bool SMESH_MeshEditor::InverseDiag (const SMDS_MeshElement * theTria1,
                                     const SMDS_MeshElement * theTria2 )
 {
-  myLastCreatedElems.Clear();
-  myLastCreatedNodes.Clear();
+  ClearLastCreated();
 
   if (!theTria1 || !theTria2)
     return false;
@@ -892,8 +878,7 @@ static bool findTriangles(const SMDS_MeshNode *    theNode1,
 bool SMESH_MeshEditor::InverseDiag (const SMDS_MeshNode * theNode1,
                                     const SMDS_MeshNode * theNode2)
 {
-  myLastCreatedElems.Clear();
-  myLastCreatedNodes.Clear();
+  ClearLastCreated();
 
   const SMDS_MeshElement *tr1, *tr2;
   if ( !findTriangles( theNode1, theNode2, tr1, tr2 ))
@@ -1013,8 +998,7 @@ bool getQuadrangleNodes(const SMDS_MeshNode *    theQuadNodes [],
 bool SMESH_MeshEditor::DeleteDiag (const SMDS_MeshNode * theNode1,
                                    const SMDS_MeshNode * theNode2)
 {
-  myLastCreatedElems.Clear();
-  myLastCreatedNodes.Clear();
+  ClearLastCreated();
 
   const SMDS_MeshElement *tr1, *tr2;
   if ( !findTriangles( theNode1, theNode2, tr1, tr2 ))
@@ -1035,13 +1019,13 @@ bool SMESH_MeshEditor::DeleteDiag (const SMDS_MeshNode * theNode1,
 
     const SMDS_MeshElement* newElem = 0;
     newElem = aMesh->AddFace( aNodes[0], aNodes[1], aNodes[2], aNodes[3] );
-    myLastCreatedElems.Append(newElem);
+    myLastCreatedElems.push_back(newElem);
     AddToSameGroups( newElem, tr1, aMesh );
     int aShapeId = tr1->getshapeId();
     if ( aShapeId )
-      {
-        aMesh->SetMeshElementOnShape( newElem, aShapeId );
-      }
+    {
+      aMesh->SetMeshElementOnShape( newElem, aShapeId );
+    }
     aMesh->RemoveElement( tr1 );
     aMesh->RemoveElement( tr2 );
 
@@ -1085,13 +1069,13 @@ bool SMESH_MeshEditor::DeleteDiag (const SMDS_MeshNode * theNode1,
   const SMDS_MeshElement* newElem = 0;
   newElem = aMesh->AddFace( aNodes[0], aNodes[1], aNodes[2], aNodes[3],
                             aNodes[4], aNodes[5], aNodes[6], aNodes[7]);
-  myLastCreatedElems.Append(newElem);
+  myLastCreatedElems.push_back(newElem);
   AddToSameGroups( newElem, tr1, aMesh );
   int aShapeId = tr1->getshapeId();
   if ( aShapeId )
-    {
-      aMesh->SetMeshElementOnShape( newElem, aShapeId );
-    }
+  {
+    aMesh->SetMeshElementOnShape( newElem, aShapeId );
+  }
   aMesh->RemoveElement( tr1 );
   aMesh->RemoveElement( tr2 );
 
@@ -1108,8 +1092,7 @@ bool SMESH_MeshEditor::DeleteDiag (const SMDS_MeshNode * theNode1,
 
 bool SMESH_MeshEditor::Reorient (const SMDS_MeshElement * theElem)
 {
-  myLastCreatedElems.Clear();
-  myLastCreatedNodes.Clear();
+  ClearLastCreated();
 
   if (!theElem)
     return false;
@@ -1314,7 +1297,7 @@ int SMESH_MeshEditor::Reorient2DBy3D (TIDSortedElemSet & theFaces,
   if ( theFaces.empty() )
     faceIt = GetMeshDS()->elementsIterator( SMDSAbs_Face );
   else
-    faceIt = elemSetIterator( theFaces );
+    faceIt = SMESHUtils::elemSetIterator( theFaces );
 
   vector< const SMDS_MeshNode* > faceNodes;
   TIDSortedElemSet checkedVolumes;
@@ -1403,16 +1386,16 @@ static double getBadRate (const SMDS_MeshElement*               theElem,
 bool SMESH_MeshEditor::QuadToTri (TIDSortedElemSet &                   theElems,
                                   SMESH::Controls::NumericalFunctorPtr theCrit)
 {
-  myLastCreatedElems.Clear();
-  myLastCreatedNodes.Clear();
+  ClearLastCreated();
 
   if ( !theCrit.get() )
     return false;
 
-  SMESHDS_Mesh * aMesh = GetMeshDS();
-
+  SMESHDS_Mesh *       aMesh = GetMeshDS();
   Handle(Geom_Surface) surface;
   SMESH_MesherHelper   helper( *GetMesh() );
+
+  myLastCreatedElems.reserve( theElems.size() * 2 );
 
   TIDSortedElemSet::iterator itElem;
   for ( itElem = theElems.begin(); itElem != theElems.end(); itElem++ )
@@ -1482,8 +1465,8 @@ bool SMESH_MeshEditor::QuadToTri (TIDSortedElemSet &                   theElems,
 
     // care of a new element
 
-    myLastCreatedElems.Append(newElem1);
-    myLastCreatedElems.Append(newElem2);
+    myLastCreatedElems.push_back(newElem1);
+    myLastCreatedElems.push_back(newElem2);
     AddToSameGroups( newElem1, elem, aMesh );
     AddToSameGroups( newElem2, elem, aMesh );
 
@@ -1506,15 +1489,15 @@ bool SMESH_MeshEditor::QuadToTri (TIDSortedElemSet &                   theElems,
 
 void SMESH_MeshEditor::QuadTo4Tri (TIDSortedElemSet & theElems)
 {
-  myLastCreatedElems.Clear();
-  myLastCreatedNodes.Clear();
+  ClearLastCreated();
+  myLastCreatedElems.reserve( theElems.size() * 4 );
 
   SMESH_MesherHelper helper( *GetMesh() );
   helper.SetElementsOnShape( true );
 
   SMDS_ElemIteratorPtr faceIt;
   if ( theElems.empty() ) faceIt = GetMeshDS()->elementsIterator(SMDSAbs_Face);
-  else                    faceIt = elemSetIterator( theElems );
+  else                    faceIt = SMESHUtils::elemSetIterator( theElems );
 
   bool   checkUV;
   gp_XY  uv [9]; uv[8] = gp_XY(0,0);
@@ -1598,7 +1581,7 @@ void SMESH_MeshEditor::QuadTo4Tri (TIDSortedElemSet & theElems)
 
       nCentral = helper.AddNode( xyz[8].X(), xyz[8].Y(), xyz[8].Z(), /*id=*/0,
                                  uv[8].X(), uv[8].Y() );
-      myLastCreatedNodes.Append( nCentral );
+      myLastCreatedNodes.push_back( nCentral );
     }
 
     // create 4 triangles
@@ -1616,7 +1599,7 @@ void SMESH_MeshEditor::QuadTo4Tri (TIDSortedElemSet & theElems)
                                                nodes[(i+1)%4],
                                                nCentral );
       ReplaceElemInGroups( tria, quad, GetMeshDS() );
-      myLastCreatedElems.Append( tria );
+      myLastCreatedElems.push_back( tria );
     }
   }
 }
@@ -1629,8 +1612,7 @@ void SMESH_MeshEditor::QuadTo4Tri (TIDSortedElemSet & theElems)
 int SMESH_MeshEditor::BestSplit (const SMDS_MeshElement*              theQuad,
                                  SMESH::Controls::NumericalFunctorPtr theCrit)
 {
-  myLastCreatedElems.Clear();
-  myLastCreatedNodes.Clear();
+  ClearLastCreated();
 
   if (!theCrit.get())
     return -1;
@@ -2296,7 +2278,7 @@ void SMESH_MeshEditor::SplitVolumes (const TFacetOfElem & theElems,
       volTool.GetBaryCenter( bc[0], bc[1], bc[2] );
       SMDS_MeshNode* gcNode = helper.AddNode( bc[0], bc[1], bc[2] );
       nodes.push_back( gcNode );
-      newNodes.Append( gcNode );
+      newNodes.push_back( gcNode );
     }
     if ( !splitMethod._faceBaryNode.empty() )
     {
@@ -2310,7 +2292,7 @@ void SMESH_MeshEditor::SplitVolumes (const TFacetOfElem & theElems,
         if ( !f_n->second )
         {
           volTool.GetFaceBaryCenter( iF_n->first, bc[0], bc[1], bc[2] );
-          newNodes.Append( f_n->second = helper.AddNode( bc[0], bc[1], bc[2] ));
+          newNodes.push_back( f_n->second = helper.AddNode( bc[0], bc[1], bc[2] ));
         }
         nodes.push_back( iF_n->second = f_n->second );
       }
@@ -2321,18 +2303,18 @@ void SMESH_MeshEditor::SplitVolumes (const TFacetOfElem & theElems,
     const int* volConn = splitMethod._connectivity;
     if ( splitMethod._nbCorners == 4 ) // tetra
       for ( int i = 0; i < splitMethod._nbSplits; ++i, volConn += splitMethod._nbCorners )
-        newElems.Append( splitVols[ i ] = helper.AddVolume( nodes[ volConn[0] ],
-                                                            nodes[ volConn[1] ],
-                                                            nodes[ volConn[2] ],
-                                                            nodes[ volConn[3] ]));
+        newElems.push_back( splitVols[ i ] = helper.AddVolume( nodes[ volConn[0] ],
+                                                               nodes[ volConn[1] ],
+                                                               nodes[ volConn[2] ],
+                                                               nodes[ volConn[3] ]));
     else // prisms
       for ( int i = 0; i < splitMethod._nbSplits; ++i, volConn += splitMethod._nbCorners )
-        newElems.Append( splitVols[ i ] = helper.AddVolume( nodes[ volConn[0] ],
-                                                            nodes[ volConn[1] ],
-                                                            nodes[ volConn[2] ],
-                                                            nodes[ volConn[3] ],
-                                                            nodes[ volConn[4] ],
-                                                            nodes[ volConn[5] ]));
+        newElems.push_back( splitVols[ i ] = helper.AddVolume( nodes[ volConn[0] ],
+                                                               nodes[ volConn[1] ],
+                                                               nodes[ volConn[2] ],
+                                                               nodes[ volConn[3] ],
+                                                               nodes[ volConn[4] ],
+                                                               nodes[ volConn[5] ]));
 
     ReplaceElemInGroups( elem, splitVols, GetMeshDS() );
 
@@ -2385,7 +2367,7 @@ void SMESH_MeshEditor::SplitVolumes (const TFacetOfElem & theElems,
               gp_XY uv( 1e100, 1e100 );
               double distXYZ[4];
               if ( !fHelper.CheckNodeUV( TopoDS::Face( s ), baryNode,
-                                        uv, /*tol=*/1e-7, /*force=*/true, distXYZ ) &&
+                                         uv, /*tol=*/1e-7, /*force=*/true, distXYZ ) &&
                    uv.X() < 1e100 )
               {
                 // node is too far from the surface
@@ -2439,7 +2421,7 @@ void SMESH_MeshEditor::SplitVolumes (const TFacetOfElem & theElems,
           if ( !triangles[ i ]) continue;
           if ( fSubMesh )
             fSubMesh->AddElement( triangles[ i ]);
-          newElems.Append( triangles[ i ]);
+          newElems.push_back( triangles[ i ]);
         }
         ReplaceElemInGroups( face, triangles, GetMeshDS() );
         GetMeshDS()->RemoveFreeElement( face, fSubMesh, /*fromGroups=*/false );
@@ -2476,7 +2458,7 @@ void SMESH_MeshEditor::GetHexaFacetsToSplit( TIDSortedElemSet& theHexas,
                                              const gp_Ax1&     theFacetNormal,
                                              TFacetOfElem &    theFacets)
 {
-  #define THIS_METHOD "SMESH_MeshEditor::GetHexaFacetsToSplit(): "
+#define THIS_METHOD "SMESH_MeshEditor::GetHexaFacetsToSplit(): "
 
   // Find a hexa closest to the location of theFacetNormal
 
@@ -2930,11 +2912,10 @@ void SMESH_MeshEditor::ReplaceElemInGroups (const SMDS_MeshElement*             
 bool SMESH_MeshEditor::QuadToTri (TIDSortedElemSet & theElems,
                                   const bool         the13Diag)
 {
-  myLastCreatedElems.Clear();
-  myLastCreatedNodes.Clear();
+  ClearLastCreated();
+  myLastCreatedElems.reserve( theElems.size() * 2 );
 
-  SMESHDS_Mesh * aMesh = GetMeshDS();
-
+  SMESHDS_Mesh *       aMesh = GetMeshDS();
   Handle(Geom_Surface) surface;
   SMESH_MesherHelper   helper( *GetMesh() );
 
@@ -2964,8 +2945,8 @@ bool SMESH_MeshEditor::QuadToTri (TIDSortedElemSet & theElems,
         newElem1 = aMesh->AddFace( aNodes[3], aNodes[0], aNodes[1] );
         newElem2 = aMesh->AddFace( aNodes[3], aNodes[1], aNodes[2] );
       }
-      myLastCreatedElems.Append(newElem1);
-      myLastCreatedElems.Append(newElem2);
+      myLastCreatedElems.push_back(newElem1);
+      myLastCreatedElems.push_back(newElem2);
       // put a new triangle on the same shape and add to the same groups
       if ( aShapeId )
       {
@@ -3007,7 +2988,7 @@ bool SMESH_MeshEditor::QuadToTri (TIDSortedElemSet & theElems,
         centrNode = helper.GetCentralNode( aNodes[0], aNodes[1], aNodes[2], aNodes[3],
                                            aNodes[4], aNodes[5], aNodes[6], aNodes[7],
                                            surface.IsNull() );
-        myLastCreatedNodes.Append(centrNode);
+        myLastCreatedNodes.push_back(centrNode);
       }
 
       // create a new element
@@ -3025,8 +3006,8 @@ bool SMESH_MeshEditor::QuadToTri (TIDSortedElemSet & theElems,
         newElem2 = aMesh->AddFace(aNodes[3], aNodes[1], aNodes[2],
                                   centrNode, aNodes[5], aNodes[6] );
       }
-      myLastCreatedElems.Append(newElem1);
-      myLastCreatedElems.Append(newElem2);
+      myLastCreatedElems.push_back(newElem1);
+      myLastCreatedElems.push_back(newElem2);
       // put a new triangle on the same shape and add to the same groups
       if ( aShapeId )
       {
@@ -3150,8 +3131,8 @@ bool SMESH_MeshEditor::TriToQuad (TIDSortedElemSet &                   theElems,
                                   SMESH::Controls::NumericalFunctorPtr theCrit,
                                   const double                         theMaxAngle)
 {
-  myLastCreatedElems.Clear();
-  myLastCreatedNodes.Clear();
+  ClearLastCreated();
+  myLastCreatedElems.reserve( theElems.size() / 2 );
 
   if ( !theCrit.get() )
     return false;
@@ -3335,7 +3316,7 @@ bool SMESH_MeshEditor::TriToQuad (TIDSortedElemSet &                   theElems,
           {
             const SMDS_MeshElement* newElem = 0;
             newElem = aMesh->AddFace(n12[0], n12[1], n12[2], n12[3] );
-            myLastCreatedElems.Append(newElem);
+            myLastCreatedElems.push_back(newElem);
             AddToSameGroups( newElem, tr1, aMesh );
             int aShapeId = tr1->getshapeId();
             if ( aShapeId )
@@ -3366,7 +3347,7 @@ bool SMESH_MeshEditor::TriToQuad (TIDSortedElemSet &                   theElems,
             else
               newElem = aMesh->AddFace(aNodes[0], aNodes[1], aNodes[2], aNodes[3],
                                        aNodes[4], aNodes[5], aNodes[6], aNodes[7]);
-            myLastCreatedElems.Append(newElem);
+            myLastCreatedElems.push_back(newElem);
             AddToSameGroups( newElem, tr1, aMesh );
             int aShapeId = tr1->getshapeId();
             if ( aShapeId )
@@ -3389,7 +3370,7 @@ bool SMESH_MeshEditor::TriToQuad (TIDSortedElemSet &                   theElems,
           if ( tr1->NbNodes() == 3 ) {
             const SMDS_MeshElement* newElem = 0;
             newElem = aMesh->AddFace(n13[0], n13[1], n13[2], n13[3] );
-            myLastCreatedElems.Append(newElem);
+            myLastCreatedElems.push_back(newElem);
             AddToSameGroups( newElem, tr1, aMesh );
             int aShapeId = tr1->getshapeId();
             if ( aShapeId )
@@ -3420,7 +3401,7 @@ bool SMESH_MeshEditor::TriToQuad (TIDSortedElemSet &                   theElems,
             else
               newElem = aMesh->AddFace(aNodes[0], aNodes[1], aNodes[2], aNodes[3],
                                        aNodes[4], aNodes[5], aNodes[6], aNodes[7]);
-            myLastCreatedElems.Append(newElem);
+            myLastCreatedElems.push_back(newElem);
             AddToSameGroups( newElem, tr1, aMesh );
             int aShapeId = tr1->getshapeId();
             if ( aShapeId )
@@ -3447,286 +3428,6 @@ bool SMESH_MeshEditor::TriToQuad (TIDSortedElemSet &                   theElems,
 
   return true;
 }
-
-
-/*#define DUMPSO(txt) \
-//  cout << txt << endl;
-//=============================================================================
-//
-//
-//
-//=============================================================================
-static void swap( int i1, int i2, int idNodes[], gp_Pnt P[] )
-{
-if ( i1 == i2 )
-return;
-int tmp = idNodes[ i1 ];
-idNodes[ i1 ] = idNodes[ i2 ];
-idNodes[ i2 ] = tmp;
-gp_Pnt Ptmp = P[ i1 ];
-P[ i1 ] = P[ i2 ];
-P[ i2 ] = Ptmp;
-DUMPSO( i1 << "(" << idNodes[ i2 ] << ") <-> " << i2 << "(" << idNodes[ i1 ] << ")");
-}
-
-//=======================================================================
-//function : SortQuadNodes
-//purpose  : Set 4 nodes of a quadrangle face in a good order.
-//           Swap 1<->2 or 2<->3 nodes and correspondingly return
-//           1 or 2 else 0.
-//=======================================================================
-
-int SMESH_MeshEditor::SortQuadNodes (const SMDS_Mesh * theMesh,
-int               idNodes[] )
-{
-  gp_Pnt P[4];
-  int i;
-  for ( i = 0; i < 4; i++ ) {
-    const SMDS_MeshNode *n = theMesh->FindNode( idNodes[i] );
-    if ( !n ) return 0;
-    P[ i ].SetCoord( n->X(), n->Y(), n->Z() );
-  }
-
-  gp_Vec V1(P[0], P[1]);
-  gp_Vec V2(P[0], P[2]);
-  gp_Vec V3(P[0], P[3]);
-
-  gp_Vec Cross1 = V1 ^ V2;
-  gp_Vec Cross2 = V2 ^ V3;
-
-  i = 0;
-  if (Cross1.Dot(Cross2) < 0)
-  {
-    Cross1 = V2 ^ V1;
-    Cross2 = V1 ^ V3;
-
-    if (Cross1.Dot(Cross2) < 0)
-      i = 2;
-    else
-      i = 1;
-    swap ( i, i + 1, idNodes, P );
-
-    //     for ( int ii = 0; ii < 4; ii++ ) {
-    //       const SMDS_MeshNode *n = theMesh->FindNode( idNodes[ii] );
-    //       DUMPSO( ii << "(" << idNodes[ii] <<") : "<<n->X()<<" "<<n->Y()<<" "<<n->Z());
-    //     }
-  }
-  return i;
-}
-
-//=======================================================================
-//function : SortHexaNodes
-//purpose  : Set 8 nodes of a hexahedron in a good order.
-//           Return success status
-//=======================================================================
-
-bool SMESH_MeshEditor::SortHexaNodes (const SMDS_Mesh * theMesh,
-                                      int               idNodes[] )
-{
-  gp_Pnt P[8];
-  int i;
-  DUMPSO( "INPUT: ========================================");
-  for ( i = 0; i < 8; i++ ) {
-    const SMDS_MeshNode *n = theMesh->FindNode( idNodes[i] );
-    if ( !n ) return false;
-    P[ i ].SetCoord( n->X(), n->Y(), n->Z() );
-    DUMPSO( i << "(" << idNodes[i] <<") : "<<n->X()<<" "<<n->Y()<<" "<<n->Z());
-  }
-  DUMPSO( "========================================");
-
-
-  set<int> faceNodes;  // ids of bottom face nodes, to be found
-  set<int> checkedId1; // ids of tried 2-nd nodes
-  Standard_Real leastDist = DBL_MAX; // dist of the 4-th node from 123 plane
-  const Standard_Real tol = 1.e-6;   // tolerance to find nodes in plane
-  int iMin, iLoop1 = 0;
-
-  // Loop to try the 2-nd nodes
-
-  while ( leastDist > DBL_MIN && ++iLoop1 < 8 )
-  {
-    // Find not checked 2-nd node
-    for ( i = 1; i < 8; i++ )
-      if ( checkedId1.find( idNodes[i] ) == checkedId1.end() ) {
-        int id1 = idNodes[i];
-        swap ( 1, i, idNodes, P );
-        checkedId1.insert ( id1 );
-        break;
-      }
-
-    // Find the 3-d node so that 1-2-3 triangle to be on a hexa face,
-    // ie that all but meybe one (id3 which is on the same face) nodes
-    // lay on the same side from the triangle plane.
-
-    bool manyInPlane = false; // more than 4 nodes lay in plane
-    int iLoop2 = 0;
-    while ( ++iLoop2 < 6 ) {
-
-      // get 1-2-3 plane coeffs
-      Standard_Real A, B, C, D;
-      gp_Vec N = gp_Vec (P[0], P[1]).Crossed( gp_Vec (P[0], P[2]) );
-      if ( N.SquareMagnitude() > gp::Resolution() )
-      {
-        gp_Pln pln ( P[0], N );
-        pln.Coefficients( A, B, C, D );
-
-        // find the node (iMin) closest to pln
-        Standard_Real dist[ 8 ], minDist = DBL_MAX;
-        set<int> idInPln;
-        for ( i = 3; i < 8; i++ ) {
-          dist[i] = A * P[i].X() + B * P[i].Y() + C * P[i].Z() + D;
-          if ( fabs( dist[i] ) < minDist ) {
-            minDist = fabs( dist[i] );
-            iMin = i;
-          }
-          if ( fabs( dist[i] ) <= tol )
-            idInPln.insert( idNodes[i] );
-        }
-
-        // there should not be more than 4 nodes in bottom plane
-        if ( idInPln.size() > 1 )
-        {
-          DUMPSO( "### idInPln.size() = " << idInPln.size());
-          // idInPlane does not contain the first 3 nodes
-          if ( manyInPlane || idInPln.size() == 5)
-            return false; // all nodes in one plane
-          manyInPlane = true;
-
-          // set the 1-st node to be not in plane
-          for ( i = 3; i < 8; i++ ) {
-            if ( idInPln.find( idNodes[ i ] ) == idInPln.end() ) {
-              DUMPSO( "### Reset 0-th node");
-              swap( 0, i, idNodes, P );
-              break;
-            }
-          }
-
-          // reset to re-check second nodes
-          leastDist = DBL_MAX;
-          faceNodes.clear();
-          checkedId1.clear();
-          iLoop1 = 0;
-          break; // from iLoop2;
-        }
-
-        // check that the other 4 nodes are on the same side
-        bool sameSide = true;
-        bool isNeg = dist[ iMin == 3 ? 4 : 3 ] <= 0.;
-        for ( i = 3; sameSide && i < 8; i++ ) {
-          if ( i != iMin )
-            sameSide = ( isNeg == dist[i] <= 0.);
-        }
-
-        // keep best solution
-        if ( sameSide && minDist < leastDist ) {
-          leastDist = minDist;
-          faceNodes.clear();
-          faceNodes.insert( idNodes[ 1 ] );
-          faceNodes.insert( idNodes[ 2 ] );
-          faceNodes.insert( idNodes[ iMin ] );
-          DUMPSO( "loop " << iLoop2 << " id2 " << idNodes[ 1 ] << " id3 " << idNodes[ 2 ]
-                  << " leastDist = " << leastDist);
-          if ( leastDist <= DBL_MIN )
-            break;
-        }
-      }
-
-      // set next 3-d node to check
-      int iNext = 2 + iLoop2;
-      if ( iNext < 8 ) {
-        DUMPSO( "Try 2-nd");
-        swap ( 2, iNext, idNodes, P );
-      }
-    } // while ( iLoop2 < 6 )
-  } // iLoop1
-
-  if ( faceNodes.empty() ) return false;
-
-  // Put the faceNodes in proper places
-  for ( i = 4; i < 8; i++ ) {
-    if ( faceNodes.find( idNodes[ i ] ) != faceNodes.end() ) {
-      // find a place to put
-      int iTo = 1;
-      while ( faceNodes.find( idNodes[ iTo ] ) != faceNodes.end() )
-        iTo++;
-      DUMPSO( "Set faceNodes");
-      swap ( iTo, i, idNodes, P );
-    }
-  }
-
-
-  // Set nodes of the found bottom face in good order
-  DUMPSO( " Found bottom face: ");
-  i = SortQuadNodes( theMesh, idNodes );
-  if ( i ) {
-    gp_Pnt Ptmp = P[ i ];
-    P[ i ] = P[ i+1 ];
-    P[ i+1 ] = Ptmp;
-  }
-  //   else
-  //     for ( int ii = 0; ii < 4; ii++ ) {
-  //       const SMDS_MeshNode *n = theMesh->FindNode( idNodes[ii] );
-  //       DUMPSO( ii << "(" << idNodes[ii] <<") : "<<n->X()<<" "<<n->Y()<<" "<<n->Z());
-  //    }
-
-  // Gravity center of the top and bottom faces
-  gp_Pnt aGCb = ( P[0].XYZ() + P[1].XYZ() + P[2].XYZ() + P[3].XYZ() ) / 4.;
-  gp_Pnt aGCt = ( P[4].XYZ() + P[5].XYZ() + P[6].XYZ() + P[7].XYZ() ) / 4.;
-
-  // Get direction from the bottom to the top face
-  gp_Vec upDir ( aGCb, aGCt );
-  Standard_Real upDirSize = upDir.Magnitude();
-  if ( upDirSize <= gp::Resolution() ) return false;
-  upDir / upDirSize;
-
-  // Assure that the bottom face normal points up
-  gp_Vec Nb = gp_Vec (P[0], P[1]).Crossed( gp_Vec (P[0], P[2]) );
-  Nb += gp_Vec (P[0], P[2]).Crossed( gp_Vec (P[0], P[3]) );
-  if ( Nb.Dot( upDir ) < 0 ) {
-    DUMPSO( "Reverse bottom face");
-    swap( 1, 3, idNodes, P );
-  }
-
-  // Find 5-th node - the one closest to the 1-st among the last 4 nodes.
-  Standard_Real minDist = DBL_MAX;
-  for ( i = 4; i < 8; i++ ) {
-    // projection of P[i] to the plane defined by P[0] and upDir
-    gp_Pnt Pp = P[i].Translated( upDir * ( upDir.Dot( gp_Vec( P[i], P[0] ))));
-    Standard_Real sqDist = P[0].SquareDistance( Pp );
-    if ( sqDist < minDist ) {
-      minDist = sqDist;
-      iMin = i;
-    }
-  }
-  DUMPSO( "Set 4-th");
-  swap ( 4, iMin, idNodes, P );
-
-  // Set nodes of the top face in good order
-  DUMPSO( "Sort top face");
-  i = SortQuadNodes( theMesh, &idNodes[4] );
-  if ( i ) {
-    i += 4;
-    gp_Pnt Ptmp = P[ i ];
-    P[ i ] = P[ i+1 ];
-    P[ i+1 ] = Ptmp;
-  }
-
-  // Assure that direction of the top face normal is from the bottom face
-  gp_Vec Nt = gp_Vec (P[4], P[5]).Crossed( gp_Vec (P[4], P[6]) );
-  Nt += gp_Vec (P[4], P[6]).Crossed( gp_Vec (P[4], P[7]) );
-  if ( Nt.Dot( upDir ) < 0 ) {
-    DUMPSO( "Reverse top face");
-    swap( 5, 7, idNodes, P );
-  }
-
-  //   DUMPSO( "OUTPUT: ========================================");
-  //   for ( i = 0; i < 8; i++ ) {
-  //     float *p = ugrid->GetPoint(idNodes[i]);
-  //     DUMPSO( i << "(" << idNodes[i] << ") : " << p[0] << " " << p[1] << " " << p[2]);
-  //   }
-
-  return true;
-}*/
 
 //================================================================================
 /*!
@@ -3933,8 +3634,7 @@ void SMESH_MeshEditor::Smooth (TIDSortedElemSet &          theElems,
                                double                      theTgtAspectRatio,
                                const bool                  the2D)
 {
-  myLastCreatedElems.Clear();
-  myLastCreatedNodes.Clear();
+  ClearLastCreated();
 
   if ( theTgtAspectRatio < 1.0 )
     theTgtAspectRatio = 1.0;
@@ -4140,7 +3840,7 @@ void SMESH_MeshEditor::Smooth (TIDSortedElemSet &          theElems,
             // if ( posType != SMDS_TOP_3DSPACE )
             //   dist2 = pNode.SquareDistance( surface->Value( newUV.X(), newUV.Y() ));
             // if ( dist2 < dist1 )
-              uv = newUV;
+            uv = newUV;
           }
         }
         // store UV in the map
@@ -4660,55 +4360,55 @@ void SMESH_MeshEditor::sweepElement(const SMDS_MeshElement*               elem,
         break;
       }
       case SMDSEntity_Triangle: // TRIANGLE --->
-        {
-          if ( nbDouble > 0 ) break;
-          if ( nbSame == 0 )       // ---> pentahedron
-            aNewElem = aMesh->AddVolume (prevNod[ 0 ], prevNod[ 1 ], prevNod[ 2 ],
-                                         nextNod[ 0 ], nextNod[ 1 ], nextNod[ 2 ] );
+      {
+        if ( nbDouble > 0 ) break;
+        if ( nbSame == 0 )       // ---> pentahedron
+          aNewElem = aMesh->AddVolume (prevNod[ 0 ], prevNod[ 1 ], prevNod[ 2 ],
+                                       nextNod[ 0 ], nextNod[ 1 ], nextNod[ 2 ] );
 
-          else if ( nbSame == 1 )  // ---> pyramid
-            aNewElem = aMesh->AddVolume (prevNod[ iBeforeSame ], prevNod[ iAfterSame ],
-                                         nextNod[ iAfterSame ],  nextNod[ iBeforeSame ],
-                                         nextNod[ iSameNode ]);
+        else if ( nbSame == 1 )  // ---> pyramid
+          aNewElem = aMesh->AddVolume (prevNod[ iBeforeSame ], prevNod[ iAfterSame ],
+                                       nextNod[ iAfterSame ],  nextNod[ iBeforeSame ],
+                                       nextNod[ iSameNode ]);
 
-          else // 2 same nodes:       ---> tetrahedron
-            aNewElem = aMesh->AddVolume (prevNod[ 0 ], prevNod[ 1 ], prevNod[ 2 ],
-                                         nextNod[ iNotSameNode ]);
-          break;
-        }
+        else // 2 same nodes:       ---> tetrahedron
+          aNewElem = aMesh->AddVolume (prevNod[ 0 ], prevNod[ 1 ], prevNod[ 2 ],
+                                       nextNod[ iNotSameNode ]);
+        break;
+      }
       case SMDSEntity_Quad_Edge: // sweep quadratic EDGE --->
+      {
+        if ( nbSame == 2 )
+          return;
+        if ( nbDouble+nbSame == 2 )
         {
-          if ( nbSame == 2 )
-            return;
-          if ( nbDouble+nbSame == 2 )
-          {
-            if(nbSame==0) {      // ---> quadratic quadrangle
-              aNewElem = aMesh->AddFace(prevNod[0], prevNod[1], nextNod[1], nextNod[0],
-                                        prevNod[2], midlNod[1], nextNod[2], midlNod[0]);
-            }
-            else { //(nbSame==1) // ---> quadratic triangle
-              if(sames[0]==2) {
-                return; // medium node on axis
-              }
-              else if(sames[0]==0)
-                aNewElem = aMesh->AddFace(prevNod[0], prevNod[1], nextNod[1],
-                                          prevNod[2], midlNod[1], nextNod[2] );
-              else // sames[0]==1
-                aNewElem = aMesh->AddFace(prevNod[0], prevNod[1], nextNod[0],
-                                          prevNod[2], nextNod[2], midlNod[0]);
-            }
+          if(nbSame==0) {      // ---> quadratic quadrangle
+            aNewElem = aMesh->AddFace(prevNod[0], prevNod[1], nextNod[1], nextNod[0],
+                                      prevNod[2], midlNod[1], nextNod[2], midlNod[0]);
           }
-          else if ( nbDouble == 3 )
-          {
-            if ( nbSame == 0 ) {  // ---> bi-quadratic quadrangle
-              aNewElem = aMesh->AddFace(prevNod[0], prevNod[1], nextNod[1], nextNod[0],
-                                        prevNod[2], midlNod[1], nextNod[2], midlNod[0], midlNod[2]);
+          else { //(nbSame==1) // ---> quadratic triangle
+            if(sames[0]==2) {
+              return; // medium node on axis
             }
+            else if(sames[0]==0)
+              aNewElem = aMesh->AddFace(prevNod[0], prevNod[1], nextNod[1],
+                                        prevNod[2], midlNod[1], nextNod[2] );
+            else // sames[0]==1
+              aNewElem = aMesh->AddFace(prevNod[0], prevNod[1], nextNod[0],
+                                        prevNod[2], nextNod[2], midlNod[0]);
           }
-          else
-            return;
-          break;
         }
+        else if ( nbDouble == 3 )
+        {
+          if ( nbSame == 0 ) {  // ---> bi-quadratic quadrangle
+            aNewElem = aMesh->AddFace(prevNod[0], prevNod[1], nextNod[1], nextNod[0],
+                                      prevNod[2], midlNod[1], nextNod[2], midlNod[0], midlNod[2]);
+          }
+        }
+        else
+          return;
+        break;
+      }
       case SMDSEntity_Quadrangle: { // sweep QUADRANGLE --->
         if ( nbDouble > 0 ) break;
 
@@ -4930,8 +4630,8 @@ void SMESH_MeshEditor::sweepElement(const SMDS_MeshElement*               elem,
 
     if ( aNewElem ) {
       newElems.push_back( aNewElem );
-      myLastCreatedElems.Append(aNewElem);
-      srcElements.Append( elem );
+      myLastCreatedElems.push_back(aNewElem);
+      srcElements.push_back( elem );
     }
 
     // set new prev nodes
@@ -5021,19 +4721,19 @@ void SMESH_MeshEditor::makeWalls (TNodeOfNodeListMap &     mapNewNodes,
       if ( !isQuadratic ) {
         if ( !aMesh->FindEdge( vecNewNodes[ 0 ]->second.back(),
                                vecNewNodes[ 1 ]->second.back())) {
-          myLastCreatedElems.Append(aMesh->AddEdge(vecNewNodes[ 0 ]->second.back(),
-                                                   vecNewNodes[ 1 ]->second.back()));
-          srcElements.Append( elem );
+          myLastCreatedElems.push_back(aMesh->AddEdge(vecNewNodes[ 0 ]->second.back(),
+                                                      vecNewNodes[ 1 ]->second.back()));
+          srcElements.push_back( elem );
         }
       }
       else {
         if ( !aMesh->FindEdge( vecNewNodes[ 0 ]->second.back(),
                                vecNewNodes[ 1 ]->second.back(),
                                vecNewNodes[ 2 ]->second.back())) {
-          myLastCreatedElems.Append(aMesh->AddEdge(vecNewNodes[ 0 ]->second.back(),
-                                                   vecNewNodes[ 1 ]->second.back(),
-                                                   vecNewNodes[ 2 ]->second.back()));
-          srcElements.Append( elem );
+          myLastCreatedElems.push_back(aMesh->AddEdge(vecNewNodes[ 0 ]->second.back(),
+                                                      vecNewNodes[ 1 ]->second.back(),
+                                                      vecNewNodes[ 2 ]->second.back()));
+          srcElements.push_back( elem );
         }
       }
     }
@@ -5061,14 +4761,14 @@ void SMESH_MeshEditor::makeWalls (TNodeOfNodeListMap &     mapNewNodes,
           // make a new edge and a ceiling for a new edge
           const SMDS_MeshElement* edge;
           if ( ! ( edge = aMesh->FindEdge( n1, n2 ))) {
-            myLastCreatedElems.Append( edge = aMesh->AddEdge( n1, n2 )); // free link edge
-            srcElements.Append( myLastCreatedElems.Last() );
+            myLastCreatedElems.push_back( edge = aMesh->AddEdge( n1, n2 )); // free link edge
+            srcElements.push_back( myLastCreatedElems.back() );
           }
           n1 = vecNewNodes[ iNode ]->second.back();
           n2 = vecNewNodes[ iNext ]->second.back();
           if ( !aMesh->FindEdge( n1, n2 )) {
-            myLastCreatedElems.Append(aMesh->AddEdge( n1, n2 )); // new edge ceiling
-            srcElements.Append( edge );
+            myLastCreatedElems.push_back(aMesh->AddEdge( n1, n2 )); // new edge ceiling
+            srcElements.push_back( edge );
           }
         }
       }
@@ -5089,15 +4789,15 @@ void SMESH_MeshEditor::makeWalls (TNodeOfNodeListMap &     mapNewNodes,
           // make an edge and a ceiling for a new edge
           // find medium node
           if ( !aMesh->FindEdge( n1, n2, n3 )) {
-            myLastCreatedElems.Append(aMesh->AddEdge( n1, n2, n3 )); // free link edge
-            srcElements.Append( elem );
+            myLastCreatedElems.push_back(aMesh->AddEdge( n1, n2, n3 )); // free link edge
+            srcElements.push_back( elem );
           }
           n1 = vecNewNodes[ iNode ]->second.back();
           n2 = vecNewNodes[ iNext ]->second.back();
           n3 = vecNewNodes[ iNode+nbn ]->second.back();
           if ( !aMesh->FindEdge( n1, n2, n3 )) {
-            myLastCreatedElems.Append(aMesh->AddEdge( n1, n2, n3 )); // ceiling edge
-            srcElements.Append( elem );
+            myLastCreatedElems.push_back(aMesh->AddEdge( n1, n2, n3 )); // ceiling edge
+            srcElements.push_back( elem );
           }
         }
       }
@@ -5190,8 +4890,8 @@ void SMESH_MeshEditor::makeWalls (TNodeOfNodeListMap &     mapNewNodes,
                 if ( f )
                   aMesh->ChangeElementNodes( f, &newOrder[0], nbn );
                 else
-                  myLastCreatedElems.Append(aMesh->AddFace( newOrder[ 0 ], newOrder[ 1 ],
-                                                            newOrder[ 2 ] ));
+                  myLastCreatedElems.push_back(aMesh->AddFace( newOrder[ 0 ], newOrder[ 1 ],
+                                                               newOrder[ 2 ] ));
               }
             }
             else if ( nbn == 4 )       ///// quadrangle
@@ -5205,8 +4905,8 @@ void SMESH_MeshEditor::makeWalls (TNodeOfNodeListMap &     mapNewNodes,
                 if ( f )
                   aMesh->ChangeElementNodes( f, &newOrder[0], nbn );
                 else
-                  myLastCreatedElems.Append(aMesh->AddFace( newOrder[ 0 ], newOrder[ 1 ],
-                                                            newOrder[ 2 ], newOrder[ 3 ]));
+                  myLastCreatedElems.push_back(aMesh->AddFace( newOrder[ 0 ], newOrder[ 1 ],
+                                                               newOrder[ 2 ], newOrder[ 3 ]));
               }
             }
             else if ( nbn == 6 && isQuadratic ) /////// quadratic triangle
@@ -5224,12 +4924,12 @@ void SMESH_MeshEditor::makeWalls (TNodeOfNodeListMap &     mapNewNodes,
                 if ( f )
                   aMesh->ChangeElementNodes( f, &newOrder[0], nbn );
                 else
-                  myLastCreatedElems.Append(aMesh->AddFace( newOrder[ 0 ],
-                                                            newOrder[ 1 ],
-                                                            newOrder[ 2 ],
-                                                            newOrder[ 3 ],
-                                                            newOrder[ 4 ],
-                                                            newOrder[ 5 ] ));
+                  myLastCreatedElems.push_back(aMesh->AddFace( newOrder[ 0 ],
+                                                               newOrder[ 1 ],
+                                                               newOrder[ 2 ],
+                                                               newOrder[ 3 ],
+                                                               newOrder[ 4 ],
+                                                               newOrder[ 5 ] ));
               }
             }
             else if ( nbn == 8 && isQuadratic ) /////// quadratic quadrangle
@@ -5250,10 +4950,10 @@ void SMESH_MeshEditor::makeWalls (TNodeOfNodeListMap &     mapNewNodes,
                 if ( f )
                   aMesh->ChangeElementNodes( f, &newOrder[0], nbn );
                 else
-                  myLastCreatedElems.Append(aMesh->AddFace(newOrder[ 0 ], newOrder[ 1 ],
-                                                           newOrder[ 2 ], newOrder[ 3 ],
-                                                           newOrder[ 4 ], newOrder[ 5 ],
-                                                           newOrder[ 6 ], newOrder[ 7 ]));
+                  myLastCreatedElems.push_back(aMesh->AddFace(newOrder[ 0 ], newOrder[ 1 ],
+                                                              newOrder[ 2 ], newOrder[ 3 ],
+                                                              newOrder[ 4 ], newOrder[ 5 ],
+                                                              newOrder[ 6 ], newOrder[ 7 ]));
               }
             }
             else if ( nbn == 9 && isQuadratic ) /////// bi-quadratic quadrangle
@@ -5275,11 +4975,11 @@ void SMESH_MeshEditor::makeWalls (TNodeOfNodeListMap &     mapNewNodes,
                 if ( f )
                   aMesh->ChangeElementNodes( f, &newOrder[0], nbn );
                 else
-                  myLastCreatedElems.Append(aMesh->AddFace(newOrder[ 0 ], newOrder[ 1 ],
-                                                           newOrder[ 2 ], newOrder[ 3 ],
-                                                           newOrder[ 4 ], newOrder[ 5 ],
-                                                           newOrder[ 6 ], newOrder[ 7 ],
-                                                           newOrder[ 8 ]));
+                  myLastCreatedElems.push_back(aMesh->AddFace(newOrder[ 0 ], newOrder[ 1 ],
+                                                              newOrder[ 2 ], newOrder[ 3 ],
+                                                              newOrder[ 4 ], newOrder[ 5 ],
+                                                              newOrder[ 6 ], newOrder[ 7 ],
+                                                              newOrder[ 8 ]));
               }
             }
             else  //////// polygon
@@ -5298,8 +4998,8 @@ void SMESH_MeshEditor::makeWalls (TNodeOfNodeListMap &     mapNewNodes,
               }
             }
 
-            while ( srcElements.Length() < myLastCreatedElems.Length() )
-              srcElements.Append( *srcEdge );
+            while ( srcElements.size() < myLastCreatedElems.size() )
+              srcElements.push_back( *srcEdge );
 
           }  // loop on free faces
 
@@ -5336,8 +5036,8 @@ void SMESH_MeshEditor::makeWalls (TNodeOfNodeListMap &     mapNewNodes,
 
         AddElement( nodeVec, anyFace.Init( elem ));
 
-        while ( srcElements.Length() < myLastCreatedElems.Length() )
-          srcElements.Append( elem );
+        while ( srcElements.size() < myLastCreatedElems.size() )
+          srcElements.push_back( elem );
       }
     }
   } // loop on swept elements
@@ -5357,11 +5057,16 @@ SMESH_MeshEditor::RotationSweep(TIDSortedElemSet   theElemSets[2],
                                 const bool         theMakeGroups,
                                 const bool         theMakeWalls)
 {
-  myLastCreatedElems.Clear();
-  myLastCreatedNodes.Clear();
+  ClearLastCreated();
+
+  setElemsFirst( theElemSets );
+  myLastCreatedElems.reserve( theElemSets[0].size() * theNbSteps );
+  myLastCreatedNodes.reserve( theElemSets[1].size() * theNbSteps );
 
   // source elements for each generated one
   SMESH_SequenceOfElemPtr srcElems, srcNodes;
+  srcElems.reserve( theElemSets[0].size() );
+  srcNodes.reserve( theElemSets[1].size() );
 
   gp_Trsf aTrsf;
   aTrsf.SetRotation( theAxis, theAngle );
@@ -5381,7 +5086,6 @@ SMESH_MeshEditor::RotationSweep(TIDSortedElemSet   theElemSets[2],
                                      myMesh->NbFaces(ORDER_QUADRATIC) +
                                      myMesh->NbVolumes(ORDER_QUADRATIC) );
   // loop on theElemSets
-  setElemsFirst( theElemSets );
   TIDSortedElemSet::iterator itElem;
   for ( int is2ndSet = 0; is2ndSet < 2; ++is2ndSet )
   {
@@ -5433,8 +5137,8 @@ SMESH_MeshEditor::RotationSweep(TIDSortedElemSet   theElemSets[2],
               {
                 aTrsf2.Transforms( coord[0], coord[1], coord[2] );
                 newNode = aMesh->AddNode( coord[0], coord[1], coord[2] );
-                myLastCreatedNodes.Append(newNode);
-                srcNodes.Append( node );
+                myLastCreatedNodes.push_back(newNode);
+                srcNodes.push_back( node );
                 listNewNodes.push_back( newNode );
                 aTrsf2.Transforms( coord[0], coord[1], coord[2] );
               }
@@ -5443,8 +5147,8 @@ SMESH_MeshEditor::RotationSweep(TIDSortedElemSet   theElemSets[2],
               }
               // create a corner node
               newNode = aMesh->AddNode( coord[0], coord[1], coord[2] );
-              myLastCreatedNodes.Append(newNode);
-              srcNodes.Append( node );
+              myLastCreatedNodes.push_back(newNode);
+              srcNodes.push_back( node );
               listNewNodes.push_back( newNode );
             }
             else {
@@ -5750,12 +5454,12 @@ makeNodesByDirAndSew( SMESHDS_Mesh*                     mesh,
     P1 += myDir.XYZ() * nextStep();
 
     // try to search in sequence of existing nodes
-    // if myNodes.Length()>0 we 'nave to use given sequence
+    // if myNodes.size()>0 we 'nave to use given sequence
     // else - use all nodes of mesh
     const SMDS_MeshNode * node = 0;
     if ( myNodes.Length() > 0 ) {
       int i;
-      for(i=1; i<=myNodes.Length(); i++) {
+      for ( i = 1; i <= myNodes.Length(); i++ ) {
         gp_XYZ P2 = SMESH_TNodeXYZ( myNodes.Value(i) );
         if (( P1 - P2 ).SquareModulus() < myTolerance * myTolerance )
         {
@@ -5917,13 +5621,17 @@ SMESH_MeshEditor::ExtrusionSweep (TIDSortedElemSet     theElemSets[2],
                                   ExtrusParam&         theParams,
                                   TTElemOfElemListMap& newElemsMap)
 {
-  myLastCreatedElems.Clear();
-  myLastCreatedNodes.Clear();
+  ClearLastCreated();
+
+  setElemsFirst( theElemSets );
+  myLastCreatedElems.reserve( theElemSets[0].size() * theParams.NbSteps() );
+  myLastCreatedNodes.reserve( theElemSets[1].size() * theParams.NbSteps() );
 
   // source elements for each generated one
   SMESH_SequenceOfElemPtr srcElems, srcNodes;
+  srcElems.reserve( theElemSets[0].size() );
+  srcNodes.reserve( theElemSets[1].size() );
 
-  setElemsFirst( theElemSets );
   const int nbSteps = theParams.NbSteps();
   theParams.SetElementsToUse( theElemSets[0], theElemSets[1] );
 
@@ -5982,8 +5690,8 @@ SMESH_MeshEditor::ExtrusionSweep (TIDSortedElemSet     theElemSets[2],
             list<const SMDS_MeshNode*>::iterator newNodesIt = listNewNodes.begin();
             for ( ; newNodesIt != listNewNodes.end(); ++newNodesIt )
             {
-              myLastCreatedNodes.Append( *newNodesIt );
-              srcNodes.Append( node );
+              myLastCreatedNodes.push_back( *newNodesIt );
+              srcNodes.push_back( node );
             }
           }
           else
@@ -6024,8 +5732,7 @@ SMESH_MeshEditor::ExtrusionAlongTrack (TIDSortedElemSet     theElements[2],
                                        const gp_Pnt&        theRefPoint,
                                        const bool           theMakeGroups)
 {
-  myLastCreatedElems.Clear();
-  myLastCreatedNodes.Clear();
+  ClearLastCreated();
 
   int aNbE;
   std::list<double> aPrms;
@@ -6199,8 +5906,7 @@ SMESH_MeshEditor::ExtrusionAlongTrack (TIDSortedElemSet     theElements[2],
                                        const gp_Pnt&        theRefPoint,
                                        const bool           theMakeGroups)
 {
-  myLastCreatedElems.Clear();
-  myLastCreatedNodes.Clear();
+  ClearLastCreated();
 
   int aNbE;
   std::list<double> aPrms;
@@ -6679,13 +6385,13 @@ SMESH_MeshEditor::MakeExtrElements(TIDSortedElemSet                  theElemSets
               // create additional node
               gp_XYZ midP = 0.5 * ( aPN1.XYZ() + aPN0.XYZ() );
               const SMDS_MeshNode* newNode = aMesh->AddNode( midP.X(), midP.Y(), midP.Z() );
-              myLastCreatedNodes.Append(newNode);
-              srcNodes.Append( node );
+              myLastCreatedNodes.push_back(newNode);
+              srcNodes.push_back( node );
               listNewNodes.push_back( newNode );
             }
             const SMDS_MeshNode* newNode = aMesh->AddNode( aPN1.X(), aPN1.Y(), aPN1.Z() );
-            myLastCreatedNodes.Append(newNode);
-            srcNodes.Append( node );
+            myLastCreatedNodes.push_back(newNode);
+            srcNodes.push_back( node );
             listNewNodes.push_back( newNode );
 
             aPN0 = aPN1;
@@ -6711,8 +6417,8 @@ SMESH_MeshEditor::MakeExtrElements(TIDSortedElemSet                  theElemSets
               double y = ( N->Y() + P.Y() )/2.;
               double z = ( N->Z() + P.Z() )/2.;
               const SMDS_MeshNode* newN = aMesh->AddNode(x,y,z);
-              srcNodes.Append( node );
-              myLastCreatedNodes.Append(newN);
+              srcNodes.push_back( node );
+              myLastCreatedNodes.push_back(newN);
               aNodes[2*i] = newN;
               aNodes[2*i+1] = N;
               P = gp_XYZ(N->X(),N->Y(),N->Z());
@@ -6805,8 +6511,8 @@ SMESH_MeshEditor::Transform (TIDSortedElemSet & theElems,
                              const bool         theMakeGroups,
                              SMESH_Mesh*        theTargetMesh)
 {
-  myLastCreatedElems.Clear();
-  myLastCreatedNodes.Clear();
+  ClearLastCreated();
+  myLastCreatedElems.reserve( theElems.size() );
 
   bool needReverse = false;
   string groupPostfix;
@@ -6901,14 +6607,14 @@ SMESH_MeshEditor::Transform (TIDSortedElemSet & theElems,
         if ( theTargetMesh ) {
           const SMDS_MeshNode * newNode = aTgtMesh->AddNode( coord[0], coord[1], coord[2] );
           n2n_isnew.first->second = newNode;
-          myLastCreatedNodes.Append(newNode);
-          srcNodes.Append( node );
+          myLastCreatedNodes.push_back(newNode);
+          srcNodes.push_back( node );
         }
         else if ( theCopy ) {
           const SMDS_MeshNode * newNode = aMesh->AddNode( coord[0], coord[1], coord[2] );
           n2n_isnew.first->second = newNode;
-          myLastCreatedNodes.Append(newNode);
-          srcNodes.Append( node );
+          myLastCreatedNodes.push_back(newNode);
+          srcNodes.push_back( node );
         }
         else {
           aMesh->MoveNode( node, coord[0], coord[1], coord[2] );
@@ -6998,7 +6704,7 @@ SMESH_MeshEditor::Transform (TIDSortedElemSet & theElems,
     if ( editor ) {
       // copy in this or a new mesh
       if ( editor->AddElement( nodes, elemType.Init( elem, /*basicOnly=*/false )))
-        srcElems.Append( elem );
+        srcElems.push_back( elem );
     }
     else {
       // reverse element as it was reversed by transformation
@@ -7009,7 +6715,7 @@ SMESH_MeshEditor::Transform (TIDSortedElemSet & theElems,
   } // loop on elements
 
   if ( editor && editor != this )
-    myLastCreatedElems = editor->myLastCreatedElems;
+    myLastCreatedElems.swap( editor->myLastCreatedElems );
 
   PGroupIDs newGroupIDs;
 
@@ -7020,14 +6726,97 @@ SMESH_MeshEditor::Transform (TIDSortedElemSet & theElems,
   return newGroupIDs;
 }
 
+//================================================================================
+/*!
+ * \brief Make an offset mesh from a source 2D mesh
+ *  \param [in] theElements - source faces
+ *  \param [in] theValue - offset value
+ *  \param [out] theTgtMesh - a mesh to add offset elements to
+ *  \param [in] theMakeGroups - to generate groups
+ *  \return PGroupIDs - IDs of created groups
+ */
+//================================================================================
+
+SMESH_MeshEditor::PGroupIDs SMESH_MeshEditor::Offset( TIDSortedElemSet & theElements,
+                                                      const double       theValue,
+                                                      SMESH_Mesh*        theTgtMesh,
+                                                      const bool         theMakeGroups,
+                                                      const bool         theFixSelfIntersection)
+{
+  SMESHDS_Mesh*    meshDS = GetMeshDS();
+  SMESHDS_Mesh* tgtMeshDS = theTgtMesh->GetMeshDS();
+  SMESH_MeshEditor tgtEditor( theTgtMesh );
+
+  SMDS_ElemIteratorPtr eIt;
+  if ( theElements.empty() ) eIt = meshDS->elementsIterator( SMDSAbs_Face );
+  else                       eIt = SMESHUtils::elemSetIterator( theElements );
+
+  SMESH_MeshAlgos::TEPairVec new2OldFaces;
+  SMESH_MeshAlgos::TNPairVec new2OldNodes;
+  std::unique_ptr< SMDS_Mesh > offsetMesh
+    ( SMESH_MeshAlgos::MakeOffset( eIt, *meshDS, theValue,
+                                   theFixSelfIntersection,
+                                   new2OldFaces, new2OldNodes ));
+
+  offsetMesh->Modified();
+  offsetMesh->CompactMesh(); // make IDs start from 1
+
+  // source elements for each generated one
+  SMESH_SequenceOfElemPtr srcElems, srcNodes;
+  srcElems.reserve( new2OldFaces.size() );
+  srcNodes.reserve( new2OldNodes.size() );
+
+  ClearLastCreated();
+  myLastCreatedElems.reserve( new2OldFaces.size() );
+  myLastCreatedNodes.reserve( new2OldNodes.size() );
+
+  // copy offsetMesh to theTgtMesh
+
+  int idShift = meshDS->MaxNodeID();
+  for ( size_t i = 0; i < new2OldNodes.size(); ++i )
+    if ( const SMDS_MeshNode* n = new2OldNodes[ i ].first )
+    {
+      if ( n->NbInverseElements() > 0 )
+      {
+        const SMDS_MeshNode* n2 =
+          tgtMeshDS->AddNodeWithID( n->X(), n->Y(), n->Z(), idShift + n->GetID() );
+        myLastCreatedNodes.push_back( n2 );
+        srcNodes.push_back( new2OldNodes[ i ].second );
+      }
+    }
+
+  ElemFeatures elemType;
+  for ( size_t i = 0; i < new2OldFaces.size(); ++i )
+    if ( const SMDS_MeshElement* f = new2OldFaces[ i ].first )
+    {
+      elemType.Init( f );
+      elemType.myNodes.clear();
+      for ( SMDS_NodeIteratorPtr nIt = f->nodeIterator(); nIt->more(); )
+      {
+        const SMDS_MeshNode* n2 = nIt->next();
+        elemType.myNodes.push_back( tgtMeshDS->FindNode( idShift + n2->GetID() ));
+      }
+      tgtEditor.AddElement( elemType.myNodes, elemType );
+      srcElems.push_back( new2OldFaces[ i ].second );
+    }
+
+  myLastCreatedElems.swap( tgtEditor.myLastCreatedElems );
+
+  PGroupIDs newGroupIDs;
+  if ( theMakeGroups )
+    newGroupIDs = generateGroups( srcNodes, srcElems, "offset", theTgtMesh, false );
+
+  return newGroupIDs;
+}
+
 //=======================================================================
 /*!
  * \brief Create groups of elements made during transformation
  *  \param nodeGens - nodes making corresponding myLastCreatedNodes
  *  \param elemGens - elements making corresponding myLastCreatedElems
- *  \param postfix - to append to names of new groups
+ *  \param postfix - to push_back to names of new groups
  *  \param targetMesh - mesh to create groups in
- *  \param topPresent - is there "top" elements that are created by sweeping
+ *  \param topPresent - is there are "top" elements that are created by sweeping
  */
 //=======================================================================
 
@@ -7080,30 +6869,30 @@ SMESH_MeshEditor::generateGroups(const SMESH_SequenceOfElemPtr& nodeGens,
   {
     const SMESH_SequenceOfElemPtr& gens  = isNodes ? nodeGens : elemGens;
     const SMESH_SequenceOfElemPtr& elems = isNodes ? myLastCreatedNodes : myLastCreatedElems;
-    if ( gens.Length() != elems.Length() )
+    if ( gens.size() != elems.size() )
       throw SALOME_Exception("SMESH_MeshEditor::generateGroups(): invalid args");
 
     // loop on created elements
-    for (int iElem = 1; iElem <= elems.Length(); ++iElem )
+    for (size_t iElem = 0; iElem < elems.size(); ++iElem )
     {
-      const SMDS_MeshElement* sourceElem = gens( iElem );
+      const SMDS_MeshElement* sourceElem = gens[ iElem ];
       if ( !sourceElem ) {
         MESSAGE("generateGroups(): NULL source element");
         continue;
       }
       list< TOldNewGroup > & groupsOldNew = groupsByType[ sourceElem->GetType() ];
       if ( groupsOldNew.empty() ) { // no groups of this type at all
-        while ( iElem < gens.Length() && gens( iElem+1 ) == sourceElem )
+        while ( iElem+1 < gens.size() && gens[ iElem+1 ] == sourceElem )
           ++iElem; // skip all elements made by sourceElem
         continue;
       }
       // collect all elements made by the iElem-th sourceElem
       resultElems.clear();
-      if ( const SMDS_MeshElement* resElem = elems( iElem ))
+      if ( const SMDS_MeshElement* resElem = elems[ iElem ])
         if ( resElem != sourceElem )
           resultElems.push_back( resElem );
-      while ( iElem < gens.Length() && gens( iElem+1 ) == sourceElem )
-        if ( const SMDS_MeshElement* resElem = elems( ++iElem ))
+      while ( iElem+1 < gens.size() && gens[ iElem+1 ] == sourceElem )
+        if ( const SMDS_MeshElement* resElem = elems[ ++iElem ])
           if ( resElem != sourceElem )
             resultElems.push_back( resElem );
 
@@ -7143,7 +6932,7 @@ SMESH_MeshEditor::generateGroups(const SMESH_SequenceOfElemPtr& nodeGens,
           {
             SMDS_MeshGroup & newTopGroup = gOldNew->get<2>()->SMDSGroup();
             newTopGroup.Add( topElem );
-         }
+          }
         }
       }
     } // loop on created elements
@@ -7230,8 +7019,7 @@ void SMESH_MeshEditor::FindCoincidentNodes (TIDSortedNodeSet &   theNodes,
                                             TListOfListOfNodes & theGroupsOfNodes,
                                             bool                 theSeparateCornersAndMedium)
 {
-  myLastCreatedElems.Clear();
-  myLastCreatedNodes.Clear();
+  ClearLastCreated();
 
   if ( myMesh->NbEdges  ( ORDER_QUADRATIC ) +
        myMesh->NbFaces  ( ORDER_QUADRATIC ) +
@@ -7343,8 +7131,7 @@ int SMESH_MeshEditor::SimplifyFace (const vector<const SMDS_MeshNode *>& faceNod
 
 void SMESH_MeshEditor::MergeNodes (TListOfListOfNodes & theGroupsOfNodes)
 {
-  myLastCreatedElems.Clear();
-  myLastCreatedNodes.Clear();
+  ClearLastCreated();
 
   SMESHDS_Mesh* aMesh = GetMeshDS();
 
@@ -7530,7 +7317,7 @@ void SMESH_MeshEditor::MergeNodes (TListOfListOfNodes & theGroupsOfNodes)
               {
                 const SMDS_MeshElement* newElem =
                   aMesh->AddPolyhedralVolume( poly_nodes, quantities );
-                myLastCreatedElems.Append( newElem );
+                myLastCreatedElems.push_back( newElem );
                 if ( aShapeId && newElem )
                   aMesh->SetMeshElementOnShape( newElem, aShapeId );
                 rmElemIds.push_back( elem->GetID() );
@@ -7799,7 +7586,7 @@ void SMESH_MeshEditor::MergeNodes (TListOfListOfNodes & theGroupsOfNodes)
           if ( quantities.size() >= 4 )
           {
             const SMDS_MeshElement* newElem = aMesh->AddPolyhedralVolume( poly_nodes, quantities );
-            myLastCreatedElems.Append( newElem );
+            myLastCreatedElems.push_back( newElem );
             if ( aShapeId && newElem )
               aMesh->SetMeshElementOnShape( newElem, aShapeId );
             rmElemIds.push_back( elem->GetID() );
@@ -7880,27 +7667,22 @@ private:
 void SMESH_MeshEditor::FindEqualElements(TIDSortedElemSet &        theElements,
                                          TListOfListOfElementsID & theGroupsOfElementsID)
 {
-  myLastCreatedElems.Clear();
-  myLastCreatedNodes.Clear();
+  ClearLastCreated();
 
   typedef map< SortableElement, int > TMapOfNodeSet;
   typedef list<int> TGroupOfElems;
 
-  if ( theElements.empty() )
-  { // get all elements in the mesh
-    SMDS_ElemIteratorPtr eIt = GetMeshDS()->elementsIterator();
-    while ( eIt->more() )
-      theElements.insert( theElements.end(), eIt->next() );
-  }
+  SMDS_ElemIteratorPtr elemIt;
+  if ( theElements.empty() ) elemIt = GetMeshDS()->elementsIterator();
+  else                       elemIt = SMESHUtils::elemSetIterator( theElements );
 
   vector< TGroupOfElems > arrayOfGroups;
   TGroupOfElems groupOfElems;
   TMapOfNodeSet mapOfNodeSet;
 
-  TIDSortedElemSet::iterator elemIt = theElements.begin();
-  for ( int i = 0; elemIt != theElements.end(); ++elemIt )
+  for ( int i = 0; elemIt->more(); )
   {
-    const SMDS_MeshElement* curElem = *elemIt;
+    const SMDS_MeshElement* curElem = elemIt->next();
     SortableElement SE(curElem);
     // check uniqueness
     pair< TMapOfNodeSet::iterator, bool> pp = mapOfNodeSet.insert(make_pair(SE, i));
@@ -7935,8 +7717,7 @@ void SMESH_MeshEditor::FindEqualElements(TIDSortedElemSet &        theElements,
 
 void SMESH_MeshEditor::MergeElements(TListOfListOfElementsID & theGroupsOfElementsID)
 {
-  myLastCreatedElems.Clear();
-  myLastCreatedNodes.Clear();
+  ClearLastCreated();
 
   typedef list<int> TListOfIDs;
   TListOfIDs rmElemIds; // IDs of elems to remove
@@ -8138,7 +7919,7 @@ bool SMESH_MeshEditor::FindFreeBorder (const SMDS_MeshNode*             theFirst
       if ( contNodes[0].empty() && contNodes[1].empty() )
         return false;
 
-      // append the best free border
+      // push_back the best free border
       cNL = & contNodes[ contNodes[0].empty() ? 1 : 0 ];
       cFL = & contFaces[ contFaces[0].empty() ? 1 : 0 ];
       theNodes.pop_back(); // remove nIgnore
@@ -8188,8 +7969,7 @@ SMESH_MeshEditor::SewFreeBorder (const SMDS_MeshNode* theBordFirstNode,
                                  const bool           toCreatePolygons,
                                  const bool           toCreatePolyedrs)
 {
-  myLastCreatedElems.Clear();
-  myLastCreatedNodes.Clear();
+  ClearLastCreated();
 
   Sew_Error aResult = SEW_OK;
 
@@ -8642,13 +8422,13 @@ SMESH_MeshEditor::SewFreeBorder (const SMDS_MeshNode* theBordFirstNode,
   // get new segments
   TIDSortedElemSet segments;
   SMESH_SequenceOfElemPtr newFaces;
-  for ( int i = 1; i <= myLastCreatedElems.Length(); ++i )
+  for ( size_t i = 0; i < myLastCreatedElems.size(); ++i )
   {
-    if ( !myLastCreatedElems(i) ) continue;
-    if ( myLastCreatedElems(i)->GetType() == SMDSAbs_Edge )
-      segments.insert( segments.end(), myLastCreatedElems(i) );
+    if ( !myLastCreatedElems[i] ) continue;
+    if ( myLastCreatedElems[i]->GetType() == SMDSAbs_Edge )
+      segments.insert( segments.end(), myLastCreatedElems[i] );
     else
-      newFaces.Append( myLastCreatedElems(i) );
+      newFaces.push_back( myLastCreatedElems[i] );
   }
   // get segments adjacent to merged nodes
   TListOfListOfNodes::iterator groupIt = nodeGroupsToMerge.begin();
@@ -8683,7 +8463,7 @@ SMESH_MeshEditor::SewFreeBorder (const SMDS_MeshNode* theBordFirstNode,
     myLastCreatedElems = newFaces;
     TIDSortedElemSet::iterator seg = segments.begin();
     for ( ; seg != segments.end(); ++seg )
-      myLastCreatedElems.Append( *seg );
+      myLastCreatedElems.push_back( *seg );
   }
 
   return aResult;
@@ -8753,7 +8533,7 @@ void SMESH_MeshEditor::InsertNodesIntoLink(const SMDS_MeshElement*     theElemen
       if ( newElems[i] )
       {
         aMesh->SetMeshElementOnShape( newElems[i], theElement->getshapeId() );
-        myLastCreatedElems.Append( newElems[i] );
+        myLastCreatedElems.push_back( newElems[i] );
       }
     ReplaceElemInGroups( theElement, newElems, aMesh );
     aMesh->RemoveElement( theElement );
@@ -9014,7 +8794,7 @@ void SMESH_MeshEditor::InsertNodesIntoLink(const SMDS_MeshElement*     theElemen
     if ( newElems[i] )
     {
       aMesh->SetMeshElementOnShape( newElems[i], theFace->getshapeId() );
-      myLastCreatedElems.Append( newElems[i] );
+      myLastCreatedElems.push_back( newElems[i] );
     }
   ReplaceElemInGroups( theFace, newElems, aMesh );
   aMesh->RemoveElement(theFace);
@@ -9030,8 +8810,7 @@ void SMESH_MeshEditor::UpdateVolumes (const SMDS_MeshNode*        theBetweenNode
                                       const SMDS_MeshNode*        theBetweenNode2,
                                       list<const SMDS_MeshNode*>& theNodesToInsert)
 {
-  myLastCreatedElems.Clear();
-  myLastCreatedNodes.Clear();
+  ClearLastCreated();
 
   SMDS_ElemIteratorPtr invElemIt = theBetweenNode1->GetInverseElementIterator(SMDSAbs_Volume);
   while (invElemIt->more()) { // loop on inverse elements of theBetweenNode1
@@ -9093,7 +8872,7 @@ void SMESH_MeshEditor::UpdateVolumes (const SMDS_MeshNode*        theBetweenNode
     if ( SMDS_MeshElement* newElem = aMesh->AddPolyhedralVolume( poly_nodes, quantities ))
     {
       aMesh->SetMeshElementOnShape( newElem, elem->getshapeId() );
-      myLastCreatedElems.Append( newElem );
+      myLastCreatedElems.push_back( newElem );
       ReplaceElemInGroups( elem, newElem, aMesh );
     }
     aMesh->RemoveElement( elem );
@@ -9208,50 +8987,50 @@ int SMESH_MeshEditor::convertElemToQuadratic(SMESHDS_SubMesh *   theSm,
     switch( aType )
     {
     case SMDSAbs_Edge :
-      {
-        NewElem = theHelper.AddEdge(nodes[0], nodes[1], id, theForce3d);
-        break;
-      }
+    {
+      NewElem = theHelper.AddEdge(nodes[0], nodes[1], id, theForce3d);
+      break;
+    }
     case SMDSAbs_Face :
+    {
+      switch(nbNodes)
       {
-        switch(nbNodes)
-        {
-        case 3:
-          NewElem = theHelper.AddFace(nodes[0], nodes[1], nodes[2], id, theForce3d);
-          break;
-        case 4:
-          NewElem = theHelper.AddFace(nodes[0], nodes[1], nodes[2], nodes[3], id, theForce3d);
-          break;
-        default:
-          NewElem = theHelper.AddPolygonalFace(nodes, id, theForce3d);
-        }
+      case 3:
+        NewElem = theHelper.AddFace(nodes[0], nodes[1], nodes[2], id, theForce3d);
         break;
+      case 4:
+        NewElem = theHelper.AddFace(nodes[0], nodes[1], nodes[2], nodes[3], id, theForce3d);
+        break;
+      default:
+        NewElem = theHelper.AddPolygonalFace(nodes, id, theForce3d);
       }
+      break;
+    }
     case SMDSAbs_Volume :
+    {
+      switch( aGeomType )
       {
-        switch( aGeomType )
-        {
-        case SMDSEntity_Tetra:
-          NewElem = theHelper.AddVolume(nodes[0], nodes[1], nodes[2], nodes[3], id, theForce3d);
-          break;
-        case SMDSEntity_Pyramid:
-          NewElem = theHelper.AddVolume(nodes[0], nodes[1], nodes[2], nodes[3], nodes[4], id, theForce3d);
-          break;
-        case SMDSEntity_Penta:
-          NewElem = theHelper.AddVolume(nodes[0], nodes[1], nodes[2], nodes[3], nodes[4], nodes[5], id, theForce3d);
-          break;
-        case SMDSEntity_Hexa:
-        case SMDSEntity_Quad_Hexa:
-        case SMDSEntity_TriQuad_Hexa:
-          NewElem = theHelper.AddVolume(nodes[0], nodes[1], nodes[2], nodes[3],
-                                        nodes[4], nodes[5], nodes[6], nodes[7], id, theForce3d);
-          break;
-        case SMDSEntity_Hexagonal_Prism:
-        default:
-          NewElem = theHelper.AddPolyhedralVolume(nodes, nbNodeInFaces, id, theForce3d);
-        }
+      case SMDSEntity_Tetra:
+        NewElem = theHelper.AddVolume(nodes[0], nodes[1], nodes[2], nodes[3], id, theForce3d);
         break;
+      case SMDSEntity_Pyramid:
+        NewElem = theHelper.AddVolume(nodes[0], nodes[1], nodes[2], nodes[3], nodes[4], id, theForce3d);
+        break;
+      case SMDSEntity_Penta:
+        NewElem = theHelper.AddVolume(nodes[0], nodes[1], nodes[2], nodes[3], nodes[4], nodes[5], id, theForce3d);
+        break;
+      case SMDSEntity_Hexa:
+      case SMDSEntity_Quad_Hexa:
+      case SMDSEntity_TriQuad_Hexa:
+        NewElem = theHelper.AddVolume(nodes[0], nodes[1], nodes[2], nodes[3],
+                                      nodes[4], nodes[5], nodes[6], nodes[7], id, theForce3d);
+        break;
+      case SMDSEntity_Hexagonal_Prism:
+      default:
+        NewElem = theHelper.AddPolyhedralVolume(nodes, nbNodeInFaces, id, theForce3d);
       }
+      break;
+    }
     default :
       continue;
     }
@@ -9621,7 +9400,7 @@ void SMESH_MeshEditor::ConvertToQuadratic(const bool        theForce3d,
     if( newElem && smDS )
       smDS->AddElement( newElem );
 
-     // remove central nodes
+    // remove central nodes
     for ( size_t i = nodes.size() - nbCentralNodes; i < nodes.size(); ++i )
       if ( nodes[i]->NbInverseElements() == 0 )
         meshDS->RemoveFreeNode( nodes[i], smDS, /*fromGroups=*/true );
@@ -9755,7 +9534,7 @@ void SMESH_MeshEditor::ConvertFromQuadratic(TIDSortedElemSet& theElements)
   }
 
   // replace given elements by linear ones
-  SMDS_ElemIteratorPtr elemIt = elemSetIterator( theElements );
+  SMDS_ElemIteratorPtr elemIt = SMESHUtils::elemSetIterator( theElements );
   removeQuadElem( /*theSm=*/0, elemIt, /*theShapeID=*/0 );
 
   // we need to convert remaining elements whose all medium nodes are in mediumNodeIDs
@@ -9807,7 +9586,7 @@ void SMESH_MeshEditor::ConvertFromQuadratic(TIDSortedElemSet& theElements)
       }
     }
   }
-  elemIt = elemSetIterator( moreElemsToConvert );
+  elemIt = SMESHUtils::elemSetIterator( moreElemsToConvert );
   removeQuadElem( /*theSm=*/0, elemIt, /*theShapeID=*/0 );
 }
 
@@ -9824,8 +9603,7 @@ SMESH_MeshEditor::SewSideElements (TIDSortedElemSet&    theSide1,
                                    const SMDS_MeshNode* theSecondNode1,
                                    const SMDS_MeshNode* theSecondNode2)
 {
-  myLastCreatedElems.Clear();
-  myLastCreatedNodes.Clear();
+  ClearLastCreated();
 
   if ( theSide1.size() != theSide2.size() )
     return SEW_DIFF_NB_OF_ELEMENTS;
@@ -10101,12 +9879,12 @@ SMESH_MeshEditor::SewSideElements (TIDSortedElemSet&    theSide1,
 
   if ( faceSet1.size() != faceSet2.size() ) {
     // delete temporary faces: they are in reverseElements of actual nodes
-//    SMDS_FaceIteratorPtr tmpFaceIt = aTmpFacesMesh.facesIterator();
-//    while ( tmpFaceIt->more() )
-//      aTmpFacesMesh.RemoveElement( tmpFaceIt->next() );
-//    list<const SMDS_MeshElement* >::iterator tmpFaceIt = tempFaceList.begin();
-//    for (; tmpFaceIt !=tempFaceList.end(); ++tmpFaceIt)
-//      aMesh->RemoveElement(*tmpFaceIt);
+    //    SMDS_FaceIteratorPtr tmpFaceIt = aTmpFacesMesh.facesIterator();
+    //    while ( tmpFaceIt->more() )
+    //      aTmpFacesMesh.RemoveElement( tmpFaceIt->next() );
+    //    list<const SMDS_MeshElement* >::iterator tmpFaceIt = tempFaceList.begin();
+    //    for (; tmpFaceIt !=tempFaceList.end(); ++tmpFaceIt)
+    //      aMesh->RemoveElement(*tmpFaceIt);
     MESSAGE("Diff nb of faces");
     return SEW_TOPO_DIFF_SETS_OF_ELEMENTS;
   }
@@ -10245,7 +10023,7 @@ SMESH_MeshEditor::SewSideElements (TIDSortedElemSet&    theSide1,
 
   if ( aResult == SEW_OK &&
        ( //linkIt[0] != linkList[0].end() ||
-         !faceSetPtr[0]->empty() || !faceSetPtr[1]->empty() )) {
+        !faceSetPtr[0]->empty() || !faceSetPtr[1]->empty() )) {
     MESSAGE( (linkIt[0] != linkList[0].end()) <<" "<< (faceSetPtr[0]->empty()) <<
              " " << (faceSetPtr[1]->empty()));
     aResult = SEW_TOPO_DIFF_SETS_OF_ELEMENTS;
@@ -10256,9 +10034,9 @@ SMESH_MeshEditor::SewSideElements (TIDSortedElemSet&    theSide1,
   // ====================================================================
 
   // delete temporary faces
-//  SMDS_FaceIteratorPtr tmpFaceIt = aTmpFacesMesh.facesIterator();
-//  while ( tmpFaceIt->more() )
-//    aTmpFacesMesh.RemoveElement( tmpFaceIt->next() );
+  //  SMDS_FaceIteratorPtr tmpFaceIt = aTmpFacesMesh.facesIterator();
+  //  while ( tmpFaceIt->more() )
+  //    aTmpFacesMesh.RemoveElement( tmpFaceIt->next() );
   list<const SMDS_MeshElement* >::iterator tmpFaceIt = tempFaceList.begin();
   for (; tmpFaceIt !=tempFaceList.end(); ++tmpFaceIt)
     aMesh->RemoveElement(*tmpFaceIt);
@@ -10523,17 +10301,12 @@ void SMESH_MeshEditor::DoubleElements( const TIDSortedElemSet& theElements )
         type = types[i];
         break;
       }
-    // put all elements in the vector <allElems>
-    allElems.reserve( mesh->GetMeshInfo().NbElements( type ));
     elemIt = mesh->elementsIterator( type );
-    while ( elemIt->more() )
-      allElems.push_back( elemIt->next());
-    elemIt = elemSetIterator( allElems );
   }
   else
   {
     type = (*theElements.begin())->GetType();
-    elemIt = elemSetIterator( theElements );
+    elemIt = SMESHUtils::elemSetIterator( theElements );
   }
 
   // duplicate elements
@@ -10570,8 +10343,7 @@ bool SMESH_MeshEditor::DoubleNodes( const TIDSortedElemSet& theElems,
                                     const TIDSortedElemSet& theNodesNot,
                                     const TIDSortedElemSet& theAffectedElems )
 {
-  myLastCreatedElems.Clear();
-  myLastCreatedNodes.Clear();
+  ClearLastCreated();
 
   if ( theElems.size() == 0 )
     return false;
@@ -10639,7 +10411,7 @@ bool SMESH_MeshEditor::doubleNodes(SMESHDS_Mesh*           theMeshDS,
         aNewNode = theMeshDS->AddNode( aCurrNode->X(), aCurrNode->Y(), aCurrNode->Z() );
         copyPosition( aCurrNode, aNewNode );
         theNodeNodeMap[ aCurrNode ] = aNewNode;
-        myLastCreatedNodes.Append( aNewNode );
+        myLastCreatedNodes.push_back( aNewNode );
       }
       isDuplicate |= (aCurrNode != aNewNode);
       newNodes[ ind++ ] = aNewNode;
@@ -10671,8 +10443,7 @@ bool SMESH_MeshEditor::doubleNodes(SMESHDS_Mesh*           theMeshDS,
 bool SMESH_MeshEditor::DoubleNodes( const std::list< int >& theListOfNodes,
                                     const std::list< int >& theListOfModifiedElems )
 {
-  myLastCreatedElems.Clear();
-  myLastCreatedNodes.Clear();
+  ClearLastCreated();
 
   if ( theListOfNodes.size() == 0 )
     return false;
@@ -10700,7 +10471,7 @@ bool SMESH_MeshEditor::DoubleNodes( const std::list< int >& theListOfNodes,
     {
       copyPosition( aNode, aNewNode );
       anOldNodeToNewNode[ aNode ] = aNewNode;
-      myLastCreatedNodes.Append( aNewNode );
+      myLastCreatedNodes.push_back( aNewNode );
     }
   }
 
@@ -10756,8 +10527,8 @@ namespace {
 
   //================================================================================
   /*!
-  \brief Check if element located inside shape
-  \return TRUE if IN or ON shape, FALSE otherwise
+    \brief Check if element located inside shape
+    \return TRUE if IN or ON shape, FALSE otherwise
   */
   //================================================================================
 
@@ -12482,7 +12253,7 @@ int SMESH_MeshEditor::MakeBoundaryMesh(const TIDSortedElemSet& elements,
 
   SMDS_ElemIteratorPtr eIt;
   if (elements.empty()) eIt = aMesh->elementsIterator(elemType);
-  else                  eIt = elemSetIterator( elements );
+  else                  eIt = SMESHUtils::elemSetIterator( elements );
 
   while (eIt->more())
   {
@@ -12661,7 +12432,7 @@ int SMESH_MeshEditor::MakeBoundaryMesh(const TIDSortedElemSet& elements,
     else // store present elements to add them to a group
       for ( size_t i = 0 ; i < presentBndElems.size(); ++i )
       {
-        presentEditor->myLastCreatedElems.Append( presentBndElems[ i ]);
+        presentEditor->myLastCreatedElems.push_back( presentBndElems[ i ]);
       }
 
   } // loop on given elements
@@ -12672,11 +12443,11 @@ int SMESH_MeshEditor::MakeBoundaryMesh(const TIDSortedElemSet& elements,
   if ( group )
   {
     if ( SMESHDS_Group* g = dynamic_cast<SMESHDS_Group*>( group->GetGroupDS() ))
-      for ( int i = 0; i < tgtEditor.myLastCreatedElems.Size(); ++i )
-        g->SMDSGroup().Add( tgtEditor.myLastCreatedElems( i+1 ));
+      for ( size_t i = 0; i < tgtEditor.myLastCreatedElems.size(); ++i )
+        g->SMDSGroup().Add( tgtEditor.myLastCreatedElems[ i ]);
   }
-  tgtEditor.myLastCreatedElems.Clear();
-  tgtEditor2.myLastCreatedElems.Clear();
+  tgtEditor.myLastCreatedElems.clear();
+  tgtEditor2.myLastCreatedElems.clear();
 
   // -----------------------
   // 5. Copy given elements
@@ -12684,7 +12455,7 @@ int SMESH_MeshEditor::MakeBoundaryMesh(const TIDSortedElemSet& elements,
   if ( toCopyElements && targetMesh != myMesh )
   {
     if (elements.empty()) eIt = aMesh->elementsIterator(elemType);
-    else                  eIt = elemSetIterator( elements );
+    else                  eIt = SMESHUtils::elemSetIterator( elements );
     while (eIt->more())
     {
       const SMDS_MeshElement* elem = eIt->next();
@@ -12693,7 +12464,7 @@ int SMESH_MeshEditor::MakeBoundaryMesh(const TIDSortedElemSet& elements,
         tgtNodes[inode] = getNodeWithSameID( tgtMeshDS, elem->GetNode(inode) );
       tgtEditor.AddElement( tgtNodes, elemToCopy.Init( elem ));
 
-      tgtEditor.myLastCreatedElems.Clear();
+      tgtEditor.myLastCreatedElems.clear();
     }
   }
   return nbAddedBnd;

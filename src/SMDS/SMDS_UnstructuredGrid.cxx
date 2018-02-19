@@ -188,10 +188,10 @@ void SMDS_UnstructuredGrid::compactGrid(std::vector<int>& idNodesOldToNew, int n
 
   int oldNodeSize = this->GetNumberOfPoints();
   bool updateNodes = ( oldNodeSize > newNodeSize );
-  if ( updateNodes )
+  if ( true /*updateNodes*/ )
   {
     // 21125: EDF 1233 SMESH: Degradation of precision in a test case for quadratic conversion
-    // using double type for storing coordinates of nodes instead float.
+    // Use double type for storing coordinates of nodes instead float.
     vtkPoints *newPoints = vtkPoints::New();
     newPoints->SetDataType( VTK_DOUBLE );
     newPoints->SetNumberOfPoints( newNodeSize );
@@ -212,8 +212,11 @@ void SMDS_UnstructuredGrid::compactGrid(std::vector<int>& idNodesOldToNew, int n
     this->SetPoints(newPoints);
     newPoints->Delete();
   }
-  this->Points->Squeeze();
-  this->Points->Modified();
+  else
+  {
+    this->Points->Squeeze();
+    this->Points->Modified();
+  }
 
   // Compact cells if VTK IDs do not correspond to SMDS IDs or nodes compacted
 
@@ -222,7 +225,7 @@ void SMDS_UnstructuredGrid::compactGrid(std::vector<int>& idNodesOldToNew, int n
   for ( int newID = 0, nbIDs = idCellsNewToOld.size(); newID < nbIDs &&  !updateCells; ++newID )
     updateCells = ( idCellsNewToOld[ newID ] != newID );
 
-  if ( !updateCells ) // no holes in elements
+  if ( false /*!updateCells*/ ) // no holes in elements
   {
     this->Connectivity->Squeeze();
     this->Locations->Squeeze();
@@ -245,10 +248,15 @@ void SMDS_UnstructuredGrid::compactGrid(std::vector<int>& idNodesOldToNew, int n
 
   // --- create new compacted Connectivity, Locations and Types
 
+  int newConnectivitySize = this->Connectivity->GetNumberOfConnectivityEntries();
+  if ( newCellSize != oldCellSize )
+    for ( int i = 0; i < oldCellSize - 1; ++i )
+      if ( this->Types->GetValue( i ) == VTK_EMPTY_CELL )
+        newConnectivitySize -= this->Locations->GetValue( i+1 ) - this->Locations->GetValue( i );
+
   vtkCellArray *newConnectivity = vtkCellArray::New();
   newConnectivity->Initialize();
-  int oldCellDataSize = this->Connectivity->GetData()->GetSize();
-  newConnectivity->Allocate(oldCellDataSize);
+  newConnectivity->Allocate( newConnectivitySize );
 
   vtkUnsignedCharArray *newTypes = vtkUnsignedCharArray::New();
   newTypes->Initialize();
@@ -262,7 +270,6 @@ void SMDS_UnstructuredGrid::compactGrid(std::vector<int>& idNodesOldToNew, int n
 
   copyBloc(newTypes, idCellsNewToOld, idNodesOldToNew,
            newConnectivity, newLocations, pointsCell );
-  newConnectivity->Squeeze();
 
   if (vtkDoubleArray* diameters =
       vtkDoubleArray::SafeDownCast( vtkDataSet::CellData->GetScalars() )) // Balls
@@ -346,8 +353,8 @@ void SMDS_UnstructuredGrid::copyNodes(vtkPoints *       newPoints,
 }
 
 void SMDS_UnstructuredGrid::copyBloc(vtkUnsignedCharArray *  newTypes,
-                                     const std::vector<int>&  idCellsNewToOld,
-                                     const std::vector<int>&  idNodesOldToNew,
+                                     const std::vector<int>& idCellsNewToOld,
+                                     const std::vector<int>& idNodesOldToNew,
                                      vtkCellArray*           newConnectivity,
                                      vtkIdTypeArray*         newLocations,
                                      std::vector<vtkIdType>& pointsCell)

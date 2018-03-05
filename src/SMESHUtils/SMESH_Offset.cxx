@@ -40,7 +40,7 @@
 
 namespace
 {
-  const size_t theMaxNbFaces = 256; // max number of faces sharing a node
+  const int theMaxNbFaces = 256; // max number of faces sharing a node
 
   typedef NCollection_DataMap< Standard_Address, const SMDS_MeshNode* > TNNMap;
   typedef NCollection_Map< SMESH_Link, SMESH_Link >                     TLinkMap;
@@ -575,7 +575,7 @@ namespace
     TIDSortedElemSet elemSet, avoidSet;
     int iFace = 0;
     const SMDS_MeshElement* f;
-    for ( ; faceIt->more(); faceIt->next() )
+    for ( ; faceIt->more() && iFace < theMaxNbFaces; faceIt->next() )
     {
       avoidSet.insert( faces[ iFace ].myFace );
       f = SMESH_MeshAlgos::FindFaceInSet( theNewNode, faces[ iFace ].myNode2.Node(),
@@ -597,7 +597,7 @@ namespace
       faces[ iFace ].SetNodes( i0, i1 );
       faces[ iFace ].SetNormal( theFaceNormals );
     }
-    int nbFaces = Min( iFace + 1, (int)theMaxNbFaces );
+    int nbFaces = iFace + 1;
 
     theNewPos.SetCoord( 0, 0, 0 );
     gp_XYZ oldXYZ = SMESH_NodeXYZ( theNewNode );

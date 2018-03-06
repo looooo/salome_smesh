@@ -682,9 +682,10 @@ namespace
           dot *= -1;
         if ( dot * theSign < 0 )
         {
-          gp_XYZ p1 = oldXYZ + faces[ i ].Norm()     * theOffset;
-          gp_XYZ p2 = oldXYZ + faces[ iPrev ].Norm() * theOffset;
-          useOneNormal = ( p1 - p2 ).SquareModulus() > theTol * theTol;
+          useOneNormal = true;
+          // gp_XYZ p1 = oldXYZ + faces[ i ].Norm()     * theOffset;
+          // gp_XYZ p2 = oldXYZ + faces[ iPrev ].Norm() * theOffset;
+          // useOneNormal = ( p1 - p2 ).SquareModulus() > theTol * theTol;
         }
       }
       if ( useOneNormal && theNewNode->isMarked() )
@@ -1393,7 +1394,8 @@ namespace
     for ( int is2nd = 0; is2nd < 2; ++is2nd )
     {
       const SMDS_MeshElement* f = is2nd ? myFace1 : myFace2;
-      const CutFace&         cf = myCutFaces.Added( CutFace( is2nd ? myFace2 : myFace1 ));
+      if ( !f ) continue;
+      const CutFace& cf = myCutFaces.Added( CutFace( is2nd ? myFace2 : myFace1 ));
       for ( size_t i = 0; i < cf.myLinks.size(); ++i )
         if ( cf.myLinks[i].myFace == f &&
              //cf.myLinks[i].myIndex != EdgePart::_COPLANAR &&

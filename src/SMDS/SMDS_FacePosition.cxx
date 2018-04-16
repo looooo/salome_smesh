@@ -26,62 +26,63 @@
 //  Module : SMESH
 //
 #include "SMDS_FacePosition.hxx"
-#include "SMDS_EdgePosition.hxx"
+
+#include "utilities.h"
+
+using namespace std;
 
 //=======================================================================
 //function : SMDS_FacePosition
-//purpose  :
+//purpose  : 
 //=======================================================================
 
 SMDS_FacePosition::SMDS_FacePosition(const double aUParam,
                                      const double aVParam)
+   : myUParameter(aUParam),myVParameter(aVParam)
 {
-  SetParameters( aUParam,aVParam );
+  //MESSAGE("******************************************************** SMDS_FacePosition");
 }
 
-//=======================================================================
-//function : GetTypeOfPosition
-//purpose  :
-//=======================================================================
-
+/**
+*/
 SMDS_TypeOfPosition SMDS_FacePosition::GetTypeOfPosition() const
 {
-  return SMDS_TOP_FACE;
+        return SMDS_TOP_FACE;
 }
 
 void SMDS_FacePosition::SetUParameter(double aUparam)
 {
-  myParameter[0] = aUparam;
+        myUParameter = aUparam;
 }
 
 //=======================================================================
 //function : SetVParameter
-//purpose  :
+//purpose  : 
 //=======================================================================
 
 void SMDS_FacePosition::SetVParameter(double aVparam)
 {
-  myParameter[1] = aVparam;
+        myVParameter = aVparam;
 }
 
 //=======================================================================
 //function : GetUParameter
-//purpose  :
+//purpose  : 
 //=======================================================================
 
-double SMDS_FacePosition::GetUParameter() const
+double SMDS_FacePosition::GetUParameter() const 
 {
-  return myParameter[0];
+        return myUParameter;
 }
 
 //=======================================================================
 //function : GetVParameter
-//purpose  :
+//purpose  : 
 //=======================================================================
 
-double SMDS_FacePosition::GetVParameter() const
+double SMDS_FacePosition::GetVParameter() const 
 {
-  return myParameter[1];
+        return myVParameter;
 }
 
 //=======================================================================
@@ -91,6 +92,6 @@ double SMDS_FacePosition::GetVParameter() const
 
 void SMDS_FacePosition::SetParameters(double aUparam, double aVparam)
 {
-  myParameter[0] = aUparam;
-  myParameter[1] = aVparam;
+  myUParameter = aUparam;
+  myVParameter = aVparam;
 }

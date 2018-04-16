@@ -371,7 +371,8 @@ namespace {
         if ( node->GetPosition()->GetTypeOfPosition() != SMDS_TOP_EDGE )
           RETURN_BAD_RESULT("Bad node position type: node " << node->GetID() <<
                             " pos type " << node->GetPosition()->GetTypeOfPosition());
-        SMDS_EdgePositionPtr pos = node->GetPosition();
+        const SMDS_EdgePosition* pos =
+          static_cast<const SMDS_EdgePosition*>(node->GetPosition());
         u2nodes.insert( make_pair( pos->GetUParameter(), node ));
         seamNodes.insert( node );
       }
@@ -1586,7 +1587,8 @@ bool StdMeshers_Projection_2D::Compute(SMESH_Mesh& theMesh, const TopoDS_Shape& 
           break;
         }
         case  SMDS_TOP_EDGE:   {
-          SMDS_EdgePositionPtr pos = node->GetPosition();
+          const SMDS_EdgePosition* pos =
+            static_cast<const SMDS_EdgePosition*>(node->GetPosition());
           pos2nodes.insert( make_pair( pos->GetUParameter(), node ));
           break;
         }

@@ -20,40 +20,59 @@
 #include "SMDS_VtkCellIterator.hxx"
 #include "utilities.h"
 
-#include <vtkCell.h>
-#include <vtkIdList.h>
-
-_GetVtkNodes::_GetVtkNodes( vtkIdList*         _vtkIdList,
-                            SMDS_Mesh*         mesh,
-                            int                vtkCellId,
-                            SMDSAbs_EntityType aType )
+SMDS_VtkCellIterator::SMDS_VtkCellIterator(SMDS_Mesh* mesh, int vtkCellId, SMDSAbs_EntityType aType) :
+  _mesh(mesh), _cellId(vtkCellId), _index(0), _type(aType)
 {
-  vtkUnstructuredGrid* grid = mesh->GetGrid();
+  vtkUnstructuredGrid* grid = _mesh->getGrid();
+  _vtkIdList = vtkIdList::New();
   const std::vector<int>& interlace = SMDS_MeshCell::fromVtkOrder( aType );
   if ( interlace.empty() )
   {
-    grid->GetCellPoints( vtkCellId, _vtkIdList );
+    grid->GetCellPoints(_cellId, _vtkIdList);
+    _nbNodes = _vtkIdList->GetNumberOfIds();
   }
   else
   {
     vtkIdType npts, *pts;
-    grid->GetCellPoints( vtkCellId, npts, pts );
-    _vtkIdList->SetNumberOfIds( npts );
-    for (int i = 0; i < npts; i++)
+    grid->GetCellPoints( _cellId, npts, pts );
+    _vtkIdList->SetNumberOfIds( _nbNodes = npts );
+    for (int i = 0; i < _nbNodes; i++)
       _vtkIdList->SetId(i, pts[interlace[i]]);
   }
 }
 
-_GetVtkNodesToUNV::_GetVtkNodesToUNV( vtkIdList*         _vtkIdList,
-                                      SMDS_Mesh*         mesh,
-                                      int                vtkCellId,
-                                      SMDSAbs_EntityType aType )
+SMDS_VtkCellIterator::~SMDS_VtkCellIterator()
 {
-  vtkIdType * pts, npts;
-  vtkUnstructuredGrid* grid = mesh->GetGrid();
-  grid->GetCellPoints( (vtkIdType)vtkCellId, npts, pts );
+  _vtkIdList->Delete();
+}
+
+bool SMDS_VtkCellIterator::more()
+{
+  return (_index < _nbNodes);
+}
+
+const SMDS_MeshElement* SMDS_VtkCellIterator::next()
+{
+  vtkIdType id = _vtkIdList->GetId(_index++);
+  return _mesh->FindNodeVtk(id);
+}
+
+SMDS_VtkCellIteratorToUNV::SMDS_VtkCellIteratorToUNV(SMDS_Mesh* mesh, int vtkCellId, SMDSAbs_EntityType aType) :
+  SMDS_VtkCellIterator()
+{
+  _mesh = mesh;
+  _cellId = vtkCellId;
+  _index = 0;
+  _type = aType;
+  //MESSAGE("SMDS_VtkCellInterlacedIterator (UNV)" << _type);
+
+  _vtkIdList = vtkIdList::New();
+  vtkIdType* pts;
+  vtkUnstructuredGrid* grid = _mesh->getGrid();
+  grid->GetCellPoints((vtkIdType)_cellId, (vtkIdType&)_nbNodes, pts);
+  _vtkIdList->SetNumberOfIds(_nbNodes);
   const int *ids = 0;
-  switch (aType)
+  switch (_type)
   {
   case SMDSEntity_Quad_Edge:
   {
@@ -66,7 +85,7 @@ _GetVtkNodesToUNV::_GetVtkNodesToUNV( vtkIdList*         _vtkIdList,
   {
     static int id[] = { 0, 3, 1, 4, 2, 5 };
     ids = id;
-    npts = 6;
+    _nbNodes = 6;
     break;
   }
   case SMDSEntity_Quad_Quadrangle:
@@ -74,7 +93,7 @@ _GetVtkNodesToUNV::_GetVtkNodesToUNV( vtkIdList*         _vtkIdList,
   {
     static int id[] = { 0, 4, 1, 5, 2, 6, 3, 7 };
     ids = id;
-    npts = 8;
+    _nbNodes = 8;
     break;
   }
   case SMDSEntity_Quad_Tetra:
@@ -107,7 +126,7 @@ _GetVtkNodesToUNV::_GetVtkNodesToUNV( vtkIdList*         _vtkIdList,
   {
     static int id[] = { 0, 8, 1, 9, 2, 10, 3, 11, 16, 17, 18, 19, 4, 12, 5, 13, 6, 14, 7, 15 };
     ids = id;
-    npts = 20;
+    _nbNodes = 20;
     break;
   }
   case SMDSEntity_Polygon:
@@ -115,42 +134,62 @@ _GetVtkNodesToUNV::_GetVtkNodesToUNV( vtkIdList*         _vtkIdList,
   case SMDSEntity_Polyhedra:
   case SMDSEntity_Quad_Polyhedra:
   default:
-    const std::vector<int>& i = SMDS_MeshCell::interlacedSmdsOrder( aType, npts );
+    const std::vector<int>& i = SMDS_MeshCell::interlacedSmdsOrder(aType, _nbNodes);
     if ( !i.empty() )
       ids = & i[0];
   }
 
-  _vtkIdList->SetNumberOfIds( npts );
-
   if ( ids )
-    for (int i = 0; i < npts; i++)
+    for (int i = 0; i < _nbNodes; i++)
       _vtkIdList->SetId(i, pts[ids[i]]);
   else
-    for (int i = 0; i < npts; i++)
+    for (int i = 0; i < _nbNodes; i++)
       _vtkIdList->SetId(i, pts[i]);
 }
 
-_GetVtkNodesPolyh::_GetVtkNodesPolyh( vtkIdList*         _vtkIdList,
-                                      SMDS_Mesh*         mesh,
-                                      int                vtkCellId,
-                                      SMDSAbs_EntityType aType )
+bool SMDS_VtkCellIteratorToUNV::more()
 {
-  vtkUnstructuredGrid* grid = mesh->GetGrid();
-  switch (aType)
+  return SMDS_VtkCellIterator::more();
+}
+
+const SMDS_MeshNode* SMDS_VtkCellIteratorToUNV::next()
+{
+  return static_cast< const SMDS_MeshNode* >( SMDS_VtkCellIterator::next() );
+}
+
+SMDS_VtkCellIteratorToUNV::~SMDS_VtkCellIteratorToUNV()
+{
+}
+
+SMDS_VtkCellIteratorPolyH::SMDS_VtkCellIteratorPolyH(SMDS_Mesh* mesh, int vtkCellId, SMDSAbs_EntityType aType) :
+  SMDS_VtkCellIterator()
+{
+  _mesh = mesh;
+  _cellId = vtkCellId;
+  _index = 0;
+  _type = aType;
+  //MESSAGE("SMDS_VtkCellIteratorPolyH " << _type);
+  _vtkIdList = vtkIdList::New();
+  vtkUnstructuredGrid* grid = _mesh->getGrid();
+  grid->GetCellPoints(_cellId, _vtkIdList);
+  _nbNodes = _vtkIdList->GetNumberOfIds();
+  switch (_type)
   {
   case SMDSEntity_Polyhedra:
   {
+    //MESSAGE("SMDS_VtkCellIterator Polyhedra");
     vtkIdType nFaces = 0;
     vtkIdType* ptIds = 0;
-    grid->GetFaceStream( vtkCellId, nFaces, ptIds );
-    int id = 0, nbNodesInFaces = 0;
+    grid->GetFaceStream(_cellId, nFaces, ptIds);
+    int id = 0;
+    _nbNodesInFaces = 0;
     for (int i = 0; i < nFaces; i++)
     {
       int nodesInFace = ptIds[id]; // nodeIds in ptIds[id+1 .. id+nodesInFace]
-      nbNodesInFaces += nodesInFace;
+      _nbNodesInFaces += nodesInFace;
       id += (nodesInFace + 1);
     }
-    _vtkIdList->SetNumberOfIds( nbNodesInFaces );
+    _vtkIdList->SetNumberOfIds(_nbNodesInFaces);
     id = 0;
     int n = 0;
     for (int i = 0; i < nFaces; i++)
@@ -165,4 +204,13 @@ _GetVtkNodesPolyh::_GetVtkNodesPolyh( vtkIdList*         _vtkIdList,
   default:
     assert(0);
   }
+}
+
+SMDS_VtkCellIteratorPolyH::~SMDS_VtkCellIteratorPolyH()
+{
+}
+
+bool SMDS_VtkCellIteratorPolyH::more()
+{
+  return (_index < _nbNodesInFaces);
 }

@@ -26,15 +26,15 @@
 #pragma warning(disable:4786)
 #endif
 
-#include "SMDS_FaceOfNodes.hxx"
-
 #include "SMDS_SetIterator.hxx"
+#include "SMDS_FaceOfNodes.hxx"
+#include "SMDS_IteratorOfElements.hxx"
 #include "SMDS_MeshNode.hxx"
 #include "SMDS_Mesh.hxx"
 
-#include <utilities.h>
+#include "utilities.h"
 
-#include <boost/make_shared.hpp>
+using namespace std;
 
 //=======================================================================
 //function : NbEdges
@@ -43,25 +43,17 @@
 
 int SMDS_FaceOfNodes::NbEdges() const
 {
-  return NbNodes();
+        return NbNodes();
 }
 
 int SMDS_FaceOfNodes::NbFaces() const
 {
-  return 1;
+        return 1;
 }
 
 int SMDS_FaceOfNodes::NbNodes() const
 {
-  return myNbNodes;
-}
-
-int SMDS_FaceOfNodes::GetNodeIndex( const SMDS_MeshNode* node ) const
-{
-  for ( int i = 0; i < myNbNodes; ++i )
-    if ( myNodes[i] == node )
-      return i;
-  return -1;
+        return myNbNodes;
 }
 
 //=======================================================================
@@ -71,31 +63,81 @@ int SMDS_FaceOfNodes::GetNodeIndex( const SMDS_MeshNode* node ) const
 
 void SMDS_FaceOfNodes::Print(ostream & OS) const
 {
-  OS << "face <" << GetID() << " > : ";
-  int i;
-  for (i = 0; i < NbNodes() - 1; i++) OS << myNodes[i] << ",";
-  OS << myNodes[i] << ") " << endl;
+        OS << "face <" << GetID() << " > : ";
+        int i;
+        for (i = 0; i < NbNodes() - 1; i++) OS << myNodes[i] << ",";
+        OS << myNodes[i] << ") " << endl;
 }
 
-SMDS_ElemIteratorPtr SMDS_FaceOfNodes::nodesIterator() const
-{
-  return boost::make_shared< SMDS_NodeArrayElemIterator >( &myNodes[0], &myNodes[0] + NbNodes() );
-}
+//=======================================================================
+//function : elementsIterator
+//purpose  : 
+//=======================================================================
 
-SMDS_NodeIteratorPtr SMDS_FaceOfNodes::nodeIterator() const
+class SMDS_FaceOfNodes_MyIterator:public SMDS_NodeArrayElemIterator
 {
-  return boost::make_shared< SMDS_NodeArrayIterator >( &myNodes[0], &myNodes[0] + NbNodes() );
+ public:
+  SMDS_FaceOfNodes_MyIterator(const SMDS_MeshNode* const *s, int l):
+    SMDS_NodeArrayElemIterator( s, & s[ l ] ) {}
+};
+
+/// ===================================================================
+/*!
+ * \brief Iterator on edges of face
+ */
+/// ===================================================================
+
+class _MyEdgeIterator : public SMDS_ElemIterator
+{
+  vector< const SMDS_MeshElement* > myElems;
+  size_t                            myIndex;
+public:
+  _MyEdgeIterator(const SMDS_FaceOfNodes* face):myIndex(0) {
+    myElems.reserve( face->NbNodes() );
+    for ( int i = 0; i < face->NbNodes(); ++i ) {
+      const SMDS_MeshElement* edge =
+        SMDS_Mesh::FindEdge( face->GetNode( i ), face->GetNodeWrap( i + 1 ));
+      if ( edge )
+        myElems.push_back( edge );
+    }
+  }
+  /// Return true if and only if there are other object in this iterator
+  virtual bool more() { return myIndex < myElems.size(); }
+
+  /// Return the current object and step to the next one
+  virtual const SMDS_MeshElement* next() { return myElems[ myIndex++ ]; }
+};
+
+SMDS_ElemIteratorPtr SMDS_FaceOfNodes::elementsIterator( SMDSAbs_ElementType type ) const
+{
+  switch(type)
+  {
+  case SMDSAbs_Face:
+    return SMDS_MeshElement::elementsIterator(SMDSAbs_Face);
+  case SMDSAbs_Node:
+    return SMDS_ElemIteratorPtr(new SMDS_FaceOfNodes_MyIterator(myNodes,myNbNodes));
+  case SMDSAbs_Edge:
+    return SMDS_ElemIteratorPtr(new _MyEdgeIterator( this ));
+    break;
+  default:
+    return SMDS_ElemIteratorPtr
+      (new SMDS_IteratorOfElements
+       (this,type,SMDS_ElemIteratorPtr
+        (new SMDS_FaceOfNodes_MyIterator(myNodes,myNbNodes))));
+  }
+  return SMDS_ElemIteratorPtr();
 }
 
 SMDS_FaceOfNodes::SMDS_FaceOfNodes(const SMDS_MeshNode* node1,
                                    const SMDS_MeshNode* node2,
                                    const SMDS_MeshNode* node3)
 {
-  myNbNodes = 3;
-  myNodes[0]=node1;
-  myNodes[1]=node2;
-  myNodes[2]=node3;
-  myNodes[3]=0;
+  //MESSAGE("******************************************************* SMDS_FaceOfNodes");
+        myNbNodes = 3;
+        myNodes[0]=node1;
+        myNodes[1]=node2;
+        myNodes[2]=node3;
+        myNodes[3]=0;
 }
 
 SMDS_FaceOfNodes::SMDS_FaceOfNodes(const SMDS_MeshNode* node1,
@@ -103,11 +145,12 @@ SMDS_FaceOfNodes::SMDS_FaceOfNodes(const SMDS_MeshNode* node1,
                                    const SMDS_MeshNode* node3,
                                    const SMDS_MeshNode* node4)
 {
-  myNbNodes = 4;
-  myNodes[0]=node1;
-  myNodes[1]=node2;
-  myNodes[2]=node3;
-  myNodes[3]=node4;       
+  //MESSAGE("******************************************************* SMDS_FaceOfNodes");
+        myNbNodes = 4;
+        myNodes[0]=node1;
+        myNodes[1]=node2;
+        myNodes[2]=node3;
+        myNodes[3]=node4;       
 }
 bool SMDS_FaceOfNodes::ChangeNodes(const SMDS_MeshNode* nodes[],
                                    const int            nbNodes)

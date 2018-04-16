@@ -30,33 +30,89 @@
 #endif
 
 #include "SMDS_MeshGroup.hxx"
+#include "utilities.h"
 
-#include "SMDS_SetIterator.hxx"
-#include "ObjectPool.hxx"
-
-#include <utilities.h>
-
-#include <boost/make_shared.hpp>
+using namespace std;
 
 //=======================================================================
 //function : SMDS_MeshGroup
-//purpose  :
+//purpose  : 
 //=======================================================================
 
-SMDS_MeshGroup::SMDS_MeshGroup(const SMDS_Mesh *         theMesh,
+SMDS_MeshGroup::SMDS_MeshGroup(const SMDS_Mesh * theMesh,
                                const SMDSAbs_ElementType theType)
-  : SMDS_ElementHolder( theMesh ), myType(theType), myTic(0)
+  :myMesh(theMesh),myType(theType), myParent(NULL), myTic(0)
 {
 }
 
 //=======================================================================
+//function : SMDS_MeshGroup
+//purpose  : 
+//=======================================================================
+
+SMDS_MeshGroup::SMDS_MeshGroup(SMDS_MeshGroup * theParent,
+                               const SMDSAbs_ElementType theType)
+        :myMesh(theParent->myMesh),myType(theType), myParent(theParent)
+{
+}
+
+//=======================================================================
+//function : AddSubGroup
+//purpose  : 
+//=======================================================================
+
+const SMDS_MeshGroup *SMDS_MeshGroup::AddSubGroup
+                (const SMDSAbs_ElementType theType)
+{
+        const SMDS_MeshGroup * subgroup = new SMDS_MeshGroup(this,theType);
+        myChildren.insert(myChildren.end(),subgroup);
+        return subgroup;
+}
+
+//=======================================================================
+//function : RemoveSubGroup
+//purpose  : 
+//=======================================================================
+
+bool SMDS_MeshGroup::RemoveSubGroup(const SMDS_MeshGroup * theGroup)
+{
+        bool found = false;     
+        list<const SMDS_MeshGroup*>::iterator itgroup;
+        for(itgroup=myChildren.begin(); itgroup!=myChildren.end(); itgroup++)
+        {
+                const SMDS_MeshGroup* subgroup=*itgroup;
+                if (subgroup == theGroup)
+                {
+                        found = true;
+                        myChildren.erase(itgroup);
+                }
+        }
+
+        return found;
+}
+
+//=======================================================================
+//function : RemoveFromParent
+//purpose  : 
+//=======================================================================
+
+bool SMDS_MeshGroup::RemoveFromParent()
+{
+        
+        if (myParent==NULL) return false;
+        else
+        {
+                return (myParent->RemoveSubGroup(this));
+        }
+}
+//=======================================================================
 //function : Clear
-//purpose  :
+//purpose  : 
 //=======================================================================
 
 void SMDS_MeshGroup::Clear()
 {
-  clearVector( myElements );
+  myElements.clear();
   myType = SMDSAbs_All;
   ++myTic;
 }
@@ -76,8 +132,8 @@ bool SMDS_MeshGroup::Add(const SMDS_MeshElement * theElem)
     MESSAGE("SMDS_MeshGroup::Add : Type Mismatch "<<theElem->GetType()<<"!="<<myType);
     return false;
   }
-
-  myElements.insert(theElem);
+        
+  myElements.insert(myElements.end(), theElem);
   ++myTic;
 
   return true;
@@ -85,12 +141,12 @@ bool SMDS_MeshGroup::Add(const SMDS_MeshElement * theElem)
 
 //=======================================================================
 //function : Remove
-//purpose  :
+//purpose  : 
 //=======================================================================
 
 bool SMDS_MeshGroup::Remove(const SMDS_MeshElement * theElem)
 {
-  TElementSet::iterator found = myElements.find(theElem);
+  set<const SMDS_MeshElement *>::iterator found = myElements.find(theElem);
   if ( found != myElements.end() ) {
     myElements.erase(found);
     if (myElements.empty()) myType = SMDSAbs_All;
@@ -119,39 +175,4 @@ void SMDS_MeshGroup::SetType(const SMDSAbs_ElementType theType)
 {
   if (IsEmpty())
     myType = theType;
-}
-
-//=======================================================================
-//function : GetElements
-//purpose  : 
-//=======================================================================
-
-SMDS_ElemIteratorPtr SMDS_MeshGroup::GetElements() const
-{
-  typedef SMDS_SetIterator< const SMDS_MeshElement*, TIterator > TSetIterator;
-  return boost::make_shared< TSetIterator >( myElements.begin(), myElements.end() );
-}
-
-//=======================================================================
-//function : Move contents of another group
-//purpose  : 
-//=======================================================================
-
-void SMDS_MeshGroup::operator=( SMDS_MeshGroup && other )
-{
-  myMesh = other.myMesh;
-  myType = other.myType;
-  myElements = std::move( other.myElements );
-  ++myTic;
-}
-
-//=======================================================================
-//function : tmpClear
-//purpose  : temporary remove its elements before mesh compacting
-//=======================================================================
-
-void SMDS_MeshGroup::tmpClear()
-{
-  compact();
-  myElements.clear();
 }

@@ -801,7 +801,8 @@ bool SMESH_Pattern::Load (SMESH_Mesh*        theMesh,
             ++nbMeduimNodes;
             continue;
           }
-          SMDS_EdgePositionPtr epos = node->GetPosition();
+          const SMDS_EdgePosition* epos =
+            static_cast<const SMDS_EdgePosition*>(node->GetPosition());
           double u = epos->GetUParameter();
           paramNodeMap.insert( make_pair( u, node ));
         }
@@ -928,7 +929,8 @@ bool SMESH_Pattern::Load (SMESH_Mesh*        theMesh,
         if ( theProject || edgesUVBox.IsOut( p->myInitUV ) )
           p->myInitUV = project( node, projector );
         else {
-          SMDS_FacePositionPtr pos = node->GetPosition();
+          const SMDS_FacePosition* pos =
+            static_cast<const SMDS_FacePosition*>(node->GetPosition());
           p->myInitUV.SetCoord( pos->GetUParameter(), pos->GetVParameter() );
         }
         p->myInitXYZ.SetCoord( p->myInitUV.X(), p->myInitUV.Y(), 0 );
@@ -3286,7 +3288,8 @@ bool SMESH_Pattern::Load (SMESH_Mesh*         theMesh,
         const SMDS_MeshNode* node = nIt->next();
         if ( isQuadMesh && SMESH_MeshEditor::IsMedium( node, SMDSAbs_Edge ))
           continue;
-        SMDS_EdgePositionPtr epos = node->GetPosition();
+        const SMDS_EdgePosition* epos =
+          static_cast<const SMDS_EdgePosition*>(node->GetPosition());
         double u = ( epos->GetUParameter() - f ) / ( l - f );
         (*pIt)->myInitXYZ.SetCoord( iCoord, isForward ? u : 1 - u );
       }
@@ -4169,8 +4172,7 @@ bool SMESH_Pattern::MakeMesh(SMESH_Mesh* theMesh,
     createElements( theMesh, nodesVector, myElemPointIDs, myElements );
   }
 
-  aMeshDS->Modified();
-  aMeshDS->CompactMesh();
+  aMeshDS->compactMesh();
 
   if ( myToKeepNodes )
     myOutNodes.swap( nodesVector );

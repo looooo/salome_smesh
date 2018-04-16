@@ -2209,7 +2209,8 @@ FindMatchingNodesOnFaces( const TopoDS_Face&     face1,
       SMDS_NodeIteratorPtr nIt = edgeSM->GetNodes();
       while ( nIt->more() ) {
         const SMDS_MeshNode* node = nIt->next();
-        SMDS_EdgePositionPtr pos = node->GetPosition();
+        const SMDS_EdgePosition* pos =
+          static_cast<const SMDS_EdgePosition*>(node->GetPosition());
         pos2nodes.insert( make_pair( pos->GetUParameter(), node ));
       }
       if ((int) pos2nodes.size() != edgeSM->NbNodes() )
@@ -2885,6 +2886,7 @@ namespace StdMeshers_ProjectionUtils
 
     double bc[3]; // barycentric coordinates
     int    nodeIDs[3]; // nodes of a delaunay triangle
+    const SMDS_FacePosition* pos;
 
     _delaunay.InitTraversal( nbSrcNodes );
 
@@ -2902,8 +2904,8 @@ namespace StdMeshers_ProjectionUtils
       tgtNode = n2n->second;
       tgtMesh->MoveNode( tgtNode, xyz.X(), xyz.Y(), xyz.Z() );
 
-      if ( SMDS_FacePositionPtr pos = tgtNode->GetPosition() )
-        pos->SetParameters( uvNew.X(), uvNew.Y() );
+      if (( pos = dynamic_cast< const SMDS_FacePosition* >( tgtNode->GetPosition() )))
+        const_cast<SMDS_FacePosition*>( pos )->SetParameters( uvNew.X(), uvNew.Y() );
 
       --nbSrcNodes;
     }

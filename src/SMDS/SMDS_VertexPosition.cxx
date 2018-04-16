@@ -21,48 +21,28 @@
 //
 
 //  SMESH SMDS : implementation of Salome mesh data structure
-//  File   : SMDS_CellOfNodes.hxx
+//  File   : SMDS_VertexPosition.cxx
+//  Author : Jean-Michel BOULCOURT
 //  Module : SMESH
 //
-#ifndef _SMDS_CellOfNodes_HeaderFile
-#define _SMDS_CellOfNodes_HeaderFile
+#include "SMDS_VertexPosition.hxx"
 
-#include "SMESH_SMDS.hxx"
-        
-#include "SMDS_MeshElement.hxx"
+#include "utilities.h"
 
-// ============================================================
-/*!
- * \brief Base class for elements of not contained in the mesh
- */
-// ============================================================
+using namespace std;
 
+//=======================================================================
+//function : SMDS_VertexPosition
+//purpose  : 
+//=======================================================================
 
-class SMDS_EXPORT SMDS_CellOfNodes : public SMDS_MeshElement
+SMDS_VertexPosition:: SMDS_VertexPosition()
 {
-public:
+  //MESSAGE("*********************************************** SMDS_VertexPosition " << aVertexId);
+}
 
-  virtual int GetID() const;
-  virtual int GetShapeID() const;
-
-  virtual void setIsMarked( bool is ) const;
-  virtual bool isMarked() const;
-
-  virtual VTKCellType GetVtkType() const { return VTK_EMPTY_CELL; }
-
- protected:
-
-  SMDS_CellOfNodes( int id = -1, int shapeID = 0);
-
-  virtual void setID( const int id);
-  virtual void setShapeID( const int shapeID );
-
-  int  myID;
-  int  myShapeID;
-
-  enum Bits { // use the 1st right bit of myShapeId to set/unset a mark
-    BIT_IS_MARKED = 1,
-    BITS_SHIFT = 1
-  };
-};
-#endif
+SMDS_TypeOfPosition SMDS_VertexPosition::GetTypeOfPosition() const
+{
+  //MESSAGE("################################################# GetTypeOfPosition");
+        return SMDS_TOP_VERTEX;
+}

@@ -31,6 +31,7 @@
 
 #include "StdMeshers_ProjectionUtils.hxx"
 
+#include "SMDS_PolyhedralVolumeOfNodes.hxx"
 #include "SMDS_VolumeTool.hxx"
 #include "SMESHDS_Hypothesis.hxx"
 #include "SMESHDS_Mesh.hxx"
@@ -407,7 +408,8 @@ bool StdMeshers_Projection_3D::Compute(SMESH_Mesh& aMesh, const TopoDS_Shape& aS
                                  nodes[6],
                                  nodes[7], id, force3d); break;
     default: // polyhedron
-      const SMDS_MeshVolume * poly = tgtMeshDS->DownCast<SMDS_MeshVolume>( srcVol );
+      const SMDS_VtkVolume * poly =
+        dynamic_cast<const SMDS_VtkVolume*>( srcVol );
       if ( !poly )
         RETURN_BAD_RESULT("Unexpected volume type");
       if ( !poly->IsPoly())

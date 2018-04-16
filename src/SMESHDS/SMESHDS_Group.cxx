@@ -19,12 +19,16 @@
 //
 // See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 //
+
+//  SMESH SMESHDS : idl implementation based on 'SMESH' unit's classes
 //  File   : SMESHDS_Group.cxx
 //  Module : SMESH
+//  $Header$
 //
-
 #include "SMESHDS_Group.hxx"
 #include "SMESHDS_Mesh.hxx"
+
+using namespace std;
 
 //=============================================================================
 /*!
@@ -35,8 +39,8 @@
 SMESHDS_Group::SMESHDS_Group (const int                 theID,
                               const SMESHDS_Mesh*       theMesh,
                               const SMDSAbs_ElementType theType)
-  : SMESHDS_GroupBase(theID,theMesh,theType),
-    myGroup(theMesh,theType)
+     : SMESHDS_GroupBase(theID,theMesh,theType),
+       myGroup(theMesh,theType)
 {
 }
 
@@ -143,7 +147,20 @@ void SMESHDS_Group::Clear()
   myGroup.Clear();
   resetIterator();
 }
-  
+
+// =====================
+// class MyGroupIterator
+// =====================
+
+class MyGroupIterator: public SMDS_ElemIterator
+{
+  const SMDS_MeshGroup& myGroup;
+ public:
+  MyGroupIterator(const SMDS_MeshGroup& group): myGroup(group) { myGroup.InitIterator(); }
+  bool more() { return myGroup.More(); }
+  const SMDS_MeshElement* next() { return myGroup.Next(); }
+};
+   
 //=======================================================================
 //function : GetElements
 //purpose  : 
@@ -151,7 +168,7 @@ void SMESHDS_Group::Clear()
 
 SMDS_ElemIteratorPtr SMESHDS_Group::GetElements() const
 {
-  return myGroup.GetElements();
+  return SMDS_ElemIteratorPtr( new MyGroupIterator ( myGroup ));
 }
 
 //================================================================================
@@ -172,14 +189,11 @@ int SMESHDS_Group::GetTic() const
 
 void SMESHDS_Group::SetType(SMDSAbs_ElementType theType)
 {
-  if ( myGroup.IsEmpty() || GetType() == SMDSAbs_All )
-  {
+  if ( myGroup.IsEmpty() || GetType() == SMDSAbs_All ) {
     SMESHDS_GroupBase::SetType( theType );
     myGroup.SetType ( theType );
   }
   else
-  {
     SMESHDS_GroupBase::SetType( myGroup.GetType() );
-  }
 }
 

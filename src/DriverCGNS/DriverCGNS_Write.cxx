@@ -301,26 +301,26 @@ Driver_Mesh::Status DriverCGNS_Write::Perform()
     vector< double > coords( myMesh->NbNodes() );
     int iC;
     // X
-    SMDS_NodeIteratorPtr nIt = myMesh->nodesIterator();
+    SMDS_NodeIteratorPtr nIt = myMesh->nodesIterator( /*idInceasingOrder=*/true );
     for ( int i = 0; nIt->more(); ++i ) coords[i] = nIt->next()->X();
     if ( cg_coord_write( _fn, iBase, iZone, CGNS_ENUMV(RealDouble),
                           "CoordinateX", &coords[0], &iC) != CG_OK )
       return addMessage( cg_get_error(), /*fatal = */true );
     // Y
-    nIt = myMesh->nodesIterator();
+    nIt = myMesh->nodesIterator( /*idInceasingOrder=*/true );
     for ( int i = 0; nIt->more(); ++i ) coords[i] = nIt->next()->Y();
     if ( cg_coord_write( _fn, iBase, iZone, CGNS_ENUMV(RealDouble),
                           "CoordinateY", &coords[0], &iC) != CG_OK )
       return addMessage( cg_get_error(), /*fatal = */true );
     // Z
-    nIt = myMesh->nodesIterator();
+    nIt = myMesh->nodesIterator( /*idInceasingOrder=*/true );
     for ( int i = 0; nIt->more(); ++i ) coords[i] = nIt->next()->Z();
     if ( cg_coord_write( _fn, iBase, iZone, CGNS_ENUMV(RealDouble),
                           "CoordinateZ", &coords[0], &iC) != CG_OK )
       return addMessage( cg_get_error(), /*fatal = */true );
 
     // store CGNS ids of nodes
-    nIt = myMesh->nodesIterator();
+    nIt = myMesh->nodesIterator( /*idInceasingOrder=*/true );
     for ( int i = 0; nIt->more(); ++i )
     {
       const SMDS_MeshElement* n = nIt->next();

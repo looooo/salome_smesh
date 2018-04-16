@@ -119,10 +119,8 @@ class MESHDRIVERMED_EXPORT DriverMED_Family
 
   bool MemberOf(std::string theGroupName) const;
 
-  int  GetGroupAttributVal() const;
+  int GetGroupAttributVal() const;
   void SetGroupAttributVal( int theValue);
-
-  size_t NbElements( SMDSAbs_ElementType ) const;
 
  private:
   //! Initialize the tool by SMESHDS_GroupBase

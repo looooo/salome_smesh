@@ -33,17 +33,18 @@
 
 class SMDS_EXPORT SMDS_FacePosition:public SMDS_Position
 {
- public:
-  SMDS_FacePosition(double aUParam=0, double aVParam=0);
-  SMDS_TypeOfPosition GetTypeOfPosition() const;
-  virtual void SetUParameter(double aUparam);
-  virtual void SetVParameter(double aVparam);
-  virtual void SetParameters(double aUparam, double aVparam);
-  virtual double GetUParameter() const;
-  virtual double GetVParameter() const;
-  virtual const double* GetParameters() const { return &myParameter[0]; }
 
- private:
-  double myParameter[2];
+  public:
+        SMDS_FacePosition(double aUParam=0, double aVParam=0);
+        SMDS_TypeOfPosition GetTypeOfPosition() const;
+        void SetUParameter(double aUparam);
+        void SetVParameter(double aVparam);
+        void SetParameters(double aUparam, double aVparam);
+        double GetUParameter() const;
+        double GetVParameter() const;
+
+  private:
+        double myUParameter;
+        double myVParameter;
 };
 #endif

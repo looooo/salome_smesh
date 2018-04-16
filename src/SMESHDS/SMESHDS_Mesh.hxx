@@ -66,7 +66,7 @@ class DownIdType;
 
 class SMESHDS_EXPORT SMESHDS_Mesh : public SMDS_Mesh
 {
- public:
+public:
   SMESHDS_Mesh(int theMeshID, bool theIsEmbeddedMode);
   bool IsEmbeddedMode();
   void SetPersistentId(int id);
@@ -566,18 +566,18 @@ class SMESHDS_EXPORT SMESHDS_Mesh : public SMDS_Mesh
   virtual SMDS_MeshFace* AddQuadPolygonalFace(const std::vector<const SMDS_MeshNode*> & nodes);
 
   virtual SMDS_MeshVolume* AddPolyhedralVolumeWithID
-    (const std::vector<int>& nodes_ids,
-     const std::vector<int>& quantities,
-     const int               ID);
+                           (const std::vector<int>& nodes_ids,
+                            const std::vector<int>& quantities,
+                            const int               ID);
 
   virtual SMDS_MeshVolume* AddPolyhedralVolumeWithID
-    (const std::vector<const SMDS_MeshNode*>& nodes,
-     const std::vector<int>&                  quantities,
-     const int                                ID);
+                           (const std::vector<const SMDS_MeshNode*>& nodes,
+                            const std::vector<int>&                  quantities,
+                            const int                                ID);
 
   virtual SMDS_MeshVolume* AddPolyhedralVolume
-    (const std::vector<const SMDS_MeshNode*>& nodes,
-     const std::vector<int>&                  quantities);
+                           (const std::vector<const SMDS_MeshNode*>& nodes,
+                            const std::vector<int>&                  quantities);
 
   virtual void MoveNode(const SMDS_MeshNode *, double x, double y, double z);
   virtual void RemoveNode(const SMDS_MeshNode *);
@@ -587,7 +587,7 @@ class SMESHDS_EXPORT SMESHDS_Mesh : public SMDS_Mesh
    *  Methods do not work for meshes with descendants.
    *  Implemented for fast cleaning of meshes.
    */
-  bool RemoveFreeNode   (const SMDS_MeshNode *,    SMESHDS_SubMesh *, bool fromGroups=true);
+  void RemoveFreeNode   (const SMDS_MeshNode *,    SMESHDS_SubMesh *, bool fromGroups=true);
   void RemoveFreeElement(const SMDS_MeshElement *, SMESHDS_SubMesh *, bool fromGroups=true);
 
   void ClearMesh();
@@ -646,13 +646,13 @@ class SMESHDS_EXPORT SMESHDS_Mesh : public SMDS_Mesh
 
   bool IsGroupOfSubShapes (const TopoDS_Shape& aSubShape) const;
 
-  virtual void CompactMesh();
+  virtual void compactMesh();
   void CleanDownWardConnectivity();
   void BuildDownWardConnectivity(bool withEdges);
 
   ~SMESHDS_Mesh();
   
- private:
+private:
 
   ShapeToHypothesis          myShapeToHypothesis;
 
@@ -665,12 +665,12 @@ class SMESHDS_EXPORT SMESHDS_Mesh : public SMDS_Mesh
   TopTools_IndexedMapOfShape myIndexToShape;
 
   typedef std::set<SMESHDS_GroupBase*> TGroups;
-  TGroups                    myGroups;
+  TGroups myGroups;
 
   SMESHDS_Script*            myScript;
   bool                       myIsEmbeddedMode;
 
-  int add( const SMDS_MeshElement* elem, SMESHDS_SubMesh* subMesh );
+  bool add( const SMDS_MeshElement* elem, SMESHDS_SubMesh* subMesh );
   SMESHDS_SubMesh* getSubmesh( const TopoDS_Shape & shape);
 };
 

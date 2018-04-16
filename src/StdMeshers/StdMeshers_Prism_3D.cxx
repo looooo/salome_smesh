@@ -1798,8 +1798,9 @@ bool StdMeshers_Prism_3D::computeWalls(const Prism_3D::TPrismTopo& thePrism)
       if ( myHelper->GetIsQuadratic() )
       {
         // fill myHelper with medium nodes built by quadAlgo
-        for ( SMDS_ElemIteratorPtr fIt = fSM->GetSubMeshDS()->GetElements(); fIt->more(); )
-          myHelper->AddTLinks( SMDS_Mesh::DownCast<SMDS_MeshFace>( fIt->next() ));
+        SMDS_ElemIteratorPtr fIt = fSM->GetSubMeshDS()->GetElements();
+        while ( fIt->more() )
+          myHelper->AddTLinks( dynamic_cast<const SMDS_MeshFace*>( fIt->next() ));
       }
     }
   }
@@ -4846,7 +4847,7 @@ TPCurveOnHorFaceAdaptor::TPCurveOnHorFaceAdaptor( const TSideFace*   sideFace,
         }
         if ( !C2d.IsNull() )
         {
-          double u = SMDS_EdgePositionPtr( n->GetPosition() )->GetUParameter();
+          double u = static_cast< const SMDS_EdgePosition* >( n->GetPosition() )->GetUParameter();
           if ( f <= u && u <= l )
           {
             uv = C2d->Value( u ).XY();

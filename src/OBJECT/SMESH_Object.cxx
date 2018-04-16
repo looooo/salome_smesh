@@ -31,6 +31,7 @@
 #include "SMDS_BallElement.hxx"
 #include "SMDS_Mesh.hxx"
 #include "SMDS_MeshCell.hxx"
+#include "SMDS_PolyhedralVolumeOfNodes.hxx"
 #include "SMESHDS_Mesh.hxx"
 #include "SMESHDS_Script.hxx"
 #include "SMESH_Actor.h"
@@ -80,6 +81,54 @@ static int MYDEBUGWITHFILES = 0;
   Class       : SMESH_VisualObjDef
   Description : Base class for all mesh objects to be visuilised
 */
+
+//=================================================================================
+// function : getCellType
+// purpose  : Get type of VTK cell
+//=================================================================================
+// static inline vtkIdType getCellType( const SMDSAbs_ElementType theType,
+//                                      const bool                thePoly,
+//                                      const int                 theNbNodes )
+// {
+//   switch( theType )
+//   {
+//     case SMDSAbs_0DElement:         return VTK_VERTEX;
+
+//     case SMDSAbs_Ball:              return VTK_POLY_VERTEX;
+
+//     case SMDSAbs_Edge: 
+//       if( theNbNodes == 2 )         return VTK_LINE;
+//       else if ( theNbNodes == 3 )   return VTK_QUADRATIC_EDGE;
+//       else return VTK_EMPTY_CELL;
+
+//     case SMDSAbs_Face  :
+//       if (thePoly && theNbNodes>2 ) return VTK_POLYGON;
+//       else if ( theNbNodes == 3 )   return VTK_TRIANGLE;
+//       else if ( theNbNodes == 4 )   return VTK_QUAD;
+//       else if ( theNbNodes == 6 )   return VTK_QUADRATIC_TRIANGLE;
+//       else if ( theNbNodes == 8 )   return VTK_QUADRATIC_QUAD;
+//       else if ( theNbNodes == 9 )   return VTK_BIQUADRATIC_QUAD;
+//       else if ( theNbNodes == 7 )   return VTK_BIQUADRATIC_TRIANGLE;
+//       else return VTK_EMPTY_CELL;
+      
+//     case SMDSAbs_Volume:
+//       if (thePoly && theNbNodes>3 ) return VTK_POLYHEDRON; //VTK_CONVEX_POINT_SET;
+//       else if ( theNbNodes == 4 )   return VTK_TETRA;
+//       else if ( theNbNodes == 5 )   return VTK_PYRAMID;
+//       else if ( theNbNodes == 6 )   return VTK_WEDGE;
+//       else if ( theNbNodes == 8 )   return VTK_HEXAHEDRON;
+//       else if ( theNbNodes == 12 )  return VTK_HEXAGONAL_PRISM;
+//       else if ( theNbNodes == 10 )  return VTK_QUADRATIC_TETRA;
+//       else if ( theNbNodes == 20 )  return VTK_QUADRATIC_HEXAHEDRON;
+//       else if ( theNbNodes == 27 )  return VTK_TRIQUADRATIC_HEXAHEDRON;
+//       else if ( theNbNodes == 15 )  return VTK_QUADRATIC_WEDGE;
+//       else if ( theNbNodes == 13 )  return VTK_QUADRATIC_PYRAMID; //VTK_CONVEX_POINT_SET;
+//       else return VTK_EMPTY_CELL;
+
+//     default: return VTK_EMPTY_CELL;
+//   }
+// }
+
 //=================================================================================
 // functions : SMESH_VisualObjDef
 // purpose   : Constructor
@@ -129,7 +178,7 @@ vtkIdType SMESH_VisualObjDef::GetNodeVTKId( int theObjID )
   if( this->GetMesh() ) {
     aNode = this->GetMesh()->FindNode(theObjID);
   }
-  return aNode ? aNode->GetVtkID() : -1;
+  return aNode ? aNode->getVtkId() : -1;
 }
 
 vtkIdType SMESH_VisualObjDef::GetElemObjId( int theVTKID )
@@ -139,7 +188,7 @@ vtkIdType SMESH_VisualObjDef::GetElemObjId( int theVTKID )
     TMapOfIds::const_iterator i = myVTK2SMDSElems.find(theVTKID);
     return i == myVTK2SMDSElems.end() ? -1 : i->second;
   }
-  return this->GetMesh()->FromVtkToSmds(theVTKID);
+  return this->GetMesh()->fromVtkToSmds(theVTKID);
 }
 
 vtkIdType SMESH_VisualObjDef::GetElemVTKId( int theObjID )
@@ -154,7 +203,7 @@ vtkIdType SMESH_VisualObjDef::GetElemVTKId( int theObjID )
   if ( this->GetMesh() )
     e = this->GetMesh()->FindElement(theObjID);
 
-  return e ? e->GetVtkID() : -1;
+  return e ? e->getVtkId() : -1;
 }
 
 //=================================================================================
@@ -231,15 +280,15 @@ void SMESH_VisualObjDef::buildPrs(bool buildGrid)
   else
   {
     myLocalGrid = false;
-    if (!GetMesh()->IsCompacted())
+    if (!GetMesh()->isCompacted())
     {
       NulData(); // detach from the SMDS grid to allow immediate memory de-allocation in compactMesh()
       if ( MYDEBUG ) MESSAGE("*** buildPrs ==> compactMesh!");
-      GetMesh()->CompactMesh();
+      GetMesh()->compactMesh();
       if ( SMESHDS_Mesh* m = dynamic_cast<SMESHDS_Mesh*>( GetMesh() )) // IPAL53915
         m->GetScript()->SetModified(false); // drop IsModified set in compactMesh()
     }
-    vtkUnstructuredGrid *theGrid = GetMesh()->GetGrid();
+    vtkUnstructuredGrid *theGrid = GetMesh()->getGrid();
     updateEntitiesFlags();
     myGrid->ShallowCopy(theGrid);
     //MESSAGE(myGrid->GetReferenceCount());
@@ -346,16 +395,17 @@ void SMESH_VisualObjDef::buildElemPrs()
         if((*anIter)->GetEntityType() != SMDSEntity_Polyhedra &&
            (*anIter)->GetEntityType() != SMDSEntity_Quad_Polyhedra) {
           aCellsSize += (*anIter)->NbNodes() + 1;
-        }
+        } 
         // Special case for the VTK_POLYHEDRON:
         // itsinput cellArray is of special format.
-        //  [nCellFaces, nFace0Pts, i, j, k, nFace1Pts, i, j, k, ...]
+        //  [nCellFaces, nFace0Pts, i, j, k, nFace1Pts, i, j, k, ...]   
         else {
-          if ( const SMDS_MeshVolume* ph = SMDS_Mesh::DownCast<SMDS_MeshVolume>( *anIter )) {
+          if( const SMDS_VtkVolume* ph = dynamic_cast<const SMDS_VtkVolume*>(*anIter) ) {
             int nbFaces = ph->NbFaces();
             aCellsSize += (1 + ph->NbFaces());
-            for( int i = 1; i <= nbFaces; i++ )
+            for( int i = 1; i <= nbFaces; i++ ) {
               aCellsSize += ph->NbFaceNodes(i);
+            }
           }
         }
       }
@@ -417,14 +467,16 @@ void SMESH_VisualObjDef::buildElemPrs()
 
           if (aType == SMDSAbs_Volume && anElem->IsPoly() && aNbNodes > 3) { // POLYEDRE
             anIdList->Reset();
-            if ( const SMDS_MeshVolume* ph = SMDS_Mesh::DownCast<SMDS_MeshVolume>( anElem )) {
+            if ( const SMDS_VtkVolume* ph = dynamic_cast<const SMDS_VtkVolume*>(anElem) ) {
               int nbFaces = ph->NbFaces();
               anIdList->InsertNextId(nbFaces);
               for( int i = 1; i <= nbFaces; i++ ) {
                 anIdList->InsertNextId(ph->NbFaceNodes(i));
                 for(int j = 1; j <= ph->NbFaceNodes(i); j++) {
-                  if ( const SMDS_MeshNode* n = ph->GetFaceNode( i, j ))
-                    anIdList->InsertNextId( mySMDS2VTKNodes[ n->GetID() ]);
+                  const SMDS_MeshNode* n = ph->GetFaceNode(i,j);
+                  if(n) {
+                    anIdList->InsertNextId(mySMDS2VTKNodes[n->GetID()]);
+                  }
                 }
               }
             }
@@ -452,8 +504,11 @@ void SMESH_VisualObjDef::buildElemPrs()
         //Store diameters of the balls
         if(aScalars) {
           double aDiam = 0;
-          if (const SMDS_BallElement* ball = SMDS_Mesh::DownCast<SMDS_BallElement>(anElem) )
-            aDiam = ball->GetDiameter();
+          if(aType == SMDSAbs_Ball) {
+            if (const SMDS_BallElement* ball = dynamic_cast<const SMDS_BallElement*>(anElem) ) {
+              aDiam = ball->GetDiameter();
+            }
+          }
           aScalars->SetTuple(aCurId,&aDiam);
         }
 
@@ -518,14 +573,14 @@ bool SMESH_VisualObjDef::GetEdgeNodes( const int theElemId,
 
 vtkUnstructuredGrid* SMESH_VisualObjDef::GetUnstructuredGrid()
 {
-  if ( !myLocalGrid && !GetMesh()->IsCompacted() )
+  if ( !myLocalGrid && !GetMesh()->isCompacted() )
   {
-    NulData(); // detach from the SMDS grid to allow immediate memory de-allocation in CompactMesh()
-    GetMesh()->CompactMesh();
+    NulData(); // detach from the SMDS grid to allow immediate memory de-allocation in compactMesh()
+    GetMesh()->compactMesh();
     if ( SMESHDS_Mesh* m = dynamic_cast<SMESHDS_Mesh*>( GetMesh() )) // IPAL53915
-      m->GetScript()->SetModified(false); // drop IsModified set in CompactMesh()
+      m->GetScript()->SetModified(false); // drop IsModified set in compactMesh()
     updateEntitiesFlags();
-    vtkUnstructuredGrid *theGrid = GetMesh()->GetGrid();
+    vtkUnstructuredGrid *theGrid = GetMesh()->getGrid();
     myGrid->ShallowCopy(theGrid);
   }
   return myGrid;

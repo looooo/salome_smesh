@@ -234,7 +234,8 @@ void StdMeshers_Penta_3D::MakeNodes()
       aTNode.SetBaseNodeID(aNodeID);
       //
       if ( SMESH_Block::IsEdgeID (aSID)) {
-        SMDS_EdgePositionPtr epos = aNode->GetPosition();
+        const SMDS_EdgePosition* epos =
+          static_cast<const SMDS_EdgePosition*>(aNode->GetPosition());
         myBlock.ComputeParameters( epos->GetUParameter(), aS, aCoords );
       }
       else {
@@ -1464,9 +1465,11 @@ bool StdMeshers_Penta_3D::LoadIJNodes(StdMeshers_IJNodeMap & theIJNodes,
     node = nIt->next();
     if(myTool->IsMedium(node))
       continue;
-    SMDS_EdgePositionPtr pos = node->GetPosition();
-    if ( !pos )
+    const SMDS_EdgePosition* pos =
+      dynamic_cast<const SMDS_EdgePosition*>( node->GetPosition() );
+    if ( !pos ) {
       return false;
+    }
     double u = ( pos->GetUParameter() - f ) / range;
     vector<const SMDS_MeshNode*> & nVec = theIJNodes[ u ];
     nVec.resize( vsize, nullNode );
@@ -1485,9 +1488,11 @@ bool StdMeshers_Penta_3D::LoadIJNodes(StdMeshers_IJNodeMap & theIJNodes,
     node = nIt->next();
     if(myTool->IsMedium(node))
       continue;
-    SMDS_EdgePositionPtr pos = node->GetPosition();
-    if ( !pos )
+    const SMDS_EdgePosition* pos =
+      dynamic_cast<const SMDS_EdgePosition*>( node->GetPosition() );
+    if ( !pos ) {
       return false;
+    }
     sortedNodes.insert( make_pair( pos->GetUParameter(), node ));
   }
   loadedNodes.insert( nVecf[ vsize - 1 ] = smVft->GetNodes()->next() );

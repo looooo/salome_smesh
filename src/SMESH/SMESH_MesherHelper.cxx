@@ -643,22 +643,22 @@ gp_XY SMESH_MesherHelper::GetNodeUV(const TopoDS_Face&   F,
 {
   gp_Pnt2d uv( Precision::Infinite(), Precision::Infinite() );
 
-  SMDS_PositionPtr pos = n->GetPosition();
+  const SMDS_PositionPtr Pos = n->GetPosition();
   bool uvOK = false;
-  if ( pos->GetTypeOfPosition() == SMDS_TOP_FACE )
+  if ( Pos->GetTypeOfPosition() == SMDS_TOP_FACE )
   {
     // node has position on face
-    SMDS_FacePositionPtr fpos = pos;
+    const SMDS_FacePosition* fpos = static_cast<const SMDS_FacePosition*>( Pos );
     uv.SetCoord( fpos->GetUParameter(), fpos->GetVParameter() );
     if ( check )
       uvOK = CheckNodeUV( F, n, uv.ChangeCoord(), 2.*getFaceMaxTol( F )); // 2. from 22830
   }
-  else if ( pos->GetTypeOfPosition() == SMDS_TOP_EDGE )
+  else if ( Pos->GetTypeOfPosition() == SMDS_TOP_EDGE )
   {
     // node has position on EDGE => it is needed to find
     // corresponding EDGE from FACE, get pcurve for this
     // EDGE and retrieve value from this pcurve
-    SMDS_EdgePositionPtr epos = pos;
+    const SMDS_EdgePosition* epos = static_cast<const SMDS_EdgePosition*>( Pos );
     const int              edgeID = n->getshapeId();
     const TopoDS_Edge& E = TopoDS::Edge( GetMeshDS()->IndexToShape( edgeID ));
     double f, l, u = epos->GetUParameter();
@@ -699,7 +699,7 @@ gp_XY SMESH_MesherHelper::GetNodeUV(const TopoDS_Face&   F,
       uv = newUV;
     }
   }
-  else if ( pos->GetTypeOfPosition() == SMDS_TOP_VERTEX )
+  else if ( Pos->GetTypeOfPosition() == SMDS_TOP_VERTEX )
   {
     if ( int vertexID = n->getshapeId() ) {
       const TopoDS_Vertex& V = TopoDS::Vertex(GetMeshDS()->IndexToShape(vertexID));
@@ -1031,7 +1031,8 @@ double SMESH_MesherHelper::GetNodeU(const TopoDS_Edge&   E,
   const SMDS_PositionPtr pos = n->GetPosition();
   if ( pos->GetTypeOfPosition()==SMDS_TOP_EDGE )
   {
-    param = pos->GetParameters()[0];
+    const SMDS_EdgePosition* epos = static_cast<const SMDS_EdgePosition*>( pos );
+    param =  epos->GetUParameter();
   }
   else if( pos->GetTypeOfPosition() == SMDS_TOP_VERTEX )
   {
@@ -4561,16 +4562,8 @@ namespace { // Structures used by FixQuadraticElements()
     TopoDS_Shape  shape = theHelper.GetSubShape().Oriented( TopAbs_FORWARD );
     if ( shape.IsNull() ) return;
 
-    if ( !dynamic_cast<SMESH_BadInputElements*>( theError.get() ))
-    {
-      if ( !theError )
-        theError.reset( new SMESH_BadInputElements( meshDS ));
-      else
-        theError.reset( new SMESH_BadInputElements( meshDS,
-                                                    theError->myName,
-                                                    theError->myComment,
-                                                    theError->myAlgo));
-    }
+    if ( !theError ) theError = SMESH_ComputeError::New();
+
     gp_XYZ faceNorm;
 
     if ( shape.ShapeType() == TopAbs_FACE ) // 2D
@@ -4688,13 +4681,13 @@ namespace { // Structures used by FixQuadraticElements()
                 gp_XYZ pMid3D = 0.5 * ( pN0 + SMESH_TNodeXYZ( nOnEdge[1] ));
                 meshDS->MoveNode( n, pMid3D.X(), pMid3D.Y(), pMid3D.Z() );
                 MSG( "move OUT of face " << n );
-                static_cast<SMESH_BadInputElements*>( theError.get() )->add( f );
+                theError->myBadElements.push_back( f );
               }
             }
           }
         }
       }
-      if ( theError->HasBadElems() )
+      if ( !theError->myBadElements.empty() )
         theError->myName = EDITERR_NO_MEDIUM_ON_GEOM;
       return;
 
@@ -4882,13 +4875,13 @@ namespace { // Structures used by FixQuadraticElements()
                   MSG( "move OUT of solid " << nMedium );
                 }
               }
-              static_cast<SMESH_BadInputElements*>( theError.get() )->add( vol );
+              theError->myBadElements.push_back( vol );
             }
           } // loop on volumes sharing a node on FACE
         } // loop on nodes on FACE
       }  // loop on FACEs of a SOLID
 
-      if ( theError->HasBadElems() )
+      if ( !theError->myBadElements.empty() )
         theError->myName = EDITERR_NO_MEDIUM_ON_GEOM;
     } // 3D case
   }
@@ -4900,7 +4893,7 @@ namespace { // Structures used by FixQuadraticElements()
  * \brief Move medium nodes of faces and volumes to fix distorted elements
  * \param error - container of fixed distorted elements
  * \param volumeOnly - to fix nodes on faces or not, if the shape is solid
- *
+ * 
  * Issue 0020307: EDF 992 SMESH : Linea/Quadratic with Medium Node on Geometry
  */
 //=======================================================================
@@ -5275,7 +5268,8 @@ void SMESH_MesherHelper::FixQuadraticElements(SMESH_ComputeErrorPtr& compError,
               gp_XY newUV   = ApplyIn2D( s, oldUV, gp_XY( move.X(),move.Y()), gp_XY_Added );
               gp_Pnt newPnt = s->Value( newUV.X(), newUV.Y());
               move = gp_Vec( XYZ((*link1)->_mediumNode), newPnt.Transformed(loc) );
-              if ( SMDS_FacePositionPtr nPos = (*link1)->_mediumNode->GetPosition())
+              if ( SMDS_FacePosition* nPos =
+                   dynamic_cast< SMDS_FacePosition* >((*link1)->_mediumNode->GetPosition()))
                 nPos->SetParameters( newUV.X(), newUV.Y() );
 #ifdef _DEBUG_
               if ( (XYZ((*link1)->node1()) - XYZ((*link1)->node2())).SquareModulus() <

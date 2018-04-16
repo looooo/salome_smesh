@@ -549,7 +549,8 @@ const std::vector<UVPtStruct>& StdMeshers_FaceSide::GetUVPtStruct(bool   isXCons
           uvPt.normParam  = u_node->first;
           uvPt.x = uvPt.y = uvPt.normParam;
           // -- U ----------------------------------------------
-          SMDS_EdgePositionPtr epos = uvPt.node->GetPosition();
+          const SMDS_EdgePosition* epos =
+            dynamic_cast<const SMDS_EdgePosition*>(uvPt.node->GetPosition());
           if ( epos && uvPt.node->getshapeId() == myEdgeID[iE] ) {
             uvPt.param = epos->GetUParameter();
           }

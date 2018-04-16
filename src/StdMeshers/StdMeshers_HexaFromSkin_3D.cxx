@@ -386,7 +386,7 @@ namespace
 
     // Find a node at any block corner
 
-    SMDS_NodeIteratorPtr nIt = meshDS->nodesIterator();
+    SMDS_NodeIteratorPtr nIt = meshDS->nodesIterator(/*idInceasingOrder=*/true);
     if ( !nIt->more() ) return error("Empty mesh");
 
     const SMDS_MeshNode* nCorner = 0;

@@ -92,7 +92,7 @@ namespace
       myNodes[0] = node1->Node();
       myNodes[1] = node2->Node();
       myFace     = face;
-      setID( ID ); // mesh element ID
+      setId( ID ); // mesh element ID
     }
     bool IsInGroup() const
     {

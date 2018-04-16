@@ -22,8 +22,6 @@
 
 #include "SMDS_MeshElement.hxx"
 
-#include <vector>
-
 /*!
  * \brief Base class for all cells
  */

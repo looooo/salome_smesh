@@ -26,9 +26,8 @@
 #define _SMDS_PolygonalFaceOfNodes_HeaderFile
 
 #include "SMESH_SMDS.hxx"
-#include "SMDS_CellOfNodes.hxx"
 
-#include <vector>
+#include "SMDS_CellOfNodes.hxx"
 
 class SMDS_EXPORT SMDS_PolygonalFaceOfNodes : public SMDS_CellOfNodes
 {

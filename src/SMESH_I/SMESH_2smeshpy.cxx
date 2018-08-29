@@ -1999,7 +1999,7 @@ void _pyMesh::Process( const Handle(_pyCommand)& theCommand )
           args.push_back( theCommand->GetArg( i ) );
       }
       theCommand->RemoveArgs();
-      for ( uint i = 0; i < args.size(); i++ )
+      for ( unsigned int i = 0; i < args.size(); i++ )
         theCommand->SetArg( i+1, args[i] );
       if ( theCommand->GetNbArgs() == 4 )
       {
@@ -2039,7 +2039,7 @@ void _pyMesh::Process( const Handle(_pyCommand)& theCommand )
           args.push_back( theCommand->GetArg( i ) );
       }
       theCommand->RemoveArgs();
-      for ( uint i = 0; i < args.size(); i++ )
+      for (unsigned int i = 0; i < args.size(); i++ )
         theCommand->SetArg( i+1, args[i] );
       // make the 1st arg be the last one (or last but three for ExportMED())
       _pyID partID = theCommand->GetArg( 1 );

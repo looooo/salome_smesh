@@ -440,13 +440,13 @@ GenericHypothesisCreator_i* SMESH_Gen_i::getHypothesisCreator(const char* theHyp
       // load plugin library
       if(MYDEBUG) MESSAGE("Loading server meshers plugin library ...");
 #ifdef WIN32
-#ifdef UNICODE
+  #ifdef UNICODE
 	  const wchar_t* path = Kernel_Utils::decode_s(aPlatformLibName);
+  #else
+	  const char* path = aPlatformLibName.c_str();
+  #endif
 #else
-	  const char* path = aPlatformLibName.c_str()
-#endif
-#else
-	  const char* path = aPlatformLibName.c_str()
+	  const char* path = aPlatformLibName.c_str();
 #endif
       LibHandle libHandle = LoadLib( path );
 #if defined(WIN32) && defined(UNICODE)

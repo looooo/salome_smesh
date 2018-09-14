@@ -42,6 +42,7 @@ SET(BAD_TESTS
   quality_controls_ex21.py
   quality_controls_ex22.py
   viewing_meshes_ex01.py
+  test_smeshplugins.py
   )
 
 SET(GOOD_TESTS

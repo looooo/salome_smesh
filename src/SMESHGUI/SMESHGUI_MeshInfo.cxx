@@ -53,6 +53,7 @@
 #include <QApplication>
 #include <QButtonGroup>
 #include <QCheckBox>
+#include <QComboBox>
 #include <QContextMenuEvent>
 #include <QGridLayout>
 #include <QHBoxLayout>
@@ -65,6 +66,8 @@
 #include <QPushButton>
 #include <QToolButton>
 #include <QRadioButton>
+#include <QStackedWidget>
+#include <QStandardItemModel>
 #include <QTextStream>
 #include <QTabWidget>
 #include <QTextBrowser>
@@ -1005,6 +1008,19 @@ void SMESHGUI_ElemInfo::showInfo( QSet<long> ids, bool isElem )
   myIndex = 0;
   updateControls();
   information( myIDs.mid( myIndex*MAXITEMS, MAXITEMS ));
+}
+
+void SMESHGUI_ElemInfo::showInfo( SMESH::SMESH_GroupBase_ptr group )
+{
+  QSet<long> ids;
+  bool isElem = false;
+  if ( !group->_is_nil() ) {
+    isElem = group->GetType() != SMESH::NODE;
+    SMESH::long_array_var corbaIds = group->GetListOfID();
+    for (int i = 0, n = corbaIds->length(); i < n; i++)
+      ids << corbaIds[i];
+  }
+  showInfo( ids, isElem );
 }
 
 /*!
@@ -2870,6 +2886,66 @@ void SMESHGUI_AddInfo::saveInfo( QTextStream &out )
   out << "\n";
 }
 
+
+class GroupCombo: public QComboBox
+{
+  class Item: public QStandardItem
+  {
+  public:
+    SMESH::SMESH_GroupBase_var myGroup;
+    Item( SMESH::SMESH_GroupBase_ptr group )
+    {
+      myGroup = SMESH::SMESH_GroupBase::_duplicate( group );
+      setText( myGroup->GetName() );
+    }
+    SMESH::SMESH_GroupBase_ptr group()
+    {
+      return SMESH::SMESH_GroupBase::_duplicate( myGroup );
+    }
+  };
+  SMESH::SMESH_IDSource_var myObj;
+public:
+  GroupCombo( QWidget* parent ): QComboBox( parent )
+  {
+    setModel( new QStandardItemModel( this ) );
+  }
+  void setSource( SMESH::SMESH_IDSource_ptr obj )
+  {
+    if ( myObj->_is_equivalent( obj ) )
+      return;
+    myObj = SMESH::SMESH_IDSource::_duplicate( obj );
+    bool blocked = blockSignals( true );
+    QStandardItemModel* m = dynamic_cast<QStandardItemModel*>(model());
+    m->clear();
+    SMESH::SMESH_Mesh_var mesh = SMESH::SMESH_Mesh::_narrow( myObj );
+    SMESH::SMESH_GroupBase_var group = SMESH::SMESH_GroupBase::_narrow( myObj );
+    if ( !mesh->_is_nil() ) {
+      SMESH::ListOfGroups_var groups = mesh->GetGroups();
+      for ( size_t i = 0; i < groups->length(); ++i ) {
+	if ( !CORBA::is_nil( groups[i] ) ) {
+	  QString name = groups[0]->GetName();
+	  if ( !name.isEmpty() )
+	    m->appendRow( new Item( groups[i].in() ) );
+	}
+      }
+      setCurrentIndex(-1); // for performance reasons
+    }
+    else if ( !group->_is_nil() ) {
+      m->appendRow( new Item( group.in() ) );
+      setCurrentIndex(0);
+    }
+    blockSignals( blocked );
+  }
+  SMESH::SMESH_GroupBase_ptr currentGroup()
+  {
+    SMESH::SMESH_GroupBase_var group;
+    QStandardItemModel* m = dynamic_cast<QStandardItemModel*>(model());
+    if ( currentIndex() >= 0 )
+      group = dynamic_cast<Item*>(m->item(currentIndex()))->myGroup;
+    return group._retn();
+  }
+};
+
 /*!
   \class SMESHGUI_MeshInfoDlg
   \brief Mesh information dialog box
@@ -2902,9 +2978,14 @@ SMESHGUI_MeshInfoDlg::SMESHGUI_MeshInfoDlg( QWidget* parent, int page )
   myMode = new QButtonGroup( this );
   myMode->addButton( new QRadioButton( tr( "NODE_MODE" ), w ), NodeMode );
   myMode->addButton( new QRadioButton( tr( "ELEM_MODE" ), w ), ElemMode );
+  myMode->addButton( new QRadioButton( tr( "GROUP_MODE" ), w ), GroupMode );
   myMode->button( NodeMode )->setChecked( true );
   myID = new QLineEdit( w );
   myID->setValidator( new SMESHGUI_IdValidator( this ));
+  myGroups = new GroupCombo( w );
+  QStackedWidget* stack = new QStackedWidget( w );
+  stack->addWidget( myID );
+  stack->addWidget( myGroups );
   myIDPreviewCheck = new QCheckBox( tr( "SHOW_IDS" ), w );
   myIDPreview = new SMESHGUI_IdPreview( SMESH::GetViewWindow( SMESHGUI::GetSMESHGUI() ));
 
@@ -2915,15 +2996,17 @@ SMESHGUI_MeshInfoDlg::SMESHGUI_MeshInfoDlg( QWidget* parent, int page )
     myElemInfo = new SMESHGUI_SimpleElemInfo( w );
   else
     myElemInfo = new SMESHGUI_TreeElemInfo( w );
+  stack->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Fixed );
 
   QGridLayout* elemLayout = new QGridLayout( w );
   elemLayout->setMargin( MARGIN );
   elemLayout->setSpacing( SPACING );
   elemLayout->addWidget( myMode->button( NodeMode ), 0, 0 );
   elemLayout->addWidget( myMode->button( ElemMode ), 0, 1 );
-  elemLayout->addWidget( myID,                       0, 2 );
-  elemLayout->addWidget( myIDPreviewCheck,           1, 0, 1, 2 );
-  elemLayout->addWidget( myElemInfo,                 2, 0, 1, 3 );
+  elemLayout->addWidget( myMode->button( GroupMode ), 0, 2 );
+  elemLayout->addWidget( stack, 0, 3 );
+  elemLayout->addWidget( myIDPreviewCheck, 1, 0, 1, 4 );
+  elemLayout->addWidget( myElemInfo, 2, 0, 1, 4 );
 
   myTabWidget->addTab( w, tr( "ELEM_INFO" ));
 
@@ -2970,13 +3053,14 @@ SMESHGUI_MeshInfoDlg::SMESHGUI_MeshInfoDlg( QWidget* parent, int page )
   connect( helpBtn,     SIGNAL( clicked() ),              this, SLOT( help() ));
   connect( myTabWidget, SIGNAL( currentChanged( int  )), this, SLOT( updateSelection() ));
   connect( myMode,      SIGNAL( buttonClicked( int  )),  this, SLOT( modeChanged() ));
+  connect( myGroups,    SIGNAL( currentIndexChanged( int )),  this, SLOT( modeChanged() ));
   connect( myID,        SIGNAL( textChanged( QString )), this, SLOT( idChanged() ));
   connect( myIDPreviewCheck,         SIGNAL( toggled(bool) ), this, SLOT( idPreviewChange(bool) ));
   connect( SMESHGUI::GetSMESHGUI(),  SIGNAL( SignalDeactivateActiveDialog() ), this, SLOT( deactivate() ));
   connect( SMESHGUI::GetSMESHGUI(),  SIGNAL( SignalCloseAllDialogs() ),        this, SLOT( reject() ));
   connect( myElemInfo,  SIGNAL( itemInfo( int )),     this, SLOT( showItemInfo( int )));
   connect( myElemInfo,  SIGNAL( itemInfo( QString )), this, SLOT( showItemInfo( QString )));
-
+  connect( this,        SIGNAL( switchMode( int ) ), stack, SLOT( setCurrentIndex( int ) ) );
   myIDPreviewCheck->setChecked( SMESHGUI::resourceMgr()->booleanValue( "SMESH", id_preview_resource, false ));
 
   updateSelection();
@@ -3000,15 +3084,33 @@ void SMESHGUI_MeshInfoDlg::showInfo( const Handle(SALOME_InteractiveObject)& IO 
     myIO = IO;
 
   SMESH::SMESH_IDSource_var obj = SMESH::IObjectToInterface<SMESH::SMESH_IDSource>( IO );
-  if ( !CORBA::is_nil( obj ))
+  if ( !CORBA::is_nil( obj ) )
   {
-    myAddInfo->showInfo( obj );  // nb of nodes in a group can be computed by myAddInfo,
-    myBaseInfo->showInfo( obj ); // and it will be used by myBaseInfo (IPAL52871)
+    // "Additional info" tab
+    myAddInfo->showInfo( obj );
+
+    // "Base info" tab
+    // Note: we update it AFTER additional info as nb of nodes in a group
+    // can be computed there and this data will be shown in base info (see IPAL52871)
+    myBaseInfo->showInfo( obj );
+
+    // "Quality info" tab
+    // Note: for performance reasons we update it only if it is currently active
     if ( myTabWidget->currentIndex() == CtrlInfo )
       myCtrlInfo->showInfo( obj );
 
-    {
-      myActor = SMESH::FindActorByEntry( IO->getEntry() );
+    // "Element info" tab
+    myGroups->setSource( obj.in() );
+    myActor = SMESH::FindActorByEntry( IO->getEntry() );
+    myElemInfo->setSource( myActor, obj );
+    if ( myMode->checkedId() == GroupMode ) {
+      SMESH::SMESH_GroupBase_var group = myGroups->currentGroup();
+      if ( !group->_is_nil() )
+        myElemInfo->showInfo( group );
+      else
+        myElemInfo->clear();
+    }
+    else {
       SVTK_Selector* selector = SMESH::GetSelector();
       QString ID;
       int nb = 0;
@@ -3017,7 +3119,6 @@ void SMESHGUI_MeshInfoDlg::showInfo( const Handle(SALOME_InteractiveObject)& IO 
           SMESH::GetNameOfSelectedElements( selector, IO, ID ) :
           SMESH::GetNameOfSelectedNodes( selector, IO, ID );
       }
-      myElemInfo->setSource( myActor, obj ) ;
       if ( nb > 0 ) {
         myID->setText( ID.trimmed() );
         QSet<long> ids;
@@ -3079,25 +3180,14 @@ void SMESHGUI_MeshInfoDlg::updateSelection()
   disconnect( selMgr, 0, this, 0 );
   selMgr->clearFilters();
 
-  if ( myTabWidget->currentIndex() == BaseInfo ||
-       myTabWidget->currentIndex() == AddInfo ||
-       myTabWidget->currentIndex() == CtrlInfo ) {
-    SMESH::SetPointRepresentation( false );
-    if ( SVTK_ViewWindow* aViewWindow = SMESH::GetViewWindow() )
-      aViewWindow->SetSelectionMode( ActorSelection );
-  }
-  else {
-    if ( myMode->checkedId() == NodeMode ) {
-      SMESH::SetPointRepresentation( true );
-      if ( SVTK_ViewWindow* aViewWindow = SMESH::GetViewWindow() )
-        aViewWindow->SetSelectionMode( NodeSelection );
-    }
-    else {
-      SMESH::SetPointRepresentation( false );
-      if ( SVTK_ViewWindow* aViewWindow = SMESH::GetViewWindow() )
-        aViewWindow->SetSelectionMode( CellSelection );
-    }
-  }
+  int selMode = ActorSelection;
+  if ( myTabWidget->currentIndex() == ElemInfo && myMode->checkedId() == NodeMode )
+    selMode = NodeSelection;
+  else if ( myTabWidget->currentIndex() == ElemInfo && myMode->checkedId() == ElemMode )
+    selMode = CellSelection;
+  SMESH::SetPointRepresentation( selMode == NodeSelection );
+  if ( SVTK_ViewWindow* aViewWindow = SMESH::GetViewWindow() )
+    aViewWindow->SetSelectionMode( selMode );
 
   QString oldID = myID->text().trimmed();
   SMESH_Actor* oldActor = myActor;
@@ -3166,6 +3256,7 @@ void SMESHGUI_MeshInfoDlg::deactivate()
 */
 void SMESHGUI_MeshInfoDlg::modeChanged()
 {
+  emit( switchMode( myMode->checkedId() == GroupMode ? 1 : 0 ) );
   myID->clear();
   updateSelection();
 }

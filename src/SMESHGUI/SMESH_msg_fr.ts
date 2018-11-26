@@ -7471,6 +7471,10 @@ en raison de leurs types incompatibles:
         <translation>Elément</translation>
     </message>
     <message>
+        <source>GROUP_MODE</source>
+        <translation>Groupe</translation>
+    </message>
+    <message>
         <source>SHOW_IDS</source>
         <translation>Montre les IDs</translation>
     </message>

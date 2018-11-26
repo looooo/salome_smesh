@@ -67,6 +67,7 @@ class SMESHGUI_SpinBox;
 class SMESH_Actor;
 
 class ExtraWidget;
+class GroupCombo;
 
 class SMESHGUI_EXPORT SMESHGUI_MeshInfo : public QFrame
 {
@@ -156,6 +157,7 @@ public:
   void         setSource( SMESH_Actor*, SMESH::SMESH_IDSource_var );
   void         showInfo( long, bool );
   void         showInfo( QSet<long>, bool );
+  void         showInfo( SMESH::SMESH_GroupBase_ptr );
   void         clear();
   virtual void saveInfo( QTextStream &out ) = 0;
 
@@ -362,7 +364,7 @@ class SMESHGUI_EXPORT SMESHGUI_MeshInfoDlg : public QDialog
 { 
   Q_OBJECT;
 
-  enum { NodeMode, ElemMode };
+  enum { NodeMode, ElemMode, GroupMode };
 
 public:
   //! Information type
@@ -383,6 +385,9 @@ protected:
   void keyPressEvent( QKeyEvent* );
   void enterEvent( QEvent* );
 
+signals:
+  void switchMode( int );
+
 private slots:
   void help();
   void updateSelection();
@@ -402,6 +407,7 @@ private:
   QButtonGroup*                    myMode;
   QLineEdit*                       myID;
   QCheckBox*                       myIDPreviewCheck;
+  GroupCombo*                      myGroups;
   SMESHGUI_IdPreview*              myIDPreview;
   SMESHGUI_ElemInfo*               myElemInfo;   
   SMESHGUI_AddInfo*                myAddInfo;

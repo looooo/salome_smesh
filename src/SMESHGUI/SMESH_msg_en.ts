@@ -7548,6 +7548,10 @@ as they are of improper type:
         <translation>Element</translation>
     </message>
     <message>
+        <source>GROUP_MODE</source>
+        <translation>Group</translation>
+    </message>
+    <message>
         <source>SHOW_IDS</source>
         <translation>Show IDs</translation>
     </message>

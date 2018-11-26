@@ -7367,6 +7367,10 @@
       <translation>要素</translation>
     </message>
     <message>
+      <source>GROUP_MODE</source>
+      <translation type="unfinished">Group</translation>
+    </message>
+    <message>
       <source>SHOW_IDS</source>
       <translation>IDの表示</translation>
     </message>

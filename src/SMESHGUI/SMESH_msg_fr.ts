@@ -7306,7 +7306,7 @@ en raison de leurs types incompatibles:
     </message>
 </context>
 <context>
-    <name>SMESHGUI_MeshInfo</name>
+    <name>SMESHGUI_BaseInfo</name>
     <message>
         <source>BASE_INFO</source>
         <translation>Informations de base</translation>
@@ -7434,6 +7434,18 @@ en raison de leurs types incompatibles:
     <message>
         <source>OBJECT_GROUP_BALLS</source>
         <translation>Groupe d&apos;éléments particulaires</translation>
+    </message>
+    <message>
+        <source>OBJECT_GROUP_STANDALONE</source>
+        <translation>(autonome)</translation>
+    </message>
+    <message>
+        <source>OBJECT_GROUP_GEOM</source>
+        <translation>(lié à une géométrie)</translation>
+    </message>
+    <message>
+        <source>OBJECT_GROUP_FILTER</source>
+        <translation>(lié à un filtre)</translation>
     </message>
     <message>
         <source>BUT_LOAD_MESH</source>
@@ -7802,6 +7814,14 @@ en raison de leurs types incompatibles:
     <message>
         <source>FILE_NAME</source>
         <translation>Nom du fichier</translation>
+    </message>
+    <message>
+        <source>FILE_SIZE</source>
+        <translation>Taille du fichier</translation>
+    </message>
+    <message>
+        <source>FILE_VERSION</source>
+        <translation>Format du fichier</translation>
     </message>
     <message>
         <source>STANDALONE_MESH</source>

@@ -7202,7 +7202,7 @@
     </message>
   </context>
   <context>
-    <name>SMESHGUI_MeshInfo</name>
+    <name>SMESHGUI_BaseInfo</name>
     <message>
       <source>BASE_INFO</source>
       <translation>基本情報</translation>
@@ -7330,6 +7330,18 @@
     <message>
       <source>OBJECT_GROUP_BALLS</source>
       <translation>粒子状物質の要素のグループ</translation>
+    </message>
+    <message>
+        <source>OBJECT_GROUP_STANDALONE</source>
+        <translation type="unfinished">(standalone)</translation>
+    </message>
+    <message>
+        <source>OBJECT_GROUP_GEOM</source>
+        <translation type="unfinished">(on geometry)</translation>
+    </message>
+    <message>
+        <source>OBJECT_GROUP_FILTER</source>
+        <translation type="unfinished">(on filter)</translation>
     </message>
     <message>
       <source>BUT_LOAD_MESH</source>
@@ -7698,6 +7710,14 @@
     <message>
       <source>FILE_NAME</source>
       <translation>ファイルの名前</translation>
+    </message>
+    <message>
+        <source>FILE_SIZE</source>
+        <translation type="unfinished">Size</translation>
+    </message>
+    <message>
+        <source>FILE_VERSION</source>
+        <translation type="unfinished">Version</translation>
     </message>
     <message>
       <source>STANDALONE_MESH</source>

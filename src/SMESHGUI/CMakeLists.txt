@@ -164,6 +164,7 @@ SET(_other_HEADERS
   SMESHGUI_MeshEditPreview.h
   SMESHGUI_IdValidator.h
   SMESHGUI_FileValidator.h
+  SMESHGUI_SelectionProxy.h
   SMESH_SMESHGUI.hxx
 )
 
@@ -188,6 +189,7 @@ SET(_other_SOURCES
   SMESHGUI_GroupDlg.cxx
   SMESHGUI_RemoveNodesDlg.cxx
   SMESHGUI_RemoveElementsDlg.cxx
+  SMESHGUI_SelectionProxy.cxx
   SMESHGUI_MeshInfo.cxx
   SMESHGUI_Measurements.cxx
   SMESHGUI_Preferences_ScalarBarDlg.cxx

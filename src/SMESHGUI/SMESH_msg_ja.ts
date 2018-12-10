@@ -1868,7 +1868,7 @@
       <translation>高さ:</translation>
     </message>
     <message>
-      <source>SMESH_HEXAS</source>
+      <source>SMESH_HEXAHEDRON</source>
       <translation>六面体</translation>
     </message>
     <message>
@@ -2704,7 +2704,7 @@
       <translation>オブジェクトの反転</translation>
     </message>
     <message>
-      <source>SMESH_TETRAS</source>
+      <source>SMESH_TETRAHEDRON</source>
       <translation>四面体</translation>
     </message>
     <message>
@@ -4426,6 +4426,10 @@
     <message>
       <source>SMESH_3D_ALGO_GROUP_ADVANCED</source>
       <translation>アドバンス</translation>
+    </message>
+    <message>
+      <source>SMESH_HEX_PRISM</source>
+      <translation>六角形プリズム</translation>
     </message>
   </context>
   <context>

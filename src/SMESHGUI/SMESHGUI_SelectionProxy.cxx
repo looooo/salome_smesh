@@ -25,16 +25,19 @@
 #include "SMESHGUI.h"
 #include "SMESHGUI_Utils.h"
 #include "SMESHGUI_VTKUtils.h"
+#include "SMDS_Mesh.hxx"
 #include "SMESH_Actor.h"
+#include "SMESH_ControlsDef.hxx"
 
 #include <SALOMEconfig.h>
+#include CORBA_SERVER_HEADER(SMESH_Filter)
 #include CORBA_SERVER_HEADER(SMESH_Group)
 
 #include <SALOMEDSClient_Study.hxx>
 #include <SUIT_ResourceMgr.h>
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \class SMESHGUI_SelectionProxy
+/// \class SMESH::SelectionProxy
 /// \brief Provide operations over the selected object.
 ///
 /// The selection proxy class is aimed to use in dialogs to access mesh object
@@ -49,12 +52,17 @@
 /// - From mesh source object (CORBA reference); for performance reasons in this
 ///   case full initialization is not immediately done and performed only when
 ///   needed.
+///
+/// \todo To show min edge length with volumes, it is necessary to add new
+/// control Length3D.
+/// \todo To avoid showing controls unsuitable for particular elements, the
+/// corresponding check has to be done in each contro's IsSatisfy method.
 ////////////////////////////////////////////////////////////////////////////////
 
 /*!
   \brief Default constructor. Creates null proxy.
 */
-SMESHGUI_SelectionProxy::SMESHGUI_SelectionProxy(): myActor(0), myDirty(false)
+SMESH::SelectionProxy::SelectionProxy(): myActor(0), myDirty(false)
 {
 }
 
@@ -62,7 +70,7 @@ SMESHGUI_SelectionProxy::SMESHGUI_SelectionProxy(): myActor(0), myDirty(false)
   \brief Constructor.
   \param io Interactive object.
 */
-SMESHGUI_SelectionProxy::SMESHGUI_SelectionProxy( const Handle(SALOME_InteractiveObject)& io ): myActor(0), myDirty(true)
+SMESH::SelectionProxy::SelectionProxy( const Handle(SALOME_InteractiveObject)& io ): myActor(0), myDirty(true)
 {
   myObject = SMESH::IObjectToInterface<SMESH::SMESH_IDSource>( io );
   init();
@@ -72,7 +80,7 @@ SMESHGUI_SelectionProxy::SMESHGUI_SelectionProxy( const Handle(SALOME_Interactiv
   \brief Constructor.
   \param object Mesh source.
 */
-SMESHGUI_SelectionProxy::SMESHGUI_SelectionProxy( SMESH::SMESH_IDSource_ptr object ): myActor(0), myDirty(true)
+SMESH::SelectionProxy::SelectionProxy( SMESH::SMESH_IDSource_ptr object ): myActor(0), myDirty(true)
 {
   if ( !CORBA::is_nil( object ) )
     myObject = SMESH::SMESH_IDSource::_duplicate( object );
@@ -82,7 +90,7 @@ SMESHGUI_SelectionProxy::SMESHGUI_SelectionProxy( SMESH::SMESH_IDSource_ptr obje
   \brief Copy constructor.
   \param other Proxy being copied.
 */
-SMESHGUI_SelectionProxy::SMESHGUI_SelectionProxy( const SMESHGUI_SelectionProxy& other )
+SMESH::SelectionProxy::SelectionProxy( const SelectionProxy& other )
 {
   myIO = other.myIO;
   myObject = other.myObject;
@@ -94,7 +102,7 @@ SMESHGUI_SelectionProxy::SMESHGUI_SelectionProxy( const SMESHGUI_SelectionProxy&
   \brief Perform internal initialization.
   \internal
 */
-void SMESHGUI_SelectionProxy::init()
+void SMESH::SelectionProxy::init()
 {
   if ( myIO.IsNull() )
     myIO = new SALOME_InteractiveObject(); // create dummy IO to avoid crashes when accesing it
@@ -117,7 +125,7 @@ void SMESHGUI_SelectionProxy::init()
   \brief Assignment operator.
   \param other Proxy being copied.
 */
-SMESHGUI_SelectionProxy& SMESHGUI_SelectionProxy::operator= ( const SMESHGUI_SelectionProxy& other )
+SMESH::SelectionProxy& SMESH::SelectionProxy::operator= ( const SMESH::SelectionProxy& other )
 {
   myIO = other.myIO;
   myObject = other.myObject;
@@ -131,16 +139,16 @@ SMESHGUI_SelectionProxy& SMESHGUI_SelectionProxy::operator= ( const SMESHGUI_Sel
   \param other Proxy to compare with.
   \return \c true if two proxies are equal; \c false otherwise.
 */
-bool SMESHGUI_SelectionProxy::operator== ( const SMESHGUI_SelectionProxy& other )
+bool SMESH::SelectionProxy::operator== ( const SMESH::SelectionProxy& other )
 {
   return !CORBA::is_nil( myObject ) && !CORBA::is_nil( other.myObject ) && 
     myObject->_is_equivalent( other.myObject );
 }
 
 /*!
-  \brief Try to re-initialize proxy.
+  \brief Re-initialize proxy.
 */
-void SMESHGUI_SelectionProxy::refresh()
+void SMESH::SelectionProxy::refresh()
 {
   init();
 }
@@ -149,7 +157,7 @@ void SMESHGUI_SelectionProxy::refresh()
   \brief Check if proxy is null.
   \return \c true if proxy is null; \c false otherwise.
 */
-bool SMESHGUI_SelectionProxy::isNull() const
+bool SMESH::SelectionProxy::isNull() const
 {
   return CORBA::is_nil( myObject );
 }
@@ -158,7 +166,7 @@ bool SMESHGUI_SelectionProxy::isNull() const
   \brief Boolean conversion operator.
   \return \c true if proxy is not null; \c false otherwise.
 */
-SMESHGUI_SelectionProxy::operator bool() const
+SMESH::SelectionProxy::operator bool() const
 {
   return !isNull();
 }
@@ -167,10 +175,10 @@ SMESHGUI_SelectionProxy::operator bool() const
   \brief Get interactive object.
   \return Interactive object referenced by proxy.
 */
-const Handle(SALOME_InteractiveObject)& SMESHGUI_SelectionProxy::io() const
+const Handle(SALOME_InteractiveObject)& SMESH::SelectionProxy::io() const
 {
   if ( myDirty )
-    const_cast<SMESHGUI_SelectionProxy*>(this)->init();
+    const_cast<SMESH::SelectionProxy*>(this)->init();
   return myIO;
 }
 
@@ -178,7 +186,7 @@ const Handle(SALOME_InteractiveObject)& SMESHGUI_SelectionProxy::io() const
   \brief Get mesh object.
   \return Mesh object (mesh, sub-mesh, group, etc.) referenced by proxy.
 */
-SMESH::SMESH_IDSource_ptr SMESHGUI_SelectionProxy::object() const
+SMESH::SMESH_IDSource_ptr SMESH::SelectionProxy::object() const
 {
   return SMESH::SMESH_IDSource::_duplicate( myObject );
 }
@@ -187,21 +195,21 @@ SMESH::SMESH_IDSource_ptr SMESHGUI_SelectionProxy::object() const
   \brief Get actor.
   \return Actor referenced by proxy.
 */
-SMESH_Actor* SMESHGUI_SelectionProxy::actor() const
+SMESH_Actor* SMESH::SelectionProxy::actor() const
 {
   if ( myDirty )
-    const_cast<SMESHGUI_SelectionProxy*>(this)->init();
+    const_cast<SMESH::SelectionProxy*>(this)->init();
   return myActor;
 }
 
 /*!
   \brief Get object's validity.
 
-  Mesh object is valid if it is null and information stored in it is valid.
+  Mesh object is valid if it is not null and information stored in it is valid.
 
   \return \c true if object is valid; \c false otherwise.
 */
-bool SMESHGUI_SelectionProxy::isValid() const
+bool SMESH::SelectionProxy::isValid() const
 {
   return !isNull() && myObject->IsMeshInfoCorrect();
 }
@@ -209,7 +217,7 @@ bool SMESHGUI_SelectionProxy::isValid() const
 /*!
   \brief Load mesh object from study file.
 */
-void SMESHGUI_SelectionProxy::load()
+void SMESH::SelectionProxy::load()
 {
   if ( !isNull() )
   {
@@ -223,7 +231,7 @@ void SMESHGUI_SelectionProxy::load()
   \brief Get name.
   \return Mesh object's name.
 */
-QString SMESHGUI_SelectionProxy::name() const
+QString SMESH::SelectionProxy::name() const
 {
   QString value;
   if ( !isNull() )
@@ -235,7 +243,7 @@ QString SMESHGUI_SelectionProxy::name() const
   \brief Get type.
   \return Mesh object's type.
 */
-SMESHGUI_SelectionProxy::Type SMESHGUI_SelectionProxy::type() const
+SMESH::SelectionProxy::Type SMESH::SelectionProxy::type() const
 {
   Type value = Unknown;
   if ( !isNull() )
@@ -267,9 +275,9 @@ SMESHGUI_SelectionProxy::Type SMESHGUI_SelectionProxy::type() const
   \brief Get mesh information.
   \return Statistics on stored mesh object.
 */
-SMESHGUI_MeshInfo SMESHGUI_SelectionProxy::meshInfo() const
+SMESH::MeshInfo SMESH::SelectionProxy::meshInfo() const
 {
-  SMESHGUI_MeshInfo info;
+  SMESH::MeshInfo info;
   if ( !isNull() )
   {
     SMESH::long_array_var data = myObject->GetMeshInfo();
@@ -287,11 +295,11 @@ SMESHGUI_MeshInfo SMESHGUI_SelectionProxy::meshInfo() const
   \return Proxy object that stores parent mesh object.
   \note For proxy that stores a mesh, returns its copy.
 */
-SMESHGUI_SelectionProxy SMESHGUI_SelectionProxy::mesh() const
+SMESH::SelectionProxy SMESH::SelectionProxy::mesh() const
 {
-  SMESHGUI_SelectionProxy parent;
-  if ( isValid() )
-    parent = SMESHGUI_SelectionProxy( (SMESH::SMESH_Mesh_var) myObject->GetMesh() ); // cast to var to avoid leaks
+  SMESH::SelectionProxy parent;
+  if ( !isNull() )
+    parent = SMESH::SelectionProxy( (SMESH::SMESH_Mesh_var) myObject->GetMesh() ); // cast to var to avoid leaks
   return parent;
 }
 
@@ -300,17 +308,14 @@ SMESHGUI_SelectionProxy SMESHGUI_SelectionProxy::mesh() const
   \return \c true if Parent mesh is built on a shape; \c false otherwise.
   \note For group or submesh, this method checks that parent mesh has a shape.
 */
-bool SMESHGUI_SelectionProxy::hasShapeToMesh() const
+bool SMESH::SelectionProxy::hasShapeToMesh() const
 {
   bool result = false;
   if ( !isNull() )
   {
-    SMESHGUI_SelectionProxy parent = mesh();
-    if ( parent )
-    {
-      SMESH::SMESH_Mesh_var m = SMESH::SMESH_Mesh::_narrow( (SMESH::SMESH_IDSource_var)parent.object() ); // cast to var to avoid leaks
-      result = m->HasShapeToMesh();
-    }
+    SMESH::SMESH_Mesh_var mesh = myObject->GetMesh();
+    if ( !CORBA::is_nil( mesh ) )
+      result = mesh->HasShapeToMesh();
   }
   return result;
 }
@@ -322,7 +327,7 @@ bool SMESHGUI_SelectionProxy::hasShapeToMesh() const
   The result contains valid pointer only if proxy refers to mesh, sub-mesh
   or group created on a geometry.
 */
-GEOM::GEOM_Object_ptr SMESHGUI_SelectionProxy::shape() const
+GEOM::GEOM_Object_ptr SMESH::SelectionProxy::shape() const
 {
   GEOM::GEOM_Object_var shape;
   if ( !isNull() )
@@ -347,7 +352,7 @@ GEOM::GEOM_Object_ptr SMESHGUI_SelectionProxy::shape() const
   The result contains non-empty name only if proxy refers to mesh, sub-mesh
   or group created on a geometry, and if that geometry has valid name.
 */
-QString SMESHGUI_SelectionProxy::shapeName() const
+QString SMESH::SelectionProxy::shapeName() const
 {
   QString name;
   if ( !isNull() )
@@ -367,7 +372,7 @@ QString SMESHGUI_SelectionProxy::shapeName() const
   The result contains valid type only if proxy refers to mesh, sub-mesh
   or group created on a geometry.
 */
-int SMESHGUI_SelectionProxy::shapeType() const
+int SMESH::SelectionProxy::shapeType() const
 {
   int type = -1;
   if ( !isNull() )
@@ -383,14 +388,535 @@ int SMESHGUI_SelectionProxy::shapeType() const
   \brief Check if mesh has been loaded from study file.
   \return \c true if mesh was loaded; \c false otherwise.
 */
-bool SMESHGUI_SelectionProxy::isMeshLoaded() const
+bool SMESH::SelectionProxy::isMeshLoaded() const
 {
   bool result = true; // set default to true to avoid side effects
-  if ( isValid() )
+  if ( !isNull() )
   {
     SMESH::SMESH_Mesh_var mesh = myObject->GetMesh();
     if ( !CORBA::is_nil( mesh ) )
       result = mesh->IsLoaded();
+  }
+  return result;
+}
+
+/*!
+  \brief Check if node with given ID is present in the mesh.
+  \param id Mesh node ID.
+  \return \c true if mesh contains node; \c false otherwise.
+*/
+bool SMESH::SelectionProxy::hasNode( int id )
+{
+  bool result = false;
+  if ( !isNull() )
+  {
+    if ( actor() )
+    {
+      const SMDS_MeshNode* node = actor()->GetObject()->GetMesh()->FindNode( id );
+      result = node != 0;
+    }
+    else
+    {
+      SMESH::SMESH_Mesh_var mesh = myObject->GetMesh();
+      if ( !CORBA::is_nil( mesh ) )
+      {
+        SMESH::double_array_var coords = mesh->GetNodeXYZ( id );
+        result = coords->length() >= 3;
+      }
+    }
+  }
+  return result; 
+}
+
+/*!
+  \brief Get node coordinates.
+  \param id Mesh node ID.
+  \param xyz Returned node coordinates.
+  \return \c true if result is valid; \c false otherwise.
+*/
+bool SMESH::SelectionProxy::nodeCoordinates( int id, SMESH::XYZ& xyz )
+{
+  bool result = false;
+  xyz = SMESH::XYZ();
+  
+  if ( !isNull() )
+  {
+    if ( actor() )
+    {
+      const SMDS_MeshNode* node = actor()->GetObject()->GetMesh()->FindNode( id );
+      if ( node )
+      {
+	xyz = SMESH::XYZ( node->X(), node->Y(), node->Z() );
+        result = true;
+      }
+    }
+    else
+    {
+      SMESH::SMESH_Mesh_var mesh = myObject->GetMesh();
+      if ( !CORBA::is_nil( mesh ) )
+      {
+        SMESH::double_array_var coords = mesh->GetNodeXYZ( id );
+        if ( coords->length() >= 3 )
+        {
+          xyz = SMESH::XYZ( coords[0], coords[1], coords[2] );
+          result = true;
+        }
+      }
+    }
+  }
+  return result;
+}
+
+/*!
+  \brief Get node connectivity.
+  \param id Mesh node ID.
+  \param connectivity Returned node connectivity.
+  \return \c true if result is valid; \c false otherwise.
+*/
+bool SMESH::SelectionProxy::nodeConnectivity( int id, SMESH::Connectivity& connectivity )
+{
+  bool result = false;
+  connectivity.clear();
+  if ( !isNull() )
+  {
+    if ( actor() )
+    {
+      const SMDS_MeshNode* node = actor()->GetObject()->GetMesh()->FindNode( id );
+      if ( node )
+      {
+        SMDS_ElemIteratorPtr it = node->GetInverseElementIterator();
+        while ( it && it->more() )
+        {
+          const SMDS_MeshElement* ne = it->next();
+          connectivity[ ne->GetType() ] << ne->GetID();
+        }
+        result = true;
+      }
+    }
+    else
+    {
+      SMESH::SMESH_Mesh_var mesh = myObject->GetMesh();
+      if ( !CORBA::is_nil( mesh ) )
+      {
+        SMESH::long_array_var elements = mesh->GetNodeInverseElements( id );
+        for ( int i = 0, n = elements->length(); i < n; i++ )
+        {
+          SMESH::ElementType type = mesh->GetElementType( elements[i], true );
+          connectivity[ type ] << elements[i];
+        }
+        result = true;
+      }
+    }
+  }
+  return result;
+}
+
+/*!
+  \brief Get node position on a shape.
+  \param id Mesh node ID.
+  \param position Returned node position.
+  \return \c true if result is valid; \c false otherwise.
+*/
+bool SMESH::SelectionProxy::nodePosition( int id, Position& position )
+{
+  bool result = false;
+  position = Position();
+  if ( !isNull() )
+  {
+    SMESH::SMESH_Mesh_var mesh = myObject->GetMesh();
+    if ( !CORBA::is_nil( mesh ) )
+    {
+      SMESH::NodePosition_var pos = mesh->GetNodePosition( id );
+      position.setShapeId( pos->shapeID );
+      if ( pos->shapeID > 0 )
+      {
+        position.setShapeType( pos->shapeType );
+        if ( pos->shapeType == GEOM::EDGE && pos->params.length() > 0 )
+        {
+          position.setU( pos->params[0] );
+        }
+        if ( pos->shapeType == GEOM::FACE && pos->params.length() > 1 )
+        {
+          position.setU( pos->params[0] );
+          position.setV( pos->params[1] );
+        }
+        result = true;
+      }
+    }
+  }
+  return result;
+}
+
+/*!
+  \brief Get groups given node belongs to.
+  \param id Mesh node ID.
+  \return List of groups containing given node.
+*/
+QList<SMESH::SelectionProxy> SMESH::SelectionProxy::nodeGroups( int id ) const
+{
+  QList<SMESH::SelectionProxy> result;
+  if ( !isNull() )
+  {
+    SMESH::SMESH_Mesh_var mesh = myObject->GetMesh();
+    if ( !CORBA::is_nil( mesh ) )
+    {
+      SMESH::ListOfGroups_var groups = mesh->GetGroups();
+      for ( uint i = 0 ; i < groups->length(); i++ )
+      {
+        if ( groups[i]->GetType() == SMESH::NODE && groups[i]->Contains( id ) )
+        {
+          result << SMESH::SelectionProxy( groups[i].in() );
+        }
+      }
+    }
+  }
+  return result;
+}
+
+/*!
+  \brief Check if element with given ID is present in the mesh.
+  \param id Mesh element ID.
+  \return \c true if mesh contains element; \c false otherwise.
+*/
+bool SMESH::SelectionProxy::hasElement( int id )
+{
+  bool result = false;
+  if ( !isNull() )
+  {
+    if ( actor() )
+    {
+      const SMDS_MeshElement* element = actor()->GetObject()->GetMesh()->FindElement( id );
+      result = element != 0;
+    }
+    else
+    {
+      SMESH::SMESH_Mesh_var mesh = myObject->GetMesh();
+      if ( !CORBA::is_nil( mesh ) )
+      {
+        SMESH::long_array_var nodes = mesh->GetElemNodes( id );
+        result = nodes->length() > 0;
+      }
+    }
+  }
+  return result; 
+}
+
+/*!
+  \brief Get type of given mesh element.
+  \param id Mesh element ID.
+  \return Element type.
+*/
+SMESH::ElementType SMESH::SelectionProxy::elementType( int id ) const
+{
+  SMESH::ElementType value = SMESH::ALL;
+  if ( !isNull() )
+  {
+    if ( actor() )
+    {
+      const SMDS_MeshElement* element = actor()->GetObject()->GetMesh()->FindElement( id );
+      if ( element )
+      {
+        value = (SMESH::ElementType)element->GetType();
+      }
+    }
+    else
+    {
+      SMESH::SMESH_Mesh_var mesh = myObject->GetMesh();
+      if ( !CORBA::is_nil( mesh ) )
+      {
+        value = mesh->GetElementType( id, true );
+      }
+    }
+  }
+  return value;
+}
+
+/*!
+  \brief Get entity type of given mesh element.
+  \param id Mesh element ID.
+  \return Entity type.
+*/
+int SMESH::SelectionProxy::elementEntityType( int id ) const
+{
+  SMESH::EntityType value = SMESH::Entity_Last;
+  if ( !isNull() )
+  {
+    if ( actor() )
+    {
+      const SMDS_MeshElement* element = actor()->GetObject()->GetMesh()->FindElement( id );
+      if ( element )
+      {
+        value = (SMESH::EntityType)element->GetEntityType();
+      }
+    }
+    else
+    {
+      SMESH::SMESH_Mesh_var mesh = myObject->GetMesh();
+      if ( !CORBA::is_nil( mesh ) )
+      {
+        value = mesh->GetElementGeomType( id );
+      }
+    }
+  }
+  return value;
+}
+
+/*!
+  \brief Get element connectivity.
+  \param id Mesh element ID.
+  \param connectivity Returned element connectivity.
+  \return \c true if result is valid; \c false otherwise.
+*/
+bool SMESH::SelectionProxy::elementConnectivity( int id, Connectivity& connectivity )
+{
+  bool result = false;
+  connectivity.clear();
+  if ( !isNull() )
+  {
+    if ( actor() )
+    {
+      const SMDS_MeshElement* element = actor()->GetObject()->GetMesh()->FindElement( id );
+      if ( element )
+      {
+        QSet<int> nodes;
+        SMDS_ElemIteratorPtr it = element->nodesIterator();
+        while ( it && it->more() )
+          nodes << static_cast<const SMDS_MeshNode*>( it->next() )->GetID();
+        connectivity[ SMDSAbs_Node ] = nodes.toList();
+        result = true;
+      }
+    }
+    else
+    {
+      SMESH::SMESH_Mesh_var mesh = myObject->GetMesh();
+      if ( !CORBA::is_nil( mesh ) )
+      {
+        SMESH::long_array_var nodes = mesh->GetElemNodes( id );
+        for ( int i = 0, n = nodes->length(); i < n; i++ )
+        {
+          connectivity[ SMDSAbs_Node ] << nodes[i];
+        }
+        result = true;
+      }
+    }
+  }
+  return result;
+}
+
+/*!
+  \brief Get element position on a shape.
+  \param id Mesh element ID.
+  \param position Returned element position.
+  \return \c true if result is valid; \c false otherwise.
+*/
+bool SMESH::SelectionProxy::elementPosition( int id, Position& position )
+{
+  bool result = false;
+  position = Position();
+  if ( !isNull() )
+  {
+    SMESH::SMESH_Mesh_var mesh = myObject->GetMesh();
+    if ( !CORBA::is_nil( mesh ) )
+    {
+      SMESH::ElementPosition_var pos = mesh->GetElementPosition( id );
+      position.setShapeId( pos->shapeID );
+      if ( pos->shapeID > 0 )
+      {
+        position.setShapeType( pos->shapeType );
+        result = true;
+      }
+    }
+  }
+  return result;
+}
+
+/*!
+  \brief Get gravity center of given element.
+  \param id Mesh element ID.
+  \param xyz Returned gravity center.
+  \return \c true if result is valid; \c false otherwise.
+*/
+bool SMESH::SelectionProxy::elementGravityCenter( int id, SMESH::XYZ& xyz )
+{
+  bool result = false;
+  xyz = SMESH::XYZ();
+  if ( !isNull() )
+  {
+    if ( actor() )
+    {
+      const SMDS_MeshElement* element = actor()->GetObject()->GetMesh()->FindElement( id );
+      if ( element )
+      {
+        SMDS_ElemIteratorPtr it = element->nodesIterator();
+        while ( it->more() )
+        {
+          const SMDS_MeshNode* node = static_cast<const SMDS_MeshNode*>( it->next() );
+          xyz.add( node->X(), node->Y(), node->Z() );
+        }
+        xyz.divide( element->NbNodes() );
+        result = true;
+      }
+    }
+    else
+    {
+      SMESH::SMESH_Mesh_var mesh = myObject->GetMesh();
+      if ( !CORBA::is_nil( mesh ) )
+      {
+        SMESH::long_array_var nodes = mesh->GetElemNodes( id );
+        for ( int i = 0, n = nodes->length(); i < n; i++ )
+        {
+          SMESH::double_array_var coords = mesh->GetNodeXYZ( nodes[i]  );
+          if ( coords->length() >= 3 )
+          {
+            xyz.add( coords[0], coords[1], coords[2] );
+          }
+        }
+        xyz.divide( nodes->length() );
+        result = true;
+      }
+    }
+  }
+  return result;
+}
+
+/*!
+  \brief Get normal vector to given element (face).
+  \param id Mesh element ID.
+  \param xyz Returned normal vector.
+  \return \c true if result is valid; \c false otherwise.
+*/
+bool SMESH::SelectionProxy::elementNormal( int id, SMESH::XYZ& xyz )
+{
+  bool result = false;
+  xyz = SMESH::XYZ();
+  if ( !isNull() )
+  {
+    if ( actor() )
+    {
+      const SMDS_MeshElement* element = actor()->GetObject()->GetMesh()->FindElement( id );
+      if ( element && element->GetType() == SMDSAbs_Face )
+      {
+        xyz = SMESH::getNormale( SMDS_Mesh::DownCast<SMDS_MeshFace>( element ) );
+        result = true;
+      }
+    }
+    else
+    {
+      SMESH::SMESH_Mesh_var mesh = myObject->GetMesh();
+      if ( !CORBA::is_nil( mesh ) )
+      {
+        SMESH::double_array_var normal = mesh->GetFaceNormal( id, true );
+        if ( normal->length() >= 3 )
+        {
+          xyz = SMESH::XYZ( normal[0], normal[1], normal[2] );
+          result = true;
+        }
+      }
+    }
+  }
+  return result;
+}
+
+/*!
+  \brief Get quality control's value for given element.
+  \param id Mesh element ID.
+  \param control Quality control type.
+  \param precision Precision for control's value.
+  \param value Returned quality control's value.
+  \return \c true if result is valid; \c false otherwise.
+*/
+bool SMESH::SelectionProxy::elementControl( int id, int control, double precision, double& value ) const
+{
+  bool result = false;
+  value = 0.;
+  if ( !isNull() )
+  {
+    if ( actor() )
+    {
+      SMESH::Controls::NumericalFunctorPtr functor;
+      switch ( control )
+      {
+      case SMESH::FT_AspectRatio:
+        functor.reset( new SMESH::Controls::AspectRatio() );
+        break;
+      case SMESH::FT_AspectRatio3D:
+        functor.reset( new SMESH::Controls::AspectRatio3D() );
+        break;
+      case SMESH::FT_Warping:
+        functor.reset( new SMESH::Controls::Warping() );
+        break;
+      case SMESH::FT_MinimumAngle:
+        functor.reset( new SMESH::Controls::MinimumAngle() );
+        break;
+      case SMESH::FT_Taper:
+        functor.reset( new SMESH::Controls::Taper() );
+        break;
+      case SMESH::FT_Skew:
+        functor.reset( new SMESH::Controls::Skew() );
+        break;
+      case SMESH::FT_Area:
+        functor.reset(  new SMESH::Controls::Area() );
+        break;
+      case SMESH::FT_Volume3D:
+        functor.reset(  new SMESH::Controls::Volume() );
+        break;
+      case SMESH::FT_MaxElementLength2D:
+        functor.reset( new SMESH::Controls::MaxElementLength2D() );
+        break;
+      case SMESH::FT_MaxElementLength3D:
+        functor.reset(  new SMESH::Controls::MaxElementLength3D() );
+        break;
+      case SMESH::FT_Length:
+        functor.reset( new SMESH::Controls::Length() );
+        break;
+      case SMESH::FT_Length2D:
+        functor.reset( new SMESH::Controls::Length2D() );
+        break;
+      case SMESH::FT_BallDiameter:
+        functor.reset( new SMESH::Controls::BallDiameter() );
+        break;
+      default:
+        break;
+      }	
+      const SMDS_MeshElement* element = actor()->GetObject()->GetMesh()->FindElement( id );
+      if ( element && functor && element->GetType() == functor->GetType() )
+      {
+        functor->SetMesh( actor()->GetObject()->GetMesh() );
+        functor->SetPrecision( precision );
+        value = functor->GetValue( id );
+        result = true;
+      }
+    }
+    else
+    {
+      //todo
+    }
+  }
+  return result;
+}
+
+/*!
+  \brief Get groups given element belongs to.
+  \param id Mesh element ID.
+  \return List of groups containing element.
+*/
+QList<SMESH::SelectionProxy> SMESH::SelectionProxy::elementGroups( int id ) const
+{
+  QList<SMESH::SelectionProxy> result;
+  if ( !isNull() )
+  {
+    SMESH::SMESH_Mesh_var mesh = myObject->GetMesh();
+    if ( !CORBA::is_nil( mesh ) )
+    {
+      SMESH::ListOfGroups_var groups = mesh->GetGroups();
+      for ( uint i = 0 ; i < groups->length(); i++ )
+      {
+        if ( groups[i]->GetType() != SMESH::NODE && groups[i]->Contains( id ) )
+        {
+          result << SMESH::SelectionProxy( groups[i].in() );
+        }
+      }
+    }
   }
   return result;
 }
@@ -402,9 +928,9 @@ bool SMESHGUI_SelectionProxy::isMeshLoaded() const
   The result contains valid data only if proxy refers to mesh object
   which has been imported from the MED file.
 */
-SMESHGUI_MedFileInfo SMESHGUI_SelectionProxy::medFileInfo() const
+SMESH::MedInfo SMESH::SelectionProxy::medFileInfo() const
 {
-  SMESHGUI_MedFileInfo info;
+  SMESH::MedInfo info;
   if ( !isNull() )
   {
     SMESH::SMESH_Mesh_var mesh = SMESH::SMESH_Mesh::_narrow( myObject );
@@ -423,9 +949,9 @@ SMESHGUI_MedFileInfo SMESHGUI_SelectionProxy::medFileInfo() const
   \brief Get child sub-meshes.
   \return List of sub-meshes for mesh object; empty list for other types.
 */
-QList<SMESHGUI_SelectionProxy> SMESHGUI_SelectionProxy::submeshes() const
+QList<SMESH::SelectionProxy> SMESH::SelectionProxy::submeshes() const
 {
-  QList<SMESHGUI_SelectionProxy> lst;
+  QList<SMESH::SelectionProxy> lst;
   if ( !isNull() )
   {
     SMESH::SMESH_Mesh_var mesh = SMESH::SMESH_Mesh::_narrow( myObject );
@@ -433,7 +959,7 @@ QList<SMESHGUI_SelectionProxy> SMESHGUI_SelectionProxy::submeshes() const
     {
       SMESH::submesh_array_var array = mesh->GetSubMeshes();
       for ( uint i = 0 ; i < array->length(); i++ )
-        lst << SMESHGUI_SelectionProxy( array[i].in() );
+        lst << SMESH::SelectionProxy( array[i].in() );
     }
   }
   return lst;
@@ -443,9 +969,9 @@ QList<SMESHGUI_SelectionProxy> SMESHGUI_SelectionProxy::submeshes() const
   \brief Get child groups.
   \return List of groups for mesh object; empty list for other types.
 */
-QList<SMESHGUI_SelectionProxy> SMESHGUI_SelectionProxy::groups() const
+QList<SMESH::SelectionProxy> SMESH::SelectionProxy::groups() const
 {
-  QList<SMESHGUI_SelectionProxy> lst;
+  QList<SMESH::SelectionProxy> lst;
   if ( !isNull() )
   {
     SMESH::SMESH_Mesh_var mesh = SMESH::SMESH_Mesh::_narrow( myObject );
@@ -453,7 +979,7 @@ QList<SMESHGUI_SelectionProxy> SMESHGUI_SelectionProxy::groups() const
     {
       SMESH::ListOfGroups_var array = mesh->GetGroups();
       for ( uint i = 0 ; i < array->length(); i++ )
-        lst << SMESHGUI_SelectionProxy( array[i].in() );
+        lst << SMESH::SelectionProxy( array[i].in() );
     }
   }
   return lst;
@@ -463,7 +989,7 @@ QList<SMESHGUI_SelectionProxy> SMESHGUI_SelectionProxy::groups() const
   \brief Get element type (for group). For other mesh objects result is undefined.
   \return Group's element type.
 */
-SMESH::ElementType SMESHGUI_SelectionProxy::elementType() const
+SMESH::ElementType SMESH::SelectionProxy::groupElementType() const
 {
   SMESH::ElementType value = SMESH::ALL;
   if ( !isNull() )
@@ -479,7 +1005,7 @@ SMESH::ElementType SMESHGUI_SelectionProxy::elementType() const
   \brief Get color (for group). For other mesh objects result is undefined.
   \return Group's color.
 */
-QColor SMESHGUI_SelectionProxy::color() const
+QColor SMESH::SelectionProxy::color() const
 {
   QColor result;
   if ( !isNull() )
@@ -499,7 +1025,7 @@ QColor SMESHGUI_SelectionProxy::color() const
   \param autoCompute Compute size if it is unavailable. Defaults to \c false.
   \return Group's size.
 */
-int SMESHGUI_SelectionProxy::size( bool autoCompute ) const
+int SMESH::SelectionProxy::size( bool autoCompute ) const
 {
   // note: size is not computed for group on filter for performance reasons, see IPAL52831
   int result = -1;
@@ -527,7 +1053,7 @@ int SMESHGUI_SelectionProxy::size( bool autoCompute ) const
   \param autoCompute Compute size if it is unavailable. Defaults to \c false.
   \return Number of nodes contained in group.
 */
-int SMESHGUI_SelectionProxy::nbNodes( bool autoCompute ) const
+int SMESH::SelectionProxy::nbNodes( bool autoCompute ) const
 {
   // note: nb of nodes is not computed automatically for performance reasons
   int result = -1;
@@ -552,7 +1078,7 @@ int SMESHGUI_SelectionProxy::nbNodes( bool autoCompute ) const
   \brief Get list of nodes / elements IDs for the mesh group.
   \return List of IDs for group object; empty list for other types.
 */
-QSet<uint> SMESHGUI_SelectionProxy::ids() const
+QSet<uint> SMESH::SelectionProxy::ids() const
 {
   QSet<uint> result;
   if ( !isNull() )
@@ -569,14 +1095,14 @@ QSet<uint> SMESHGUI_SelectionProxy::ids() const
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \class SMESHGUI_MeshInfo
+/// \class SMESH::MeshInfo
 /// \brief Store statistics on mesh object.
 ////////////////////////////////////////////////////////////////////////////////
 
 /*!
   \brief Constructor.
 */
-SMESHGUI_MeshInfo::SMESHGUI_MeshInfo()
+SMESH::MeshInfo::MeshInfo()
 {
 }
 
@@ -585,7 +1111,7 @@ SMESHGUI_MeshInfo::SMESHGUI_MeshInfo()
   \param type Entity type.
   \param value Number of entities.
 */
-void SMESHGUI_MeshInfo::addInfo( int type, long value )
+void SMESH::MeshInfo::addInfo( int type, long value )
 {
   myInfo[type] = value;
 }
@@ -595,7 +1121,7 @@ void SMESHGUI_MeshInfo::addInfo( int type, long value )
   \param type Entity type.
   \return Number of entities.
 */
-uint SMESHGUI_MeshInfo::info( int type ) const
+uint SMESH::MeshInfo::info( int type ) const
 {
   return myInfo.value( type, 0U );
 }
@@ -605,7 +1131,7 @@ uint SMESHGUI_MeshInfo::info( int type ) const
   \param type Entity type.
   \return Number of entities.
 */
-uint SMESHGUI_MeshInfo::operator[] ( int type )
+uint SMESH::MeshInfo::operator[] ( int type )
 {
   return (uint)info( type );
 }
@@ -616,7 +1142,7 @@ uint SMESHGUI_MeshInfo::operator[] ( int type )
   \param toType Upper entity type.
   \return Number of entities.
 */
-uint SMESHGUI_MeshInfo::count( int fromType, int toType ) const
+uint SMESH::MeshInfo::count( int fromType, int toType ) const
 {
   uint value = 0;
   for ( int type = fromType; type <= toType; type++ )
@@ -625,14 +1151,14 @@ uint SMESHGUI_MeshInfo::count( int fromType, int toType ) const
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \class SMESHGUI_MedFileInfo
+/// \class SMESH::MedInfo
 /// \brief Provide operations over the selected object
 ////////////////////////////////////////////////////////////////////////////////
 
 /*!
   \brief Constructor.
 */
-SMESHGUI_MedFileInfo::SMESHGUI_MedFileInfo()
+SMESH::MedInfo::MedInfo()
 {
 }
 
@@ -643,7 +1169,7 @@ SMESHGUI_MedFileInfo::SMESHGUI_MedFileInfo()
 
   \return \c true if MED file info is valid; \c false otherwise.
 */
-bool SMESHGUI_MedFileInfo::isValid() const
+bool SMESH::MedInfo::isValid() const
 {
   return !myFileName.isEmpty();
 }
@@ -652,7 +1178,7 @@ bool SMESHGUI_MedFileInfo::isValid() const
   \brief Get file name for mesh imported from MED file.
   \return MED file name.
 */
-QString SMESHGUI_MedFileInfo::fileName() const
+QString SMESH::MedInfo::fileName() const
 {
   return myFileName;
 }
@@ -661,7 +1187,7 @@ QString SMESHGUI_MedFileInfo::fileName() const
   \brief Set file name for mesh imported from MED file.
   \param fileName MED file name.
 */
-void SMESHGUI_MedFileInfo::setFileName( const QString& fileName )
+void SMESH::MedInfo::setFileName( const QString& fileName )
 {
   myFileName = fileName;
 }
@@ -670,7 +1196,7 @@ void SMESHGUI_MedFileInfo::setFileName( const QString& fileName )
   \brief Get file size for mesh imported from MED file.
   \return MED file size.
 */
-uint SMESHGUI_MedFileInfo::size() const
+uint SMESH::MedInfo::size() const
 {
   return mySize;
 }
@@ -679,7 +1205,7 @@ uint SMESHGUI_MedFileInfo::size() const
   \brief Set file size for mesh imported from MED file.
   \param size MED file size.
 */
-void SMESHGUI_MedFileInfo::setSize( uint size )
+void SMESH::MedInfo::setSize( uint size )
 {
   mySize = size;
 }
@@ -688,7 +1214,7 @@ void SMESHGUI_MedFileInfo::setSize( uint size )
   \brief Get version of format for mesh imported from MED file.
   \return MED file format version.
 */
-QString SMESHGUI_MedFileInfo::version() const
+QString SMESH::MedInfo::version() const
 {
   QString v = QString( "%1" ).arg( myMajor );
   if ( myMinor > 0 || myRelease > 0 ) v += QString( ".%1" ).arg( myMinor );
@@ -703,9 +1229,223 @@ QString SMESHGUI_MedFileInfo::version() const
   \param minor Minor version number.
   \param release Release version number.
 */
-void SMESHGUI_MedFileInfo::setVersion( uint major, uint minor, uint release )
+void SMESH::MedInfo::setVersion( uint major, uint minor, uint release )
 {
   myMajor = major;
   myMinor = minor;
   myRelease = release;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// \class SMESH::Position
+/// \brief Describes position of mesh node or element on a reference shape.
+////////////////////////////////////////////////////////////////////////////////
+
+/*!
+  \brief Contructor. Creates invalid position.
+*/
+SMESH::Position::Position():
+  myShapeId(-1), myShapeType(-1), myU(0), myV(0), myHasU(false), myHasV(false)
+{
+}
+
+/*!
+  \brief Check if position is valid.
+  \return \c true if position is valid; \c false otherwise.
+*/
+bool SMESH::Position::isValid() const
+{
+  return myShapeId > 0 && myShapeType != -1;
+}
+
+/*!
+  \brief Get reference shape ID.
+  \return Shape / sub-shape ID.
+*/
+int SMESH::Position::shapeId() const
+{
+  return myShapeId;
+}
+
+/*!
+  \brief Set reference shape ID.
+  \param id Shape / sub-shape ID.
+*/
+void SMESH::Position::setShapeId( int id )
+{
+  myShapeId = id;
+}
+
+/*!
+  \brief Get reference shape type.
+  \return Shape type.
+*/
+int SMESH::Position::shapeType() const
+{
+  return myShapeType;
+}
+
+/*!
+  \brief Set reference shape type.
+  \param type Shape type.
+*/
+void SMESH::Position::setShapeType( int type )
+{
+  myShapeType = type;
+}
+
+/*!
+  \brief Check if there is U position on a shape.
+  \return \c true if U position is valid; \c false otherwise.
+*/
+bool SMESH::Position::hasU() const
+{
+  return myHasU;
+}
+
+/*!
+  \brief Get U position on a shape.
+  \return U position.
+*/
+double SMESH::Position::u() const
+{
+  return myU;
+}
+
+/*!
+  \brief Set U position on a shape.
+  \parm u U position.
+*/
+void SMESH::Position::setU( double u )
+{
+  myU = u;
+  myHasU = true;
+}
+
+/*!
+  \brief Check if there is V position on a shape.
+  \return \c true if V position is valid; \c false otherwise.
+*/
+bool SMESH::Position::hasV() const
+{
+  return myHasV;
+}
+
+/*!
+  \brief Get V position on a shape.
+  \return V position.
+*/
+double SMESH::Position::v() const
+{
+  return myV;
+}
+
+/*!
+  \brief Set V position on a shape.
+  \parm v V position.
+*/
+void SMESH::Position::setV( double v)
+{
+  myV = v;
+  myHasV = true;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// \class SMESH::XYZ
+/// \brief Simple structure to manage 3D coordinate.
+////////////////////////////////////////////////////////////////////////////////
+
+/*!
+  \brief Default constructor.
+*/
+SMESH::XYZ::XYZ()
+{
+  myX = myY = myZ = 0.0;
+}
+
+/*!
+  \brief Base constructor.
+  \param parameter x X coordinate.
+  \param parameter y Y coordinate.
+  \param parameter z Z coordinate.
+*/
+SMESH::XYZ::XYZ( double x, double y, double z )
+{
+  myX = x;
+  myY = y;
+  myZ = z;
+}
+
+/*!
+  \brief Construction from geometrical point.
+  \param parameter p Geometrical point.
+*/
+SMESH::XYZ::XYZ( const gp_XYZ& p )
+{
+  myX = p.X();
+  myY = p.Y();
+  myZ = p.Z();
+}
+
+/*!
+  \brief Add a point.
+  \param parameter x X coordinate.
+  \param parameter y Y coordinate.
+  \param parameter z Z coordinate.
+*/
+void SMESH::XYZ::add( double x, double y, double z )
+{
+  myX += x;
+  myY += y;
+  myZ += z;
+}
+
+/*!
+  \brief Divide point to given coefficient.
+  \param parameter a Divider coefficient.
+*/
+void SMESH::XYZ::divide( double a )
+{
+  if ( a != 0.)
+  {
+    myX /= a;
+    myY /= a;
+    myZ /= a;
+  }
+}
+
+/*!
+  \brief Get X coordinate.
+  \return X coordinate.
+*/
+double SMESH::XYZ::x() const
+{
+  return myX;
+}
+
+/*!
+  \brief Get Y coordinate.
+  \return Y coordinate.
+*/
+double SMESH::XYZ::y() const
+{
+  return myY;
+}
+
+/*!
+  \brief Get Z coordinate.
+  \return Z coordinate.
+*/
+double SMESH::XYZ::z() const
+{
+  return myZ;
+}
+
+/*!
+  \brief Conversion to geometrical point.
+  \return Geometrical point.
+*/
+SMESH::XYZ::operator gp_XYZ() const
+{
+  return gp_XYZ( myX, myY, myZ );
 }

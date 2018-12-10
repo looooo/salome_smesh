@@ -1924,7 +1924,7 @@ add the exported data to its contents?</translation>
         <translation>Height:</translation>
     </message>
     <message>
-        <source>SMESH_HEXAS</source>
+        <source>SMESH_HEXAHEDRON</source>
         <translation>Hexahedron</translation>
     </message>
     <message>
@@ -2770,7 +2770,7 @@ Check algorithm documentation for supported geometry</translation>
         <translation>Symmetry</translation>
     </message>
     <message>
-        <source>SMESH_TETRAS</source>
+        <source>SMESH_TETRAHEDRON</source>
         <translation>Tetrahedron</translation>
     </message>
     <message>
@@ -4522,6 +4522,10 @@ It can&apos;t be deleted </translation>
     <message>
         <source>SMESH_3D_ALGO_GROUP_ADVANCED</source>
         <translation>Advanced</translation>
+    </message>
+    <message>
+        <source>SMESH_HEX_PRISM</source>
+        <translation>Hexagonal Prism</translation>
     </message>
 </context>
 <context>

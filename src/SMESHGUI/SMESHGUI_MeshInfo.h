@@ -19,14 +19,11 @@
 //
 // See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 //
-//  File   : SMESHGUI_MeshInfo.h
-//  Author : Vadim SANDLER, Open CASCADE S.A.S. (vadim.sandler@opencascade.com)
 
 #ifndef SMESHGUI_MESHINFO_H
 #define SMESHGUI_MESHINFO_H
 
 #include "SMESH_SMESHGUI.hxx"
-#include "SMESH_ControlsDef.hxx"
 #include "SMESHGUI_SelectionProxy.h"
 
 #ifndef DISABLE_PLOT2DVIEWER
@@ -41,8 +38,6 @@
 #include <QSet>
 
 #include <SALOMEconfig.h>
-#include CORBA_SERVER_HEADER(SMESH_Mesh)
-#include CORBA_SERVER_HEADER(SMESH_Group)
 #include CORBA_SERVER_HEADER(SMESH_Filter)
 
 #include <SALOME_InteractiveObject.hxx>
@@ -65,24 +60,13 @@ class SMESHGUI_SpinBox;
 
 class ExtraWidget;
 class GroupCombo;
+class InfoWriter;
 
 class SMESHGUI_EXPORT SMESHGUI_Info : public QWidget
 {
 public:
   SMESHGUI_Info( QWidget* = 0 );
-
   virtual void saveInfo( QTextStream& ) = 0;
-
-protected:
-  enum { Bold = 0x01, Italic = 0x02, AllColumns = 0x80 };
-  QFont fontFromOptions( int );
-  void setFontAttributes( QWidget*, int );
-  void setFontAttributes( QTreeWidgetItem*, int );
-  QLabel* createLabel( QWidget*, int = 0 );
-  QLabel* createLabel( const QString&, QWidget*, int = 0 );
-  QLabel* createField( QWidget*, const QString& = QString() );
-  QLabel* createField( QWidget*, int, const QString& = QString() );
-  QWidget* createSeparator( QWidget*, Qt::Orientation = Qt::Horizontal );
 };
 
 class SMESHGUI_EXPORT SMESHGUI_BaseInfo : public SMESHGUI_Info
@@ -153,7 +137,7 @@ public:
   SMESHGUI_BaseInfo( QWidget* = 0 );
   ~SMESHGUI_BaseInfo();
 
-  void showInfo( const SMESHGUI_SelectionProxy& );
+  void showInfo( const SMESH::SelectionProxy& );
   void clear();
   void saveInfo( QTextStream& );
 
@@ -169,7 +153,7 @@ private slots:
 
 private:
   iwlist myWidgets;
-  SMESHGUI_SelectionProxy myProxy;
+  SMESH::SelectionProxy myProxy;
 };
 
 class SMESHGUI_EXPORT SMESHGUI_ElemInfo : public SMESHGUI_Info
@@ -180,42 +164,27 @@ public:
   SMESHGUI_ElemInfo( QWidget* = 0 );
   ~SMESHGUI_ElemInfo();
 
-  void showInfo( const SMESHGUI_SelectionProxy&, uint, bool );
-  void showInfo( const SMESHGUI_SelectionProxy&, QSet<uint>, bool );
-  void showInfo( const SMESHGUI_SelectionProxy& );
+  void showInfo( const SMESH::SelectionProxy&, uint, bool );
+  void showInfo( const SMESH::SelectionProxy&, QSet<uint>, bool );
+  void showInfo( const SMESH::SelectionProxy& );
   void clear();
-
-  gp_XYZ getGravityCenter( const SMDS_MeshElement* );
+  void saveInfo( QTextStream& );
 
 protected:
   enum { ShowNone, ShowNodes, ShowElements };
 
-  struct XYZ
-  {
-    double myX, myY, myZ;
-    XYZ() { myX = myY = myZ = 0.0; }
-    XYZ(double x, double y, double z) { myX = x; myY = y; myZ = z; }
-    void add( double x, double y, double z ) { myX += x; myY += y; myZ += z; }
-    void divide( double a ) { if ( a != 0.) { myX /= a; myY /= a; myZ /= a; } }
-    double x() const { return myX; }
-    double y() const { return myY; }
-    double z() const { return myZ; }
-    operator gp_XYZ() const { return gp_XYZ( myX, myY, myZ ); }
-  };
-  typedef QMap< int, QList<int> > Connectivity;
+  QWidget* centralWidget() const;
 
-  QWidget* frame() const;
-
+  SMESH::SelectionProxy proxy() const;
   int what() const;
-  SMESHGUI_SelectionProxy proxy() const;
 
+  QString type2str( int, bool = false );
+  QString stype2str( int );
+  QString etype2str( int );
+  QString ctrl2str( int );
+  void writeInfo( InfoWriter*, const QList<uint>& );
   virtual void information( const QList<uint>& ) = 0;
   virtual void clearInternal();
-
-  Connectivity nodeConnectivity( const SMDS_MeshNode* );
-  QString formatConnectivity( Connectivity, int );
-  XYZ gravityCenter( const SMDS_MeshElement* );
-  XYZ normal( const SMDS_MeshElement* );
 
 signals:
   void itemInfo( int );
@@ -229,7 +198,7 @@ private slots:
 private:
   QWidget* myFrame;
   ExtraWidget* myExtra;
-  SMESHGUI_SelectionProxy myProxy;
+  SMESH::SelectionProxy myProxy;
   int myWhat;
   QList<uint> myIDs;
   int myIndex;
@@ -241,7 +210,6 @@ class SMESHGUI_EXPORT SMESHGUI_SimpleElemInfo : public SMESHGUI_ElemInfo
 
 public:
   SMESHGUI_SimpleElemInfo( QWidget* = 0 );
-  void saveInfo( QTextStream& );
 
 protected:
   void information( const QList<uint>& );
@@ -256,10 +224,10 @@ class SMESHGUI_EXPORT SMESHGUI_TreeElemInfo : public SMESHGUI_ElemInfo
   Q_OBJECT;
 
   class ItemDelegate;
+  class ItemCreator;
 
 public:
   SMESHGUI_TreeElemInfo( QWidget* = 0 );
-  void saveInfo( QTextStream& );
 
 protected:
   void contextMenuEvent( QContextMenuEvent* );
@@ -269,11 +237,9 @@ protected:
 
 private slots:
   void itemDoubleClicked( QTreeWidgetItem*, int );
-  void saveExpanded( QTreeWidgetItem* );
   
 private:
   QTreeWidgetItem* createItem( QTreeWidgetItem* = 0, int = 0 );
-  QString expandedResource( QTreeWidgetItem* );
   
 private:
   QTreeWidget* myInfo;
@@ -286,7 +252,7 @@ class InfoComputor: public QObject
 public:
   enum { GrpSize, GrpNbNodes };
   
-  InfoComputor( QObject*, const SMESHGUI_SelectionProxy&, int );
+  InfoComputor( QObject*, const SMESH::SelectionProxy&, int );
 
 signals:
   void computed();
@@ -295,7 +261,7 @@ public slots:
   void compute();
 
 private:
-  SMESHGUI_SelectionProxy myProxy;
+  SMESH::SelectionProxy myProxy;
   int myOperation;
 };
 
@@ -307,7 +273,7 @@ public:
   SMESHGUI_AddInfo( QWidget* = 0 );
   ~SMESHGUI_AddInfo();
 
-  void showInfo( const SMESHGUI_SelectionProxy& );
+  void showInfo( const SMESH::SelectionProxy& );
   void clear();
   void saveInfo( QTextStream& );
 
@@ -320,19 +286,19 @@ private slots:
 
 private:
   QTreeWidgetItem* createItem( QTreeWidgetItem* = 0, int = 0 );
-  void meshInfo( const SMESHGUI_SelectionProxy&, QTreeWidgetItem* );
-  void subMeshInfo( const SMESHGUI_SelectionProxy&, QTreeWidgetItem* );
-  void groupInfo( const SMESHGUI_SelectionProxy&, QTreeWidgetItem* );
+  void meshInfo( const SMESH::SelectionProxy&, QTreeWidgetItem* );
+  void subMeshInfo( const SMESH::SelectionProxy&, QTreeWidgetItem* );
+  void groupInfo( const SMESH::SelectionProxy&, QTreeWidgetItem* );
 
   void showGroups();
   void showSubMeshes();
 
 private:
-  SMESHGUI_SelectionProxy myProxy;
+  SMESH::SelectionProxy myProxy;
   QTreeWidget* myTree;
   QList<InfoComputor*> myComputors;
-  QList<SMESHGUI_SelectionProxy> myGroups;
-  QList<SMESHGUI_SelectionProxy> mySubMeshes;
+  QList<SMESH::SelectionProxy> myGroups;
+  QList<SMESH::SelectionProxy> mySubMeshes;
 };
 
 class SMESHGUI_EXPORT SMESHGUI_CtrlInfo : public SMESHGUI_Info
@@ -343,7 +309,7 @@ public:
   SMESHGUI_CtrlInfo( QWidget* = 0 );
   ~SMESHGUI_CtrlInfo();
 
-  void showInfo( const SMESHGUI_SelectionProxy& );
+  void showInfo( const SMESH::SelectionProxy& );
   void saveInfo( QTextStream& );
 
 private:
@@ -371,7 +337,7 @@ private slots:
 private:
   typedef SALOME::GenericObj_wrap< SMESH::Predicate > TPredicate;
   typedef SALOME::GenericObj_wrap< SMESH::NumericalFunctor > TNumFunctor;
-  SMESHGUI_SelectionProxy myProxy;
+  SMESH::SelectionProxy myProxy;
   ObjectType myObjectType;
   SMESHGUI_SpinBox* myToleranceWidget;
   QList<QLabel*> myWidgets;
@@ -423,9 +389,9 @@ private slots:
   void dump();
 
 private:
-  void showInfo( const SMESHGUI_SelectionProxy& );
+  void showInfo( const SMESH::SelectionProxy& );
 
-  SMESHGUI_SelectionProxy myProxy;
+  SMESH::SelectionProxy myProxy;
   QTabWidget* myTabWidget;
   SMESHGUI_BaseInfo* myBaseInfo;
   SMESHGUI_ElemInfo* myElemInfo;
@@ -457,9 +423,9 @@ private slots:
   void dump();
 
 private:
-  void showInfo( const SMESHGUI_SelectionProxy& );
+  void showInfo( const SMESH::SelectionProxy& );
 
-  SMESHGUI_SelectionProxy myProxy;
+  SMESH::SelectionProxy myProxy;
   SMESHGUI_CtrlInfo* myCtrlInfo;
 };
 

@@ -20,8 +20,8 @@
 // See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 //
 
-#ifndef SMESHGUI_OBJECTPROXY_H
-#define SMESHGUI_OBJECTPROXY_H
+#ifndef SMESHGUI_SELECTIONPROXY_H
+#define SMESHGUI_SELECTIONPROXY_H
 
 #include "SMESH_SMESHGUI.hxx"
 
@@ -31,104 +31,173 @@
 #include CORBA_SERVER_HEADER(GEOM_Gen)
 
 #include <QColor>
+#include <QList>
 #include <QMap>
 #include <QSet>
 #include <QString>
 
+#include <gp_XYZ.hxx>
+
 class SMESH_Actor;
 
-class SMESHGUI_EXPORT SMESHGUI_MeshInfo
+namespace SMESH
 {
-  QMap<int, long> myInfo;
-
-public:
-  SMESHGUI_MeshInfo();
-
-  void addInfo( int, long );
-  uint info( int ) const;
-  uint operator[] ( int );
-  uint count( int, int ) const;
-};
-
-class SMESHGUI_EXPORT SMESHGUI_MedFileInfo
-{
-  QString myFileName;
-  uint mySize;
-  uint myMajor, myMinor, myRelease;
-
-public:
-  SMESHGUI_MedFileInfo();
-
-  bool isValid() const;
-  QString fileName() const;
-  void setFileName( const QString& );
-  uint size() const;
-  void setSize( uint );
-  QString version() const;
-  void setVersion( uint, uint, uint );
-};
-
-class SMESHGUI_EXPORT SMESHGUI_SelectionProxy
-{
-  Handle(SALOME_InteractiveObject) myIO;
-  SMESH::SMESH_IDSource_var myObject;
-  SMESH_Actor* myActor;
-  bool myDirty;
-
-public:
-  enum Type
+  class SMESHGUI_EXPORT MeshInfo
   {
-    Unknown,
-    Mesh,
-    Submesh,
-    Group,
-    GroupStd,
-    GroupGeom,
-    GroupFilter
+    QMap<int, long> myInfo;
+  public:
+    MeshInfo();
+    uint info( int ) const;
+    uint operator[] ( int );
+    uint count( int, int ) const;
+  private:
+    void addInfo( int, long );
+    friend class SelectionProxy;
   };
 
-  SMESHGUI_SelectionProxy();
-  SMESHGUI_SelectionProxy( const Handle(SALOME_InteractiveObject)& );
-  SMESHGUI_SelectionProxy( SMESH::SMESH_IDSource_ptr );
-  SMESHGUI_SelectionProxy( const SMESHGUI_SelectionProxy& );
+  class SMESHGUI_EXPORT MedInfo
+  {
+    QString myFileName;
+    uint mySize;
+    uint myMajor, myMinor, myRelease;
+  public:
+    MedInfo();
+    bool isValid() const;
+    QString fileName() const;
+    uint size() const;
+    QString version() const;
+  private:
+    void setFileName( const QString& );
+    void setSize( uint );
+    void setVersion( uint, uint, uint );
+    friend class SelectionProxy;
+  };
 
-  SMESHGUI_SelectionProxy& operator= ( const SMESHGUI_SelectionProxy& );
-  bool operator== ( const SMESHGUI_SelectionProxy& );
+  class SMESHGUI_EXPORT Position
+  {
+    int myShapeId;
+    int myShapeType;
+    double myU, myV;
+    bool myHasU, myHasV;
+  public:
+    Position();
+    bool isValid() const;
+    int shapeId() const;
+    int shapeType() const;
+    bool hasU() const;
+    double u() const;
+    bool hasV() const;
+    double v() const;
+  private:
+    void setShapeId( int );
+    void setShapeType( int );
+    void setU( double );
+    void setV( double );
+    friend class SelectionProxy;
+  };
 
-  void refresh();
+  class XYZ
+  {
+    double myX, myY, myZ;
+  public:
+    XYZ();
+    XYZ( double, double, double );
+    XYZ( const gp_XYZ& );
+    void add( double, double, double );
+    void divide( double );
+    double x() const;
+    double y() const;
+    double z() const;
+    operator gp_XYZ() const;
+  };
 
-  bool isNull() const;
-  operator bool() const;
+  typedef QMap< int, QList<int> > Connectivity;
 
-  SMESH::SMESH_IDSource_ptr object() const;
-  const Handle(SALOME_InteractiveObject)& io() const;
-  SMESH_Actor* actor() const;
+  class SMESHGUI_EXPORT SelectionProxy
+  {
+    Handle(SALOME_InteractiveObject) myIO;
+    SMESH::SMESH_IDSource_var myObject;
+    SMESH_Actor* myActor;
+    bool myDirty;
 
-  bool isValid() const;
-  void load();
+  public:
+    enum Type
+    {
+      Unknown,
+      Mesh,
+      Submesh,
+      Group,
+      GroupStd,
+      GroupGeom,
+      GroupFilter
+    };
 
-  QString name() const;
-  Type type() const;
-  SMESHGUI_MeshInfo meshInfo() const;
-  SMESHGUI_SelectionProxy mesh() const;
-  bool hasShapeToMesh() const;
-  GEOM::GEOM_Object_ptr shape() const;
-  QString shapeName() const;
-  int shapeType() const;
+    // construction
+    SelectionProxy();
+    SelectionProxy( const Handle(SALOME_InteractiveObject)& );
+    SelectionProxy( SMESH::SMESH_IDSource_ptr );
+    SelectionProxy( const SelectionProxy& );
 
-  bool isMeshLoaded() const;
-  SMESHGUI_MedFileInfo medFileInfo() const;
-  QList<SMESHGUI_SelectionProxy> submeshes() const;
-  QList<SMESHGUI_SelectionProxy> groups() const;
+    SelectionProxy& operator= ( const SelectionProxy& );
 
-  SMESH::ElementType elementType() const;
-  QColor color() const;
-  int size( bool = false ) const;
-  int nbNodes( bool = false ) const;
-  QSet<uint> ids() const;
+    // comparison
+    bool operator== ( const SelectionProxy& );
 
-private:
-  void init();
-};
+    // general purpose methods
+    void refresh();
 
-#endif // SMESHGUI_OBJECTPROXY_H
+    bool isNull() const;
+    operator bool() const;
+
+    SMESH::SMESH_IDSource_ptr object() const;
+    const Handle(SALOME_InteractiveObject)& io() const;
+    SMESH_Actor* actor() const;
+
+    bool isValid() const;
+    void load();
+
+    // methods common to all types of proxy
+    QString name() const;
+    Type type() const;
+    MeshInfo meshInfo() const;
+    SelectionProxy mesh() const;
+    bool hasShapeToMesh() const;
+    GEOM::GEOM_Object_ptr shape() const;
+    QString shapeName() const;
+    int shapeType() const;
+    bool isMeshLoaded() const;
+
+    bool hasNode( int );
+    bool nodeCoordinates( int, XYZ& );
+    bool nodeConnectivity( int, Connectivity& );
+    bool nodePosition( int, Position& );
+    QList<SelectionProxy> nodeGroups( int ) const;
+
+    bool hasElement( int );
+    SMESH::ElementType elementType( int ) const;
+    int elementEntityType( int ) const;
+    bool elementConnectivity( int, Connectivity& );
+    bool elementPosition( int, Position& );
+    bool elementGravityCenter( int, XYZ& );
+    bool elementNormal( int, XYZ& );
+    bool elementControl( int, int, double, double& ) const;
+    QList<SelectionProxy> elementGroups( int ) const;
+
+    // methods that work for mesh only
+    MedInfo medFileInfo() const;
+    QList<SelectionProxy> submeshes() const;
+    QList<SelectionProxy> groups() const;
+
+    // methods that work for group only
+    SMESH::ElementType groupElementType() const;
+    QColor color() const;
+    int size( bool = false ) const;
+    int nbNodes( bool = false ) const;
+    QSet<uint> ids() const;
+
+  private:
+    void init();
+  };
+}
+
+#endif // SMESHGUI_SELECTIONPROXY_H

@@ -2536,6 +2536,7 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
 #ifndef DISABLE_PLOT2DVIEWER
             SMESH::ProcessIn2DViewers(anActor,SMESH::RemoveFrom2dViewer);
 #endif
+            anActor->UpdateFilter();
           }
         }
       }

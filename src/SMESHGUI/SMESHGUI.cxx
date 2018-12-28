@@ -116,6 +116,7 @@
 #include <LightApp_SelectionMgr.h>
 #include <LightApp_UpdateFlags.h>
 
+#include <SVTK_Renderer.h>
 #include <SVTK_ViewManager.h>
 #include <SVTK_ViewModel.h>
 #include <SVTK_ViewWindow.h>
@@ -2722,6 +2723,10 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
       }
       else
         aSel->setSelectedObjects( to_process );
+
+      if ( vtkwnd && vtkwnd->GetRenderer() && !isStudyLocked() &&
+           ( theCommandID==SMESHOp::OpShow || theCommandID==SMESHOp::OpShowOnly ) )
+        vtkwnd->GetRenderer()->AdjustActors();
 
       break;
     }

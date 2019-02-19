@@ -75,7 +75,7 @@
                <item row="4" column="1">
                 <widget class="QDoubleSpinBox" name="dsb_epais">
                  <property name="toolTip">
-                  <string>Valeur de l’epaisseur du coude et des embouts</string>
+                  <string>Valeur de l'epaisseur du coude et des embouts</string>
                  </property>
                  <property name="decimals">
                   <number>5</number>
@@ -95,7 +95,7 @@
                <item row="3" column="1">
                 <widget class="QDoubleSpinBox" name="dsb_lTubeP2">
                  <property name="toolTip">
-                  <string>Valeur de la longueur de l’embout P2 a l’extremite duquel seront appliques les chargements</string>
+                  <string>Valeur de la longueur de l'embout P2 a l'extremite duquel seront appliques les chargements</string>
                  </property>
                  <property name="decimals">
                   <number>5</number>
@@ -135,7 +135,7 @@
                <item row="2" column="1">
                 <widget class="QDoubleSpinBox" name="dsb_lTubeP1">
                  <property name="toolTip">
-                  <string>Valeur de la longueur de l’embout P1 a l’extremite duquel seront appliques les chargements</string>
+                  <string>Valeur de la longueur de l'embout P1 a l'extremite duquel seront appliques les chargements</string>
                  </property>
                  <property name="decimals">
                   <number>5</number>
@@ -203,7 +203,7 @@
               <item row="0" column="1">
                <widget class="QSpinBox" name="sb_nbAxeTubeP1">
                 <property name="toolTip">
-                 <string>Nombre d’elements le long de l’embout P1</string>
+                 <string>Nombre d'elements le long de l'embout P1</string>
                 </property>
                 <property name="maximum">
                  <number>10000</number>
@@ -223,7 +223,7 @@
               <item row="1" column="1">
                <widget class="QSpinBox" name="sb_nbAxeTubeP2">
                 <property name="toolTip">
-                 <string>Nombre d’elements le long de l’embout P2</string>
+                 <string>Nombre d'elements le long de l'embout P2</string>
                 </property>
                 <property name="maximum">
                  <number>10000</number>
@@ -243,7 +243,7 @@
               <item row="2" column="1">
                <widget class="QSpinBox" name="sb_nbAxeCoude">
                 <property name="toolTip">
-                 <string>Nombre d’elements le long de l’axe du coude</string>
+                 <string>Nombre d'elements le long de l'axe du coude</string>
                 </property>
                 <property name="maximum">
                  <number>10000</number>
@@ -263,7 +263,7 @@
               <item row="3" column="1">
                <widget class="QSpinBox" name="sb_nbCirconf">
                 <property name="toolTip">
-                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Nombre d’elements le long de la circonference&lt;/p&gt;&lt;p&gt;(nombre pair)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Nombre d'elements le long de la circonference&lt;/p&gt;&lt;p&gt;(nombre pair)&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                 </property>
                 <property name="maximum">
                  <number>10000</number>
@@ -419,7 +419,7 @@
                <item row="2" column="1">
                 <widget class="QDoubleSpinBox" name="dsb_azimut">
                  <property name="toolTip">
-                  <string>Valeur de la position circonferentielle du centre de la fissure comptee positivement en degres a partir de l’extrados jusqu’a l’intrados en passant par le flanc gauche</string>
+                  <string>Valeur de la position circonferentielle du centre de la fissure comptee positivement en degres a partir de l'extrados jusqu'a l'intrados en passant par le flanc gauche</string>
                  </property>
                  <property name="decimals">
                   <number>5</number>
@@ -479,7 +479,7 @@
                <item row="3" column="1">
                 <widget class="QDoubleSpinBox" name="dsb_orientation">
                  <property name="toolTip">
-                  <string>Valeur de l’angle en degres forme par le grand axe de la fissure et la generatrice du coude donnant ainsi l’orientation du defaut</string>
+                  <string>Valeur de l'angle en degres forme par le grand axe de la fissure et la generatrice du coude donnant ainsi l'orientation du defaut</string>
                  </property>
                  <property name="decimals">
                   <number>5</number>

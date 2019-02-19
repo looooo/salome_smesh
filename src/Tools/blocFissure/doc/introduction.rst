@@ -17,6 +17,6 @@ Introduction
 
 « Bloc Fissure » is not applicable every time. It is highly recommended to read the section on :ref:`general principles <general_principles>` to see how « Bloc Fissure » works. This section also gives the functional scope and the :ref:`limitations <recommendations>` of the tool. Finally, this part deals with cautions that the user must take using « Bloc Fissure ». The user can also refers himself to the :ref:`tutorial <tutorials>` to get some advice on how to make « Bloc Fissure » works.
 
-If « Bloc Fissure » can’t be used on a case, the user may switch to the other FEM insertion tool Zcracks in SALOME (soon available). It’s more robust and has less limitations but the result is a cracked free mesh with tetrahedral elements. Another possibility is the `X-FEM method <http://www.code-aster.org/doc/v11/fr/man_u/u2/u2.05.02.pdf>`_ method in SALOME_MECA.
+If « Bloc Fissure » can't be used on a case, the user may switch to the other FEM insertion tool Zcracks in SALOME (soon available). It's more robust and has less limitations but the result is a cracked free mesh with tetrahedral elements. Another possibility is the `X-FEM method <http://www.code-aster.org/doc/v11/fr/man_u/u2/u2.05.02.pdf>`_ method in SALOME_MECA.
 
 

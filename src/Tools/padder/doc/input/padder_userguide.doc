@@ -40,9 +40,9 @@ To generate DE mesh for a reinforced concrete structure, one should
 supply a single tetrahedral mesh for concrete and as many segment-type
 1D meshes as groups of steel reinforcement bars of different
 diameters. The size (length) of segment-type steel reinforcement
-elements should correspond to the modelled bar’s
+elements should correspond to the modelled bar's
 diameter. SpherePadder algorithm will create steel discrete elements
-by using the segment’s length as the DE diameter.
+by using the segment's length as the DE diameter.
 
 Warning: The User should control that all steel bars of a given
 diameter in a mesh belong to the same mesh group, and that different
@@ -62,7 +62,7 @@ of the GNU General Public License.
 Bibliography:
 - [1] J.-F.Jerier, V.Richefeu, D.Imbault, F.-V. Donze, “Packing spherical discrete elements for large scale simulations”, Computer Methods in Applied Mechanics and Engineering 199 (2010) 1668–1676.
 - [2] CGAL, Computational Geometry Algorithms Library. https://gforge.inria.fr.
-- [3] EUROPLEXUS: a computer program for the finite element simulation of fluid–structure systems under transient dynamic loading. http://europlexus.jrc.ec.europa.eu, (User’s Manual).
+- [3] EUROPLEXUS: a computer program for the finite element simulation of fluid–structure systems under transient dynamic loading. http://europlexus.jrc.ec.europa.eu, (User's Manual).
 
 \section S2_PADDER The SpherePadder SALOME plugin
 

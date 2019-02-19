@@ -10,7 +10,7 @@ The main command of « Bloc Fissure » is the casStandard function. It has a sin
 +------------------------------------------------------------------------------------------------------------------+
 |       Script parameters                                                                                          |
 +======================+===================================+=======================================================+
-| / **nomCas**         | *[string, default=’casStandard’]* |  Name of the problem                                  |
+| / **nomCas**         | *[string, default='casStandard']* |  Name of the problem                                  |
 +----------------------+-----------------------------------+-------------------------------------------------------+
 | **maillageSain**     | *[string]*                        |  Absolute address of the input structure 3D mesh      |
 |                      |                                   |  in MED format                                        |

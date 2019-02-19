@@ -86,14 +86,14 @@ Surface crack geometry shall exceed from the structure mesh. Boolean operation c
 
 4) **Crack front edges must exceed from the structure:**
 
-For similar reasons, crack front edges must exceed from the structure mesh. The user shall be really careful when fusing crack front edges within the structure with edges outside of the structure because junction mustn’t be on the box external face. For example the following figure shows the bad and the good practice. In grew a 2D view of a structure to cut and in red the crack surface. Line 1 is the edge declared as the crack front. On the left case, Line 1 stops on the box boundary. Even if Line 1 is extended with Line 2 and 5, « Bloc Fissure» will fail. The good practice is to extend the Line 1 with the same shape. See how to extend the front edges in the :ref:`tutorials section <tutorials>`
+For similar reasons, crack front edges must exceed from the structure mesh. The user shall be really careful when fusing crack front edges within the structure with edges outside of the structure because junction mustn't be on the box external face. For example the following figure shows the bad and the good practice. In grew a 2D view of a structure to cut and in red the crack surface. Line 1 is the edge declared as the crack front. On the left case, Line 1 stops on the box boundary. Even if Line 1 is extended with Line 2 and 5, « Bloc Fissure» will fail. The good practice is to extend the Line 1 with the same shape. See how to extend the front edges in the :ref:`tutorials section <tutorials>`
 
 .. image:: images/schema_lignes1.png
    :scale: 80
 
 5) **Loss of element groups:**
 
-Crack insertion with « Bloc Fissure» doesn’t ensure elements groups conservation. All the groups that are partially or totally in the Box mesh are impacted. Groups are not deleted but newly created elements are not added to the initial groups. Users must be really careful and verify their groups after crack insertion.
+Crack insertion with « Bloc Fissure» doesn't ensure elements groups conservation. All the groups that are partially or totally in the Box mesh are impacted. Groups are not deleted but newly created elements are not added to the initial groups. Users must be really careful and verify their groups after crack insertion.
 
 +-------------------------------------------+------------------------------------------+
 |.. image:: images/recom_groupe_avant.png   | .. image:: images/recom_groupe_apres.png |
@@ -115,7 +115,7 @@ Interfaces between elements are not kept in the Box zone during insertion. For e
 
 7) **Element normal:**
 
-Elements normal orientation doesn’t always follow the outgoing rule. User must verify faces orientation if fluxes boundary conditions are to be applied to the mesh.
+Elements normal orientation doesn't always follow the outgoing rule. User must verify faces orientation if fluxes boundary conditions are to be applied to the mesh.
 
 
 

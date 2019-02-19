@@ -12,7 +12,7 @@ Cracked bended pipes being a common encountered case, a specific module was deve
 
    Print screen of GUI of the extension *Meshed Pipe with a crack*
 
-The GUI is a window with mandatory and optional parameters. Optional parameters have to be activated by ticking the corresponding check box. Parameters are explained on the following figures and table. Angles are in degrees and lengths dimensions are all the same and shall then be consistent with each other’s.
+The GUI is a window with mandatory and optional parameters. Optional parameters have to be activated by ticking the corresponding check box. Parameters are explained on the following figures and table. Angles are in degrees and lengths dimensions are all the same and shall then be consistent with each other's.
 
 +---------------------------------------+---------------------------------------+
 |.. image:: images/schema_tube_sain.png | .. image:: images/schema_fis_ext2.png |
@@ -68,7 +68,7 @@ The GUI is a window with mandatory and optional parameters. Optional parameters 
 |**ORIEN**                  | Angle between the major axis of the crack and the axe of the pipe.                           |
 +---------------------------+----------------------------------------------------------------------------------------------+
 |**ABS_CURV**               | Longitudinal position of the crack centre defined from the interface between P1 and the bend.|
-|                           | It’s a curvilinear abscise and it can be negative or positive.                               |
+|                           | It's a curvilinear abscise and it can be negative or positive.                               |
 +---------------------------+----------------------------------------------------------------------------------------------+
 |Or **POSI_ANGUL**          | Longitudinal position of the crack centre (DO NOT USE)                                       |
 +---------------------------+----------------------------------------------------------------------------------------------+

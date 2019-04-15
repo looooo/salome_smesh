@@ -1229,11 +1229,22 @@ bool SMESH_PreMeshInfo::IsMeshInfoCorrect() const
  */
 //================================================================================
 
-void SMESH_PreMeshInfo::RemoveStudyFiles_TMP_METHOD(SALOMEDS::SComponent_ptr smeshComp)
+void SMESH_PreMeshInfo::RemoveStudyFiles_TMP_METHOD()
 {
   if ( theMeshCounter > 0 )
   {
-    SALOMEDS::ChildIterator_wrap itBig = SMESH_Gen_i::getStudyServant()->NewChildIterator( smeshComp );
+    SMESH_Gen_i *aGen = SMESH_Gen_i::GetSMESHGen();
+    if(!aGen)
+      return;
+
+    SALOMEDS::Study_var aStudy = SMESH_Gen_i::getStudyServant();
+    if(aStudy->_is_nil())
+      return;
+
+    CORBA::String_var compDataType = aGen->ComponentDataType();
+    SALOMEDS::SObject_wrap  aSO = aStudy->FindComponent( compDataType.in() );
+
+    SALOMEDS::ChildIterator_wrap itBig = SMESH_Gen_i::getStudyServant()->NewChildIterator( aSO );
     for ( ; itBig->More(); itBig->Next() ) {
       SALOMEDS::SObject_wrap gotBranch = itBig->Value();
       CORBA::Object_var       anObject = SMESH_Gen_i::SObjectToObject( gotBranch );

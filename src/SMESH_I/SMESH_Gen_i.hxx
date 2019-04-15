@@ -410,7 +410,7 @@ public:
   SMESH::Measurements_ptr  CreateMeasurements();
 
   // Clears study-connected data when it is closed
-  void Close( SALOMEDS::SComponent_ptr theComponent );
+  void Close();
 
   // Get component data type
   char* ComponentDataType();

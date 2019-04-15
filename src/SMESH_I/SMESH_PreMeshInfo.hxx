@@ -87,7 +87,7 @@ public:
 
   // TEMPORARY method to remove study files on closing study;
   // RIGHT WAY: study files are remove automatically when meshes are destroyed
-  static void RemoveStudyFiles_TMP_METHOD(SALOMEDS::SComponent_ptr smeshComp);
+  static void RemoveStudyFiles_TMP_METHOD();
 
 private:
 

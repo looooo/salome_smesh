@@ -5908,7 +5908,7 @@ bool SMESH_Gen_i::LoadASCII( SALOMEDS::SComponent_ptr theComponent,
  */
 //=============================================================================
 
-void SMESH_Gen_i::Close( SALOMEDS::SComponent_ptr theComponent )
+void SMESH_Gen_i::Close()
 {
   if(MYDEBUG) MESSAGE( "SMESH_Gen_i::Close" );
 
@@ -5916,7 +5916,7 @@ void SMESH_Gen_i::Close( SALOMEDS::SComponent_ptr theComponent )
   myStudyContext->Clear();
 
   // remove the tmp files meshes are loaded from
-  SMESH_PreMeshInfo::RemoveStudyFiles_TMP_METHOD( theComponent );
+  SMESH_PreMeshInfo::RemoveStudyFiles_TMP_METHOD();
 
   // Clean trace of API methods calls
   CleanPythonTrace();

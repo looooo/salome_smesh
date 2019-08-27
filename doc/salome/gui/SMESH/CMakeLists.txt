@@ -50,11 +50,11 @@ ENDIF()
 
 # 1. Options for generating temporary python modules
 SET(_cmd_tmp_gen_options ${smesh_file} -o tmp1/smeshBuilder_dynamic.py -f sphinx StdMeshers)
-SALOME_GENERATE_ENVIRONMENT_SCRIPT(_cmd_tmp_gen env_script "${PYTHON_EXECUTABLE}" "${_cmd_tmp_gen_options}" CONTEXT "SMESH_DOC")
+SALOME_GENERATE_ENVIRONMENT_SCRIPT(_cmd_tmp_gen env_script "${PYTHON_EXECUTABLE}" "${_cmd_tmp_gen_options}" CONTEXT "SMESH_DOC" ADDITIONAL_VARIABLES ${ADD_VAR})
 
 # 2. Options for generating final smeshBuilder.py script
 SET(_cmd_smeshBuilder_gen_options ${smesh_merge_file} -o tmp2/smeshBuilder.py smeshBuilder)
-SALOME_GENERATE_ENVIRONMENT_SCRIPT(_cmd_smeshBuilder_gen env_script "${PYTHON_EXECUTABLE}" "${_cmd_smeshBuilder_gen_options}" CONTEXT "SMESH_DOC")
+SALOME_GENERATE_ENVIRONMENT_SCRIPT(_cmd_smeshBuilder_gen env_script "${PYTHON_EXECUTABLE}" "${_cmd_smeshBuilder_gen_options}" CONTEXT "SMESH_DOC" ADDITIONAL_VARIABLES ${ADD_VAR})
 
 ADD_CUSTOM_TARGET(pre_usr_docs
   # 1. Make temporary directories for python modules 

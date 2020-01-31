@@ -17,6 +17,8 @@
 # See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 #
 
+find_package(ParaView REQUIRED)
+
 # --- options ---
 # additional include directories
 INCLUDE_DIRECTORIES(
@@ -52,10 +54,9 @@ SET(_link_LIBRARIES
   ${QT_MT_LIBS}
   ${GUI_SalomeObject}
   ${GUI_suit}
-  ${GUI_LightApp}
-  ${GUI_SalomeApp}
   SalomeIDLSMESH
   SMESH
+  ParaView::pqApplicationComponents
 )
 
 # --- headers ---

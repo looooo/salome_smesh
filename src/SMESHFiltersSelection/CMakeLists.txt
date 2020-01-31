@@ -17,13 +17,14 @@
 # See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 #
 
+find_package(ParaView REQUIRED)
+
 # --- options ---
 # additional include directories
 INCLUDE_DIRECTORIES(
   ${OpenCASCADE_INCLUDE_DIR}
   ${QT_INCLUDES}
   ${PYTHON_INCLUDE_DIRS}
-  ${VTK_INCLUDE_DIRS}
   ${KERNEL_INCLUDE_DIRS}
   ${GUI_INCLUDE_DIRS}
   ${GEOM_INCLUDE_DIRS}
@@ -44,14 +45,13 @@ ADD_DEFINITIONS(
 SET(_link_LIBRARIES
   ${KERNEL_SalomeDSClient}
   ${KERNEL_SalomeDS}
-  ${GUI_SalomeApp}
   ${GUI_suit}
-  ${GUI_LightApp}
   ${GEOM_GEOM}
   ${GEOM_GEOMClient}
   ${OpenCASCADE_FoundationClasses_LIBRARIES}
   ${OpenCASCADE_ModelingData_LIBRARIES}
   SalomeIDLSMESH
+  ParaView::pqApplicationComponents
 )
 
 # --- headers ---

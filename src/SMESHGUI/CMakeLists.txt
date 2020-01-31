@@ -17,13 +17,14 @@
 # See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 #
 
+find_package(ParaView REQUIRED)
+
 INCLUDE(UseQtExt)
 
 # --- options ---
 # additional include directories
 INCLUDE_DIRECTORIES(
   ${QT_INCLUDES}
-  ${VTK_INCLUDE_DIRS}
   ${OGL_INCLUDE_DIRS}
   ${OpenCASCADE_INCLUDE_DIR}
   ${PYTHON_INCLUDE_DIRS}
@@ -74,6 +75,7 @@ SET(_link_LIBRARIES
   SMDS
   SMESHControls
   SMESHObject
+  ParaView::pqApplicationComponents
 )
 
 # --- headers ---

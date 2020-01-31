@@ -17,6 +17,8 @@
 # See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 #
 
+find_package(ParaView REQUIRED)
+
 INCLUDE(${SWIG_USE_FILE})
 
 # --- options ---
@@ -25,7 +27,6 @@ INCLUDE_DIRECTORIES(
   ${QT_INCLUDES}
   ${PYTHON_INCLUDE_DIRS}
   ${OpenCASCADE_INCLUDE_DIR}
-  ${VTK_INCLUDE_DIRS}
   ${OGL_INCLUDE_DIRS}
   ${KERNEL_INCLUDE_DIRS}
   ${GUI_INCLUDE_DIRS}
@@ -56,10 +57,10 @@ SET(_link_LIBRARIES
   ${GUI_CAM}
   ${GUI_suit}
   ${GUI_qtx}
-  ${GUI_SalomeApp}
   ${GUI_std}
   ${GUI_Event}
   SMESH
+  ParaView::pqApplicationComponents
 )
 
 # --- headers ---

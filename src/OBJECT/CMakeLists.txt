@@ -17,6 +17,8 @@
 # See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 #
 
+find_package(ParaView REQUIRED)
+
 # --- options ---
 # additional include directories
 INCLUDE_DIRECTORIES(
@@ -26,7 +28,6 @@ INCLUDE_DIRECTORIES(
   ${QWT_INCLUDE_DIR}
   ${GEOM_INCLUDE_DIRS}
   ${OpenCASCADE_INCLUDE_DIR}
-  ${VTK_INCLUDE_DIRS}
   ${OMNIORB_INCLUDE_DIR}
   ${Boost_INCLUDE_DIRS}
   ${PROJECT_SOURCE_DIR}/src/Controls
@@ -50,10 +51,8 @@ ADD_DEFINITIONS(
 # libraries to link to
 SET(_link_LIBRARIES
   ${QT_LIBRARIES}
-  ${VTK_LIBRARIES}
   ${OpenCASCADE_KERNEL}
   ${GEOM_GEOMObject}
-  ${GUI_SalomeApp}
   ${GUI_SalomeObject}
   ${GUI_SVTK}
   ${GUI_VTKViewer}
@@ -63,6 +62,7 @@ SET(_link_LIBRARIES
   SMESHClient
   SMDS
   SMESHControls
+  ParaView::pqApplicationComponents
 )
 
 IF(SALOME_USE_PLOT2DVIEWER)

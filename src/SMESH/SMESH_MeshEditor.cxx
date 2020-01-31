@@ -11185,7 +11185,7 @@ bool SMESH_MeshEditor::DoubleNodesOnGroupBoundaries( const std::vector<TIDSorted
       {
         int oldId = *itn;
         //MESSAGE("     node " << oldId);
-        vtkCellLinks::Link l = grid->GetCellLinks()->GetLink(oldId);
+        vtkCellLinks::Link l = (static_cast <vtkCellLinks *>(grid->GetCellLinks()))->GetLink(oldId);
         for (int i=0; i<l.ncells; i++)
         {
           int vtkId = l.cells[i];
@@ -11364,7 +11364,7 @@ bool SMESH_MeshEditor::DoubleNodesOnGroupBoundaries( const std::vector<TIDSorted
                       //MESSAGE("  domain " << idom << " volume " << elem->GetID());
                       double values[3] = { 0,0,0 };
                       vtkIdType npts = 0;
-                      vtkIdType* pts = 0;
+                      vtkIdType const *pts(nullptr);
                       grid->GetCellPoints(vtkVolIds[ivol], npts, pts);
                       for ( vtkIdType i = 0; i < npts; ++i )
                       {
@@ -11547,7 +11547,7 @@ bool SMESH_MeshEditor::DoubleNodesOnGroupBoundaries( const std::vector<TIDSorted
     {
       int oldId = itnod->first;
       //MESSAGE("     node " << oldId);
-      vtkCellLinks::Link l = grid->GetCellLinks()->GetLink(oldId);
+      vtkCellLinks::Link l = (static_cast< vtkCellLinks *>(grid->GetCellLinks()))->GetLink(oldId);
       for (int i = 0; i < l.ncells; i++)
       {
         int vtkId = l.cells[i];
@@ -11999,7 +11999,7 @@ void SMESH_MeshEditor::CreateHoleSkin(double                          radius,
       //MESSAGE("volume to check,  vtkId " << vtkId << " smdsId " << meshDS->FromVtkToSmds(vtkId));
       bool volInside = false;
       vtkIdType npts = 0;
-      vtkIdType* pts = 0;
+      vtkIdType const *pts(nullptr);
       grid->GetCellPoints(vtkId, npts, pts);
       for (int i=0; i<npts; i++)
       {

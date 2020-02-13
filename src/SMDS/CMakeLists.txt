@@ -34,6 +34,7 @@ SET(_link_LIBRARIES
   ${KERNEL_SALOMELocalTrace}
   ${KERNEL_OpUtil}
   VTK::CommonCore
+  VTK::CommonDataModel
 )
 
 # --- headers ---

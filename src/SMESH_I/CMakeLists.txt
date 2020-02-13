@@ -74,6 +74,7 @@ SET(_link_LIBRARIES
   ${OpenCASCADE_ModelingAlgorithms_LIBRARIES}
   ${GEOM_GEOMClient}
   ${GEOM_SalomeIDLGEOM}
+  VTK::IOLegacy
   SalomeIDLSMESH
   SMESHimpl
   SMDS

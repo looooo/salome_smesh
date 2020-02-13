@@ -59,6 +59,7 @@ SET(_link_LIBRARIES
   ${GUI_qtx}
   ${GUI_suit}
   ${GUI_std}
+  ${GUI_SalomeApp}
   SMESHClient
   SMDS
   SMESHControls

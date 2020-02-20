@@ -46,7 +46,7 @@ void SMDS_CellLinks::ResizeForPoint(vtkIdType vtkID)
   if ( vtkID > this->MaxId )
   {
     this->MaxId = vtkID;
-    if ( vtkID >= this->Size ) 
+    if ( vtkID >= this->Size )
       vtkCellLinks::Resize( vtkID+SMDS_Mesh::chunkSize );
   }
 }
@@ -1204,4 +1204,3 @@ double SMDS_UnstructuredGrid::GetBallDiameter( vtkIdType vtkID ) const
     return vtkDoubleArray::SafeDownCast( vtkDataSet::CellData->GetScalars() )->GetValue( vtkID );
   return 0;
 }
-

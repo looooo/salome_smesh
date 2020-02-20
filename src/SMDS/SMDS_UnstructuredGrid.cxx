@@ -320,12 +320,14 @@ void SMDS_UnstructuredGrid::compactGrid(std::vector<int>& idNodesOldToNew, int n
     newFaceLocations->Squeeze();
     newFaces->Squeeze();
     this->SetCells( newTypes, newLocations, newConnectivity, newFaceLocations, newFaces );
+    this->CellLocations = newLocations;
     newFaceLocations->Delete();
     newFaces->Delete();
   }
   else
   {
     this->SetCells( newTypes, newLocations, newConnectivity, FaceLocations, Faces );
+    this->CellLocations = newLocations;
   }
 
   newTypes->Delete();
@@ -360,7 +362,8 @@ void SMDS_UnstructuredGrid::copyBloc(vtkUnsignedCharArray *  newTypes,
   {
     int iOld = idCellsNewToOld[ iNew ];
     newTypes->SetValue( iNew, this->Types->GetValue( iOld ));
-    vtkIdType oldLoc = this->CellLocations->GetValue( iOld );
+
+    vtkIdType oldLoc = ((vtkIdTypeArray *)(this->Connectivity->GetOffsetsArray()))->GetValue( iOld );
     vtkIdType nbpts;
     vtkIdType const *oldPtsCell(nullptr);
     this->Connectivity->GetCell( oldLoc, nbpts, oldPtsCell );

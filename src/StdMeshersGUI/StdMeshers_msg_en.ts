@@ -59,6 +59,14 @@ this one for this mesh/sub-mesh.</translation>
         <source>EXTMETH_FACE_OFFSET</source>
         <translation>Face offset</translation>
     </message>
+    <message>
+        <source>CREATE_GROUPS_FROM_LAYERS</source>
+        <translation>Create groups from layers</translation>
+    </message>
+    <message>
+        <source>GROUP_NAME</source>
+        <translation>Group name</translation>
+    </message>
 </context>
 <context>
     <name>@default</name>
@@ -571,6 +579,18 @@ this one for this mesh/sub-mesh.</translation>
     <message>
         <source>ADD_EDGES</source>
         <translation>Implement Edges</translation>
+    </message>
+    <message>
+        <source>CREATE_FACES</source>
+        <translation>Create Faces</translation>
+    </message>
+    <message>
+        <source>CONSIDER_INTERNAL_FACES</source>
+        <translation>Consider Shared and Internal Faces</translation>
+    </message>
+    <message>
+        <source>USE_THRESHOLD_FOR_INTERNAL_FACES</source>
+        <translation>Apply Threshold to Shared / Internal Faces</translation>
     </message>
     <message>
         <source>AXIS_X</source>

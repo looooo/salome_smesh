@@ -80,6 +80,7 @@ SET(_moc_HEADERS
   StdMeshersGUI_CartesianParamCreator.h
   StdMeshersGUI_RadioButtonsGrpWdg.h
   StdMeshersGUI_PropagationHelperWdg.h
+  StdMeshersGUI_NameCheckableGrpWdg.h
 )
 
 IF(SALOME_USE_PLOT2DVIEWER)
@@ -115,6 +116,7 @@ SET(_other_SOURCES
   StdMeshersGUI_CartesianParamCreator.cxx
   StdMeshersGUI_RadioButtonsGrpWdg.cxx
   StdMeshersGUI_PropagationHelperWdg.cxx
+  StdMeshersGUI_NameCheckableGrpWdg.cxx
 )
 
 IF(SALOME_USE_PLOT2DVIEWER)

@@ -161,8 +161,7 @@ SMESH_MeshEditor::ElemFeatures::Init( const SMDS_MeshElement* elem, bool basicOn
         myIsQuad = elem->IsQuadratic();
         if ( myType == SMDSAbs_Volume && !basicOnly )
         {
-          vector<int> quant = static_cast<const SMDS_MeshVolume* >( elem )->GetQuantities();
-          myPolyhedQuantities.swap( quant );
+          myPolyhedQuantities = static_cast<const SMDS_MeshVolume* >( elem )->GetQuantities();
         }
       }
     }
@@ -9880,10 +9879,10 @@ SMESH_MeshEditor::FindMatchingNodes(set<const SMDS_MeshElement*>& theSide1,
   set<const SMDS_MeshElement*> * faceSetPtr[] = { &theSide1, &theSide2 };
 
   nReplaceMap.clear();
-  if ( theFirstNode1 != theFirstNode2 )
-    nReplaceMap.insert( make_pair( theFirstNode1, theFirstNode2 ));
-  if ( theSecondNode1 != theSecondNode2 )
-    nReplaceMap.insert( make_pair( theSecondNode1, theSecondNode2 ));
+  //if ( theFirstNode1 != theFirstNode2 )
+  nReplaceMap.insert( make_pair( theFirstNode1, theFirstNode2 ));
+  //if ( theSecondNode1 != theSecondNode2 )
+  nReplaceMap.insert( make_pair( theSecondNode1, theSecondNode2 ));
 
   set< SMESH_TLink > linkSet; // set of nodes where order of nodes is ignored
   linkSet.insert( SMESH_TLink( theFirstNode1, theSecondNode1 ));

@@ -39,6 +39,7 @@
 #include "StdMeshersGUI_PropagationHelperWdg.h"
 #include "StdMeshersGUI_QuadrangleParamWdg.h"
 #include "StdMeshersGUI_RadioButtonsGrpWdg.h"
+#include "StdMeshersGUI_NameCheckableGrpWdg.h"
 #include "StdMeshersGUI_SubShapeSelectorWdg.h"
 
 #include <SALOMEDSClient_Study.hxx>
@@ -379,8 +380,49 @@ namespace {
 
 //================================================================================
 /*!
+ * \brief Remove a group, whose name is stored by hypothesis, upon group name modification
+ *  \param [in] oldName - old group name
+ *  \param [in] newName - new group name
+ *  \param [in] type - group type
+ */
+//================================================================================
+
+void StdMeshersGUI_StdHypothesisCreator::
+removeOldGroup(const char* oldName, const char* newName, SMESH::ElementType type) const
+{
+  if ( !oldName || !oldName[0] )
+    return; // old name undefined
+  if ( newName && strcmp( oldName, newName ) == 0 )
+    return; // same name
+
+  SMESH::SMESH_Hypothesis_var h = hypothesis();
+  SMESH::SObjectList listSOmesh = SMESH::GetMeshesUsingAlgoOrHypothesis( h );
+  for ( size_t i = 0; i < listSOmesh.size(); i++ )
+  {
+    _PTR(SObject) submSO = listSOmesh[i];
+    SMESH::SMESH_Mesh_var       mesh = SMESH::SObjectToInterface<SMESH::SMESH_Mesh>( submSO );
+    SMESH::SMESH_subMesh_var subMesh = SMESH::SObjectToInterface<SMESH::SMESH_subMesh>( submSO );
+    if( !subMesh->_is_nil() )
+      mesh = subMesh->GetFather();
+    if ( mesh->_is_nil() )
+      continue;
+    SMESH::ListOfGroups_var groups = mesh->GetGroups();
+    for ( CORBA::ULong iG = 0; iG < groups->length(); iG++ )
+    {
+      if ( groups[iG]->GetType() != type )
+        continue;
+      CORBA::String_var name = groups[iG]->GetName();
+      if ( strcmp( name.in(), oldName ))
+        continue;
+      mesh->RemoveGroup( groups[iG] );
+    }
+  }
+}
+
+//================================================================================
+/*!
  * \brief Check parameter values before accept()
-  * \retval bool - true if OK
+ *  \retval bool - true if OK
  */
 //================================================================================
 
@@ -422,7 +464,7 @@ bool StdMeshersGUI_StdHypothesisCreator::checkParams( QString& msg ) const
       // then the FACE must have only one VERTEX
       GEOM::GEOM_Object_var face = w->GetObject< GEOM::GEOM_Object >();
 
-      GEOM::GEOM_Gen_var geomGen = SMESH::GetGEOMGen();
+      GEOM::GEOM_Gen_var geomGen = SMESH::GetGEOMGen( face );
       _PTR(Study)         aStudy = SMESH::getStudy();
       GEOM::GEOM_IShapesOperations_wrap shapeOp;
       if ( !geomGen->_is_nil() && aStudy )
@@ -728,6 +770,15 @@ QString StdMeshersGUI_StdHypothesisCreator::storeParams() const
       {
         h->SetFaces( idsWg->GetListOfIDs(), params[4].myValue.toInt() );
       }
+
+      if ( StdMeshersGUI_NameCheckableGrpWdg* nameWg =
+           widget< StdMeshersGUI_NameCheckableGrpWdg >( 6 ))
+      {
+        CORBA::String_var oldName = h->GetGroupName();
+        h->SetGroupName( nameWg->getName().toUtf8().data() );
+        CORBA::String_var newName = h->GetGroupName();
+        removeOldGroup( oldName, newName, SMESH::VOLUME );
+      }
     }
     else if( hypType()=="ViscousLayers2D" )
     {
@@ -745,6 +796,15 @@ QString StdMeshersGUI_StdHypothesisCreator::storeParams() const
            widget< StdMeshersGUI_SubShapeSelectorWdg >( 4 ))
       {
         h->SetEdges( idsWg->GetListOfIDs(), params[3].myValue.toInt() );
+      }
+
+      if ( StdMeshersGUI_NameCheckableGrpWdg* nameWg =
+           widget< StdMeshersGUI_NameCheckableGrpWdg >( 5 ))
+      {
+        CORBA::String_var oldName = h->GetGroupName();
+        h->SetGroupName( nameWg->getName().toUtf8().data() );
+        CORBA::String_var newName = h->GetGroupName();
+        removeOldGroup( oldName, newName, SMESH::FACE );
       }
     }
     // else if( hypType()=="QuadrangleParams" )
@@ -1250,6 +1310,19 @@ bool StdMeshersGUI_StdHypothesisCreator::stdParams( ListOfStdParams& p ) const
       }
       customWidgets()->append ( idsWg );
     }
+
+    item.setNoName();
+    p.append( item );
+    StdMeshersGUI_NameCheckableGrpWdg* nameWdg =
+      new StdMeshersGUI_NameCheckableGrpWdg( tr( "CREATE_GROUPS_FROM_LAYERS" ),
+                                             tr( "GROUP_NAME" ));
+    nameWdg->setName( h->GetGroupName() );
+    if ( nameWdg->getName().isEmpty() )
+    {
+      nameWdg->setDefaultName( type() );
+      nameWdg->setChecked( false );
+    }
+    customWidgets()->append ( nameWdg );
   }
   else if( hypType()=="ViscousLayers2D" )
   {
@@ -1308,6 +1381,19 @@ bool StdMeshersGUI_StdHypothesisCreator::stdParams( ListOfStdParams& p ) const
       }
       customWidgets()->append ( idsWg );
     }
+
+    item.setNoName();
+    p.append( item );
+    StdMeshersGUI_NameCheckableGrpWdg* nameWdg =
+      new StdMeshersGUI_NameCheckableGrpWdg( tr( "CREATE_GROUPS_FROM_LAYERS" ),
+                                             tr( "GROUP_NAME" ));
+    nameWdg->setName( h->GetGroupName() );
+    if ( nameWdg->getName().isEmpty() )
+    {
+      nameWdg->setDefaultName( type() );
+      nameWdg->setChecked( false );
+    }
+    customWidgets()->append ( nameWdg );
   }
   else
     res = false;
@@ -1572,6 +1658,10 @@ bool StdMeshersGUI_StdHypothesisCreator::getParamFromCustomWidget( StdParam & pa
     const StdMeshersGUI_RadioButtonsGrpWdg * w =
       static_cast<const StdMeshersGUI_RadioButtonsGrpWdg*>( widget );
     param.myValue = w->checkedId();
+    return true;
+  }
+  if ( widget->inherits( "StdMeshersGUI_NameCheckableGrpWdg" ))
+  {
     return true;
   }
   return false;

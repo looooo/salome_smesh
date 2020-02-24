@@ -185,10 +185,11 @@ QFrame* SMESHGUI_GenericHypothesisCreator::buildStdFrame()
   GroupC1Layout->setMargin( MARGIN );
 
   ListOfStdParams::const_iterator anIt = params.begin(), aLast = params.end();
-  for( int i=0; anIt!=aLast; anIt++, i++ )
+  for( int i = 0; anIt != aLast; anIt++, i++ )
   {
-    QLabel* lab = new QLabel( (*anIt).myName, GroupC1 );
-    GroupC1Layout->addWidget( lab, i, 0 );
+    QLabel* lab = anIt->hasName() ? new QLabel( anIt->myName, GroupC1 ) : NULL;
+    if ( lab )
+      GroupC1Layout->addWidget( lab, i, 0 );
     myParamLabels << lab;
 
     QWidget* w = getCustomWidget( *anIt, GroupC1, i );
@@ -251,9 +252,12 @@ QFrame* SMESHGUI_GenericHypothesisCreator::buildStdFrame()
       default:;
       } // switch( (*anIt).myValue.type() )
 
-    if( w )
+    if ( w )
     {
-      GroupC1Layout->addWidget( w, i, 1 );
+      if ( lab )
+        GroupC1Layout->addWidget( w, i, 1 );
+      else
+        GroupC1Layout->addWidget( w, i, 0, 1, 2 );
       changeWidgets().append( w );
     }
   }
@@ -336,6 +340,8 @@ void SMESHGUI_GenericHypothesisCreator::onDialogFinished( int result )
   myDlg->close();
   //delete myDlg; since WA_DeleteOnClose==true
   myDlg = 0;
+
+  SMESH::UpdateActorsAfterUpdateStudy();// remove actors of removed groups (#16522)
   if (SVTK_ViewWindow* vf = SMESH::GetCurrentVtkView()) {
     vf->Repaint();
   }
@@ -807,8 +813,8 @@ HypothesesSet::HypothesesSet( const QString& theSetName,
   : myUseCommonSize( useCommonSize ),
     myQuadDominated( isQuadDominated ),
     myHypoSetName( theSetName ),
-	myHypoList { mainHypos, altHypos, intHypos },
-	myAlgoList { mainAlgos, altAlgos, intAlgos },
+    myHypoList { mainHypos, altHypos, intHypos },
+    myAlgoList { mainAlgos, altAlgos, intAlgos },
     myIsAlgo( false ),
     myIsCustom( false ),
     myIndex( 0 )

@@ -17,8 +17,6 @@
 # See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 #
 
-find_package(ParaView REQUIRED)
-
 INCLUDE(${SWIG_USE_FILE})
 
 # --- options ---
@@ -60,7 +58,6 @@ SET(_link_LIBRARIES
   ${GUI_std}
   ${GUI_Event}
   SMESH
-  ParaView::pqApplicationComponents
 )
 
 # --- headers ---

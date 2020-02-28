@@ -17,8 +17,6 @@
 # See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 #
 
-find_package(ParaView REQUIRED)
-
 INCLUDE(UseQtExt)
 
 # --- options ---
@@ -75,7 +73,6 @@ SET(_link_LIBRARIES
   SMDS
   SMESHControls
   SMESHObject
-  ParaView::pqApplicationComponents
 )
 
 # --- headers ---

@@ -17,8 +17,6 @@
 # See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 #
 
-find_package(ParaView REQUIRED)
-
 # --- options ---
 # additional include directories
 INCLUDE_DIRECTORIES(
@@ -63,7 +61,6 @@ SET(_link_LIBRARIES
   SMESHClient
   SMDS
   SMESHControls
-  ParaView::pqApplicationComponents
 )
 
 IF(SALOME_USE_PLOT2DVIEWER)

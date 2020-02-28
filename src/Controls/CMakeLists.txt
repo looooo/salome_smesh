@@ -42,6 +42,7 @@ SET(_link_LIBRARIES
   SMDS
   SMESHDS
   SMESHUtils
+  VTK::FiltersVerdict
 )
 
 # --- headers ---

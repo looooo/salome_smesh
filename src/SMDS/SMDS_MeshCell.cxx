@@ -490,10 +490,10 @@ void SMDS_MeshCell::init( SMDSAbs_EntityType            theEntity,
 bool SMDS_MeshCell::ChangeNodes(const SMDS_MeshNode* nodes[], const int theNbNodes)
 {
   vtkIdType npts = 0;
-  vtkIdType *pts;
+  vtkIdType *pts(nullptr);
   vtkIdType const *tmp(nullptr);
   getGrid()->GetCellPoints( GetVtkID(), npts, tmp );
-  std::copy(tmp,tmp+npts,pts);
+  pts = const_cast<vtkIdType *>(tmp);
   if ( theNbNodes != npts )
   {
     MESSAGE("ChangeNodes problem: not the same number of nodes " << npts << " -> " << theNbNodes);

@@ -366,7 +366,7 @@ void SMDS_UnstructuredGrid::copyBloc(vtkUnsignedCharArray *  newTypes,
     vtkIdType oldLoc = ((vtkIdTypeArray *)(this->Connectivity->GetOffsetsArray()))->GetValue( iOld );
     vtkIdType nbpts;
     vtkIdType const *oldPtsCell(nullptr);
-    this->Connectivity->GetCell( oldLoc, nbpts, oldPtsCell );
+    this->Connectivity->GetCell( oldLoc+iOld, nbpts, oldPtsCell );
     if ((vtkIdType) pointsCell.size() < nbpts )
       pointsCell.resize( nbpts );
     for ( int l = 0; l < nbpts; l++ )

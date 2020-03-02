@@ -249,7 +249,7 @@ void SMDS_UnstructuredGrid::compactGrid(std::vector<int>& idNodesOldToNew, int n
   if ( newCellSize != oldCellSize )
     for ( int i = 0; i < oldCellSize - 1; ++i )
       if ( this->Types->GetValue( i ) == VTK_EMPTY_CELL )
-        newConnectivitySize -= this->CellLocations->GetValue( i+1 ) - this->CellLocations->GetValue( i );
+        newConnectivitySize -= this->Connectivity->GetCellSize( i );
 
   vtkCellArray *newConnectivity = vtkCellArray::New();
   newConnectivity->Initialize();
@@ -982,7 +982,7 @@ void SMDS_UnstructuredGrid::ModifyCellNodes(int vtkVolId, std::map<int, int> loc
   vtkIdType const *tmp(nullptr); // will refer to the point id's of the face
   vtkIdType *pts;                // will refer to the point id's of the face
   this->GetCellPoints(vtkVolId, npts, tmp);
-  std::copy(tmp, tmp+npts, pts);
+  pts = const_cast< vtkIdType*>( tmp );
   for (int i = 0; i < npts; i++)
     {
       if (localClonedNodeIds.count(pts[i]))

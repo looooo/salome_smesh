@@ -246,10 +246,11 @@ void SMDS_UnstructuredGrid::compactGrid(std::vector<int>& idNodesOldToNew, int n
   // --- create new compacted Connectivity, Locations and Types
 
   int newConnectivitySize = this->Connectivity->GetNumberOfConnectivityEntries();
+  vtkIdTypeArray *tmp((vtkIdTypeArray *)(this->Connectivity->GetOffsetsArray()));
   if ( newCellSize != oldCellSize )
     for ( int i = 0; i < oldCellSize - 1; ++i )
       if ( this->Types->GetValue( i ) == VTK_EMPTY_CELL )
-        newConnectivitySize -= this->CellLocations->GetValue( i+1 ) - this->CellLocations->GetValue( i );
+        newConnectivitySize -= tmp->GetValue( i+1 ) - tmp->GetValue( i );
 
   vtkCellArray *newConnectivity = vtkCellArray::New();
   newConnectivity->Initialize();

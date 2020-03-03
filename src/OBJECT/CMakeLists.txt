@@ -61,6 +61,7 @@ SET(_link_LIBRARIES
   SMESHClient
   SMDS
   SMESHControls
+  VTK::RenderingLabel
 )
 
 IF(SALOME_USE_PLOT2DVIEWER)

@@ -82,10 +82,9 @@ bool SMDS_MeshVolume::ChangeNodes(const std::vector<const SMDS_MeshNode*>& nodes
     return false;
 
   vtkIdType nFaces = 0;
-  vtkIdType *ptIds;
   vtkIdType const *tmp(nullptr);
   getGrid()->GetFaceStream( GetVtkID(), nFaces, tmp );
-  std::copy(tmp, tmp+nFaces, ptIds);
+  vtkIdType *ptIds = const_cast<vtkIdType*>( tmp );
 
   // stream size and nb faces should not change
 
@@ -93,14 +92,14 @@ bool SMDS_MeshVolume::ChangeNodes(const std::vector<const SMDS_MeshNode*>& nodes
   {
     return false;
   }
-  int id = 0, nbPoints = 0;
+  size_t id = 0, nbPoints = 0;
   for ( int i = 0; i < nFaces; i++ )
   {
     int nodesInFace = ptIds[id];
     nbPoints += nodesInFace;
     id += (nodesInFace + 1);
   }
-  if ((int) nodes.size() != nbPoints )
+  if ( nodes.size() != nbPoints )
   {
     return false;
   }

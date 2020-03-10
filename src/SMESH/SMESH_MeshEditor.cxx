@@ -161,8 +161,7 @@ SMESH_MeshEditor::ElemFeatures::Init( const SMDS_MeshElement* elem, bool basicOn
         myIsQuad = elem->IsQuadratic();
         if ( myType == SMDSAbs_Volume && !basicOnly )
         {
-          vector<int> quant = static_cast<const SMDS_MeshVolume* >( elem )->GetQuantities();
-          myPolyhedQuantities.swap( quant );
+          myPolyhedQuantities = static_cast<const SMDS_MeshVolume* >( elem )->GetQuantities();
         }
       }
     }
@@ -296,6 +295,18 @@ SMESH_MeshEditor::AddElement(const vector<const SMDS_MeshNode*> & node,
                                                  node[4], node[5], node[6], node[7],
                                                  node[8], node[9], node[10],node[11],
                                                  node[12],node[13],node[14] );
+      }
+      else if (nbnode == 18) {
+        if ( ID >= 1 ) e = mesh->AddVolumeWithID(node[0], node[1], node[2], node[3],
+                                                 node[4], node[5], node[6], node[7],
+                                                 node[8], node[9], node[10],node[11],
+                                                 node[12],node[13],node[14],
+                                                 node[15],node[16],node[17],ID );
+        else           e = mesh->AddVolume      (node[0], node[1], node[2], node[3],
+                                                 node[4], node[5], node[6], node[7],
+                                                 node[8], node[9], node[10],node[11],
+                                                 node[12],node[13],node[14],
+                                                 node[15],node[16],node[17] );
       }
       else if (nbnode == 20) {
         if ( ID >= 1 ) e = mesh->AddVolumeWithID(node[0], node[1], node[2], node[3],
@@ -9880,10 +9891,10 @@ SMESH_MeshEditor::FindMatchingNodes(set<const SMDS_MeshElement*>& theSide1,
   set<const SMDS_MeshElement*> * faceSetPtr[] = { &theSide1, &theSide2 };
 
   nReplaceMap.clear();
-  if ( theFirstNode1 != theFirstNode2 )
-    nReplaceMap.insert( make_pair( theFirstNode1, theFirstNode2 ));
-  if ( theSecondNode1 != theSecondNode2 )
-    nReplaceMap.insert( make_pair( theSecondNode1, theSecondNode2 ));
+  //if ( theFirstNode1 != theFirstNode2 )
+  nReplaceMap.insert( make_pair( theFirstNode1, theFirstNode2 ));
+  //if ( theSecondNode1 != theSecondNode2 )
+  nReplaceMap.insert( make_pair( theSecondNode1, theSecondNode2 ));
 
   set< SMESH_TLink > linkSet; // set of nodes where order of nodes is ignored
   linkSet.insert( SMESH_TLink( theFirstNode1, theSecondNode1 ));

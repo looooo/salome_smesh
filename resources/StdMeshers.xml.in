@@ -224,7 +224,6 @@
     <hypothesis type     ="CartesianParameters3D"
                 label-id ="Body Fitting Parameters"
                 icon-id  ="mesh_hypo_length.png"
-                context  ="GLOBAL"
                 dim      ="3"/>
 
   </hypotheses>
@@ -318,7 +317,7 @@
         <algo>MEFISTO_2D=Triangle(algo=smeshBuilder.MEFISTO)</algo>
         <hypo>LengthFromEdges=LengthFromEdges()</hypo>
         <hypo>MaxElementArea=MaxElementArea(SetMaxElementArea())</hypo>
-        <hypo>ViscousLayers2D=ViscousLayers2D(SetTotalThickness(),SetNumberLayers(),SetStretchFactor(),SetEdges(1),SetEdges(2))</hypo>
+        <hypo>ViscousLayers2D=ViscousLayers2D(SetTotalThickness(),SetNumberLayers(),SetStretchFactor(),SetEdges(1),SetEdges(2),SetGroupName())</hypo>
       </python-wrap>
     </algorithm>
 
@@ -335,7 +334,7 @@
       <python-wrap>
         <algo>Quadrangle_2D=Quadrangle(algo=smeshBuilder.QUADRANGLE)</algo>
         <hypo>QuadrangleParams=QuadrangleParameters(SetQuadType(),SetTriaVertex(),SetEnforcedNodes(1),SetEnforcedNodes(2),SetCorners())</hypo>
-        <hypo>ViscousLayers2D=ViscousLayers2D(SetTotalThickness(),SetNumberLayers(),SetStretchFactor(),SetIgnoreEdges())</hypo>
+        <hypo>ViscousLayers2D=ViscousLayers2D(SetTotalThickness(),SetNumberLayers(),SetStretchFactor(),SetEdges(1),SetEdges(2),SetGroupName())</hypo>
       </python-wrap>
     </algorithm>
 
@@ -351,7 +350,7 @@
                dim      ="2">
       <python-wrap>
         <algo>QuadFromMedialAxis_1D2D=Quadrangle(algo=smeshBuilder.QUAD_MA_PROJ)</algo>
-        <hypo>ViscousLayers2D=ViscousLayers2D(SetTotalThickness(),SetNumberLayers(),SetStretchFactor(),SetIgnoreEdges())</hypo>
+        <hypo>ViscousLayers2D=ViscousLayers2D(SetTotalThickness(),SetNumberLayers(),SetStretchFactor(),SetEdges(1),SetEdges(2),SetGroupName())</hypo>
         <hypo>NumberOfLayers2D=NumberOfLayers(SetNumberOfLayers())</hypo>
       </python-wrap>
     </algorithm>
@@ -367,7 +366,19 @@
                dim      ="2">
       <python-wrap>
         <algo>PolygonPerFace_2D=Polygon()</algo>
-        <hypo>ViscousLayers2D=ViscousLayers2D(SetTotalThickness(),SetNumberLayers(),SetStretchFactor(),SetIgnoreEdges())</hypo>
+        <hypo>ViscousLayers2D=ViscousLayers2D(SetTotalThickness(),SetNumberLayers(),SetStretchFactor(),SetEdges(1),SetEdges(2),SetGroupName())</hypo>
+      </python-wrap>
+    </algorithm>
+
+    <algorithm type     ="PolyhedronPerSolid_3D"
+               label-id ="Polyhedron per Solid"
+               icon-id  ="mesh_algo_polygon.png"
+               opt-hypos="ViscousLayers"
+               input    ="POLYGON,QUAD,TRIA,EDGE"
+               dim      ="3">
+      <python-wrap>
+        <algo>PolyhedronPerSolid_3D=Polyhedron()</algo>
+        <hypo>ViscousLayers=ViscousLayers(SetTotalThickness(),SetNumberLayers(),SetStretchFactor(),SetIgnoreEdges())</hypo>
       </python-wrap>
     </algorithm>
 
@@ -383,7 +394,7 @@
                dim      ="3">
       <python-wrap>
         <algo>Hexa_3D=Hexahedron(algo=smeshBuilder.Hexa)</algo>
-        <hypo>ViscousLayers=ViscousLayers(SetTotalThickness(),SetNumberLayers(),SetStretchFactor(),SetFaces(1),SetFaces(2),SetMethod())</hypo>
+        <hypo>ViscousLayers=ViscousLayers(SetTotalThickness(),SetNumberLayers(),SetStretchFactor(),SetFaces(1),SetFaces(2),SetMethod(),SetGroupName())</hypo>
       </python-wrap>
     </algorithm>
 
@@ -558,7 +569,6 @@
                support-submeshes="false"
                output           ="HEXA"
                need-hyp         ="true"
-               context          ="GLOBAL"
                dim              ="3">
       <python-wrap>
         <algo>Cartesian_3D=BodyFitted()</algo>

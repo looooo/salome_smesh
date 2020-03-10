@@ -706,11 +706,12 @@ double SMDS_VolumeTool::GetSize() const
     if ( !myPolyedre )
       return 0.;
 
+    SaveFacet savedFacet( myCurFace );
+
     // split a polyhedron into tetrahedrons
 
-    SaveFacet savedFacet( myCurFace );
+    bool oriOk = true;
     SMDS_VolumeTool* me = const_cast< SMDS_VolumeTool* > ( this );
-    XYZ origin( 1 + 1e-6, 22 + 2e-6, 333 + 3e-6 ); // for invalid poly: avoid lying on a facet plane
     for ( int f = 0; f < NbFaces(); ++f )
     {
       me->setFace( f );
@@ -721,9 +722,12 @@ double SMDS_VolumeTool::GetSize() const
         area = area + p1.Crossed( p2 );
         p1 = p2;
       }
-      V += ( p1 - origin ).Dot( area );
+      V += p1.Dot( area );
+      oriOk = oriOk && IsFaceExternal( f );
     }
     V /= 6;
+    if ( !oriOk && V > 0 )
+      V *= -1;
   }
   else 
   {
@@ -1203,11 +1207,13 @@ bool SMDS_VolumeTool::GetFaceNormal (int faceIndex, double & X, double & Y, doub
   XYZ aVec13( p3 - p1 );
   XYZ cross = aVec12.Crossed( aVec13 );
 
-  if ( myCurFace.myNbNodes >3*iQuad ) {
-    XYZ p4 ( myCurFace.myNodes[3*iQuad] );
+  for ( int i = 3*iQuad; i < myCurFace.myNbNodes; i += iQuad )
+  {
+    XYZ p4 ( myCurFace.myNodes[i] );
     XYZ aVec14( p4 - p1 );
     XYZ cross2 = aVec13.Crossed( aVec14 );
     cross = cross + cross2;
+    aVec13 = aVec14;
   }
 
   double size = cross.Magnitude();

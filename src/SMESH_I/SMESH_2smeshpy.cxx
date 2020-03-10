@@ -567,7 +567,8 @@ _pyGen::_pyGen(Resource_DataMapOfAsciiStringAsciiString& theEntry2AccessorMethod
     myRemovedObjIDs( theRemovedObjIDs ),
     myNbFilters( 0 ),
     myToKeepAllCommands( theToKeepAllCommands ),
-    myGeomIDNb(0), myGeomIDIndex(-1)
+    myGeomIDNb(0), myGeomIDIndex(-1),
+    myShaperIDNb(0), myShaperIDIndex(-1)
 {
   // make that GetID() to return TPythonDump::SMESHGenName()
   GetCreationCmd()->Clear();
@@ -575,30 +576,38 @@ _pyGen::_pyGen(Resource_DataMapOfAsciiStringAsciiString& theEntry2AccessorMethod
   GetCreationCmd()->GetString() += "=";
 
   // Find 1st digit of study entry by which a GEOM object differs from a SMESH object
-  if ( !theObjectNames.IsEmpty() )
+  if (!theObjectNames.IsEmpty())
   {
-    // find a GEOM entry
-    _pyID geomID;
-    SALOMEDS::SComponent_wrap geomComp = SMESH_Gen_i::getStudyServant()->FindComponent("GEOM");
-    if ( geomComp->_is_nil() ) return;
-    CORBA::String_var entry = geomComp->GetID();
-    geomID = entry.in();
+    // find a GEOM (aPass == 0) and SHAPERSTUDY (aPass == 1) entries
+    for(int aPass = 0; aPass < 2; aPass++) {
+      _pyID geomID;
+      SALOMEDS::SComponent_wrap geomComp = SMESH_Gen_i::getStudyServant()->
+        FindComponent(aPass == 0 ? "GEOM" : "SHAPERSTUDY");
+      if (geomComp->_is_nil()) continue;
+      CORBA::String_var entry = geomComp->GetID();
+      geomID = entry.in();
 
-    // find a SMESH entry
-    _pyID smeshID;
-    Resource_DataMapIteratorOfDataMapOfAsciiStringAsciiString e2n( theObjectNames );
-    for ( ; e2n.More() && smeshID.IsEmpty(); e2n.Next() )
-      if ( _pyCommand::IsStudyEntry( e2n.Key() ))
-        smeshID = e2n.Key();
+      // find a SMESH entry
+      _pyID smeshID;
+      Resource_DataMapIteratorOfDataMapOfAsciiStringAsciiString e2n(theObjectNames);
+      for (; e2n.More() && smeshID.IsEmpty(); e2n.Next())
+        if (_pyCommand::IsStudyEntry(e2n.Key()))
+          smeshID = e2n.Key();
 
-    // find 1st difference between smeshID and geomID
-    if ( !geomID.IsEmpty() && !smeshID.IsEmpty() )
-      for ( int i = 1; i <= geomID.Length() && i <= smeshID.Length(); ++i )
-        if ( geomID.Value( i ) != smeshID.Value( i ))
-        {
-          myGeomIDNb = geomID.Value( i );
-          myGeomIDIndex = i;
-        }
+      // find 1st difference between smeshID and geomID
+      if (!geomID.IsEmpty() && !smeshID.IsEmpty())
+        for (int i = 1; i <= geomID.Length() && i <= smeshID.Length(); ++i)
+          if (geomID.Value(i) != smeshID.Value(i))
+          {
+            if (aPass == 0) {
+              myGeomIDNb = geomID.Value(i);
+              myGeomIDIndex = i;
+            } else {
+              myShaperIDNb = geomID.Value(i);
+              myShaperIDIndex = i;
+            }
+          }
+    }
   }
 }
 
@@ -1680,13 +1689,11 @@ Handle(_pyObject) _pyGen::FindObject( const _pyID& theObjID )  const
 
 bool _pyGen::IsGeomObject(const _pyID& theObjID) const
 {
-  if ( myGeomIDNb )
-  {
-    return ( myGeomIDIndex <= theObjID.Length() &&
-             int( theObjID.Value( myGeomIDIndex )) == myGeomIDNb &&
-             _pyCommand::IsStudyEntry( theObjID ));
-  }
-  return false;
+  bool isGeom = myGeomIDNb && myGeomIDIndex <= theObjID.Length() &&
+                int( theObjID.Value( myGeomIDIndex )) == myGeomIDNb;
+  bool isShaper = myShaperIDNb && myShaperIDIndex <= theObjID.Length() &&
+                  int( theObjID.Value( myShaperIDIndex )) == myShaperIDNb;
+  return ((isGeom || isShaper) && _pyCommand::IsStudyEntry( theObjID ));
 }
 
 //================================================================================
@@ -1827,7 +1834,7 @@ _pyMesh::_pyMesh(const Handle(_pyCommand) theCreationCmd, const _pyID& meshId):
 
 void _pyMesh::Process( const Handle(_pyCommand)& theCommand )
 {
-  // some methods of SMESH_Mesh interface needs special conversion
+  // some methods of SMESH_Mesh interface need special conversion
   // to methods of Mesh python class
   //
   // 1. GetSubMesh(geom, name) + AddHypothesis(geom, algo)
@@ -1980,7 +1987,7 @@ void _pyMesh::Process( const Handle(_pyCommand)& theCommand )
       // if GetGroups() is just after Compute(), this can mean that the groups
       // were created by some algorithm and hence Compute() should not be discarded
       std::list< Handle(_pyCommand) >& cmdList = theGen->GetCommands();
-      std::list< Handle(_pyCommand) >::iterator cmd = cmdList.begin();
+      std::list< Handle(_pyCommand) >::reverse_iterator cmd = cmdList.rbegin();
       while ( (*cmd)->GetMethod() == "GetGroups" )
         ++cmd;
       if ( myLastComputeCmd == (*cmd))
@@ -2488,7 +2495,7 @@ void _pyMeshEditor::Process( const Handle(_pyCommand)& theCommand)
       "ExtrusionByNormal", "ExtrusionSweepObject2D","ExtrusionAlongPath","ExtrusionAlongPathObject",
       "ExtrusionAlongPathX","ExtrusionAlongPathObject1D","ExtrusionAlongPathObject2D",
       "ExtrusionSweepObjects","RotationSweepObjects","ExtrusionAlongPathObjects",
-      "Mirror","MirrorObject","Translate","TranslateObject","Rotate","RotateObject",
+      "Mirror","MirrorObject","Translate","TranslateObject","Rotate","RotateObject","Offset",
       "FindCoincidentNodes","MergeNodes","FindEqualElements","FillHole",
       "MergeElements","MergeEqualElements","SewFreeBorders","SewConformFreeBorders",
       "FindCoincidentFreeBorders", "SewCoincidentFreeBorders",
@@ -3158,8 +3165,7 @@ void _pyHypothesis::ComputeDiscarded( const Handle(_pyCommand)& theComputeCmd )
       continue;
     // check if a cmd is a sole command setting its parameter;
     // don't use method name for search as it can change
-    map<TCollection_AsciiString, list<Handle(_pyCommand)> >::iterator
-      m2cmds = myMeth2Commands.begin();
+    map<_AString, list<Handle(_pyCommand)> >::iterator m2cmds = myMeth2Commands.begin();
     for ( ; m2cmds != myMeth2Commands.end(); ++m2cmds )
     {
       list< Handle(_pyCommand)>& cmds = m2cmds->second;
@@ -3831,6 +3837,8 @@ bool _pyCommand::IsMethodCall()
   if ( GetMethod().IsEmpty() )
     return false;
   if ( myString.StartsWith("#") )
+    return false;
+  if ( myString.StartsWith("SHAPERSTUDY") ) // skip shaperstudy specific dump string analysis
     return false;
   const char* s = myString.ToCString() + GetBegPos( METHOD_IND ) + myMeth.Length() - 1;
   return ( s[0] == '(' || s[1] == '(' );

@@ -19,52 +19,35 @@
 //
 // See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 //
-// File      : DriverGMF_Read.hxx
-// Created   : Mon Sep 17 15:36:47 2012
-// Author    : Edward AGAPOV (eap)
 
+//  File   : StdMeshers_PolyhedronPerSolid_3D_i.hxx
+//  Module : SMESH
+//
+#ifndef _SMESH_PolyhedronPerSolid_3D_I_HXX_
+#define _SMESH_PolyhedronPerSolid_3D_I_HXX_
 
-#ifndef __DriverGMF_Read_HXX__
-#define __DriverGMF_Read_HXX__
+#include "SMESH_StdMeshers_I.hxx"
 
-#include "SMESH_DriverGMF.hxx"
+#include <SALOMEconfig.h>
+#include CORBA_SERVER_HEADER(SMESH_BasicHypothesis)
 
-#include "Driver_SMESHDS_Mesh.h"
+#include "SMESH_3D_Algo_i.hxx"
 
-#include <vector>
-#include <string>
+class SMESH_Gen;
 
-/*!
- * \brief Driver reading a mesh from the GMF file. The mesh to read is selected by 
- *  an index (counted form 0) set via SetMeshId()
- */
-class MESHDriverGMF_EXPORT DriverGMF_Read : public Driver_SMESHDS_Mesh
+// ======================================================
+// Polyhedron Per Solid 3D algorithm
+// ======================================================
+class STDMESHERS_I_EXPORT StdMeshers_PolyhedronPerSolid_3D_i:
+  public virtual POA_StdMeshers::StdMeshers_PolyhedronPerSolid_3D,
+  public virtual SMESH_3D_Algo_i
 {
-public:
-
-  DriverGMF_Read();
-  ~DriverGMF_Read();
-
-  void SetMakeRequiredGroups( bool theMakeRequiredGroups )
-  {
-    _makeRequiredGroups = theMakeRequiredGroups;
-  }
-
-  void SetMakeFaultGroups( bool theMakeFaultGroups )
-  {
-    _makeFaultGroups = theMakeFaultGroups;
-  }
-
-  virtual Status Perform();
-
- private:
-
-  Status storeBadNodeIds(const char* gmfKwd, int elemNb, int nb, ...);
-
-  bool _makeRequiredGroups;
-  bool _makeFaultGroups;
-
+ public:
+  // Constructor
+  StdMeshers_PolyhedronPerSolid_3D_i( PortableServer::POA_ptr thePOA,
+                                      ::SMESH_Gen*            theGenImpl );
+  // Destructor
+  virtual ~StdMeshers_PolyhedronPerSolid_3D_i();
 };
-
 
 #endif

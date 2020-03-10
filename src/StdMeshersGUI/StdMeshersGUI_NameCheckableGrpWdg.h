@@ -1,4 +1,4 @@
-// Copyright (C) 2010-2019  CEA/DEN, EDF R&D, OPEN CASCADE
+// Copyright (C) 2007-2019  CEA/DEN, EDF R&D, OPEN CASCADE
 //
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -16,32 +16,38 @@
 //
 // See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 //
+#ifndef STDMESHERSGUI_NameCheckableGrpWdg_H
+#define STDMESHERSGUI_NameCheckableGrpWdg_H
 
-//  SMESH SMDS : implementation of Salome mesh data structure
-//  Module     : SMESH
-//  File       : SMDS_BallElement.cxx
-//  Author     : Edward AGAPOV (eap)
+// SMESH includes
+#include "SMESH_StdMeshersGUI.hxx"
 
-#include "SMDS_BallElement.hxx"
+// Qt includes
+#include <QGroupBox>
 
-#include "SMDS_Mesh.hxx"
-#include "SMDS_MeshNode.hxx"
+#include <omniORB4/CORBA.h>
 
-void SMDS_BallElement::init(const SMDS_MeshNode * node, double diameter )
+class QButtonGroup;
+class QLineEdit;
+
+/*!
+ * \brief A QGroupBox holding several radio buttons
+ */
+class STDMESHERSGUI_EXPORT StdMeshersGUI_NameCheckableGrpWdg : public QGroupBox
 {
-  vtkIdType nodeVtkID = node->GetVtkID();
-  int vtkID = getGrid()->InsertNextLinkedCell( toVtkType( SMDSEntity_Ball ), 1, &nodeVtkID );
-  setVtkID( vtkID );
-  getGrid()->SetBallDiameter( GetVtkID(), diameter );
-}
+  Q_OBJECT
 
-double SMDS_BallElement::GetDiameter() const
-{
-  return getGrid()->GetBallDiameter( GetVtkID() );
-}
+public:
+  StdMeshersGUI_NameCheckableGrpWdg(const QString& groupTitle,
+                                    const QString& nameLabel);
 
-void SMDS_BallElement::SetDiameter(double diameter)
-{
-  getGrid()->SetBallDiameter( GetVtkID(), diameter );
-  GetMesh()->setMyModified();
-}
+  QString getName();
+
+  void    setName( CORBA::String_var name );
+  void    setDefaultName( QString name );
+
+private:
+  QLineEdit* myNameLineEdit;
+};
+
+#endif // STDMESHERSGUI_NameCheckableGrpWdg_H

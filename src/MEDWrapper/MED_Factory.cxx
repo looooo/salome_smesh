@@ -194,22 +194,16 @@ namespace MED
       remove(fileName.c_str());
       isCreated = true;
     }
-    int minor = -1;
+    med_int wantedMajor = MED_MAJOR_NUM;
+    med_int wantedMinor = MED_MINOR_NUM;
     if (isCreated)
     {
-      med_int wantedMajor = MED_MAJOR_NUM;
-      med_int wantedMinor = MED_MINOR_NUM;
       if (theVersion > 0)
       {
         wantedMajor = theVersion/10;
         wantedMinor = theVersion%10;
       }
-      if (wantedMajor == MED_MAJOR_NUM) // the med file will be actually created
-      {
-        if (wantedMinor < MED_MINOR_NUM)
-          minor = wantedMinor;
-      }
     }
-    return new MED::TWrapper(fileName, true, minor);
+    return new MED::TWrapper(fileName, true, wantedMajor, wantedMinor);
   }
 }

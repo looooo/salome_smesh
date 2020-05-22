@@ -1,7 +1,4 @@
-# Copyright (C) 2007-2020  CEA/DEN, EDF R&D, OPEN CASCADE
-#
-# Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
-# CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
+# Copyright (C) 2015-2020  CEA/DEN, EDF R&D, OPEN CASCADE
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -20,10 +17,11 @@
 # See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 #
 
-ADD_SUBDIRECTORY(examples)
-IF(SALOME_BUILD_DOC)
-  ADD_SUBDIRECTORY(tui)
-  ADD_SUBDIRECTORY(gui)
-ENDIF()
+INCLUDE(tests.set)
 
-SALOME_INSTALL_SCRIPTS(collect_mesh_methods.py ${SALOME_INSTALL_BINS})
+FOREACH(tfile ${GOOD_TESTS} ${BAD_TESTS} ${RESTRICTED_TESTS})
+  GET_FILENAME_COMPONENT(BASE_NAME ${tfile} NAME_WE)
+  SET(TEST_NAME ${COMPONENT_NAME}_${BASE_NAME})
+  ADD_TEST(${TEST_NAME} python ${SALOME_TEST_DRIVER} ${TIMEOUT} ${tfile})
+  SET_TESTS_PROPERTIES(${TEST_NAME} PROPERTIES LABELS "${COMPONENT_NAME}")
+ENDFOREACH()

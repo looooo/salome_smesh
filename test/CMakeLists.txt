@@ -20,23 +20,30 @@
 # See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 #
 
+INCLUDE(tests.set)
+
+# For 'make test'
+
 SALOME_GENERATE_TESTS_ENVIRONMENT(_test_env)
-SET(_test_helper ${CMAKE_SOURCE_DIR}/doc/salome/examples/testme.py)
+SET(TEST_HELPER ${KERNEL_ROOT_DIR}/bin/salome/test_helper.py)
 
-# Tests from RESTRICTED repository -----------------------------------
+FOREACH(test ${GOOD_TESTS})
+  GET_FILENAME_COMPONENT(testname ${test} NAME_WE)
+  ADD_TEST(NAME ${testname}
+           COMMAND ${PYTHON_EXECUTABLE} -B ${TEST_HELPER} ${CMAKE_CURRENT_SOURCE_DIR}/${test})
+  SET_TESTS_PROPERTIES(${testname} PROPERTIES ENVIRONMENT "${tests_env}")
+ENDFOREACH()
 
-SET(RESTRICTED_ROOT_DIR $ENV{RESTRICTED_ROOT_DIR} CACHE PATH "Path to the restricted repository")
+# Application tests
 
-IF(WITH_SHAPER_STUDY AND EXISTS ${RESTRICTED_ROOT_DIR})
-  FILE(GLOB _restricted_tests "${RESTRICTED_ROOT_DIR}/SMESH/*.py")
-  FOREACH(_test ${_restricted_tests})
-    GET_FILENAME_COMPONENT(_test_name ${_test} NAME_WE)
-    ADD_TEST(NAME ${_test_name}
-             COMMAND ${PYTHON_EXECUTABLE} -B ${_test_helper} ${_test})
-    SET_TESTS_PROPERTIES(${_test_name} PROPERTIES ENVIRONMENT "${_test_env}")
-  ENDFOREACH()
-ELSE()
-  MESSAGE(WARNING "Tests from RESTRICTED repository aren't available")
-ENDIF()
+SET(TEST_INSTALL_DIRECTORY ${SALOME_INSTALL_SCRIPT_SCRIPTS}/test/tests)
 
-# --------------------------------------------------------------------
+INSTALL(FILES CTestTestfileInstall.cmake
+        DESTINATION ${TEST_INSTALL_DIRECTORY}
+        RENAME CTestTestfile.cmake)
+
+INSTALL(FILES tests.set DESTINATION ${TEST_INSTALL_DIRECTORY})
+
+# WARNING! DO NOT INSTALL RESTRICTED_TESTS HERE!!!!
+SET(ALL_TESTS ${BAD_TESTS} ${GOOD_TESTS})
+SALOME_INSTALL_SCRIPTS("${ALL_TESTS}" ${TEST_INSTALL_DIRECTORY})

@@ -19,31 +19,42 @@
 
 INCLUDE(tests.set)
 
-SET(TEST_REINIT_SALOME "False")
 SALOME_CONFIGURE_FILE(tests.py.in tests.py)
 
-SALOME_GENERATE_TESTS_ENVIRONMENT(tests_env)
+# Install examples
 
-IF(SMESH_JOIN_TESTS)
-  ADD_TEST(NAME SMESH_examples COMMAND ${PYTHON_EXECUTABLE} -B ${CMAKE_SOURCE_DIR}/doc/salome/examples/testme.py tests.py)
-ELSE(SMESH_JOIN_TESTS)
-  FOREACH(test ${GOOD_TESTS})
-    GET_FILENAME_COMPONENT(testname ${test} NAME_WE)
-    ADD_TEST(NAME ${testname}
-             COMMAND ${PYTHON_EXECUTABLE} -B ${CMAKE_SOURCE_DIR}/doc/salome/examples/testme.py ${CMAKE_CURRENT_SOURCE_DIR}/${test})
-    SET_TESTS_PROPERTIES(${testname} PROPERTIES ENVIRONMENT "${tests_env}")
-  ENDFOREACH()
-ENDIF(SMESH_JOIN_TESTS)
-
-# install Python scripts
+SET(EXAMPLES_TESTS ${BAD_TESTS} ${GOOD_TESTS})
 SALOME_INSTALL_SCRIPTS("${EXAMPLES_TESTS}" ${SALOME_INSTALL_DOC}/examples/SMESH)
 
-# Application tests
+# Tests
 
-SET(TEST_INSTALL_DIRECTORY ${SALOME_INSTALL_SCRIPT_SCRIPTS}/test)
-INSTALL(FILES ${GOOD_TESTS} ${BAD_TESTS} DESTINATION ${TEST_INSTALL_DIRECTORY})
+IF(SALOME_BUILD_TESTS)
 
-INSTALL(FILES CTestTestfileInstall.cmake
-        DESTINATION ${TEST_INSTALL_DIRECTORY}
-        RENAME CTestTestfile.cmake)
-INSTALL(FILES tests.set DESTINATION ${TEST_INSTALL_DIRECTORY})
+  SET(TEST_REINIT_SALOME "False")
+  SET(TEST_HELPER ${KERNEL_ROOT_DIR}/bin/salome/test_helper.py)
+
+  SALOME_GENERATE_TESTS_ENVIRONMENT(tests_env)
+
+  IF(SMESH_JOIN_TESTS)
+    ADD_TEST(NAME all_examples COMMAND ${PYTHON_EXECUTABLE} -B ${TEST_HELPER} tests.py)
+  ELSE(SMESH_JOIN_TESTS)
+    FOREACH(test ${GOOD_TESTS})
+      GET_FILENAME_COMPONENT(testname ${test} NAME_WE)
+      ADD_TEST(NAME ${testname}
+               COMMAND ${PYTHON_EXECUTABLE} -B ${TEST_HELPER} ${CMAKE_CURRENT_SOURCE_DIR}/${test})
+      SET_TESTS_PROPERTIES(${testname} PROPERTIES ENVIRONMENT "${tests_env}")
+    ENDFOREACH()
+  ENDIF(SMESH_JOIN_TESTS)
+
+  # Application tests
+  # Note: we don't install test scripts as they are already installed to the documentation folder
+
+  SET(TEST_INSTALL_DIRECTORY ${SALOME_INSTALL_SCRIPT_SCRIPTS}/test/examples)
+
+  CONFIGURE_FILE(CTestTestfileInstall.cmake ${CMAKE_CURRENT_BINARY_DIR}/CTestTestfileInstall.cmake @ONLY)
+  INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/CTestTestfileInstall.cmake
+          DESTINATION ${TEST_INSTALL_DIRECTORY}
+          RENAME CTestTestfile.cmake)
+  INSTALL(FILES tests.set DESTINATION ${TEST_INSTALL_DIRECTORY})
+
+ENDIF(SALOME_BUILD_TESTS)

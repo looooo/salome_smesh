@@ -19,10 +19,8 @@
 
 INCLUDE(UseSphinx)
 
-SALOME_INSTALL_SCRIPTS(collect_mesh_methods.py ${SALOME_INSTALL_BINS})
-
 #SET(DOC_SMESH_MeshersList StdMeshers)
-SET(smesh_file "${CMAKE_CURRENT_SOURCE_DIR}/collect_mesh_methods.py")
+SET(smesh_file "${CMAKE_SOURCE_DIR}/doc/salome/collect_mesh_methods.py")
 SET(smesh_merge_file "${CMAKE_CURRENT_SOURCE_DIR}/merge_mesh_class.py")
 
 # Define requared environment variables

@@ -17,15 +17,13 @@
 # See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 #
 
-INCLUDE(tests.set)
+SET(TESTS_DIR "$ENV{SMESH_ROOT_DIR}/@SALOME_INSTALL_DOC@/examples/SMESH")
 
-SET(SALOME_TEST_DRIVER "$ENV{KERNEL_ROOT_DIR}/bin/salome/appliskel/salome_test_driver.py")
-SET(COMPONENT_NAME SMESH)
-SET(TIMEOUT        300)
+INCLUDE(tests.set)
 
 FOREACH(tfile ${GOOD_TESTS} ${BAD_TESTS})
   GET_FILENAME_COMPONENT(BASE_NAME ${tfile} NAME_WE)
-  SET(TEST_NAME SMESH_${BASE_NAME})
-  ADD_TEST(${TEST_NAME} python ${SALOME_TEST_DRIVER} ${TIMEOUT} ${tfile})
+  SET(TEST_NAME ${COMPONENT_NAME}_${BASE_NAME})
+  ADD_TEST(${TEST_NAME} python ${SALOME_TEST_DRIVER} ${TIMEOUT} ${TESTS_DIR}/${tfile})
   SET_TESTS_PROPERTIES(${TEST_NAME} PROPERTIES LABELS "${COMPONENT_NAME}")
 ENDFOREACH()

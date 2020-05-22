@@ -1,7 +1,4 @@
-# Copyright (C) 2007-2020  CEA/DEN, EDF R&D, OPEN CASCADE
-#
-# Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
-# CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
+# Copyright (C) 2017-2020  CEA/DEN, EDF R&D, OPEN CASCADE
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -20,10 +17,11 @@
 # See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 #
 
-ADD_SUBDIRECTORY(examples)
-IF(SALOME_BUILD_DOC)
-  ADD_SUBDIRECTORY(tui)
-  ADD_SUBDIRECTORY(gui)
-ENDIF()
+SET(SALOME_TEST_DRIVER "$ENV{KERNEL_ROOT_DIR}/bin/salome/appliskel/salome_test_driver.py")
 
-SALOME_INSTALL_SCRIPTS(collect_mesh_methods.py ${SALOME_INSTALL_BINS})
+SET(COMPONENT_NAME SMESH)
+SET(TIMEOUT        300)
+
+SUBDIRS(examples)
+SUBDIRS(tests)
+SUBDIRS(tools)

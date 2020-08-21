@@ -414,7 +414,7 @@ SMESH_Gen_i::~SMESH_Gen_i()
 GenericHypothesisCreator_i* SMESH_Gen_i::getHypothesisCreator(const char* theHypName,
                                                               const char* theLibName,
                                                               std::string& thePlatformLibName)
-  throw (SALOME::SALOME_Exception)
+  
 {
   std::string aPlatformLibName;
   /* It's Need to translate lib name for WIN32 or X platform */
@@ -565,7 +565,7 @@ SMESH::SMESH_Hypothesis_ptr SMESH_Gen_i::createHypothesis(const char* theHypName
 //=============================================================================
 
 SMESH::SMESH_Mesh_ptr SMESH_Gen_i::createMesh()
-  throw ( SALOME::SALOME_Exception )
+  
 {
   Unexpect aCatch(SALOME_SalomeException);
   if(MYDEBUG) MESSAGE( "SMESH_Gen_i::createMesh" );
@@ -814,7 +814,7 @@ StudyContext* SMESH_Gen_i::GetStudyContext()
 
 SMESH::SMESH_Hypothesis_ptr SMESH_Gen_i::CreateHypothesis( const char* theHypName,
                                                            const char* theLibName )
-  throw ( SALOME::SALOME_Exception )
+  
 {
   Unexpect aCatch(SALOME_SalomeException);
   // Create hypothesis/algorithm
@@ -849,7 +849,7 @@ SMESH_Gen_i::CreateHypothesisByAverageLength( const char*    theHypType,
                                               const char*    theLibName,
                                               CORBA::Double  theAverageLength,
                                               CORBA::Boolean theQuadDominated)
-  throw ( SALOME::SALOME_Exception )
+  
 {
   SMESH::HypInitParams initParams = { ::SMESH_Hypothesis::BY_AVERAGE_LENGTH,
                                       theAverageLength, theQuadDominated };
@@ -890,7 +890,7 @@ SMESH_Gen_i::GetHypothesisParameterValues( const char*                 theHypTyp
                                            SMESH::SMESH_Mesh_ptr       theMesh,
                                            GEOM::GEOM_Object_ptr       theGeom,
                                            const SMESH::HypInitParams& theParams)
-  throw ( SALOME::SALOME_Exception )
+  
 {
   Unexpect aCatch(SALOME_SalomeException);
 
@@ -1080,7 +1080,7 @@ CORBA::Boolean SMESH_Gen_i::GetSoleSubMeshUsingHyp( SMESH::SMESH_Hypothesis_ptr 
 //=============================================================================
 
 void SMESH_Gen_i::SetBoundaryBoxSegmentation( CORBA::Long theNbSegments )
-  throw ( SALOME::SALOME_Exception )
+  
 {
   if ( theNbSegments > 0 )
     myGen.SetBoundaryBoxSegmentation( int( theNbSegments ));
@@ -1095,7 +1095,7 @@ void SMESH_Gen_i::SetBoundaryBoxSegmentation( CORBA::Long theNbSegments )
 //=============================================================================
 
 void SMESH_Gen_i::SetDefaultNbSegments(CORBA::Long theNbSegments)
-  throw ( SALOME::SALOME_Exception )
+  
 {
   if ( theNbSegments > 0 )
     myGen.SetDefaultNbSegments( int(theNbSegments) );
@@ -1201,7 +1201,7 @@ char* SMESH_Gen_i::GetOption(const char* name)
 //=============================================================================
 
 SMESH::SMESH_Mesh_ptr SMESH_Gen_i::CreateMesh( GEOM::GEOM_Object_ptr theShapeObject )
-     throw ( SALOME::SALOME_Exception )
+     
 {
   Unexpect aCatch(SALOME_SalomeException);
   if(MYDEBUG) MESSAGE( "SMESH_Gen_i::CreateMesh" );
@@ -1236,7 +1236,7 @@ SMESH::SMESH_Mesh_ptr SMESH_Gen_i::CreateMesh( GEOM::GEOM_Object_ptr theShapeObj
 //=============================================================================
 
 SMESH::SMESH_Mesh_ptr SMESH_Gen_i::CreateEmptyMesh()
-     throw ( SALOME::SALOME_Exception )
+     
 {
   Unexpect aCatch(SALOME_SalomeException);
   if(MYDEBUG) MESSAGE( "SMESH_Gen_i::CreateMesh" );
@@ -1266,7 +1266,7 @@ namespace
    */
   //================================================================================
 
-  void checkFileReadable( const char* theFileName ) throw ( SALOME::SALOME_Exception )
+  void checkFileReadable( const char* theFileName ) 
   {
     SMESH_File f ( theFileName );
     if ( !f )
@@ -1290,7 +1290,7 @@ namespace
 //=============================================================================
 
 SMESH::SMESH_Mesh_ptr SMESH_Gen_i::CreateMeshesFromUNV( const char* theFileName )
-  throw ( SALOME::SALOME_Exception )
+  
 {
   Unexpect aCatch(SALOME_SalomeException);
 
@@ -1421,7 +1421,7 @@ SMESH::mesh_array* SMESH_Gen_i::CreateMeshesFromMEDorSAUV( const char* theFileNa
 
 SMESH::mesh_array* SMESH_Gen_i::CreateMeshesFromMED( const char*                  theFileName,
                                                      SMESH::DriverMED_ReadStatus& theStatus)
-  throw ( SALOME::SALOME_Exception )
+  
 {
   Unexpect aCatch(SALOME_SalomeException);
   checkFileReadable( theFileName );
@@ -1441,7 +1441,7 @@ SMESH::mesh_array* SMESH_Gen_i::CreateMeshesFromMED( const char*                
 
 SMESH::mesh_array* SMESH_Gen_i::CreateMeshesFromSAUV( const char*                  theFileName,
                                                       SMESH::DriverMED_ReadStatus& theStatus)
-     throw ( SALOME::SALOME_Exception )
+     
 {
   Unexpect aCatch(SALOME_SalomeException);
   checkFileReadable( theFileName );
@@ -1484,7 +1484,7 @@ SMESH::mesh_array* SMESH_Gen_i::CreateMeshesFromSAUV( const char*               
 //=============================================================================
 
 SMESH::SMESH_Mesh_ptr SMESH_Gen_i::CreateMeshesFromSTL( const char* theFileName )
-  throw ( SALOME::SALOME_Exception )
+  
 {
   Unexpect aCatch(SALOME_SalomeException);
   checkFileReadable( theFileName );
@@ -1525,7 +1525,7 @@ SMESH::SMESH_Mesh_ptr SMESH_Gen_i::CreateMeshesFromSTL( const char* theFileName 
 
 SMESH::mesh_array* SMESH_Gen_i::CreateMeshesFromCGNS( const char*                  theFileName,
                                                       SMESH::DriverMED_ReadStatus& theStatus)
-  throw ( SALOME::SALOME_Exception )
+  
 {
   Unexpect aCatch(SALOME_SalomeException);
   checkFileReadable( theFileName );
@@ -1613,7 +1613,7 @@ SMESH::SMESH_Mesh_ptr
 SMESH_Gen_i::CreateMeshesFromGMF( const char*             theFileName,
                                   CORBA::Boolean          theMakeRequiredGroups,
                                   SMESH::ComputeError_out theError)
-    throw ( SALOME::SALOME_Exception )
+    
 {
   Unexpect aCatch(SALOME_SalomeException);
   checkFileReadable( theFileName );
@@ -1657,7 +1657,7 @@ SMESH_Gen_i::CreateMeshesFromGMF( const char*             theFileName,
 
 CORBA::Boolean SMESH_Gen_i::IsReadyToCompute( SMESH::SMESH_Mesh_ptr theMesh,
                                               GEOM::GEOM_Object_ptr theShapeObject )
-  throw ( SALOME::SALOME_Exception )
+  
 {
   Unexpect aCatch(SALOME_SalomeException);
   if(MYDEBUG) MESSAGE( "SMESH_Gen_i::IsReadyToCompute" );
@@ -1732,7 +1732,7 @@ SALOMEDS::SObject_ptr SMESH_Gen_i::GetAlgoSO(const ::SMESH_Algo* algo)
 
 SMESH::compute_error_array* SMESH_Gen_i::GetComputeErrors( SMESH::SMESH_Mesh_ptr theMesh,
                                                            GEOM::GEOM_Object_ptr theSubObject )
-  throw ( SALOME::SALOME_Exception )
+  
 {
   Unexpect aCatch(SALOME_SalomeException);
   if(MYDEBUG) MESSAGE( "SMESH_Gen_i::GetComputeErrors()" );
@@ -1807,7 +1807,7 @@ SMESH::compute_error_array* SMESH_Gen_i::GetComputeErrors( SMESH::SMESH_Mesh_ptr
 SMESH::MeshPreviewStruct*
 SMESH_Gen_i::GetBadInputElements( SMESH::SMESH_Mesh_ptr theMesh,
                                   CORBA::Short          theSubShapeID )
-  throw ( SALOME::SALOME_Exception )
+  
 {
   Unexpect aCatch(SALOME_SalomeException);
   if(MYDEBUG) MESSAGE( "SMESH_Gen_i::GetBadInputElements()" );
@@ -1895,7 +1895,7 @@ SMESH::ListOfGroups*
 SMESH_Gen_i::MakeGroupsOfBadInputElements( SMESH::SMESH_Mesh_ptr theMesh,
                                            CORBA::Short          theSubShapeID,
                                            const char*           theGroupName )
-  throw ( SALOME::SALOME_Exception )
+  
 {
   Unexpect aCatch(SALOME_SalomeException);
 
@@ -1930,7 +1930,7 @@ SMESH_Gen_i::MakeGroupsOfBadInputElements( SMESH::SMESH_Mesh_ptr theMesh,
 
 SMESH::algo_error_array* SMESH_Gen_i::GetAlgoState( SMESH::SMESH_Mesh_ptr theMesh,
                                                     GEOM::GEOM_Object_ptr theSubObject )
-      throw ( SALOME::SALOME_Exception )
+      
 {
   Unexpect aCatch(SALOME_SalomeException);
   if(MYDEBUG) MESSAGE( "SMESH_Gen_i::GetAlgoState()" );
@@ -1992,7 +1992,7 @@ SMESH::algo_error_array* SMESH_Gen_i::GetAlgoState( SMESH::SMESH_Mesh_ptr theMes
 SMESH::long_array*
 SMESH_Gen_i::GetSubShapesId( GEOM::GEOM_Object_ptr      theMainShapeObject,
                              const SMESH::object_array& theListOfSubShapeObject )
-  throw ( SALOME::SALOME_Exception )
+  
 {
   Unexpect aCatch(SALOME_SalomeException);
   if(MYDEBUG) MESSAGE( "SMESH_Gen_i::GetSubShapesId" );
@@ -2066,7 +2066,7 @@ SMESH_Gen_i::GetSubShapesId( GEOM::GEOM_Object_ptr      theMainShapeObject,
 
 CORBA::Boolean SMESH_Gen_i::Compute( SMESH::SMESH_Mesh_ptr theMesh,
                                      GEOM::GEOM_Object_ptr theShapeObject )
-     throw ( SALOME::SALOME_Exception )
+     
 {
   //MEMOSTAT;
   Unexpect aCatch(SALOME_SalomeException);
@@ -2163,7 +2163,7 @@ SMESH::MeshPreviewStruct* SMESH_Gen_i::Precompute( SMESH::SMESH_Mesh_ptr theMesh
                                                    GEOM::GEOM_Object_ptr theShapeObject,
                                                    SMESH::Dimension      theDimension,
                                                    SMESH::long_array&    theShapesId)
-     throw ( SALOME::SALOME_Exception )
+     
 {
   Unexpect aCatch(SALOME_SalomeException);
   if(MYDEBUG) MESSAGE( "SMESH_Gen_i::Precompute" );
@@ -2351,7 +2351,7 @@ SMESH::MeshPreviewStruct* SMESH_Gen_i::Precompute( SMESH::SMESH_Mesh_ptr theMesh
 SMESH::long_array* SMESH_Gen_i::Evaluate(SMESH::SMESH_Mesh_ptr theMesh,
                                          GEOM::GEOM_Object_ptr theShapeObject)
 //                                     SMESH::long_array& theNbElems)
-     throw ( SALOME::SALOME_Exception )
+     
 {
   Unexpect aCatch(SALOME_SalomeException);
   if(MYDEBUG) MESSAGE( "SMESH_Gen_i::Evaluate" );
@@ -2439,7 +2439,7 @@ GEOM::GEOM_Object_ptr
 SMESH_Gen_i::GetGeometryByMeshElement( SMESH::SMESH_Mesh_ptr  theMesh,
                                        CORBA::Long            theElementID,
                                        const char*            theGeomName)
-  throw ( SALOME::SALOME_Exception )
+  
 {
   Unexpect aCatch(SALOME_SalomeException);
 
@@ -2503,7 +2503,7 @@ SMESH_Gen_i::GetGeometryByMeshElement( SMESH::SMESH_Mesh_ptr  theMesh,
 GEOM::GEOM_Object_ptr
 SMESH_Gen_i::FindGeometryByMeshElement( SMESH::SMESH_Mesh_ptr  theMesh,
                                         CORBA::Long            theElementID)
-  throw ( SALOME::SALOME_Exception )
+  
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( CORBA::is_nil( theMesh ) )
@@ -2579,7 +2579,7 @@ SMESH_Gen_i::Concatenate(const SMESH::ListOfIDSources& theMeshesArray,
                          CORBA::Boolean                theMergeNodesAndElements,
                          CORBA::Double                 theMergeTolerance,
                          SMESH::SMESH_Mesh_ptr         theMeshToAppendTo)
-  throw ( SALOME::SALOME_Exception )
+  
 {
   return ConcatenateCommon(theMeshesArray,
                            theUniteIdenticalGroups,
@@ -2604,7 +2604,7 @@ SMESH_Gen_i::ConcatenateWithGroups(const SMESH::ListOfIDSources& theMeshesArray,
                                    CORBA::Boolean                theMergeNodesAndElements,
                                    CORBA::Double                 theMergeTolerance,
                                    SMESH::SMESH_Mesh_ptr         theMeshToAppendTo)
-  throw ( SALOME::SALOME_Exception )
+  
 {
   return ConcatenateCommon(theMeshesArray,
                            theUniteIdenticalGroups,
@@ -2629,7 +2629,7 @@ SMESH_Gen_i::ConcatenateCommon(const SMESH::ListOfIDSources& theMeshesArray,
                                CORBA::Double                 theMergeTolerance,
                                CORBA::Boolean                theCommonGroups,
                                SMESH::SMESH_Mesh_ptr         theMeshToAppendTo)
-  throw ( SALOME::SALOME_Exception )
+  
 {
   std::unique_ptr< TPythonDump > pPythonDump( new TPythonDump );
   TPythonDump& pythonDump = *pPythonDump; // prevent dump of called methods
@@ -2909,7 +2909,7 @@ SMESH::SMESH_Mesh_ptr SMESH_Gen_i::CopyMesh(SMESH::SMESH_IDSource_ptr meshPart,
                                             const char*               meshName,
                                             CORBA::Boolean            toCopyGroups,
                                             CORBA::Boolean            toKeepIDs)
-  throw ( SALOME::SALOME_Exception )
+  
 {
   Unexpect aCatch(SALOME_SalomeException);
 
@@ -3684,7 +3684,7 @@ CORBA::Boolean SMESH_Gen_i::CopyMeshWithGeom( SMESH::SMESH_Mesh_ptr       theSou
                                               SMESH::submesh_array_out    theNewSubmeshes,
                                               SMESH::ListOfHypothesis_out theNewHypotheses,
                                               SMESH::string_array_out     theInvalidEntries)
-throw ( SALOME::SALOME_Exception )
+
 {
   if ( CORBA::is_nil( theSourceMesh ) ||
        CORBA::is_nil( theNewGeometry ))

@@ -55,7 +55,7 @@ public:
 
   // Set deflection
   void SetDeflection( CORBA::Double theLength )
-    throw ( SALOME::SALOME_Exception );
+    ;
   // Get deflection
   CORBA::Double GetDeflection();
 

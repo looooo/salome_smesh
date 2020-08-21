@@ -76,7 +76,6 @@ StdMeshers_Deflection1D_i::~StdMeshers_Deflection1D_i()
 //=============================================================================
 
 void StdMeshers_Deflection1D_i::SetDeflection( CORBA::Double theValue )
-     throw ( SALOME::SALOME_Exception )
 {
   ASSERT( myBaseImpl );
   try {

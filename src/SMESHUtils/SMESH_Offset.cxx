@@ -552,7 +552,7 @@ namespace
 
   bool getTranslatedPosition( const SMDS_MeshNode*         theNewNode,
                               const double                 theOffset,
-                              const double                 theTol,
+                              const double                 /*theTol*/,
                               const double                 theSign,
                               const std::vector< gp_XYZ >& theFaceNormals,
                               SMDS_Mesh&                   theSrcMesh,
@@ -2497,7 +2497,7 @@ namespace
    */
   //================================================================================
 
-  void CutFace::AddPoint( const CutLink& p1, const CutLink& p2, double tol ) const
+  void CutFace::AddPoint( const CutLink& p1, const CutLink& p2, double /*tol*/ ) const
   {
     if ( myInitFace->GetNodeIndex( p1.IntNode() ) >= 0 ||
          myInitFace->GetNodeIndex( p2.IntNode() ) >= 0 )
@@ -2918,7 +2918,7 @@ namespace
                              const double                 theSign,
                              const std::vector< gp_XYZ >& theNormals,
                              std::vector< EdgePart >&     theCutOffLinks,
-                             TLinkMap&                    theCutOffCoplanarLinks) const
+                             TLinkMap&                    /*theCutOffCoplanarLinks*/) const
   {
     EdgePart sideEdge;
     boost::container::flat_set< const SMDS_MeshElement* > checkedCoplanar;

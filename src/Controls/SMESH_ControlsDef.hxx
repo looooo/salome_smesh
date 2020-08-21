@@ -68,7 +68,7 @@ namespace SMESH{
     public:
       TSequenceOfXYZ();
 
-      explicit TSequenceOfXYZ(size_type n);
+      explicit TSequenceOfXYZ(size_type n);                             
 
       TSequenceOfXYZ(size_type n, const gp_XYZ& t);
 
@@ -1214,8 +1214,8 @@ namespace SMESH{
     protected:
       PredicatePtr myPredicate;
     };
-  };
-};
+  }
+}
 
 
 #endif

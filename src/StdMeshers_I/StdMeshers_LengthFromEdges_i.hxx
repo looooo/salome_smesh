@@ -53,8 +53,7 @@ public:
   virtual ~StdMeshers_LengthFromEdges_i();
 
   // Set mode
-  void SetMode( CORBA::Long theMode )
-    throw ( SALOME::SALOME_Exception );
+  void SetMode( CORBA::Long theMode );
   // Get mode
   CORBA::Long GetMode();
 

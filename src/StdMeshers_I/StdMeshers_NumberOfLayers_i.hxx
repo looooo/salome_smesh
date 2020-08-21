@@ -57,7 +57,7 @@ public:
 
   // Sets <number of segments> parameter value
   void SetNumberOfLayers(CORBA::Long numberOfLayers)
-    throw ( SALOME::SALOME_Exception );
+    ;
 
   // Returns <number of layers> parameter value
   CORBA::Long GetNumberOfLayers();

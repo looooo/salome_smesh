@@ -61,7 +61,7 @@ public:
    * Sets a source <shape> to take a mesh pattern from
    */
   void SetSource3DShape(GEOM::GEOM_Object_ptr shape)
-    throw ( SALOME::SALOME_Exception );
+    ;
 
   /*!
    * Returns the source shape
@@ -72,7 +72,7 @@ public:
    * Sets source <mesh> to take a mesh pattern from
    */
   void SetSourceMesh(SMESH::SMESH_Mesh_ptr mesh)
-    throw ( SALOME::SALOME_Exception );
+    ;
 
   /*!
    * Return source mesh
@@ -88,7 +88,7 @@ public:
                             GEOM::GEOM_Object_ptr sourceVertex2,
                             GEOM::GEOM_Object_ptr targetVertex1,
                             GEOM::GEOM_Object_ptr targetVertex2)
-    throw ( SALOME::SALOME_Exception );
+    ;
 
   /*!
    * Returns the <i>-th source vertex associated with the <i>-th target vertex.

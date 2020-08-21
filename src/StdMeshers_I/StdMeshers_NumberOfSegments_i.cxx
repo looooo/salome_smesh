@@ -76,7 +76,7 @@ StdMeshers_NumberOfSegments_i::~StdMeshers_NumberOfSegments_i()
 SMESH::double_array* StdMeshers_NumberOfSegments_i::BuildDistributionExpr( const char* func, 
                                                                            CORBA::Long nbSeg, 
                                                                            CORBA::Long conv )
-  throw ( SALOME::SALOME_Exception )
+  
 {
   ASSERT( myBaseImpl );
   try
@@ -98,7 +98,7 @@ SMESH::double_array*
 StdMeshers_NumberOfSegments_i::BuildDistributionTab( const SMESH::double_array& func,
                                                      CORBA::Long                nbSeg,
                                                      CORBA::Long                conv )
-  throw ( SALOME::SALOME_Exception )
+  
 {
   ASSERT( myBaseImpl );
 
@@ -130,7 +130,7 @@ StdMeshers_NumberOfSegments_i::BuildDistributionTab( const SMESH::double_array& 
 //=============================================================================
 
 void StdMeshers_NumberOfSegments_i::SetNumberOfSegments( CORBA::Long theSegmentsNumber )
-     throw ( SALOME::SALOME_Exception )
+     
 {
   ASSERT( myBaseImpl );
   try {
@@ -165,7 +165,7 @@ CORBA::Long StdMeshers_NumberOfSegments_i::GetNumberOfSegments()
 //=============================================================================
 
 void StdMeshers_NumberOfSegments_i::SetDistrType(CORBA::Long typ)
-  throw ( SALOME::SALOME_Exception )
+  
 {
   ASSERT( myBaseImpl );
   try {
@@ -203,7 +203,7 @@ CORBA::Long StdMeshers_NumberOfSegments_i::GetDistrType()
 //=============================================================================
 
 void StdMeshers_NumberOfSegments_i::SetScaleFactor( CORBA::Double theScaleFactor )
-     throw ( SALOME::SALOME_Exception )
+     
 {
   ASSERT( myBaseImpl );
   try {
@@ -226,7 +226,7 @@ void StdMeshers_NumberOfSegments_i::SetScaleFactor( CORBA::Double theScaleFactor
 //=============================================================================
 
 CORBA::Double StdMeshers_NumberOfSegments_i::GetScaleFactor()
-  throw ( SALOME::SALOME_Exception )
+  
 {
   ASSERT( myBaseImpl );
   double scale;
@@ -246,7 +246,7 @@ CORBA::Double StdMeshers_NumberOfSegments_i::GetScaleFactor()
 //=============================================================================
 
 void StdMeshers_NumberOfSegments_i::SetTableFunction(const SMESH::double_array& table)
-  throw ( SALOME::SALOME_Exception )
+  
 {
   ASSERT( myBaseImpl );
   std::vector<double> tbl( table.length() );
@@ -269,7 +269,7 @@ void StdMeshers_NumberOfSegments_i::SetTableFunction(const SMESH::double_array& 
 //=============================================================================
 
 SMESH::double_array* StdMeshers_NumberOfSegments_i::GetTableFunction()
-  throw ( SALOME::SALOME_Exception )
+  
 {
   ASSERT( myBaseImpl );
   const std::vector<double>* tbl;
@@ -292,7 +292,7 @@ SMESH::double_array* StdMeshers_NumberOfSegments_i::GetTableFunction()
 //=============================================================================
 
 void StdMeshers_NumberOfSegments_i::SetExpressionFunction(const char* expr)
-  throw ( SALOME::SALOME_Exception )
+  
 {
   ASSERT( myBaseImpl );
   try {
@@ -312,7 +312,7 @@ void StdMeshers_NumberOfSegments_i::SetExpressionFunction(const char* expr)
 //=============================================================================
 
 char* StdMeshers_NumberOfSegments_i::GetExpressionFunction()
-  throw ( SALOME::SALOME_Exception )
+  
 {
   ASSERT( myBaseImpl );
   const char* expr;
@@ -332,7 +332,7 @@ char* StdMeshers_NumberOfSegments_i::GetExpressionFunction()
 //=============================================================================
 
 void StdMeshers_NumberOfSegments_i::SetConversionMode(CORBA::Long conv )
-  throw ( SALOME::SALOME_Exception )
+  
 {
   ASSERT( myBaseImpl );
   try {
@@ -352,7 +352,7 @@ void StdMeshers_NumberOfSegments_i::SetConversionMode(CORBA::Long conv )
 //=============================================================================
 
 CORBA::Long StdMeshers_NumberOfSegments_i::ConversionMode()
-  throw ( SALOME::SALOME_Exception )
+  
 {
   ASSERT( myBaseImpl );
   int conv;

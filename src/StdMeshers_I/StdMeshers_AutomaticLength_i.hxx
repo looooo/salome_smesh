@@ -55,8 +55,7 @@ public:
   virtual ~StdMeshers_AutomaticLength_i();
 
   // Set Fineness
-  void SetFineness( CORBA::Double theFineness )
-    throw ( SALOME::SALOME_Exception );
+  void SetFineness( CORBA::Double theFineness );
 
   // Get Fineness
   CORBA::Double GetFineness();

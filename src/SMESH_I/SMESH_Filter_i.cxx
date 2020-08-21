@@ -1637,7 +1637,6 @@ void ConnectedElements_i::SetPoint( CORBA::Double x, CORBA::Double y, CORBA::Dou
 }
 
 void ConnectedElements_i::SetVertex( GEOM::GEOM_Object_ptr vertex )
-  throw (SALOME::SALOME_Exception)
 {
   TopoDS_Shape shape = SMESH_Gen_i::GetSMESHGen()->GeomObjectToShape( vertex );
   if ( shape.IsNull() )
@@ -1659,7 +1658,6 @@ void ConnectedElements_i::SetVertex( GEOM::GEOM_Object_ptr vertex )
 }
 
 void ConnectedElements_i::SetNode ( CORBA::Long nodeID )
-  throw (SALOME::SALOME_Exception)
 {
   if ( nodeID < 1 )
     THROW_SALOME_CORBA_EXCEPTION( "ConnectedElements_i::SetNode(): nodeID must be > 0",
@@ -1675,7 +1673,6 @@ void ConnectedElements_i::SetNode ( CORBA::Long nodeID )
  */
 void ConnectedElements_i::SetThreshold ( const char*                             threshold,
                                          SMESH::ConnectedElements::ThresholdType type )
-  throw (SALOME::SALOME_Exception)
 {
   if ( !threshold )
     THROW_SALOME_CORBA_EXCEPTION( "ConnectedElements_i::SetThreshold(): NULL threshold",

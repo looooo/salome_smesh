@@ -50,12 +50,12 @@ public:
 
   // Set length
   void SetLength( CORBA::Double theLength )
-    throw ( SALOME::SALOME_Exception );
+    ;
   // Set precision
 
   // Sets preestimation flag
   void SetUsePreestimatedLength( CORBA::Boolean toUse)
-    throw ( SALOME::SALOME_Exception );
+    ;
 
   // Get length
   CORBA::Double GetLength();

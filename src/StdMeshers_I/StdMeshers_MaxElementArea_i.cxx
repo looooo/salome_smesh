@@ -76,7 +76,6 @@ StdMeshers_MaxElementArea_i::~StdMeshers_MaxElementArea_i()
 //=============================================================================
 
 void StdMeshers_MaxElementArea_i::SetMaxElementArea( CORBA::Double theArea )
-     throw ( SALOME::SALOME_Exception )
 {
   ASSERT( myBaseImpl );
   try {

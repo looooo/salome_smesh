@@ -52,7 +52,7 @@ class SMDS_EXPORT SMDS_MeshVolume : public SMDS_MeshCell
   virtual int  NbFaces() const;
   virtual int  NbEdges() const;
   virtual int  GetNodeIndex( const SMDS_MeshNode* node ) const;
-  virtual bool ChangeNodes(const SMDS_MeshNode* nodes[], const int nbNodes);
+  virtual bool ChangeNodes(const SMDS_MeshNode* /*nodes[]*/, const int /*nbNodes*/);
   virtual bool IsMediumNode(const SMDS_MeshNode* node) const;
   virtual int  NbCornerNodes() const;
 

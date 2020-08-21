@@ -74,7 +74,7 @@ StdMeshers_ProjectionSource1D_i::~StdMeshers_ProjectionSource1D_i()
 //=============================================================================
 
 void StdMeshers_ProjectionSource1D_i::SetSourceEdge(GEOM::GEOM_Object_ptr edge)
-  throw ( SALOME::SALOME_Exception )
+  
 {
   ASSERT( myBaseImpl );
   try {
@@ -98,7 +98,7 @@ void StdMeshers_ProjectionSource1D_i::SetSourceEdge(GEOM::GEOM_Object_ptr edge)
 
 void StdMeshers_ProjectionSource1D_i::SetVertexAssociation(GEOM::GEOM_Object_ptr sourceVertex,
                                                            GEOM::GEOM_Object_ptr targetVertex)
-  throw ( SALOME::SALOME_Exception )
+  
 {
   ASSERT( myBaseImpl );
   try {
@@ -124,7 +124,7 @@ void StdMeshers_ProjectionSource1D_i::SetVertexAssociation(GEOM::GEOM_Object_ptr
 //=============================================================================
 
 void StdMeshers_ProjectionSource1D_i::SetSourceMesh(SMESH::SMESH_Mesh_ptr theMesh)
-  throw ( SALOME::SALOME_Exception )
+  
 {
   ASSERT( myBaseImpl );
 

@@ -52,8 +52,7 @@ public:
   virtual ~StdMeshers_MaxElementVolume_i();
 
   // Set maximum element volume
-  void SetMaxElementVolume( CORBA::Double theVolume )
-    throw (SALOME::SALOME_Exception);
+  void SetMaxElementVolume( CORBA::Double theVolume );
   // Get maximum element volume
   CORBA::Double GetMaxElementVolume();
 

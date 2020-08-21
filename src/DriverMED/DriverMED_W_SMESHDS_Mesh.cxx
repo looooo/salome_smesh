@@ -112,7 +112,7 @@ void DriverMED_W_SMESHDS_Mesh::AddAllSubMeshes()
   myAllSubMeshes = true;
 }
 
-void DriverMED_W_SMESHDS_Mesh::AddSubMesh(SMESHDS_SubMesh* theSubMesh, int theID)
+void DriverMED_W_SMESHDS_Mesh::AddSubMesh(SMESHDS_SubMesh* theSubMesh, int /*theID*/)
 {
   mySubMeshes.push_back( theSubMesh );
 }

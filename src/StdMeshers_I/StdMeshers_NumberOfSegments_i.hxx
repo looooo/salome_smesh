@@ -55,49 +55,49 @@ public:
 
   // Builds point distribution according to passed function
   SMESH::double_array* BuildDistributionExpr( const char*, CORBA::Long, CORBA::Long )
-    throw ( SALOME::SALOME_Exception );
+    ;
   SMESH::double_array* BuildDistributionTab( const SMESH::double_array&, CORBA::Long, CORBA::Long )
-    throw ( SALOME::SALOME_Exception );
+    ;
 
   // Set number of segments
   void SetNumberOfSegments( CORBA::Long theSegmentsNumber )
-    throw ( SALOME::SALOME_Exception );
+    ;
   // Get number of segments
   CORBA::Long GetNumberOfSegments();
 
   // Set distribution type
   void SetDistrType(CORBA::Long typ)
-    throw ( SALOME::SALOME_Exception );
+    ;
   // Get distribution type
   CORBA::Long GetDistrType();
 
   // Set scalar factor
   void SetScaleFactor( CORBA::Double theScaleFactor )
-    throw ( SALOME::SALOME_Exception );
+    ;
   // Get scalar factor
   CORBA::Double GetScaleFactor()
-    throw ( SALOME::SALOME_Exception );
+    ;
 
   // Set table function for distribution DT_TabFunc
   void SetTableFunction(const SMESH::double_array& table)
-    throw ( SALOME::SALOME_Exception );
+    ;
   // Get table function for distribution DT_TabFunc
   SMESH::double_array* GetTableFunction()
-    throw ( SALOME::SALOME_Exception );
+    ;
 
   // Set expression function for distribution DT_ExprFunc
   void SetExpressionFunction(const char* expr)
-    throw ( SALOME::SALOME_Exception );
+    ;
   // Get expression function for distribution DT_ExprFunc
   char* GetExpressionFunction()
-    throw ( SALOME::SALOME_Exception );
+    ;
 
   // Set the exponent mode on/off
   void SetConversionMode( CORBA::Long conv )
-    throw ( SALOME::SALOME_Exception );
+    ;
   // Returns true if the exponent mode is set
   CORBA::Long ConversionMode()
-    throw ( SALOME::SALOME_Exception );
+    ;
 
   // Get implementation
   ::StdMeshers_NumberOfSegments* GetImpl();

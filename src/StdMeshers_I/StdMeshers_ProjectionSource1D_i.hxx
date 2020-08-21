@@ -60,7 +60,7 @@ public:
    * Sets source <edge> or a group containing edges to take a mesh pattern from
    */
   void SetSourceEdge(GEOM::GEOM_Object_ptr edge)
-    throw ( SALOME::SALOME_Exception );
+    ;
 
   /*!
    * Returns the source edge or a group containing edges
@@ -71,7 +71,7 @@ public:
    * Sets source <mesh> to take a mesh pattern from
    */
   void SetSourceMesh(SMESH::SMESH_Mesh_ptr mesh)
-    throw ( SALOME::SALOME_Exception );
+    ;
 
   /*!
    * Return source mesh
@@ -84,7 +84,7 @@ public:
    */
   void SetVertexAssociation(GEOM::GEOM_Object_ptr sourceVertex,
                             GEOM::GEOM_Object_ptr targetVertex)
-    throw ( SALOME::SALOME_Exception );
+    ;
 
   /*!
    * Returns the vertex associated with the target vertex.

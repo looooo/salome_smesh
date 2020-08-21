@@ -417,7 +417,7 @@ public:
   { min = false; max = true; return myUsedRanges; }
 
   //! Return ranges of elements assigned to sub-shapes and min/max of sub-shape IDs
-  const TSubIDRangeSet& GetSubIDRangesMinMax( int& min, int& max ) const
+  const TSubIDRangeSet& GetSubIDRangesMinMax( int& /*min*/, int& /*max*/ ) const
   { /*min = myMinSubID; max = myMaxSubID;*/ return mySubIDRanges; }
 
   //! Minimize allocated memory

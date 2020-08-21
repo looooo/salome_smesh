@@ -53,7 +53,7 @@ public:
 
   // Set maximum element area 
   void SetMaxElementArea( CORBA::Double theArea )
-    throw ( SALOME::SALOME_Exception );
+    ;
   // Get maximum element area 
   CORBA::Double GetMaxElementArea();
 

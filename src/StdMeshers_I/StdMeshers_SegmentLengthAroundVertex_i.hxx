@@ -52,7 +52,7 @@ public:
 
   // Set length
   void SetLength( CORBA::Double theLength )
-    throw ( SALOME::SALOME_Exception );
+    ;
 
   // Get length
   CORBA::Double GetLength();

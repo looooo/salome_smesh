@@ -44,7 +44,7 @@
 #include <vtkUnstructuredGrid.h>
 #include <vtkCellData.h>
 
-vtkStandardNewMacro(SMESH_CellLabelActor);
+vtkStandardNewMacro(SMESH_CellLabelActor)
 
 /*!
   Constructor.

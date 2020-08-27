@@ -2106,7 +2106,7 @@ void SMESH_subMesh::removeSubMeshElementsAndNodes()
 //           meshed at once along with _subShape
 //=======================================================================
 
-TopoDS_Shape SMESH_subMesh::getCollection(SMESH_Gen * theGen,
+TopoDS_Shape SMESH_subMesh::getCollection(SMESH_Gen * /*theGen*/,
                                           SMESH_Algo* theAlgo,
                                           bool &      theSubComputed,
                                           bool &      theSubFailed,

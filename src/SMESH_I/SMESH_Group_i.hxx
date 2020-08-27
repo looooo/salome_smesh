@@ -206,7 +206,7 @@ class SMESH_I_EXPORT SMESH_GroupOnFilter_i:
   virtual bool IsMeshInfoCorrect();
 
   // method of SMESH::NotifyerAndWaiter to update self when myFilter changes
-  virtual void OnBaseObjModified(NotifyerAndWaiter* filter, bool);
+  virtual void OnBaseObjModified(NotifyerAndWaiter* /*filter*/, bool);
 
  private:
   SMESH::Filter_var myFilter;

@@ -55,7 +55,7 @@ namespace SMESH
    */
   struct NotifyerAndWaiter
   {
-    virtual void OnBaseObjModified(NotifyerAndWaiter* obj, bool removed) {};
+    virtual void OnBaseObjModified(NotifyerAndWaiter* /*obj*/, bool /*removed*/) {};
     // specific reaction on modification of a base object
 
     void Modified( bool removed=false, NotifyerAndWaiter* who = 0);

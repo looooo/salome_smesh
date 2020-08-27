@@ -283,8 +283,8 @@ StdMeshers_CompositeHexa_3D::StdMeshers_CompositeHexa_3D(int hypId, SMESH_Gen* g
  */
 //================================================================================
 
-bool StdMeshers_CompositeHexa_3D::CheckHypothesis(SMESH_Mesh&         aMesh,
-                                                  const TopoDS_Shape& aShape,
+bool StdMeshers_CompositeHexa_3D::CheckHypothesis(SMESH_Mesh&         /*aMesh*/,
+                                                  const TopoDS_Shape& /*aShape*/,
                                                   Hypothesis_Status&  aStatus)
 {
   aStatus = HYP_OK;

@@ -509,8 +509,8 @@ StdMeshers_ViscousLayers2D::StdMeshers_ViscousLayers2D(int hypId, SMESH_Gen* gen
   _param_algo_dim = -2; // auxiliary hyp used by 2D algos
 }
 // --------------------------------------------------------------------------------
-bool StdMeshers_ViscousLayers2D::SetParametersByMesh(const SMESH_Mesh*   theMesh,
-                                                     const TopoDS_Shape& theShape)
+bool StdMeshers_ViscousLayers2D::SetParametersByMesh(const SMESH_Mesh*   /*theMesh*/,
+                                                     const TopoDS_Shape& /*theShape*/)
 {
   // TODO ???
   return false;

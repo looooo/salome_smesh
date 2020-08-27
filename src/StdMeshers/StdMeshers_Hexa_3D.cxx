@@ -869,7 +869,7 @@ bool StdMeshers_Hexa_3D::IsApplicable( const TopoDS_Shape & aShape, bool toCheck
     if ( !toCheckAll && ok ) return true;
   }
   return toCheckAll;
-};
+}
 
 //=======================================================================
 //function : ComputePentahedralMesh

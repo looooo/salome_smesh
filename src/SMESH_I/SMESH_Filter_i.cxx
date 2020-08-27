@@ -718,7 +718,7 @@ BadOrientedVolume_i::BadOrientedVolume_i()
 {
   Controls::PredicatePtr control( new Controls::BadOrientedVolume() );
   myFunctorPtr = myPredicatePtr = control;
-};
+}
 
 FunctorType BadOrientedVolume_i::GetFunctorType()
 {
@@ -733,7 +733,7 @@ BareBorderVolume_i::BareBorderVolume_i()
 {
   Controls::PredicatePtr control( new Controls::BareBorderVolume() );
   myFunctorPtr = myPredicatePtr = control;
-};
+}
 
 FunctorType BareBorderVolume_i::GetFunctorType()
 {
@@ -748,7 +748,7 @@ BareBorderFace_i::BareBorderFace_i()
 {
   Controls::PredicatePtr control( new Controls::BareBorderFace() );
   myFunctorPtr = myPredicatePtr = control;
-};
+}
 
 FunctorType BareBorderFace_i::GetFunctorType()
 {
@@ -763,7 +763,7 @@ OverConstrainedVolume_i::OverConstrainedVolume_i()
 {
   Controls::PredicatePtr control( new Controls::OverConstrainedVolume() );
   myFunctorPtr = myPredicatePtr = control;
-};
+}
 
 FunctorType OverConstrainedVolume_i::GetFunctorType()
 {
@@ -778,7 +778,7 @@ OverConstrainedFace_i::OverConstrainedFace_i()
 {
   Controls::PredicatePtr control( new Controls::OverConstrainedFace() );
   myFunctorPtr = myPredicatePtr = control;
-};
+}
 
 FunctorType OverConstrainedFace_i::GetFunctorType()
 {

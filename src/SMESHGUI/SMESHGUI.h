@@ -202,7 +202,7 @@ protected:
   static void                     ProcessEvents( vtkObject* theObject, 
                                                  unsigned long theEvent,
                                                  void* theClientData, 
-                                                 void* theCallData );
+                                                 void* /*theCallData*/ );
 
 private:
   void                            OnEditDelete();

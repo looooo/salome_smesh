@@ -91,10 +91,10 @@ public:
                const ::MeshDimension aDim=::MeshDim_3D,
                TSetOfInt*            aShapesId=0);
 
-  void PrepareCompute(::SMESH_Mesh &        aMesh,
-                      const TopoDS_Shape &  aShape);
-  void CancelCompute(::SMESH_Mesh &        aMesh,
-                     const TopoDS_Shape &  aShape);
+  void PrepareCompute(::SMESH_Mesh &        /*aMesh*/,
+                      const TopoDS_Shape &  /*aShape*/);
+  void CancelCompute(::SMESH_Mesh &        /*aMesh*/,
+                     const TopoDS_Shape &  /*aShape*/);
 
   const SMESH_subMesh* GetCurrentSubMesh() const;
 

@@ -1071,7 +1071,7 @@ SMESH_GroupOnFilter_i::~SMESH_GroupOnFilter_i()
  */
 //================================================================================
 
-void SMESH_GroupOnFilter_i::OnBaseObjModified(NotifyerAndWaiter* filter, bool /*removed*/)
+void SMESH_GroupOnFilter_i::OnBaseObjModified(NotifyerAndWaiter* /*filter*/, bool /*removed*/)
 {
   if ( myPreMeshInfo )
     myPreMeshInfo->FullLoadFromFile();

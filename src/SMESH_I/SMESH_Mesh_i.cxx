@@ -1692,25 +1692,25 @@ SMESH_Mesh_i::CutListOfGroups(const SMESH::ListOfGroups& theMainGroups,
 
 namespace // functions making checks according to SMESH::NB_COMMON_NODES_ENUM
 {
-  bool isAllNodesCommon(int nbChecked, int nbCommon, int nbNodes, int nbCorners,
+  bool isAllNodesCommon(int nbChecked, int nbCommon, int nbNodes, int /*nbCorners*/,
                         bool & toStopChecking )
   {
     toStopChecking = ( nbCommon < nbChecked );
     return nbCommon == nbNodes;
   }
-  bool isMainNodesCommon(int nbChecked, int nbCommon, int nbNodes, int nbCorners,
+  bool isMainNodesCommon(int nbChecked, int nbCommon, int /*nbNodes*/, int nbCorners,
                          bool & toStopChecking )
   {
     toStopChecking = ( nbCommon < nbChecked || nbChecked >= nbCorners );
     return nbCommon == nbCorners;
   }
-  bool isAtLeastOneNodeCommon(int nbChecked, int nbCommon, int nbNodes, int nbCorners,
-                              bool & toStopChecking )
+  bool isAtLeastOneNodeCommon(int /*nbChecked*/, int nbCommon, int /*nbNodes*/, int /*nbCorners*/,
+                              bool & /*toStopChecking*/ )
   {
     return nbCommon > 0;
   }
-  bool isMajorityOfNodesCommon(int nbChecked, int nbCommon, int nbNodes, int nbCorners,
-                               bool & toStopChecking )
+  bool isMajorityOfNodesCommon(int /*nbChecked*/, int nbCommon, int nbNodes, int /*nbCorners*/,
+                               bool & /*toStopChecking*/ )
   {
     return nbCommon >= (nbNodes+1) / 2;
   }

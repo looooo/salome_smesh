@@ -77,7 +77,7 @@ static int MYDEBUG = 0;
 using namespace std;
 
 
-vtkStandardNewMacro(SMESH_DeviceActor);
+vtkStandardNewMacro(SMESH_DeviceActor)
 
 
 SMESH_DeviceActor

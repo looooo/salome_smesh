@@ -415,8 +415,8 @@ bool SMESH_Gen::Compute(SMESH_Mesh &          aMesh,
  * Prepare Compute a mesh
  */
 //=============================================================================
-void SMESH_Gen::PrepareCompute(SMESH_Mesh &          aMesh,
-                               const TopoDS_Shape &  aShape)
+void SMESH_Gen::PrepareCompute(SMESH_Mesh &          /*aMesh*/,
+                               const TopoDS_Shape &  /*aShape*/)
 {
   _compute_canceled = false;
   resetCurrentSubMesh();
@@ -427,8 +427,8 @@ void SMESH_Gen::PrepareCompute(SMESH_Mesh &          aMesh,
  * Cancel Compute a mesh
  */
 //=============================================================================
-void SMESH_Gen::CancelCompute(SMESH_Mesh &          aMesh,
-                              const TopoDS_Shape &  aShape)
+void SMESH_Gen::CancelCompute(SMESH_Mesh &          /*aMesh*/,
+                              const TopoDS_Shape &  /*aShape*/)
 {
   _compute_canceled = true;
   if ( const SMESH_subMesh* sm = GetCurrentSubMesh() )

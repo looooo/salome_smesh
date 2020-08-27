@@ -68,7 +68,7 @@ public:
                   std::vector< const SMDS_MeshNode*>& mefistoToDS,
                   double scalex, double               scaley);
 
-  void ComputeScaleOnFace(SMESH_Mesh& aMesh,
+  void ComputeScaleOnFace(SMESH_Mesh& /*aMesh*/,
                           const TopoDS_Face& aFace,
                           double& scalex,
                           double& scaley);

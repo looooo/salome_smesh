@@ -450,7 +450,7 @@ namespace {
   //================================================================================
 
   int countNbSides( const Prism_3D::TPrismTopo & thePrism,
-                    vector<int> &                nbUnitePerEdge,
+                    vector<int> &                /*nbUnitePerEdge*/,
                     vector< double > &           edgeLength)
   {
     int nbEdges = thePrism.myNbEdgesInWires.front();  // nb outer edges
@@ -598,8 +598,8 @@ StdMeshers_Prism_3D::~StdMeshers_Prism_3D()
 //purpose  :
 //=======================================================================
 
-bool StdMeshers_Prism_3D::CheckHypothesis(SMESH_Mesh&                          aMesh,
-                                          const TopoDS_Shape&                  aShape,
+bool StdMeshers_Prism_3D::CheckHypothesis(SMESH_Mesh&                          /*aMesh*/,
+                                          const TopoDS_Shape&                  /*aShape*/,
                                           SMESH_Hypothesis::Hypothesis_Status& aStatus)
 {
   // no hypothesis

@@ -222,6 +222,6 @@ SMESHGUI_EXPORT
 
   SMESHGUI_EXPORT
   void UpdateActorsAfterUpdateStudy();
-};
+}
 
 #endif // SMESHGUI_VTKUTILS_H

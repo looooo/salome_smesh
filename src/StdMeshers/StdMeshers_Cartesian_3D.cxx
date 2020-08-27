@@ -191,10 +191,10 @@ namespace
     bool    _hasInternalFaces;
   public:
     virtual ~Solid() {}
-    virtual bool Contains( TGeomID subID ) const { return true; }
-    virtual bool ContainsAny( const vector< TGeomID>& subIDs ) const { return true; }
+    virtual bool Contains( TGeomID /*subID*/ ) const { return true; }
+    virtual bool ContainsAny( const vector< TGeomID>& /*subIDs*/ ) const { return true; }
     virtual TopAbs_Orientation Orientation( const TopoDS_Shape& s ) const { return s.Orientation(); }
-    virtual bool IsOutsideOriented( TGeomID faceID ) const { return true; }
+    virtual bool IsOutsideOriented( TGeomID /*faceID*/ ) const { return true; }
     void SetID( TGeomID id ) { _id = id; }
     TGeomID ID() const { return _id; }
     void SetHasInternalFaces( bool has ) { _hasInternalFaces = has; }
@@ -5830,9 +5830,9 @@ bool StdMeshers_Cartesian_3D::Compute(SMESH_Mesh &         theMesh,
  */
 //=============================================================================
 
-bool StdMeshers_Cartesian_3D::Evaluate(SMESH_Mesh &         theMesh,
-                                       const TopoDS_Shape & theShape,
-                                       MapShapeNbElems&     theResMap)
+bool StdMeshers_Cartesian_3D::Evaluate(SMESH_Mesh &         /*theMesh*/,
+                                       const TopoDS_Shape & /*theShape*/,
+                                       MapShapeNbElems&     /*theResMap*/)
 {
   // TODO
 //   std::vector<int> aResVec(SMDSEntity_Last);
@@ -5886,10 +5886,10 @@ namespace
     // --------------------------------------------------------------------------------
     // unsetting _alwaysComputed flag if "Cartesian_3D" was removed
     //
-    virtual void ProcessEvent(const int          event,
+    virtual void ProcessEvent(const int          /*event*/,
                               const int          eventType,
                               SMESH_subMesh*     subMeshOfSolid,
-                              SMESH_subMeshEventListenerData* data,
+                              SMESH_subMeshEventListenerData* /*data*/,
                               const SMESH_Hypothesis*         hyp = 0)
     {
       if ( eventType == SMESH_subMesh::COMPUTE_EVENT )

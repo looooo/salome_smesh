@@ -1230,7 +1230,7 @@ void _pyGen::Flush()
  */
 //================================================================================
 
-void _pyGen::PlaceSubmeshAfterItsCreation( Handle(_pyCommand) theCmdUsingSubmesh ) const
+void _pyGen::PlaceSubmeshAfterItsCreation( Handle(_pyCommand) /*theCmdUsingSubmesh*/ ) const
 {
   // map< _pyID, Handle(_pyObject) >::const_iterator id_obj = myObjects.begin();
   // for ( ; id_obj != myObjects.end(); ++id_obj )
@@ -4482,7 +4482,7 @@ _pySubMesh::_pySubMesh(const Handle(_pyCommand)& theCreationCmd, bool toKeepAgrC
  */
 //================================================================================
 
-bool _pySubMesh::CanBeArgOfMethod(const _AString& theMethodName)
+bool _pySubMesh::CanBeArgOfMethod(const _AString& /*theMethodName*/)
 {
   return false;
   // names of all methods where a sub-mesh can be used as argument

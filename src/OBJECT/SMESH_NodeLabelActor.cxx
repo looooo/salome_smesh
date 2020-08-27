@@ -39,7 +39,7 @@
 #include <vtkRenderer.h>
 #include <vtkUnstructuredGrid.h>
 
-vtkStandardNewMacro(SMESH_NodeLabelActor);
+vtkStandardNewMacro(SMESH_NodeLabelActor)
 
 /*!
   Constructor.

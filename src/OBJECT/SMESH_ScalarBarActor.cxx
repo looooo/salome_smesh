@@ -41,7 +41,7 @@
 
 #define SHRINK_COEF 0.08;
 
-vtkStandardNewMacro(SMESH_ScalarBarActor);
+vtkStandardNewMacro(SMESH_ScalarBarActor)
 
 vtkCxxSetObjectMacro(SMESH_ScalarBarActor,LookupTable,vtkScalarsToColors);
 vtkCxxSetObjectMacro(SMESH_ScalarBarActor,LabelTextProperty,vtkTextProperty);

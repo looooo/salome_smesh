@@ -482,8 +482,8 @@ public:
   StdMeshers_Prism_3D(int hypId, SMESH_Gen* gen);
   virtual ~StdMeshers_Prism_3D();
 
-  virtual bool CheckHypothesis(SMESH_Mesh&                          aMesh,
-                               const TopoDS_Shape&                  aShape,
+  virtual bool CheckHypothesis(SMESH_Mesh&                          /*aMesh*/,
+                               const TopoDS_Shape&                  /*aShape*/,
                                SMESH_Hypothesis::Hypothesis_Status& aStatus);
 
   virtual bool Compute(SMESH_Mesh& aMesh, const TopoDS_Shape& aShape);

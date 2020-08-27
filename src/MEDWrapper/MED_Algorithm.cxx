@@ -178,7 +178,7 @@ namespace MED
 
   //---------------------------------------------------------------
   TEntity2FamilySet
-  GetEntity2FamilySet(const PWrapper& theWrapper,
+  GetEntity2FamilySet(const PWrapper& /*theWrapper*/,
                       const TEntity2TGeom2ElemInfo& theEntity2TGeom2ElemInfo,
                       const TFamilyInfoSet& theFamilyInfoSet)
   {

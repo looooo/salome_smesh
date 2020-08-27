@@ -5652,10 +5652,10 @@ makeNodesByNormal2D( SMESHDS_Mesh*                     mesh,
 //=======================================================================
 
 int SMESH_MeshEditor::ExtrusParam::
-makeNodesByNormal1D( SMESHDS_Mesh*                     mesh,
-                     const SMDS_MeshNode*              srcNode,
-                     std::list<const SMDS_MeshNode*> & newNodes,
-                     const bool                        makeMediumNodes)
+makeNodesByNormal1D( SMESHDS_Mesh*                     /*mesh*/,
+                     const SMDS_MeshNode*              /*srcNode*/,
+                     std::list<const SMDS_MeshNode*> & /*newNodes*/,
+                     const bool                        /*makeMediumNodes*/)
 {
   throw SALOME_Exception("Extrusion 1D by Normal not implemented");
   return 0;
@@ -9202,7 +9202,7 @@ void SMESH_MeshEditor::ConvertToQuadratic(const bool        theForce3d,
 
 int SMESH_MeshEditor::removeQuadElem(SMESHDS_SubMesh *    theSm,
                                      SMDS_ElemIteratorPtr theItr,
-                                     const int            theShapeID)
+                                     const int            /*theShapeID*/)
 {
   int nbElem = 0;
   SMESHDS_Mesh* meshDS = GetMeshDS();

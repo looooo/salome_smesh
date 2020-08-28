@@ -293,7 +293,7 @@ void StdMeshers_ViscousLayers2D_i::UpdateAsMeshesRestored()
 //================================================================================
 
 bool
-StdMeshers_ViscousLayers2D_i::getObjectsDependOn( std::vector< std::string > & entryArray,
+StdMeshers_ViscousLayers2D_i::getObjectsDependOn( std::vector< std::string > & /*entryArray*/,
                                                   std::vector< int >         & subIDArray ) const
 {
   const ::StdMeshers_ViscousLayers2D* impl =
@@ -311,7 +311,7 @@ StdMeshers_ViscousLayers2D_i::getObjectsDependOn( std::vector< std::string > & e
 //================================================================================
 
 bool
-StdMeshers_ViscousLayers2D_i::setObjectsDependOn( std::vector< std::string > & entryArray,
+StdMeshers_ViscousLayers2D_i::setObjectsDependOn( std::vector< std::string > & /*entryArray*/,
                                                   std::vector< int >         & subIDArray )
 {
   std::vector< int > newIDs;

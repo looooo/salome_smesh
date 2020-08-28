@@ -150,7 +150,7 @@ namespace VISCOUS_2D
     // Treat events
     void ProcessEvent(const int          event,
                       const int          eventType,
-                      SMESH_subMesh*     subMesh,
+                      SMESH_subMesh*     /*subMesh*/,
                       EventListenerData* data,
                       const SMESH_Hypothesis*  /*hyp*/)
     {

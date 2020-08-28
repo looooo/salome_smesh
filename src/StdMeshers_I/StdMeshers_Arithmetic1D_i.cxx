@@ -163,7 +163,7 @@ CORBA::Boolean StdMeshers_Arithmetic1D_i::IsDimSupported( SMESH::Dimension type 
 //================================================================================
 
 std::string StdMeshers_Arithmetic1D_i::getMethodOfParameter(const int paramIndex,
-                                                            int       nbVars) const
+                                                            int       /*nbVars*/) const
 {
   return paramIndex == 0 ? "SetStartLength" : "SetEndLength";
 }

@@ -137,7 +137,7 @@ CORBA::Boolean StdMeshers_MaxElementArea_i::IsDimSupported( SMESH::Dimension typ
  */
 //================================================================================
 
-std::string StdMeshers_MaxElementArea_i::getMethodOfParameter(const int paramIndex,
+std::string StdMeshers_MaxElementArea_i::getMethodOfParameter(const int /*paramIndex*/,
                                                               int       /*nbVars*/) const
 {
   return "SetMaxElementArea";

@@ -79,7 +79,7 @@ public:
   ::StdMeshers_RadialPrism_3D* GetImpl();
 
   // Return true if the algorithm is applicable to a shape
-  static bool IsApplicable(const TopoDS_Shape &S, bool toCheckAll, int dim);
+  static bool IsApplicable(const TopoDS_Shape &S, bool toCheckAll, int /*dim*/);
 };
 
 

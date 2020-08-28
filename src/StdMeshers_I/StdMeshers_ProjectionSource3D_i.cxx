@@ -320,7 +320,7 @@ void StdMeshers_ProjectionSource3D_i::LoadFrom( const char* theStream )
 
 bool
 StdMeshers_ProjectionSource3D_i::getObjectsDependOn( std::vector< std::string > & entryArray,
-                                                     std::vector< int >         & subIDArray ) const
+                                                     std::vector< int >         & /*subIDArray*/ ) const
 {
   for ( int i = 0; i < NB_SHAPES; ++i )
     entryArray.push_back( myShapeEntries[ i ]);
@@ -336,7 +336,7 @@ StdMeshers_ProjectionSource3D_i::getObjectsDependOn( std::vector< std::string > 
 
 bool
 StdMeshers_ProjectionSource3D_i::setObjectsDependOn( std::vector< std::string > & entryArray,
-                                                     std::vector< int >         & subIDArray )
+                                                     std::vector< int >         & /*subIDArray*/ )
 {
   TopoDS_Shape shapes[ NB_SHAPES ];
   for ( int i = 0; i < NB_SHAPES; ++i )

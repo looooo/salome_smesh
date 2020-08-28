@@ -82,7 +82,7 @@ public:
                                    std::vector< int >         & subIDArray );
 
  protected:
-  virtual std::string getMethodOfParameter(const int paramIndex, int nbVars) const;
+  virtual std::string getMethodOfParameter(const int paramIndex, int /*nbVars*/) const;
 };
 
 #endif

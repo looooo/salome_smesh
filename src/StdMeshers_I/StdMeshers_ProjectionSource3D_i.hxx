@@ -119,11 +119,11 @@ public:
 
   // Return geometry this hypothesis depends on. Return false if there is no geometry parameter
   virtual bool getObjectsDependOn( std::vector< std::string > & entryArray,
-                                   std::vector< int >         & subIDArray ) const;
+                                   std::vector< int >         & /*subIDArray*/ ) const;
 
   // Set new geometry instead of that returned by getObjectsDependOn()
   virtual bool setObjectsDependOn( std::vector< std::string > & entryArray,
-                                   std::vector< int >         & subIDArray );
+                                   std::vector< int >         & /*subIDArray*/ );
 
 private:
   // keep entries because the same shape can be published several times with

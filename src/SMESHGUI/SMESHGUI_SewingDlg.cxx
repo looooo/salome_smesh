@@ -1798,7 +1798,7 @@ void SMESHGUI_SewingDlg::ActivateThisDialog()
 // function : enterEvent()
 // purpose  :
 //=================================================================================
-void SMESHGUI_SewingDlg::enterEvent (QEvent* e)
+void SMESHGUI_SewingDlg::enterEvent (QEvent* /*e*/)
 {
   if (!ConstructorsBox->isEnabled()) {
     SVTK_ViewWindow* aViewWindow = SMESH::GetViewWindow( mySMESHGUI );

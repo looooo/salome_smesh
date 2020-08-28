@@ -330,7 +330,7 @@ std::string StdMeshers_ViscousLayers_i::getMethodOfParameter(const int paramInde
 //================================================================================
 
 bool
-StdMeshers_ViscousLayers_i::getObjectsDependOn( std::vector< std::string > & entryArray,
+StdMeshers_ViscousLayers_i::getObjectsDependOn( std::vector< std::string > & /*entryArray*/,
                                                 std::vector< int >         & subIDArray ) const
 {
   const ::StdMeshers_ViscousLayers* impl =
@@ -348,7 +348,7 @@ StdMeshers_ViscousLayers_i::getObjectsDependOn( std::vector< std::string > & ent
 //================================================================================
 
 bool
-StdMeshers_ViscousLayers_i::setObjectsDependOn( std::vector< std::string > & entryArray,
+StdMeshers_ViscousLayers_i::setObjectsDependOn( std::vector< std::string > & /*entryArray*/,
                                                 std::vector< int >         & subIDArray )
 {
   std::vector< int > newIDs;

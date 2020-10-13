@@ -76,7 +76,6 @@ StdMeshers_NumberOfSegments_i::~StdMeshers_NumberOfSegments_i()
 SMESH::double_array* StdMeshers_NumberOfSegments_i::BuildDistributionExpr( const char* func, 
                                                                            CORBA::Long nbSeg, 
                                                                            CORBA::Long conv )
-  
 {
   ASSERT( myBaseImpl );
   try
@@ -98,7 +97,6 @@ SMESH::double_array*
 StdMeshers_NumberOfSegments_i::BuildDistributionTab( const SMESH::double_array& func,
                                                      CORBA::Long                nbSeg,
                                                      CORBA::Long                conv )
-  
 {
   ASSERT( myBaseImpl );
 
@@ -130,7 +128,6 @@ StdMeshers_NumberOfSegments_i::BuildDistributionTab( const SMESH::double_array& 
 //=============================================================================
 
 void StdMeshers_NumberOfSegments_i::SetNumberOfSegments( CORBA::Long theSegmentsNumber )
-     
 {
   ASSERT( myBaseImpl );
   try {
@@ -165,7 +162,6 @@ CORBA::Long StdMeshers_NumberOfSegments_i::GetNumberOfSegments()
 //=============================================================================
 
 void StdMeshers_NumberOfSegments_i::SetDistrType(CORBA::Long typ)
-  
 {
   ASSERT( myBaseImpl );
   try {
@@ -203,7 +199,6 @@ CORBA::Long StdMeshers_NumberOfSegments_i::GetDistrType()
 //=============================================================================
 
 void StdMeshers_NumberOfSegments_i::SetScaleFactor( CORBA::Double theScaleFactor )
-     
 {
   ASSERT( myBaseImpl );
   try {
@@ -226,7 +221,6 @@ void StdMeshers_NumberOfSegments_i::SetScaleFactor( CORBA::Double theScaleFactor
 //=============================================================================
 
 CORBA::Double StdMeshers_NumberOfSegments_i::GetScaleFactor()
-  
 {
   ASSERT( myBaseImpl );
   double scale;
@@ -246,7 +240,6 @@ CORBA::Double StdMeshers_NumberOfSegments_i::GetScaleFactor()
 //=============================================================================
 
 void StdMeshers_NumberOfSegments_i::SetTableFunction(const SMESH::double_array& table)
-  
 {
   ASSERT( myBaseImpl );
   std::vector<double> tbl( table.length() );
@@ -269,7 +262,6 @@ void StdMeshers_NumberOfSegments_i::SetTableFunction(const SMESH::double_array& 
 //=============================================================================
 
 SMESH::double_array* StdMeshers_NumberOfSegments_i::GetTableFunction()
-  
 {
   ASSERT( myBaseImpl );
   const std::vector<double>* tbl;
@@ -292,7 +284,6 @@ SMESH::double_array* StdMeshers_NumberOfSegments_i::GetTableFunction()
 //=============================================================================
 
 void StdMeshers_NumberOfSegments_i::SetExpressionFunction(const char* expr)
-  
 {
   ASSERT( myBaseImpl );
   try {
@@ -312,7 +303,6 @@ void StdMeshers_NumberOfSegments_i::SetExpressionFunction(const char* expr)
 //=============================================================================
 
 char* StdMeshers_NumberOfSegments_i::GetExpressionFunction()
-  
 {
   ASSERT( myBaseImpl );
   const char* expr;
@@ -332,7 +322,6 @@ char* StdMeshers_NumberOfSegments_i::GetExpressionFunction()
 //=============================================================================
 
 void StdMeshers_NumberOfSegments_i::SetConversionMode(CORBA::Long conv )
-  
 {
   ASSERT( myBaseImpl );
   try {
@@ -352,7 +341,6 @@ void StdMeshers_NumberOfSegments_i::SetConversionMode(CORBA::Long conv )
 //=============================================================================
 
 CORBA::Long StdMeshers_NumberOfSegments_i::ConversionMode()
-  
 {
   ASSERT( myBaseImpl );
   int conv;

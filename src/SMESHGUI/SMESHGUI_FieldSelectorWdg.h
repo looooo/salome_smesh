@@ -50,7 +50,7 @@ class SMESHGUI_EXPORT SMESHGUI_FieldSelectorWdg : public QGroupBox
 
  private slots:
 
-  void onItemCheck(QTreeWidgetItem * item, int /*column*/);
+  void onItemCheck(QTreeWidgetItem * item, int column);
 
  private:
 

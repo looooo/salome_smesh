@@ -74,7 +74,6 @@ StdMeshers_ProjectionSource3D_i::~StdMeshers_ProjectionSource3D_i()
 //=============================================================================
 
 void StdMeshers_ProjectionSource3D_i::SetSource3DShape(GEOM::GEOM_Object_ptr shape)
-  
 {
   ASSERT( myBaseImpl );
   try {
@@ -97,7 +96,6 @@ void StdMeshers_ProjectionSource3D_i::SetSource3DShape(GEOM::GEOM_Object_ptr sha
 //=============================================================================
 
 void StdMeshers_ProjectionSource3D_i::SetSourceMesh(SMESH::SMESH_Mesh_ptr theMesh)
-  
 {
   ASSERT( myBaseImpl );
 
@@ -148,7 +146,6 @@ void StdMeshers_ProjectionSource3D_i::SetVertexAssociation(GEOM::GEOM_Object_ptr
                                                            GEOM::GEOM_Object_ptr sourceVertex2,
                                                            GEOM::GEOM_Object_ptr targetVertex1,
                                                            GEOM::GEOM_Object_ptr targetVertex2)
-  
 {
   ASSERT( myBaseImpl );
   try {

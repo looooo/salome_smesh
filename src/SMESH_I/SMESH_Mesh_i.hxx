@@ -65,131 +65,100 @@ public:
 
   // --- CORBA
 
-  void SetShape( GEOM::GEOM_Object_ptr theShapeObject )
-    ;
+  void SetShape( GEOM::GEOM_Object_ptr theShapeObject );
 
-  CORBA::Boolean HasShapeToMesh()
-    ;
+  CORBA::Boolean HasShapeToMesh();
 
-  GEOM::GEOM_Object_ptr GetShapeToMesh()
-    ;
+  GEOM::GEOM_Object_ptr GetShapeToMesh();
 
-  virtual void ReplaceShape(GEOM::GEOM_Object_ptr theNewGeom)
-    ;
+  virtual void ReplaceShape(GEOM::GEOM_Object_ptr theNewGeom);
 
-  CORBA::Boolean IsLoaded()
-    ;
+  CORBA::Boolean IsLoaded();
 
-  void Load()
-    ;
+  void Load();
 
-  void Clear()
-    ;
+  void Clear();
 
-  void ClearSubMesh(CORBA::Long ShapeID)
-    ;
+  void ClearSubMesh(CORBA::Long ShapeID);
 
   SMESH::Hypothesis_Status AddHypothesis(GEOM::GEOM_Object_ptr       aSubShape,
                                          SMESH::SMESH_Hypothesis_ptr anHyp,
-                                         CORBA::String_out           anErrorText)
-    ;
+                                         CORBA::String_out           anErrorText);
 
   SMESH::Hypothesis_Status RemoveHypothesis(GEOM::GEOM_Object_ptr       aSubShape,
-                                            SMESH::SMESH_Hypothesis_ptr anHyp)
-    ;
+                                            SMESH::SMESH_Hypothesis_ptr anHyp);
 
-  SMESH::ListOfHypothesis* GetHypothesisList(GEOM::GEOM_Object_ptr aSubShape)
-    ;
+  SMESH::ListOfHypothesis* GetHypothesisList(GEOM::GEOM_Object_ptr aSubShape);
 
-  SMESH::submesh_array* GetSubMeshes()
-    ;
+  SMESH::submesh_array* GetSubMeshes();
 
-  SMESH::SMESH_subMesh_ptr GetSubMesh(GEOM::GEOM_Object_ptr aSubShape, const char* theName)
-    ;
+  SMESH::SMESH_subMesh_ptr GetSubMesh(GEOM::GEOM_Object_ptr aSubShape, const char* theName);
 
-  void RemoveSubMesh( SMESH::SMESH_subMesh_ptr theSubMesh )
-    ;
+  void RemoveSubMesh( SMESH::SMESH_subMesh_ptr theSubMesh );
 
-  SMESH::SMESH_Group_ptr CreateGroup( SMESH::ElementType theElemType, const char* theName )
-    ;
+  SMESH::SMESH_Group_ptr CreateGroup( SMESH::ElementType theElemType, const char* theName );
 
   SMESH::SMESH_GroupOnGeom_ptr CreateGroupFromGEOM(SMESH::ElementType    theElemType,
                                                    const char*           theName,
-                                                   GEOM::GEOM_Object_ptr theGeomObj )
-    ;
+                                                   GEOM::GEOM_Object_ptr theGeomObj );
 
   SMESH::SMESH_GroupOnFilter_ptr CreateGroupFromFilter(SMESH::ElementType theElemType,
                                                        const char*        theName,
-                                                       SMESH::Filter_ptr  theFilter )
-    ;
+                                                       SMESH::Filter_ptr  theFilter );
 
-  void RemoveGroup( SMESH::SMESH_GroupBase_ptr theGroup )
-    ;
+  void RemoveGroup( SMESH::SMESH_GroupBase_ptr theGroup );
 
-  void RemoveGroupWithContents( SMESH::SMESH_GroupBase_ptr theGroup )
-    ;
+  void RemoveGroupWithContents( SMESH::SMESH_GroupBase_ptr theGroup );
 
-  SMESH::ListOfGroups* GetGroups()
-    ;
+  SMESH::ListOfGroups* GetGroups();
 
-  CORBA::Long NbGroups()
-    ;
+  CORBA::Long NbGroups();
 
   SMESH::SMESH_Group_ptr UnionGroups( SMESH::SMESH_GroupBase_ptr theGroup1,
                                       SMESH::SMESH_GroupBase_ptr theGroup2,
-                                      const char* theName )
-    ;
+                                      const char* theName );
 
   SMESH::SMESH_Group_ptr UnionListOfGroups( const SMESH::ListOfGroups& theGroups,
-                                            const char* theName)
-    ;
+                                            const char* theName);
 
   SMESH::SMESH_Group_ptr IntersectGroups( SMESH::SMESH_GroupBase_ptr theGroup1,
                                           SMESH::SMESH_GroupBase_ptr theGroup2,
-                                          const char* theName )
-    ;
+                                          const char* theName );
 
   SMESH::SMESH_Group_ptr IntersectListOfGroups( const SMESH::ListOfGroups&  theGroups,
-                                                const char* theName )
-    ;
+                                                const char* theName );
 
   SMESH::SMESH_Group_ptr CutGroups( SMESH::SMESH_GroupBase_ptr theGroup1,
                                     SMESH::SMESH_GroupBase_ptr theGroup2,
-                                    const char* theName )
-    ;
+                                    const char* theName );
 
   SMESH::SMESH_Group_ptr CutListOfGroups( const SMESH::ListOfGroups& theMainGroups,
                                           const SMESH::ListOfGroups& theToolGroups,
-                                          const char* theName )
-    ;
+                                          const char* theName );
 
   SMESH::SMESH_Group_ptr CreateDimGroup( const SMESH::ListOfIDSources& theGroups,
                                          SMESH::ElementType            theElemType,
                                          const char*                   theName,
                                          SMESH::NB_COMMON_NODES_ENUM   theNbCommonNodes,
-                                         CORBA::Boolean                theUnderlyingOnly )
-    ;
+                                         CORBA::Boolean                theUnderlyingOnly );
 
   SMESH::ListOfGroups* FaceGroupsSeparatedByEdges( CORBA::Double  theSharpAngle,
                                                    CORBA::Boolean theCreateEdges,
-                                                   CORBA::Boolean theUseExistingEdges )
-    ;
+                                                   CORBA::Boolean theUseExistingEdges );
 
-  SMESH::SMESH_Group_ptr ConvertToStandalone( SMESH::SMESH_GroupBase_ptr theGroupOn )
-    ;
+  SMESH::SMESH_Group_ptr ConvertToStandalone( SMESH::SMESH_GroupBase_ptr theGroupOn );
 
-  SMESH::log_array* GetLog(CORBA::Boolean clearAfterGet)
-    ;
+  SMESH::log_array* GetLog(CORBA::Boolean clearAfterGet);
 
-  SMESH::SMESH_MeshEditor_ptr GetMeshEditor() ;
+  SMESH::SMESH_MeshEditor_ptr GetMeshEditor();
 
-  SMESH::SMESH_MeshEditor_ptr GetMeshEditPreviewer() ;
+  SMESH::SMESH_MeshEditor_ptr GetMeshEditPreviewer();
 
-  CORBA::Boolean HasModificationsToDiscard() ;
+  CORBA::Boolean HasModificationsToDiscard();
 
-  void ClearLog() ;
+  void ClearLog();
 
-  CORBA::Long GetId() ;
+  CORBA::Long GetId();
 
   // --- C++ interface
 
@@ -198,35 +167,28 @@ public:
 
   SMESH_Gen_i* GetGen() { return _gen_i; }
 
-  int ImportUNVFile( const char* theFileName )
-    ;
+  int ImportUNVFile( const char* theFileName );
 
-  int ImportSTLFile( const char* theFileName )
-    ;
+  int ImportSTLFile( const char* theFileName );
 
   SMESH::ComputeError* ImportGMFFile( const char* theFileName,
-                                      bool        theMakeRequiredGroups)
-    ;
+                                      bool        theMakeRequiredGroups);
 
   /*!
    * consult DriverMED_R_SMESHDS_Mesh::ReadStatus for returned value
    */
-  SMESH::DriverMED_ReadStatus ImportMEDFile( const char* theFileName, const char* theMeshName )
-    ;
+  SMESH::DriverMED_ReadStatus ImportMEDFile( const char* theFileName, const char* theMeshName );
 
   SMESH::DriverMED_ReadStatus ImportCGNSFile( const char*  theFileName,
                                               const int    theMeshIndex,
-                                              std::string& theMeshName)
-    ;
+                                              std::string& theMeshName);
 
   /*!
    *  Auto color
    */
-  void SetAutoColor(CORBA::Boolean theAutoColor)
-    ;
+  void SetAutoColor(CORBA::Boolean theAutoColor);
 
-  CORBA::Boolean GetAutoColor()
-    ;
+  CORBA::Boolean GetAutoColor();
 
   /*! Check group names for duplications.
    *  Consider maximum group name length stored in MED file.
@@ -248,20 +210,20 @@ public:
                   CORBA::Boolean     auto_groups,
                   CORBA::Long        version,
                   CORBA::Boolean     overwrite,
-                  CORBA::Boolean     autoDimension = true) ;
+                  CORBA::Boolean     autoDimension = true);
 
-  void ExportSAUV( const char* file, CORBA::Boolean auto_groups ) ;
+  void ExportSAUV( const char* file, CORBA::Boolean auto_groups );
 
-  void ExportDAT( const char* file ) ;
-  void ExportUNV( const char* file ) ;
-  void ExportSTL( const char* file, bool isascii ) ;
+  void ExportDAT( const char* file );
+  void ExportUNV( const char* file );
+  void ExportSTL( const char* file, bool isascii );
   void ExportCGNS(SMESH::SMESH_IDSource_ptr meshPart,
                   const char*               file,
                   CORBA::Boolean            overwrite,
-                  CORBA::Boolean            groupElemsByType) ;
+                  CORBA::Boolean            groupElemsByType);
   void ExportGMF(SMESH::SMESH_IDSource_ptr meshPart,
                  const char*               file,
-                 CORBA::Boolean            withRequiredGroups) ;
+                 CORBA::Boolean            withRequiredGroups);
 
   void ExportPartToMED(SMESH::SMESH_IDSource_ptr meshPart,
                        const char*               file,
@@ -271,151 +233,111 @@ public:
                        CORBA::Boolean            autoDim,
                        const GEOM::ListOfFields& fields,
                        const char*               geomAssocFields,
-                       CORBA::Double             ZTolerance) ;
+                       CORBA::Double             ZTolerance);
   void ExportPartToDAT(SMESH::SMESH_IDSource_ptr meshPart,
-                       const char*               file) ;
+                       const char*               file);
   void ExportPartToUNV(SMESH::SMESH_IDSource_ptr meshPart,
-                       const char*               file) ;
+                       const char*               file);
   void ExportPartToSTL(SMESH::SMESH_IDSource_ptr meshPart,
                        const char*               file,
-                       CORBA::Boolean            isascii) ;
+                       CORBA::Boolean            isascii);
 
   CORBA::Double GetComputeProgress();
 
-  CORBA::Long NbNodes()
-    ;
+  CORBA::Long NbNodes();
 
-  CORBA::Long NbElements()
-    ;
+  CORBA::Long NbElements();
 
-  CORBA::Long Nb0DElements()
-    ;
+  CORBA::Long Nb0DElements();
 
-  CORBA::Long NbBalls()
-    ;
+  CORBA::Long NbBalls();
 
-  CORBA::Long NbEdges()
-    ;
+  CORBA::Long NbEdges();
 
-  CORBA::Long NbEdgesOfOrder(SMESH::ElementOrder order)
-    ;
+  CORBA::Long NbEdgesOfOrder(SMESH::ElementOrder order);
 
-  CORBA::Long NbFaces()
-    ;
+  CORBA::Long NbFaces();
 
-  CORBA::Long NbFacesOfOrder(SMESH::ElementOrder order)
-    ;
+  CORBA::Long NbFacesOfOrder(SMESH::ElementOrder order);
 
-  CORBA::Long NbTriangles()
-    ;
+  CORBA::Long NbTriangles();
 
-  CORBA::Long NbTrianglesOfOrder(SMESH::ElementOrder order)
-    ;
+  CORBA::Long NbTrianglesOfOrder(SMESH::ElementOrder order);
 
-  CORBA::Long NbBiQuadTriangles()
-    ;
+  CORBA::Long NbBiQuadTriangles();
 
-  CORBA::Long NbQuadrangles()
-    ;
+  CORBA::Long NbQuadrangles();
 
-  CORBA::Long NbQuadranglesOfOrder(SMESH::ElementOrder order)
-    ;
+  CORBA::Long NbQuadranglesOfOrder(SMESH::ElementOrder order);
 
-  CORBA::Long NbBiQuadQuadrangles()
-    ;
+  CORBA::Long NbBiQuadQuadrangles();
 
-  CORBA::Long NbPolygons()
-    ;
+  CORBA::Long NbPolygons();
 
-  CORBA::Long NbPolygonsOfOrder(SMESH::ElementOrder order = SMESH::ORDER_ANY)
-    ;
+  CORBA::Long NbPolygonsOfOrder(SMESH::ElementOrder order = SMESH::ORDER_ANY);
 
-  CORBA::Long NbVolumes()
-    ;
+  CORBA::Long NbVolumes();
 
-  CORBA::Long NbVolumesOfOrder(SMESH::ElementOrder order)
-    ;
+  CORBA::Long NbVolumesOfOrder(SMESH::ElementOrder order);
 
-  CORBA::Long NbTetras()
-    ;
+  CORBA::Long NbTetras();
 
-  CORBA::Long NbTetrasOfOrder(SMESH::ElementOrder order)
-    ;
+  CORBA::Long NbTetrasOfOrder(SMESH::ElementOrder order);
 
-  CORBA::Long NbHexas()
-    ;
+  CORBA::Long NbHexas();
 
-  CORBA::Long NbHexasOfOrder(SMESH::ElementOrder order)
-    ;
+  CORBA::Long NbHexasOfOrder(SMESH::ElementOrder order);
 
-  CORBA::Long NbTriQuadraticHexas()
-    ;
+  CORBA::Long NbTriQuadraticHexas();
 
-  CORBA::Long NbPyramids()
-    ;
+  CORBA::Long NbPyramids();
 
-  CORBA::Long NbPyramidsOfOrder(SMESH::ElementOrder order)
-    ;
+  CORBA::Long NbPyramidsOfOrder(SMESH::ElementOrder order);
 
-  CORBA::Long NbPrisms()
-    ;
+  CORBA::Long NbPrisms();
 
-  CORBA::Long NbPrismsOfOrder(SMESH::ElementOrder order)
-    ;
+  CORBA::Long NbPrismsOfOrder(SMESH::ElementOrder order);
 
-  CORBA::Long NbHexagonalPrisms()
-    ;
+  CORBA::Long NbHexagonalPrisms();
 
-  CORBA::Long NbPolyhedrons()
-    ;
+  CORBA::Long NbPolyhedrons();
 
-  CORBA::Long NbSubMesh()
-    ;
+  CORBA::Long NbSubMesh();
 
-  SMESH::long_array* GetElementsId()
-    ;
+  SMESH::long_array* GetElementsId();
 
-  SMESH::long_array* GetElementsByType( SMESH::ElementType theElemType )
-    ;
+  SMESH::long_array* GetElementsByType( SMESH::ElementType theElemType );
 
-  SMESH::long_array* GetNodesId()
-    ;
+  SMESH::long_array* GetNodesId();
 
-  SMESH::ElementType GetElementType( CORBA::Long id, bool iselem )
-    ;
+  SMESH::ElementType GetElementType( CORBA::Long id, bool iselem );
 
-  SMESH::EntityType GetElementGeomType( CORBA::Long id )
-    ;
+  SMESH::EntityType GetElementGeomType( CORBA::Long id );
 
-  SMESH::GeometryType GetElementShape( CORBA::Long id )
-    ;
+  SMESH::GeometryType GetElementShape( CORBA::Long id );
 
   /*!
    * Returns ID of elements for given submesh
    */
-  SMESH::long_array* GetSubMeshElementsId(CORBA::Long ShapeID)
-    ;
+  SMESH::long_array* GetSubMeshElementsId(CORBA::Long ShapeID);
 
   /*!
    * Returns ID of nodes for given submesh
    * If param all==true - returns all nodes, else -
    * returns only nodes on shapes.
    */
-  SMESH::long_array* GetSubMeshNodesId(CORBA::Long ShapeID, CORBA::Boolean all)
-    ;
+  SMESH::long_array* GetSubMeshNodesId(CORBA::Long ShapeID, CORBA::Boolean all);
 
   /*!
    * Returns type of elements for given submesh
    */
-  SMESH::ElementType GetSubMeshElementType(CORBA::Long ShapeID)
-    ;
+  SMESH::ElementType GetSubMeshElementType(CORBA::Long ShapeID);
 
   char* Dump();
 
   // Create groups of elements preventing computation of a sub-shape
   SMESH::ListOfGroups* MakeGroupsOfBadInputElements( int         theSubShapeID,
-                                                     const char* theGroupName)
-    ;
+                                                     const char* theGroupName);
 
   // ===================================================
   // Internal methods not available through CORBA

@@ -60,8 +60,7 @@ public:
   /*!
    * Sets a source <shape> to take a mesh pattern from
    */
-  void SetSource3DShape(GEOM::GEOM_Object_ptr shape)
-    ;
+  void SetSource3DShape(GEOM::GEOM_Object_ptr shape);
 
   /*!
    * Returns the source shape
@@ -71,8 +70,7 @@ public:
   /*!
    * Sets source <mesh> to take a mesh pattern from
    */
-  void SetSourceMesh(SMESH::SMESH_Mesh_ptr mesh)
-    ;
+  void SetSourceMesh(SMESH::SMESH_Mesh_ptr mesh);
 
   /*!
    * Return source mesh
@@ -87,8 +85,7 @@ public:
   void SetVertexAssociation(GEOM::GEOM_Object_ptr sourceVertex1,
                             GEOM::GEOM_Object_ptr sourceVertex2,
                             GEOM::GEOM_Object_ptr targetVertex1,
-                            GEOM::GEOM_Object_ptr targetVertex2)
-    ;
+                            GEOM::GEOM_Object_ptr targetVertex2);
 
   /*!
    * Returns the <i>-th source vertex associated with the <i>-th target vertex.
@@ -119,11 +116,11 @@ public:
 
   // Return geometry this hypothesis depends on. Return false if there is no geometry parameter
   virtual bool getObjectsDependOn( std::vector< std::string > & entryArray,
-                                   std::vector< int >         & /*subIDArray*/ ) const;
+                                   std::vector< int >         & subIDArray ) const;
 
   // Set new geometry instead of that returned by getObjectsDependOn()
   virtual bool setObjectsDependOn( std::vector< std::string > & entryArray,
-                                   std::vector< int >         & /*subIDArray*/ );
+                                   std::vector< int >         & subIDArray );
 
 private:
   // keep entries because the same shape can be published several times with

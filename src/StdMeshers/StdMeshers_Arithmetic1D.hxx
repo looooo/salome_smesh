@@ -42,7 +42,7 @@ public:
   StdMeshers_Arithmetic1D(int hypId, SMESH_Gen* gen);
   virtual ~StdMeshers_Arithmetic1D();
 
-  void SetLength(double length, bool isStartLength) ;
+  void SetLength(double length, bool isStartLength);
 
   double GetLength(bool isStartLength) const;
 

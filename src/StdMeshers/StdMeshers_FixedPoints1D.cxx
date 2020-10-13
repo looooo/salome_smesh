@@ -61,7 +61,6 @@ StdMeshers_FixedPoints1D::~StdMeshers_FixedPoints1D()
 //=============================================================================
 
 void StdMeshers_FixedPoints1D::SetPoints(const std::vector<double>& listParams)
-  
 {
   _params = listParams;
   NotifySubMeshesHypothesisModification();
@@ -74,7 +73,6 @@ void StdMeshers_FixedPoints1D::SetPoints(const std::vector<double>& listParams)
 //=============================================================================
 
 void StdMeshers_FixedPoints1D::SetNbSegments(const std::vector<int>& listNbSeg) 
-  
 {
   _nbsegs = listNbSeg;
   NotifySubMeshesHypothesisModification();

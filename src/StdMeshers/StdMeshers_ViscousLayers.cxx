@@ -440,7 +440,7 @@ namespace VISCOUS_3D
     std::string DumpFlags() const; // debug
 
     void SetNewLength( double len, _EdgesOnShape& eos, SMESH_MesherHelper& helper );
-    bool SetNewLength2d( Handle(Geom_Surface)& /*surface*/,
+    bool SetNewLength2d( Handle(Geom_Surface)& surface,
                          const TopoDS_Face&    F,
                          _EdgesOnShape&        eos,
                          SMESH_MesherHelper&   helper );
@@ -451,7 +451,7 @@ namespace VISCOUS_3D
     void Block( _SolidData& data );
     void InvalidateStep( size_t curStep, const _EdgesOnShape& eos, bool restoreLength=false );
     void ChooseSmooFunction(const set< TGeomID >& concaveVertices,
-                            const TNode2Edge&     /*n2eMap*/);
+                            const TNode2Edge&     n2eMap);
     void SmoothPos( const vector< double >& segLen, const double tol );
     int  GetSmoothedPos( const double tol );
     int  Smooth(const int step, const bool isConcaveFace, bool findBest);
@@ -937,7 +937,7 @@ namespace VISCOUS_3D
                          bool                 shiftInside=false);
     bool getFaceNormalAtSingularity(const gp_XY&        uv,
                                     const TopoDS_Face&  face,
-                                    SMESH_MesherHelper& /*helper*/,
+                                    SMESH_MesherHelper& helper,
                                     gp_Dir&             normal );
     gp_XYZ getWeigthedNormal( const _LayerEdge*                edge );
     gp_XYZ getNormalByOffset( _LayerEdge*                      edge,
@@ -975,15 +975,15 @@ namespace VISCOUS_3D
                                                 SMESH_MesherHelper& helper );
     void limitMaxLenByCurvature( _SolidData& data, SMESH_MesherHelper& helper );
     void limitMaxLenByCurvature( _LayerEdge* e1, _LayerEdge* e2,
-                                 _EdgesOnShape& /*eos1*/, _EdgesOnShape& /*eos2*/,
-                                 const bool /*isSmoothable*/ );
-    bool updateNormals( _SolidData& data, SMESH_MesherHelper& helper, int stepNb, double /*stepSize*/ );
+                                 _EdgesOnShape& eos1, _EdgesOnShape& eos2,
+                                 const bool isSmoothable );
+    bool updateNormals( _SolidData& data, SMESH_MesherHelper& helper, int stepNb, double stepSize );
     bool updateNormalsOfConvexFaces( _SolidData&         data,
                                      SMESH_MesherHelper& helper,
                                      int                 stepNb );
     void updateNormalsOfC1Vertices( _SolidData& data );
     bool updateNormalsOfSmoothed( _SolidData&         data,
-                                  SMESH_MesherHelper& /*helper*/,
+                                  SMESH_MesherHelper& helper,
                                   const int           nbSteps,
                                   const double        stepSize );
     bool isNewNormalOk( _SolidData&   data,
@@ -993,7 +993,7 @@ namespace VISCOUS_3D
     bool shrink(_SolidData& data);
     bool prepareEdgeToShrink( _LayerEdge& edge, _EdgesOnShape& eos,
                               SMESH_MesherHelper& helper,
-                              const SMESHDS_SubMesh* /*faceSubMesh*/ );
+                              const SMESHDS_SubMesh* faceSubMesh );
     void restoreNoShrink( _LayerEdge& edge ) const;
     void fixBadFaces(const TopoDS_Face&          F,
                      SMESH_MesherHelper&         helper,
@@ -1091,10 +1091,10 @@ namespace VISCOUS_3D
                              Handle(ShapeAnalysis_Surface)& surface,
                              const TopoDS_Face&             F,
                              SMESH_MesherHelper&            helper);
-    bool smoothComplexEdge( _SolidData&                    /*data*/,
+    bool smoothComplexEdge( _SolidData&                     data,
                             Handle(ShapeAnalysis_Surface)& surface,
                             const TopoDS_Face&             F,
-                            SMESH_MesherHelper&            /*helper*/);
+                            SMESH_MesherHelper&            helper);
     gp_XYZ getNormalNormal( const gp_XYZ & normal,
                             const gp_XYZ&  edgeDir);
     _LayerEdge* getLEdgeOnV( bool is2nd )

@@ -53,7 +53,7 @@ namespace MED
   //! Get set of TElemInfo by its geometrical type and corresponding MED ENTITY
   MEDWRAPPER_EXPORT
   TEntity2TGeom2ElemInfo
-  GetEntity2TGeom2ElemInfo(const PWrapper& /*theWrapper*/,
+  GetEntity2TGeom2ElemInfo(const PWrapper& theWrapper,
                            const PMeshInfo& theMeshInfo,
                            const MED::TEntityInfo& theEntityInfo);
 

@@ -62,13 +62,13 @@ public:
    *
    * Just return false as this hypothesis does not have parameters values
    */
-  virtual bool SetParametersByMesh(const SMESH_Mesh* /*theMesh*/, const TopoDS_Shape& /*theShape*/);
+  virtual bool SetParametersByMesh(const SMESH_Mesh* theMesh, const TopoDS_Shape& theShape);
 
   /*!
    * \brief Initialize my parameter values by default parameters.
    *  \retval bool - true if parameter values have been successfully defined
    */
-  virtual bool SetParametersByDefaults(const TDefaults& /*dflts*/, const SMESH_Mesh* theMesh=0)
+  virtual bool SetParametersByDefaults(const TDefaults& /*dflts*/, const SMESH_Mesh* /*theMesh*/=0)
   { return false; }
 
   static const char* GetHypType() { return "ViscousLayers2D"; }

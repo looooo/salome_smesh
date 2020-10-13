@@ -56,8 +56,7 @@ public:
   virtual ~StdMeshers_NumberOfLayers_i();
 
   // Sets <number of segments> parameter value
-  void SetNumberOfLayers(CORBA::Long numberOfLayers)
-    ;
+  void SetNumberOfLayers(CORBA::Long numberOfLayers);
 
   // Returns <number of layers> parameter value
   CORBA::Long GetNumberOfLayers();

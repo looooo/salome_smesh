@@ -54,50 +54,38 @@ public:
   virtual ~StdMeshers_NumberOfSegments_i();
 
   // Builds point distribution according to passed function
-  SMESH::double_array* BuildDistributionExpr( const char*, CORBA::Long, CORBA::Long )
-    ;
-  SMESH::double_array* BuildDistributionTab( const SMESH::double_array&, CORBA::Long, CORBA::Long )
-    ;
+  SMESH::double_array* BuildDistributionExpr( const char*, CORBA::Long, CORBA::Long );
+  SMESH::double_array* BuildDistributionTab( const SMESH::double_array&, CORBA::Long, CORBA::Long );
 
   // Set number of segments
-  void SetNumberOfSegments( CORBA::Long theSegmentsNumber )
-    ;
+  void SetNumberOfSegments( CORBA::Long theSegmentsNumber );
   // Get number of segments
   CORBA::Long GetNumberOfSegments();
 
   // Set distribution type
-  void SetDistrType(CORBA::Long typ)
-    ;
+  void SetDistrType(CORBA::Long typ);
   // Get distribution type
   CORBA::Long GetDistrType();
 
   // Set scalar factor
-  void SetScaleFactor( CORBA::Double theScaleFactor )
-    ;
+  void SetScaleFactor( CORBA::Double theScaleFactor );
   // Get scalar factor
-  CORBA::Double GetScaleFactor()
-    ;
+  CORBA::Double GetScaleFactor();
 
   // Set table function for distribution DT_TabFunc
-  void SetTableFunction(const SMESH::double_array& table)
-    ;
+  void SetTableFunction(const SMESH::double_array& table);
   // Get table function for distribution DT_TabFunc
-  SMESH::double_array* GetTableFunction()
-    ;
+  SMESH::double_array* GetTableFunction();
 
   // Set expression function for distribution DT_ExprFunc
-  void SetExpressionFunction(const char* expr)
-    ;
+  void SetExpressionFunction(const char* expr);
   // Get expression function for distribution DT_ExprFunc
-  char* GetExpressionFunction()
-    ;
+  char* GetExpressionFunction();
 
   // Set the exponent mode on/off
-  void SetConversionMode( CORBA::Long conv )
-    ;
+  void SetConversionMode( CORBA::Long conv );
   // Returns true if the exponent mode is set
-  CORBA::Long ConversionMode()
-    ;
+  CORBA::Long ConversionMode();
 
   // Get implementation
   ::StdMeshers_NumberOfSegments* GetImpl();

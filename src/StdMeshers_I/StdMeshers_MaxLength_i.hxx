@@ -49,13 +49,11 @@ public:
   virtual ~StdMeshers_MaxLength_i();
 
   // Set length
-  void SetLength( CORBA::Double theLength )
-    ;
+  void SetLength( CORBA::Double theLength );
   // Set precision
 
   // Sets preestimation flag
-  void SetUsePreestimatedLength( CORBA::Boolean toUse)
-    ;
+  void SetUsePreestimatedLength( CORBA::Boolean toUse);
 
   // Get length
   CORBA::Double GetLength();

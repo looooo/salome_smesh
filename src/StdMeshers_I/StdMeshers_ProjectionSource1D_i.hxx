@@ -59,8 +59,7 @@ public:
   /*!
    * Sets source <edge> or a group containing edges to take a mesh pattern from
    */
-  void SetSourceEdge(GEOM::GEOM_Object_ptr edge)
-    ;
+  void SetSourceEdge(GEOM::GEOM_Object_ptr edge);
 
   /*!
    * Returns the source edge or a group containing edges
@@ -70,8 +69,7 @@ public:
   /*!
    * Sets source <mesh> to take a mesh pattern from
    */
-  void SetSourceMesh(SMESH::SMESH_Mesh_ptr mesh)
-    ;
+  void SetSourceMesh(SMESH::SMESH_Mesh_ptr mesh);
 
   /*!
    * Return source mesh
@@ -83,8 +81,7 @@ public:
    * This parameter is optional
    */
   void SetVertexAssociation(GEOM::GEOM_Object_ptr sourceVertex,
-                            GEOM::GEOM_Object_ptr targetVertex)
-    ;
+                            GEOM::GEOM_Object_ptr targetVertex);
 
   /*!
    * Returns the vertex associated with the target vertex.
@@ -113,11 +110,11 @@ public:
 
   // Return geometry this hypothesis depends on. Return false if there is no geometry parameter
   virtual bool getObjectsDependOn( std::vector< std::string > & entryArray,
-                                   std::vector< int >         & /*subIDArray*/ ) const;
+                                   std::vector< int >         & subIDArray ) const;
 
   // Set new geometry instead of that returned by getObjectsDependOn()
   virtual bool setObjectsDependOn( std::vector< std::string > & entryArray,
-                                   std::vector< int >         & /*subIDArray*/ );
+                                   std::vector< int >         & subIDArray );
 private:
   // keep entries because the same shape can be published several times with
   // different names and in this case a correct name can't be restored by a TopoDS_Shape

@@ -74,7 +74,7 @@ StdMeshers_ViscousLayers2D_i::~StdMeshers_ViscousLayers2D_i()
 //================================================================================
 
 void StdMeshers_ViscousLayers2D_i::SetEdges(const ::SMESH::long_array& edgeIDs,
-                                            CORBA::Boolean             toIgnore)  
+                                            CORBA::Boolean             toIgnore)
 {
   vector<int> ids( edgeIDs.length() );
   for ( unsigned i = 0; i < ids.size(); ++i )
@@ -93,7 +93,6 @@ void StdMeshers_ViscousLayers2D_i::SetEdges(const ::SMESH::long_array& edgeIDs,
 //================================================================================
 
 void StdMeshers_ViscousLayers2D_i::SetIgnoreEdges(const ::SMESH::long_array& edgeIDs)
-  
 {
   SMESH::TPythonDump pyDump;
   this->SetEdges( edgeIDs, true );
@@ -147,7 +146,6 @@ CORBA::Boolean StdMeshers_ViscousLayers2D_i::GetIsToIgnoreEdges()
 //================================================================================
 
 void StdMeshers_ViscousLayers2D_i::SetTotalThickness(::CORBA::Double thickness)
-
 {
   if ( thickness < 1e-100 )
     THROW_SALOME_CORBA_EXCEPTION( "Invalid thickness", SALOME::BAD_PARAM );
@@ -174,7 +172,6 @@ void StdMeshers_ViscousLayers2D_i::SetTotalThickness(::CORBA::Double thickness)
 //================================================================================
 
 void StdMeshers_ViscousLayers2D_i::SetNumberLayers(::CORBA::Short nb)
-
 {
   if ( nb < 1 )
     THROW_SALOME_CORBA_EXCEPTION( "Invalid number of layers", SALOME::BAD_PARAM );
@@ -201,7 +198,6 @@ void StdMeshers_ViscousLayers2D_i::SetNumberLayers(::CORBA::Short nb)
 //================================================================================
 
 void StdMeshers_ViscousLayers2D_i::SetStretchFactor(::CORBA::Double factor)
-
 {
   if ( factor < 1 )
     THROW_SALOME_CORBA_EXCEPTION( "Invalid stretch factor, it must be >= 1.0", SALOME::BAD_PARAM );

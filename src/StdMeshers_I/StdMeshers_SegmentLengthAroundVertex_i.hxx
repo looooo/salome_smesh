@@ -51,8 +51,7 @@ public:
   virtual ~StdMeshers_SegmentLengthAroundVertex_i();
 
   // Set length
-  void SetLength( CORBA::Double theLength )
-    ;
+  void SetLength( CORBA::Double theLength );
 
   // Get length
   CORBA::Double GetLength();

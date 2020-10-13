@@ -76,7 +76,6 @@ StdMeshers_ViscousLayers_i::~StdMeshers_ViscousLayers_i()
 
 void StdMeshers_ViscousLayers_i::SetFaces(const ::SMESH::long_array& faceIDs,
                                           CORBA::Boolean             toIgnore)
-  
 {
   vector<int> ids( faceIDs.length() );
   for ( unsigned i = 0; i < ids.size(); ++i )
@@ -135,7 +134,6 @@ CORBA::Boolean StdMeshers_ViscousLayers_i::GetIsToIgnoreFaces()
 //================================================================================
 
 void StdMeshers_ViscousLayers_i::SetIgnoreFaces(const ::SMESH::long_array& faceIDs)
-
 {
   vector<int> ids( faceIDs.length() );
   for ( unsigned i = 0; i < ids.size(); ++i )
@@ -152,7 +150,6 @@ void StdMeshers_ViscousLayers_i::SetIgnoreFaces(const ::SMESH::long_array& faceI
 //================================================================================
 
 void StdMeshers_ViscousLayers_i::SetTotalThickness(::CORBA::Double thickness)
-
 {
   if ( thickness < 1e-100 )
     THROW_SALOME_CORBA_EXCEPTION( "Invalid thickness", SALOME::BAD_PARAM );
@@ -179,7 +176,6 @@ void StdMeshers_ViscousLayers_i::SetTotalThickness(::CORBA::Double thickness)
 //================================================================================
 
 void StdMeshers_ViscousLayers_i::SetNumberLayers(::CORBA::Short nb)
-
 {
   if ( nb < 1 )
     THROW_SALOME_CORBA_EXCEPTION( "Invalid number of layers", SALOME::BAD_PARAM );
@@ -206,7 +202,6 @@ void StdMeshers_ViscousLayers_i::SetNumberLayers(::CORBA::Short nb)
 //================================================================================
 
 void StdMeshers_ViscousLayers_i::SetStretchFactor(::CORBA::Double factor)
-
 {
   if ( factor < 1 )
     THROW_SALOME_CORBA_EXCEPTION( "Invalid stretch factor, it must be >= 1.0", SALOME::BAD_PARAM );

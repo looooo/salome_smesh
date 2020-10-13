@@ -196,7 +196,7 @@ class SMESH_I_EXPORT SMESH_GroupOnFilter_i:
   static SMESH_PredicatePtr GetPredicate( SMESH::Filter_ptr );
 
   // CORBA interface implementation
-  void SetFilter(SMESH::Filter_ptr theFilter) ;
+  void SetFilter(SMESH::Filter_ptr theFilter);
   SMESH::Filter_ptr GetFilter();
   virtual CORBA::Boolean IsUpToDate();
   virtual SMESH::long_array* GetListOfID();
@@ -206,7 +206,7 @@ class SMESH_I_EXPORT SMESH_GroupOnFilter_i:
   virtual bool IsMeshInfoCorrect();
 
   // method of SMESH::NotifyerAndWaiter to update self when myFilter changes
-  virtual void OnBaseObjModified(NotifyerAndWaiter* /*filter*/, bool);
+  virtual void OnBaseObjModified(NotifyerAndWaiter* filter, bool);
 
  private:
   SMESH::Filter_var myFilter;

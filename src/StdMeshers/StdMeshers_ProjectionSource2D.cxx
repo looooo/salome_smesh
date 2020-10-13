@@ -99,7 +99,7 @@ void StdMeshers_ProjectionSource2D::SetSourceFace(const TopoDS_Shape& Face)
 void StdMeshers_ProjectionSource2D::SetVertexAssociation(const TopoDS_Shape& sourceVertex1,
                                                          const TopoDS_Shape& sourceVertex2,
                                                          const TopoDS_Shape& targetVertex1,
-                                                         const TopoDS_Shape& targetVertex2) 
+                                                         const TopoDS_Shape& targetVertex2)
 {
   if ( sourceVertex1.IsNull() != targetVertex1.IsNull() ||
        sourceVertex2.IsNull() != targetVertex2.IsNull() )

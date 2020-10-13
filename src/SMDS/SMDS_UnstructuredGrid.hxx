@@ -85,7 +85,7 @@ public:
   int CellIdToDownId(int vtkCellId);
   void setCellIdToDownId(int vtkCellId, int downId);
   void CleanDownwardConnectivity();
-  void BuildDownwardConnectivity(bool /*withEdges*/);
+  void BuildDownwardConnectivity(bool withEdges);
   int GetNeighbors(int* neighborsVtkIds, int* downIds, unsigned char* downTypes, int vtkId, bool getSkin=false);
   int GetParentVolumes(int* volVtkIds, int vtkId);
   int GetParentVolumes(int* volVtkIds, int downId, unsigned char downType);
@@ -115,7 +115,7 @@ public:
 protected:
   SMDS_UnstructuredGrid();
   ~SMDS_UnstructuredGrid();
-  void copyNodes(vtkPoints *newPoints, std::vector<int>& /*idNodesOldToNew*/, int& alreadyCopied, int start, int end);
+  void copyNodes(vtkPoints *newPoints, std::vector<int>& idNodesOldToNew, int& alreadyCopied, int start, int end);
   void copyBloc(vtkUnsignedCharArray *newTypes,
                 const std::vector<int>& idCellsOldToNew,
                 const std::vector<int>& idNodesOldToNew,

@@ -52,8 +52,7 @@ public:
   virtual ~StdMeshers_MaxElementArea_i();
 
   // Set maximum element area 
-  void SetMaxElementArea( CORBA::Double theArea )
-    ;
+  void SetMaxElementArea( CORBA::Double theArea );
   // Get maximum element area 
   CORBA::Double GetMaxElementArea();
 

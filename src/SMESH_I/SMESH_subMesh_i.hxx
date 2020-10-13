@@ -53,29 +53,21 @@ public:
                    int                     localId );
   ~SMESH_subMesh_i();
 
-  CORBA::Long GetNumberOfElements()
-    ;
+  CORBA::Long GetNumberOfElements();
   
-  CORBA::Long  GetNumberOfNodes( CORBA::Boolean all )
-    ;
+  CORBA::Long  GetNumberOfNodes( CORBA::Boolean all );
   
-  SMESH::long_array* GetElementsId()
-    ;
+  SMESH::long_array* GetElementsId();
 
-  SMESH::long_array* GetElementsByType( SMESH::ElementType theElemType )
-    ;
+  SMESH::long_array* GetElementsByType( SMESH::ElementType theElemType );
   
-  SMESH::ElementType GetElementType( CORBA::Long id, bool iselem )
-    ;
+  SMESH::ElementType GetElementType( CORBA::Long id, bool iselem );
   
-  SMESH::long_array* GetNodesId()
-    ;
+  SMESH::long_array* GetNodesId();
   
-  SMESH::SMESH_Mesh_ptr GetFather()
-    ;
+  SMESH::SMESH_Mesh_ptr GetFather();
   
-  GEOM::GEOM_Object_ptr GetSubShape()
-    ;
+  GEOM::GEOM_Object_ptr GetSubShape();
 
   CORBA::Long GetId();
 
@@ -144,8 +136,7 @@ class SMESH_I_EXPORT SMESH_Invalid_subMesh_i:
                            int                     localId,
                            GEOM::GEOM_Object_ptr   shape);
 
-  virtual GEOM::GEOM_Object_ptr GetSubShape()
-    ;
+  virtual GEOM::GEOM_Object_ptr GetSubShape();
 
  protected:
 

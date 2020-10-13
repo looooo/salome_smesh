@@ -132,16 +132,13 @@ class SMESH_EXPORT SMESH_Mesh
                                   bool        theMakeRequiredGroups = true );
 
   SMESH_Hypothesis::Hypothesis_Status
-  AddHypothesis(const TopoDS_Shape & aSubShape, int anHypId, std::string* error=0)
-    ;
+  AddHypothesis(const TopoDS_Shape & aSubShape, int anHypId, std::string* error=0);
   
   SMESH_Hypothesis::Hypothesis_Status
-  RemoveHypothesis(const TopoDS_Shape & aSubShape, int anHypId)
-    ;
+  RemoveHypothesis(const TopoDS_Shape & aSubShape, int anHypId);
   
   const std::list <const SMESHDS_Hypothesis * >&
-  GetHypothesisList(const TopoDS_Shape & aSubShape) const
-    ;
+  GetHypothesisList(const TopoDS_Shape & aSubShape) const;
 
   const SMESH_Hypothesis * GetHypothesis(const TopoDS_Shape &    aSubShape,
                                          const SMESH_HypoFilter& aFilter,
@@ -167,9 +164,9 @@ class SMESH_EXPORT SMESH_Mesh
 
   SMESH_Hypothesis * GetHypothesis(const int aHypID) const;
 
-  const std::list<SMESHDS_Command*> & GetLog() ;
+  const std::list<SMESHDS_Command*> & GetLog();
   
-  void ClearLog() ;
+  void ClearLog();
   
   int GetId() const          { return _id; }
   
@@ -183,19 +180,15 @@ class SMESH_EXPORT SMESH_Mesh
   
   SMESH_Gen *GetGen()        { return _gen; }
 
-  SMESH_subMesh *GetSubMesh(const TopoDS_Shape & aSubShape)
-    ;
+  SMESH_subMesh *GetSubMesh(const TopoDS_Shape & aSubShape);
   
-  SMESH_subMesh *GetSubMeshContaining(const TopoDS_Shape & aSubShape) const
-    ;
+  SMESH_subMesh *GetSubMeshContaining(const TopoDS_Shape & aSubShape) const;
   
-  SMESH_subMesh *GetSubMeshContaining(const int aShapeID) const
-    ;
+  SMESH_subMesh *GetSubMeshContaining(const int aShapeID) const;
   /*!
    * \brief Return submeshes of groups containing the given subshape
    */
-  std::list<SMESH_subMesh*> GetGroupSubMeshesContaining(const TopoDS_Shape & shape) const
-    ;
+  std::list<SMESH_subMesh*> GetGroupSubMeshesContaining(const TopoDS_Shape & shape) const;
   /*!
    * \brief Say all submeshes that theChangedHyp has been modified
    */
@@ -220,9 +213,9 @@ class SMESH_EXPORT SMESH_Mesh
    */
   const TopTools_ListOfShape& GetAncestors(const TopoDS_Shape& theSubShape) const;
 
-  void SetAutoColor(bool theAutoColor) ;
+  void SetAutoColor(bool theAutoColor);
 
-  bool GetAutoColor() ;
+  bool GetAutoColor();
 
   /*!
    * \brief Set the flag meaning that the mesh has been edited "manually".
@@ -263,17 +256,16 @@ class SMESH_EXPORT SMESH_Mesh
                  bool                theAutoDimension = false,
                  bool                theAddODOnVertices = false,
                  double              theZTolerance = -1.,
-                 bool                theAllElemsToGroup = false)
-    ;
+                 bool                theAllElemsToGroup = false);
 
   void ExportDAT(const char *        file,
-                 const SMESHDS_Mesh* meshPart = 0) ;
+                 const SMESHDS_Mesh* meshPart = 0);
   void ExportUNV(const char *        file,
-                 const SMESHDS_Mesh* meshPart = 0) ;
+                 const SMESHDS_Mesh* meshPart = 0);
   void ExportSTL(const char *        file,
                  const bool          isascii,
                  const char *        name = 0,
-                 const SMESHDS_Mesh* meshPart = 0) ;
+                 const SMESHDS_Mesh* meshPart = 0);
   void ExportCGNS(const char *        file,
                   const SMESHDS_Mesh* mesh,
                   const char *        meshName = 0,
@@ -283,35 +275,35 @@ class SMESH_EXPORT SMESH_Mesh
                  bool                withRequiredGroups = true );
   void ExportSAUV(const char *file, 
                   const char* theMeshName = NULL, 
-                  bool theAutoGroups = true) ;
+                  bool theAutoGroups = true);
 
   double GetComputeProgress() const;
   
-  int NbNodes() const ;
-  int Nb0DElements() const ;
-  int NbBalls() const ;
+  int NbNodes() const;
+  int Nb0DElements() const;
+  int NbBalls() const;
   
-  int NbEdges(SMDSAbs_ElementOrder order = ORDER_ANY) const ;
+  int NbEdges(SMDSAbs_ElementOrder order = ORDER_ANY) const;
   
-  int NbFaces(SMDSAbs_ElementOrder order = ORDER_ANY) const ;
-  int NbTriangles(SMDSAbs_ElementOrder order = ORDER_ANY) const ;
-  int NbQuadrangles(SMDSAbs_ElementOrder order = ORDER_ANY) const ;
-  int NbBiQuadQuadrangles() const ;
-  int NbBiQuadTriangles() const ;
-  int NbPolygons(SMDSAbs_ElementOrder order = ORDER_ANY) const ;
+  int NbFaces(SMDSAbs_ElementOrder order = ORDER_ANY) const;
+  int NbTriangles(SMDSAbs_ElementOrder order = ORDER_ANY) const;
+  int NbQuadrangles(SMDSAbs_ElementOrder order = ORDER_ANY) const;
+  int NbBiQuadQuadrangles() const;
+  int NbBiQuadTriangles() const;
+  int NbPolygons(SMDSAbs_ElementOrder order = ORDER_ANY) const;
   
-  int NbVolumes(SMDSAbs_ElementOrder order = ORDER_ANY) const ;
-  int NbTetras(SMDSAbs_ElementOrder order = ORDER_ANY) const ;
-  int NbHexas(SMDSAbs_ElementOrder order = ORDER_ANY) const ;
-  int NbTriQuadraticHexas() const ;
-  int NbPyramids(SMDSAbs_ElementOrder order = ORDER_ANY) const ;
-  int NbPrisms(SMDSAbs_ElementOrder order = ORDER_ANY) const ;
-  int NbQuadPrisms() const ;
-  int NbBiQuadPrisms() const ;
-  int NbHexagonalPrisms() const ;
-  int NbPolyhedrons() const ;
+  int NbVolumes(SMDSAbs_ElementOrder order = ORDER_ANY) const;
+  int NbTetras(SMDSAbs_ElementOrder order = ORDER_ANY) const;
+  int NbHexas(SMDSAbs_ElementOrder order = ORDER_ANY) const;
+  int NbTriQuadraticHexas() const;
+  int NbPyramids(SMDSAbs_ElementOrder order = ORDER_ANY) const;
+  int NbPrisms(SMDSAbs_ElementOrder order = ORDER_ANY) const;
+  int NbQuadPrisms() const;
+  int NbBiQuadPrisms() const;
+  int NbHexagonalPrisms() const;
+  int NbPolyhedrons() const;
   
-  int NbSubMesh() const ;
+  int NbSubMesh() const;
   
   int NbGroup() const { return _mapGroup.size(); }
 
@@ -323,7 +315,7 @@ class SMESH_EXPORT SMESH_Mesh
                          const TopoDS_Shape&       theShape = TopoDS_Shape(),
                          const SMESH_PredicatePtr& thePredicate = SMESH_PredicatePtr());
 
-  SMESH_Group* AddGroup (SMESHDS_GroupBase* groupDS) ;
+  SMESH_Group* AddGroup (SMESHDS_GroupBase* groupDS);
 
   typedef boost::shared_ptr< SMDS_Iterator<SMESH_Group*> > GroupIteratorPtr;
   GroupIteratorPtr GetGroups() const;

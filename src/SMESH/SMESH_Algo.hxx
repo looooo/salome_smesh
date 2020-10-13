@@ -173,7 +173,7 @@ class SMESH_EXPORT SMESH_Algo : public SMESH_Hypothesis
    *              else, returns OK if at least one shape is OK
    *  \retval bool - \c true by default
    */
-  virtual bool IsApplicableToShape(const TopoDS_Shape & /*shape*/, bool /*toCheckAll*/) const;
+  virtual bool IsApplicableToShape(const TopoDS_Shape & shape, bool toCheckAll) const;
 
   /*!
    * \brief Sets _computeCanceled to true. It's usage depends on
@@ -480,7 +480,7 @@ public:
    *              else, returns OK if at least one shape is OK
    *  \retval bool - \c true by default
    */
-  virtual bool IsApplicableToShape(const TopoDS_Shape & shape, bool /*toCheckAll*/) const;
+  virtual bool IsApplicableToShape(const TopoDS_Shape & shape, bool toCheckAll) const;
 };
 
 class SMESH_EXPORT SMESH_2D_Algo: public SMESH_Algo
@@ -494,7 +494,7 @@ public:
    *              else, returns OK if at least one shape is OK
    *  \retval bool - \c true by default
    */
-  virtual bool IsApplicableToShape(const TopoDS_Shape & shape, bool /*toCheckAll*/) const;
+  virtual bool IsApplicableToShape(const TopoDS_Shape & shape, bool toCheckAll) const;
   /*!
    * \brief Method in which an algorithm generating a structured mesh
    *        fixes positions of in-face nodes after there movement
@@ -515,7 +515,7 @@ public:
    *              else, returns OK if at least one shape is OK
    *  \retval bool - \c true by default
    */
-  virtual bool IsApplicableToShape(const TopoDS_Shape & shape, bool /*toCheckAll*/) const;
+  virtual bool IsApplicableToShape(const TopoDS_Shape & shape, bool toCheckAll) const;
 };
 
 #endif

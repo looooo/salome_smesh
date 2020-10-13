@@ -54,11 +54,9 @@ public:
   virtual ~StdMeshers_LocalLength_i();
 
   // Set length
-  void SetLength( CORBA::Double theLength )
-    ;
+  void SetLength( CORBA::Double theLength );
   // Set precision
-  void SetPrecision( CORBA::Double thePrecision )
-    ;
+  void SetPrecision( CORBA::Double thePrecision );
 
   // Get length
   CORBA::Double GetLength();

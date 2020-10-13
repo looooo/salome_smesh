@@ -54,8 +54,7 @@ public:
   virtual ~StdMeshers_Deflection1D_i();
 
   // Set deflection
-  void SetDeflection( CORBA::Double theLength )
-    ;
+  void SetDeflection( CORBA::Double theLength );
   // Get deflection
   CORBA::Double GetDeflection();
 

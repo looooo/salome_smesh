@@ -183,7 +183,6 @@ SMESH_Mesh_i::~SMESH_Mesh_i()
 //=============================================================================
 
 void SMESH_Mesh_i::SetShape( GEOM::GEOM_Object_ptr theShapeObject )
-    
 {
   Unexpect aCatch(SALOME_SalomeException);
   try {
@@ -206,7 +205,6 @@ void SMESH_Mesh_i::SetShape( GEOM::GEOM_Object_ptr theShapeObject )
 //================================================================================
 
 CORBA::Boolean SMESH_Mesh_i::HasShapeToMesh()
-  
 {
   Unexpect aCatch(SALOME_SalomeException);
   bool res = false;
@@ -226,7 +224,6 @@ CORBA::Boolean SMESH_Mesh_i::HasShapeToMesh()
 //================================================================================
 
 GEOM::GEOM_Object_ptr SMESH_Mesh_i::GetShapeToMesh()
-  
 {
   Unexpect aCatch(SALOME_SalomeException);
   GEOM::GEOM_Object_var aShapeObj;
@@ -263,7 +260,7 @@ GEOM::GEOM_Object_ptr SMESH_Mesh_i::GetShapeToMesh()
  */
 //================================================================================
 
-CORBA::Boolean SMESH_Mesh_i::IsLoaded() 
+CORBA::Boolean SMESH_Mesh_i::IsLoaded()
 {
   Unexpect aCatch(SALOME_SalomeException);
   return !_preMeshInfo;
@@ -275,7 +272,7 @@ CORBA::Boolean SMESH_Mesh_i::IsLoaded()
  */
 //================================================================================
 
-void SMESH_Mesh_i::Load() 
+void SMESH_Mesh_i::Load()
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -288,7 +285,7 @@ void SMESH_Mesh_i::Load()
  */
 //================================================================================
 
-void SMESH_Mesh_i::Clear() 
+void SMESH_Mesh_i::Clear()
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -315,7 +312,6 @@ void SMESH_Mesh_i::Clear()
 //================================================================================
 
 void SMESH_Mesh_i::ClearSubMesh(CORBA::Long ShapeID)
-  
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -432,7 +428,6 @@ SMESH_Mesh_i::ImportMEDFile( const char* theFileName, const char* theMeshName )
 SMESH::DriverMED_ReadStatus SMESH_Mesh_i::ImportCGNSFile( const char*  theFileName,
                                                           const int    theMeshIndex,
                                                           std::string& theMeshName )
-  
 {
   Unexpect aCatch(SALOME_SalomeException);
   int status;
@@ -498,7 +493,6 @@ SMESH::long_array* SMESH_Mesh_i::GetMEDVersionsCompatibleForAppend()
 //=============================================================================
 
 int SMESH_Mesh_i::ImportUNVFile( const char* theFileName )
-  
 {
   SMESH_TRY;
 
@@ -528,7 +522,6 @@ int SMESH_Mesh_i::ImportUNVFile( const char* theFileName )
 //=============================================================================
 
 int SMESH_Mesh_i::ImportSTLFile( const char* theFileName )
-  
 {
   SMESH_TRY;
 
@@ -573,7 +566,6 @@ namespace
 
 SMESH::ComputeError* SMESH_Mesh_i::ImportGMFFile( const char* theFileName,
                                                   bool        theMakeRequiredGroups )
-  
 {
   SMESH_ComputeErrorPtr error;
 
@@ -645,7 +637,6 @@ SMESH::Hypothesis_Status
 SMESH_Mesh_i::AddHypothesis(GEOM::GEOM_Object_ptr       aSubShape,
                             SMESH::SMESH_Hypothesis_ptr anHyp,
                             CORBA::String_out           anErrorText)
-
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -738,7 +729,6 @@ SMESH_Mesh_i::addHypothesis(GEOM::GEOM_Object_ptr       aSubShape,
 
 SMESH::Hypothesis_Status SMESH_Mesh_i::RemoveHypothesis(GEOM::GEOM_Object_ptr       aSubShape,
                                                         SMESH::SMESH_Hypothesis_ptr anHyp)
-  
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -817,7 +807,6 @@ SMESH_Mesh_i::removeHypothesis(GEOM::GEOM_Object_ptr       aSubShape,
 
 SMESH::ListOfHypothesis *
 SMESH_Mesh_i::GetHypothesisList(GEOM::GEOM_Object_ptr aSubShape)
-
 {
   Unexpect aCatch(SALOME_SalomeException);
   if (MYDEBUG) MESSAGE("GetHypothesisList");
@@ -857,7 +846,7 @@ SMESH_Mesh_i::GetHypothesisList(GEOM::GEOM_Object_ptr aSubShape)
  */
 //================================================================================
 
-SMESH::submesh_array* SMESH_Mesh_i::GetSubMeshes() 
+SMESH::submesh_array* SMESH_Mesh_i::GetSubMeshes()
 {
   Unexpect aCatch(SALOME_SalomeException);
   if (MYDEBUG) MESSAGE("GetSubMeshes");
@@ -901,7 +890,6 @@ SMESH::submesh_array* SMESH_Mesh_i::GetSubMeshes()
 
 SMESH::SMESH_subMesh_ptr SMESH_Mesh_i::GetSubMesh(GEOM::GEOM_Object_ptr aSubShape,
                                                   const char*           theName )
-     
 {
   Unexpect aCatch(SALOME_SalomeException);
   if (CORBA::is_nil(aSubShape))
@@ -953,7 +941,6 @@ SMESH::SMESH_subMesh_ptr SMESH_Mesh_i::GetSubMesh(GEOM::GEOM_Object_ptr aSubShap
 //================================================================================
 
 void SMESH_Mesh_i::RemoveSubMesh( SMESH::SMESH_subMesh_ptr theSubMesh )
-  
 {
   SMESH_TRY;
 
@@ -997,7 +984,6 @@ void SMESH_Mesh_i::RemoveSubMesh( SMESH::SMESH_subMesh_ptr theSubMesh )
 
 SMESH::SMESH_Group_ptr SMESH_Mesh_i::CreateGroup( SMESH::ElementType theElemType,
                                                   const char*        theName )
-  
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -1029,7 +1015,6 @@ SMESH::SMESH_GroupOnGeom_ptr
 SMESH_Mesh_i::CreateGroupFromGEOM (SMESH::ElementType    theElemType,
                                    const char*           theName,
                                    GEOM::GEOM_Object_ptr theGeomObj)
-  
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -1071,7 +1056,6 @@ SMESH::SMESH_GroupOnFilter_ptr
 SMESH_Mesh_i::CreateGroupFromFilter(SMESH::ElementType theElemType,
                                     const char*        theName,
                                     SMESH::Filter_ptr  theFilter )
-  
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -1111,7 +1095,6 @@ SMESH_Mesh_i::CreateGroupFromFilter(SMESH::ElementType theElemType,
 //================================================================================
 
 void SMESH_Mesh_i::RemoveGroup( SMESH::SMESH_GroupBase_ptr theGroup )
-  
 {
   if ( theGroup->_is_nil() )
     return;
@@ -1151,7 +1134,6 @@ void SMESH_Mesh_i::RemoveGroup( SMESH::SMESH_GroupBase_ptr theGroup )
 //=============================================================================
 
 void SMESH_Mesh_i::RemoveGroupWithContents( SMESH::SMESH_GroupBase_ptr theGroup )
-  
 {
   SMESH_TRY;
   if ( _preMeshInfo )
@@ -1225,7 +1207,7 @@ void SMESH_Mesh_i::RemoveGroupWithContents( SMESH::SMESH_GroupBase_ptr theGroup 
  */
 //================================================================================
 
-SMESH::ListOfGroups * SMESH_Mesh_i::GetGroups() 
+SMESH::ListOfGroups * SMESH_Mesh_i::GetGroups()
 {
   Unexpect aCatch(SALOME_SalomeException);
   if (MYDEBUG) MESSAGE("GetGroups");
@@ -1264,7 +1246,7 @@ SMESH::ListOfGroups * SMESH_Mesh_i::GetGroups()
  */
 //=============================================================================
 
-CORBA::Long SMESH_Mesh_i::NbGroups() 
+CORBA::Long SMESH_Mesh_i::NbGroups()
 {
   Unexpect aCatch(SALOME_SalomeException);
   return _mapGroups.size();
@@ -1279,7 +1261,6 @@ CORBA::Long SMESH_Mesh_i::NbGroups()
 SMESH::SMESH_Group_ptr SMESH_Mesh_i::UnionGroups( SMESH::SMESH_GroupBase_ptr theGroup1,
                                                   SMESH::SMESH_GroupBase_ptr theGroup2,
                                                   const char*                theName )
-  
 {
   SMESH::SMESH_Group_var aResGrp;
 
@@ -1323,7 +1304,6 @@ SMESH::SMESH_Group_ptr SMESH_Mesh_i::UnionGroups( SMESH::SMESH_GroupBase_ptr the
 
 SMESH::SMESH_Group_ptr SMESH_Mesh_i::UnionListOfGroups(const SMESH::ListOfGroups& theGroups,
                                                        const char*                theName )
-  
 {
   SMESH::SMESH_Group_var aResGrp;
 
@@ -1386,7 +1366,6 @@ SMESH::SMESH_Group_ptr SMESH_Mesh_i::UnionListOfGroups(const SMESH::ListOfGroups
 SMESH::SMESH_Group_ptr SMESH_Mesh_i::IntersectGroups( SMESH::SMESH_GroupBase_ptr theGroup1,
                                                       SMESH::SMESH_GroupBase_ptr theGroup2,
                                                       const char*                theName )
-  
 {
   SMESH::SMESH_Group_var aResGrp;
 
@@ -1452,7 +1431,6 @@ SMESH::SMESH_Group_ptr SMESH_Mesh_i::IntersectGroups( SMESH::SMESH_GroupBase_ptr
 SMESH::SMESH_Group_ptr
 SMESH_Mesh_i::IntersectListOfGroups(const SMESH::ListOfGroups& theGroups,
                                     const char*                theName )
-  
 {
   SMESH::SMESH_Group_var aResGrp;
 
@@ -1536,7 +1514,6 @@ SMESH_Mesh_i::IntersectListOfGroups(const SMESH::ListOfGroups& theGroups,
 SMESH::SMESH_Group_ptr SMESH_Mesh_i::CutGroups( SMESH::SMESH_GroupBase_ptr theGroup1,
                                                 SMESH::SMESH_GroupBase_ptr theGroup2,
                                                 const char*                theName )
-  
 {
   SMESH::SMESH_Group_var aResGrp;
 
@@ -1603,7 +1580,6 @@ SMESH::SMESH_Group_ptr
 SMESH_Mesh_i::CutListOfGroups(const SMESH::ListOfGroups& theMainGroups,
                               const SMESH::ListOfGroups& theToolGroups,
                               const char*                theName )
-  
 {
   SMESH::SMESH_Group_var aResGrp;
 
@@ -1736,7 +1712,6 @@ SMESH_Mesh_i::CreateDimGroup(const SMESH::ListOfIDSources& theGroups,
                              const char*                   theName,
                              SMESH::NB_COMMON_NODES_ENUM   theNbCommonNodes,
                              CORBA::Boolean                theUnderlyingOnly)
-  
 {
   SMESH::SMESH_Group_var aResGrp;
 
@@ -1917,7 +1892,6 @@ SMESH::ListOfGroups*
 SMESH_Mesh_i::FaceGroupsSeparatedByEdges( CORBA::Double  theSharpAngle,
                                           CORBA::Boolean theCreateEdges,
                                           CORBA::Boolean theUseExistingEdges )
-  
 {
   if ( theSharpAngle < 0 || theSharpAngle > 180 )
     THROW_SALOME_CORBA_EXCEPTION("Invalid sharp angle, it must be between 0 and 180 degrees",
@@ -2045,7 +2019,6 @@ void SMESH_Mesh_i::removeGeomGroupData(CORBA::Object_ptr theSmeshObj)
 //================================================================================
 
 void SMESH_Mesh_i::ReplaceShape(GEOM::GEOM_Object_ptr theNewGeom)
-  
 {
   // check if geometry changed
   bool geomChanged = true;
@@ -3040,7 +3013,6 @@ void SMESH_Mesh_i::CheckGeomGroupModif()
 //=============================================================================
 
 SMESH::SMESH_Group_ptr SMESH_Mesh_i::ConvertToStandalone( SMESH::SMESH_GroupBase_ptr theGroup )
-  
 {
   SMESH::SMESH_Group_var aGroup;
 
@@ -3342,7 +3314,6 @@ void SMESH_Mesh_i::removeGroup( const int theId )
 //================================================================================
 
 SMESH::log_array * SMESH_Mesh_i::GetLog(CORBA::Boolean clearAfterGet)
-  
 {
   SMESH::log_array_var aLog;
 
@@ -3395,7 +3366,7 @@ SMESH::log_array * SMESH_Mesh_i::GetLog(CORBA::Boolean clearAfterGet)
  */
 //================================================================================
 
-void SMESH_Mesh_i::ClearLog() 
+void SMESH_Mesh_i::ClearLog()
 {
   SMESH_TRY;
   _impl->ClearLog();
@@ -3509,7 +3480,6 @@ void SMESH_Mesh_i::SetImpl(::SMESH_Mesh * impl)
 //=============================================================================
 
 SMESH::SMESH_MeshEditor_ptr SMESH_Mesh_i::GetMeshEditor()
-  
 {
   SMESH::SMESH_MeshEditor_var aMeshEdVar;
 
@@ -3538,7 +3508,6 @@ SMESH::SMESH_MeshEditor_ptr SMESH_Mesh_i::GetMeshEditor()
 //=============================================================================
 
 SMESH::SMESH_MeshEditor_ptr SMESH_Mesh_i::GetMeshEditPreviewer()
-  
 {
   SMESH::SMESH_MeshEditor_var aMeshEdVar;
 
@@ -3562,7 +3531,7 @@ SMESH::SMESH_MeshEditor_ptr SMESH_Mesh_i::GetMeshEditPreviewer()
  */
 //================================================================================
 
-CORBA::Boolean SMESH_Mesh_i::HasModificationsToDiscard() 
+CORBA::Boolean SMESH_Mesh_i::HasModificationsToDiscard()
 {
   Unexpect aCatch(SALOME_SalomeException);
   return _impl->HasModificationsToDiscard();
@@ -3610,7 +3579,7 @@ static SALOMEDS::Color getUniqueColor( const std::list<SALOMEDS::Color>& theRese
  */
 //=============================================================================
 
-void SMESH_Mesh_i::SetAutoColor(CORBA::Boolean theAutoColor) 
+void SMESH_Mesh_i::SetAutoColor(CORBA::Boolean theAutoColor)
 {
   Unexpect aCatch(SALOME_SalomeException);
   _impl->SetAutoColor(theAutoColor);
@@ -3634,7 +3603,7 @@ void SMESH_Mesh_i::SetAutoColor(CORBA::Boolean theAutoColor)
  */
 //=============================================================================
 
-CORBA::Boolean SMESH_Mesh_i::GetAutoColor() 
+CORBA::Boolean SMESH_Mesh_i::GetAutoColor()
 {
   Unexpect aCatch(SALOME_SalomeException);
   return _impl->GetAutoColor();
@@ -3751,7 +3720,6 @@ void SMESH_Mesh_i::ExportMED(const char*        file,
                              CORBA::Long        version,
                              CORBA::Boolean     overwrite,
                              CORBA::Boolean     autoDimension)
-  
 {
   //MESSAGE("MED minor version: "<< minor);
   SMESH_TRY;
@@ -3780,7 +3748,6 @@ void SMESH_Mesh_i::ExportMED(const char*        file,
 
 void SMESH_Mesh_i::ExportSAUV (const char* file,
                                CORBA::Boolean auto_groups)
-  
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -3800,7 +3767,6 @@ void SMESH_Mesh_i::ExportSAUV (const char* file,
 //================================================================================
 
 void SMESH_Mesh_i::ExportDAT (const char *file)
-  
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -3823,7 +3789,6 @@ void SMESH_Mesh_i::ExportDAT (const char *file)
 //================================================================================
 
 void SMESH_Mesh_i::ExportUNV (const char *file)
-  
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -3846,7 +3811,6 @@ void SMESH_Mesh_i::ExportUNV (const char *file)
 //================================================================================
 
 void SMESH_Mesh_i::ExportSTL (const char *file, const bool isascii)
-  
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -3883,7 +3847,6 @@ void SMESH_Mesh_i::ExportPartToMED(SMESH::SMESH_IDSource_ptr meshPart,
                                    const GEOM::ListOfFields& fields,
                                    const char*               geomAssocFields,
                                    CORBA::Double             ZTolerance)
-  
 {
   MESSAGE("MED version: "<< version);
   SMESH_TRY;
@@ -4268,7 +4231,6 @@ void SMESH_Mesh_i::exportMEDFields( DriverMED_W_Field&        fieldWriter,
 
 void SMESH_Mesh_i::ExportPartToDAT(::SMESH::SMESH_IDSource_ptr meshPart,
                                    const char*                 file)
-  
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4290,7 +4252,6 @@ void SMESH_Mesh_i::ExportPartToDAT(::SMESH::SMESH_IDSource_ptr meshPart,
 
 void SMESH_Mesh_i::ExportPartToUNV(::SMESH::SMESH_IDSource_ptr meshPart,
                                    const char*                 file)
-  
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4313,7 +4274,6 @@ void SMESH_Mesh_i::ExportPartToUNV(::SMESH::SMESH_IDSource_ptr meshPart,
 void SMESH_Mesh_i::ExportPartToSTL(::SMESH::SMESH_IDSource_ptr meshPart,
                                    const char*                 file,
                                    ::CORBA::Boolean            isascii)
-  
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4343,7 +4303,6 @@ void SMESH_Mesh_i::ExportCGNS(::SMESH::SMESH_IDSource_ptr meshPart,
                               const char*                 file,
                               CORBA::Boolean              overwrite,
                               CORBA::Boolean              groupElemsByType)
-  
 {
 #ifdef WITH_CGNS
   Unexpect aCatch(SALOME_SalomeException);
@@ -4382,7 +4341,6 @@ void SMESH_Mesh_i::ExportCGNS(::SMESH::SMESH_IDSource_ptr meshPart,
 void SMESH_Mesh_i::ExportGMF(::SMESH::SMESH_IDSource_ptr meshPart,
                              const char*                 file,
                              bool                        withRequiredGroups)
-  
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4466,7 +4424,7 @@ CORBA::Long SMESH_Mesh_i::Nb0DElements()
  */
 //================================================================================
 
-CORBA::Long SMESH_Mesh_i::NbBalls() 
+CORBA::Long SMESH_Mesh_i::NbBalls()
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4497,7 +4455,6 @@ CORBA::Long SMESH_Mesh_i::NbEdges()
 //================================================================================
 
 CORBA::Long SMESH_Mesh_i::NbEdgesOfOrder(SMESH::ElementOrder order)
-  
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4569,7 +4526,7 @@ CORBA::Long SMESH_Mesh_i::NbBiQuadQuadrangles()
   return _impl->NbBiQuadQuadrangles();
 }
 
-CORBA::Long SMESH_Mesh_i::NbPolygons() 
+CORBA::Long SMESH_Mesh_i::NbPolygons()
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4578,7 +4535,7 @@ CORBA::Long SMESH_Mesh_i::NbPolygons()
   return _impl->NbPolygons();
 }
 
-CORBA::Long SMESH_Mesh_i::NbPolygonsOfOrder(SMESH::ElementOrder order) 
+CORBA::Long SMESH_Mesh_i::NbPolygonsOfOrder(SMESH::ElementOrder order)
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4588,7 +4545,6 @@ CORBA::Long SMESH_Mesh_i::NbPolygonsOfOrder(SMESH::ElementOrder order)
 }
 
 CORBA::Long SMESH_Mesh_i::NbFacesOfOrder(SMESH::ElementOrder order)
-  
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4598,7 +4554,6 @@ CORBA::Long SMESH_Mesh_i::NbFacesOfOrder(SMESH::ElementOrder order)
 }
 
 CORBA::Long SMESH_Mesh_i::NbTrianglesOfOrder(SMESH::ElementOrder order)
-  
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4608,7 +4563,6 @@ CORBA::Long SMESH_Mesh_i::NbTrianglesOfOrder(SMESH::ElementOrder order)
 }
 
 CORBA::Long SMESH_Mesh_i::NbQuadranglesOfOrder(SMESH::ElementOrder order)
-  
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4692,7 +4646,6 @@ CORBA::Long SMESH_Mesh_i::NbPolyhedrons()
 }
 
 CORBA::Long SMESH_Mesh_i::NbVolumesOfOrder(SMESH::ElementOrder order)
-  
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4702,7 +4655,6 @@ CORBA::Long SMESH_Mesh_i::NbVolumesOfOrder(SMESH::ElementOrder order)
 }
 
 CORBA::Long SMESH_Mesh_i::NbTetrasOfOrder(SMESH::ElementOrder order)
-  
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4712,7 +4664,6 @@ CORBA::Long SMESH_Mesh_i::NbTetrasOfOrder(SMESH::ElementOrder order)
 }
 
 CORBA::Long SMESH_Mesh_i::NbHexasOfOrder(SMESH::ElementOrder order)
-  
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4722,7 +4673,6 @@ CORBA::Long SMESH_Mesh_i::NbHexasOfOrder(SMESH::ElementOrder order)
 }
 
 CORBA::Long SMESH_Mesh_i::NbPyramidsOfOrder(SMESH::ElementOrder order)
-  
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4732,7 +4682,6 @@ CORBA::Long SMESH_Mesh_i::NbPyramidsOfOrder(SMESH::ElementOrder order)
 }
 
 CORBA::Long SMESH_Mesh_i::NbPrismsOfOrder(SMESH::ElementOrder order)
-  
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4784,7 +4733,6 @@ SMESH::long_array* SMESH_Mesh_i::GetIDs()
 //=============================================================================
 
 SMESH::long_array* SMESH_Mesh_i::GetElementsId()
-  
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4813,7 +4761,6 @@ SMESH::long_array* SMESH_Mesh_i::GetElementsId()
 //=============================================================================
 
 SMESH::long_array* SMESH_Mesh_i::GetElementsByType( SMESH::ElementType theElemType )
-    
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4853,7 +4800,6 @@ SMESH::long_array* SMESH_Mesh_i::GetElementsByType( SMESH::ElementType theElemTy
 //=============================================================================
 
 SMESH::long_array* SMESH_Mesh_i::GetNodesId()
-  
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4881,7 +4827,6 @@ SMESH::long_array* SMESH_Mesh_i::GetNodesId()
 //=============================================================================
 
 SMESH::ElementType SMESH_Mesh_i::GetElementType( const CORBA::Long id, const bool iselem )
-  
 {
   SMESH::ElementType type = SMESH::ALL;
   SMESH_TRY;
@@ -4903,7 +4848,6 @@ SMESH::ElementType SMESH_Mesh_i::GetElementType( const CORBA::Long id, const boo
 //=============================================================================
 
 SMESH::EntityType SMESH_Mesh_i::GetElementGeomType( const CORBA::Long id )
-  
 {
   if ( _preMeshInfo )
     _preMeshInfo->FullLoadFromFile();
@@ -4922,7 +4866,6 @@ SMESH::EntityType SMESH_Mesh_i::GetElementGeomType( const CORBA::Long id )
 //=============================================================================
 
 SMESH::GeometryType SMESH_Mesh_i::GetElementShape( const CORBA::Long id )
-  
 {
   if ( _preMeshInfo )
     _preMeshInfo->FullLoadFromFile();
@@ -4941,7 +4884,6 @@ SMESH::GeometryType SMESH_Mesh_i::GetElementShape( const CORBA::Long id )
 //=============================================================================
 
 SMESH::long_array* SMESH_Mesh_i::GetSubMeshElementsId(const CORBA::Long ShapeID)
-     
 {
   SMESH::long_array_var aResult = new SMESH::long_array();
 
@@ -4978,7 +4920,6 @@ SMESH::long_array* SMESH_Mesh_i::GetSubMeshElementsId(const CORBA::Long ShapeID)
 
 SMESH::long_array* SMESH_Mesh_i::GetSubMeshNodesId(const CORBA::Long ShapeID,
                                                    CORBA::Boolean    all)
-  
 {
   SMESH::long_array_var aResult = new SMESH::long_array();
 
@@ -5030,7 +4971,6 @@ SMESH::long_array* SMESH_Mesh_i::GetSubMeshNodesId(const CORBA::Long ShapeID,
 //=============================================================================
 
 SMESH::ElementType SMESH_Mesh_i::GetSubMeshElementType(const CORBA::Long ShapeID)
-  
 {
   SMESH::ElementType type = SMESH::ALL;
 
@@ -5690,7 +5630,6 @@ SMESH::double_array* SMESH_Mesh_i::BaryCenter(const CORBA::Long id)
 SMESH::ListOfGroups*
 SMESH_Mesh_i::MakeGroupsOfBadInputElements( int         theSubShapeID,
                                             const char* theGroupName )
-  
 {
   Unexpect aCatch(SALOME_SalomeException);
 

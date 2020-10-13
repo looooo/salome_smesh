@@ -395,10 +395,10 @@ public:
                              const SMDS_MeshNode*              srcNode,
                              std::list<const SMDS_MeshNode*> & newNodes,
                              const bool                        makeMediumNodes);
-    int makeNodesByNormal1D( SMESHDS_Mesh*                     /*mesh*/,
-                             const SMDS_MeshNode*              /*srcNode*/,
-                             std::list<const SMDS_MeshNode*> & /*newNodes*/,
-                             const bool                        /*makeMediumNodes*/);
+    int makeNodesByNormal1D( SMESHDS_Mesh*                     mesh,
+                             const SMDS_MeshNode*              srcNode,
+                             std::list<const SMDS_MeshNode*> & newNodes,
+                             const bool                        makeMediumNodes);
     int makeNodesAlongTrack( SMESHDS_Mesh*                     mesh,
                              const SMDS_MeshNode*              srcNode,
                              std::list<const SMDS_MeshNode*> & newNodes,
@@ -747,7 +747,7 @@ public:
    */
   int removeQuadElem( SMESHDS_SubMesh *    theSm,
                       SMDS_ElemIteratorPtr theItr,
-                      const int            /*theShapeID*/);
+                      const int            theShapeID);
   /*!
    * \brief Create groups of elements made during transformation
    * \param nodeGens - nodes making corresponding myLastCreatedNodes

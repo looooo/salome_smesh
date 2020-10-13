@@ -47,7 +47,7 @@ class STDMESHERS_I_EXPORT StdMeshers_ViscousLayers2D_i:
   // Destructor
   virtual ~StdMeshers_ViscousLayers2D_i();
 
-  void SetIgnoreEdges(const SMESH::long_array& edgeIDs) ;
+  void SetIgnoreEdges(const SMESH::long_array& edgeIDs);
   SMESH::long_array* GetIgnoreEdges();
 
   void SetEdges(const SMESH::long_array& edgeIDs, 
@@ -55,13 +55,13 @@ class STDMESHERS_I_EXPORT StdMeshers_ViscousLayers2D_i:
   SMESH::long_array* GetEdges();
   CORBA::Boolean     GetIsToIgnoreEdges();
 
-  void SetTotalThickness(::CORBA::Double thickness) ;
+  void SetTotalThickness(::CORBA::Double thickness);
   ::CORBA::Double GetTotalThickness();
 
-  void SetNumberLayers(::CORBA::Short nb) ;
+  void SetNumberLayers(::CORBA::Short nb);
   ::CORBA::Short GetNumberLayers();
 
-  void SetStretchFactor(::CORBA::Double factor) ;
+  void SetStretchFactor(::CORBA::Double factor);
   ::CORBA::Double GetStretchFactor();
 
   void SetGroupName(const char* name);
@@ -82,11 +82,11 @@ class STDMESHERS_I_EXPORT StdMeshers_ViscousLayers2D_i:
   // Methods for copying mesh definition to other geometry
 
   // Return geometry this hypothesis depends on. Return false if there is no geometry parameter
-  virtual bool getObjectsDependOn( std::vector< std::string > & /*entryArray*/,
+  virtual bool getObjectsDependOn( std::vector< std::string > & entryArray,
                                    std::vector< int >         & subIDArray ) const;
 
   // Set new geometry instead of that returned by getObjectsDependOn()
-  virtual bool setObjectsDependOn( std::vector< std::string > & /*entryArray*/,
+  virtual bool setObjectsDependOn( std::vector< std::string > & entryArray,
                                    std::vector< int >         & subIDArray );
 };
 

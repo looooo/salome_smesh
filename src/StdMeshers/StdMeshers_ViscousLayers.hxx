@@ -106,7 +106,7 @@ public:
     * \param theShape - the geometry of interest
     * \retval bool - true if parameter values have been successfully defined
    */
-  virtual bool SetParametersByMesh(const SMESH_Mesh* /*theMesh*/, const TopoDS_Shape& /*theShape*/);
+  virtual bool SetParametersByMesh(const SMESH_Mesh* theMesh, const TopoDS_Shape& theShape);
 
   /*!
    * \brief Initialize my parameter values by default parameters.

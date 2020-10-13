@@ -42,8 +42,8 @@ public:
 
   virtual std::ostream & SaveTo(std::ostream & save);
   virtual std::istream & LoadFrom(std::istream & load);
-  friend std::ostream & operator << (std::ostream & save, StdMeshers_NotConformAllowed & /*hyp*/);
-  friend std::istream & operator >> (std::istream & load, StdMeshers_NotConformAllowed & /*hyp*/);
+  friend std::ostream & operator << (std::ostream & save, StdMeshers_NotConformAllowed & hyp);
+  friend std::istream & operator >> (std::istream & load, StdMeshers_NotConformAllowed & hyp);
 
   /*!
    * \brief Initialize my parameter values by the mesh built on the geometry

@@ -822,13 +822,10 @@ namespace SMESH
 
     void                    SetElementType( ElementType theType );
     void                    SetPoint( CORBA::Double x, CORBA::Double y, CORBA::Double z );
-    void                    SetVertex( GEOM::GEOM_Object_ptr vertex )
-      ;
-    void                    SetNode ( CORBA::Long nodeID )
-      ;
+    void                    SetVertex( GEOM::GEOM_Object_ptr vertex );
+    void                    SetNode ( CORBA::Long nodeID );
     void                    SetThreshold ( const char* threshold,
-                                           SMESH::ConnectedElements::ThresholdType type )
-      ;
+                                           SMESH::ConnectedElements::ThresholdType type );
     char*                   GetThreshold ( SMESH::ConnectedElements::ThresholdType& type );
 
   private:

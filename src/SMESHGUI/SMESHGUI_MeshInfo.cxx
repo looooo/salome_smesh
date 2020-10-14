@@ -1804,8 +1804,8 @@ void SMESHGUI_ElemInfo::writeInfo( InfoWriter* writer, const QList<uint>& ids )
               writer->write( SMESHGUI_AddInfo::tr( "TYPE" ), SMESHGUI_AddInfo::tr( "GROUP_ON_FILTER" ) );
             }
             int size = group.size();
-            if ( size != -1 );
-            writer->write( SMESHGUI_AddInfo::tr( "SIZE" ), size );
+            if ( size != -1 )
+              writer->write( SMESHGUI_AddInfo::tr( "SIZE" ), size );
             QColor color = group.color();
             if ( color.isValid() )
               writer->write( SMESHGUI_AddInfo::tr( "COLOR" ), color.name() );
@@ -1935,7 +1935,7 @@ void SMESHGUI_ElemInfo::writeInfo( InfoWriter* writer, const QList<uint>& ids )
               writer->write( SMESHGUI_AddInfo::tr( "TYPE" ), SMESHGUI_AddInfo::tr( "GROUP_ON_FILTER" ) );
             }
             int size = group.size();
-            if ( size != -1 );
+            if ( size != -1 )
               writer->write( SMESHGUI_AddInfo::tr( "SIZE" ), size );
             QColor color = group.color();
             if ( color.isValid() )

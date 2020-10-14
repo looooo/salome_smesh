@@ -2759,7 +2759,7 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
         OCC_CATCH_SIGNALS;
         SMESH::UpdateView();
       }
-      catch (std::bad_alloc) { // PAL16774 (Crash after display of many groups)
+      catch (std::bad_alloc&) { // PAL16774 (Crash after display of many groups)
         SMESH::OnVisuException();
       }
       catch (...) { // PAL16774 (Crash after display of many groups)
@@ -2864,7 +2864,7 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
   case SMESHOp::OpCreateSubMesh:
     if ( warnOnGeomModif() )
       break; // action forbiden as geometry modified
-
+    // fall through
   case SMESHOp::OpCreateMesh:
   case SMESHOp::OpCompute:
   case SMESHOp::OpComputeSubMesh:

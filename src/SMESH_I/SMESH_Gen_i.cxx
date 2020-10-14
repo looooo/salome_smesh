@@ -295,7 +295,7 @@ GEOM::GEOM_Gen_var SMESH_Gen_i::GetGeomEngine( bool isShaper )
 
 GEOM::GEOM_Gen_var SMESH_Gen_i::GetGeomEngine( GEOM::GEOM_Object_ptr go )
 {
-  GEOM::GEOM_Gen_ptr gen;
+  GEOM::GEOM_Gen_ptr gen = GEOM::GEOM_Gen::_nil();;
   if ( !CORBA::is_nil( go ))
     gen = go->GetGen();
   return gen;
@@ -550,7 +550,7 @@ SMESH::SMESH_Hypothesis_ptr SMESH_Gen_i::createHypothesis(const char* theHypName
     hypothesis_i = myHypothesis_i->_this();
     int nextId = RegisterObject( hypothesis_i );
     if(MYDEBUG) { MESSAGE( "Add hypo to map with id = "<< nextId ); }
-    else        { nextId = 0; } // avoid "unused variable" warning in release mode
+    else        { (void)nextId; } // avoid "unused variable" warning in release mode
   }
   return hypothesis_i._retn();
 }
@@ -580,7 +580,7 @@ SMESH::SMESH_Mesh_ptr SMESH_Gen_i::createMesh()
     SMESH::SMESH_Mesh_var mesh = SMESH::SMESH_Mesh::_narrow( meshServant->_this() );
     int nextId = RegisterObject( mesh );
     if(MYDEBUG) { MESSAGE( "Add mesh to map with id = "<< nextId); }
-    else        { nextId = 0; } // avoid "unused variable" warning in release mode
+    else        { (void)nextId; } // avoid "unused variable" warning in release mode
     return mesh._retn();
   }
   catch (SALOME_Exception& S_ex) {
@@ -2094,7 +2094,7 @@ CORBA::Boolean SMESH_Gen_i::Compute( SMESH::SMESH_Mesh_ptr theMesh,
       return ok;
     }
   }
-  catch ( std::bad_alloc ) {
+  catch ( std::bad_alloc& ) {
     INFOS( "Compute(): lack of memory" );
   }
   catch ( SALOME_Exception& S_ex ) {
@@ -2304,7 +2304,7 @@ SMESH::MeshPreviewStruct* SMESH_Gen_i::Precompute( SMESH::SMESH_Mesh_ptr theMesh
       }
     }
   }
-  catch ( std::bad_alloc ) {
+  catch ( std::bad_alloc& ) {
     INFOS( "Precompute(): lack of memory" );
   }
   catch ( SALOME_Exception& S_ex ) {
@@ -2388,7 +2388,7 @@ SMESH::long_array* SMESH_Gen_i::Evaluate(SMESH::SMESH_Mesh_ptr theMesh,
       return nbels._retn();
     }
   }
-  catch ( std::bad_alloc ) {
+  catch ( std::bad_alloc& ) {
     INFOS( "Evaluate(): lack of memory" );
   }
   catch ( SALOME_Exception& S_ex ) {
@@ -6278,7 +6278,7 @@ CORBA::Boolean SMESH_Gen_i::IsApplicable ( const char*           theAlgoType,
   SMESH_TRY;
 
   std::string aPlatformLibName;
-  typedef GenericHypothesisCreator_i* (*GetHypothesisCreator)(const char*);
+  //typedef GenericHypothesisCreator_i* (*GetHypothesisCreator)(const char*);
   GenericHypothesisCreator_i* aCreator =
     getHypothesisCreator(theAlgoType, theLibName, aPlatformLibName);
   if (aCreator)

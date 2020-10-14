@@ -178,7 +178,7 @@ bool StdMeshers_FixedPoints1D::SetParametersByMesh(const SMESH_Mesh*   theMesh,
  */
 //================================================================================
 
-bool StdMeshers_FixedPoints1D::SetParametersByDefaults(const TDefaults&  dflts,
+bool StdMeshers_FixedPoints1D::SetParametersByDefaults(const TDefaults&  /*dflts*/,
                                                        const SMESH_Mesh* /*mesh*/)
 {
   _nbsegs.reserve( 1 );

@@ -518,7 +518,7 @@ GeomAbs_Shape SMESH_Algo::Continuity(const TopoDS_Edge& theE1,
     OCC_CATCH_SIGNALS;
     return BRepLProp::Continuity(C1, C2, u1, u2, tol, angTol);
   }
-  catch (Standard_Failure) {
+  catch (Standard_Failure&) {
   }
   return GeomAbs_C0;
 }

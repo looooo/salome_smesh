@@ -193,8 +193,8 @@ namespace MeshEditor_I {
     //!< Delete theNodeSearcher
     static void Delete()
     {
-      if ( theNodeSearcher )    delete theNodeSearcher;    theNodeSearcher    = 0;
-      if ( theElementSearcher ) delete theElementSearcher; theElementSearcher = 0;
+      if ( theNodeSearcher )    { delete theNodeSearcher; }    theNodeSearcher    = 0;
+      if ( theElementSearcher ) { delete theElementSearcher; } theElementSearcher = 0;
     }
     typedef map < int, SMESH_subMesh * > TDependsOnMap;
     //!< The meshod called by submesh: do my main job

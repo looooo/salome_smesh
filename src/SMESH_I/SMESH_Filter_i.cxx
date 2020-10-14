@@ -843,7 +843,7 @@ void BelongToMeshGroup_i::SetGroupID( const char* theID ) // IOR or StoreName
 std::string BelongToMeshGroup_i::GetGroupID()
 {
   if ( myGroup->_is_nil() )
-    SMESH::SMESH_GroupBase_var( GetGroup() );
+    SMESH::SMESH_GroupBase_var( GetGroup() );  // todo: unnecessary parentheses?
 
   if ( !myGroup->_is_nil() )
     myID = SMESH_Gen_i::GetORB()->object_to_string( myGroup );

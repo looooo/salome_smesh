@@ -3135,7 +3135,7 @@ SMESH::SMESH_subMesh_ptr SMESH_Mesh_i::createSubMesh( GEOM::GEOM_Object_ptr theS
   // register CORBA object for persistence
   int nextId = _gen_i->RegisterObject( subMesh );
   if(MYDEBUG) { MESSAGE( "Add submesh to map with id = "<< nextId); }
-  else        { nextId = 0; } // avoid "unused variable" warning
+  else        { (void)nextId; } // avoid "unused variable" warning
 
   // to track changes of GEOM groups
   if ( subMeshId > 0 )
@@ -5753,7 +5753,7 @@ void SMESH_Mesh_i::CreateGroupServants()
     // register CORBA object for persistence
     int nextId = _gen_i->RegisterObject( groupVar );
     if(MYDEBUG) { MESSAGE( "Add group to map with id = "<< nextId); }
-    else        { nextId = 0; } // avoid "unused variable" warning in release mode
+    else        { (void)nextId; } // avoid "unused variable" warning in release mode
 
     // publishing the groups in the study
     GEOM::GEOM_Object_var shapeVar = _gen_i->ShapeToGeomObject( shape );

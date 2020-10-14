@@ -205,7 +205,7 @@ void SMESH_CellLabelActor::UpdateLabels()
 
 
 void SMESH_CellLabelActor::ProcessEvents(vtkObject* vtkNotUsed(theObject),
-                                         unsigned long theEvent,
+                                         unsigned long /*theEvent*/,
                                          void* theClientData,
                                          void* vtkNotUsed(theCallData))
 {

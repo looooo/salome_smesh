@@ -1015,10 +1015,10 @@ std::vector< std::string > SMESH_Gen::GetPluginXMLPaths()
       }
 
       // get a separator from rootDir
-      for ( pos = strlen( rootDir )-1; pos >= 0 && sep.empty(); --pos )
-        if ( rootDir[pos] == '/' || rootDir[pos] == '\\' )
+      for ( int i = strlen( rootDir )-1; i >= 0 && sep.empty(); --i )
+        if ( rootDir[i] == '/' || rootDir[i] == '\\' )
         {
-          sep = rootDir[pos];
+          sep = rootDir[i];
           break;
         }
 #ifdef WIN32

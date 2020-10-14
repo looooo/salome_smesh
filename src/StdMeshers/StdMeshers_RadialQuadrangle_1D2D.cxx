@@ -439,7 +439,7 @@ namespace
   {
     // find the center and a point most distant from it
 
-    double maxDist = 0, normPar;
+    double maxDist = 0, normPar = 0;
     gp_XY uv1, uv2;
     for ( int i = 0; i < 32; ++i )
     {

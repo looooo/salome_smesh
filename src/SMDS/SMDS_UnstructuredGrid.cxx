@@ -482,6 +482,7 @@ void SMDS_UnstructuredGrid::BuildDownwardConnectivity(bool /*withEdges*/)
   GuessSize[VTK_QUADRATIC_HEXAHEDRON]    = nbQuadHexa;
   GuessSize[VTK_TRIQUADRATIC_HEXAHEDRON] = nbQuadHexa;
   GuessSize[VTK_HEXAGONAL_PRISM]         = nbHexPrism;
+  (void)GuessSize; // unused in Release mode
 
   _downArray[VTK_LINE]                   ->allocate(nbLineGuess);
   _downArray[VTK_QUADRATIC_EDGE]         ->allocate(nbQuadEdgeGuess);

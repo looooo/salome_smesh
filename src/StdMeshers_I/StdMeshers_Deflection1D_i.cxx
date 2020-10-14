@@ -137,7 +137,7 @@ CORBA::Boolean StdMeshers_Deflection1D_i::IsDimSupported( SMESH::Dimension type 
  */
 //================================================================================
 
-std::string StdMeshers_Deflection1D_i::getMethodOfParameter(const int paramIndex,
+std::string StdMeshers_Deflection1D_i::getMethodOfParameter(const int /*paramIndex*/,
                                                             int       /*nbVars*/) const
 {
   return "SetDeflection";

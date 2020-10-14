@@ -484,7 +484,7 @@ static void addReference (SALOMEDS::SObject_ptr theSObject,
  */
 //=============================================================================
 
-SALOMEDS::SObject_ptr SMESH_Gen_i::PublishInStudy(SALOMEDS::SObject_ptr theSObject,
+SALOMEDS::SObject_ptr SMESH_Gen_i::PublishInStudy(SALOMEDS::SObject_ptr /*theSObject*/,
                                                   CORBA::Object_ptr     theIOR,
                                                   const char*           theName)
 {

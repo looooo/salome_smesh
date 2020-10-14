@@ -557,6 +557,8 @@ namespace {
       cout << "mesh.AddNode( " << p[i].X() << ", "<< p[i].Y() << ", "<< p[i].Z() << ") # " << i <<" " ;
       SMESH_Block::DumpShapeID( i, cout ) << endl;
     }
+#else
+    (void)p; // unused in release mode
 #endif
   }
 } // namespace
@@ -2705,7 +2707,7 @@ bool StdMeshers_Prism_3D::project2dMesh(const TopoDS_Face& theSrcFace,
  */
 //================================================================================
 
-bool StdMeshers_Prism_3D::setFaceAndEdgesXYZ( const int faceID, const gp_XYZ& params, int z )
+bool StdMeshers_Prism_3D::setFaceAndEdgesXYZ( const int faceID, const gp_XYZ& params, int /*z*/ )
 {
   // find base and top edges of the face
   enum { BASE = 0, TOP, LEFT, RIGHT };
@@ -4166,7 +4168,9 @@ void StdMeshers_PrismAsBlock::faceGridToPythonDump(const SMESH_Block::TShapeID f
            << n << ", " << n+1 << ", "
            << n+nb+2 << ", " << n+nb+1 << "]) " << endl;
     }
-
+#else
+  (void)face; // unused in release mode
+  (void)nb;   // unused in release mode
 #endif
 }
 
@@ -4786,6 +4790,8 @@ void StdMeshers_PrismAsBlock::TSideFace::dumpNodes(int nbNodes) const
   TVerticalEdgeAdaptor* vSide1 = (TVerticalEdgeAdaptor*) VertiCurve(1);
   cout << "Verti side 1: "; vSide1->dumpNodes(nbNodes); cout << endl;
   delete hSize0; delete hSize1; delete vSide0; delete vSide1;
+#else
+  (void)nbNodes; // unused in release mode
 #endif
 }
 
@@ -4832,6 +4838,8 @@ void StdMeshers_PrismAsBlock::TVerticalEdgeAdaptor::dumpNodes(int nbNodes) const
     cout << (*myNodeColumn)[i]->GetID() << " ";
   if ( nbNodes < (int) myNodeColumn->size() )
     cout << myNodeColumn->back()->GetID();
+#else
+  (void)nbNodes; // unused in release mode
 #endif
 }
 
@@ -4890,6 +4898,8 @@ void StdMeshers_PrismAsBlock::THorizontalEdgeAdaptor::dumpNodes(int nbNodes) con
   side->GetColumns( u , col, col2 );
   if ( n != col->second[ i ] )
     cout << col->second[ i ]->GetID();
+#else
+  (void)nbNodes; // unused in release mode
 #endif
 }
 

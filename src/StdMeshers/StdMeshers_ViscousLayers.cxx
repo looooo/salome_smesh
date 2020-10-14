@@ -5312,7 +5312,9 @@ bool _ViscousBuilder::smoothAndCheck(_SolidData& data,
   } // loop on data._edgesOnShape
 
   if ( !is1stBlocked )
+  {
     dumpFunctionEnd();
+  }
 
   if ( closestFace && le )
   {
@@ -5525,7 +5527,7 @@ void _ViscousBuilder::makeOffsetSurface( _EdgesOnShape& eos, SMESH_MesherHelper&
 
     eos._offsetSurf = new ShapeAnalysis_Surface( surf );
   }
-  catch ( Standard_Failure )
+  catch ( Standard_Failure& )
   {
   }
 }
@@ -5627,8 +5629,9 @@ void _ViscousBuilder::putOnOffsetSurface( _EdgesOnShape&            eos,
                  << "_InfStep" << infStep << "_" << smooStep );
     for ( ; i < eos._edges.size(); ++i )
     {
-      if ( eos._edges[i]->Is( _LayerEdge::MARKED ))
+      if ( eos._edges[i]->Is( _LayerEdge::MARKED )) {
         dumpMove( eos._edges[i]->_nodes.back() );
+      }
     }
     dumpFunctionEnd();
   }
@@ -7284,7 +7287,7 @@ bool _ViscousBuilder::updateNormals( _SolidData&         data,
       _LayerEdge*    edge = e2neIt->first;
       _LayerEdge& newEdge = e2neIt->second;
       _EdgesOnShape*  eos = data.GetShapeEdges( edge );
-      if ( edge->Is( _LayerEdge::BLOCKED && newEdge._maxLen > edge->_len ))
+      if ( edge->Is( _LayerEdge::BLOCKED ) && newEdge._maxLen > edge->_len )
         continue;
 
       // Check if a new _normal is OK:
@@ -9110,7 +9113,7 @@ gp_XYZ _LayerEdge::smoothAngular()
       else
         norm += cross;
     }
-    catch (Standard_Failure) { // if |cross| == 0.
+    catch (Standard_Failure&) { // if |cross| == 0.
     }
   }
   gp_XYZ vec = newPos - pN;

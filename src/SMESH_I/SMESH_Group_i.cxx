@@ -98,7 +98,8 @@ SMESH_GroupOnFilter_i::SMESH_GroupOnFilter_i( PortableServer::POA_ptr thePOA,
 
 SMESH_GroupBase_i::~SMESH_GroupBase_i()
 {
-  if ( myPreMeshInfo ) delete myPreMeshInfo; myPreMeshInfo = NULL;
+  if ( myPreMeshInfo ) delete myPreMeshInfo;
+  myPreMeshInfo = NULL;
 }
 
 //=======================================================================

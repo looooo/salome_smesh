@@ -231,7 +231,7 @@ struct _RangeSet
    * \brief Return ranges of indices (from,to) of elements having a given value
    */
   bool GetIndices( const attr_t theValue, TIndexRanges & theIndices,
-                   const attr_t* theMinValue = 0, const attr_t* theMaxValue = 0) const
+                   const attr_t* /*theMinValue*/ = 0, const attr_t* /*theMaxValue*/ = 0) const
   {
     bool isFound = false;
 

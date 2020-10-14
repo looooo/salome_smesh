@@ -1732,6 +1732,7 @@ static QList<int> entityTypes( const int theType )
   {
   case SMESH::NODE:
     typeIds.append( SMDSEntity_Node );
+    break;
   case SMESH::EDGE:
     typeIds.append( SMDSEntity_Edge );
     typeIds.append( SMDSEntity_Quad_Edge );
@@ -3816,6 +3817,7 @@ void SMESHGUI_FilterDlg::onSelectionDone()
         myTable->SetThreshold(aRow, SMESH::toQStr( grp->GetName() ));
         myTable->SetID       (aRow, anIO->getEntry() );
       }
+      break;
     }
   default: // get a GEOM object
     {

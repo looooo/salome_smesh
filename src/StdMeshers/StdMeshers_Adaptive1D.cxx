@@ -443,7 +443,7 @@ namespace // internal utils
     double a[3];
     bool   isDone[3];
     double size = -1., maxLinkLen;
-    int    jLongest;
+    int    jLongest = 0;
 
     //int nbLinks = 0;
     for ( int i = 1; i <= myPolyTrias->Upper(); ++i )

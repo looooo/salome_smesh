@@ -295,7 +295,7 @@ GEOM::GEOM_Gen_var SMESH_Gen_i::GetGeomEngine( bool isShaper )
 
 GEOM::GEOM_Gen_var SMESH_Gen_i::GetGeomEngine( GEOM::GEOM_Object_ptr go )
 {
-  GEOM::GEOM_Gen_ptr gen = GEOM::GEOM_Gen::_nil();;
+  GEOM::GEOM_Gen_ptr gen = GEOM::GEOM_Gen::_nil();
   if ( !CORBA::is_nil( go ))
     gen = go->GetGen();
   return gen;

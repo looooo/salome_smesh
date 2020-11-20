@@ -113,6 +113,7 @@
 #include <LightApp_UpdateFlags.h>
 #include <QtxFontEdit.h>
 #include <QtxPopupMgr.h>
+#include <QtxInfoPanel.h>
 #include <SALOME_ListIO.hxx>
 #include <SUIT_Desktop.h>
 #include <SUIT_FileDlg.h>
@@ -5105,12 +5106,41 @@ bool SMESHGUI::reusableOperation( const int id )
   return ( id == SMESHOp::OpCompute || id == SMESHOp::OpPreCompute || id == SMESHOp::OpEvaluate || id == SMESHOp::OpRecompute ) ? false : SalomeApp_Module::reusableOperation( id );
 }
 
+namespace
+{
+  QString wrap(const QString& text, const QString& tag)
+  { return QString("<%1>%2</%3>").arg(tag).arg(text).arg(tag);}
+}
+
 bool SMESHGUI::activateModule( SUIT_Study* study )
 {
   bool res = SalomeApp_Module::activateModule( study );
 
   setMenuShown( true );
   setToolShown( true );
+
+  //InfoPanel
+  SalomeApp_Application* app = dynamic_cast<SalomeApp_Application*>( application() );
+  
+  app->infoPanel()->setTitle(tr("Welcome to SMESH"));
+
+  int gb1 = app->infoPanel()->addGroup(tr("Create a mesh"));
+  QString lbl1 = wrap("Define mesh algorithms", "li") + wrap("Define mesh hypotheses", "li") + wrap("Compute", "li") + wrap("Add some refinements:", "li");
+  QString lbl2 = wrap("via local sizes with some hypotheses", "li") + wrap("or via sub-meshes", "li");
+  lbl2 = lbl1 + wrap(lbl2, "ul");
+  lbl1 = wrap(lbl2, "ul");
+  app->infoPanel()->addLabel(lbl1, Qt::AlignLeft, gb1);
+
+  int gb2 = app->infoPanel()->addGroup(tr("Import a mesh"));
+  lbl1 = wrap("unv", "li") + wrap("med", "li") + wrap("stl", "li") + wrap("cgns", "li") + wrap("sauv", "li") +wrap("gmf", "li");
+  lbl1 = tr("Available formats:") + wrap(lbl1, "ul");
+  app->infoPanel()->addLabel(lbl1, Qt::AlignLeft, gb2);
+    
+  int gb3 = app->infoPanel()->addGroup(tr("Check the mesh"));
+  lbl1 = wrap("area", "li") + wrap("volume", "li") + wrap("aspect ration...", "li");
+  lbl1 = wrap("Display the mesh", "li") + wrap("Display some quality criteria:","li") + wrap(lbl1, "ul") + wrap("Add some clipping planes", "li");
+  lbl1 = wrap(lbl1, "ul");
+  app->infoPanel()->addLabel(lbl1, Qt::AlignLeft, gb3);
 
   // import Python module that manages SMESH plugins (need to be here because SalomePyQt API uses active module)
   PyGILState_STATE gstate = PyGILState_Ensure();
@@ -5230,6 +5260,7 @@ void SMESHGUI::windows( QMap<int, int>& aMap ) const
 {
   aMap.insert( SalomeApp_Application::WT_ObjectBrowser, Qt::LeftDockWidgetArea );
   aMap.insert( SalomeApp_Application::WT_NoteBook, Qt::LeftDockWidgetArea );
+  aMap.insert( SalomeApp_Application::WT_InfoPanel, Qt::RightDockWidgetArea);
 #ifndef DISABLE_PYCONSOLE
   aMap.insert( SalomeApp_Application::WT_PyConsole, Qt::BottomDockWidgetArea );
 #endif

@@ -5119,28 +5119,48 @@ bool SMESHGUI::activateModule( SUIT_Study* study )
   setMenuShown( true );
   setToolShown( true );
 
-  //InfoPanel
+  // Fill in Help Panel
   SalomeApp_Application* app = dynamic_cast<SalomeApp_Application*>( application() );
+  app->infoPanel()->setTitle(tr("INFO_WELCOME_TO_SMESH"));
+
+  int gb = app->infoPanel()->addGroup(tr("INFO_GRP_CREATE_MESH"));
+  QString lab;
+  QStringList items;
+  lab =       tr("INFO_DEFINE_ALGOS") + "<br/>";
+  lab = lab + tr("INFO_DEFINE_HYPOS") + "<br/>";
+  lab = lab + tr("INFO_COMPUTE") + "<br/>";
+  lab = lab + tr("INFO_REFINE") + ":";
+  items << wrap(tr("INFO_REFINE_LOCAL_SIZE"), "li")
+	<< wrap(tr("INFO_REFINE_SUBMESH"), "li");
+  lab = lab + wrap(items.join(""), "ul");
+  items.clear();
+
+  app->infoPanel()->addLabel(lab, gb);
+
+  gb = app->infoPanel()->addGroup(tr("INFO_GRP_IMPORT_MESH"));
+  items << wrap("UNV", "li")
+	<< wrap("MED", "li")
+	<< wrap("STL", "li")
+	<< wrap("CGNS", "li")
+	<< wrap("SAUV", "li")
+	<< wrap("GMF", "li");
+  lab = tr("INFO_AVAILABLE_FORMATS") + ":" + wrap(items.join(""), "ul");
+  items.clear();
   
-  app->infoPanel()->setTitle(tr("Welcome to SMESH"));
-
-  int gb1 = app->infoPanel()->addGroup(tr("Create a mesh"));
-  QString lbl1 = wrap("Define mesh algorithms", "li") + wrap("Define mesh hypotheses", "li") + wrap("Compute", "li") + wrap("Add some refinements:", "li");
-  QString lbl2 = wrap("via local sizes with some hypotheses", "li") + wrap("or via sub-meshes", "li");
-  lbl2 = lbl1 + wrap(lbl2, "ul");
-  lbl1 = wrap(lbl2, "ul");
-  app->infoPanel()->addLabel(lbl1, Qt::AlignLeft, gb1);
-
-  int gb2 = app->infoPanel()->addGroup(tr("Import a mesh"));
-  lbl1 = wrap("unv", "li") + wrap("med", "li") + wrap("stl", "li") + wrap("cgns", "li") + wrap("sauv", "li") +wrap("gmf", "li");
-  lbl1 = tr("Available formats:") + wrap(lbl1, "ul");
-  app->infoPanel()->addLabel(lbl1, Qt::AlignLeft, gb2);
+  app->infoPanel()->addLabel(lab, gb);
     
-  int gb3 = app->infoPanel()->addGroup(tr("Check the mesh"));
-  lbl1 = wrap("area", "li") + wrap("volume", "li") + wrap("aspect ration...", "li");
-  lbl1 = wrap("Display the mesh", "li") + wrap("Display some quality criteria:","li") + wrap(lbl1, "ul") + wrap("Add some clipping planes", "li");
-  lbl1 = wrap(lbl1, "ul");
-  app->infoPanel()->addLabel(lbl1, Qt::AlignLeft, gb3);
+  gb = app->infoPanel()->addGroup(tr("INFO_GRP_CHECK_MESH"));
+  lab = tr("INFO_DISPLAY") + "<br/>";
+  items << wrap(tr("INFO_QUALITY_AREA"), "li")
+	<< wrap(tr("INFO_QUALITY_VOLUME"), "li")
+	<< wrap(tr("INFO_QUALITY_ASPECT_RATION"), "li")
+	<< wrap("...", "li");
+  lab = lab + tr("INFO_QUALITY_INFO") + ":" + wrap(items.join(""), "ul");
+  items.clear();
+  lab = lab + tr("INFO_CLIPPING");
+  
+  app->infoPanel()->addLabel(lab, gb);
+  // << Help Panel
 
   // import Python module that manages SMESH plugins (need to be here because SalomePyQt API uses active module)
   PyGILState_STATE gstate = PyGILState_Ensure();

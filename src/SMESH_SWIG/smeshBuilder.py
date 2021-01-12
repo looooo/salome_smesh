@@ -380,7 +380,13 @@ class smeshBuilder( SMESH._objref_SMESH_Gen, object ):
                     # 1. CORBA resolution of server
                     # 2. the __new__ method is called again
                     #print("==== smeshInst = lcc.FindOrLoadComponent ", engine, smeshInst, doLcc)
-                    smeshInst = salome.lcc.FindOrLoadComponent( "FactoryServer", "SMESH" )
+                    #smeshInst = salome.lcc.FindOrLoadComponent( "FactoryServer", "SMESH" )
+                    import SMeshHelper
+                    smesh_ior = SMeshHelper.BuildSMESHInstance()
+                    import SMESH
+                    import CORBA
+                    orb=CORBA.ORB_init([''])
+                    smeshInst = orb.string_to_object(smesh_ior)
             else:
                 # FindOrLoadComponent not called
                 if smeshInst is None:

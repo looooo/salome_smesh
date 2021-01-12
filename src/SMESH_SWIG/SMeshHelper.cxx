@@ -24,10 +24,10 @@
 
 #include <cstring>
 
-CORBA::ORB_var orb;
 
 std::string BuildSMESHInstance()
 {
+    CORBA::ORB_var orb;
     { int argc(0); orb = CORBA::ORB_init(argc,nullptr); }
     CORBA::Object_var obj = orb->resolve_initial_references("RootPOA");
     PortableServer::POA_var poa = PortableServer::POA::_narrow(obj);

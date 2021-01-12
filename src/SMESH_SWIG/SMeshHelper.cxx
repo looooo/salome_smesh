@@ -23,5 +23,13 @@
 
 std::string BuildSMESHInstance()
 {
+    CORBA::ORB_var orb;
+    { int argc(0); orb = CORBA::ORB_init(argc,nullptr); }
+    CORBA::Object_var obj = orb->resolve_initial_references("RootPOA");
+    PortableServer::POA_var poa = PortableServer::POA::_narrow(obj);
+    PortableServer::ObjectId * id = nullptr ;
+    SMESH_Gen_i *servant = new SMESH_Gen_i(orb,poa,id,"SMESH_inst_2","SMESH");
+    PortableServer::ObjectId *zeId = servant->getId();
+    CORBA::Object_var zeRef = poa->id_to_reference(*zeId);
     return "%%%%%%%%";
 }

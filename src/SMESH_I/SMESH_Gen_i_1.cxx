@@ -40,6 +40,7 @@
 #include <Utils_ExceptHandlers.hxx>
 #include <SALOMEDS_wrap.hxx>
 #include <SALOMEDS_Attributes_wrap.hxx>
+#include "SALOMEDS_Study_i.hxx"
 #include <SALOME_KernelServices.hxx>
 
 #include <TCollection_AsciiString.hxx>
@@ -215,7 +216,7 @@ SALOMEDS::SObject_ptr SMESH_Gen_i::ObjectToSObject(CORBA::Object_ptr theObject)
 //=======================================================================
 SALOMEDS::Study_var SMESH_Gen_i::getStudyServant()
 {
-  return SALOMEDS::Study::_duplicate(KERNEL::getStudyServant());
+  return SALOMEDS::Study::_duplicate(KERNEL::getStudyServantSA());
 }
 
 //=======================================================================

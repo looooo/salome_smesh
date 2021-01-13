@@ -32,6 +32,7 @@ std::string BuildSMESHInstance()
     CORBA::Object_var obj = orb->resolve_initial_references("RootPOA");
     PortableServer::POA_var poa = PortableServer::POA::_narrow(obj);
     PortableServer::POAManager_var pman = poa->the_POAManager();
+    PortableServer::ObjectId_var conId;
     //
     {
         char *argv[4] = {"Container","FactoryServer","toto",nullptr};

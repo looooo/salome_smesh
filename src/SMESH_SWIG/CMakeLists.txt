@@ -19,20 +19,7 @@
 
 include(${SWIG_USE_FILE})
 
-# --- options ---
-# additional include directories
 include_directories(
-  ${QT_INCLUDES}
-  ${PYTHON_INCLUDE_DIRS}
-  ${OpenCASCADE_INCLUDE_DIR}
-  ${OGL_INCLUDE_DIRS}
-  ${KERNEL_INCLUDE_DIRS}
-  ${GUI_INCLUDE_DIRS}
-  ${MEDFILE_INCLUDE_DIRS}
-  ${GEOM_INCLUDE_DIRS}
-  ${OMNIORB_INCLUDE_DIR}
-  ${Boost_INCLUDE_DIRS}
-  ${CMAKE_CURRENT_SOURCE_DIR}
   ${PROJECT_SOURCE_DIR}/src/SMESHDS
   ${PROJECT_SOURCE_DIR}/src/SMESHUtils
   ${PROJECT_SOURCE_DIR}/src/SMDS

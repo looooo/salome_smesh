@@ -361,9 +361,11 @@ class smeshBuilder( SMESH._objref_SMESH_Gen, object ):
     Hex_5Tet, Hex_6Tet, Hex_24Tet, Hex_2Prisms, Hex_4Prisms = 1, 2, 3, 1, 2
 
     def __new__(cls, *args):
+        #import pdb
         global engine
         global smeshInst
         global doLcc
+        #pdb.set_trace()
         #print("==== __new__", engine, smeshInst, doLcc)
 
         if smeshInst is None:
@@ -380,7 +382,7 @@ class smeshBuilder( SMESH._objref_SMESH_Gen, object ):
                     # 1. CORBA resolution of server
                     # 2. the __new__ method is called again
                     #print("==== smeshInst = lcc.FindOrLoadComponent ", engine, smeshInst, doLcc)
-                    #smeshInst = salome.lcc.FindOrLoadComponent( "FactoryServer", "SMESH" )
+                    #salome.lcc.FindOrLoadComponent( "FactoryServer", "SMESH" )
                     import SMeshHelper
                     smesh_ior = SMeshHelper.BuildSMESHInstance()
                     import SMESH

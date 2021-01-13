@@ -17,6 +17,8 @@
 // See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 //
 
+#pragma once
+
 #include <string>
 
-std::string BuildSMESHInstance();
+std::string BuildSMESHInstanceInternal(bool checkNS);

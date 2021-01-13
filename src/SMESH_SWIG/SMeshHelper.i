@@ -21,7 +21,14 @@
 
 %include "std_string.i"
 
+%{
+#include "SMeshHelper.h"
+%}
+
 %inline
 {
-  std::string BuildSMESHInstance();
+  std::string BuildSMESHInstance()
+  {
+    return BuildSMESHInstanceInternal(false);
+  }
 }

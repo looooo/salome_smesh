@@ -384,7 +384,8 @@ class smeshBuilder( SMESH._objref_SMESH_Gen, object ):
                     #print("==== smeshInst = lcc.FindOrLoadComponent ", engine, smeshInst, doLcc)
                     #salome.lcc.FindOrLoadComponent( "FactoryServer", "SMESH" )
                     import SMeshHelper
-                    smesh_ior = SMeshHelper.BuildSMESHInstance()
+                    checkNS = False
+                    smesh_ior = SMeshHelper.BuildSMESHInstance(checkNS)
                     import SMESH
                     import CORBA
                     orb=CORBA.ORB_init([''])

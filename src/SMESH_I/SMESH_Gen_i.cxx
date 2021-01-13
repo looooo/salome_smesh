@@ -330,7 +330,8 @@ SMESH_Gen_i::SMESH_Gen_i( CORBA::ORB_ptr            orb,
                           PortableServer::POA_ptr   poa,
                           PortableServer::ObjectId* contId,
                           const char*               instanceName,
-                          const char*               interfaceName )
+                          const char*               interfaceName,
+                          bool                      checkNS)
   : Engines_Component_i( orb, poa, contId, instanceName, interfaceName )
 {
 
@@ -356,21 +357,24 @@ SMESH_Gen_i::SMESH_Gen_i( CORBA::ORB_ptr            orb,
   // find out mode (embedded or standalone) here else
   // meshes created before calling SMESH_Client::GetSMESHGen(), which calls
   // SMESH_Gen_i::SetEmbeddedMode(), have wrong IsEmbeddedMode flag
-  if ( SALOME_NamingService* ns = GetNS() )
+  if(checkNS)
   {
-    CORBA::Object_var obj = ns->Resolve( "/Kernel/Session" );
-    SALOME::Session_var session = SALOME::Session::_narrow( obj ) ;
-    if ( !session->_is_nil() )
+    if ( SALOME_NamingService* ns = GetNS() )
     {
-      CORBA::String_var str_host = session->getHostname();
-      CORBA::Long        s_pid = session->getPID();
-      string my_host = Kernel_Utils::GetHostname();
+      CORBA::Object_var obj = ns->Resolve( "/Kernel/Session" );
+      SALOME::Session_var session = SALOME::Session::_narrow( obj ) ;
+      if ( !session->_is_nil() )
+      {
+        CORBA::String_var str_host = session->getHostname();
+        CORBA::Long        s_pid = session->getPID();
+        string my_host = Kernel_Utils::GetHostname();
 #ifdef WIN32
-      long    my_pid = (long)_getpid();
+        long    my_pid = (long)_getpid();
 #else
-      long    my_pid = (long) getpid();
+        long    my_pid = (long) getpid();
 #endif
-      SetEmbeddedMode( s_pid == my_pid && my_host == str_host.in() );
+        SetEmbeddedMode( s_pid == my_pid && my_host == str_host.in() );
+      }
     }
   }
 }

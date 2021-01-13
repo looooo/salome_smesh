@@ -133,7 +133,8 @@ public:
                PortableServer::POA_ptr   poa,
                PortableServer::ObjectId* contId,
                const char*               instanceName,
-               const char*               interfaceName );
+               const char*               interfaceName,
+               bool                      checkNS = true);
   // Destructor
   virtual ~SMESH_Gen_i();
 

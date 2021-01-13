@@ -25,7 +25,7 @@
 #include <cstring>
 
 
-std::string BuildSMESHInstance()
+std::string BuildSMESHInstanceInternal(bool checkNS)
 {
     CORBA::ORB_var orb;
     { int argc(0); orb = CORBA::ORB_init(argc,nullptr); }
@@ -42,7 +42,7 @@ std::string BuildSMESHInstance()
     //
     pman->activate();
     //
-    SMESH_Gen_i *servant = new SMESH_Gen_i(orb,poa,const_cast<PortableServer::ObjectId*>(&conId.in()),"SMESH_inst_2","SMESH");
+    SMESH_Gen_i *servant = new SMESH_Gen_i(orb,poa,const_cast<PortableServer::ObjectId*>(&conId.in()),"SMESH_inst_2","SMESH",checkNS);
     PortableServer::ObjectId *zeId = servant->getId();
     CORBA::Object_var zeRef = poa->id_to_reference(*zeId);
     CORBA::String_var ior = orb->object_to_string(zeRef);

@@ -332,7 +332,7 @@ SMESH_Gen_i::SMESH_Gen_i( CORBA::ORB_ptr            orb,
                           const char*               instanceName,
                           const char*               interfaceName,
                           bool                      checkNS)
-  : Engines_Component_i( orb, poa, contId, instanceName, interfaceName )
+  : Engines_Component_i( orb, poa, contId, instanceName, interfaceName, false, checkNS )
 {
 
   myOrb = CORBA::ORB::_duplicate(orb);

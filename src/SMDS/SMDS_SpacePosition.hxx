@@ -40,7 +40,8 @@ class SMDS_EXPORT SMDS_SpacePosition : public SMDS_Position
   virtual const double* GetParameters() const { return 0; }
 
  private:
-  static SMDS_SpacePosition* _originPosition;
+  static SMDS_SpacePosition *_originPosition();
+  static SMDS_SpacePosition* __originPosition;
 };
 
 #endif

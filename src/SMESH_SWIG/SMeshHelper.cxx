@@ -36,7 +36,7 @@ std::string BuildSMESHInstanceInternal(bool checkNS)
     //
     {
         char *argv[4] = {"Container","FactoryServer","toto",nullptr};
-        Engines_Container_i *cont = new Engines_Container_i(orb,poa,"FactoryServer",2,argv,false,false);
+        Engines_Container_i *cont = new Engines_Container_i(orb,poa,"FactoryServer",2,argv,false,checkNS);
         conId = poa->activate_object(cont);
     }
     //

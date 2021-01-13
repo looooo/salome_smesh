@@ -70,6 +70,7 @@ SET(_link_LIBRARIES
   ${KERNEL_SalomeIDLKERNEL}
   ${KERNEL_SALOMELocalTrace}
   ${KERNEL_SalomeKernelHelpers}
+  ${KERNEL_SalomeDS}
   ${OpenCASCADE_ApplicationFramework_LIBRARIES}
   ${OpenCASCADE_ModelingAlgorithms_LIBRARIES}
   ${GEOM_GEOMClient}

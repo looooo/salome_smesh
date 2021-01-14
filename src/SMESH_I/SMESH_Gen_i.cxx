@@ -49,6 +49,7 @@
 #include <TopoDS_Wire.hxx>
 #include <gp_Pnt.hxx>
 
+#include "SALOME_KernelServices.hxx"
 
 #ifdef WIN32
  #include <windows.h>
@@ -282,11 +283,8 @@ SALOME_LifeCycleCORBA*  SMESH_Gen_i::GetLCC()
 
 GEOM::GEOM_Gen_var SMESH_Gen_i::GetGeomEngine( bool isShaper )
 {
-  Engines::EngineComponent_ptr temp =
-    GetLCC()->FindOrLoad_Component( isShaper ? "FactoryServer" : "FactoryServer",
-                                    isShaper ? "SHAPERSTUDY" : "GEOM" );
+  CORBA::Object_var temp = KERNEL::RetrieveCompo(isShaper ? "SHAPERSTUDY" : "GEOM");
   myGeomGen = GEOM::GEOM_Gen::_narrow( temp );
-
   return myGeomGen;
 }
 

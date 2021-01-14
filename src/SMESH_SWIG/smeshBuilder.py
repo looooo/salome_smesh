@@ -652,8 +652,9 @@ class smeshBuilder( SMESH._objref_SMESH_Gen, object ):
         self.geompyD=geompyD
         self.SetGeomEngine(geompyD)
         SMESH._objref_SMESH_Gen.UpdateStudy(self)
-        sb = salome.myStudy.NewBuilder()
-        sc = salome.myStudy.FindComponent("SMESH")
+        import GeomHelper
+        sb = GeomHelper.myStudy().NewBuilder()
+        sc = GeomHelper.myStudy().FindComponent("SMESH")
         if sc:
             sb.LoadWith(sc, self)
         pass

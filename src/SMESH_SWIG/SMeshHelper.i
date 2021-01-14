@@ -31,4 +31,19 @@
   {
     return BuildSMESHInstanceInternal(checkNS);
   }
+  
+  std::string GetSessionInstance()
+  {
+    return GetSessionInstanceInternal();
+  }
 }
+
+%pythoncode %{
+
+def myStudy():
+  import SALOMEDS
+  import CORBA
+  orb=CORBA.ORB_init([''])
+  return orb.string_to_object(GetSessionInstance())
+
+%}

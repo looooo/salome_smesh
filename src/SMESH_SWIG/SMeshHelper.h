@@ -22,4 +22,3 @@
 #include <string>
 
 std::string BuildSMESHInstanceInternal(bool checkNS);
-std::string GetSessionInstanceInternal();

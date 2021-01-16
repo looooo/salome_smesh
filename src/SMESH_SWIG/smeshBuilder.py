@@ -361,11 +361,9 @@ class smeshBuilder( SMESH._objref_SMESH_Gen, object ):
     Hex_5Tet, Hex_6Tet, Hex_24Tet, Hex_2Prisms, Hex_4Prisms = 1, 2, 3, 1, 2
 
     def __new__(cls, *args):
-        #import pdb
         global engine
         global smeshInst
         global doLcc
-        #pdb.set_trace()
         #print("==== __new__", engine, smeshInst, doLcc)
 
         if smeshInst is None:
@@ -382,14 +380,7 @@ class smeshBuilder( SMESH._objref_SMESH_Gen, object ):
                     # 1. CORBA resolution of server
                     # 2. the __new__ method is called again
                     #print("==== smeshInst = lcc.FindOrLoadComponent ", engine, smeshInst, doLcc)
-                    #salome.lcc.FindOrLoadComponent( "FactoryServer", "SMESH" )
-                    import SMeshHelper
-                    checkNS = False
-                    smesh_ior = SMeshHelper.BuildSMESHInstance(checkNS)
-                    import SMESH
-                    import CORBA
-                    orb=CORBA.ORB_init([''])
-                    smeshInst = orb.string_to_object(smesh_ior)
+                    smeshInst = salome.lcc.FindOrLoadComponent( "FactoryServer", "SMESH" )
             else:
                 # FindOrLoadComponent not called
                 if smeshInst is None:
@@ -620,9 +611,7 @@ class smeshBuilder( SMESH._objref_SMESH_Gen, object ):
             obj = obj.GetMesh()
         elif isinstance( obj, Mesh_Algorithm ):
             obj = obj.GetAlgorithm()
-        import CORBA
-        orb=CORBA.ORB_init([''])
-        ior  = orb.object_to_string(obj)
+        ior  = salome.orb.object_to_string(obj)
         SMESH._objref_SMESH_Gen.SetName(self, ior, name)
 
     def SetEmbeddedMode( self,theMode ):
@@ -654,9 +643,8 @@ class smeshBuilder( SMESH._objref_SMESH_Gen, object ):
         self.geompyD=geompyD
         self.SetGeomEngine(geompyD)
         SMESH._objref_SMESH_Gen.UpdateStudy(self)
-        import GeomHelper
-        sb = GeomHelper.myStudy().NewBuilder()
-        sc = GeomHelper.myStudy().FindComponent("SMESH")
+        sb = salome.myStudy.NewBuilder()
+        sc = salome.myStudy.FindComponent("SMESH")
         if sc:
             sb.LoadWith(sc, self)
         pass

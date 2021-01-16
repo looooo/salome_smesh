@@ -620,7 +620,9 @@ class smeshBuilder( SMESH._objref_SMESH_Gen, object ):
             obj = obj.GetMesh()
         elif isinstance( obj, Mesh_Algorithm ):
             obj = obj.GetAlgorithm()
-        ior  = salome.orb.object_to_string(obj)
+        import CORBA
+        orb=CORBA.ORB_init([''])
+        ior  = orb.object_to_string(obj)
         SMESH._objref_SMESH_Gen.SetName(self, ior, name)
 
     def SetEmbeddedMode( self,theMode ):
@@ -1962,9 +1964,10 @@ class Mesh(metaclass = MeshMeta):
                 print(msg)
                 print(allReasons)
             pass
-        if salome.sg.hasDesktop():
-            if not isinstance( refresh, list): # not a call from subMesh.Compute()
-                if refresh: salome.sg.updateObjBrowser()
+        if salome.sg:
+            if salome.sg.hasDesktop():
+                if not isinstance( refresh, list): # not a call from subMesh.Compute()
+                    if refresh: salome.sg.updateObjBrowser()
 
         return ok
 

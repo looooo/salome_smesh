@@ -41,7 +41,8 @@
 #include <SALOMEDS_wrap.hxx>
 #include <SALOMEDS_Attributes_wrap.hxx>
 #include "SALOMEDS_Study_i.hxx"
-#include <SALOME_KernelServices.hxx>
+#include "SALOME_KernelServices.hxx"
+#include "SALOME_ModuleCatalog_impl.hxx"
 
 #include <TCollection_AsciiString.hxx>
 #include <TopoDS_Solid.hxx>
@@ -588,8 +589,7 @@ SALOMEDS::SComponent_ptr SMESH_Gen_i::PublishComponent()
 
   // If component for this SMESH engine does not exist in the study, create it
 
-  SALOME_ModuleCatalog::ModuleCatalog_var aCat =
-    SALOME_ModuleCatalog::ModuleCatalog::_narrow( GetNS()->Resolve("/Kernel/ModulCatalog") );
+  SALOME_ModuleCatalog::ModuleCatalog_var aCat = KERNEL::getModuleComponentServantSA();
   if ( CORBA::is_nil( aCat ) )
     return father._retn();
 

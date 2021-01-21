@@ -49,8 +49,6 @@
 #include <TopoDS_Wire.hxx>
 #include <gp_Pnt.hxx>
 
-#include "SALOME_KernelServices.hxx"
-
 #ifdef WIN32
  #include <windows.h>
  #include <process.h>
@@ -271,21 +269,6 @@ SALOME_LifeCycleCORBA*  SMESH_Gen_i::GetLCC()
     myLCC = new SALOME_LifeCycleCORBA( GetNS() );
   }
   return myLCC;
-}
-
-//=============================================================================
-/*!
- *  GetGeomEngine [ static ]
- *
- *  Get GEOM::GEOM_Gen reference
- */
-//=============================================================================
-
-GEOM::GEOM_Gen_var SMESH_Gen_i::GetGeomEngine( bool isShaper )
-{
-  CORBA::Object_var temp = KERNEL::RetrieveCompo(isShaper ? "SHAPERSTUDY" : "GEOM");
-  myGeomGen = GEOM::GEOM_Gen::_narrow( temp );
-  return myGeomGen;
 }
 
 //=============================================================================

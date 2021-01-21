@@ -107,7 +107,7 @@ public:
   // Get SALOME_LifeCycleCORBA object
   static SALOME_LifeCycleCORBA* GetLCC();
   // Retrieve and get GEOM engine reference
-  static GEOM::GEOM_Gen_var GetGeomEngine( bool isShaper );
+  virtual GEOM::GEOM_Gen_var GetGeomEngine( bool isShaper ) = 0;
   static GEOM::GEOM_Gen_var GetGeomEngine( GEOM::GEOM_Object_ptr );
   // Get object of the CORBA reference
   static PortableServer::ServantBase_var GetServant( CORBA::Object_ptr theObject );
@@ -636,8 +636,9 @@ private:
                                const TopoDS_Shape&       Shape,
                                double*                   Tolerance = NULL);
 
-private:
+protected:
   static GEOM::GEOM_Gen_var      myGeomGen;
+private:
   static CORBA::ORB_var          myOrb;         // ORB reference
   static PortableServer::POA_var myPoa;         // POA reference
   static SALOME_NamingService*   myNS;          // Naming Service

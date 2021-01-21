@@ -93,9 +93,7 @@ private:
 // ===========================================================
 // SMESH module's engine
 // ==========================================================
-class SMESH_I_EXPORT SMESH_Gen_i:
-  public virtual POA_SMESH::SMESH_Gen,
-  public virtual Engines_Component_i
+class SMESH_I_EXPORT SMESH_Gen_i : public POA_SMESH::SMESH_Gen, public Engines_Component_i
 {
 public:
   // Get last created instance of the class

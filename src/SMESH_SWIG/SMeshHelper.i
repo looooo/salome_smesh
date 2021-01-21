@@ -27,8 +27,8 @@
 
 %inline
 {
-  std::string BuildSMESHInstance(bool checkNS)
+  std::string BuildSMESHInstance()
   {
-    return BuildSMESHInstanceInternal(checkNS);
+    return BuildSMESHInstanceInternal();
   }
 }

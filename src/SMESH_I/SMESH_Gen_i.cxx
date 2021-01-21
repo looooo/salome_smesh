@@ -6583,26 +6583,3 @@ std::vector<long> SMESH_Gen_i::_GetInside( SMESH::SMESH_IDSource_ptr meshPart,
   }
   return res;
 }
-
-//=============================================================================
-/*!
- *  SMESHEngine_factory
- *
- *  C factory, accessible with dlsym, after dlopen
- */
-//=============================================================================
-
-extern "C"
-{ SMESH_I_EXPORT
-  PortableServer::ObjectId* SMESHEngine_factory( CORBA::ORB_ptr            orb,
-                                                 PortableServer::POA_ptr   poa,
-                                                 PortableServer::ObjectId* contId,
-                                                 const char*               instanceName,
-                                                 const char*               interfaceName )
-  {
-    if(MYDEBUG) MESSAGE( "PortableServer::ObjectId* SMESHEngine_factory()" );
-    if(MYDEBUG) SCRUTE(interfaceName);
-    SMESH_Gen_i* aSMESHGen = new SMESH_Gen_i(orb, poa, contId, instanceName, interfaceName);
-    return aSMESHGen->getId() ;
-  }
-}

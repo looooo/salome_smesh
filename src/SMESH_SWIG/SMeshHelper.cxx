@@ -19,13 +19,13 @@
 
 #include "SMeshHelper.h"
 
-#include "SMESH_Gen_i.hxx"
+#include "SMESH_Gen_No_Session_i.hxx"
 #include "SALOME_Container_i.hxx"
 #include "SALOME_KernelServices.hxx"
 
 #include <cstring>
 
-std::string BuildSMESHInstanceInternal(bool checkNS)
+std::string BuildSMESHInstanceInternal()
 {
     CORBA::ORB_var orb;
     { int argc(0); orb = CORBA::ORB_init(argc,nullptr); }
@@ -36,13 +36,13 @@ std::string BuildSMESHInstanceInternal(bool checkNS)
     //
     {
         char *argv[4] = {"Container","FactoryServer","toto",nullptr};
-        Engines_Container_i *cont = new Engines_Container_i(orb,poa,"FactoryServer",2,argv,false,checkNS);
+        Engines_Container_i *cont = new Engines_Container_i(orb,poa,"FactoryServer",2,argv,false,false);
         conId = poa->activate_object(cont);
     }
     //
     pman->activate();
     //
-    SMESH_Gen_i *servant = new SMESH_Gen_i(orb,poa,const_cast<PortableServer::ObjectId*>(&conId.in()),"SMESH_inst_2","SMESH",checkNS);
+    SMESH_Gen_No_Session_i *servant = new SMESH_Gen_No_Session_i(orb,poa,const_cast<PortableServer::ObjectId*>(&conId.in()),"SMESH_inst_2","SMESH");
     PortableServer::ObjectId *zeId = servant->getId();
     CORBA::Object_var zeRef = poa->id_to_reference(*zeId);
     CORBA::String_var ior = orb->object_to_string(zeRef);

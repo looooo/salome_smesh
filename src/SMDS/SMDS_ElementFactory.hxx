@@ -40,6 +40,8 @@
 
 #include <vtkType.h>
 
+#include <smIdType.hxx>
+
 class SMDS_ElementChunk;
 class SMDS_Mesh;
 class SMDS_MeshCell;
@@ -78,25 +80,25 @@ public:
   virtual ~SMDS_ElementFactory();
 
   //! Return minimal ID of a non-used element
-  int GetFreeID();
+  smIdType GetFreeID();
 
   //! Return maximal ID of an used element
-  int GetMaxID();
+  smIdType GetMaxID();
 
   //! Return minimal ID of an used element
-  int GetMinID();
+  smIdType GetMinID();
 
   //! Return an element by ID. NULL if the element with the given ID is already used
-  SMDS_MeshElement* NewElement( const int id );
+  SMDS_MeshElement* NewElement( const smIdType id );
 
   //! Return a SMDS_MeshCell by ID. NULL if the cell with the given ID is already used
-  SMDS_MeshCell* NewCell( const int id ) { return static_cast<SMDS_MeshCell*>( NewElement( id )); }
+  SMDS_MeshCell* NewCell( const smIdType id ) { return static_cast<SMDS_MeshCell*>( NewElement( id )); }
 
   //! Return an used element by ID. NULL if the element with the given ID is not yet used
-  const SMDS_MeshElement* FindElement( const int id ) const;
+  const SMDS_MeshElement* FindElement( const smIdType id ) const;
 
   //! Return a number of used elements
-  int NbUsedElements() const { return myNbUsedElements; }
+  smIdType NbUsedElements() const { return myNbUsedElements; }
 
   //! Return an iterator on all element filtered using a given filter.
   //  nbElemsToReturn is used to optimize by stopping the iteration as soon as
@@ -132,7 +134,7 @@ public:
   virtual bool CompactChangePointers();
 
   //! Return a number of elements in a chunk
-  static int ChunkSize();
+  static smIdType ChunkSize();
 };
 
 //------------------------------------------------------------------------------------
@@ -149,19 +151,19 @@ public:
   ~SMDS_NodeFactory();
 
   //! Return a SMDS_MeshNode by ID. NULL if the node with the given ID is already used
-  SMDS_MeshNode* NewNode( int id ) { return (SMDS_MeshNode*) NewElement(id); }
+  SMDS_MeshNode* NewNode( smIdType id ) { return (SMDS_MeshNode*) NewElement(id); }
 
   //! Return an used node by ID. NULL if the node with the given ID is not yet used
-  const SMDS_MeshNode* FindNode( int id ) { return (const SMDS_MeshNode*) FindElement(id); }
+  const SMDS_MeshNode* FindNode( smIdType id ) { return (const SMDS_MeshNode*) FindElement(id); }
 
   //! Set a total number of sub-shapes in the main shape
   void SetNbShapes( size_t nbShapes );
 
   //! Return a dimension of a shape
-  int  GetShapeDim( int shapeID ) const;
+  int  GetShapeDim( smIdType shapeID ) const;
 
   //! Set a dimension of a shape
-  void SetShapeDim( int shapeID, int dim );
+  void SetShapeDim( smIdType shapeID, int dim );
 
   //! De-allocate all nodes
   virtual void Clear();
@@ -403,7 +405,7 @@ public:
   static bool IsUsed( const _UsedRange& r ) { return r.myValue; }
 
   //! Return index of an element in the chunk
-  int Index( const SMDS_MeshElement* e ) const { return e - myElements; }
+  smIdType Index( const SMDS_MeshElement* e ) const { return e - myElements; }
 
   //! Return ID of the 1st element in the chunk
   int Get1stID() const { return my1stID; }

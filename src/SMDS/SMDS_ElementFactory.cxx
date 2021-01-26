@@ -92,11 +92,11 @@ SMDS_ElementFactory::~SMDS_ElementFactory()
 //================================================================================
 /*!
  * \brief Return a number of elements in a chunk
- *  \return int - chunk size
+ *  \return smIdType - chunk size
  */
 //================================================================================
 
-int SMDS_ElementFactory::ChunkSize()
+smIdType SMDS_ElementFactory::ChunkSize()
 {
   return theChunkSize;
 }
@@ -108,7 +108,7 @@ int SMDS_ElementFactory::ChunkSize()
  */
 //================================================================================
 
-int SMDS_ElementFactory::GetFreeID()
+smIdType SMDS_ElementFactory::GetFreeID()
 {
   if ( myChunksWithUnused.empty() )
   {
@@ -122,11 +122,11 @@ int SMDS_ElementFactory::GetFreeID()
 //================================================================================
 /*!
  * \brief Return maximal ID of an used element
- *  \return int - element ID
+ *  \return smIdType - element ID
  */
 //================================================================================
 
-int SMDS_ElementFactory::GetMaxID()
+smIdType SMDS_ElementFactory::GetMaxID()
 {
   int id = 0;
   TIndexRanges usedRanges;
@@ -143,11 +143,11 @@ int SMDS_ElementFactory::GetMaxID()
 //================================================================================
 /*!
  * \brief Return minimal ID of an used element
- *  \return int - element ID
+ *  \return smIdType - element ID
  */
 //================================================================================
 
-int SMDS_ElementFactory::GetMinID()
+smIdType SMDS_ElementFactory::GetMinID()
 {
   int id = 0;
   TIndexRanges usedRanges;
@@ -169,7 +169,7 @@ int SMDS_ElementFactory::GetMinID()
  */
 //================================================================================
 
-SMDS_MeshElement* SMDS_ElementFactory::NewElement( const int id )
+SMDS_MeshElement* SMDS_ElementFactory::NewElement( const smIdType id )
 {
   int iChunk = ( id - 1 ) / theChunkSize;
   int index  = ( id - 1 ) % theChunkSize;
@@ -200,7 +200,7 @@ SMDS_MeshElement* SMDS_ElementFactory::NewElement( const int id )
  */
 //================================================================================
 
-const SMDS_MeshElement* SMDS_ElementFactory::FindElement( const int id ) const
+const SMDS_MeshElement* SMDS_ElementFactory::FindElement( const smIdType id ) const
 {
   if ( id > 0 )
   {
@@ -488,7 +488,7 @@ void SMDS_NodeFactory::SetNbShapes( size_t nbShapes )
  */
 //================================================================================
 
-int SMDS_NodeFactory::GetShapeDim( int shapeID ) const
+int SMDS_NodeFactory::GetShapeDim( smIdType shapeID ) const
 {
   return shapeID < (int)myShapeDim.size() ? myShapeDim[ shapeID ] : theDefaultShapeDim;
 }
@@ -499,9 +499,9 @@ int SMDS_NodeFactory::GetShapeDim( int shapeID ) const
  */
 //================================================================================
 
-void SMDS_NodeFactory::SetShapeDim( int shapeID, int dim )
+void SMDS_NodeFactory::SetShapeDim( smIdType shapeID, int dim )
 {
-  if ( shapeID >= (int)myShapeDim.size() )
+  if ( shapeID >= (smIdType)myShapeDim.size() )
     myShapeDim.resize( shapeID + 10, theDefaultShapeDim );
   myShapeDim[ shapeID ] = dim;
 }

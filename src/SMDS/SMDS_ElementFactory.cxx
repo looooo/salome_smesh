@@ -92,11 +92,11 @@ SMDS_ElementFactory::~SMDS_ElementFactory()
 //================================================================================
 /*!
  * \brief Return a number of elements in a chunk
- *  \return smIdType - chunk size
+ *  \return int - chunk size
  */
 //================================================================================
 
-smIdType SMDS_ElementFactory::ChunkSize()
+int SMDS_ElementFactory::ChunkSize()
 {
   return theChunkSize;
 }
@@ -295,7 +295,7 @@ void SMDS_ElementFactory::Compact( std::vector<int>& theVtkIDsNewToOld )
   }
   else if ( newNbCells == maxCellID ) // no holes
   {
-    int newID, minLastID = std::min( myVtkIDs.size(), theVtkIDsNewToOld.size() );
+    smIdType newID, minLastID = std::min( myVtkIDs.size(), theVtkIDsNewToOld.size() );
     for ( newID = 0; newID < minLastID; ++newID )
       theVtkIDsNewToOld[ newID ] = myVtkIDs[ newID ];
     for ( ; newID < newNbCells; ++newID )
@@ -565,7 +565,7 @@ void SMDS_ElementChunk::UseElement( const int index )
  */
 //================================================================================
 
-int SMDS_ElementChunk::GetUnusedID() const
+smIdType SMDS_ElementChunk::GetUnusedID() const
 {
   TUsedRangeSet::set_iterator r = myUsedRanges.mySet.begin();
   for ( ; r != myUsedRanges.mySet.end(); ++r )
@@ -603,7 +603,7 @@ void SMDS_ElementChunk::Free( const SMDS_MeshElement* e )
  */
 //================================================================================
 
-int SMDS_ElementChunk::GetID( const SMDS_MeshElement* e ) const
+smIdType SMDS_ElementChunk::GetID( const SMDS_MeshElement* e ) const
 {
   return my1stID + Index( e );
 }

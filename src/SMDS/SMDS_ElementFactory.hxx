@@ -134,7 +134,7 @@ public:
   virtual bool CompactChangePointers();
 
   //! Return a number of elements in a chunk
-  static smIdType ChunkSize();
+  static int ChunkSize();
 };
 
 //------------------------------------------------------------------------------------
@@ -393,7 +393,7 @@ public:
   const SMDS_MeshElement* Element(int index) const { return & myElements[index]; }
 
   //! Return ID of the first non-used element
-  int  GetUnusedID() const;
+  smIdType  GetUnusedID() const;
 
   //! Mark an element as used
   void UseElement( const int index );
@@ -431,7 +431,7 @@ public:
 
   // Methods called by SMDS_MeshElement
 
-  int  GetID( const SMDS_MeshElement* e ) const;
+  smIdType  GetID( const SMDS_MeshElement* e ) const;
 
   int  GetVtkID( const SMDS_MeshElement* e ) const;
   void SetVTKID( const SMDS_MeshElement* e, const vtkIdType id );

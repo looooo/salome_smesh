@@ -815,9 +815,9 @@ SMDS_MeshVolume* SMDS_Mesh::AddVolumeWithID(const SMDS_MeshNode * n1,
 SMDS_MeshFace* SMDS_Mesh::AddPolygonalFaceWithID (const std::vector<smIdType> & nodes_ids,
                                                   const smIdType               ID)
 {
-  int nbNodes = nodes_ids.size();
+  smIdType nbNodes = nodes_ids.size();
   std::vector<const SMDS_MeshNode*> nodes (nbNodes);
-  for (int i = 0; i < nbNodes; i++) {
+  for (smIdType i = 0; i < nbNodes; i++) {
     nodes[i] = myNodeFactory->FindNode( nodes_ids[i] );
     if (!nodes[i]) return NULL;
   }
@@ -911,9 +911,9 @@ SMDS_MeshVolume * SMDS_Mesh::AddPolyhedralVolumeWithID (const std::vector<smIdTy
                                                         const std::vector<int> & quantities,
                                                         const smIdType                ID)
 {
-  int nbNodes = nodes_ids.size();
+  smIdType nbNodes = nodes_ids.size();
   std::vector<const SMDS_MeshNode*> nodes (nbNodes);
-  for (int i = 0; i < nbNodes; i++) {
+  for (smIdType i = 0; i < nbNodes; i++) {
     nodes[i] = myNodeFactory->FindNode(nodes_ids[i]);
     if (!nodes[i]) return NULL;
   }
@@ -1589,7 +1589,7 @@ SMDS_NodeIteratorPtr SMDS_Mesh::nodesIterator() const
 
 SMDS_ElemIteratorPtr SMDS_Mesh::elementGeomIterator(SMDSAbs_GeometryType type) const
 {
-  int nbElems = myCellFactory->CompactChangePointers() ? -1 : myInfo.NbElements( type );
+  smIdType nbElems = myCellFactory->CompactChangePointers() ? -1 : myInfo.NbElements( type );
   return myCellFactory->GetIterator< SMDS_ElemIterator >( new SMDS_MeshElement::GeomFilter( type ),
                                                           nbElems);
 }
@@ -1600,7 +1600,7 @@ SMDS_ElemIteratorPtr SMDS_Mesh::elementEntityIterator(SMDSAbs_EntityType type) c
   {
     return myNodeFactory->GetIterator< SMDS_ElemIterator >( new SMDS_MeshElement::NonNullFilter );
   }
-  int nbElems = myCellFactory->CompactChangePointers() ? -1 : myInfo.NbElements( type );
+  smIdType nbElems = myCellFactory->CompactChangePointers() ? -1 : myInfo.NbElements( type );
   return myCellFactory->GetIterator<SMDS_ElemIterator>( new SMDS_MeshElement::EntityFilter( type ),
                                                         nbElems);
 }
@@ -1620,7 +1620,7 @@ SMDS_ElemIteratorPtr SMDS_Mesh::elementsIterator(SMDSAbs_ElementType type) const
     return myNodeFactory->GetIterator< TIterator >( new SMDS_MeshElement::NonNullFilter );
 
   default:
-    int nbElems = myCellFactory->CompactChangePointers() ? -1 : myInfo.NbElements( type );
+    smIdType nbElems = myCellFactory->CompactChangePointers() ? -1 : myInfo.NbElements( type );
     return myCellFactory->GetIterator< TIterator >( new SMDS_MeshElement::TypeFilter( type ),
                                                     nbElems);
   }
@@ -1634,7 +1634,7 @@ SMDS_ElemIteratorPtr SMDS_Mesh::elementsIterator(SMDSAbs_ElementType type) const
 SMDS_EdgeIteratorPtr SMDS_Mesh::edgesIterator() const
 {
   typedef SMDS_EdgeIterator TIterator;
-  int nbElems = myCellFactory->CompactChangePointers() ? -1 : myInfo.NbEdges();
+  smIdType nbElems = myCellFactory->CompactChangePointers() ? -1 : myInfo.NbEdges();
   return myCellFactory->GetIterator< TIterator >( new SMDS_MeshElement::TypeFilter( SMDSAbs_Edge ),
                                                   nbElems);
 }
@@ -1646,7 +1646,7 @@ SMDS_EdgeIteratorPtr SMDS_Mesh::edgesIterator() const
 SMDS_FaceIteratorPtr SMDS_Mesh::facesIterator() const
 {
   typedef SMDS_FaceIterator TIterator;
-  int nbElems = myCellFactory->CompactChangePointers() ? -1 : myInfo.NbFaces();
+  smIdType nbElems = myCellFactory->CompactChangePointers() ? -1 : myInfo.NbFaces();
   return myCellFactory->GetIterator< TIterator >( new SMDS_MeshElement::TypeFilter( SMDSAbs_Face ),
                                                   nbElems);
 }
@@ -1658,7 +1658,7 @@ SMDS_FaceIteratorPtr SMDS_Mesh::facesIterator() const
 SMDS_VolumeIteratorPtr SMDS_Mesh::volumesIterator() const
 {
   typedef SMDS_VolumeIterator TIterator;
-  int nbElems = myCellFactory->CompactChangePointers() ? -1 : myInfo.NbVolumes();
+  smIdType nbElems = myCellFactory->CompactChangePointers() ? -1 : myInfo.NbVolumes();
   return
     myCellFactory->GetIterator< TIterator >( new SMDS_MeshElement::TypeFilter( SMDSAbs_Volume ),
                                              nbElems );
@@ -1705,7 +1705,7 @@ intersectionOfSets( std::set<const SMDS_MeshElement*> vs[], int numberOfSets )
 ///////////////////////////////////////////////////////////////////////////////
 static std::set<const SMDS_MeshElement*> * getFinitElements(const SMDS_MeshElement * element)
 {
-  int numberOfSets=element->NbNodes();
+  smIdType numberOfSets=element->NbNodes();
   std::set<const SMDS_MeshElement*> *initSet = new std::set<const SMDS_MeshElement*>[numberOfSets];
 
   SMDS_NodeIteratorPtr itNodes = element->nodeIterator();
@@ -2973,16 +2973,16 @@ void SMDS_Mesh::CompactMesh()
     for ( ; holder != myElemHolders.end(); ++holder )
       (*holder)->beforeCompacting();
   }
-  int oldCellSize = myCellFactory->GetMaxID();
+  smIdType oldCellSize = myCellFactory->GetMaxID();
 
   // remove "holes" in SMDS numeration
-  std::vector<int> idNodesOldToNew, idCellsNewToOld, idCellsOldToNew;
+  std::vector<smIdType> idNodesOldToNew, idCellsNewToOld, idCellsOldToNew;
   myNodeFactory->Compact( idNodesOldToNew );
   myCellFactory->Compact( idCellsNewToOld );
 
   // make VTK IDs correspond to SMDS IDs
-  int newNodeSize = myNodeFactory->NbUsedElements();
-  int newCellSize = myCellFactory->NbUsedElements();
+  smIdType newNodeSize = myNodeFactory->NbUsedElements();
+  smIdType newCellSize = myCellFactory->NbUsedElements();
   myGrid->compactGrid( idNodesOldToNew, newNodeSize, idCellsNewToOld, newCellSize );
 
   if ( idsChange && !myElemHolders.empty() )

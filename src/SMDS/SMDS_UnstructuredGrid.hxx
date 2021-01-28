@@ -28,6 +28,7 @@
 
 #include <vtkUnstructuredGrid.h>
 #include <vtkCellLinks.h>
+#include <smIdType.hxx>
 
 #include <vector>
 #include <set>
@@ -73,10 +74,10 @@ class SMDS_EXPORT SMDS_UnstructuredGrid: public vtkUnstructuredGrid
 {
 public:
   void setSMDS_mesh(SMDS_Mesh *mesh);
-  void compactGrid(std::vector<int>& idNodesOldToNew,
-                   int               newNodeSize,
-                   std::vector<int>& idCellsOldToNew,
-                   int               newCellSize);
+  void compactGrid(std::vector<smIdType>& idNodesOldToNew,
+                   smIdType               newNodeSize,
+                   std::vector<smIdType>& idCellsOldToNew,
+                   smIdType               newCellSize);
   virtual vtkMTimeType GetMTime();
   virtual vtkPoints *GetPoints();
 
@@ -115,10 +116,10 @@ public:
 protected:
   SMDS_UnstructuredGrid();
   ~SMDS_UnstructuredGrid();
-  void copyNodes(vtkPoints *newPoints, std::vector<int>& idNodesOldToNew, int& alreadyCopied, int start, int end);
+  void copyNodes(vtkPoints *newPoints, std::vector<smIdType>& idNodesOldToNew, int& alreadyCopied, int start, int end);
   void copyBloc(vtkUnsignedCharArray *newTypes,
-                const std::vector<int>& idCellsOldToNew,
-                const std::vector<int>& idNodesOldToNew,
+                const std::vector<smIdType>& idCellsOldToNew,
+                const std::vector<smIdType>& idNodesOldToNew,
                 vtkCellArray* newConnectivity,
                 vtkIdTypeArray* newLocations,
                 std::vector<vtkIdType>& pointsCell);

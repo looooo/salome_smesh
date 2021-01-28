@@ -281,11 +281,11 @@ void SMDS_ElementFactory::Clear()
  */
 //================================================================================
 
-void SMDS_ElementFactory::Compact( std::vector<int>& theVtkIDsNewToOld )
+void SMDS_ElementFactory::Compact( std::vector<smIdType>& theVtkIDsNewToOld )
 {
-  int  newNbCells = NbUsedElements();
-  int   maxCellID = GetMaxID();
-  int newNbChunks = newNbCells / theChunkSize + bool ( newNbCells % theChunkSize );
+  smIdType  newNbCells = NbUsedElements();
+  smIdType   maxCellID = GetMaxID();
+  smIdType newNbChunks = newNbCells / theChunkSize + bool ( newNbCells % theChunkSize );
 
   theVtkIDsNewToOld.resize( newNbCells );
 
@@ -377,16 +377,16 @@ SMDS_NodeFactory::~SMDS_NodeFactory()
  */
 //================================================================================
 
-void SMDS_NodeFactory::Compact( std::vector<int>& theVtkIDsOldToNew )
+void SMDS_NodeFactory::Compact( std::vector<smIdType>& theVtkIDsOldToNew )
 {
   // IDs of VTK nodes always correspond to SMDS IDs but there can be "holes"
   // in the chunks. So we remove holes and report relocation in theVtkIDsOldToNew:
   // theVtkIDsOldToNew[ old VtkID ] = new VtkID
 
-  int  oldNbNodes = myMesh->GetGrid()->GetNumberOfPoints();
-  int  newNbNodes = NbUsedElements();
-  int newNbChunks = newNbNodes / theChunkSize + bool ( newNbNodes % theChunkSize );
-  int   maxNodeID = GetMaxID();
+  smIdType  oldNbNodes = myMesh->GetGrid()->GetNumberOfPoints();
+  smIdType  newNbNodes = NbUsedElements();
+  smIdType newNbChunks = newNbNodes / theChunkSize + bool ( newNbNodes % theChunkSize );
+  smIdType   maxNodeID = GetMaxID();
 
   theVtkIDsOldToNew.resize( oldNbNodes, -1 );
 
@@ -836,7 +836,7 @@ void SMDS_ElementChunk::Compact()
     }
     else if ( it != mySubIDRanges.mySet.rbegin() )
     {
-      int nbNodes = (it-1)->my1st;
+      smIdType nbNodes = (it-1)->my1st;
       myPositions.resize( nbNodes * 2 );
       std::vector<TParam> newPos( myPositions.begin(), myPositions.end() );
       myPositions.swap( newPos );

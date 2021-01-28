@@ -633,7 +633,7 @@ public:
   }
 
   const SMDS_MeshNode *FindNode(smIdType idnode) const;
-  const SMDS_MeshNode *FindNodeVtk(smIdType idnode) const;
+  const SMDS_MeshNode *FindNodeVtk(int idnode) const;
   const SMDS_MeshElement *FindElementVtk(int IDelem) const;
   virtual const SMDS_MeshElement * FindElement(int IDelem) const;
   static const SMDS_Mesh0DElement* Find0DElement(const SMDS_MeshNode * n);

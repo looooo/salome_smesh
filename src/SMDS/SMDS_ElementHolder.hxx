@@ -29,6 +29,8 @@
 
 #include "SMDS_ElemIterator.hxx"
 
+#include <smIdType.hxx>
+
 #include <vector>
 #include <set>
 
@@ -80,8 +82,8 @@ class SMDS_EXPORT SMDS_ElementHolder
   void beforeCompacting();
 
   //! restore pointers to elements
-  void restoreElements( const std::vector<int>& idNodessOldToNew,
-                        const std::vector<int>& idCellsOldToNew );
+  void restoreElements( const std::vector<smIdType>& idNodessOldToNew,
+                        const std::vector<smIdType>& idCellsOldToNew );
 
 
   std::vector<const SMDS_MeshElement*>      myExternalElems; //!< elements not contained in the mesh

@@ -105,7 +105,7 @@ int SMDS_MeshElement::GetNodeIndex( const SMDS_MeshNode* node ) const
  */
 //================================================================================
 
-int SMDS_MeshElement::GetID() const
+smIdType SMDS_MeshElement::GetID() const
 {
   return myHolder ? myHolder->GetID( this ) : -1;
 }
@@ -127,7 +127,7 @@ void SMDS_MeshElement::setShapeID( const int shapeID ) const
  */
 //================================================================================
 
-int SMDS_MeshElement::GetShapeID() const
+smIdType SMDS_MeshElement::GetShapeID() const
 {
   return myHolder->GetShapeID( this );
 }

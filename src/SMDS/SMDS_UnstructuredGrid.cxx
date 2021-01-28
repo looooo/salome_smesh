@@ -175,8 +175,8 @@ void SMDS_UnstructuredGrid::setSMDS_mesh(SMDS_Mesh *mesh)
   _mesh = mesh;
 }
 
-void SMDS_UnstructuredGrid::compactGrid(std::vector<int>& idNodesOldToNew, int newNodeSize,
-                                        std::vector<int>& idCellsNewToOld, int newCellSize)
+void SMDS_UnstructuredGrid::compactGrid(std::vector<smIdType>& idNodesOldToNew, smIdType newNodeSize,
+                                        std::vector<smIdType>& idCellsNewToOld, smIdType newCellSize)
 {
   this->DeleteLinks();
 
@@ -336,7 +336,7 @@ void SMDS_UnstructuredGrid::compactGrid(std::vector<int>& idNodesOldToNew, int n
 }
 
 void SMDS_UnstructuredGrid::copyNodes(vtkPoints *       newPoints,
-                                      std::vector<int>& /*idNodesOldToNew*/,
+                                      std::vector<smIdType>& /*idNodesOldToNew*/,
                                       int&              alreadyCopied,
                                       int               start,
                                       int               end)
@@ -352,8 +352,8 @@ void SMDS_UnstructuredGrid::copyNodes(vtkPoints *       newPoints,
 }
 
 void SMDS_UnstructuredGrid::copyBloc(vtkUnsignedCharArray *  newTypes,
-                                     const std::vector<int>& idCellsNewToOld,
-                                     const std::vector<int>& idNodesOldToNew,
+                                     const std::vector<smIdType>& idCellsNewToOld,
+                                     const std::vector<smIdType>& idNodesOldToNew,
                                      vtkCellArray*           newConnectivity,
                                      vtkIdTypeArray*         newLocations,
                                      std::vector<vtkIdType>& pointsCell)

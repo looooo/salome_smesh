@@ -102,7 +102,7 @@ private:
   smIdType myNbHexPrism;
   smIdType myNbPolyhedrons;
 
-  std::vector<int*> myNb; // pointers to myNb... fields
+  std::vector<smIdType*> myNb; // pointers to myNb... fields
   std::vector<int>  myShift; // shift to get an index in myNb by elem->NbNodes()
 };
 
@@ -407,7 +407,7 @@ SMDS_MeshInfo::NbElementsOfGeom(SMDSAbs_GeometryType geom) const
 }
 
 inline void // setNb
-SMDS_MeshInfo::setNb(const SMDSAbs_EntityType geomType, const int nb)
+SMDS_MeshInfo::setNb(const SMDSAbs_EntityType geomType, const smIdType nb)
 {
   switch (geomType) {
   case SMDSEntity_Node:             myNbNodes             = nb; break;

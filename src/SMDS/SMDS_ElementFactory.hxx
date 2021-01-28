@@ -128,7 +128,7 @@ public:
 
   //! Remove unused elements located not at the end of the last chunk.
   //  Minimize allocated memory
-  virtual void Compact(std::vector<int>& idCellsOldToNew);
+  virtual void Compact(std::vector<smIdType>& idCellsOldToNew);
 
   //! Return true if Compact() will change IDs of elements
   virtual bool CompactChangePointers();
@@ -170,7 +170,7 @@ public:
 
   //! Remove unused nodes located not at the end of the last chunk.
   //  Minimize allocated memory
-  virtual void Compact(std::vector<int>& idNodesOldToNew);
+  virtual void Compact(std::vector<smIdType>& idNodesOldToNew);
 
   //! Return true if Compact() will change IDs of node
   virtual bool CompactChangePointers();

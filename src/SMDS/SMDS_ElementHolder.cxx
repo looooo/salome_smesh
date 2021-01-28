@@ -84,8 +84,8 @@ void SMDS_ElementHolder::beforeCompacting()
 //purpose  : restore pointers to elements
 //=======================================================================
 
-void SMDS_ElementHolder::restoreElements( const std::vector<int>& idNodesOldToNew,
-                                          const std::vector<int>& idCellsOldToNew )
+void SMDS_ElementHolder::restoreElements( const std::vector<smIdType>& idNodesOldToNew,
+                                          const std::vector<smIdType>& idCellsOldToNew )
 {
   tmpClear();
 

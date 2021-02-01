@@ -790,7 +790,7 @@ SMESHDS_Mesh::AddQuadPolygonalFace (const std::vector<const SMDS_MeshNode*>& nod
 //purpose  : 
 //=======================================================================
 SMDS_MeshVolume* SMESHDS_Mesh::AddPolyhedralVolumeWithID (const std::vector<smIdType>& nodes_ids,
-                                                          const std::vector<int>& quantities,
+                                                          const std::vector<smIdType>& quantities,
                                                           const smIdType               ID)
 {
   SMDS_MeshVolume *anElem = SMDS_Mesh::AddPolyhedralVolumeWithID(nodes_ids, quantities, ID);
@@ -802,8 +802,8 @@ SMDS_MeshVolume* SMESHDS_Mesh::AddPolyhedralVolumeWithID (const std::vector<smId
 
 SMDS_MeshVolume* SMESHDS_Mesh::AddPolyhedralVolumeWithID
 (const std::vector<const SMDS_MeshNode*>& nodes,
- const std::vector<int>&                  quantities,
- const smIdType                                ID)
+ const std::vector<smIdType>&             quantities,
+ const smIdType                           ID)
 {
   SMDS_MeshVolume *anElem = SMDS_Mesh::AddPolyhedralVolumeWithID(nodes, quantities, ID);
   if (anElem) {
@@ -819,7 +819,7 @@ SMDS_MeshVolume* SMESHDS_Mesh::AddPolyhedralVolumeWithID
 
 SMDS_MeshVolume* SMESHDS_Mesh::AddPolyhedralVolume
 (const std::vector<const SMDS_MeshNode*>& nodes,
- const std::vector<int>&                  quantities)
+ const std::vector<smIdType>&             quantities)
 {
   SMDS_MeshVolume *anElem = SMDS_Mesh::AddPolyhedralVolume(nodes, quantities);
   if (anElem) {

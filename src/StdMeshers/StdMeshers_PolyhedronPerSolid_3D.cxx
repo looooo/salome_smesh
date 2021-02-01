@@ -63,7 +63,7 @@ namespace
   //=======================================================================
 
   const SMDS_MeshElement* addHexa( std::vector< const SMDS_MeshElement* >& faces,
-                                   const std::vector< int > &              quantities,
+                                   const std::vector< smIdType > &         quantities,
                                    SMESH_MesherHelper &                    helper )
   {
     const SMDS_MeshElement* newHexa = 0;
@@ -134,7 +134,7 @@ namespace
   //=======================================================================
 
   const SMDS_MeshElement* addTetra( std::vector< const SMDS_MeshElement* >& faces,
-                                    const std::vector< int > &              quantities,
+                                    const std::vector< smIdType > &         quantities,
                                     SMESH_MesherHelper &                    helper )
   {
     const SMDS_MeshElement* newTetra = 0;
@@ -173,7 +173,7 @@ namespace
   //=======================================================================
 
   const SMDS_MeshElement* addPenta( std::vector< const SMDS_MeshElement* >& faces,
-                                    const std::vector< int > &              quantities,
+                                    const std::vector< smIdType > &         quantities,
                                     SMESH_MesherHelper &                    helper )
   {
     const SMDS_MeshElement* newPenta = 0;
@@ -232,7 +232,7 @@ namespace
   //=======================================================================
 
   const SMDS_MeshElement* addPyra( std::vector< const SMDS_MeshElement* >& faces,
-                                   const std::vector< int > &              quantities,
+                                   const std::vector< smIdType > &         quantities,
                                    SMESH_MesherHelper &                    helper )
   {
     const SMDS_MeshElement* newPyra = 0;
@@ -276,7 +276,7 @@ namespace
   //=======================================================================
 
   const SMDS_MeshElement* addHPrism( std::vector< const SMDS_MeshElement* >& faces,
-                                     const std::vector< int > &              quantities,
+                                     const std::vector< smIdType > &         quantities,
                                      SMESH_MesherHelper &                    helper )
   {
     const SMDS_MeshElement* newHexPrism = 0;
@@ -357,7 +357,7 @@ namespace
   //=======================================================================
 
   const SMDS_MeshElement* addPoly( std::vector< const SMDS_MeshElement* >& faces,
-                                   const std::vector< int > &              quantities,
+                                   const std::vector< smIdType > &         quantities,
                                    SMESH_MesherHelper &                    helper )
   {
     const SMDS_MeshElement* newPoly = 0;
@@ -508,7 +508,7 @@ bool StdMeshers_PolyhedronPerSolid_3D::Compute(SMESH_Mesh&         theMesh,
         for ( size_t i = 0; i < faces.size() &&  !useMediumNodes ; ++i )
           useMediumNodes = faces[ i ]->IsQuadratic();
 
-      std::vector< int > quantities( faces.size() );
+      std::vector< smIdType > quantities( faces.size() );
       std::set< const SMDS_MeshNode* > nodes;
       for ( size_t i = 0; i < faces.size(); ++i )
       {

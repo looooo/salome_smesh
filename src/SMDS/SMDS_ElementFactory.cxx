@@ -383,9 +383,9 @@ void SMDS_NodeFactory::Compact( std::vector<smIdType>& theVtkIDsOldToNew )
   // in the chunks. So we remove holes and report relocation in theVtkIDsOldToNew:
   // theVtkIDsOldToNew[ old VtkID ] = new VtkID
 
-  int  oldNbNodes = myMesh->GetGrid()->GetNumberOfPoints();
-  int  newNbNodes = NbUsedElements();
-  int newNbChunks = newNbNodes / theChunkSize + bool ( newNbNodes % theChunkSize );
+  smIdType  oldNbNodes = myMesh->GetGrid()->GetNumberOfPoints();
+  smIdType  newNbNodes = NbUsedElements();
+  smIdType newNbChunks = newNbNodes / theChunkSize + bool ( newNbNodes % theChunkSize );
   smIdType   maxNodeID = GetMaxID();
 
   theVtkIDsOldToNew.resize( oldNbNodes, -1 );

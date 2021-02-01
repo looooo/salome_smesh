@@ -45,24 +45,24 @@ class SMESHDS_EXPORT SMESHDS_Command
         void AddFace(int NewFaceID, int idnode1, int idnode2, int idnode3);
         void AddFace(int NewFaceID, int idnode1, int idnode2, int idnode3,
                      int idnode4);
-        void AddVolume(int NewVolID, int idnode1, int idnode2, int idnode3,
-                       int idnode4);
-        void AddVolume(int NewVolID, int idnode1, int idnode2, int idnode3,
-                       int idnode4, int idnode5);
-        void AddVolume(int NewVolID, int idnode1, int idnode2, int idnode3,
-                       int idnode4, int idnode5, int idnode6);
-        void AddVolume(int NewVolID, int idnode1, int idnode2, int idnode3,
-                       int idnode4, int idnode5, int idnode6, int idnode7, int idnode8);
-        void AddVolume(int NewVolID, int idnode1, int idnode2, int idnode3,
-                       int idnode4, int idnode5, int idnode6, int idnode7, int idnode8,
-                       int idnode9, int idnode10, int idnode11, int idnode12);
+        void AddVolume(smIdType NewVolID, smIdType idnode1, smIdType idnode2, smIdType idnode3,
+                       smIdType idnode4);
+        void AddVolume(smIdType NewVolID, smIdType idnode1, smIdType idnode2, smIdType idnode3,
+                       smIdType idnode4, smIdType idnode5);
+        void AddVolume(smIdType NewVolID, smIdType idnode1, smIdType idnode2, smIdType idnode3,
+                       smIdType idnode4, smIdType idnode5, smIdType idnode6);
+        void AddVolume(smIdType NewVolID, smIdType idnode1, smIdType idnode2, smIdType idnode3,
+                       smIdType idnode4, smIdType idnode5, smIdType idnode6, smIdType idnode7, smIdType idnode8);
+        void AddVolume(smIdType NewVolID, smIdType idnode1, smIdType idnode2, smIdType idnode3,
+                       smIdType idnode4, smIdType idnode5, smIdType idnode6, smIdType idnode7, smIdType idnode8,
+                       smIdType idnode9, smIdType idnode10, smIdType idnode11, smIdType idnode12);
         void AddPolygonalFace (const smIdType               ElementID,
                                const std::vector<smIdType>& nodes_ids);
         void AddQuadPolygonalFace (const smIdType               ElementID,
                                    const std::vector<smIdType>& nodes_ids);
         void AddPolyhedralVolume (const smIdType               ElementID,
                                   const std::vector<smIdType>& nodes_ids,
-                                  const std::vector<int>& quantities);
+                                  const std::vector<smIdType>& quantities);
         void AddBall(int NewBallID, int node, double diameter);
         // special methods for quadratic elements
         void AddEdge(int NewEdgeID, int n1, int n2, int n12);

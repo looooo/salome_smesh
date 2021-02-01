@@ -2441,7 +2441,7 @@ SMDS_MeshVolume* SMESH_MesherHelper::AddVolume(const SMDS_MeshNode* n1,
 
 SMDS_MeshVolume*
 SMESH_MesherHelper::AddPolyhedralVolume (const std::vector<const SMDS_MeshNode*>& nodes,
-                                         const std::vector<int>&                  quantities,
+                                         const std::vector<smIdType>&             quantities,
                                          const int                                id,
                                          const bool                               force3d)
 {
@@ -2457,7 +2457,7 @@ SMESH_MesherHelper::AddPolyhedralVolume (const std::vector<const SMDS_MeshNode*>
   else
   {
     vector<const SMDS_MeshNode*> newNodes;
-    vector<int> newQuantities;
+    vector<smIdType> newQuantities;
     for ( size_t iFace = 0, iN = 0; iFace < quantities.size(); ++iFace )
     {
       int nbNodesInFace = quantities[iFace];

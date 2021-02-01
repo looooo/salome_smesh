@@ -1983,49 +1983,49 @@ bool SMDS_VolumeTool::setFace( int faceIndex ) const
         myAllFacesNodeIndices_F  = &Tetra_F [0][0];
         //myAllFacesNodeIndices_FE = &Tetra_F [0][0];
         myAllFacesNodeIndices_RE = &Tetra_RE[0][0];
-        myAllFacesNbNodes        = Tetra_nbN;
+        myAllFacesNbNodes        = (smIdType*)(Tetra_nbN);
         myMaxFaceNbNodes         = sizeof(Tetra_F[0])/sizeof(Tetra_F[0][0]);
         break;
       case 5:
         myAllFacesNodeIndices_F  = &Pyramid_F [0][0];
         //myAllFacesNodeIndices_FE = &Pyramid_F [0][0];
         myAllFacesNodeIndices_RE = &Pyramid_RE[0][0];
-        myAllFacesNbNodes        = Pyramid_nbN;
+        myAllFacesNbNodes        = (smIdType*)(Pyramid_nbN);
         myMaxFaceNbNodes         = sizeof(Pyramid_F[0])/sizeof(Pyramid_F[0][0]);
         break;
       case 6:
         myAllFacesNodeIndices_F  = &Penta_F [0][0];
         //myAllFacesNodeIndices_FE = &Penta_FE[0][0];
         myAllFacesNodeIndices_RE = &Penta_RE[0][0];
-        myAllFacesNbNodes        = Penta_nbN;
+        myAllFacesNbNodes        = (smIdType*)(Penta_nbN);
         myMaxFaceNbNodes         = sizeof(Penta_F[0])/sizeof(Penta_F[0][0]);
         break;
       case 8:
         myAllFacesNodeIndices_F  = &Hexa_F [0][0];
         ///myAllFacesNodeIndices_FE = &Hexa_FE[0][0];
         myAllFacesNodeIndices_RE = &Hexa_RE[0][0];
-        myAllFacesNbNodes        = Hexa_nbN;
+        myAllFacesNbNodes        = (smIdType*)(Hexa_nbN);
         myMaxFaceNbNodes         = sizeof(Hexa_F[0])/sizeof(Hexa_F[0][0]);
         break;
       case 10:
         myAllFacesNodeIndices_F  = &QuadTetra_F [0][0];
         //myAllFacesNodeIndices_FE = &QuadTetra_F [0][0];
         myAllFacesNodeIndices_RE = &QuadTetra_RE[0][0];
-        myAllFacesNbNodes        = QuadTetra_nbN;
+        myAllFacesNbNodes        = (smIdType*)(QuadTetra_nbN);
         myMaxFaceNbNodes         = sizeof(QuadTetra_F[0])/sizeof(QuadTetra_F[0][0]);
         break;
       case 13:
         myAllFacesNodeIndices_F  = &QuadPyram_F [0][0];
         //myAllFacesNodeIndices_FE = &QuadPyram_F [0][0];
         myAllFacesNodeIndices_RE = &QuadPyram_RE[0][0];
-        myAllFacesNbNodes        = QuadPyram_nbN;
+        myAllFacesNbNodes        = (smIdType*)(QuadPyram_nbN);
         myMaxFaceNbNodes         = sizeof(QuadPyram_F[0])/sizeof(QuadPyram_F[0][0]);
         break;
       case 15:
         myAllFacesNodeIndices_F  = &QuadPenta_F [0][0];
         //myAllFacesNodeIndices_FE = &QuadPenta_FE[0][0];
         myAllFacesNodeIndices_RE = &QuadPenta_RE[0][0];
-        myAllFacesNbNodes        = QuadPenta_nbN;
+        myAllFacesNbNodes        = (smIdType*)(QuadPenta_nbN);
         myMaxFaceNbNodes         = sizeof(QuadPenta_F[0])/sizeof(QuadPenta_F[0][0]);
         break;
       case 20:
@@ -2033,14 +2033,14 @@ bool SMDS_VolumeTool::setFace( int faceIndex ) const
         myAllFacesNodeIndices_F  = &QuadHexa_F [0][0];
         //myAllFacesNodeIndices_FE = &QuadHexa_FE[0][0];
         myAllFacesNodeIndices_RE = &QuadHexa_RE[0][0];
-        myAllFacesNbNodes        = QuadHexa_nbN;
+        myAllFacesNbNodes        = (smIdType*)(QuadHexa_nbN);
         myMaxFaceNbNodes         = sizeof(QuadHexa_F[0])/sizeof(QuadHexa_F[0][0]);
         if ( !myIgnoreCentralNodes && myVolumeNodes.size() == 27 )
         {
           myAllFacesNodeIndices_F  = &TriQuadHexa_F [0][0];
           //myAllFacesNodeIndices_FE = &TriQuadHexa_FE[0][0];
           myAllFacesNodeIndices_RE = &TriQuadHexa_RE[0][0];
-          myAllFacesNbNodes        = TriQuadHexa_nbN;
+          myAllFacesNbNodes        = (smIdType*)(TriQuadHexa_nbN);
           myMaxFaceNbNodes         = sizeof(TriQuadHexa_F[0])/sizeof(TriQuadHexa_F[0][0]);
         }
         break;
@@ -2048,7 +2048,7 @@ bool SMDS_VolumeTool::setFace( int faceIndex ) const
         myAllFacesNodeIndices_F  = &HexPrism_F [0][0];
         //myAllFacesNodeIndices_FE = &HexPrism_FE[0][0];
         myAllFacesNodeIndices_RE = &HexPrism_RE[0][0];
-        myAllFacesNbNodes        = HexPrism_nbN;
+        myAllFacesNbNodes        = (smIdType*)(HexPrism_nbN);
         myMaxFaceNbNodes         = sizeof(HexPrism_F[0])/sizeof(HexPrism_F[0][0]);
         break;
       default:

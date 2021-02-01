@@ -31,6 +31,8 @@
 
 #include "SMESH_SMDS.hxx"
 
+#include <smIdType.hxx>
+
 class SMDS_MeshElement;
 class SMDS_MeshNode;
 class SMDS_MeshVolume;
@@ -261,7 +263,7 @@ class SMDS_EXPORT SMDS_VolumeTool
   int                     myNbFaces;
   std::vector<const SMDS_MeshNode*> myVolumeNodes;
   std::vector< int >      myPolyIndices; // of a myCurFace
-  std::vector< int >      myPolyQuantities;
+  std::vector<smIdType>   myPolyQuantities;
   std::vector< int >      myPolyFacetOri; // -1-in, +1-out, 0-undef
 
   typedef std::pair<int,int> Link;
@@ -271,7 +273,7 @@ class SMDS_EXPORT SMDS_VolumeTool
 
   mutable const int*      myAllFacesNodeIndices_F;
   mutable const int*      myAllFacesNodeIndices_RE;
-  mutable const int*      myAllFacesNbNodes;
+  mutable const smIdType* myAllFacesNbNodes;
   mutable int             myMaxFaceNbNodes;
 
   struct SaveFacet;

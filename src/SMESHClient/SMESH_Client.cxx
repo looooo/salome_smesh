@@ -424,7 +424,7 @@ namespace
       }
 
       int aNbFaces = anIndexes[anIndexId++];
-      std::vector<int> quantities (aNbFaces);
+      std::vector<smIdType> quantities (aNbFaces);
       for (int i = 0; i < aNbFaces; i++) {
         quantities[i] = anIndexes[anIndexId++];
       }

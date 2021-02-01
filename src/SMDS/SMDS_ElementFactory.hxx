@@ -98,7 +98,7 @@ public:
   const SMDS_MeshElement* FindElement( const smIdType id ) const;
 
   //! Return a number of used elements
-  int NbUsedElements() const { return myNbUsedElements; }
+  smIdType NbUsedElements() const { return myNbUsedElements; }
 
   //! Return an iterator on all element filtered using a given filter.
   //  nbElemsToReturn is used to optimize by stopping the iteration as soon as

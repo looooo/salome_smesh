@@ -160,8 +160,8 @@ void SMESHDS_Command::AddFace(int NewFaceID,
 //function : 
 //purpose  : 
 //=======================================================================
-void SMESHDS_Command::AddVolume(int NewVolID,
-        int idnode1, int idnode2, int idnode3, int idnode4)
+void SMESHDS_Command::AddVolume(smIdType NewVolID,
+        smIdType idnode1, smIdType idnode2, smIdType idnode3, smIdType idnode4)
 {
         if ( myType != SMESHDS_AddTetrahedron)
         {
@@ -180,8 +180,8 @@ void SMESHDS_Command::AddVolume(int NewVolID,
 //function : 
 //purpose  : 
 //=======================================================================
-void SMESHDS_Command::AddVolume(int NewVolID,
-        int idnode1, int idnode2, int idnode3, int idnode4, int idnode5)
+void SMESHDS_Command::AddVolume(smIdType NewVolID,
+        smIdType idnode1, smIdType idnode2, smIdType idnode3, smIdType idnode4, smIdType idnode5)
 {
         if ( myType != SMESHDS_AddPyramid)
         {
@@ -201,9 +201,9 @@ void SMESHDS_Command::AddVolume(int NewVolID,
 //function : 
 //purpose  : 
 //=======================================================================
-void SMESHDS_Command::AddVolume(int NewVolID,
-        int idnode1,
-        int idnode2, int idnode3, int idnode4, int idnode5, int idnode6)
+void SMESHDS_Command::AddVolume(smIdType NewVolID,
+        smIdType idnode1,
+        smIdType idnode2, smIdType idnode3, smIdType idnode4, smIdType idnode5, smIdType idnode6)
 {
         if ( myType != SMESHDS_AddPrism)
         {
@@ -224,11 +224,11 @@ void SMESHDS_Command::AddVolume(int NewVolID,
 //function : 
 //purpose  : 
 //=======================================================================
-void SMESHDS_Command::AddVolume(int NewVolID,
-        int idnode1,
-        int idnode2,
-        int idnode3,
-        int idnode4, int idnode5, int idnode6, int idnode7, int idnode8)
+void SMESHDS_Command::AddVolume(smIdType NewVolID,
+        smIdType idnode1,
+        smIdType idnode2,
+        smIdType idnode3,
+        smIdType idnode4, smIdType idnode5, smIdType idnode6, smIdType idnode7, smIdType idnode8)
 {
         if ( myType != SMESHDS_AddHexahedron)
         {
@@ -247,10 +247,10 @@ void SMESHDS_Command::AddVolume(int NewVolID,
         myNumber++;
 }
 
-void SMESHDS_Command::AddVolume(int NewVolID,
-                                int idnode1,int idnode2,int idnode3,int idnode4,
-                                int idnode5, int idnode6, int idnode7, int idnode8,
-                                int idnode9, int idnode10, int idnode11, int idnode12)
+void SMESHDS_Command::AddVolume(smIdType NewVolID,
+                                smIdType idnode1,smIdType idnode2,smIdType idnode3,smIdType idnode4,
+                                smIdType idnode5, smIdType idnode6, smIdType idnode7, smIdType idnode8,
+                                smIdType idnode9, smIdType idnode10, smIdType idnode11, smIdType idnode12)
 {
   if (myType != SMESHDS_AddHexagonalPrism)
   {
@@ -323,7 +323,7 @@ void SMESHDS_Command::AddQuadPolygonalFace (const smIdType               Element
 //=======================================================================
 void SMESHDS_Command::AddPolyhedralVolume (const smIdType               ElementID,
                                            const std::vector<smIdType>& nodes_ids,
-                                           const std::vector<int>&      quantities)
+                                           const std::vector<smIdType>& quantities)
 {
   if ( myType != SMESHDS_AddPolyhedron) {
     MESSAGE("SMESHDS_Command::AddPolyhedralVolume : Bad Type");

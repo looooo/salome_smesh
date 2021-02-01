@@ -1190,7 +1190,7 @@ CORBA::Long SMESH_MeshEditor_i::AddPolyhedralVolume (const SMESH::long_array & I
     }
 
   int NbFaces = Quantities.length();
-  std::vector<int> q (NbFaces);
+  std::vector<smIdType> q (NbFaces);
   for (int j = 0; j < NbFaces; j++)
     q[j] = Quantities[j];
 
@@ -1220,7 +1220,7 @@ CORBA::Long SMESH_MeshEditor_i::AddPolyhedralVolumeByFaces (const SMESH::long_ar
 
   int NbFaces = IdsOfFaces.length();
   std::vector<const SMDS_MeshNode*> poly_nodes;
-  std::vector<int> quantities (NbFaces);
+  std::vector<smIdType> quantities (NbFaces);
 
   for (int i = 0; i < NbFaces; i++) {
     const SMDS_MeshElement* aFace = getMeshDS()->FindElement(IdsOfFaces[i]);

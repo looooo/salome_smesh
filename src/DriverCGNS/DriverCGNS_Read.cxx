@@ -892,7 +892,7 @@ Driver_Mesh::Status DriverCGNS_Read::Perform()
               //                      ...
               //                      NfacesM, Face1M, Face2M, ... FaceNM
               const int nbFaces = elemData[ pos++ ];
-              vector<int> quantities( nbFaces );
+              vector<smIdType> quantities( nbFaces );
               vector<const SMDS_MeshNode*> nodes, faceNodes;
               nodes.reserve( nbFaces * 4 );
               for ( int iF = 0; iF < nbFaces; ++iF )

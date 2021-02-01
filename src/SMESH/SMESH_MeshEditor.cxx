@@ -3121,7 +3121,7 @@ public:
     :myMesh( theMesh ), myMaxID( theMesh->MaxNodeID() + 1)
   {}
 
-  long GetLinkID (const SMDS_MeshNode * n1,
+  smIdType GetLinkID (const SMDS_MeshNode * n1,
                   const SMDS_MeshNode * n2) const
   {
     return ( Min(FromIdType<int>(n1->GetID()),FromIdType<int>(n2->GetID())) * myMaxID + Max(FromIdType<int>(n1->GetID()),FromIdType<int>(n2->GetID())));
@@ -4603,7 +4603,7 @@ void SMESH_MeshEditor::sweepElement(const SMDS_MeshElement*               elem,
         baseType = SMDSEntity_Polygon; // WARNING: change baseType !!!!
       }
       vector<const SMDS_MeshNode*> polyedre_nodes (nbNodes*2 + 4*nbNodes);
-      vector<int> quantities (nbNodes + 2);
+      vector<smIdType> quantities (nbNodes + 2);
       polyedre_nodes.clear();
       quantities.clear();
 
@@ -6774,7 +6774,7 @@ void SMESH_MeshEditor::FindCoincidentNodes (TIDSortedNodeSet &   theNodes,
 
 int SMESH_MeshEditor::SimplifyFace (const vector<const SMDS_MeshNode *>& faceNodes,
                                     vector<const SMDS_MeshNode *>&       poly_nodes,
-                                    vector<int>&                         quantities) const
+                                    vector<smIdType>&                    quantities) const
 {
   int nbNodes = faceNodes.size();
   while ( faceNodes[ 0 ] == faceNodes[ nbNodes-1 ] && nbNodes > 2 )
@@ -7078,7 +7078,7 @@ bool SMESH_MeshEditor::applyMerge( const SMDS_MeshElement* elem,
 
       // a polygon can divide into several elements
       vector<const SMDS_MeshNode *> polygons_nodes;
-      vector<int> quantities;
+      vector<smIdType> quantities;
       nbResElems = SimplifyFace( curNodes, polygons_nodes, quantities );
       newElemDefs.resize( nbResElems );
       for ( int inode = 0, iface = 0; iface < nbResElems; iface++ )
@@ -7118,7 +7118,7 @@ bool SMESH_MeshEditor::applyMerge( const SMDS_MeshElement* elem,
           int nbFaces = aPolyedre->NbFaces();
 
           vector<const SMDS_MeshNode *>& poly_nodes = newElemDefs[0].myNodes;
-          vector<int>                  & quantities = newElemDefs[0].myPolyhedQuantities;
+          vector<smIdType>             & quantities = newElemDefs[0].myPolyhedQuantities;
           vector<const SMDS_MeshNode *>  faceNodes;
           poly_nodes.clear();
           quantities.clear();
@@ -7370,7 +7370,7 @@ bool SMESH_MeshEditor::applyMerge( const SMDS_MeshElement* elem,
         ////////////////// HEXAHEDRON ---> polyhedron
         hexa.SetExternalNormal();
         vector<const SMDS_MeshNode *>& poly_nodes = newElemDefs[0].myNodes;
-        vector<int>                  & quantities = newElemDefs[0].myPolyhedQuantities;
+        vector<smIdType>             & quantities = newElemDefs[0].myPolyhedQuantities;
         poly_nodes.reserve( 6 * 4 ); poly_nodes.clear();
         quantities.reserve( 6 );     quantities.clear();
         for ( int iFace = 0; iFace < 6; iFace++ )
@@ -8607,7 +8607,7 @@ void SMESH_MeshEditor::UpdateVolumes (const SMDS_MeshNode*        theBetweenNode
     // insert new nodes in all faces of the volume, sharing link theBetweenNode1 - theBetweenNode2
     int iface, nbFaces = aVolume.NbFaces();
     vector<const SMDS_MeshNode *> poly_nodes;
-    vector<int> quantities (nbFaces);
+    vector<smIdType> quantities (nbFaces);
 
     for (iface = 0; iface < nbFaces; iface++) {
       int nbFaceNodes = aVolume.NbFaceNodes(iface), nbInserted = 0;
@@ -8672,7 +8672,7 @@ namespace
 
   void volumeToPolyhedron( const SMDS_MeshElement*         elem,
                            vector<const SMDS_MeshNode *> & nodes,
-                           vector<int> &                   nbNodeInFaces )
+                           vector<smIdType> &                   nbNodeInFaces )
   {
     nodes.clear();
     nbNodeInFaces.clear();
@@ -8701,7 +8701,7 @@ int SMESH_MeshEditor::convertElemToQuadratic(SMESHDS_SubMesh *   theSm,
   int nbElem = 0;
   if( !theSm ) return nbElem;
 
-  vector<int> nbNodeInFaces;
+  vector<smIdType> nbNodeInFaces;
   vector<const SMDS_MeshNode *> nodes;
   SMDS_ElemIteratorPtr ElemItr = theSm->GetElements();
   while(ElemItr->more())
@@ -8948,7 +8948,7 @@ void SMESH_MeshEditor::ConvertToQuadratic(const bool theForce3d, const bool theT
     }
 
     // convert volumes
-    vector<int> nbNodeInFaces;
+    vector<smIdType> nbNodeInFaces;
     SMDS_VolumeIteratorPtr aVolumeItr = meshDS->volumesIterator();
     while(aVolumeItr->more())
     {

@@ -108,10 +108,11 @@ public:
   // Get SALOME_LifeCycleCORBA object
   static SALOME_LifeCycleCORBA* GetLCC();
   // Retrieve and get GEOM engine reference
-  virtual GEOM::GEOM_Gen_var GetGeomEngine( bool isShaper ) = 0;
   static GEOM::GEOM_Gen_var GetGeomEngine( GEOM::GEOM_Object_ptr );
   // Retrieve Study depending on Session / Standalone mode
-  virtual SALOMEDS::Study_var getStudyServant() const = 0;
+  virtual GEOM::GEOM_Gen_var GetGeomEngine( bool isShaper ) = 0;
+  SALOMEDS::Study_var getStudyServant() const { return this->getStudyServantVirtual(); }
+  virtual SALOMEDS::Study_var getStudyServantVirtual() const = 0 ;
   virtual SALOME_ModuleCatalog::ModuleCatalog_var getModuleCatalog() const = 0;
   SALOMEDS::SObject_ptr publish(CORBA::Object_ptr     theIOR,
                                 SALOMEDS::SObject_ptr theFatherObject,

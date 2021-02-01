@@ -38,7 +38,7 @@ GEOM::GEOM_Gen_var SMESH_Gen_Session_i::GetGeomEngine( bool isShaper )
     return myGeomGen;
 }
 
-SALOMEDS::Study_var SMESH_Gen_Session_i::getStudyServant() const
+SALOMEDS::Study_var SMESH_Gen_Session_i::getStudyServantVirtual() const
 {
   return SALOMEDS::Study::_duplicate(KERNEL::getStudyServant());
 }

@@ -18,7 +18,7 @@
 //
 
 #include "SMESH_Gen_Session_i.hxx"
-
+#include "SALOME_KernelServices.hxx"
 #include "SALOME_LifeCycleCORBA.hxx"
 
 
@@ -36,6 +36,11 @@ GEOM::GEOM_Gen_var SMESH_Gen_Session_i::GetGeomEngine( bool isShaper )
     Engines::EngineComponent_ptr temp = GetLCC()->FindOrLoad_Component( isShaper ? "FactoryServer" : "FactoryServer", isShaper ? "SHAPERSTUDY" : "GEOM" );
     myGeomGen = GEOM::GEOM_Gen::_narrow( temp );
     return myGeomGen;
+}
+
+SALOMEDS::Study_var SMESH_Gen_Session_i::getStudyServant() const
+{
+  return SALOMEDS::Study::_duplicate(KERNEL::getStudyServant());
 }
 
 extern "C"

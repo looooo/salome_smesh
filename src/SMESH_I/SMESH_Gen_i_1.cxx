@@ -40,7 +40,6 @@
 #include <Utils_ExceptHandlers.hxx>
 #include <SALOMEDS_wrap.hxx>
 #include <SALOMEDS_Attributes_wrap.hxx>
-#include "SALOMEDS_Study_i.hxx"
 #include "SALOME_KernelServices.hxx"
 #include "SALOME_ModuleCatalog_impl.hxx"
 
@@ -212,15 +211,6 @@ SALOMEDS::SObject_ptr SMESH_Gen_i::ObjectToSObject(CORBA::Object_ptr theObject)
 }
 
 //=======================================================================
-//function : GetStudyPtr
-//purpose  : Get study from naming service
-//=======================================================================
-SALOMEDS::Study_var SMESH_Gen_i::getStudyServant()
-{
-  return SALOMEDS::Study::_duplicate(KERNEL::getStudyServantSA());
-}
-
-//=======================================================================
 //function : objectToServant
 //purpose  : 
 //=======================================================================
@@ -293,14 +283,14 @@ GEOM::GEOM_Object_ptr SMESH_Gen_i::GetGeomObjectByEntry( const std::string& entr
 //purpose  :
 //=======================================================================
 
-static SALOMEDS::SObject_ptr publish(CORBA::Object_ptr     theIOR,
+SALOMEDS::SObject_ptr SMESH_Gen_i::publish(CORBA::Object_ptr     theIOR,
                                      SALOMEDS::SObject_ptr theFatherObject,
-                                     const int             theTag = 0,
-                                     const char*           thePixMap = 0,
-                                     const bool            theSelectable = true)
+                                     const int             theTag,
+                                     const char*           thePixMap,
+                                     const bool            theSelectable)
 {
-  SALOMEDS::Study_var theStudy = SMESH_Gen_i::getStudyServant();
-  SALOMEDS::SObject_wrap SO = SMESH_Gen_i::ObjectToSObject( theIOR );
+  SALOMEDS::Study_var theStudy = getStudyServant();
+  SALOMEDS::SObject_wrap SO = ObjectToSObject( theIOR );
   SALOMEDS::StudyBuilder_var     aStudyBuilder = theStudy->NewBuilder();
   SALOMEDS::UseCaseBuilder_wrap useCaseBuilder = theStudy->GetUseCaseBuilder();
   bool isNewSO = false, isInUseCaseTree = false;
@@ -441,9 +431,7 @@ void SMESH_Gen_i::SetPixMap(SALOMEDS::SObject_ptr theSObject,
 //purpose  : 
 //=======================================================================
 
-static void addReference (SALOMEDS::SObject_ptr theSObject,
-                          CORBA::Object_ptr     theToObject,
-                          int                   theTag = 0)
+void SMESH_Gen_i::addReference (SALOMEDS::SObject_ptr theSObject, CORBA::Object_ptr theToObject, int theTag)
 {
   SALOMEDS::Study_var aStudy = SMESH_Gen_i::getStudyServant();
   SALOMEDS::SObject_wrap aToObjSO = SMESH_Gen_i::ObjectToSObject( theToObject );

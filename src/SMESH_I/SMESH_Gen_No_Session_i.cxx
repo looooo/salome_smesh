@@ -18,7 +18,7 @@
 //
 
 #include "SMESH_Gen_No_Session_i.hxx"
-
+#include "SALOMEDS_Study_i.hxx"
 #include "SALOME_KernelServices.hxx"
 
 SMESH_Gen_No_Session_i::SMESH_Gen_No_Session_i( CORBA::ORB_ptr orb,
@@ -35,4 +35,9 @@ GEOM::GEOM_Gen_var SMESH_Gen_No_Session_i::GetGeomEngine( bool isShaper )
   CORBA::Object_var temp = KERNEL::RetrieveCompo(isShaper ? "SHAPERSTUDY" : "GEOM");
   myGeomGen = GEOM::GEOM_Gen::_narrow( temp );
   return myGeomGen;
+}
+
+SALOMEDS::Study_var SMESH_Gen_No_Session_i::getStudyServant() const
+{
+  return SALOMEDS::Study::_duplicate(KERNEL::getStudyServantSA());
 }

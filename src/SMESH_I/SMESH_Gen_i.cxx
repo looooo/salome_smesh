@@ -812,7 +812,7 @@ SMESH::SMESH_Hypothesis_ptr SMESH_Gen_i::CreateHypothesis( const char* theHypNam
     SALOMEDS::SObject_wrap aSO = PublishHypothesis( hyp );
     if ( !aSO->_is_nil() ) {
       // Update Python script
-      TPythonDump() << aSO << " = " << this << ".CreateHypothesis('"
+      TPythonDump(this) << aSO << " = " << this << ".CreateHypothesis('"
                     << theHypName << "', '" << theLibName << "')";
     }
   }
@@ -847,7 +847,7 @@ SMESH_Gen_i::CreateHypothesisByAverageLength( const char*    theHypType,
                                   initParams );
   SALOMEDS::SObject_wrap so = PublishHypothesis( hyp );
 
-  TPythonDump() << hyp << " = " << this << ".CreateHypothesisByAverageLength( '"
+  TPythonDump(this) << hyp << " = " << this << ".CreateHypothesisByAverageLength( '"
                 << theHypType << "', '"
                 << theLibName << "', "
                 << theAverageLength << ", "
@@ -1202,7 +1202,7 @@ SMESH::SMESH_Mesh_ptr SMESH_Gen_i::CreateMesh( GEOM::GEOM_Object_ptr theShapeObj
     aStudyBuilder->CommitCommand();
     if ( !aSO->_is_nil() ) {
       // Update Python script
-      TPythonDump() << aSO << " = " << this << ".CreateMesh(" << theShapeObject << ")";
+      TPythonDump(this) << aSO << " = " << this << ".CreateMesh(" << theShapeObject << ")";
     }
   }
 
@@ -1232,7 +1232,7 @@ SMESH::SMESH_Mesh_ptr SMESH_Gen_i::CreateEmptyMesh()
     aStudyBuilder->CommitCommand();
     if ( !aSO->_is_nil() ) {
       // Update Python script
-      TPythonDump() << aSO << " = " << this << ".CreateEmptyMesh()";
+      TPythonDump(this) << aSO << " = " << this << ".CreateEmptyMesh()";
     }
   }
 
@@ -1286,7 +1286,7 @@ SMESH::SMESH_Mesh_ptr SMESH_Gen_i::CreateMeshesFromUNV( const char* theFileName 
     aStudyBuilder->CommitCommand();
     if ( !aSO->_is_nil() ) {
       // Update Python script
-      TPythonDump() << aSO << " = " << this << ".CreateMeshesFromUNV(r'" << theFileName << "')";
+      TPythonDump(this) << aSO << " = " << this << ".CreateMeshesFromUNV(r'" << theFileName << "')";
     }
   }
 
@@ -1333,7 +1333,7 @@ SMESH::mesh_array* SMESH_Gen_i::CreateMeshesFromMEDorSAUV( const char* theFileNa
   { // open a new scope to make aPythonDump die before PythonDump in SMESH_Mesh::GetGroups()
 
   // Python Dump
-  TPythonDump aPythonDump;
+  TPythonDump aPythonDump(this);
   aPythonDump << "([";
 
   if (theStatus == SMESH::DRS_OK) {
@@ -1483,7 +1483,7 @@ SMESH::SMESH_Mesh_ptr SMESH_Gen_i::CreateMeshesFromSTL( const char* theFileName 
     aStudyBuilder->CommitCommand();
     if ( !aSO->_is_nil() ) {
       // Update Python script
-      TPythonDump() << aSO << " = " << this << ".CreateMeshesFromSTL(r'" << theFileName << "')";
+      TPythonDump(this) << aSO << " = " << this << ".CreateMeshesFromSTL(r'" << theFileName << "')";
     }
   }
 
@@ -1521,7 +1521,7 @@ SMESH::mesh_array* SMESH_Gen_i::CreateMeshesFromCGNS( const char*               
   { // open a new scope to make aPythonDump die before PythonDump in SMESH_Mesh::GetGroups()
 
     // Python Dump
-    TPythonDump aPythonDump;
+    TPythonDump aPythonDump(this);
     aPythonDump << "([";
 
     if (theStatus == SMESH::DRS_OK)
@@ -1609,7 +1609,7 @@ SMESH_Gen_i::CreateMeshesFromGMF( const char*             theFileName,
     aStudyBuilder->CommitCommand();
     if ( !aSO->_is_nil() ) {
       // Update Python script
-      TPythonDump() << "("<< aSO << ", error) = " << this << ".CreateMeshesFromGMF(r'"
+      TPythonDump(this) << "("<< aSO << ", error) = " << this << ".CreateMeshesFromGMF(r'"
                     << theFileName << "', "
                     << theMakeRequiredGroups << " )";
     }
@@ -1879,7 +1879,7 @@ SMESH_Gen_i::MakeGroupsOfBadInputElements( SMESH::SMESH_Mesh_ptr theMesh,
     if ( SMESH_Mesh_i* meshServant = SMESH::DownCast<SMESH_Mesh_i*>( theMesh ))
     {
       groups = meshServant->MakeGroupsOfBadInputElements( theSubShapeID, theGroupName );
-      TPythonDump() << groups << " = " << this
+      TPythonDump(this) << groups << " = " << this
                     << ".MakeGroupsOfBadInputElements( "
                     << theMesh << ", " << theSubShapeID << ", '" << theGroupName << "' )";
     }
@@ -2049,7 +2049,7 @@ CORBA::Boolean SMESH_Gen_i::Compute( SMESH::SMESH_Mesh_ptr theMesh,
                                   SALOME::BAD_PARAM );
 
   // Update Python script
-  TPythonDump() << "isDone = " << this << ".Compute( "
+  TPythonDump(this) << "isDone = " << this << ".Compute( "
                 << theMesh << ", " << theShapeObject << ")";
 
   try {
@@ -2335,7 +2335,7 @@ SMESH::long_array* SMESH_Gen_i::Evaluate(SMESH::SMESH_Mesh_ptr theMesh,
     nbels[i] = 0;
 
   // Update Python script
-  TPythonDump() << "theNbElems = " << this << ".Evaluate( "
+  TPythonDump(this) << "theNbElems = " << this << ".Evaluate( "
                 << theMesh << ", " << theShapeObject << ")";
 
   try {
@@ -2592,7 +2592,7 @@ SMESH_Gen_i::ConcatenateCommon(const SMESH::ListOfIDSources& theMeshesArray,
                                CORBA::Boolean                theCommonGroups,
                                SMESH::SMESH_Mesh_ptr         theMeshToAppendTo)
 {
-  std::unique_ptr< TPythonDump > pPythonDump( new TPythonDump );
+  std::unique_ptr< TPythonDump > pPythonDump( new TPythonDump(this) );
   TPythonDump& pythonDump = *pPythonDump; // prevent dump of called methods
 
   // create mesh if theMeshToAppendTo not provided
@@ -2873,7 +2873,7 @@ SMESH::SMESH_Mesh_ptr SMESH_Gen_i::CopyMesh(SMESH::SMESH_IDSource_ptr meshPart,
 {
   Unexpect aCatch(SALOME_SalomeException);
 
-  TPythonDump* pyDump = new TPythonDump; // prevent dump from CreateMesh()
+  TPythonDump* pyDump = new TPythonDump(this); // prevent dump from CreateMesh()
   std::unique_ptr<TPythonDump> pyDumpDeleter( pyDump );
 
   // 1. Get source mesh
@@ -3655,7 +3655,7 @@ CORBA::Boolean SMESH_Gen_i::CopyMeshWithGeom( SMESH::SMESH_Mesh_ptr       theSou
   bool ok = true;
   SMESH_TRY;
 
-  TPythonDump pyDump; // prevent dump from CreateMesh()
+  TPythonDump pyDump(this); // prevent dump from CreateMesh()
 
   theNewMesh        = CreateMesh( theNewGeometry );
   theNewGroups      = new SMESH::ListOfGroups();
@@ -4215,7 +4215,7 @@ SALOMEDS::TMPFile* SMESH_Gen_i::Save( SALOMEDS::SComponent_ptr theComponent,
           SMESH::SMESH_Mesh_var myMesh = SMESH::SMESH_Mesh::_narrow( anObject ) ;
           if ( !myMesh->_is_nil() ) {
             myMesh->Load(); // load from study file if not yet done
-            TPythonDump pd; // not to dump GetGroups()
+            TPythonDump pd(this); // not to dump GetGroups()
             SMESH::ListOfGroups_var groups = myMesh->GetGroups();
             for ( CORBA::ULong i = 0; i < groups->length(); ++i )
             {
@@ -5211,7 +5211,7 @@ bool SMESH_Gen_i::Load( SALOMEDS::SComponent_ptr theComponent,
     return false;
   }
 
-  TPythonDump pd; // prevent dump during loading
+  TPythonDump pd(this); // prevent dump during loading
 
   // For PAL13473 ("Repetitive mesh") implementation.
   // New dependencies between SMESH objects are established:

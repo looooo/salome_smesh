@@ -30,4 +30,6 @@ public:
                const char*               instanceName,
                const char*               interfaceName);
   GEOM::GEOM_Gen_var GetGeomEngine( bool isShaper ) override;
+  // Get the SALOMEDS::Study from naming service
+  SALOMEDS::Study_var getStudyServant() const override;
 };

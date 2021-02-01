@@ -109,14 +109,19 @@ public:
   // Retrieve and get GEOM engine reference
   virtual GEOM::GEOM_Gen_var GetGeomEngine( bool isShaper ) = 0;
   static GEOM::GEOM_Gen_var GetGeomEngine( GEOM::GEOM_Object_ptr );
+  // Retrieve Study depending on Session / Standalone mode
+  virtual SALOMEDS::Study_var getStudyServant() const = 0;
+  SALOMEDS::SObject_ptr publish(CORBA::Object_ptr     theIOR,
+                                SALOMEDS::SObject_ptr theFatherObject,
+                                const int             theTag = 0,
+                                const char*           thePixMap = 0,
+                                const bool            theSelectable = true);
   // Get object of the CORBA reference
   static PortableServer::ServantBase_var GetServant( CORBA::Object_ptr theObject );
   // Get CORBA object corresponding to the SALOMEDS::SObject
   static CORBA::Object_var SObjectToObject( SALOMEDS::SObject_ptr theSObject );
   // Get the SALOMEDS::SObject corresponding to a CORBA object
-  static SALOMEDS::SObject_ptr ObjectToSObject( CORBA::Object_ptr theObject );
-  // Get the SALOMEDS::Study from naming service
-  static SALOMEDS::Study_var getStudyServant();
+  SALOMEDS::SObject_ptr ObjectToSObject( CORBA::Object_ptr theObject );
   // Get GEOM Object corresponding to TopoDS_Shape
   static GEOM::GEOM_Object_ptr ShapeToGeomObject( const TopoDS_Shape& theShape );
   // Get TopoDS_Shape corresponding to GEOM_Object
@@ -467,7 +472,7 @@ public:
 
   void CleanPythonTrace();
 
-  static int CountInPyDump(const TCollection_AsciiString& text);
+  int CountInPyDump(const TCollection_AsciiString& text);
 
   // *****************************************
   // Internal methods
@@ -521,12 +526,12 @@ public:
                                  SMESH::SMESH_Hypothesis_ptr theHyp);
   SALOMEDS::SObject_ptr GetMeshOrSubmeshByShape (SMESH::SMESH_Mesh_ptr theMesh,
                                                  GEOM::GEOM_Object_ptr theShape);
-  static void SetName(SALOMEDS::SObject_ptr theSObject,
-                      const char*           theName,
-                      const char*           theDefaultName = 0);
+  void SetName(SALOMEDS::SObject_ptr theSObject,
+              const char*           theName,
+              const char*           theDefaultName = 0);
 
-  static void SetPixMap(SALOMEDS::SObject_ptr theSObject,
-                        const char*           thePixMap);
+  void SetPixMap(SALOMEDS::SObject_ptr theSObject, const char *thePixMap);
+  void addReference (SALOMEDS::SObject_ptr theSObject, CORBA::Object_ptr theToObject, int theTag = 0);
 
   //  Get study context
   StudyContext* GetStudyContext();

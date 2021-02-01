@@ -124,6 +124,7 @@ namespace SMESH
     SMESH_Gen_i       *mySmesh = nullptr;
   public:
     TPythonDump(SMESH_Gen_i *smesh);
+    TPythonDump();
     virtual ~TPythonDump();
 
     TPythonDump&

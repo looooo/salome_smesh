@@ -68,6 +68,11 @@ namespace SMESH
     for ( size_t i = 0; i < value.length(); i++)
       myVals[i] = SMESH_Comment(value[i]);
   }
+  
+  TPythonDump::TPythonDump():myVarsCounter(0),mySmesh(SMESH_Gen_i::GetSMESHGen())
+  {
+    ++myCounter;
+  }
 
   TPythonDump::TPythonDump(SMESH_Gen_i *smesh):myVarsCounter(0),mySmesh(smesh)
   {

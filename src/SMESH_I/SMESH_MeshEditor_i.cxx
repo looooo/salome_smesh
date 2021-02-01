@@ -793,7 +793,7 @@ SMESH_MeshEditor_i::RemoveElements(const SMESH::long_array & IDsOfElements)
     IdList.push_back( IDsOfElements[i] );
 
   // Update Python script
-  TPythonDump() << "isDone = " << this << ".RemoveElements( " << IDsOfElements << " )";
+  TPythonDump(myMesh_i->GetGen()) << "isDone = " << this << ".RemoveElements( " << IDsOfElements << " )";
 
   // Remove Elements
   bool ret = getEditor().Remove( IdList, false );
@@ -821,7 +821,7 @@ CORBA::Boolean SMESH_MeshEditor_i::RemoveNodes(const SMESH::long_array & IDsOfNo
     IdList.push_back( IDsOfNodes[i] );
 
   // Update Python script
-  TPythonDump() << "isDone = " << this << ".RemoveNodes( " << IDsOfNodes << " )";
+  TPythonDump(myMesh_i->GetGen()) << "isDone = " << this << ".RemoveNodes( " << IDsOfNodes << " )";
 
   bool ret = getEditor().Remove( IdList, true );
 
@@ -844,7 +844,7 @@ CORBA::Long SMESH_MeshEditor_i::RemoveOrphanNodes()
   initData();
 
   // Update Python script
-  TPythonDump() << "nbRemoved = " << this << ".RemoveOrphanNodes()";
+  TPythonDump(myMesh_i->GetGen()) << "nbRemoved = " << this << ".RemoveOrphanNodes()";
 
   // Create filter to find all orphan nodes
   SMESH::Controls::Filter::TIdSequence seq;
@@ -879,7 +879,7 @@ CORBA::Long SMESH_MeshEditor_i::AddNode(CORBA::Double x,CORBA::Double y, CORBA::
   const SMDS_MeshNode* N = getMeshDS()->AddNode(x, y, z);
 
   // Update Python script
-  TPythonDump() << "nodeID = " << this << ".AddNode( "
+  TPythonDump(myMesh_i->GetGen()) << "nodeID = " << this << ".AddNode( "
                 << TVar( x ) << ", " << TVar( y ) << ", " << TVar( z )<< " )";
 
   declareMeshModified( /*isReComputeSafe=*/false );
@@ -909,7 +909,7 @@ CORBA::Long SMESH_MeshEditor_i::Add0DElement(CORBA::Long    IDOfNode,
     elem = getMeshDS()->Add0DElement(aNode);
 
   // Update Python script
-  TPythonDump() << "elem0d = " << this << ".Add0DElement( " << IDOfNode <<" )";
+  TPythonDump(myMesh_i->GetGen()) << "elem0d = " << this << ".Add0DElement( " << IDOfNode <<" )";
 
   declareMeshModified( /*isReComputeSafe=*/false );
 
@@ -937,7 +937,7 @@ CORBA::Long SMESH_MeshEditor_i::AddBall(CORBA::Long IDOfNode, CORBA::Double diam
   SMDS_MeshElement* elem = getMeshDS()->AddBall(aNode, diameter);
 
   // Update Python script
-  TPythonDump() << "ballElem = "
+  TPythonDump(myMesh_i->GetGen()) << "ballElem = "
                 << this << ".AddBall( " << IDOfNode << ", " << diameter <<" )";
 
   declareMeshModified( /*isReComputeSafe=*/false );
@@ -969,7 +969,7 @@ CORBA::Long SMESH_MeshEditor_i::AddEdge(const SMESH::long_array & IDsOfNodes)
                                  getMeshDS()->FindNode(index2));
 
     // Update Python script
-    TPythonDump() << "edge = " << this << ".AddEdge([ "
+    TPythonDump(myMesh_i->GetGen()) << "edge = " << this << ".AddEdge([ "
                   << index1 << ", " << index2 <<" ])";
   }
   if (NbNodes == 3) {
@@ -980,7 +980,7 @@ CORBA::Long SMESH_MeshEditor_i::AddEdge(const SMESH::long_array & IDsOfNodes)
                                  getMeshDS()->FindNode(n2),
                                  getMeshDS()->FindNode(n12));
     // Update Python script
-    TPythonDump() << "edgeID = " << this << ".AddEdge([ "
+    TPythonDump(myMesh_i->GetGen()) << "edgeID = " << this << ".AddEdge([ "
                   <<n1<<", "<<n2<<", "<<n12<<" ])";
   }
 
@@ -1029,7 +1029,7 @@ CORBA::Long SMESH_MeshEditor_i::AddFace(const SMESH::long_array & IDsOfNodes)
   }
 
   // Update Python script
-  TPythonDump() << "faceID = " << this << ".AddFace( " << IDsOfNodes << " )";
+  TPythonDump(myMesh_i->GetGen()) << "faceID = " << this << ".AddFace( " << IDsOfNodes << " )";
 
   declareMeshModified( /*isReComputeSafe=*/false );
 
@@ -1065,7 +1065,7 @@ CORBA::Long SMESH_MeshEditor_i::AddPolygonalFace (const SMESH::long_array & IDsO
   const SMDS_MeshElement* elem = getMeshDS()->AddPolygonalFace(nodes);
 
   // Update Python script
-  TPythonDump() <<"faceID = "<<this<<".AddPolygonalFace( "<<IDsOfNodes<<" )";
+  TPythonDump(myMesh_i->GetGen()) <<"faceID = "<<this<<".AddPolygonalFace( "<<IDsOfNodes<<" )";
 
   declareMeshModified( /*isReComputeSafe=*/false );
   return elem ? elem->GetID() : 0;
@@ -1099,7 +1099,7 @@ CORBA::Long SMESH_MeshEditor_i::AddQuadPolygonalFace (const SMESH::long_array & 
   const SMDS_MeshElement* elem = getMeshDS()->AddQuadPolygonalFace(nodes);
 
   // Update Python script
-  TPythonDump() <<"faceID = "<<this<<".AddPolygonalFace( "<<IDsOfNodes<<" )";
+  TPythonDump(myMesh_i->GetGen()) <<"faceID = "<<this<<".AddPolygonalFace( "<<IDsOfNodes<<" )";
 
   declareMeshModified( /*isReComputeSafe=*/false );
   return elem ? elem->GetID() : 0;
@@ -1160,7 +1160,7 @@ CORBA::Long SMESH_MeshEditor_i::AddVolume(const SMESH::long_array & IDsOfNodes)
   }
 
   // Update Python script
-  TPythonDump() << "volID = " << this << ".AddVolume( " << IDsOfNodes << " )";
+  TPythonDump(myMesh_i->GetGen()) << "volID = " << this << ".AddVolume( " << IDsOfNodes << " )";
 
   declareMeshModified( /*isReComputeSafe=*/false );
   return elem ? elem->GetID() : 0;
@@ -1197,7 +1197,7 @@ CORBA::Long SMESH_MeshEditor_i::AddPolyhedralVolume (const SMESH::long_array & I
   const SMDS_MeshElement* elem = getMeshDS()->AddPolyhedralVolume(n, q);
 
   // Update Python script
-  TPythonDump() << "volID = " << this << ".AddPolyhedralVolume( "
+  TPythonDump(myMesh_i->GetGen()) << "volID = " << this << ".AddPolyhedralVolume( "
                 << IDsOfNodes << ", " << Quantities << " )";
 
   declareMeshModified( /*isReComputeSafe=*/false );
@@ -1235,7 +1235,7 @@ CORBA::Long SMESH_MeshEditor_i::AddPolyhedralVolumeByFaces (const SMESH::long_ar
   const SMDS_MeshElement* elem = getMeshDS()->AddPolyhedralVolume(poly_nodes, quantities);
 
   // Update Python script
-  TPythonDump() << "volID = " << this << ".AddPolyhedralVolumeByFaces( "
+  TPythonDump(myMesh_i->GetGen()) << "volID = " << this << ".AddPolyhedralVolumeByFaces( "
                 << IdsOfFaces << " )";
 
   declareMeshModified( /*isReComputeSafe=*/false );
@@ -1266,7 +1266,7 @@ SMESH_MeshEditor_i::Create0DElementsOnAllNodes(SMESH::SMESH_IDSource_ptr theObje
   initData();
 
   SMESH::SMESH_IDSource_var result;
-  TPythonDump pyDump;
+  TPythonDump pyDump(myMesh_i->GetGen());
 
   TIDSortedElemSet elements, elems0D;
   if ( idSourceToSet( theObject, getMeshDS(), elements, SMDSAbs_All, /*emptyIfIsMesh=*/1))
@@ -1523,7 +1523,7 @@ CORBA::Boolean SMESH_MeshEditor_i::InverseDiag(CORBA::Long NodeID1,
     return false;
 
   // Update Python script
-  TPythonDump() << "isDone = " << this << ".InverseDiag( "
+  TPythonDump(myMesh_i->GetGen()) << "isDone = " << this << ".InverseDiag( "
                 << NodeID1 << ", " << NodeID2 << " )";
 
   int ret =  getEditor().InverseDiag ( n1, n2 );
@@ -1553,7 +1553,7 @@ CORBA::Boolean SMESH_MeshEditor_i::DeleteDiag(CORBA::Long NodeID1,
     return false;
 
   // Update Python script
-  TPythonDump() << "isDone = " << this << ".DeleteDiag( "
+  TPythonDump(myMesh_i->GetGen()) << "isDone = " << this << ".DeleteDiag( "
                 << NodeID1 << ", " << NodeID2 <<  " )";
 
 
@@ -1586,7 +1586,7 @@ CORBA::Boolean SMESH_MeshEditor_i::Reorient(const SMESH::long_array & IDsOfEleme
       getEditor().Reorient( elem );
   }
   // Update Python script
-  TPythonDump() << "isDone = " << this << ".Reorient( " << IDsOfElements << " )";
+  TPythonDump(myMesh_i->GetGen()) << "isDone = " << this << ".Reorient( " << IDsOfElements << " )";
 
   declareMeshModified( /*isReComputeSafe=*/ IDsOfElements.length() == 0 );
   return true;
@@ -1606,7 +1606,7 @@ CORBA::Boolean SMESH_MeshEditor_i::ReorientObject(SMESH::SMESH_IDSource_ptr theO
   SMESH_TRY;
   initData();
 
-  TPythonDump aTPythonDump; // suppress dump in Reorient()
+  TPythonDump aTPythonDump(myMesh_i->GetGen()); // suppress dump in Reorient()
 
   prepareIdSource( theObject );
 
@@ -1701,7 +1701,7 @@ CORBA::Long SMESH_MeshEditor_i::Reorient2D(SMESH::SMESH_IDSource_ptr the2Dgroup,
   if ( nbReori ) {
     declareMeshModified( /*isReComputeSafe=*/false );
   }
-  TPythonDump() << this << ".Reorient2D( "
+  TPythonDump(myMesh_i->GetGen()) << this << ".Reorient2D( "
                 << the2Dgroup << ", "
                 << theDirection << ", "
                 << theFace << ", "
@@ -1751,7 +1751,7 @@ CORBA::Long SMESH_MeshEditor_i::Reorient2DBy3D(const SMESH::ListOfIDSources& fac
   if ( nbReori ) {
     declareMeshModified( /*isReComputeSafe=*/false );
   }
-  TPythonDump() << this << ".Reorient2DBy3D( "
+  TPythonDump(myMesh_i->GetGen()) << this << ".Reorient2DBy3D( "
                 << faceGroups << ", "
                 << volumeGroup << ", "
                 << outsideNormal << " )";
@@ -1797,7 +1797,7 @@ CORBA::Boolean SMESH_MeshEditor_i::TriToQuad (const SMESH::long_array &   IDsOfE
 
   if ( !myIsPreviewMode ) {
     // Update Python script
-    TPythonDump() << "isDone = " << this << ".TriToQuad( "
+    TPythonDump(myMesh_i->GetGen()) << "isDone = " << this << ".TriToQuad( "
                   << IDsOfElements << ", " << aNumericalFunctor << ", " << TVar( MaxAngle ) << " )";
   }
 
@@ -1823,7 +1823,7 @@ CORBA::Boolean SMESH_MeshEditor_i::TriToQuadObject (SMESH::SMESH_IDSource_ptr   
   SMESH_TRY;
   initData();
 
-  TPythonDump aTPythonDump;  // suppress dump in TriToQuad()
+  TPythonDump aTPythonDump(myMesh_i->GetGen());  // suppress dump in TriToQuad()
 
   prepareIdSource( theObject );
   SMESH::long_array_var anElementsId = theObject->GetIDs();
@@ -1870,7 +1870,7 @@ CORBA::Boolean SMESH_MeshEditor_i::QuadToTri (const SMESH::long_array &   IDsOfE
 
 
   // Update Python script
-  TPythonDump() << "isDone = " << this << ".QuadToTri( " << IDsOfElements << ", " << aNumericalFunctor << " )";
+  TPythonDump(myMesh_i->GetGen()) << "isDone = " << this << ".QuadToTri( " << IDsOfElements << ", " << aNumericalFunctor << " )";
 
   CORBA::Boolean stat = getEditor().QuadToTri( faces, aCrit );
 
@@ -1893,7 +1893,7 @@ CORBA::Boolean SMESH_MeshEditor_i::QuadToTriObject (SMESH::SMESH_IDSource_ptr   
   SMESH_TRY;
   initData();
 
-  TPythonDump aTPythonDump;  // suppress dump in QuadToTri()
+  TPythonDump aTPythonDump(myMesh_i->GetGen());  // suppress dump in QuadToTri()
 
   prepareIdSource( theObject );
   SMESH::long_array_var anElementsId = theObject->GetIDs();
@@ -1930,7 +1930,7 @@ void SMESH_MeshEditor_i::QuadTo4Tri (SMESH::SMESH_IDSource_ptr theObject)
     THROW_SALOME_CORBA_EXCEPTION("No faces given", SALOME::BAD_PARAM);
 
   getEditor().QuadTo4Tri( faces );
-  TPythonDump() << this << ".QuadTo4Tri( " << theObject << " )";
+  TPythonDump(myMesh_i->GetGen()) << this << ".QuadTo4Tri( " << theObject << " )";
 
   declareMeshModified( /*isReComputeSafe=*/false );
 
@@ -1954,7 +1954,7 @@ CORBA::Boolean SMESH_MeshEditor_i::SplitQuad (const SMESH::long_array & IDsOfEle
   arrayToSet(IDsOfElements, aMesh, faces, SMDSAbs_Face);
 
   // Update Python script
-  TPythonDump() << "isDone = " << this << ".SplitQuad( "
+  TPythonDump(myMesh_i->GetGen()) << "isDone = " << this << ".SplitQuad( "
                 << IDsOfElements << ", " << Diag13 << " )";
 
   CORBA::Boolean stat = getEditor().QuadToTri( faces, Diag13 );
@@ -1978,7 +1978,7 @@ CORBA::Boolean SMESH_MeshEditor_i::SplitQuadObject (SMESH::SMESH_IDSource_ptr th
   SMESH_TRY;
   initData();
 
-  TPythonDump aTPythonDump;  // suppress dump in SplitQuad()
+  TPythonDump aTPythonDump(myMesh_i->GetGen());  // suppress dump in SplitQuad()
 
   prepareIdSource( theObject );
   SMESH::long_array_var anElementsId = theObject->GetIDs();
@@ -2054,7 +2054,7 @@ void SMESH_MeshEditor_i::SplitVolumesIntoTetra (SMESH::SMESH_IDSource_ptr elems,
   getEditor().SplitVolumes( elemSet, int( methodFlags ));
   declareMeshModified( /*isReComputeSafe=*/true ); // it does not influence Compute()
 
-  TPythonDump() << this << ".SplitVolumesIntoTetra( "
+  TPythonDump(myMesh_i->GetGen()) << this << ".SplitVolumesIntoTetra( "
                 << elems << ", " << methodFlags << " )";
 
   SMESH_CATCH( SMESH::throwCorbaException );
@@ -2114,7 +2114,7 @@ void SMESH_MeshEditor_i::SplitHexahedraIntoPrisms( SMESH::SMESH_IDSource_ptr  el
   getEditor().SplitVolumes( elemFacets, int( methodFlags ));
   declareMeshModified( /*isReComputeSafe=*/true ); // it does not influence Compute()
 
-  TPythonDump() << this << ".SplitHexahedraIntoPrisms( "
+  TPythonDump(myMesh_i->GetGen()) << this << ".SplitHexahedraIntoPrisms( "
                 << elems << ", "
                 << startHexPoint << ", "
                 << facetToSplitNormal<< ", "
@@ -2155,7 +2155,7 @@ void SMESH_MeshEditor_i::SplitBiQuadraticIntoLinear(const SMESH::ListOfIDSources
 
   declareMeshModified( /*isReComputeSafe=*/true ); // it does not influence Compute()
 
-  TPythonDump() << this << ".SplitBiQuadraticIntoLinear( "
+  TPythonDump(myMesh_i->GetGen()) << this << ".SplitBiQuadraticIntoLinear( "
                 << theElems << " )";
 
   SMESH_CATCH( SMESH::throwCorbaException );
@@ -2268,7 +2268,7 @@ SMESH_MeshEditor_i::smooth(const SMESH::long_array &              IDsOfElements,
   declareMeshModified( /*isReComputeSafe=*/true ); // does not prevent re-compute
 
   // Update Python script
-  TPythonDump() << "isDone = " << this << "."
+  TPythonDump(myMesh_i->GetGen()) << "isDone = " << this << "."
                 << (IsParametric ? "SmoothParametric( " : "Smooth( ")
                 << IDsOfElements << ", "     << IDsOfFixedNodes << ", "
                 << TVar( MaxNbOfIterations ) << ", " << TVar( MaxAspectRatio ) << ", "
@@ -2299,7 +2299,7 @@ SMESH_MeshEditor_i::smoothObject(SMESH::SMESH_IDSource_ptr              theObjec
   SMESH_TRY;
   initData();
 
-  TPythonDump aTPythonDump;  // suppress dump in smooth()
+  TPythonDump aTPythonDump(myMesh_i->GetGen());  // suppress dump in smooth()
 
   prepareIdSource( theObject );
   SMESH::long_array_var anElementsId = theObject->GetIDs();
@@ -2331,7 +2331,7 @@ void SMESH_MeshEditor_i::RenumberNodes()
 {
   SMESH_TRY;
   // Update Python script
-  TPythonDump() << this << ".RenumberNodes()";
+  TPythonDump(myMesh_i->GetGen()) << this << ".RenumberNodes()";
 
   getMeshDS()->Renumber( true );
 
@@ -2348,7 +2348,7 @@ void SMESH_MeshEditor_i::RenumberElements()
 {
   SMESH_TRY;
   // Update Python script
-  TPythonDump() << this << ".RenumberElements()";
+  TPythonDump(myMesh_i->GetGen()) << this << ".RenumberElements()";
 
   getMeshDS()->Renumber( false );
 
@@ -2413,7 +2413,7 @@ SMESH_MeshEditor_i::RotationSweepObjects(const SMESH::ListOfIDSources & theNodes
     //makeWalls = false; -- faces are needed for preview
   }
 
-  TPythonDump aPythonDump; // it is here to prevent dump of getGroups()
+  TPythonDump aPythonDump(myMesh_i->GetGen()); // it is here to prevent dump of getGroups()
 
   gp_Ax1 Ax1 (gp_Pnt( theAxis.x,  theAxis.y,  theAxis.z ),
               gp_Vec( theAxis.vx, theAxis.vy, theAxis.vz ));
@@ -2621,7 +2621,7 @@ SMESH_MeshEditor_i::ExtrusionSweepObjects(const SMESH::ListOfIDSources & theNode
 
     params.SetNoGroups();
   }
-  TPythonDump aPythonDump; // it is here to prevent dump of getGroups()
+  TPythonDump aPythonDump(myMesh_i->GetGen()); // it is here to prevent dump of getGroups()
 
   ::SMESH_MeshEditor::TTElemOfElemListMap aHistory;
   ::SMESH_MeshEditor::PGroupIDs groupIds =
@@ -2675,7 +2675,7 @@ SMESH_MeshEditor_i::ExtrusionByNormal(const SMESH::ListOfIDSources& objects,
   SMESH_TRY;
   initData();
 
-  TPythonDump aPythonDump; // it is here to prevent dump of GetGroups()
+  TPythonDump aPythonDump(myMesh_i->GetGen()); // it is here to prevent dump of GetGroups()
 
   ExtrusionParams params( stepSize, nbOfSteps, dim,
                           byAverageNormal, useInputElemsOnly, makeGroups );
@@ -2751,7 +2751,7 @@ SMESH_MeshEditor_i::AdvancedExtrusion(const SMESH::long_array & theIDsOfElements
   SMESH_TRY;
   initData();
 
-  TPythonDump aPythonDump; // it is here to prevent dump of getGroups()
+  TPythonDump aPythonDump(myMesh_i->GetGen()); // it is here to prevent dump of getGroups()
 
   ExtrusionParams params( theStepVector, theNbOfSteps, theMakeGroups,
                           theExtrFlags, theSewTolerance );
@@ -2931,7 +2931,7 @@ SMESH_MeshEditor_i::ExtrusionAlongPathObjects(const SMESH::ListOfIDSources & the
   declareMeshModified( /*isReComputeSafe=*/true );
   theError = convExtrError( error );
 
-  TPythonDump aPythonDump; // it is here to prevent dump of getGroups()
+  TPythonDump aPythonDump(myMesh_i->GetGen()); // it is here to prevent dump of getGroups()
   if ( theMakeGroups ) {
     list<int> groupIDs = myMesh->GetGroupIds();
     list<int>::iterator newBegin = groupIDs.begin();
@@ -3036,8 +3036,8 @@ SMESH_MeshEditor_i::LinearAnglesVariation(SMESH::SMESH_Mesh_ptr       thePathMes
     }
   }
   // Update Python script
-  TPythonDump() << "rotAngles = " << theAngles;
-  TPythonDump() << "rotAngles = " << this << ".LinearAnglesVariation( "
+  TPythonDump(myMesh_i->GetGen()) << "rotAngles = " << theAngles;
+  TPythonDump(myMesh_i->GetGen()) << "rotAngles = " << this << ".LinearAnglesVariation( "
                 << thePathMesh  << ", "
                 << thePathShape << ", "
                 << "rotAngles )";
@@ -3124,7 +3124,7 @@ void SMESH_MeshEditor_i::Mirror(const SMESH::long_array &           theIDsOfElem
                                 CORBA::Boolean                      theCopy)
 {
   if ( !myIsPreviewMode ) {
-    TPythonDump() << this << ".Mirror( "
+    TPythonDump(myMesh_i->GetGen()) << this << ".Mirror( "
                   << theIDsOfElements              << ", "
                   << theAxis                       << ", "
                   << mirrorTypeName(theMirrorType) << ", "
@@ -3150,7 +3150,7 @@ void SMESH_MeshEditor_i::MirrorObject(SMESH::SMESH_IDSource_ptr           theObj
                                       CORBA::Boolean                      theCopy)
 {
   if ( !myIsPreviewMode ) {
-    TPythonDump() << this << ".MirrorObject( "
+    TPythonDump(myMesh_i->GetGen()) << this << ".MirrorObject( "
                   << theObject                     << ", "
                   << theAxis                       << ", "
                   << mirrorTypeName(theMirrorType) << ", "
@@ -3174,7 +3174,7 @@ SMESH_MeshEditor_i::MirrorMakeGroups(const SMESH::long_array&            theIDsO
                                      const SMESH::AxisStruct&            theMirror,
                                      SMESH::SMESH_MeshEditor::MirrorType theMirrorType)
 {
-  TPythonDump aPythonDump; // it is here to prevent dump of GetGroups()
+  TPythonDump aPythonDump(myMesh_i->GetGen()); // it is here to prevent dump of GetGroups()
 
   SMESH::ListOfGroups * aGroups = 0;
   if ( theIDsOfElements.length() > 0 )
@@ -3203,7 +3203,7 @@ SMESH_MeshEditor_i::MirrorObjectMakeGroups(SMESH::SMESH_IDSource_ptr           t
                                            const SMESH::AxisStruct&            theMirror,
                                            SMESH::SMESH_MeshEditor::MirrorType theMirrorType)
 {
-  TPythonDump aPythonDump; // it is here to prevent dump of GetGroups()
+  TPythonDump aPythonDump(myMesh_i->GetGen()); // it is here to prevent dump of GetGroups()
 
   SMESH::ListOfGroups * aGroups = 0;
   TIDSortedElemSet elements;
@@ -3238,7 +3238,7 @@ SMESH_MeshEditor_i::MirrorMakeMesh(const SMESH::long_array&            theIDsOfE
   { // open new scope to dump "MakeMesh" command
     // and then "GetGroups" using SMESH_Mesh::GetGroups()
 
-    TPythonDump pydump; // to prevent dump at mesh creation
+    TPythonDump pydump(myMesh_i->GetGen()); // to prevent dump at mesh creation
 
     mesh = makeMesh( theMeshName );
     mesh_i = SMESH::DownCast<SMESH_Mesh_i*>( mesh );
@@ -3285,7 +3285,7 @@ SMESH_MeshEditor_i::MirrorObjectMakeMesh(SMESH::SMESH_IDSource_ptr           the
   { // open new scope to dump "MakeMesh" command
     // and then "GetGroups" using SMESH_Mesh::GetGroups()
 
-    TPythonDump pydump; // to prevent dump at mesh creation
+    TPythonDump pydump(myMesh_i->GetGen()); // to prevent dump at mesh creation
 
     mesh = makeMesh( theMeshName );
     mesh_i = SMESH::DownCast<SMESH_Mesh_i*>( mesh );
@@ -3380,7 +3380,7 @@ void SMESH_MeshEditor_i::Translate(const SMESH::long_array & theIDsOfElements,
                                    CORBA::Boolean            theCopy)
 {
   if (!myIsPreviewMode) {
-    TPythonDump() << this << ".Translate( "
+    TPythonDump(myMesh_i->GetGen()) << this << ".Translate( "
                   << theIDsOfElements << ", "
                   << theVector        << ", "
                   << theCopy          << " )";
@@ -3402,7 +3402,7 @@ void SMESH_MeshEditor_i::TranslateObject(SMESH::SMESH_IDSource_ptr theObject,
                                          CORBA::Boolean            theCopy)
 {
   if (!myIsPreviewMode) {
-    TPythonDump() << this << ".TranslateObject( "
+    TPythonDump(myMesh_i->GetGen()) << this << ".TranslateObject( "
                   << theObject << ", "
                   << theVector << ", "
                   << theCopy   << " )";
@@ -3424,7 +3424,7 @@ SMESH::ListOfGroups*
 SMESH_MeshEditor_i::TranslateMakeGroups(const SMESH::long_array& theIDsOfElements,
                                         const SMESH::DirStruct&  theVector)
 {
-  TPythonDump aPythonDump; // it is here to prevent dump of GetGroups()
+  TPythonDump aPythonDump(myMesh_i->GetGen()); // it is here to prevent dump of GetGroups()
 
   SMESH::ListOfGroups * aGroups = 0;
   if (theIDsOfElements.length()) {
@@ -3450,7 +3450,7 @@ SMESH::ListOfGroups*
 SMESH_MeshEditor_i::TranslateObjectMakeGroups(SMESH::SMESH_IDSource_ptr theObject,
                                               const SMESH::DirStruct&   theVector)
 {
-  TPythonDump aPythonDump; // it is here to prevent dump of GetGroups()
+  TPythonDump aPythonDump(myMesh_i->GetGen()); // it is here to prevent dump of GetGroups()
 
   SMESH::ListOfGroups * aGroups = 0;
   TIDSortedElemSet elements;
@@ -3483,7 +3483,7 @@ SMESH_MeshEditor_i::TranslateMakeMesh(const SMESH::long_array& theIDsOfElements,
   { // open new scope to dump "MakeMesh" command
     // and then "GetGroups" using SMESH_Mesh::GetGroups()
 
-    TPythonDump pydump; // to prevent dump at mesh creation
+    TPythonDump pydump(myMesh_i->GetGen()); // to prevent dump at mesh creation
 
     mesh = makeMesh( theMeshName );
     mesh_i = SMESH::DownCast<SMESH_Mesh_i*>( mesh );
@@ -3529,7 +3529,7 @@ SMESH_MeshEditor_i::TranslateObjectMakeMesh(SMESH::SMESH_IDSource_ptr theObject,
   { // open new scope to dump "MakeMesh" command
     // and then "GetGroups" using SMESH_Mesh::GetGroups()
 
-    TPythonDump pydump; // to prevent dump at mesh creation
+    TPythonDump pydump(myMesh_i->GetGen()); // to prevent dump at mesh creation
     mesh = makeMesh( theMeshName );
     mesh_i = SMESH::DownCast<SMESH_Mesh_i*>( mesh );
 
@@ -3625,7 +3625,7 @@ void SMESH_MeshEditor_i::Rotate(const SMESH::long_array & theIDsOfElements,
                                 CORBA::Boolean            theCopy)
 {
   if (!myIsPreviewMode) {
-    TPythonDump() << this << ".Rotate( "
+    TPythonDump(myMesh_i->GetGen()) << this << ".Rotate( "
                   << theIDsOfElements << ", "
                   << theAxis          << ", "
                   << TVar( theAngle ) << ", "
@@ -3650,7 +3650,7 @@ void SMESH_MeshEditor_i::RotateObject(SMESH::SMESH_IDSource_ptr theObject,
                                       CORBA::Boolean            theCopy)
 {
   if ( !myIsPreviewMode ) {
-    TPythonDump() << this << ".RotateObject( "
+    TPythonDump(myMesh_i->GetGen()) << this << ".RotateObject( "
                   << theObject        << ", "
                   << theAxis          << ", "
                   << TVar( theAngle ) << ", "
@@ -3672,7 +3672,7 @@ SMESH_MeshEditor_i::RotateMakeGroups(const SMESH::long_array& theIDsOfElements,
                                      const SMESH::AxisStruct& theAxis,
                                      CORBA::Double            theAngle)
 {
-  TPythonDump aPythonDump; // it is here to prevent dump of GetGroups()
+  TPythonDump aPythonDump(myMesh_i->GetGen()); // it is here to prevent dump of GetGroups()
 
   SMESH::ListOfGroups * aGroups = 0;
   if (theIDsOfElements.length() > 0)
@@ -3701,7 +3701,7 @@ SMESH_MeshEditor_i::RotateObjectMakeGroups(SMESH::SMESH_IDSource_ptr theObject,
                                            const SMESH::AxisStruct&  theAxis,
                                            CORBA::Double             theAngle)
 {
-  TPythonDump aPythonDump; // it is here to prevent dump of GetGroups()
+  TPythonDump aPythonDump(myMesh_i->GetGen()); // it is here to prevent dump of GetGroups()
 
   SMESH::ListOfGroups * aGroups = 0;
   TIDSortedElemSet elements;
@@ -3737,7 +3737,7 @@ SMESH_MeshEditor_i::RotateMakeMesh(const SMESH::long_array& theIDsOfElements,
   { // open new scope to dump "MakeMesh" command
     // and then "GetGroups" using SMESH_Mesh::GetGroups()
 
-    TPythonDump pydump; // to prevent dump at mesh creation
+    TPythonDump pydump(myMesh_i->GetGen()); // to prevent dump at mesh creation
 
     mesh = makeMesh( theMeshName );
     mesh_i = SMESH::DownCast<SMESH_Mesh_i*>( mesh );
@@ -3789,7 +3789,7 @@ SMESH_MeshEditor_i::RotateObjectMakeMesh(SMESH::SMESH_IDSource_ptr theObject,
   {// open new scope to dump "MakeMesh" command
    // and then "GetGroups" using SMESH_Mesh::GetGroups()
 
-    TPythonDump pydump; // to prevent dump at mesh creation
+    TPythonDump pydump(myMesh_i->GetGen()); // to prevent dump at mesh creation
     mesh = makeMesh( theMeshName );
     mesh_i = SMESH::DownCast<SMESH_Mesh_i*>( mesh );
 
@@ -3909,7 +3909,7 @@ void SMESH_MeshEditor_i::Scale(SMESH::SMESH_IDSource_ptr  theObject,
                                CORBA::Boolean             theCopy)
 {
   if ( !myIsPreviewMode ) {
-    TPythonDump() << this << ".Scale( "
+    TPythonDump(myMesh_i->GetGen()) << this << ".Scale( "
                   << theObject            << ", "
                   << thePoint             << ", "
                   << TVar( theScaleFact ) << ", "
@@ -3929,7 +3929,7 @@ SMESH_MeshEditor_i::ScaleMakeGroups(SMESH::SMESH_IDSource_ptr  theObject,
                                     const SMESH::PointStruct&  thePoint,
                                     const SMESH::double_array& theScaleFact)
 {
-  TPythonDump aPythonDump; // it is here to prevent dump of GetGroups()
+  TPythonDump aPythonDump(myMesh_i->GetGen()); // it is here to prevent dump of GetGroups()
 
   SMESH::ListOfGroups * aGroups = scale(theObject, thePoint, theScaleFact, true, true);
   if (!myIsPreviewMode) {
@@ -3960,7 +3960,7 @@ SMESH_MeshEditor_i::ScaleMakeMesh(SMESH::SMESH_IDSource_ptr  theObject,
   { // open new scope to dump "MakeMesh" command
     // and then "GetGroups" using SMESH_Mesh::GetGroups()
 
-    TPythonDump pydump; // to prevent dump at mesh creation
+    TPythonDump pydump(myMesh_i->GetGen()); // to prevent dump at mesh creation
     mesh   = makeMesh( theMeshName );
     mesh_i = SMESH::DownCast<SMESH_Mesh_i*>( mesh );
 
@@ -4013,7 +4013,7 @@ SMESH::SMESH_Mesh_ptr SMESH_MeshEditor_i::Offset( SMESH::SMESH_IDSource_ptr theO
   SMESH::SMESH_Mesh_var         mesh_var;
   ::SMESH_MeshEditor::PGroupIDs groupIds;
 
-  TPythonDump pyDump;
+  TPythonDump pyDump(myMesh_i->GetGen());
 
   TIDSortedElemSet elements, copyElements;
   if ( idSourceToSet( theObject, aMeshDS, elements, SMDSAbs_Face,
@@ -4052,9 +4052,9 @@ SMESH::SMESH_Mesh_ptr SMESH_MeshEditor_i::Offset( SMESH::SMESH_IDSource_ptr theO
     if ( *theMeshName && mesh_var->NbFaces() == 0 )
     {
       // new mesh empty, remove it
-      SALOMEDS::Study_var          study = SMESH_Gen_i::getStudyServant();
+      SALOMEDS::Study_var          study = myMesh_i->GetGen()->getStudyServant();
       SALOMEDS::StudyBuilder_var builder = study->NewBuilder();
-      SALOMEDS::SObject_wrap      meshSO = SMESH_Gen_i::ObjectToSObject( mesh_var );
+      SALOMEDS::SObject_wrap      meshSO = myMesh_i->GetGen()->ObjectToSObject( mesh_var );
       builder->RemoveObjectWithChildren( meshSO );
       THROW_SALOME_CORBA_EXCEPTION("Offset failed", SALOME::INTERNAL_ERROR);
     }
@@ -4124,7 +4124,7 @@ FindCoincidentNodes (CORBA::Double                  Tolerance,
   TIDSortedNodeSet nodes; // no input nodes
   findCoincidentNodes( nodes, Tolerance, GroupsOfNodes, SeparateCornersAndMedium );
 
-  TPythonDump() << "coincident_nodes = " << this << ".FindCoincidentNodes( "
+  TPythonDump(myMesh_i->GetGen()) << "coincident_nodes = " << this << ".FindCoincidentNodes( "
                 << Tolerance << ", "
                 << SeparateCornersAndMedium << " )";
 
@@ -4151,7 +4151,7 @@ FindCoincidentNodesOnPart(SMESH::SMESH_IDSource_ptr      theObject,
 
   findCoincidentNodes( nodes, Tolerance, GroupsOfNodes, SeparateCornersAndMedium );
 
-  TPythonDump() << "coincident_nodes_on_part = " << this << ".FindCoincidentNodesOnPart( "
+  TPythonDump(myMesh_i->GetGen()) << "coincident_nodes_on_part = " << this << ".FindCoincidentNodesOnPart( "
                 << theObject <<", "
                 << Tolerance << ", "
                 << SeparateCornersAndMedium << " )";
@@ -4191,7 +4191,7 @@ FindCoincidentNodesOnPartBut(const SMESH::ListOfIDSources&  theObjects,
   }
   findCoincidentNodes( nodes, theTolerance, theGroupsOfNodes, theSeparateCornersAndMedium );
 
-  TPythonDump() << "coincident_nodes_on_part = " << this << ".FindCoincidentNodesOnPartBut( "
+  TPythonDump(myMesh_i->GetGen()) << "coincident_nodes_on_part = " << this << ".FindCoincidentNodesOnPartBut( "
                 << theObjects <<", "
                 << theTolerance << ", "
                 << theExceptSubMeshOrGroups << ", "
@@ -4214,7 +4214,7 @@ void SMESH_MeshEditor_i::MergeNodes (const SMESH::array_of_long_array& GroupsOfN
 
   SMESHDS_Mesh* aMesh = getMeshDS();
 
-  TPythonDump aTPythonDump;
+  TPythonDump aTPythonDump(myMesh_i->GetGen());
   aTPythonDump << this << ".MergeNodes([";
 
   TIDSortedNodeSet setOfNodesToKeep;
@@ -4311,7 +4311,7 @@ void SMESH_MeshEditor_i::FindEqualElements(const SMESH::ListOfIDSources&  theObj
         aGroup[ k ] = *idIt;
     }
 
-    TPythonDump() << "equal_elements = " << this << ".FindEqualElements( "
+    TPythonDump(myMesh_i->GetGen()) << "equal_elements = " << this << ".FindEqualElements( "
                   << theObjects << ", "
                   << theExceptObjects << " )";
   }
@@ -4330,7 +4330,7 @@ void SMESH_MeshEditor_i::MergeElements(const SMESH::array_of_long_array& theGrou
   SMESH_TRY;
   initData();
 
-  TPythonDump aTPythonDump;
+  TPythonDump aTPythonDump(myMesh_i->GetGen());
   aTPythonDump << this << ".MergeElements( [";
 
   NCollection_Map< int > idsToKeep;
@@ -4388,7 +4388,7 @@ void SMESH_MeshEditor_i::MergeEqualElements()
 
   declareMeshModified( /*isReComputeSafe=*/true );
 
-  TPythonDump() << this << ".MergeEqualElements()";
+  TPythonDump(myMesh_i->GetGen()) << this << ".MergeEqualElements()";
 
   SMESH_CATCH( SMESH::throwCorbaException );
 }
@@ -4440,7 +4440,7 @@ CORBA::Boolean SMESH_MeshEditor_i::MoveNode(CORBA::Long   NodeID,
   if ( !myIsPreviewMode )
   {
     // Update Python script
-    TPythonDump() << "isDone = " << this << ".MoveNode( "
+    TPythonDump(myMesh_i->GetGen()) << "isDone = " << this << ".MoveNode( "
                   << NodeID << ", " << TVar(x) << ", " << TVar(y) << ", " << TVar(z) << " )";
     declareMeshModified( /*isReComputeSafe=*/false );
   }
@@ -4537,7 +4537,7 @@ CORBA::Long SMESH_MeshEditor_i::MoveClosestNodeToPoint(CORBA::Double x,
 
   if ( !myIsPreviewMode )
   {
-    TPythonDump() << "nodeID = " << this
+    TPythonDump(myMesh_i->GetGen()) << "nodeID = " << this
                   << ".MoveClosestNodeToPoint( "<< x << ", " << y << ", " << z
                   << ", " << nodeID << " )";
 
@@ -5014,7 +5014,7 @@ SMESH_MeshEditor_i::FillHole(const SMESH::FreeBorder& theHole,
       const_cast<SMESH_SequenceOfElemPtr&>( getEditor().GetLastCreatedElems() );
     aSeq.swap( newFaces );
 
-    TPythonDump pyDump;
+    TPythonDump pyDump(myMesh_i->GetGen());
     if ( group->_is_nil() ) pyDump << "_group = ";
     else                    pyDump << group << " = ";
     pyDump << this << ".FillHole( SMESH.FreeBorder(" << theHole.nodeIDs << " ))";
@@ -5100,7 +5100,7 @@ SMESH_MeshEditor_i::FindCoincidentFreeBorders(CORBA::Double tolerance)
   }
   SMESH_CATCH( SMESH::doNothing );
 
-  TPythonDump() << "CoincidentFreeBorders = "
+  TPythonDump(myMesh_i->GetGen()) << "CoincidentFreeBorders = "
                 << this << ".FindCoincidentFreeBorders( " << tolerance << " )";
 
   return aCFB._retn();
@@ -5248,7 +5248,7 @@ SewCoincidentFreeBorders(const SMESH::CoincidentFreeBorders& freeBorders,
     nbSewed += groupSewed;
   }
 
-  TPythonDump() << "nbSewed = " << this << ".SewCoincidentFreeBorders( "
+  TPythonDump(myMesh_i->GetGen()) << "nbSewed = " << this << ".SewCoincidentFreeBorders( "
                 << freeBorders     << ", "
                 << createPolygons  << ", "
                 << createPolyhedra << " )";
@@ -5306,7 +5306,7 @@ SMESH_MeshEditor_i::SewFreeBorders(CORBA::Long FirstNodeID1,
       !aSide2ThirdNode)
     return SMESH::SMESH_MeshEditor::SEW_BORDER2_NOT_FOUND;
 
-  TPythonDump() << "error = " << this << ".SewFreeBorders( "
+  TPythonDump(myMesh_i->GetGen()) << "error = " << this << ".SewFreeBorders( "
                 << FirstNodeID1  << ", "
                 << SecondNodeID1 << ", "
                 << LastNodeID1   << ", "
@@ -5368,7 +5368,7 @@ SMESH_MeshEditor_i::SewConformFreeBorders(CORBA::Long FirstNodeID1,
       !aSide2SecondNode)
     return SMESH::SMESH_MeshEditor::SEW_BORDER2_NOT_FOUND;
 
-  TPythonDump() << "error = " << this << ".SewConformFreeBorders( "
+  TPythonDump(myMesh_i->GetGen()) << "error = " << this << ".SewConformFreeBorders( "
                 << FirstNodeID1  << ", "
                 << SecondNodeID1 << ", "
                 << LastNodeID1   << ", "
@@ -5427,7 +5427,7 @@ SMESH_MeshEditor_i::SewBorderToSide(CORBA::Long FirstNodeIDOnFreeBorder,
       !aSide2SecondNode)
     return SMESH::SMESH_MeshEditor::SEW_BAD_SIDE_NODES;
 
-  TPythonDump() << "error = " << this << ".SewBorderToSide( "
+  TPythonDump(myMesh_i->GetGen()) << "error = " << this << ".SewBorderToSide( "
                 << FirstNodeIDOnFreeBorder  << ", "
                 << SecondNodeIDOnFreeBorder << ", "
                 << LastNodeIDOnFreeBorder   << ", "
@@ -5489,7 +5489,7 @@ SMESH_MeshEditor_i::SewSideElements(const SMESH::long_array& IDsOfSide1Elements,
   arrayToSet(IDsOfSide1Elements, aMesh, aSide1Elems);
   arrayToSet(IDsOfSide2Elements, aMesh, aSide2Elems);
 
-  TPythonDump() << "error = " << this << ".SewSideElements( "
+  TPythonDump(myMesh_i->GetGen()) << "error = " << this << ".SewSideElements( "
                 << IDsOfSide1Elements << ", "
                 << IDsOfSide2Elements << ", "
                 << NodeID1OfSide1ToMerge << ", "
@@ -5537,7 +5537,7 @@ CORBA::Boolean SMESH_MeshEditor_i::ChangeElemNodes(CORBA::Long ide,
       return false;
     aNodes[ i ] = aNode;
   }
-  TPythonDump() << "isDone = " << this << ".ChangeElemNodes( "
+  TPythonDump(myMesh_i->GetGen()) << "isDone = " << this << ".ChangeElemNodes( "
                 << ide << ", " << newIDs << " )";
 
   bool res = getMeshDS()->ChangeElementNodes( elem, & aNodes[0], aNodes.size() );
@@ -5595,7 +5595,7 @@ CORBA::Boolean SMESH_MeshEditor_i::ConvertFromQuadratic()
   initData();
 
   CORBA::Boolean isDone = getEditor().ConvertFromQuadratic();
-  TPythonDump() << this << ".ConvertFromQuadratic()";
+  TPythonDump(myMesh_i->GetGen()) << this << ".ConvertFromQuadratic()";
   declareMeshModified( /*isReComputeSafe=*/!isDone );
   return isDone;
 
@@ -5611,7 +5611,7 @@ CORBA::Boolean SMESH_MeshEditor_i::ConvertFromQuadratic()
 void SMESH_MeshEditor_i::ConvertToQuadratic(CORBA::Boolean theForce3d)
 {
   convertToQuadratic( theForce3d, false );
-  TPythonDump() << this << ".ConvertToQuadratic("<<theForce3d<<")";
+  TPythonDump(myMesh_i->GetGen()) << this << ".ConvertToQuadratic("<<theForce3d<<")";
 }
 
 //================================================================================
@@ -5624,7 +5624,7 @@ void SMESH_MeshEditor_i::ConvertToQuadraticObject(CORBA::Boolean            theF
                                                   SMESH::SMESH_IDSource_ptr theObject)
 {
   convertToQuadratic( theForce3d, false, theObject );
-  TPythonDump() << this << ".ConvertToQuadraticObject("<<theForce3d<<", "<<theObject<<")";
+  TPythonDump(myMesh_i->GetGen()) << this << ".ConvertToQuadraticObject("<<theForce3d<<", "<<theObject<<")";
 }
 
 //================================================================================
@@ -5637,7 +5637,7 @@ void SMESH_MeshEditor_i::ConvertToBiQuadratic(CORBA::Boolean            theForce
                                               SMESH::SMESH_IDSource_ptr theObject)
 {
   convertToQuadratic( theForce3d, true, theObject );
-  TPythonDump() << this << ".ConvertToBiQuadratic("<<theForce3d<<", "<<theObject<<")";
+  TPythonDump(myMesh_i->GetGen()) << this << ".ConvertToBiQuadratic("<<theForce3d<<", "<<theObject<<")";
 }
 
 //================================================================================
@@ -5651,7 +5651,7 @@ void SMESH_MeshEditor_i::ConvertFromQuadraticObject(SMESH::SMESH_IDSource_ptr th
   SMESH_TRY;
   initData();
 
-  TPythonDump pyDump;
+  TPythonDump pyDump(myMesh_i->GetGen());
 
   TIDSortedElemSet elems;
   if ( idSourceToSet( theObject, getMeshDS(), elems, SMDSAbs_All, /*emptyIfIsMesh=*/true ))
@@ -5846,7 +5846,7 @@ SMESH_MeshEditor_i::DoubleElements(SMESH::SMESH_IDSource_ptr theElements,
   SMESH_TRY;
   initData();
 
-  TPythonDump pyDump;
+  TPythonDump pyDump(myMesh_i->GetGen());
 
   TIDSortedElemSet elems;
   if ( idSourceToSet( theElements, getMeshDS(), elems, SMDSAbs_All, /*emptyIfIsMesh=*/true))
@@ -5925,7 +5925,7 @@ CORBA::Boolean SMESH_MeshEditor_i::DoubleNodes( const SMESH::long_array& theNode
   declareMeshModified( /*isReComputeSafe=*/ !aResult );
 
   // Update Python script
-  TPythonDump() << this << ".DoubleNodes( " << theNodes << ", "<< theModifiedElems << " )";
+  TPythonDump(myMesh_i->GetGen()) << this << ".DoubleNodes( " << theNodes << ", "<< theModifiedElems << " )";
 
   return aResult;
 
@@ -5952,7 +5952,7 @@ CORBA::Boolean SMESH_MeshEditor_i::DoubleNode( CORBA::Long              theNodeI
   aNodes->length( 1 );
   aNodes[ 0 ] = theNodeId;
 
-  TPythonDump pyDump; // suppress dump by the next line
+  TPythonDump pyDump(myMesh_i->GetGen()); // suppress dump by the next line
 
   CORBA::Boolean done = DoubleNodes( aNodes, theModifiedElems );
 
@@ -5989,7 +5989,7 @@ CORBA::Boolean SMESH_MeshEditor_i::DoubleNodeGroup(SMESH::SMESH_GroupBase_ptr th
   else
     aModifiedElems = new SMESH::long_array;
 
-  TPythonDump pyDump; // suppress dump by the next line
+  TPythonDump pyDump(myMesh_i->GetGen()); // suppress dump by the next line
 
   bool done = DoubleNodes( aNodes, aModifiedElems );
 
@@ -6032,7 +6032,7 @@ SMESH_MeshEditor_i::DoubleNodeGroupNew( SMESH::SMESH_GroupBase_ptr theNodes,
     aModifiedElems->length( 0 );
   }
 
-  TPythonDump pyDump; // suppress dump by the next line
+  TPythonDump pyDump(myMesh_i->GetGen()); // suppress dump by the next line
 
   bool aResult = DoubleNodes( aNodes, aModifiedElems );
   if ( aResult )
@@ -6103,7 +6103,7 @@ CORBA::Boolean SMESH_MeshEditor_i::DoubleNodeGroups(const SMESH::ListOfGroups& t
 
   declareMeshModified( /*isReComputeSafe=*/false );
 
-  TPythonDump() << this << ".DoubleNodeGroups( " << theNodes << ", " << theModifiedElems << " )";
+  TPythonDump(myMesh_i->GetGen()) << this << ".DoubleNodeGroups( " << theNodes << ", " << theModifiedElems << " )";
 
   return aResult;
 
@@ -6128,7 +6128,7 @@ SMESH_MeshEditor_i::DoubleNodeGroupsNew( const SMESH::ListOfGroups& theNodes,
 {
   SMESH::SMESH_Group_var aNewGroup;
 
-  TPythonDump pyDump; // suppress dump by the next line
+  TPythonDump pyDump(myMesh_i->GetGen()); // suppress dump by the next line
 
   bool aResult = DoubleNodeGroups( theNodes, theModifiedElems );
 
@@ -6181,7 +6181,7 @@ CORBA::Boolean SMESH_MeshEditor_i::DoubleNodeElem( const SMESH::long_array& theE
   bool aResult = getEditor().DoubleNodes( anElems, aNodes, anAffected );
 
   // Update Python script
-  TPythonDump() << this << ".DoubleNodeElem( " << theElems << ", "
+  TPythonDump(myMesh_i->GetGen()) << this << ".DoubleNodeElem( " << theElems << ", "
                 << theNodesNot << ", " << theAffectedElems << " )";
 
   declareMeshModified( /*isReComputeSafe=*/false );
@@ -6222,7 +6222,7 @@ CORBA::Boolean SMESH_MeshEditor_i::DoubleNodeElemInRegion ( const SMESH::long_ar
   bool aResult = getEditor().DoubleNodesInRegion( anElems, aNodes, aShape );
 
   // Update Python script
-  TPythonDump() << "isDone = " << this << ".DoubleNodeElemInRegion( " << theElems << ", "
+  TPythonDump(myMesh_i->GetGen()) << "isDone = " << this << ".DoubleNodeElemInRegion( " << theElems << ", "
                 << theNodesNot << ", " << theShape << " )";
 
   declareMeshModified( /*isReComputeSafe=*/false );
@@ -6265,7 +6265,7 @@ SMESH_MeshEditor_i::DoubleNodeElemGroup(SMESH::SMESH_GroupBase_ptr theElems,
   bool aResult = getEditor().DoubleNodes( anElems, aNodes, anAffected );
 
   // Update Python script
-  TPythonDump() << "isDone = " << this << ".DoubleNodeElemGroup( " << theElems << ", "
+  TPythonDump(myMesh_i->GetGen()) << "isDone = " << this << ".DoubleNodeElemGroup( " << theElems << ", "
                 << theNodesNot << ", " << theAffectedElems << " )";
 
   declareMeshModified( /*isReComputeSafe=*/false );
@@ -6293,7 +6293,7 @@ SMESH_MeshEditor_i::DoubleNodeElemGroupNew(SMESH::SMESH_GroupBase_ptr theElems,
                                            SMESH::SMESH_GroupBase_ptr theNodesNot,
                                            SMESH::SMESH_GroupBase_ptr theAffectedElems)
 {
-  TPythonDump pyDump;
+  TPythonDump pyDump(myMesh_i->GetGen());
   SMESH::ListOfGroups_var twoGroups = DoubleNodeElemGroup2New( theElems,
                                                                theNodesNot,
                                                                theAffectedElems,
@@ -6351,7 +6351,7 @@ SMESH_MeshEditor_i::DoubleNodeElemGroup2New(SMESH::SMESH_GroupBase_ptr theElems,
 
   declareMeshModified( /*isReComputeSafe=*/ !aResult );
 
-  TPythonDump pyDump;
+  TPythonDump pyDump(myMesh_i->GetGen());
 
   if ( aResult )
   {
@@ -6432,7 +6432,7 @@ SMESH_MeshEditor_i::DoubleNodeElemGroupInRegion(SMESH::SMESH_GroupBase_ptr theEl
   declareMeshModified( /*isReComputeSafe=*/ !aResult );
 
   // Update Python script
-  TPythonDump() << "isDone = " << this << ".DoubleNodeElemGroupInRegion( " << theElems << ", "
+  TPythonDump(myMesh_i->GetGen()) << "isDone = " << this << ".DoubleNodeElemGroupInRegion( " << theElems << ", "
                 << theNodesNot << ", " << theShape << " )";
   return aResult;
 
@@ -6498,7 +6498,7 @@ SMESH_MeshEditor_i::DoubleNodeElemGroups(const SMESH::ListOfGroups& theElems,
   bool aResult = getEditor().DoubleNodes( anElems, aNodes, anAffected );
 
   // Update Python script
-  TPythonDump() << "isDone = " << this << ".DoubleNodeElemGroups( " << &theElems << ", "
+  TPythonDump(myMesh_i->GetGen()) << "isDone = " << this << ".DoubleNodeElemGroups( " << &theElems << ", "
                 << &theNodesNot << ", " << &theAffectedElems << " )";
 
   declareMeshModified( /*isReComputeSafe=*/false );
@@ -6526,7 +6526,7 @@ SMESH_MeshEditor_i::DoubleNodeElemGroupsNew(const SMESH::ListOfGroups& theElems,
                                             const SMESH::ListOfGroups& theNodesNot,
                                             const SMESH::ListOfGroups& theAffectedElems)
 {
-  TPythonDump pyDump;
+  TPythonDump pyDump(myMesh_i->GetGen());
   SMESH::ListOfGroups_var twoGroups = DoubleNodeElemGroups2New( theElems,
                                                                 theNodesNot,
                                                                 theAffectedElems,
@@ -6580,7 +6580,7 @@ SMESH_MeshEditor_i::DoubleNodeElemGroups2New(const SMESH::ListOfGroups& theElems
 
   declareMeshModified( /*isReComputeSafe=*/ !aResult );
 
-  TPythonDump pyDump;
+  TPythonDump pyDump(myMesh_i->GetGen());
   if ( aResult )
   {
     // Create group with newly created elements
@@ -6655,7 +6655,7 @@ SMESH_MeshEditor_i::DoubleNodeElemGroupsInRegion(const SMESH::ListOfGroups& theE
   bool aResult = getEditor().DoubleNodesInRegion( anElems, aNodes, aShape );
 
   // Update Python script
-  TPythonDump() << "isDone = " << this << ".DoubleNodeElemGroupsInRegion( " << &theElems << ", "
+  TPythonDump(myMesh_i->GetGen()) << "isDone = " << this << ".DoubleNodeElemGroupsInRegion( " << &theElems << ", "
                 << &theNodesNot << ", " << theShape << " )";
 
   declareMeshModified( /*isReComputeSafe=*/ !aResult );
@@ -6706,7 +6706,7 @@ SMESH_MeshEditor_i::AffectedElemGroupsInRegion( const SMESH::ListOfGroups& theEl
 
   declareMeshModified( /*isReComputeSafe=*/ !aResult );
 
-  TPythonDump pyDump;
+  TPythonDump pyDump(myMesh_i->GetGen());
   if ( aResult && anAffected.size() > 0 )
   {
     SMESH::long_array_var volumeIds = new SMESH::long_array;
@@ -6788,7 +6788,7 @@ CORBA::Boolean SMESH_MeshEditor_i::Make2DMeshFrom3D()
 
   bool aResult = getEditor().Make2DMeshFrom3D();
 
-  TPythonDump() << "isDone = " << this << ".Make2DMeshFrom3D()";
+  TPythonDump(myMesh_i->GetGen()) << "isDone = " << this << ".Make2DMeshFrom3D()";
 
   declareMeshModified( /*isReComputeSafe=*/ !aResult );
   return aResult;
@@ -6856,7 +6856,7 @@ SMESH_MeshEditor_i::DoubleNodesOnGroupBoundaries( const SMESH::ListOfGroups& the
   declareMeshModified( /*isReComputeSafe=*/ !isOK );
 
   // Update Python script
-  TPythonDump() << "isDone = " << this << ".DoubleNodesOnGroupBoundaries( " << &theDomains
+  TPythonDump(myMesh_i->GetGen()) << "isDone = " << this << ".DoubleNodesOnGroupBoundaries( " << &theDomains
                 << ", " << createJointElems << ", " << onAllBoundaries << " )";
 
   SMESH_CATCH( SMESH::throwCorbaException );
@@ -6908,7 +6908,7 @@ SMESH_MeshEditor_i::CreateFlatElementsOnFacesGroups( const SMESH::ListOfGroups& 
   declareMeshModified( /*isReComputeSafe=*/ !aResult );
 
   // Update Python script
-  TPythonDump() << this << ".CreateFlatElementsOnFacesGroups( " << &theGroupsOfFaces << " )";
+  TPythonDump(myMesh_i->GetGen()) << this << ".CreateFlatElementsOnFacesGroups( " << &theGroupsOfFaces << " )";
   return aResult;
 
   SMESH_CATCH( SMESH::throwCorbaException );
@@ -6965,7 +6965,7 @@ void SMESH_MeshEditor_i::CreateHoleSkin(CORBA::Double                  radius,
     for ( int j = 0; lIt != aListOfNodes.end(); lIt++, j++ )
       aGroup[ j ] = (*lIt);
   }
-  TPythonDump() << "lists_nodes = " << this << ".CreateHoleSkin( "
+  TPythonDump(myMesh_i->GetGen()) << "lists_nodes = " << this << ".CreateHoleSkin( "
                 << radius << ", "
                 << theShape
                 << ", '" << groupName << "', "
@@ -7011,7 +7011,7 @@ SMESH_MeshEditor_i::MakeBoundaryMesh(SMESH::SMESH_IDSource_ptr idSource,
   SMESH::SMESH_Mesh_var mesh_var;
   SMESH::SMESH_Group_var group_var;
 
-  TPythonDump pyDump;
+  TPythonDump pyDump(myMesh_i->GetGen());
 
   TIDSortedElemSet elements;
   SMDSAbs_ElementType elemType = (dim == SMESH::BND_1DFROM2D) ? SMDSAbs_Face : SMDSAbs_Volume;
@@ -7122,7 +7122,7 @@ CORBA::Long SMESH_MeshEditor_i::MakeBoundaryElements(SMESH::Bnd_Dimension dim,
   groupsOfOtherMesh->length( nbGroupsOfOtherMesh );
 
   int nbAdded = 0;
-  TPythonDump pyDump;
+  TPythonDump pyDump(myMesh_i->GetGen());
 
   if ( nbGroupsOfOtherMesh > 0 )
   {
@@ -7342,11 +7342,11 @@ void SMESH_MeshEditor_i::MakePolyLine(SMESH::ListOfPolySegments& theSegments,
   }
   else
   {
-    TPythonDump() << "_segments = []";
+    TPythonDump(myMesh_i->GetGen()) << "_segments = []";
     for ( CORBA::ULong i = 0; i < theSegments.length(); ++i )
     {
       SMESH::PolySegment& segIn = theSegments[ i ];
-      TPythonDump() << "_segments.append( SMESH.PolySegment( "
+      TPythonDump(myMesh_i->GetGen()) << "_segments.append( SMESH.PolySegment( "
                     << segIn.node1ID1 << ", "
                     << segIn.node1ID2 << ", "
                     << segIn.node2ID1 << ", "
@@ -7356,7 +7356,7 @@ void SMESH_MeshEditor_i::MakePolyLine(SMESH::ListOfPolySegments& theSegments,
                     << segIn.vector.PS.y << ", "
                     << segIn.vector.PS.z << ")))";
     }
-    TPythonDump() << this << ".MakePolyLine( _segments, '" << theGroupName << "')";
+    TPythonDump(myMesh_i->GetGen()) << this << ".MakePolyLine( _segments, '" << theGroupName << "')";
   }
   meshDS->Modified();
   SMESH_CATCH( SMESH::throwCorbaException );

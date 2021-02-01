@@ -20,6 +20,7 @@
 #include "SMESH_Gen_No_Session_i.hxx"
 #include "SALOMEDS_Study_i.hxx"
 #include "SALOME_KernelServices.hxx"
+#include "SALOME_ModuleCatalog_impl.hxx"
 
 SMESH_Gen_No_Session_i::SMESH_Gen_No_Session_i( CORBA::ORB_ptr orb,
                                                 PortableServer::POA_ptr   poa,
@@ -40,4 +41,10 @@ GEOM::GEOM_Gen_var SMESH_Gen_No_Session_i::GetGeomEngine( bool isShaper )
 SALOMEDS::Study_var SMESH_Gen_No_Session_i::getStudyServant() const
 {
   return SALOMEDS::Study::_duplicate(KERNEL::getStudyServantSA());
+}
+
+SALOME_ModuleCatalog::ModuleCatalog_var SMESH_Gen_No_Session_i::getModuleCatalog() const
+{
+  SALOME_ModuleCatalog::ModuleCatalog_var aCat = KERNEL::getModuleComponentServantSA();
+  return aCat;
 }

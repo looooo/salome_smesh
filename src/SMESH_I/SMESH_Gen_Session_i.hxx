@@ -32,4 +32,5 @@ public:
   GEOM::GEOM_Gen_var GetGeomEngine( bool isShaper ) override;
   // Get the SALOMEDS::Study from naming service
   SALOMEDS::Study_var getStudyServant() const override;
+  SALOME_ModuleCatalog::ModuleCatalog_var getModuleCatalog() const override;
 };

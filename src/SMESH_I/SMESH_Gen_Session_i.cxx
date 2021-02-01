@@ -43,6 +43,12 @@ SALOMEDS::Study_var SMESH_Gen_Session_i::getStudyServant() const
   return SALOMEDS::Study::_duplicate(KERNEL::getStudyServant());
 }
 
+SALOME_ModuleCatalog::ModuleCatalog_var SMESH_Gen_Session_i::getModuleCatalog() const
+{
+  SALOME_ModuleCatalog::ModuleCatalog_var aCat = SALOME_ModuleCatalog::ModuleCatalog::_narrow( GetNS()->Resolve("/Kernel/ModulCatalog") );
+  return aCat;
+}
+
 extern "C"
 { SMESH_I_EXPORT
   PortableServer::ObjectId* SMESHEngine_factory( CORBA::ORB_ptr            orb,

@@ -35,6 +35,7 @@
 #include CORBA_CLIENT_HEADER(GEOM_Gen)
 #include CORBA_CLIENT_HEADER(SALOMEDS)
 #include CORBA_CLIENT_HEADER(SALOMEDS_Attributes)
+#include CORBA_CLIENT_HEADER(SALOME_ModuleCatalog)
 
 #include "SMESH_Gen.hxx"
 #include "SMESH_Mesh_i.hxx"
@@ -111,6 +112,7 @@ public:
   static GEOM::GEOM_Gen_var GetGeomEngine( GEOM::GEOM_Object_ptr );
   // Retrieve Study depending on Session / Standalone mode
   virtual SALOMEDS::Study_var getStudyServant() const = 0;
+  virtual SALOME_ModuleCatalog::ModuleCatalog_var getModuleCatalog() const = 0;
   SALOMEDS::SObject_ptr publish(CORBA::Object_ptr     theIOR,
                                 SALOMEDS::SObject_ptr theFatherObject,
                                 const int             theTag = 0,

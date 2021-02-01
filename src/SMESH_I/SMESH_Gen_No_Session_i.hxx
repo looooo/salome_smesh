@@ -31,4 +31,5 @@ public:
                const char*               interfaceName);
   GEOM::GEOM_Gen_var GetGeomEngine( bool isShaper ) override;
   SALOMEDS::Study_var getStudyServant() const override;
+  SALOME_ModuleCatalog::ModuleCatalog_var getModuleCatalog() const override;
 };

@@ -34,8 +34,6 @@
 #include "SMESH_Mesh_i.hxx"
 #include "SMESH_subMesh_i.hxx"
 
-#include CORBA_CLIENT_HEADER(SALOME_ModuleCatalog)
-
 #include <utilities.h>
 #include <Utils_ExceptHandlers.hxx>
 #include <SALOMEDS_wrap.hxx>
@@ -577,7 +575,7 @@ SALOMEDS::SComponent_ptr SMESH_Gen_i::PublishComponent()
 
   // If component for this SMESH engine does not exist in the study, create it
 
-  SALOME_ModuleCatalog::ModuleCatalog_var aCat = KERNEL::getModuleComponentServantSA();
+  SALOME_ModuleCatalog::ModuleCatalog_var aCat = this->getModuleCatalog();
   if ( CORBA::is_nil( aCat ) )
     return father._retn();
 

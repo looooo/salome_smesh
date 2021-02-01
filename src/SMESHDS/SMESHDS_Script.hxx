@@ -31,6 +31,8 @@
 
 #include "SMESHDS_Command.hxx"
 
+#include <smIdType.hxx>
+
 #include <list>
 #include <vector>
 
@@ -62,12 +64,12 @@ class SMESHDS_EXPORT SMESHDS_Script
                        int idnode4, int idnode5, int idnode6, int idnode7, int idnode8,
                        int idnode9, int idnode10, int idnode11, int idnode12);
 
-        void AddPolygonalFace (const int               NewFaceID,
-                               const std::vector<int>& nodes_ids);
-        void AddQuadPolygonalFace (const int               NewFaceID,
-                                        const std::vector<int>& nodes_ids);
-        void AddPolyhedralVolume (const int               NewVolID,
-                                  const std::vector<int>& nodes_ids,
+        void AddPolygonalFace (const smIdType               NewFaceID,
+                               const std::vector<smIdType>& nodes_ids);
+        void AddQuadPolygonalFace (const smIdType               NewFaceID,
+                                        const std::vector<smIdType>& nodes_ids);
+        void AddPolyhedralVolume (const smIdType               NewVolID,
+                                  const std::vector<smIdType>& nodes_ids,
                                   const std::vector<int>& quantities);
         void AddBall(int NewBallID, int node, double diameter);
 

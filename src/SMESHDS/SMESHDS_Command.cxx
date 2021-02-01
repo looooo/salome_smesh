@@ -277,8 +277,8 @@ void SMESHDS_Command::AddVolume(int NewVolID,
 //function : AddPolygonalFace
 //purpose  : 
 //=======================================================================
-void SMESHDS_Command::AddPolygonalFace (const int               ElementID,
-                                        const std::vector<int>& nodes_ids)
+void SMESHDS_Command::AddPolygonalFace (const smIdType               ElementID,
+                                        const std::vector<smIdType>& nodes_ids)
 {
   if ( myType != SMESHDS_AddPolygon) {
     MESSAGE("SMESHDS_Command::AddPolygonalFace : Bad Type");
@@ -299,8 +299,8 @@ void SMESHDS_Command::AddPolygonalFace (const int               ElementID,
 //function : AddQuadPolygonalFace
 //purpose  :
 //=======================================================================
-void SMESHDS_Command::AddQuadPolygonalFace (const int               ElementID,
-                                            const std::vector<int>& nodes_ids)
+void SMESHDS_Command::AddQuadPolygonalFace (const smIdType               ElementID,
+                                            const std::vector<smIdType>& nodes_ids)
 {
   if ( myType != SMESHDS_AddQuadPolygon) {
     MESSAGE("SMESHDS_Command::AddQuadraticPolygonalFace : Bad Type");
@@ -321,9 +321,9 @@ void SMESHDS_Command::AddQuadPolygonalFace (const int               ElementID,
 //function : AddPolyhedralVolume
 //purpose  : 
 //=======================================================================
-void SMESHDS_Command::AddPolyhedralVolume (const int               ElementID,
-                                           const std::vector<int>& nodes_ids,
-                                           const std::vector<int>& quantities)
+void SMESHDS_Command::AddPolyhedralVolume (const smIdType               ElementID,
+                                           const std::vector<smIdType>& nodes_ids,
+                                           const std::vector<int>&      quantities)
 {
   if ( myType != SMESHDS_AddPolyhedron) {
     MESSAGE("SMESHDS_Command::AddPolyhedralVolume : Bad Type");

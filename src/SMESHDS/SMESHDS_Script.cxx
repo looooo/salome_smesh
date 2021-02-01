@@ -246,7 +246,7 @@ void SMESHDS_Script::AddVolume(int NewVolID, int idnode1, int idnode2, int idnod
 //function : AddPolygonalFace
 //purpose  : 
 //=======================================================================
-void SMESHDS_Script::AddPolygonalFace (int NewFaceID, const std::vector<int>& nodes_ids)
+void SMESHDS_Script::AddPolygonalFace (smIdType NewFaceID, const std::vector<smIdType>& nodes_ids)
 {
   if(myIsEmbeddedMode){
     myIsModified = true;
@@ -259,7 +259,7 @@ void SMESHDS_Script::AddPolygonalFace (int NewFaceID, const std::vector<int>& no
 //function : AddQuadPolygonalFace
 //purpose  : 
 //=======================================================================
-void SMESHDS_Script::AddQuadPolygonalFace(int NewFaceID, const std::vector<int>& nodes_ids)
+void SMESHDS_Script::AddQuadPolygonalFace(smIdType NewFaceID, const std::vector<smIdType>& nodes_ids)
 {
   if(myIsEmbeddedMode){
     myIsModified = true;
@@ -272,9 +272,9 @@ void SMESHDS_Script::AddQuadPolygonalFace(int NewFaceID, const std::vector<int>&
 //function : AddPolyhedralVolume
 //purpose  : 
 //=======================================================================
-void SMESHDS_Script::AddPolyhedralVolume (int                     NewID,
-                                          const std::vector<int>& nodes_ids,
-                                          const std::vector<int>& quantities)
+void SMESHDS_Script::AddPolyhedralVolume (smIdType                     NewID,
+                                          const std::vector<smIdType>& nodes_ids,
+                                          const std::vector<int>&      quantities)
 {
   if(myIsEmbeddedMode){
     myIsModified = true;

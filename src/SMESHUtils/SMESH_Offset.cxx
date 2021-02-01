@@ -277,7 +277,7 @@ namespace
 
     static Standard_Integer HashCode(const CutFace& f, const Standard_Integer upper)
     {
-      return ::HashCode( f.myInitFace->GetID(), upper );
+      return ::HashCode( (int)(f.myInitFace->GetID()), upper );
     }
     static Standard_Boolean IsEqual(const CutFace& f1, const CutFace& f2 )
     {

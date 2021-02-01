@@ -33,6 +33,7 @@
 #include "SALOME_LifeCycleCORBA.hxx"
 
 #include <SALOMEconfig.h>
+#include <smIdType.hxx>
 #include CORBA_SERVER_HEADER(SALOME_Component)
 #include CORBA_SERVER_HEADER(SALOME_Exception)
 
@@ -231,10 +232,10 @@ namespace
     CORBA::Long anIndexId = 0, aNbElems = theSeq[theId].number;
 
     for (CORBA::Long anElemId = 0; anElemId < aNbElems; anElemId++) {
-      int aFaceId = anIndexes[anIndexId++];
+      smIdType aFaceId = anIndexes[anIndexId++];
 
       int aNbNodes = anIndexes[anIndexId++];
-      std::vector<int> nodes_ids (aNbNodes);
+      std::vector<smIdType> nodes_ids (aNbNodes);
       for (int i = 0; i < aNbNodes; i++) {
         nodes_ids[i] = anIndexes[anIndexId++];
       }
@@ -258,10 +259,10 @@ namespace
     CORBA::Long anIndexId = 0, aNbElems = theSeq[theId].number;
 
     for (CORBA::Long anElemId = 0; anElemId < aNbElems; anElemId++) {
-      int aFaceId = anIndexes[anIndexId++];
+      smIdType aFaceId = anIndexes[anIndexId++];
 
       int aNbNodes = anIndexes[anIndexId++];
-      std::vector<int> nodes_ids (aNbNodes);
+      std::vector<smIdType> nodes_ids (aNbNodes);
       for (int i = 0; i < aNbNodes; i++) {
         nodes_ids[i] = anIndexes[anIndexId++];
       }
@@ -414,10 +415,10 @@ namespace
     CORBA::Long anIndexId = 0, aNbElems = theSeq[theId].number;
 
     for (CORBA::Long anElemId = 0; anElemId < aNbElems; anElemId++) {
-      int aFaceId = anIndexes[anIndexId++];
+      smIdType aFaceId = anIndexes[anIndexId++];
 
       int aNbNodes = anIndexes[anIndexId++];
-      std::vector<int> nodes_ids (aNbNodes);
+      std::vector<smIdType> nodes_ids (aNbNodes);
       for (int i = 0; i < aNbNodes; i++) {
         nodes_ids[i] = anIndexes[anIndexId++];
       }

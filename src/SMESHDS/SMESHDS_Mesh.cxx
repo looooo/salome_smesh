@@ -790,7 +790,7 @@ SMESHDS_Mesh::AddQuadPolygonalFace (const std::vector<const SMDS_MeshNode*>& nod
 //purpose  : 
 //=======================================================================
 SMDS_MeshVolume* SMESHDS_Mesh::AddPolyhedralVolumeWithID (const std::vector<smIdType>& nodes_ids,
-                                                          const std::vector<smIdType>& quantities,
+                                                          const std::vector<int>& quantities,
                                                           const smIdType               ID)
 {
   SMDS_MeshVolume *anElem = SMDS_Mesh::AddPolyhedralVolumeWithID(nodes_ids, quantities, ID);

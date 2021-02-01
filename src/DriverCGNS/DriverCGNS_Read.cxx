@@ -33,6 +33,8 @@
 #include "SMESH_Comment.hxx"
 #include "SMESH_TypeDefs.hxx"
 
+#include <smIdType.hxx>
+
 #include <gp_XYZ.hxx>
 
 #include <cgnslib.h>
@@ -546,10 +548,10 @@ namespace
   }
   SMDS_MeshElement* add_NGON(cgsize_t* ids, SMESHDS_Mesh* mesh, int ID)
   {
-    vector<int> idVec( ids[0] );
+    vector<smIdType> idVec( ids[0] );
     for ( int i = 0; i < ids[0]; ++i )
-      idVec[ i ] = (int) ids[ i + 1];
-    return mesh->AddPolygonalFaceWithID( idVec, ID );
+      idVec[ i ] = (smIdType) ids[ i + 1];
+    return mesh->AddPolygonalFaceWithID( idVec, ToIdType(ID) );
   }
 
   typedef SMDS_MeshElement* (* PAddElemFun) (cgsize_t* ids, SMESHDS_Mesh* mesh, int ID);

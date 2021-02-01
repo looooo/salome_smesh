@@ -98,7 +98,7 @@ public:
   const SMDS_MeshElement* FindElement( const smIdType id ) const;
 
   //! Return a number of used elements
-  smIdType NbUsedElements() const { return myNbUsedElements; }
+  int NbUsedElements() const { return myNbUsedElements; }
 
   //! Return an iterator on all element filtered using a given filter.
   //  nbElemsToReturn is used to optimize by stopping the iteration as soon as
@@ -160,10 +160,10 @@ public:
   void SetNbShapes( size_t nbShapes );
 
   //! Return a dimension of a shape
-  int  GetShapeDim( smIdType shapeID ) const;
+  int  GetShapeDim( int shapeID ) const;
 
   //! Set a dimension of a shape
-  void SetShapeDim( smIdType shapeID, int dim );
+  void SetShapeDim( int shapeID, int dim );
 
   //! De-allocate all nodes
   virtual void Clear();
@@ -405,7 +405,7 @@ public:
   static bool IsUsed( const _UsedRange& r ) { return r.myValue; }
 
   //! Return index of an element in the chunk
-  smIdType Index( const SMDS_MeshElement* e ) const { return e - myElements; }
+  int Index( const SMDS_MeshElement* e ) const { return e - myElements; }
 
   //! Return ID of the 1st element in the chunk
   int Get1stID() const { return my1stID; }

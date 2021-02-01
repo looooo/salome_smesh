@@ -100,6 +100,8 @@
 
 #include "SMESH_TryCatch.hxx" // include after OCCT headers!
 
+#include <smIdType.hxx>
+
 #define cast2Node(elem) static_cast<const SMDS_MeshNode*>( elem )
 
 using namespace std;
@@ -3122,7 +3124,7 @@ public:
   long GetLinkID (const SMDS_MeshNode * n1,
                   const SMDS_MeshNode * n2) const
   {
-    return ( Min(n1->GetID(),n2->GetID()) * myMaxID + Max(n1->GetID(),n2->GetID()));
+    return ( Min(FromIdType<int>(n1->GetID()),FromIdType<int>(n2->GetID())) * myMaxID + Max(FromIdType<int>(n1->GetID()),FromIdType<int>(n2->GetID())));
   }
 
   bool GetNodes (const long             theLinkID,

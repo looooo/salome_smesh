@@ -613,7 +613,7 @@ public:
 
   bool ChangeElementNodes(const SMDS_MeshElement * elem,
                           const SMDS_MeshNode    * nodes[],
-                          const smIdType           nbnodes);
+                          const int                nbnodes);
   bool ChangePolyhedronNodes(const SMDS_MeshElement *                 elem,
                              const std::vector<const SMDS_MeshNode*>& nodes,
                              const std::vector<int>&                  quantities);
@@ -689,14 +689,14 @@ public:
 
   const SMDS_MeshInfo& GetMeshInfo() const { return myInfo; }
 
-  virtual smIdType NbNodes() const;
-  virtual smIdType NbElements() const;
-  virtual smIdType Nb0DElements() const;
-  virtual smIdType NbBalls() const;
-  virtual smIdType NbEdges() const;
-  virtual smIdType NbFaces() const;
-  virtual smIdType NbVolumes() const;
-  virtual smIdType NbSubMesh() const;
+  virtual int NbNodes() const;
+  virtual int NbElements() const;
+  virtual int Nb0DElements() const;
+  virtual int NbBalls() const;
+  virtual int NbEdges() const;
+  virtual int NbFaces() const;
+  virtual int NbVolumes() const;
+  virtual int NbSubMesh() const;
 
   virtual ~SMDS_Mesh();
 
@@ -731,7 +731,7 @@ public:
 
   void updateInverseElements( const SMDS_MeshElement *        element,
                               const SMDS_MeshNode* const*     nodes,
-                              const smIdType                  nbnodes,
+                              const int                       nbnodes,
                               std::set<const SMDS_MeshNode*>& oldNodes );
 
   void setNbShapes( size_t nbShapes );

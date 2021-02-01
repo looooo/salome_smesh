@@ -7057,19 +7057,19 @@ bool SMESH_MeshPartDS::HasNumerationHoles()
            MaxElementID() != NbElements() );
 }
 // -------------------------------------------------------------------------------------
-int SMESH_MeshPartDS::MaxNodeID() const
+smIdType SMESH_MeshPartDS::MaxNodeID() const
 {
   if ( _meshDS ) return _meshDS->MaxNodeID();
   return NbNodes() == 0 ? 0 : (*_elements[ SMDSAbs_Node ].rbegin())->GetID();
 }
 // -------------------------------------------------------------------------------------
-int SMESH_MeshPartDS::MinNodeID() const
+smIdType SMESH_MeshPartDS::MinNodeID() const
 {
   if ( _meshDS ) return _meshDS->MinNodeID();
   return NbNodes() == 0 ? 0 : (*_elements[ SMDSAbs_Node ].begin())->GetID();
 }  
 // -------------------------------------------------------------------------------------
-int SMESH_MeshPartDS::MaxElementID() const
+smIdType SMESH_MeshPartDS::MaxElementID() const
 {
   if ( _meshDS ) return _meshDS->MaxElementID();
   int maxID = 0;
@@ -7079,7 +7079,7 @@ int SMESH_MeshPartDS::MaxElementID() const
   return maxID;
 }
 // -------------------------------------------------------------------------------------
-int SMESH_MeshPartDS::MinElementID() const
+smIdType SMESH_MeshPartDS::MinElementID() const
 {
   if ( _meshDS ) return _meshDS->MinElementID();
   int minID = 0;

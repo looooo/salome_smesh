@@ -285,7 +285,7 @@ void SMDS_ElementFactory::Compact( std::vector<smIdType>& theVtkIDsNewToOld )
 {
   smIdType  newNbCells = NbUsedElements();
   smIdType   maxCellID = GetMaxID();
-  smIdType newNbChunks = newNbCells / theChunkSize + bool ( newNbCells % theChunkSize );
+  int newNbChunks = newNbCells / theChunkSize + bool ( newNbCells % theChunkSize );
 
   theVtkIDsNewToOld.resize( newNbCells );
 
@@ -383,9 +383,9 @@ void SMDS_NodeFactory::Compact( std::vector<smIdType>& theVtkIDsOldToNew )
   // in the chunks. So we remove holes and report relocation in theVtkIDsOldToNew:
   // theVtkIDsOldToNew[ old VtkID ] = new VtkID
 
-  smIdType  oldNbNodes = myMesh->GetGrid()->GetNumberOfPoints();
-  smIdType  newNbNodes = NbUsedElements();
-  smIdType newNbChunks = newNbNodes / theChunkSize + bool ( newNbNodes % theChunkSize );
+  int  oldNbNodes = myMesh->GetGrid()->GetNumberOfPoints();
+  int  newNbNodes = NbUsedElements();
+  int newNbChunks = newNbNodes / theChunkSize + bool ( newNbNodes % theChunkSize );
   smIdType   maxNodeID = GetMaxID();
 
   theVtkIDsOldToNew.resize( oldNbNodes, -1 );
@@ -488,7 +488,7 @@ void SMDS_NodeFactory::SetNbShapes( size_t nbShapes )
  */
 //================================================================================
 
-int SMDS_NodeFactory::GetShapeDim( smIdType shapeID ) const
+int SMDS_NodeFactory::GetShapeDim( int shapeID ) const
 {
   return shapeID < (int)myShapeDim.size() ? myShapeDim[ shapeID ] : theDefaultShapeDim;
 }
@@ -499,9 +499,9 @@ int SMDS_NodeFactory::GetShapeDim( smIdType shapeID ) const
  */
 //================================================================================
 
-void SMDS_NodeFactory::SetShapeDim( smIdType shapeID, int dim )
+void SMDS_NodeFactory::SetShapeDim( int shapeID, int dim )
 {
-  if ( shapeID >= (smIdType)myShapeDim.size() )
+  if ( shapeID >= (int)myShapeDim.size() )
     myShapeDim.resize( shapeID + 10, theDefaultShapeDim );
   myShapeDim[ shapeID ] = dim;
 }
@@ -836,7 +836,7 @@ void SMDS_ElementChunk::Compact()
     }
     else if ( it != mySubIDRanges.mySet.rbegin() )
     {
-      smIdType nbNodes = (it-1)->my1st;
+      int nbNodes = (it-1)->my1st;
       myPositions.resize( nbNodes * 2 );
       std::vector<TParam> newPos( myPositions.begin(), myPositions.end() );
       myPositions.swap( newPos );

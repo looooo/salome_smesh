@@ -30,6 +30,7 @@
 #include "SMESH_SMESHDS.hxx"
 
 #include "SMESHDS_CommandType.hxx"
+#include <smIdType.hxx>
 #include <list>
 #include <vector>
 
@@ -55,12 +56,12 @@ class SMESHDS_EXPORT SMESHDS_Command
         void AddVolume(int NewVolID, int idnode1, int idnode2, int idnode3,
                        int idnode4, int idnode5, int idnode6, int idnode7, int idnode8,
                        int idnode9, int idnode10, int idnode11, int idnode12);
-        void AddPolygonalFace (const int               ElementID,
-                               const std::vector<int>& nodes_ids);
-        void AddQuadPolygonalFace (const int               ElementID,
-                                   const std::vector<int>& nodes_ids);
-        void AddPolyhedralVolume (const int               ElementID,
-                                  const std::vector<int>& nodes_ids,
+        void AddPolygonalFace (const smIdType               ElementID,
+                               const std::vector<smIdType>& nodes_ids);
+        void AddQuadPolygonalFace (const smIdType               ElementID,
+                                   const std::vector<smIdType>& nodes_ids);
+        void AddPolyhedralVolume (const smIdType               ElementID,
+                                  const std::vector<smIdType>& nodes_ids,
                                   const std::vector<int>& quantities);
         void AddBall(int NewBallID, int node, double diameter);
         // special methods for quadratic elements

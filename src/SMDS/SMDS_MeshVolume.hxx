@@ -31,8 +31,6 @@
 
 #include "SMDS_MeshCell.hxx"
 
-#include <smIdType.hxx>
-
 /*!
  * \brief Mesh volume. This type is not allocated.
  *        It is only used as function argument type to provide more clear semantic
@@ -41,7 +39,7 @@
 class SMDS_EXPORT SMDS_MeshVolume : public SMDS_MeshCell
 {
   void init( const std::vector<const SMDS_MeshNode*>& nodes,
-             const std::vector<smIdType>&             nbNodesPerFace ); // init a polyherdon
+             const std::vector<int>&                  nbNodesPerFace ); // init a polyherdon
 
   void init( const std::vector<vtkIdType>& vtkNodeIds );
 
@@ -49,7 +47,7 @@ class SMDS_EXPORT SMDS_MeshVolume : public SMDS_MeshCell
 
  public:
   virtual SMDSAbs_ElementType  GetType() const { return SMDSAbs_Volume; }
-  virtual const SMDS_MeshNode* GetNode(const smIdType ind) const;
+  virtual const SMDS_MeshNode* GetNode(const int ind) const;
   virtual int  NbNodes() const;
   virtual int  NbFaces() const;
   virtual int  NbEdges() const;
@@ -71,7 +69,7 @@ class SMDS_EXPORT SMDS_MeshVolume : public SMDS_MeshCell
   // 1 <= node_ind <= NbFaceNodes()
   const SMDS_MeshNode* GetFaceNode (const int face_ind, const int node_ind) const;
 
-  std::vector<smIdType> GetQuantities() const;
+  std::vector<int> GetQuantities() const;
 
   static SMDSAbs_ElementType Type() { return SMDSAbs_Volume; }
 };

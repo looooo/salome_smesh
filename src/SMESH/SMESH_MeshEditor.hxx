@@ -89,7 +89,7 @@ public:
     bool                              myIsPoly, myIsQuad;
     int                               myID;
     double                            myBallDiameter;
-    std::vector<smIdType>             myPolyhedQuantities;
+    std::vector<int>                  myPolyhedQuantities;
     std::vector<const SMDS_MeshNode*> myNodes; // not managed by ElemFeatures
 
     SMESH_EXPORT ElemFeatures( SMDSAbs_ElementType type=SMDSAbs_All, bool isPoly=false, bool isQuad=false )
@@ -103,11 +103,11 @@ public:
     SMESH_EXPORT ElemFeatures& Init( double diameter )
     { myType = SMDSAbs_Ball; myBallDiameter = diameter; return *this; }
 
-    SMESH_EXPORT ElemFeatures& Init( std::vector<smIdType>& quanities, bool isQuad=false )
+    SMESH_EXPORT ElemFeatures& Init( std::vector<int>& quanities, bool isQuad=false )
     { myType = SMDSAbs_Volume; myIsPoly = 1; myIsQuad = isQuad;
       myPolyhedQuantities.swap( quanities ); return *this; }
 
-    SMESH_EXPORT ElemFeatures& Init( const std::vector<smIdType>& quanities, bool isQuad=false )
+    SMESH_EXPORT ElemFeatures& Init( const std::vector<int>& quanities, bool isQuad=false )
     { myType = SMDSAbs_Volume; myIsPoly = 1; myIsQuad = isQuad;
       myPolyhedQuantities = quanities; return *this; }
 
@@ -517,7 +517,7 @@ public:
 
   int SimplifyFace (const std::vector<const SMDS_MeshNode *>& faceNodes,
                     std::vector<const SMDS_MeshNode *>&       poly_nodes,
-                    std::vector<smIdType>&                    quantities) const;
+                    std::vector<int>&                         quantities) const;
   // Split face, defined by <faceNodes>, into several faces by repeating nodes.
   // Is used by MergeNodes()
 

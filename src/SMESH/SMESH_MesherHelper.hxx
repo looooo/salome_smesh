@@ -440,7 +440,7 @@ public:
    * Creates polyhedron. In quadratic mesh, adds medium nodes
    */
   SMDS_MeshVolume* AddPolyhedralVolume (const std::vector<const SMDS_MeshNode*>& nodes,
-                                        const std::vector<smIdType>&             quantities,
+                                        const std::vector<int>&                  quantities,
                                         const int                                ID=0,
                                         const bool                               force3d = true);
   /*!

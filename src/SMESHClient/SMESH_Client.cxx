@@ -203,13 +203,13 @@ namespace
   //=======================================================================
   inline void AddQuadsWithID(SMDS_Mesh* theMesh,
                              SMESH::log_array_var theSeq,
-                             CORBA::Long theId)
+                             SMESH::smIdType theId)
   {
     const SMESH::long_array& anIndexes = theSeq[theId].indexes;
-    CORBA::Long anElemId = 0, aNbElems = theSeq[theId].number;
-    if(5*aNbElems != (CORBA::Long) anIndexes.length())
+    SMESH::smIdType anElemId = 0, aNbElems = theSeq[theId].number;
+    if(5*aNbElems != (SMESH::smIdType) anIndexes.length())
       EXCEPTION(runtime_error,"AddQuadsWithID - 4*aNbElems != anIndexes.length()");
-    for(CORBA::Long anIndexId = 0; anElemId < aNbElems; anElemId++, anIndexId+=5){
+    for(SMESH::smIdType anIndexId = 0; anElemId < aNbElems; anElemId++, anIndexId+=5){
       SMDS_MeshElement* anElem = theMesh->AddFaceWithID(anIndexes[anIndexId+1],
                                                         anIndexes[anIndexId+2],
                                                         anIndexes[anIndexId+3],
@@ -226,12 +226,12 @@ namespace
   //=======================================================================
   inline void AddPolygonsWithID(SMDS_Mesh* theMesh,
                                 SMESH::log_array_var& theSeq,
-                                CORBA::Long theId)
+                                SMESH::smIdType theId)
   {
     const SMESH::long_array& anIndexes = theSeq[theId].indexes;
-    CORBA::Long anIndexId = 0, aNbElems = theSeq[theId].number;
+    SMESH::smIdType anIndexId = 0, aNbElems = theSeq[theId].number;
 
-    for (CORBA::Long anElemId = 0; anElemId < aNbElems; anElemId++) {
+    for (SMESH::smIdType anElemId = 0; anElemId < aNbElems; anElemId++) {
       smIdType aFaceId = anIndexes[anIndexId++];
 
       int aNbNodes = anIndexes[anIndexId++];
@@ -424,7 +424,7 @@ namespace
       }
 
       int aNbFaces = anIndexes[anIndexId++];
-      std::vector<smIdType> quantities (aNbFaces);
+      std::vector<int> quantities (aNbFaces);
       for (int i = 0; i < aNbFaces; i++) {
         quantities[i] = anIndexes[anIndexId++];
       }

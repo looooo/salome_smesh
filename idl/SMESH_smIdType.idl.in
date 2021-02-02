@@ -22,11 +22,7 @@
 
 module SMESH
 {
-  #ifndef SALOME_USE_64BIT_IDS
-  typedef long smIdType;
-  #else
-  typedef long long smIdType;
-  #endif
+  typedef @SMESH_ID_TYPE@ smIdType;
 };
 
 #endif

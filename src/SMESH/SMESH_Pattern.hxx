@@ -28,7 +28,6 @@
 #define SMESH_Pattern_HeaderFile
 
 #include "SMESH_SMESH.hxx"
-#include <smIdType.hxx>
 
 #include <vector>
 #include <list>
@@ -329,7 +328,7 @@ private:
                           const int                                  theNbBndNodes,
                           const std::vector< const SMDS_MeshNode* >& theNodes,
                           std::list< int >&                          theFaceDefs,
-                          std::vector<smIdType>&                     theQuantity);
+                          std::vector<int>&                          theQuantity);
   // fill faces definition for a volume face defined by theBndNodes
   // return true if a face definition changes
   
@@ -393,7 +392,7 @@ private:
   std::vector<const SMDS_MeshElement*> myPolyElems;
   // definitions of new poly elements
   std::list< TElemDef >                myPolyElemXYZIDs;
-  std::list< std::vector<smIdType> >   myPolyhedronQuantities;
+  std::list< std::vector<int> >        myPolyhedronQuantities;
 
   // map a boundary to XYZs on it;
   // a boundary (edge or face) is defined as a set of its nodes,

@@ -2329,7 +2329,7 @@ bool StdMeshers_Prism_3D::AddPrisms( vector<const TNodeColumn*> & columns,
     break;
   }
   default: // ---------- polyhedra
-    vector<smIdType> quantities( 2 + nbNodes, 4 );
+    vector<int> quantities( 2 + nbNodes, 4 );
     quantities[0] = quantities[1] = nbNodes;
     columns.resize( nbNodes + 1 );
     columns[ nbNodes ] = columns[ 0 ];

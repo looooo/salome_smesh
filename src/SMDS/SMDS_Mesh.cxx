@@ -908,7 +908,7 @@ SMDS_MeshFace* SMDS_Mesh::AddQuadPolygonalFace (const std::vector<const SMDS_Mes
 ///////////////////////////////////////////////////////////////////////////////
 
 SMDS_MeshVolume * SMDS_Mesh::AddPolyhedralVolumeWithID (const std::vector<smIdType> & nodes_ids,
-                                                        const std::vector<smIdType> & quantities,
+                                                        const std::vector<int>      & quantities,
                                                         const smIdType                ID)
 {
   int nbNodes = nodes_ids.size();
@@ -928,7 +928,7 @@ SMDS_MeshVolume * SMDS_Mesh::AddPolyhedralVolumeWithID (const std::vector<smIdTy
 
 SMDS_MeshVolume*
 SMDS_Mesh::AddPolyhedralVolumeWithID (const std::vector<const SMDS_MeshNode*>& nodes,
-                                      const std::vector<smIdType>            & quantities,
+                                      const std::vector<int>                 & quantities,
                                       const smIdType                           ID)
 {
   if ( nodes.empty() || quantities.empty() )
@@ -952,7 +952,7 @@ SMDS_Mesh::AddPolyhedralVolumeWithID (const std::vector<const SMDS_MeshNode*>& n
 
 SMDS_MeshVolume* SMDS_Mesh::AddPolyhedralVolume
 (const std::vector<const SMDS_MeshNode*> & nodes,
- const std::vector<smIdType>             & quantities)
+ const std::vector<int>                  & quantities)
 {
   smIdType ID = myCellFactory->GetFreeID();
   return SMDS_Mesh::AddPolyhedralVolumeWithID(nodes, quantities, ID);
@@ -1467,7 +1467,7 @@ smIdType SMDS_Mesh::NbNodes() const
 ///////////////////////////////////////////////////////////////////////////////
 /// Return the number of elements
 ///////////////////////////////////////////////////////////////////////////////
-int SMDS_Mesh::NbElements() const
+smIdType SMDS_Mesh::NbElements() const
 {
   return myInfo.NbElements();
 }
@@ -1482,7 +1482,7 @@ smIdType SMDS_Mesh::Nb0DElements() const
 ///////////////////////////////////////////////////////////////////////////////
 /// Return the number of 0D elements
 ///////////////////////////////////////////////////////////////////////////////
-int SMDS_Mesh::NbBalls() const
+smIdType SMDS_Mesh::NbBalls() const
 {
   return myInfo.NbBalls();
 }
@@ -1490,7 +1490,7 @@ int SMDS_Mesh::NbBalls() const
 ///////////////////////////////////////////////////////////////////////////////
 /// Return the number of edges (including construction edges)
 ///////////////////////////////////////////////////////////////////////////////
-int SMDS_Mesh::NbEdges() const
+smIdType SMDS_Mesh::NbEdges() const
 {
   return myInfo.NbEdges();
 }
@@ -1498,7 +1498,7 @@ int SMDS_Mesh::NbEdges() const
 ///////////////////////////////////////////////////////////////////////////////
 /// Return the number of faces (including construction faces)
 ///////////////////////////////////////////////////////////////////////////////
-int SMDS_Mesh::NbFaces() const
+smIdType SMDS_Mesh::NbFaces() const
 {
   return myInfo.NbFaces();
 }
@@ -1506,7 +1506,7 @@ int SMDS_Mesh::NbFaces() const
 ///////////////////////////////////////////////////////////////////////////////
 /// Return the number of volumes
 ///////////////////////////////////////////////////////////////////////////////
-int SMDS_Mesh::NbVolumes() const
+smIdType SMDS_Mesh::NbVolumes() const
 {
   return myInfo.NbVolumes();
 }
@@ -1515,7 +1515,7 @@ int SMDS_Mesh::NbVolumes() const
 /// Return the number of child mesh of this mesh.
 /// Note that the tree structure of SMDS_Mesh is unused in SMESH
 ///////////////////////////////////////////////////////////////////////////////
-int SMDS_Mesh::NbSubMesh() const
+smIdType SMDS_Mesh::NbSubMesh() const
 {
   return myChildren.size();
 }

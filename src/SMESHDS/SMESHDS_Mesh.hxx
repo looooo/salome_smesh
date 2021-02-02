@@ -567,17 +567,17 @@ class SMESHDS_EXPORT SMESHDS_Mesh : public SMDS_Mesh
 
   virtual SMDS_MeshVolume* AddPolyhedralVolumeWithID
     (const std::vector<smIdType>& nodes_ids,
-     const std::vector<smIdType>& quantities,
+     const std::vector<int>&      quantities,
      const smIdType               ID);
 
   virtual SMDS_MeshVolume* AddPolyhedralVolumeWithID
     (const std::vector<const SMDS_MeshNode*>& nodes,
-     const std::vector<smIdType>&             quantities,
+     const std::vector<int>&                  quantities,
      const smIdType                           ID);
 
   virtual SMDS_MeshVolume* AddPolyhedralVolume
     (const std::vector<const SMDS_MeshNode*>& nodes,
-     const std::vector<smIdType>&             quantities);
+     const std::vector<int>&                  quantities);
 
   virtual void MoveNode(const SMDS_MeshNode *, double x, double y, double z);
   virtual void RemoveNode(const SMDS_MeshNode *);

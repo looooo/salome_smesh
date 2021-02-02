@@ -575,17 +575,17 @@ public:
 
   virtual SMDS_MeshVolume* AddPolyhedralVolumeWithID
     (const std::vector<smIdType> & nodes_ids,
-     const std::vector<smIdType> & quantities,
+     const std::vector<int>      & quantities,
      const smIdType                ID);
 
   virtual SMDS_MeshVolume* AddPolyhedralVolumeWithID
     (const std::vector<const SMDS_MeshNode*> & nodes,
-     const std::vector<smIdType>             & quantities,
+     const std::vector<int>                  & quantities,
      const smIdType                            ID);
 
   virtual SMDS_MeshVolume* AddPolyhedralVolume
     (const std::vector<const SMDS_MeshNode*> & nodes,
-     const std::vector<smIdType>             & quantities);
+     const std::vector<int>                  & quantities);
 
   virtual SMDS_MeshVolume* AddVolumeFromVtkIds(const std::vector<vtkIdType>& vtkNodeIds);
 
@@ -690,13 +690,13 @@ public:
   const SMDS_MeshInfo& GetMeshInfo() const { return myInfo; }
 
   virtual smIdType NbNodes() const;
-  virtual int NbElements() const;
+  virtual smIdType NbElements() const;
   virtual smIdType Nb0DElements() const;
-  virtual int NbBalls() const;
-  virtual int NbEdges() const;
-  virtual int NbFaces() const;
-  virtual int NbVolumes() const;
-  virtual int NbSubMesh() const;
+  virtual smIdType NbBalls() const;
+  virtual smIdType NbEdges() const;
+  virtual smIdType NbFaces() const;
+  virtual smIdType NbVolumes() const;
+  virtual smIdType NbSubMesh() const;
 
   virtual ~SMDS_Mesh();
 

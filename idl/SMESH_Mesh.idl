@@ -29,6 +29,7 @@
 #include "SALOME_Exception.idl"
 #include "SALOME_GenericObj.idl"
 #include "GEOM_Gen.idl"
+#include "SMESH_smIdType.idl"
 
 module SMESH
 {

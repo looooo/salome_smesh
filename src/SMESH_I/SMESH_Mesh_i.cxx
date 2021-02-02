@@ -3343,9 +3343,9 @@ SMESH::log_array * SMESH_Mesh_i::GetLog(CORBA::Boolean clearAfterGet)
     SMESHDS_Command *com = *its;
     int comType = com->GetType();
     int lgcom = com->GetNumber();
-    const list < int >&intList = com->GetIndexes();
+    const list < smIdType >&intList = com->GetIndexes();
     int inum = intList.size();
-    list < int >::const_iterator ii = intList.begin();
+    list < smIdType >::const_iterator ii = intList.begin();
     const list < double >&coordList = com->GetCoords();
     int rnum = coordList.size();
     list < double >::const_iterator ir = coordList.begin();

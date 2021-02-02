@@ -36,7 +36,7 @@
 
 // init a polyherdon
 void SMDS_MeshVolume::init( const std::vector<const SMDS_MeshNode*>& nodes,
-                            const std::vector<smIdType>&             nbNodesPerFace )
+                            const std::vector<int>&                  nbNodesPerFace )
 {
   std::vector<vtkIdType> ptIds;
   ptIds.reserve( nodes.size() + nbNodesPerFace.size() + 1 );
@@ -44,9 +44,9 @@ void SMDS_MeshVolume::init( const std::vector<const SMDS_MeshNode*>& nodes,
   size_t nbFaces = nbNodesPerFace.size();
   for ( size_t iN = 0, iF = 0; iF < nbFaces; iF++ )
   {
-    smIdType nf = nbNodesPerFace[iF];
+    int nf = nbNodesPerFace[iF];
     ptIds.push_back(nf);
-    for (smIdType n = 0; n < nf; n++)
+    for (int n = 0; n < nf; n++)
       ptIds.push_back( nodes[ iN++ ]->GetVtkID() );
   }
 
@@ -115,7 +115,7 @@ bool SMDS_MeshVolume::ChangeNodes(const std::vector<const SMDS_MeshNode*>& nodes
   return true;
 }
 
-const SMDS_MeshNode* SMDS_MeshVolume::GetNode(const smIdType ind) const
+const SMDS_MeshNode* SMDS_MeshVolume::GetNode(const int ind) const
 {
   if ( !IsPoly() )
     return SMDS_MeshCell::GetNode( ind );
@@ -266,18 +266,18 @@ const SMDS_MeshNode* SMDS_MeshVolume::GetFaceNode (const int face_ind, const int
   return 0;
 }
 
-std::vector<smIdType> SMDS_MeshVolume::GetQuantities() const
+std::vector<int> SMDS_MeshVolume::GetQuantities() const
 {
-  std::vector<smIdType> quantities;
+  std::vector<int> quantities;
   if ( IsPoly() )
   {
     vtkIdType nFaces = 0;
     vtkIdType const *ptIds(nullptr);
     getGrid()->GetFaceStream( GetVtkID(), nFaces, ptIds );
-    smIdType id = 0;
-    for (smIdType i = 0; i < nFaces; i++)
+    int id = 0;
+    for (int i = 0; i < nFaces; i++)
     {
-      smIdType nodesInFace = ptIds[id]; // nodeIds in ptIds[id+1 .. id+nodesInFace]
+      int nodesInFace = ptIds[id]; // nodeIds in ptIds[id+1 .. id+nodesInFace]
       quantities.push_back( nodesInFace );
       id += (nodesInFace + 1);
     }

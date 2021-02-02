@@ -52,7 +52,7 @@ SMESHDS_Command::~SMESHDS_Command()
 //function : 
 //purpose  : 
 //=======================================================================
-void SMESHDS_Command::AddNode(int NewNodeID, double x, double y, double z)
+void SMESHDS_Command::AddNode(smIdType NewNodeID, double x, double y, double z)
 {
         if ( myType != SMESHDS_AddNode)
         {
@@ -70,7 +70,7 @@ void SMESHDS_Command::AddNode(int NewNodeID, double x, double y, double z)
 //function : 
 //purpose  : 
 //=======================================================================
-void SMESHDS_Command::MoveNode(int NodeID, double x, double y, double z)
+void SMESHDS_Command::MoveNode(smIdType NodeID, double x, double y, double z)
 {
         if ( myType != SMESHDS_MoveNode)
         {
@@ -88,7 +88,7 @@ void SMESHDS_Command::MoveNode(int NodeID, double x, double y, double z)
 //function : 
 //purpose  : 
 //=======================================================================
-void SMESHDS_Command::Add0DElement(int New0DElementID, int idnode)
+void SMESHDS_Command::Add0DElement(smIdType New0DElementID, smIdType idnode)
 {
   if ( myType != SMESHDS_Add0DElement)
   {
@@ -104,7 +104,7 @@ void SMESHDS_Command::Add0DElement(int New0DElementID, int idnode)
 //function : 
 //purpose  : 
 //=======================================================================
-void SMESHDS_Command::AddEdge(int NewEdgeID, int idnode1, int idnode2)
+void SMESHDS_Command::AddEdge(smIdType NewEdgeID, smIdType idnode1, smIdType idnode2)
 {
         if ( myType != SMESHDS_AddEdge)
         {
@@ -121,8 +121,8 @@ void SMESHDS_Command::AddEdge(int NewEdgeID, int idnode1, int idnode2)
 //function : 
 //purpose  : 
 //=======================================================================
-void SMESHDS_Command::AddFace(int NewFaceID,
-        int idnode1, int idnode2, int idnode3)
+void SMESHDS_Command::AddFace(smIdType NewFaceID,
+        smIdType idnode1, smIdType idnode2, smIdType idnode3)
 {
         if ( myType != SMESHDS_AddTriangle)
         {
@@ -140,8 +140,8 @@ void SMESHDS_Command::AddFace(int NewFaceID,
 //function : 
 //purpose  : 
 //=======================================================================
-void SMESHDS_Command::AddFace(int NewFaceID,
-        int idnode1, int idnode2, int idnode3, int idnode4)
+void SMESHDS_Command::AddFace(smIdType NewFaceID,
+        smIdType idnode1, smIdType idnode2, smIdType idnode3, smIdType idnode4)
 {
         if ( myType != SMESHDS_AddQuadrangle)
         {
@@ -286,7 +286,7 @@ void SMESHDS_Command::AddPolygonalFace (const smIdType               ElementID,
   }
   myIntegers.push_back(ElementID);
 
-  int i, nbNodes = nodes_ids.size();
+  smIdType i, nbNodes = nodes_ids.size();
   myIntegers.push_back(nbNodes);
   for (i = 0; i < nbNodes; i++) {
     myIntegers.push_back(nodes_ids[i]);
@@ -308,7 +308,7 @@ void SMESHDS_Command::AddQuadPolygonalFace (const smIdType               Element
   }
   myIntegers.push_back(ElementID);
 
-  int i, nbNodes = nodes_ids.size();
+  smIdType i, nbNodes = nodes_ids.size();
   myIntegers.push_back(nbNodes);
   for (i = 0; i < nbNodes; i++) {
     myIntegers.push_back(nodes_ids[i]);
@@ -323,7 +323,7 @@ void SMESHDS_Command::AddQuadPolygonalFace (const smIdType               Element
 //=======================================================================
 void SMESHDS_Command::AddPolyhedralVolume (const smIdType               ElementID,
                                            const std::vector<smIdType>& nodes_ids,
-                                           const std::vector<smIdType>& quantities)
+                                           const std::vector<int>&      quantities)
 {
   if ( myType != SMESHDS_AddPolyhedron) {
     MESSAGE("SMESHDS_Command::AddPolyhedralVolume : Bad Type");
@@ -331,13 +331,13 @@ void SMESHDS_Command::AddPolyhedralVolume (const smIdType               ElementI
   }
   myIntegers.push_back(ElementID);
 
-  int i, nbNodes = nodes_ids.size();
+  smIdType i, nbNodes = nodes_ids.size();
   myIntegers.push_back(nbNodes);
   for (i = 0; i < nbNodes; i++) {
     myIntegers.push_back(nodes_ids[i]);
   }
 
-  int nbFaces = quantities.size();
+  smIdType nbFaces = quantities.size();
   myIntegers.push_back(nbFaces);
   for (i = 0; i < nbFaces; i++) {
     myIntegers.push_back(quantities[i]);
@@ -350,7 +350,7 @@ void SMESHDS_Command::AddPolyhedralVolume (const smIdType               ElementI
 //function : 
 //purpose  : 
 //=======================================================================
-void SMESHDS_Command::RemoveNode(int NodeID)
+void SMESHDS_Command::RemoveNode(smIdType NodeID)
 {
         if ( myType != SMESHDS_RemoveNode)
         {
@@ -365,7 +365,7 @@ void SMESHDS_Command::RemoveNode(int NodeID)
 //function : 
 //purpose  : 
 //=======================================================================
-void SMESHDS_Command::RemoveElement(int ElementID)
+void SMESHDS_Command::RemoveElement(smIdType ElementID)
 {
         if ( myType != SMESHDS_RemoveElement)
         {
@@ -381,7 +381,7 @@ void SMESHDS_Command::RemoveElement(int ElementID)
 //purpose  : 
 //=======================================================================
 
-void SMESHDS_Command::ChangeElementNodes(int ElementID, int nodes[], int nbnodes)
+void SMESHDS_Command::ChangeElementNodes(smIdType ElementID, smIdType nodes[], smIdType nbnodes)
 {
   if ( myType != SMESHDS_ChangeElementNodes)
   {
@@ -390,7 +390,7 @@ void SMESHDS_Command::ChangeElementNodes(int ElementID, int nodes[], int nbnodes
   }
   myIntegers.push_back(ElementID);
   myIntegers.push_back(nbnodes);
-  for ( int i = 0; i < nbnodes; i++ )
+  for ( smIdType i = 0; i < nbnodes; i++ )
     myIntegers.push_back( nodes[ i ] );
 
   myNumber++;
@@ -400,8 +400,8 @@ void SMESHDS_Command::ChangeElementNodes(int ElementID, int nodes[], int nbnodes
 //function : ChangePolyhedronNodes
 //purpose  : 
 //=======================================================================
-void SMESHDS_Command::ChangePolyhedronNodes (const int               ElementID,
-                                             const std::vector<int>& nodes_ids,
+void SMESHDS_Command::ChangePolyhedronNodes (const smIdType               ElementID,
+                                             const std::vector<smIdType>& nodes_ids,
                                              const std::vector<int>& quantities)
 {
   if (myType != SMESHDS_ChangePolyhedronNodes)
@@ -411,7 +411,7 @@ void SMESHDS_Command::ChangePolyhedronNodes (const int               ElementID,
   }
   myIntegers.push_back(ElementID);
 
-  int i, nbNodes = nodes_ids.size();
+  smIdType i, nbNodes = nodes_ids.size();
   myIntegers.push_back(nbNodes);
   for (i = 0; i < nbNodes; i++) {
     myIntegers.push_back(nodes_ids[i]);
@@ -431,7 +431,7 @@ void SMESHDS_Command::ChangePolyhedronNodes (const int               ElementID,
 //purpose  : 
 //=======================================================================
 
-void SMESHDS_Command::Renumber (const bool isNodes, const int startID, const int deltaID)
+void SMESHDS_Command::Renumber (const bool isNodes, const smIdType startID, const smIdType deltaID)
 {
   if ( myType != SMESHDS_Renumber)
   {
@@ -457,7 +457,7 @@ SMESHDS_CommandType SMESHDS_Command::GetType()
 //function : 
 //purpose  : 
 //=======================================================================
-int SMESHDS_Command::GetNumber()
+smIdType SMESHDS_Command::GetNumber()
 {
         return myNumber;
 }
@@ -466,7 +466,7 @@ int SMESHDS_Command::GetNumber()
 //function : 
 //purpose  : 
 //=======================================================================
-const list < int >&SMESHDS_Command::GetIndexes()
+const list < smIdType >&SMESHDS_Command::GetIndexes()
 {
         return myIntegers;
 }
@@ -489,7 +489,7 @@ const list < double >&SMESHDS_Command::GetCoords()
 //function : AddEdge
 //purpose  : 
 //=======================================================================
-void SMESHDS_Command::AddEdge(int NewEdgeID, int n1, int n2, int n12)
+void SMESHDS_Command::AddEdge(smIdType NewEdgeID, smIdType n1, smIdType n2, smIdType n12)
 {
   if ( myType != SMESHDS_AddQuadEdge) {
     MESSAGE("SMESHDS_Command::AddEdge : Bad Type");
@@ -506,9 +506,9 @@ void SMESHDS_Command::AddEdge(int NewEdgeID, int n1, int n2, int n12)
 //function : AddFace
 //purpose  : 
 //=======================================================================
-void SMESHDS_Command::AddFace(int NewFaceID,
-                              int n1, int n2, int n3,
-                              int n12, int n23, int n31)
+void SMESHDS_Command::AddFace(smIdType NewFaceID,
+                              smIdType n1, smIdType n2, smIdType n3,
+                              smIdType n12, smIdType n23, smIdType n31)
 {
   if ( myType != SMESHDS_AddQuadTriangle) {
     MESSAGE("SMESHDS_Command::AddFace : Bad Type");
@@ -528,9 +528,9 @@ void SMESHDS_Command::AddFace(int NewFaceID,
 //function : AddFace
 //purpose  : 
 //=======================================================================
-void SMESHDS_Command::AddFace(int NewFaceID,
-                              int n1, int n2, int n3,
-                              int n12, int n23, int n31, int nCenter)
+void SMESHDS_Command::AddFace(smIdType NewFaceID,
+                              smIdType n1, smIdType n2, smIdType n3,
+                              smIdType n12, smIdType n23, smIdType n31, smIdType nCenter)
 {
   if ( myType != SMESHDS_AddBiQuadTriangle) {
     MESSAGE("SMESHDS_Command::AddFace : Bad Type");
@@ -551,9 +551,9 @@ void SMESHDS_Command::AddFace(int NewFaceID,
 //function : AddFace
 //purpose  : 
 //=======================================================================
-void SMESHDS_Command::AddFace(int NewFaceID,
-                              int n1, int n2, int n3, int n4,
-                              int n12, int n23, int n34, int n41)
+void SMESHDS_Command::AddFace(smIdType NewFaceID,
+                              smIdType n1, smIdType n2, smIdType n3, smIdType n4,
+                              smIdType n12, smIdType n23, smIdType n34, smIdType n41)
 {
   if ( myType != SMESHDS_AddQuadQuadrangle) {
     MESSAGE("SMESHDS_Command::AddFace : Bad Type");
@@ -575,9 +575,9 @@ void SMESHDS_Command::AddFace(int NewFaceID,
 //function : AddFace
 //purpose  : 
 //=======================================================================
-void SMESHDS_Command::AddFace(int NewFaceID,
-                              int n1, int n2, int n3, int n4,
-                              int n12, int n23, int n34, int n41, int nCenter)
+void SMESHDS_Command::AddFace(smIdType NewFaceID,
+                              smIdType n1, smIdType n2, smIdType n3, smIdType n4,
+                              smIdType n12, smIdType n23, smIdType n34, smIdType n41, smIdType nCenter)
 {
   if (myType != SMESHDS_AddBiQuadQuadrangle) {
     MESSAGE("SMESHDS_Command::AddFace : Bad Type");
@@ -600,9 +600,9 @@ void SMESHDS_Command::AddFace(int NewFaceID,
 //function : AddVolume
 //purpose  : 
 //=======================================================================
-void SMESHDS_Command::AddVolume(int NewVolID, int n1, int n2, int n3, int n4,
-                                int n12, int n23, int n31,
-                                int n14, int n24, int n34)
+void SMESHDS_Command::AddVolume(smIdType NewVolID, smIdType n1, smIdType n2, smIdType n3, smIdType n4,
+                                smIdType n12, smIdType n23, smIdType n31,
+                                smIdType n14, smIdType n24, smIdType n34)
 {
   if ( myType != SMESHDS_AddQuadTetrahedron) {
     MESSAGE("SMESHDS_Command::AddVolume : Bad Type");
@@ -626,10 +626,10 @@ void SMESHDS_Command::AddVolume(int NewVolID, int n1, int n2, int n3, int n4,
 //function : AddVolume
 //purpose  : 
 //=======================================================================
-void SMESHDS_Command::AddVolume(int NewVolID, int n1, int n2,
-                                int n3, int n4, int n5,
-                                int n12, int n23, int n34, int n41,
-                                int n15, int n25, int n35, int n45)
+void SMESHDS_Command::AddVolume(smIdType NewVolID, smIdType n1, smIdType n2,
+                                smIdType n3, smIdType n4, smIdType n5,
+                                smIdType n12, smIdType n23, smIdType n34, smIdType n41,
+                                smIdType n15, smIdType n25, smIdType n35, smIdType n45)
 {
   if ( myType != SMESHDS_AddQuadPyramid) {
     MESSAGE("SMESHDS_Command::AddVolume : Bad Type");
@@ -656,11 +656,11 @@ void SMESHDS_Command::AddVolume(int NewVolID, int n1, int n2,
 //function : AddVolume
 //purpose  : 
 //=======================================================================
-void SMESHDS_Command::AddVolume(int NewVolID, int n1, int n2,
-                                int n3, int n4, int n5,int n6,
-                                int n12, int n23, int n31,
-                                int n45, int n56, int n64,
-                                int n14, int n25, int n36)
+void SMESHDS_Command::AddVolume(smIdType NewVolID, smIdType n1, smIdType n2,
+                                smIdType n3, smIdType n4, smIdType n5,smIdType n6,
+                                smIdType n12, smIdType n23, smIdType n31,
+                                smIdType n45, smIdType n56, smIdType n64,
+                                smIdType n14, smIdType n25, smIdType n36)
 {
   if ( myType != SMESHDS_AddQuadPentahedron) {
     MESSAGE("SMESHDS_Command::AddVolume : Bad Type");
@@ -688,12 +688,12 @@ void SMESHDS_Command::AddVolume(int NewVolID, int n1, int n2,
 //function : AddVolume
 //purpose  :
 //=======================================================================
-void SMESHDS_Command::AddVolume(int NewVolID, int n1, int n2,
-                                int n3, int n4, int n5,int n6,
-                                int n12, int n23, int n31,
-                                int n45, int n56, int n64,
-                                int n14, int n25, int n36,
-                                int n1245, int n2356, int n1346)
+void SMESHDS_Command::AddVolume(smIdType NewVolID, smIdType n1, smIdType n2,
+                                smIdType n3, smIdType n4, smIdType n5,smIdType n6,
+                                smIdType n12, smIdType n23, smIdType n31,
+                                smIdType n45, smIdType n56, smIdType n64,
+                                smIdType n14, smIdType n25, smIdType n36,
+                                smIdType n1245, smIdType n2356, smIdType n1346)
 {
   if ( myType != SMESHDS_AddBiQuadPentahedron) {
     MESSAGE("SMESHDS_Command::AddVolume : Bad Type");
@@ -726,11 +726,11 @@ void SMESHDS_Command::AddVolume(int NewVolID, int n1, int n2,
 //function : AddVolume
 //purpose  : 
 //=======================================================================
-void SMESHDS_Command::AddVolume(int NewVolID, int n1, int n2, int n3,
-                                int n4, int n5, int n6, int n7, int n8,
-                                int n12, int n23, int n34, int n41,
-                                int n56, int n67, int n78, int n85,
-                                int n15, int n26, int n37, int n48)
+void SMESHDS_Command::AddVolume(smIdType NewVolID, smIdType n1, smIdType n2, smIdType n3,
+                                smIdType n4, smIdType n5, smIdType n6, smIdType n7, smIdType n8,
+                                smIdType n12, smIdType n23, smIdType n34, smIdType n41,
+                                smIdType n56, smIdType n67, smIdType n78, smIdType n85,
+                                smIdType n15, smIdType n26, smIdType n37, smIdType n48)
 {
   if ( myType != SMESHDS_AddQuadHexahedron) {
     MESSAGE("SMESHDS_Command::AddVolume : Bad Type");
@@ -764,13 +764,13 @@ void SMESHDS_Command::AddVolume(int NewVolID, int n1, int n2, int n3,
 //function : AddVolume
 //purpose  : 
 //=======================================================================
-void SMESHDS_Command::AddVolume(int NewVolID, int n1, int n2, int n3,
-                                int n4, int n5, int n6, int n7, int n8,
-                                int n12, int n23, int n34, int n41,
-                                int n56, int n67, int n78, int n85,
-                                int n15, int n26, int n37, int n48,
-                                int n1234,int n1256,int n2367,int n3478,
-                                int n1458,int n5678,int nCenter)
+void SMESHDS_Command::AddVolume(smIdType NewVolID, smIdType n1, smIdType n2, smIdType n3,
+                                smIdType n4, smIdType n5, smIdType n6, smIdType n7, smIdType n8,
+                                smIdType n12, smIdType n23, smIdType n34, smIdType n41,
+                                smIdType n56, smIdType n67, smIdType n78, smIdType n85,
+                                smIdType n15, smIdType n26, smIdType n37, smIdType n48,
+                                smIdType n1234,smIdType n1256,smIdType n2367,smIdType n3478,
+                                smIdType n1458,smIdType n5678,smIdType nCenter)
 {
   if ( myType != SMESHDS_AddTriQuadHexa) {
     MESSAGE("SMESHDS_Command::AddVolume : Bad Type");
@@ -813,7 +813,7 @@ void SMESHDS_Command::AddVolume(int NewVolID, int n1, int n2, int n3,
  */
 //================================================================================
 
-void SMESHDS_Command::AddBall(int NewBallID, int node, double diameter)
+void SMESHDS_Command::AddBall(smIdType NewBallID, smIdType node, double diameter)
 {
   if ( myType != SMESHDS_AddBall)
   {

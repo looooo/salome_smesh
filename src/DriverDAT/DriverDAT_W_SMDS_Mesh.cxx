@@ -139,7 +139,7 @@ Driver_Mesh::Status DriverDAT_W_SMDS_Mesh::Perform()
 
       if (( v = myMesh->DownCast< SMDS_MeshVolume >( elem )))
       {
-        std::vector<smIdType> quant = v->GetQuantities();
+        std::vector<int> quant = v->GetQuantities();
         if ( !quant.empty() )
         {
           fprintf(aFileId, "%d %d ", (int)quant.size(), quant[0]);

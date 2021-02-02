@@ -400,7 +400,7 @@ Driver_Mesh::Status DriverMED_R_SMESHDS_Mesh::Perform()
             for(TInt iElem = 0; iElem < aNbElem; iElem++){
               MED::TCConnSliceArr aConnSliceArr = aPolyedreInfo->GetConnSliceArr(iElem);
               TInt aNbFaces = aConnSliceArr.size();
-              typedef MED::TVector<smIdType> TQuantities;
+              typedef MED::TVector<int> TQuantities;
               TQuantities aQuantities(aNbFaces);
               TInt aNbNodes = aPolyedreInfo->GetNbNodes(iElem);
               TNodeIds aNodeIds(aNbNodes);

@@ -3732,9 +3732,9 @@ void SMESH_Pattern::
           if ( !volTool.Set( elem ) || !avoidSet.insert( elem ).second )
             continue; // skip faces or refined elements
           // add polyhedron definition
-          myPolyhedronQuantities.push_back(vector<smIdType> ());
+          myPolyhedronQuantities.push_back(vector<int> ());
           myPolyElemXYZIDs.push_back(TElemDef());
-          vector<smIdType>& quantity = myPolyhedronQuantities.back();
+          vector<int>& quantity = myPolyhedronQuantities.back();
           TElemDef &   elemDef  = myPolyElemXYZIDs.back();
           // get definitions of new elements on volume faces
           bool makePoly = false;
@@ -3767,7 +3767,7 @@ bool SMESH_Pattern::
                      const int                             theNbBndNodes,
                      const vector< const SMDS_MeshNode* >& theNodes,
                      list< int >&                          theFaceDefs,
-                     vector<smIdType>&                     theQuantity)
+                     vector<int>&                          theQuantity)
 {
   bool makePoly = false;
 
@@ -4257,7 +4257,7 @@ void SMESH_Pattern::createElements(SMESH_Mesh*                            theMes
   bool is2d = myIs2D;
 
   list< TElemDef >::const_iterator enIt = theElemNodeIDs.begin();
-  list< vector<smIdType> >::iterator quantity = myPolyhedronQuantities.begin();
+  list< vector<int> >::iterator quantity = myPolyhedronQuantities.begin();
   for ( int iElem = 0; enIt != theElemNodeIDs.end(); enIt++, iElem++ )
   {
     const TElemDef & elemNodeInd = *enIt;

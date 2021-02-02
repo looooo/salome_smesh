@@ -26,6 +26,14 @@ INCLUDE_DIRECTORIES(
   ${PROJECT_BINARY_DIR}/idl
 )
 
+IF(SALOME_USE_64_BITS_IDS)
+   SET(SMESH_ID_TYPE "long long")
+ELSE()
+   SET(SMESH_ID_TYPE "long")
+ENDIF()
+
+SALOME_CONFIGURE_FILE(SMESH_smIdType.idl.in SMESH_smIdType.idl)
+
 SET(SalomeIDLSMESH_IDLSOURCES
   SMESH_Gen.idl
   SMESH_Mesh.idl
@@ -36,12 +44,13 @@ SET(SalomeIDLSMESH_IDLSOURCES
   SMESH_Pattern.idl
   SMESH_MeshEditor.idl
   SMESH_Measurements.idl
-  SMESH_smIdType.idl
+  ${CMAKE_CURRENT_BINARY_DIR}/SMESH_smIdType.idl
 )
 
 SET(_idl_include_dirs
   ${KERNEL_ROOT_DIR}/idl/salome
   ${GEOM_ROOT_DIR}/idl/salome
+  ${PROJECT_BINARY_DIR}/idl
 )
 
 SET(_idl_link_flags

@@ -41,7 +41,7 @@ module SMESH
   typedef sequence<SMESH_IDSource> ListOfIDSources;
 
   typedef sequence<double    > double_array ;
-  typedef sequence<long      > long_array ;
+  typedef sequence<smIdType      > long_array ;
   typedef sequence<string    > string_array ;
   typedef sequence<long_array> array_of_long_array ;
 
@@ -82,8 +82,8 @@ module SMESH
 
   struct log_block
   {
-    long commandType;
-    long number;
+    smIdType commandType;
+    smIdType number;
     double_array coords;
     long_array indexes;
   };
@@ -107,7 +107,7 @@ module SMESH
    * Node location on a shape
    */
   struct NodePosition {
-    long             shapeID;
+    smIdType             shapeID;
     GEOM::shape_type shapeType;
     double_array     params; // [U] on EDGE, [U,V] on FACE, [] on the rest shapes
   };
@@ -116,7 +116,7 @@ module SMESH
    * Element location on a shape
    */
   struct ElementPosition {
-    long             shapeID;
+    smIdType             shapeID;
     GEOM::shape_type shapeType;
   };
 
@@ -243,8 +243,8 @@ module SMESH
   struct MedFileInfo
   {
     string fileName; //!< name of file
-    long   fileSize; //!< size of file
-    long   major, minor, release; //!< MED file version
+    smIdType   fileSize; //!< size of file
+    smIdType   major, minor, release; //!< MED file version
   };
 
   /*!
@@ -260,15 +260,15 @@ module SMESH
    * BOUNDARY: create or not boundary for result of extrusion
    * SEW:      try to use existing nodes or create new nodes in any case
    */
-  const long EXTRUSION_FLAG_BOUNDARY = 1;
-  const long EXTRUSION_FLAG_SEW = 2;
+  const smIdType EXTRUSION_FLAG_BOUNDARY = 1;
+  const smIdType EXTRUSION_FLAG_SEW = 2;
   
   /*!
    * Structure used in mesh edit preview data (MeshPreviewStruct)
    */
   struct ElementSubType { ElementType SMDS_ElementType;
                           boolean     isPoly;
-                          long        nbNodesInElement; };
+                          smIdType        nbNodesInElement; };
 
   typedef sequence<ElementSubType> types_array;
 
@@ -381,7 +381,7 @@ module SMESH
     /*!
      * Remove all nodes and elements of submesh
      */
-    void ClearSubMesh(in long ShapeID)
+    void ClearSubMesh(in smIdType ShapeID)
       raises (SALOME::SALOME_Exception);
 
     /*!
@@ -444,7 +444,7 @@ module SMESH
     /*!
      *  Get number of groups existing in the mesh
      */
-    long NbGroups()
+    smIdType NbGroups()
       raises (SALOME::SALOME_Exception);
 
     /*!
@@ -608,7 +608,7 @@ module SMESH
     /*!
      * Get the internal Id
      */
-    long GetId();
+    smIdType GetId();
 
     /*!
      * Obtain instance of SMESH_MeshEditor
@@ -658,7 +658,7 @@ module SMESH
      */
     void ExportMED( in string      fileName, 
 		    in boolean     auto_groups, 
-		    in long        version,
+		    in smIdType        version,
 		    in boolean     overwrite,
 		    in boolean     autoDimension) raises (SALOME::SALOME_Exception);
 
@@ -693,7 +693,7 @@ module SMESH
     void ExportPartToMED( in SMESH_IDSource     meshPart,
                           in string             fileName,
                           in boolean            auto_groups,
-                          in long               version,
+                          in smIdType               version,
                           in boolean            overwrite,
                           in boolean            autoDimension,
                           in GEOM::ListOfFields fields,
@@ -710,7 +710,7 @@ module SMESH
     /*!
      * Return string representation of a MED file version comprising nbDigits
      */
-    string GetVersionString(in long minor, in short nbDigits);
+    string GetVersionString(in smIdType minor, in short nbDigits);
     
     /*!
      *  Return the list of med versions compatibles for write/append,
@@ -748,94 +748,94 @@ module SMESH
     /*!
      * Get information about mesh contents
      */
-    long NbNodes()
+    smIdType NbNodes()
       raises (SALOME::SALOME_Exception);
 
-    long NbElements()
+    smIdType NbElements()
       raises (SALOME::SALOME_Exception);
 
-    long Nb0DElements()
+    smIdType Nb0DElements()
       raises (SALOME::SALOME_Exception);
 
-    long NbBalls()
+    smIdType NbBalls()
       raises (SALOME::SALOME_Exception);
 
-    long NbEdges()
+    smIdType NbEdges()
       raises (SALOME::SALOME_Exception);
 
-    long NbEdgesOfOrder(in ElementOrder order)
+    smIdType NbEdgesOfOrder(in ElementOrder order)
       raises (SALOME::SALOME_Exception);
 
-    long NbFaces()
+    smIdType NbFaces()
       raises (SALOME::SALOME_Exception);
 
-    long NbFacesOfOrder(in ElementOrder order)
+    smIdType NbFacesOfOrder(in ElementOrder order)
       raises (SALOME::SALOME_Exception);
 
-    long NbTriangles()
+    smIdType NbTriangles()
       raises (SALOME::SALOME_Exception);
 
-    long NbTrianglesOfOrder(in ElementOrder order)
+    smIdType NbTrianglesOfOrder(in ElementOrder order)
       raises (SALOME::SALOME_Exception);
 
-    long NbBiQuadTriangles()
+    smIdType NbBiQuadTriangles()
       raises (SALOME::SALOME_Exception);
 
-    long NbQuadrangles()
+    smIdType NbQuadrangles()
       raises (SALOME::SALOME_Exception);
 
-    long NbQuadranglesOfOrder(in ElementOrder order)
+    smIdType NbQuadranglesOfOrder(in ElementOrder order)
       raises (SALOME::SALOME_Exception);
 
-    long NbBiQuadQuadrangles()
+    smIdType NbBiQuadQuadrangles()
       raises (SALOME::SALOME_Exception);
 
-    long NbPolygons()
+    smIdType NbPolygons()
       raises (SALOME::SALOME_Exception);
 
-    long NbPolygonsOfOrder(in ElementOrder order)
+    smIdType NbPolygonsOfOrder(in ElementOrder order)
       raises (SALOME::SALOME_Exception);
 
-    long NbVolumes()
+    smIdType NbVolumes()
       raises (SALOME::SALOME_Exception);
 
-    long NbVolumesOfOrder(in ElementOrder order)
+    smIdType NbVolumesOfOrder(in ElementOrder order)
       raises (SALOME::SALOME_Exception);
 
-    long NbTetras()
+    smIdType NbTetras()
       raises (SALOME::SALOME_Exception);
 
-    long NbTetrasOfOrder(in ElementOrder order)
+    smIdType NbTetrasOfOrder(in ElementOrder order)
       raises (SALOME::SALOME_Exception);
 
-    long NbHexas()
+    smIdType NbHexas()
       raises (SALOME::SALOME_Exception);
 
-    long NbHexasOfOrder(in ElementOrder order)
+    smIdType NbHexasOfOrder(in ElementOrder order)
       raises (SALOME::SALOME_Exception);
 
-    long NbTriQuadraticHexas()
+    smIdType NbTriQuadraticHexas()
       raises (SALOME::SALOME_Exception);
 
-    long NbPyramids()
+    smIdType NbPyramids()
       raises (SALOME::SALOME_Exception);
 
-    long NbPyramidsOfOrder(in ElementOrder order)
+    smIdType NbPyramidsOfOrder(in ElementOrder order)
       raises (SALOME::SALOME_Exception);
 
-    long NbPrisms()
+    smIdType NbPrisms()
       raises (SALOME::SALOME_Exception);
 
-    long NbPrismsOfOrder(in ElementOrder order)
+    smIdType NbPrismsOfOrder(in ElementOrder order)
       raises (SALOME::SALOME_Exception);
 
-    long NbHexagonalPrisms()
+    smIdType NbHexagonalPrisms()
       raises (SALOME::SALOME_Exception);
 
-    long NbPolyhedrons()
+    smIdType NbPolyhedrons()
       raises (SALOME::SALOME_Exception);
 
-    long NbSubMesh()
+    smIdType NbSubMesh()
       raises (SALOME::SALOME_Exception);
 
     long_array GetElementsId()
@@ -850,22 +850,22 @@ module SMESH
     /*!
      * Returns type of mesh element
      */    
-    ElementType GetElementType( in long id, in boolean iselem )
+    ElementType GetElementType( in smIdType id, in boolean iselem )
       raises (SALOME::SALOME_Exception);
 
-    EntityType GetElementGeomType( in long id )
+    EntityType GetElementGeomType( in smIdType id )
       raises (SALOME::SALOME_Exception);
 
-    GeometryType GetElementShape( in long id )
+    GeometryType GetElementShape( in smIdType id )
       raises (SALOME::SALOME_Exception);
 
-    long_array GetSubMeshElementsId(in long ShapeID)
+    long_array GetSubMeshElementsId(in smIdType ShapeID)
       raises (SALOME::SALOME_Exception);
 
-    long_array GetSubMeshNodesId(in long ShapeID, in boolean all )
+    long_array GetSubMeshNodesId(in smIdType ShapeID, in boolean all )
       raises (SALOME::SALOME_Exception);
     
-    ElementType GetSubMeshElementType(in long ShapeID)
+    ElementType GetSubMeshElementType(in smIdType ShapeID)
       raises (SALOME::SALOME_Exception);
 
 
@@ -876,7 +876,7 @@ module SMESH
     /*!
      * \brief Return \c true if a meshing order not yet set for a concurrent sub-mesh
      */
-    boolean IsUnorderedSubMesh(in long submeshID);
+    boolean IsUnorderedSubMesh(in smIdType submeshID);
 
     /*!
      * \brief Return submesh objects list in meshing order
@@ -903,91 +903,91 @@ module SMESH
      * Get XYZ coordinates of node as list of double
      * If there is not node for given ID - returns empty list
      */
-    double_array GetNodeXYZ(in long id);
+    double_array GetNodeXYZ(in smIdType id);
 
     /*!
      * For given node returns list of IDs of inverse elements
      * If there is not node for given ID - returns empty list
      */
-    long_array GetNodeInverseElements(in long id, in ElementType elemType);
+    long_array GetNodeInverseElements(in smIdType id, in ElementType elemType);
 
     /*!
      * \brief Return position of a node on shape
      */
-    NodePosition GetNodePosition(in long NodeID);
+    NodePosition GetNodePosition(in smIdType NodeID);
 
     /*!
      * \brief Return position of an element on shape
      */
-    ElementPosition GetElementPosition(in long ElemID);
+    ElementPosition GetElementPosition(in smIdType ElemID);
 
     /*!
      * If given element is node returns IDs of shape from position
      * If there is not node for given ID - returns -1
      */
-    long GetShapeID(in long id);
+    smIdType GetShapeID(in smIdType id);
 
     /*!
      * For given element returns ID of result shape after 
      * ::FindShape() from SMESH_MeshEditor
      * If there is not element for given ID - returns -1
      */
-    long GetShapeIDForElem(in long id);
+    smIdType GetShapeIDForElem(in smIdType id);
 
     /*!
      * Returns number of nodes for given element
      * If there is not element for given ID - returns -1
      */
-    long GetElemNbNodes(in long id);
+    smIdType GetElemNbNodes(in smIdType id);
 
     /*!
      * Returns IDs of nodes of given element
      */
-    long_array GetElemNodes(in long id);
+    long_array GetElemNodes(in smIdType id);
 
     /*!
      * Returns ID of node by given index for given element
      * If there is not element for given ID - returns -1
      * If there is not node for given index - returns -2
      */
-    long GetElemNode(in long id, in long index);
+    smIdType GetElemNode(in smIdType id, in smIdType index);
 
     /*!
      * Returns true if given node is medium node
      * in given quadratic element
      */
-    boolean IsMediumNode(in long ide, in long idn);
+    boolean IsMediumNode(in smIdType ide, in smIdType idn);
 
     /*!
      * Returns true if given node is medium node
      * in one of quadratic elements
      */
-    boolean IsMediumNodeOfAnyElem(in long idn, in ElementType elem_type);
+    boolean IsMediumNodeOfAnyElem(in smIdType idn, in ElementType elem_type);
 
     /*!
      * Returns number of edges for given element
      */
-    long ElemNbEdges(in long id);
+    smIdType ElemNbEdges(in smIdType id);
 
     /*!
      * Returns number of faces for given element
      */
-    long ElemNbFaces(in long id);
+    smIdType ElemNbFaces(in smIdType id);
 
     /*!
      * Returns nodes of given face (counted from zero) for given volumic element.
      */
-    long_array GetElemFaceNodes(in long elemId, in short faceIndex);
+    long_array GetElemFaceNodes(in smIdType elemId, in short faceIndex);
 
     /*!
      * Returns three components of normal of given mesh face (or an empty array in KO case)
      */
-    double_array GetFaceNormal(in long faceId, in boolean normalized);
+    double_array GetFaceNormal(in smIdType faceId, in boolean normalized);
 
     /*!
      * Returns an element based on all given nodes.
      */
-    long FindElementByNodes(in long_array nodes);
+    smIdType FindElementByNodes(in long_array nodes);
 
     /*!
      * Return elements including all given nodes.
@@ -997,24 +997,24 @@ module SMESH
     /*!
      * Returns true if given element is polygon
      */
-    boolean IsPoly(in long id);
+    boolean IsPoly(in smIdType id);
 
     /*!
      * Returns true if given element is quadratic
      */
-    boolean IsQuadratic(in long id);
+    boolean IsQuadratic(in smIdType id);
 
     /*!
      * Returns diameter of a ball discrete element or zero in case of an invalid \a id
      */
-    double GetBallDiameter(in long id);
+    double GetBallDiameter(in smIdType id);
 
     /*!
      * Returns XYZ coordinates of bary center for given element
      * as list of double
      * If there is not element for given ID - returns empty list
      */
-    double_array BaryCenter(in long id);
+    double_array BaryCenter(in smIdType id);
 
     /*! Gets information about imported MED file */
     MedFileInfo GetMEDFileInfo();
@@ -1041,13 +1041,13 @@ module SMESH
     /*!
      *
      */
-    long GetNumberOfElements()
+    smIdType GetNumberOfElements()
       raises (SALOME::SALOME_Exception);
 
     /*!
      *
      */
-    long GetNumberOfNodes( in boolean all )
+    smIdType GetNumberOfNodes( in boolean all )
       raises (SALOME::SALOME_Exception);
 
     /*!
@@ -1065,7 +1065,7 @@ module SMESH
     /*!
      * Returns type of mesh element (same as SMESH_Mesh::GetElementType() )
      */
-    ElementType GetElementType( in long id, in boolean iselem )
+    ElementType GetElementType( in smIdType id, in boolean iselem )
       raises (SALOME::SALOME_Exception);
 
     /*!
@@ -1089,7 +1089,7 @@ module SMESH
     /*!
      * Get the internal Id
      */
-    long GetId();
+    smIdType GetId();
   };
 
 };

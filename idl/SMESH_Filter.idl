@@ -30,6 +30,7 @@
 #include "SALOME_GenericObj.idl"
 #include "GEOM_Gen.idl"
 #include "SMESH_Mesh.idl"
+#include "SMESH_smIdType.idl"
 
 module SMESH
 {
@@ -97,7 +98,7 @@ module SMESH
   */
   struct HistogramRectangle
   {
-    long nbEvents;
+    smIdType nbEvents;
     double min;
     double max;
   };
@@ -119,8 +120,8 @@ module SMESH
   */
   interface NumericalFunctor: Functor
   {
-    double  GetValue    ( in long theElementId );
-    boolean IsApplicable( in long theElementId );
+    double  GetValue    ( in smIdType theElementId );
+    boolean IsApplicable( in smIdType theElementId );
 
     Histogram GetHistogram     ( in short nbIntervals, in boolean isLogarithmic );
     Histogram GetLocalHistogram( in short nbIntervals, in boolean isLogarithmic,
@@ -129,8 +130,8 @@ module SMESH
     * Set precision for calculation. It is a position after point which is
     * used to functor value after calculation.
     */
-    void   SetPrecision( in long thePrecision );
-    long   GetPrecision();
+    void   SetPrecision( in smIdType thePrecision );
+    smIdType   GetPrecision();
   };
   interface MinimumAngle    : NumericalFunctor{};
   interface AspectRatio     : NumericalFunctor{};
@@ -148,7 +149,7 @@ module SMESH
     struct Value
     {
       double myLength;
-      long myPnt1, myPnt2;
+      smIdType myPnt1, myPnt2;
     };
     typedef sequence<Value> Values;
     Values GetValues();
@@ -160,8 +161,8 @@ module SMESH
   {
     struct Value
     {
-      long myNbConnects;
-      long myPnt1, myPnt2;
+      smIdType myNbConnects;
+      smIdType myPnt1, myPnt2;
     };
     
     typedef sequence<Value> Values;
@@ -177,8 +178,8 @@ module SMESH
   */
   interface Predicate: Functor
   {
-    boolean IsSatisfy( in long thEntityId );
-    long    NbSatisfying( in SMESH::SMESH_IDSource obj );
+    boolean IsSatisfy( in smIdType thEntityId );
+    smIdType    NbSatisfying( in SMESH::SMESH_IDSource obj );
   };
 
   /*!
@@ -349,8 +350,8 @@ module SMESH
   {
     struct Border
     {
-      long myElemId;
-      long myPnt1, myPnt2;
+      smIdType myElemId;
+      smIdType myPnt1, myPnt2;
     };
     typedef sequence<Border> Borders;
     Borders GetBorders();
@@ -460,7 +461,7 @@ module SMESH
   * if normal of a face has angle with the threshold face less than a tolerance.
   */
   interface CoplanarFaces : Predicate {
-    void            SetFace ( in long theFaceID );
+    void            SetFace ( in smIdType theFaceID );
     void            SetTolerance( in double theToler );
   };
 
@@ -474,7 +475,7 @@ module SMESH
     void            SetElementType( in ElementType type );
     void            SetPoint      ( in double x, in double y, in double z );
     void            SetVertex     ( in GEOM::GEOM_Object vertex );
-    void            SetNode       ( in long nodeID );
+    void            SetNode       ( in smIdType nodeID );
     string          GetThreshold  ( out ThresholdType type );
     void            SetThreshold  ( in string threshold, in ThresholdType type ) 
       raises (SALOME::SALOME_Exception);
@@ -508,16 +509,16 @@ module SMESH
     */
     struct Criterion
     {
-      long        Type;
-      long        Compare;
+      smIdType    Type;
+      smIdType    Compare;
       double      Threshold;
       string      ThresholdStr;
       string      ThresholdID;
-      long        UnaryOp;
-      long        BinaryOp;
+      smIdType    UnaryOp;
+      smIdType    BinaryOp;
       double      Tolerance;
       ElementType TypeOfElement;
-      long        Precision;
+      smIdType    Precision;
     };
 
     typedef sequence<Criterion> Criteria;
@@ -563,7 +564,7 @@ module SMESH
     * Query methods
     */
     boolean       IsPresent( in string aFilterName );
-    long          NbFilters( in ElementType aType );
+    smIdType      NbFilters( in ElementType aType );
     string_array  GetNames( in ElementType aType );
     string_array  GetAllNames();
     void          SetFileName( in string aFilterName );

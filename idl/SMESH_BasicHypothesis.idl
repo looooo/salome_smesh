@@ -29,6 +29,7 @@
 #include "SALOME_Exception.idl"
 #include "SMESH_Hypothesis.idl"
 #include "SMESH_Mesh.idl"
+#include "SMESH_smIdType.idl"
 
 /*!
  * StdMeshers: interfaces to standard hypotheses and algorithms
@@ -161,32 +162,32 @@ module StdMeshers
     /*!
      * Builds and returns point distribution according to passed density function
      */
-    SMESH::double_array BuildDistributionExpr( in string func, in long nbSeg, in long conv )
+    SMESH::double_array BuildDistributionExpr( in string func, in SMESH::smIdType nbSeg, in SMESH::smIdType  conv )
       raises (SALOME::SALOME_Exception);
-    SMESH::double_array BuildDistributionTab( in SMESH::double_array func, in long nbSeg, in long conv )
+    SMESH::double_array BuildDistributionTab( in SMESH::double_array func, in SMESH::smIdType  nbSeg, in SMESH::smIdType  conv )
       raises (SALOME::SALOME_Exception);
   
     /*!
      * Sets <number of segments> parameter value
      */
-    void SetNumberOfSegments(in long segmentsNumber)
+    void SetNumberOfSegments(in SMESH::smIdType  segmentsNumber)
       raises (SALOME::SALOME_Exception);
 
     /*!
      * Returns <number of segments> parameter value
      */
-    long GetNumberOfSegments();
+    SMESH::smIdType  GetNumberOfSegments();
 
     /*!
      * Sets <distribution type> parameter value
      */
-    void SetDistrType(in long typ)
+    void SetDistrType(in SMESH::smIdType  typ)
       raises (SALOME::SALOME_Exception);
 
     /*!
      * Returns <distribution type> parameter value
      */
-    long GetDistrType();
+    SMESH::smIdType  GetDistrType();
 
     /*!
      * Sets <scale factor> parameter value
@@ -227,13 +228,13 @@ module StdMeshers
     /*!
      * Sets <conversion mode> parameter value for functional distributions
      */
-    void SetConversionMode(in long conv )
+    void SetConversionMode(in SMESH::smIdType  conv )
       raises (SALOME::SALOME_Exception);
 
     /*!
      * Returns <conversion mode> parameter value for functional distributions
      */
-    long ConversionMode()
+    SMESH::smIdType  ConversionMode()
       raises (SALOME::SALOME_Exception);
   };
 
@@ -323,13 +324,13 @@ module StdMeshers
     /*!
      * Sets <mode> parameter value
      */
-    void SetMode(in long mode) 
+    void SetMode(in SMESH::smIdType  mode) 
       raises (SALOME::SALOME_Exception);
 
     /*!
      * Returns <mode> parameter value
      */
-    long GetMode();
+    SMESH::smIdType  GetMode();
   };
 
   /*!
@@ -519,13 +520,13 @@ module StdMeshers
     /*!
      * Sets <number of segments> parameter value
      */
-    void SetNumberOfLayers(in long numberOfLayers) 
+    void SetNumberOfLayers(in SMESH::smIdType  numberOfLayers) 
       raises (SALOME::SALOME_Exception);
 
     /*!
      * Returns <number of layers> parameter value
      */
-    long GetNumberOfLayers();
+    SMESH::smIdType  GetNumberOfLayers();
 
   };
 
@@ -665,7 +666,7 @@ module StdMeshers
      * Result may be nil if association not set.
      * Valid indices are 1 and 2
      */
-    GEOM::GEOM_Object  GetSourceVertex(in long i)
+    GEOM::GEOM_Object  GetSourceVertex(in SMESH::smIdType  i)
       raises (SALOME::SALOME_Exception);
 
     /*!
@@ -673,7 +674,7 @@ module StdMeshers
      * Result may be nil if association not set.
      * Valid indices are 1 and 2
      */
-    GEOM::GEOM_Object  GetTargetVertex(in long i)
+    GEOM::GEOM_Object  GetTargetVertex(in SMESH::smIdType  i)
       raises (SALOME::SALOME_Exception);
   };
 
@@ -722,7 +723,7 @@ module StdMeshers
      * Result may be nil if association not set.
      * Valid indices are 1 and 2
      */
-    GEOM::GEOM_Object  GetSourceVertex(in long i)
+    GEOM::GEOM_Object  GetSourceVertex(in SMESH::smIdType  i)
       raises (SALOME::SALOME_Exception);
 
     /*!
@@ -730,7 +731,7 @@ module StdMeshers
      * Result may be nil if association not set.
      * Valid indices are 1 and 2
      */
-    GEOM::GEOM_Object  GetTargetVertex(in long i)
+    GEOM::GEOM_Object  GetTargetVertex(in SMESH::smIdType  i)
       raises (SALOME::SALOME_Exception);
   };
 
@@ -771,12 +772,12 @@ module StdMeshers
     /*!
      * Set base vertex for triangles
      */
-    void SetTriaVertex( in long vertID );
+    void SetTriaVertex( in SMESH::smIdType  vertID );
     
     /*!
      * Returns base vertex for triangles
      */
-    long GetTriaVertex();
+    SMESH::smIdType  GetTriaVertex();
     
     /*!
      * Set entry of the main object

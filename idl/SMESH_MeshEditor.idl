@@ -26,6 +26,7 @@
 
 #include "SMESH_Mesh.idl"
 #include "SMESH_Gen.idl"
+#include "SMESH_smIdType.idl"
 
 module SMESH
 {
@@ -42,9 +43,9 @@ module SMESH
   struct FreeBorderPart
   {
     short border; // border index within a sequence<FreeBorder>
-    long  node1;  // node index within the border-th FreeBorder
-    long  node2;
-    long  nodeLast;
+    smIdType  node1;  // node index within the border-th FreeBorder
+    smIdType  node2;
+    smIdType  nodeLast;
   };
   typedef sequence<FreeBorder>       ListOfFreeBorders;
   typedef sequence<FreeBorderPart>   FreeBordersGroup;
@@ -66,13 +67,13 @@ module SMESH
     // else                             ==> point is at xyz*
 
     // point 1
-    long node1ID1;
-    long node1ID2;
+    smIdType node1ID1;
+    smIdType node1ID2;
     PointStruct xyz1;
 
     // point 2
-    long node2ID1;
-    long node2ID2;
+    smIdType node2ID1;
+    smIdType node2ID2;
     PointStruct xyz2;
 
     // vector on the plane; to use a default plane set vector = (0,0,0)
@@ -83,9 +84,9 @@ module SMESH
   // face edge defined by two nodes + optional medium node
   struct FaceEdge
   {
-    long node1;
-    long node2;
-    long medium;
+    smIdType node1;
+    smIdType node2;
+    smIdType medium;
   };
   typedef sequence<FaceEdge> ListOfEdges;
 
@@ -156,7 +157,7 @@ module SMESH
      * \brief Remove all orphan nodes.
      * \return number of removed nodes
      */
-    long RemoveOrphanNodes() raises (SALOME::SALOME_Exception);
+    smIdType RemoveOrphanNodes() raises (SALOME::SALOME_Exception);
 
     /*!
      * \brief Add a new node.
@@ -165,21 +166,21 @@ module SMESH
      * \param z Z coordinate of new node
      * \return integer identifier of new node
      */
-    long AddNode(in double x, in double y, in double z) raises (SALOME::SALOME_Exception);
+    smIdType AddNode(in double x, in double y, in double z) raises (SALOME::SALOME_Exception);
 
     /*!
      *  Create a 0D element on the given node.
      *  \param IdOfNode Node IDs for creation of element.
      *  \param DuplicateElements to add one more 0D element to a node or not
      */
-    long Add0DElement(in long    IDOfNode,
+    smIdType Add0DElement(in smIdType    IDOfNode,
                       in boolean DuplicateElements) raises (SALOME::SALOME_Exception);
 
     /*!
      *  Create a ball element on the given node.
      *  \param IdOfNode Node IDs for creation of element.
      */
-    long AddBall(in long IDOfNode, in double diameter) raises (SALOME::SALOME_Exception);
+    smIdType AddBall(in smIdType IDOfNode, in double diameter) raises (SALOME::SALOME_Exception);
 
     /*!
      *  Create an edge, either linear and quadratic (this is determed
@@ -189,7 +190,7 @@ module SMESH
      *  of MED. This description is located by the following link:
      *   http://www.salome-platform.org/salome2/web_med_internet/logiciels/medV2.2.2_doc_html/html/modele_de_donnees.html#3.
      */
-    long AddEdge(in long_array IDsOfNodes) raises (SALOME::SALOME_Exception);
+    smIdType AddEdge(in long_array IDsOfNodes) raises (SALOME::SALOME_Exception);
 
     /*!
      *  Create face, either linear and quadratic (this is determed
@@ -199,16 +200,16 @@ module SMESH
      *  of MED. This description is located by the following link:
      *   http://www.salome-platform.org/salome2/web_med_internet/logiciels/medV2.2.2_doc_html/html/modele_de_donnees.html#3.
      */
-    long AddFace(in long_array IDsOfNodes) raises (SALOME::SALOME_Exception);
+    smIdType AddFace(in long_array IDsOfNodes) raises (SALOME::SALOME_Exception);
 
-    long AddPolygonalFace(in long_array IdsOfNodes) raises (SALOME::SALOME_Exception);
+    smIdType AddPolygonalFace(in long_array IdsOfNodes) raises (SALOME::SALOME_Exception);
 
     /*!
      * Create a quadratic polygonal face
      *  \param IdsOfNodes - nodes of the polygon; corner nodes follow first
-     *  \return long - ID of a new polygon
+     *  \return smIdType- ID of a new polygon
      */
-    long AddQuadPolygonalFace(in long_array IdsOfNodes) raises (SALOME::SALOME_Exception);
+    smIdType AddQuadPolygonalFace(in long_array IdsOfNodes) raises (SALOME::SALOME_Exception);
 
     /*!
      *  Create volume, either linear and quadratic (this is determed
@@ -218,7 +219,7 @@ module SMESH
      *  of MED. This description is located by the following link:
      *   http://www.salome-platform.org/salome2/web_med_internet/logiciels/medV2.2.2_doc_html/html/modele_de_donnees.html#3.
      */
-    long AddVolume(in long_array IDsOfNodes) raises (SALOME::SALOME_Exception);
+    smIdType AddVolume(in long_array IDsOfNodes) raises (SALOME::SALOME_Exception);
 
     /*!
      *  Create volume of many faces, giving nodes for each face.
@@ -226,7 +227,7 @@ module SMESH
      *  \param Quantities List of integer values, Quantities[i]
      *         gives quantity of nodes in face number i.
      */
-    long AddPolyhedralVolume (in long_array IdsOfNodes,
+    smIdType AddPolyhedralVolume (in long_array IdsOfNodes,
                               in long_array Quantities) raises (SALOME::SALOME_Exception);
     /*!
      *  Create volume of many faces, giving IDs of existing faces.
@@ -234,7 +235,7 @@ module SMESH
      *  \note The created volume will refer only to nodes
      *        of the given faces, not to the faces itself.
      */
-    long AddPolyhedralVolumeByFaces (in long_array IdsOfFaces) raises (SALOME::SALOME_Exception);
+    smIdType AddPolyhedralVolumeByFaces (in long_array IdsOfFaces) raises (SALOME::SALOME_Exception);
 
     /*!
      * Create 0D elements on all nodes of the given object.
@@ -255,7 +256,7 @@ module SMESH
       * \param NodeID - node ID
       * \param VertexID - vertex ID available through GEOM_Object.GetSubShapeIndices()[0]
      */
-    void SetNodeOnVertex(in long NodeID, in long VertexID)
+    void SetNodeOnVertex(in smIdType NodeID, in smIdType VertexID)
       raises (SALOME::SALOME_Exception);
     /*!
      * \brief Store node position on an edge
@@ -263,7 +264,7 @@ module SMESH
       * \param EdgeID - edge ID available through GEOM_Object.GetSubShapeIndices()[0]
       * \param paramOnEdge - parameter on edge where the node is located
      */
-    void SetNodeOnEdge(in long NodeID, in long EdgeID, in double paramOnEdge)
+    void SetNodeOnEdge(in smIdType NodeID, in smIdType EdgeID, in double paramOnEdge)
       raises (SALOME::SALOME_Exception);
     /*!
      * \brief Store node position on a face
@@ -272,31 +273,31 @@ module SMESH
       * \param u - U parameter on face where the node is located
       * \param v - V parameter on face where the node is located
      */
-    void SetNodeOnFace(in long NodeID, in long FaceID, in double u, in double v)
+    void SetNodeOnFace(in smIdType NodeID, in smIdType FaceID, in double u, in double v)
       raises (SALOME::SALOME_Exception);
     /*!
      * \brief Bind a node to a solid
       * \param NodeID - node ID
       * \param SolidID - vertex ID available through GEOM_Object.GetSubShapeIndices()[0]
      */
-    void SetNodeInVolume(in long NodeID, in long SolidID)
+    void SetNodeInVolume(in smIdType NodeID, in smIdType SolidID)
       raises (SALOME::SALOME_Exception);
     /*!
      * \brief Bind an element to a shape
       * \param ElementID - element ID
       * \param ShapeID - shape ID available through GEOM_Object.GetSubShapeIndices()[0]
      */
-    void SetMeshElementOnShape(in long ElementID, in long ShapeID)
+    void SetMeshElementOnShape(in smIdType ElementID, in smIdType ShapeID)
       raises (SALOME::SALOME_Exception);
 
 
-    boolean MoveNode(in long NodeID, in double x, in double y, in double z)
+    boolean MoveNode(in smIdType NodeID, in double x, in double y, in double z)
       raises (SALOME::SALOME_Exception);
 
-    boolean InverseDiag(in long NodeID1, in long NodeID2) 
+    boolean InverseDiag(in smIdType NodeID1, in smIdType NodeID2) 
       raises (SALOME::SALOME_Exception);
 
-    boolean DeleteDiag(in long NodeID1, in long NodeID2) 
+    boolean DeleteDiag(in smIdType NodeID1, in smIdType NodeID2) 
       raises (SALOME::SALOME_Exception);
 
     boolean Reorient(in long_array IDsOfElements) 
@@ -313,9 +314,9 @@ module SMESH
      * \param thePoint - is used to find a face if \a theFace < 1.
      * \return number of reoriented faces.
      */
-    long Reorient2D(in SMESH_IDSource the2Dgroup,
+    smIdType Reorient2D(in SMESH_IDSource the2Dgroup,
                     in DirStruct      theDirection,
-                    in long           theFace,
+                    in smIdType       theFace,
                     in PointStruct    thePoint) raises (SALOME::SALOME_Exception);
     /*!
      * \brief Reorient faces basing on orientation of adjacent volumes.
@@ -325,7 +326,7 @@ module SMESH
      *        pointing either \a outside or \a inside the adjacent volumes.
      * \return number of reoriented faces.
      */
-    long Reorient2DBy3D(in ListOfIDSources faces,
+    smIdType Reorient2DBy3D(in ListOfIDSources faces,
                         in SMESH_IDSource  volumes,
                         in boolean         outsideNormal) raises (SALOME::SALOME_Exception);
 
@@ -393,7 +394,7 @@ module SMESH
      *  \return 1 if 1-3 diagonal is better, 2 if 2-4
      *          diagonal is better, 0 if error occurs.
      */
-    long BestSplit (in long             IDOfQuad,
+    smIdType BestSplit (in smIdType            IDOfQuad,
                     in NumericalFunctor Criterion) raises (SALOME::SALOME_Exception);
 
     /*!
@@ -445,25 +446,25 @@ module SMESH
 
     boolean Smooth(in long_array    IDsOfElements,
                    in long_array    IDsOfFixedNodes,
-                   in long          MaxNbOfIterations,
+                   in smIdType      MaxNbOfIterations,
                    in double        MaxAspectRatio,
                    in Smooth_Method Method) raises (SALOME::SALOME_Exception);
 
     boolean SmoothObject(in SMESH_IDSource  theObject,
                          in long_array      IDsOfFixedNodes,
-                         in long            MaxNbOfIterations,
+                         in smIdType        MaxNbOfIterations,
                          in double          MaxAspectRatio,
                          in Smooth_Method   Method) raises (SALOME::SALOME_Exception);
 
     boolean SmoothParametric(in long_array    IDsOfElements,
                              in long_array    IDsOfFixedNodes,
-                             in long          MaxNbOfIterations,
+                             in smIdType      MaxNbOfIterations,
                              in double        MaxAspectRatio,
                              in Smooth_Method Method) raises (SALOME::SALOME_Exception);
 
     boolean SmoothParametricObject(in SMESH_IDSource  theObject,
                                    in long_array      IDsOfFixedNodes,
-                                   in long            MaxNbOfIterations,
+                                   in smIdType        MaxNbOfIterations,
                                    in double          MaxAspectRatio,
                                    in Smooth_Method   Method) raises (SALOME::SALOME_Exception);
 
@@ -503,7 +504,7 @@ module SMESH
                                       in ListOfIDSources Faces,
                                       in AxisStruct      Axis,
                                       in double          AngleInRadians,
-                                      in long            NbOfSteps,
+                                      in smIdType        NbOfSteps,
                                       in double          Tolerance,
                                       in boolean         ToMakeGroups)
       raises (SALOME::SALOME_Exception);
@@ -531,7 +532,7 @@ module SMESH
                                        in ListOfIDSources edges,
                                        in ListOfIDSources faces,
                                        in DirStruct       stepVector,
-                                       in long            nbOfSteps,
+                                       in smIdType        nbOfSteps,
                                        in boolean         toMakeGroups,
                                        in double_array    scaleFactors,
                                        in boolean         scaleVariation,
@@ -544,7 +545,7 @@ module SMESH
      */
     ListOfGroups ExtrusionByNormal(in ListOfIDSources theObjects,
                                    in double          stepSize,
-                                   in long            nbOfSteps,
+                                   in smIdType        nbOfSteps,
                                    in boolean         byAverageNormal,
                                    in boolean         useInputElemsOnly,
                                    in boolean         makeGroups,
@@ -563,8 +564,8 @@ module SMESH
      */
     ListOfGroups AdvancedExtrusion(in long_array IDsOfElements,
                                    in DirStruct  StepVector,
-                                   in long       NbOfSteps,
-                                   in long       ExtrFlags,
+                                   in smIdType   NbOfSteps,
+                                   in smIdType   ExtrFlags,
                                    in double     SewTolerance,
                                    in boolean    ToMakeGroups)
       raises (SALOME::SALOME_Exception);
@@ -584,7 +585,7 @@ module SMESH
                                            in ListOfIDSources   Faces,
                                            in SMESH_IDSource    Path,
                                            in GEOM::GEOM_Object PathShape,
-                                           in long              NodeStart,
+                                           in smIdType          NodeStart,
                                            in boolean           HasAngles,
                                            in double_array      Angles,
                                            in boolean           AnglesVariation,
@@ -775,13 +776,13 @@ module SMESH
      * If the given ID is a valid node ID (nodeID > 0), just move this node, else
      * move the node closest to the point to point's location and return ID of the node
      */
-    long MoveClosestNodeToPoint(in double x, in double y, in double z, in long nodeID) 
+    smIdType MoveClosestNodeToPoint(in double x, in double y, in double z, in smIdType nodeID) 
       raises (SALOME::SALOME_Exception);
 
     /*!
      * Return ID of node closest to a given point
      */
-    long FindNodeClosestTo(in double x, in double y, in double z) 
+    smIdType FindNodeClosestTo(in double x, in double y, in double z) 
       raises (SALOME::SALOME_Exception);
 
     /*!
@@ -809,7 +810,7 @@ module SMESH
      * and coordinates of the projection point.
      * In the case if nothing found, return -1 and []
      */
-    long ProjectPoint(in double         x,
+    smIdType ProjectPoint(in double         x,
                       in double         y,
                       in double         z,
                       in ElementType    type,
@@ -844,7 +845,7 @@ module SMESH
      *         If a group is closed, the first and last nodes of the group are same.
      */
     array_of_long_array Get1DBranches( in SMESH_IDSource       edges,
-                                       in long                 startNode,
+                                       in smIdType             startNode,
                                        out array_of_long_array nodeGroups)
       raises (SALOME::SALOME_Exception);
 
@@ -898,38 +899,38 @@ module SMESH
       SEW_INTERNAL_ERROR
     };
 
-    Sew_Error SewFreeBorders (in long FirstNodeID1,
-                              in long SecondNodeID1,
-                              in long LastNodeID1,
-                              in long FirstNodeID2,
-                              in long SecondNodeID2,
-                              in long LastNodeID2,
+    Sew_Error SewFreeBorders (in smIdType FirstNodeID1,
+                              in smIdType SecondNodeID1,
+                              in smIdType LastNodeID1,
+                              in smIdType FirstNodeID2,
+                              in smIdType SecondNodeID2,
+                              in smIdType LastNodeID2,
                               in boolean CreatePolygons,
                               in boolean CreatePolyedrs) 
       raises (SALOME::SALOME_Exception);
 
-    Sew_Error SewConformFreeBorders (in long FirstNodeID1,
-                                     in long SecondNodeID1,
-                                     in long LastNodeID1,
-                                     in long FirstNodeID2,
-                                     in long SecondNodeID2) 
+    Sew_Error SewConformFreeBorders (in smIdType FirstNodeID1,
+                                     in smIdType SecondNodeID1,
+                                     in smIdType LastNodeID1,
+                                     in smIdType FirstNodeID2,
+                                     in smIdType SecondNodeID2) 
       raises (SALOME::SALOME_Exception);
 
-    Sew_Error SewBorderToSide (in long FirstNodeIDOnFreeBorder,
-                               in long SecondNodeIDOnFreeBorder,
-                               in long LastNodeIDOnFreeBorder,
-                               in long FirstNodeIDOnSide,
-                               in long LastNodeIDOnSide,
+    Sew_Error SewBorderToSide (in smIdType FirstNodeIDOnFreeBorder,
+                               in smIdType SecondNodeIDOnFreeBorder,
+                               in smIdType LastNodeIDOnFreeBorder,
+                               in smIdType FirstNodeIDOnSide,
+                               in smIdType LastNodeIDOnSide,
                                in boolean CreatePolygons,
                                in boolean CreatePolyedrs) 
       raises (SALOME::SALOME_Exception);
 
     Sew_Error SewSideElements (in long_array IDsOfSide1Elements,
                                in long_array IDsOfSide2Elements,
-                               in long       NodeID1OfSide1ToMerge,
-                               in long       NodeID1OfSide2ToMerge,
-                               in long       NodeID2OfSide1ToMerge,
-                               in long       NodeID2OfSide2ToMerge) 
+                               in smIdType   NodeID1OfSide1ToMerge,
+                               in smIdType   NodeID1OfSide2ToMerge,
+                               in smIdType   NodeID2OfSide1ToMerge,
+                               in smIdType   NodeID2OfSide2ToMerge) 
       raises (SALOME::SALOME_Exception);
 
    /*!
@@ -937,7 +938,7 @@ module SMESH
     * If number of nodes is not corresponded to type of
     * element - returns false
     */
-    boolean ChangeElemNodes(in long ide, in long_array newIDs) 
+    boolean ChangeElemNodes(in smIdType ide, in long_array newIDs) 
       raises (SALOME::SALOME_Exception);
 
     /*!
@@ -976,7 +977,7 @@ module SMESH
      * \return TRUE if operation has been completed successfully, FALSE otherwise
      * \sa DoubleNodes(), DoubleNodeGroup(), DoubleNodeGroups()
      */
-    boolean DoubleNode( in long theNodeId, in long_array theModifiedElems ) 
+    boolean DoubleNode( in smIdType theNodeId, in long_array theModifiedElems ) 
       raises (SALOME::SALOME_Exception);
 
     /*!
@@ -1247,9 +1248,9 @@ module SMESH
      *  \param groups - optional groups of 2D elements to make boundary around
      *  \param mesh - returns the mesh where elements were added to
      *  \param group - returns the created group, if any
-     *  \retval long - number of added boundary elements
+     *  \retval smIdType - number of added boundary elements
      */
-    long MakeBoundaryElements(in Bnd_Dimension   dimension,
+    smIdType MakeBoundaryElements(in Bnd_Dimension   dimension,
                               in string          groupName,
                               in string          meshName,
                               in boolean         toCopyAll,

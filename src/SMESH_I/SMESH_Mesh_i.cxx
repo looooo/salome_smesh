@@ -1250,7 +1250,7 @@ SMESH::ListOfGroups * SMESH_Mesh_i::GetGroups()
  */
 //=============================================================================
 
-CORBA::Long SMESH_Mesh_i::NbGroups()
+SMESH::smIdType SMESH_Mesh_i::NbGroups()
 {
   Unexpect aCatch(SALOME_SalomeException);
   return _mapGroups.size();
@@ -3391,7 +3391,7 @@ void SMESH_Mesh_i::ClearLog()
  */
 //================================================================================
 
-CORBA::Long SMESH_Mesh_i::GetId()
+SMESH::smIdType SMESH_Mesh_i::GetId()
 {
   return _id;
 }
@@ -4396,7 +4396,7 @@ CORBA::Double SMESH_Mesh_i::GetComputeProgress()
  */
 //================================================================================
 
-CORBA::Long SMESH_Mesh_i::NbNodes()
+SMESH::smIdType SMESH_Mesh_i::NbNodes()
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4411,7 +4411,7 @@ CORBA::Long SMESH_Mesh_i::NbNodes()
  */
 //================================================================================
 
-CORBA::Long SMESH_Mesh_i::NbElements()
+SMESH::smIdType SMESH_Mesh_i::NbElements()
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4426,7 +4426,7 @@ CORBA::Long SMESH_Mesh_i::NbElements()
  */
 //================================================================================
 
-CORBA::Long SMESH_Mesh_i::Nb0DElements()
+SMESH::smIdType SMESH_Mesh_i::Nb0DElements()
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4441,7 +4441,7 @@ CORBA::Long SMESH_Mesh_i::Nb0DElements()
  */
 //================================================================================
 
-CORBA::Long SMESH_Mesh_i::NbBalls()
+SMESH::smIdType SMESH_Mesh_i::NbBalls()
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4456,7 +4456,7 @@ CORBA::Long SMESH_Mesh_i::NbBalls()
  */
 //================================================================================
 
-CORBA::Long SMESH_Mesh_i::NbEdges()
+SMESH::smIdType SMESH_Mesh_i::NbEdges()
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4471,7 +4471,7 @@ CORBA::Long SMESH_Mesh_i::NbEdges()
  */
 //================================================================================
 
-CORBA::Long SMESH_Mesh_i::NbEdgesOfOrder(SMESH::ElementOrder order)
+SMESH::smIdType SMESH_Mesh_i::NbEdgesOfOrder(SMESH::ElementOrder order)
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4486,7 +4486,7 @@ CORBA::Long SMESH_Mesh_i::NbEdgesOfOrder(SMESH::ElementOrder order)
  */
 //================================================================================
 
-CORBA::Long SMESH_Mesh_i::NbFaces()
+SMESH::smIdType SMESH_Mesh_i::NbFaces()
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4501,7 +4501,7 @@ CORBA::Long SMESH_Mesh_i::NbFaces()
  */
 //================================================================================
 
-CORBA::Long SMESH_Mesh_i::NbTriangles()
+SMESH::smIdType SMESH_Mesh_i::NbTriangles()
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4516,7 +4516,7 @@ CORBA::Long SMESH_Mesh_i::NbTriangles()
  */
 //================================================================================
 
-CORBA::Long SMESH_Mesh_i::NbBiQuadTriangles()
+SMESH::smIdType SMESH_Mesh_i::NbBiQuadTriangles()
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4525,7 +4525,7 @@ CORBA::Long SMESH_Mesh_i::NbBiQuadTriangles()
   return _impl->NbBiQuadTriangles();
 }
 
-CORBA::Long SMESH_Mesh_i::NbQuadrangles()
+SMESH::smIdType SMESH_Mesh_i::NbQuadrangles()
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4534,7 +4534,7 @@ CORBA::Long SMESH_Mesh_i::NbQuadrangles()
   return _impl->NbQuadrangles();
 }
 
-CORBA::Long SMESH_Mesh_i::NbBiQuadQuadrangles()
+SMESH::smIdType SMESH_Mesh_i::NbBiQuadQuadrangles()
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4543,7 +4543,7 @@ CORBA::Long SMESH_Mesh_i::NbBiQuadQuadrangles()
   return _impl->NbBiQuadQuadrangles();
 }
 
-CORBA::Long SMESH_Mesh_i::NbPolygons()
+SMESH::smIdType SMESH_Mesh_i::NbPolygons()
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4552,7 +4552,7 @@ CORBA::Long SMESH_Mesh_i::NbPolygons()
   return _impl->NbPolygons();
 }
 
-CORBA::Long SMESH_Mesh_i::NbPolygonsOfOrder(SMESH::ElementOrder order)
+SMESH::smIdType SMESH_Mesh_i::NbPolygonsOfOrder(SMESH::ElementOrder order)
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4561,7 +4561,7 @@ CORBA::Long SMESH_Mesh_i::NbPolygonsOfOrder(SMESH::ElementOrder order)
   return _impl->NbPolygons((SMDSAbs_ElementOrder)order);
 }
 
-CORBA::Long SMESH_Mesh_i::NbFacesOfOrder(SMESH::ElementOrder order)
+SMESH::smIdType SMESH_Mesh_i::NbFacesOfOrder(SMESH::ElementOrder order)
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4570,7 +4570,7 @@ CORBA::Long SMESH_Mesh_i::NbFacesOfOrder(SMESH::ElementOrder order)
   return _impl->NbFaces( (SMDSAbs_ElementOrder) order);
 }
 
-CORBA::Long SMESH_Mesh_i::NbTrianglesOfOrder(SMESH::ElementOrder order)
+SMESH::smIdType SMESH_Mesh_i::NbTrianglesOfOrder(SMESH::ElementOrder order)
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4579,7 +4579,7 @@ CORBA::Long SMESH_Mesh_i::NbTrianglesOfOrder(SMESH::ElementOrder order)
   return _impl->NbTriangles( (SMDSAbs_ElementOrder) order);
 }
 
-CORBA::Long SMESH_Mesh_i::NbQuadranglesOfOrder(SMESH::ElementOrder order)
+SMESH::smIdType SMESH_Mesh_i::NbQuadranglesOfOrder(SMESH::ElementOrder order)
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4590,7 +4590,7 @@ CORBA::Long SMESH_Mesh_i::NbQuadranglesOfOrder(SMESH::ElementOrder order)
 
 //=============================================================================
 
-CORBA::Long SMESH_Mesh_i::NbVolumes()
+SMESH::smIdType SMESH_Mesh_i::NbVolumes()
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4599,7 +4599,7 @@ CORBA::Long SMESH_Mesh_i::NbVolumes()
   return _impl->NbVolumes();
 }
 
-CORBA::Long SMESH_Mesh_i::NbTetras()
+SMESH::smIdType SMESH_Mesh_i::NbTetras()
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4608,7 +4608,7 @@ CORBA::Long SMESH_Mesh_i::NbTetras()
   return _impl->NbTetras();
 }
 
-CORBA::Long SMESH_Mesh_i::NbHexas()
+SMESH::smIdType SMESH_Mesh_i::NbHexas()
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4617,7 +4617,7 @@ CORBA::Long SMESH_Mesh_i::NbHexas()
   return _impl->NbHexas();
 }
 
-CORBA::Long SMESH_Mesh_i::NbTriQuadraticHexas()
+SMESH::smIdType SMESH_Mesh_i::NbTriQuadraticHexas()
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4626,7 +4626,7 @@ CORBA::Long SMESH_Mesh_i::NbTriQuadraticHexas()
   return _impl->NbTriQuadraticHexas();
 }
 
-CORBA::Long SMESH_Mesh_i::NbPyramids()
+SMESH::smIdType SMESH_Mesh_i::NbPyramids()
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4635,7 +4635,7 @@ CORBA::Long SMESH_Mesh_i::NbPyramids()
   return _impl->NbPyramids();
 }
 
-CORBA::Long SMESH_Mesh_i::NbPrisms()
+SMESH::smIdType SMESH_Mesh_i::NbPrisms()
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4644,7 +4644,7 @@ CORBA::Long SMESH_Mesh_i::NbPrisms()
   return _impl->NbPrisms();
 }
 
-CORBA::Long SMESH_Mesh_i::NbHexagonalPrisms()
+SMESH::smIdType SMESH_Mesh_i::NbHexagonalPrisms()
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4653,7 +4653,7 @@ CORBA::Long SMESH_Mesh_i::NbHexagonalPrisms()
   return _impl->NbHexagonalPrisms();
 }
 
-CORBA::Long SMESH_Mesh_i::NbPolyhedrons()
+SMESH::smIdType SMESH_Mesh_i::NbPolyhedrons()
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4662,7 +4662,7 @@ CORBA::Long SMESH_Mesh_i::NbPolyhedrons()
   return _impl->NbPolyhedrons();
 }
 
-CORBA::Long SMESH_Mesh_i::NbVolumesOfOrder(SMESH::ElementOrder order)
+SMESH::smIdType SMESH_Mesh_i::NbVolumesOfOrder(SMESH::ElementOrder order)
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4671,7 +4671,7 @@ CORBA::Long SMESH_Mesh_i::NbVolumesOfOrder(SMESH::ElementOrder order)
   return _impl->NbVolumes( (SMDSAbs_ElementOrder) order);
 }
 
-CORBA::Long SMESH_Mesh_i::NbTetrasOfOrder(SMESH::ElementOrder order)
+SMESH::smIdType SMESH_Mesh_i::NbTetrasOfOrder(SMESH::ElementOrder order)
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4680,7 +4680,7 @@ CORBA::Long SMESH_Mesh_i::NbTetrasOfOrder(SMESH::ElementOrder order)
   return _impl->NbTetras( (SMDSAbs_ElementOrder) order);
 }
 
-CORBA::Long SMESH_Mesh_i::NbHexasOfOrder(SMESH::ElementOrder order)
+SMESH::smIdType SMESH_Mesh_i::NbHexasOfOrder(SMESH::ElementOrder order)
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4689,7 +4689,7 @@ CORBA::Long SMESH_Mesh_i::NbHexasOfOrder(SMESH::ElementOrder order)
   return _impl->NbHexas( (SMDSAbs_ElementOrder) order);
 }
 
-CORBA::Long SMESH_Mesh_i::NbPyramidsOfOrder(SMESH::ElementOrder order)
+SMESH::smIdType SMESH_Mesh_i::NbPyramidsOfOrder(SMESH::ElementOrder order)
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4698,7 +4698,7 @@ CORBA::Long SMESH_Mesh_i::NbPyramidsOfOrder(SMESH::ElementOrder order)
   return _impl->NbPyramids( (SMDSAbs_ElementOrder) order);
 }
 
-CORBA::Long SMESH_Mesh_i::NbPrismsOfOrder(SMESH::ElementOrder order)
+SMESH::smIdType SMESH_Mesh_i::NbPrismsOfOrder(SMESH::ElementOrder order)
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
@@ -4713,7 +4713,7 @@ CORBA::Long SMESH_Mesh_i::NbPrismsOfOrder(SMESH::ElementOrder order)
  */
 //=============================================================================
 
-CORBA::Long SMESH_Mesh_i::NbSubMesh()
+SMESH::smIdType SMESH_Mesh_i::NbSubMesh()
 {
   Unexpect aCatch(SALOME_SalomeException);
   return _mapSubMesh_i.size();
@@ -5479,7 +5479,7 @@ SMESH::double_array* SMESH_Mesh_i::GetFaceNormal(CORBA::Long    elemId,
  */
 //================================================================================
 
-CORBA::Long SMESH_Mesh_i::FindElementByNodes(const SMESH::long_array& nodes)
+SMESH::smIdType SMESH_Mesh_i::FindElementByNodes(const SMESH::long_array& nodes)
 {
   if ( _preMeshInfo )
     _preMeshInfo->FullLoadFromFile();
@@ -6155,7 +6155,7 @@ namespace /* Iterators used in SMESH_Mesh_i::GetElements(SMESH::SMESH_IDSource_v
   //-----------------------------------------------------------------------------
   struct IDSourceIterator : public SMDS_ElemIterator
   {
-    const CORBA::Long*        _idPtr;
+    const SMESH::smIdType*    _idPtr;
     const CORBA::Long*        _idEndPtr;
     SMESH::long_array_var     _idArray;
     const SMDS_Mesh*          _mesh;
@@ -6325,7 +6325,7 @@ SMDS_ElemIteratorPtr SMESH_Mesh_i::GetElements(SMESH::SMESH_IDSource_ptr theObje
     if ( SMESH_MeshEditor_i::IsTemporaryIDSource( theObject ))
     {
       int nbIds;
-      if ( CORBA::Long* ids = SMESH_MeshEditor_i::GetTemporaryIDs( theObject, nbIds ))
+      if ( SMESH::smIdType* ids = SMESH_MeshEditor_i::GetTemporaryIDs( theObject, nbIds ))
         elemIt = SMDS_ElemIteratorPtr( new IDSourceIterator( meshDS, ids, nbIds, iterType ));
     }
     else

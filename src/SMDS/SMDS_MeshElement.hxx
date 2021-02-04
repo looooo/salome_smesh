@@ -130,7 +130,7 @@ public:
 
   virtual smIdType GetID() const;
   virtual int GetVtkID()   const;
-  virtual int getshapeId() const { return GetShapeID(); }
+  virtual smIdType getshapeId() const { return GetShapeID(); }
   virtual smIdType GetShapeID() const;
 
   // mark this element; to be used in algos

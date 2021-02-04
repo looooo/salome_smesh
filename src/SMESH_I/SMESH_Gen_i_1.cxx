@@ -1537,7 +1537,7 @@ int StudyContext::addObject( const std::string& theIOR )
 //purpose  : find the object id in the internal map by the IOR
 //=======================================================================
 
-int StudyContext::findId( const std::string& theIOR )
+smIdType StudyContext::findId( const std::string& theIOR )
 {
   TInt2StringMap::iterator imap;
   for ( imap = mapIdToIOR.begin(); imap != mapIdToIOR.end(); ++imap ) {

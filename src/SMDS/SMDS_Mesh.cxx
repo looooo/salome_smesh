@@ -1359,7 +1359,7 @@ const SMDS_MeshFace* SMDS_Mesh::FindFace(const SMDS_MeshNode *node1,
 //purpose  :
 //=======================================================================
 
-const SMDS_MeshElement* SMDS_Mesh::FindElement(int IDelem) const
+const SMDS_MeshElement* SMDS_Mesh::FindElement(smIdType IDelem) const
 {
   return myCellFactory->FindElement( IDelem );
 }
@@ -3007,7 +3007,7 @@ void SMDS_Mesh::CompactMesh()
   return;
 }
 
-int SMDS_Mesh::FromVtkToSmds( int vtkid ) const
+smIdType SMDS_Mesh::FromVtkToSmds( vtkIdType vtkid ) const
 {
   return myCellFactory->FromVtkToSmds( vtkid );
 }

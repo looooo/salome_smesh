@@ -191,7 +191,7 @@ void SMDS_UnstructuredGrid::compactGrid(std::vector<smIdType>& idNodesOldToNew, 
     // Use double type for storing coordinates of nodes instead float.
     vtkPoints *newPoints = vtkPoints::New();
     newPoints->SetDataType( VTK_DOUBLE );
-    newPoints->SetNumberOfPoints( newNodeSize );
+    newPoints->SetNumberOfPoints( FromIdType<int>(newNodeSize) );
 
     int i = 0, alreadyCopied = 0;
     while ( i < oldNodeSize )
@@ -257,11 +257,11 @@ void SMDS_UnstructuredGrid::compactGrid(std::vector<smIdType>& idNodesOldToNew, 
 
   vtkUnsignedCharArray *newTypes = vtkUnsignedCharArray::New();
   newTypes->Initialize();
-  newTypes->SetNumberOfValues(newCellSize);
+  newTypes->SetNumberOfValues(FromIdType<int>(newCellSize));
 
   vtkIdTypeArray *newLocations = vtkIdTypeArray::New();
   newLocations->Initialize();
-  newLocations->SetNumberOfValues(newCellSize);
+  newLocations->SetNumberOfValues(FromIdType<int>(newCellSize));
 
   std::vector< vtkIdType > pointsCell(1024); // --- points id to fill a new cell
 
@@ -446,15 +446,15 @@ void SMDS_UnstructuredGrid::BuildDownwardConnectivity(bool /*withEdges*/)
 
   const SMDS_MeshInfo &meshInfo = _mesh->GetMeshInfo();
 
-  int nbLinTetra  = meshInfo.NbTetras  (ORDER_LINEAR);
-  int nbQuadTetra = meshInfo.NbTetras  (ORDER_QUADRATIC);
-  int nbLinPyra   = meshInfo.NbPyramids(ORDER_LINEAR);
-  int nbQuadPyra  = meshInfo.NbPyramids(ORDER_QUADRATIC);
-  int nbLinPrism  = meshInfo.NbPrisms  (ORDER_LINEAR);
-  int nbQuadPrism = meshInfo.NbPrisms  (ORDER_QUADRATIC);
-  int nbLinHexa   = meshInfo.NbHexas   (ORDER_LINEAR);
-  int nbQuadHexa  = meshInfo.NbHexas   (ORDER_QUADRATIC);
-  int nbHexPrism  = meshInfo.NbHexPrisms();
+  int nbLinTetra  = FromIdType<int>(meshInfo.NbTetras  (ORDER_LINEAR));
+  int nbQuadTetra = FromIdType<int>(meshInfo.NbTetras  (ORDER_QUADRATIC));
+  int nbLinPyra   = FromIdType<int>(meshInfo.NbPyramids(ORDER_LINEAR));
+  int nbQuadPyra  = FromIdType<int>(meshInfo.NbPyramids(ORDER_QUADRATIC));
+  int nbLinPrism  = FromIdType<int>(meshInfo.NbPrisms  (ORDER_LINEAR));
+  int nbQuadPrism = FromIdType<int>(meshInfo.NbPrisms  (ORDER_QUADRATIC));
+  int nbLinHexa   = FromIdType<int>(meshInfo.NbHexas   (ORDER_LINEAR));
+  int nbQuadHexa  = FromIdType<int>(meshInfo.NbHexas   (ORDER_QUADRATIC));
+  int nbHexPrism  = FromIdType<int>(meshInfo.NbHexPrisms());
 
   int nbLineGuess     = int((4.0 / 3.0) * nbLinTetra + 2 * nbLinPrism + 2.5 * nbLinPyra + 3 * nbLinHexa);
   int nbQuadEdgeGuess = int((4.0 / 3.0) * nbQuadTetra + 2 * nbQuadPrism + 2.5 * nbQuadPyra + 3 * nbQuadHexa);

@@ -140,7 +140,7 @@ bool getSubMeshes(::SMESH_subMesh*  theSubMesh,
  */
 //=============================================================================
 
-CORBA::Long SMESH_subMesh_i::GetNumberOfElements()
+SMESH::smIdType SMESH_subMesh_i::GetNumberOfElements()
 {
   Unexpect aCatch(SALOME_SalomeException);
 
@@ -170,7 +170,7 @@ CORBA::Long SMESH_subMesh_i::GetNumberOfElements()
  */
 //=============================================================================
 
-CORBA::Long SMESH_subMesh_i::GetNumberOfNodes(CORBA::Boolean all)
+SMESH::smIdType SMESH_subMesh_i::GetNumberOfNodes(CORBA::Boolean all)
 {
   Unexpect aCatch(SALOME_SalomeException);
 
@@ -372,7 +372,7 @@ SMESH::SMESH_Mesh_ptr SMESH_subMesh_i::GetFather()
  */
 //=============================================================================
   
-CORBA::Long SMESH_subMesh_i::GetId()
+SMESH::smIdType SMESH_subMesh_i::GetId()
 {
   return _localId;
 }

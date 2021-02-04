@@ -53,9 +53,9 @@ public:
                    int                     localId );
   ~SMESH_subMesh_i();
 
-  CORBA::Long GetNumberOfElements();
+  SMESH::smIdType GetNumberOfElements();
   
-  CORBA::Long  GetNumberOfNodes( CORBA::Boolean all );
+  SMESH::smIdType  GetNumberOfNodes( CORBA::Boolean all );
   
   SMESH::long_array* GetElementsId();
 
@@ -69,7 +69,7 @@ public:
   
   GEOM::GEOM_Object_ptr GetSubShape();
 
-  CORBA::Long GetId();
+  SMESH::smIdType GetId();
 
 
   // =========================

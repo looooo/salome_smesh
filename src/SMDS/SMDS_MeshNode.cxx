@@ -36,6 +36,7 @@
 #include <utilities.h>
 #include <Utils_SALOME_Exception.hxx>
 #include <cassert>
+#include <smIdType.hxx>
 
 #include <boost/make_shared.hpp>
 
@@ -123,7 +124,7 @@ namespace
           for (int i = 0; i < ncells; i++)
           {
             int  vtkId = cells[i];
-            int smdsId = myMesh->FromVtkToSmds( vtkId );
+            smIdType smdsId = myMesh->FromVtkToSmds( vtkId );
             const SMDS_MeshElement* elem = myMesh->FindElement( smdsId );
             if ( elem->GetType() == type )
             {
@@ -142,7 +143,7 @@ namespace
     const SMDS_MeshElement* next()
     {
       int vtkId  = myCellList[ myIter++ ];
-      int smdsId = myMesh->FromVtkToSmds( vtkId );
+      smIdType smdsId = myMesh->FromVtkToSmds( vtkId );
       const SMDS_MeshElement* elem = myMesh->FindElement(smdsId);
       if (!elem)
       {

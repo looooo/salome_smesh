@@ -978,14 +978,14 @@ namespace
       {
         if (( myOri = ( n1->GetID() < n2->GetID() )))
         {
-          first  = n1->GetID();
-          second = n2->GetID();
+          first  = FromIdType<int>(n1->GetID());
+          second = FromIdType<int>(n2->GetID());
         }
         else
         {
           myOri  = -1;
-          first  = n2->GetID();
-          second = n1->GetID();
+          first  = FromIdType<int>(n2->GetID());
+          second = FromIdType<int>(n1->GetID());
         }
         myOri *= ori;
       }
@@ -2212,5 +2212,5 @@ const SMDS_MeshVolume* SMDS_VolumeTool::Element() const
 
 int SMDS_VolumeTool::ID() const
 {
-  return myVolume ? myVolume->GetID() : 0;
+  return myVolume ? FromIdType<int>(myVolume->GetID()) : 0;
 }

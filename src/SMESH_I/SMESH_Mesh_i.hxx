@@ -112,7 +112,7 @@ public:
 
   SMESH::ListOfGroups* GetGroups();
 
-  CORBA::Long NbGroups();
+  SMESH::smIdType NbGroups();
 
   SMESH::SMESH_Group_ptr UnionGroups( SMESH::SMESH_GroupBase_ptr theGroup1,
                                       SMESH::SMESH_GroupBase_ptr theGroup2,
@@ -158,7 +158,7 @@ public:
 
   void ClearLog();
 
-  CORBA::Long GetId();
+  SMESH::smIdType GetId();
 
   // --- C++ interface
 
@@ -244,65 +244,65 @@ public:
 
   CORBA::Double GetComputeProgress();
 
-  CORBA::Long NbNodes();
+  SMESH::smIdType NbNodes();
 
-  CORBA::Long NbElements();
+  SMESH::smIdType NbElements();
 
-  CORBA::Long Nb0DElements();
+  SMESH::smIdType Nb0DElements();
 
-  CORBA::Long NbBalls();
+  SMESH::smIdType NbBalls();
 
-  CORBA::Long NbEdges();
+  SMESH::smIdType NbEdges();
 
-  CORBA::Long NbEdgesOfOrder(SMESH::ElementOrder order);
+  SMESH::smIdType NbEdgesOfOrder(SMESH::ElementOrder order);
 
-  CORBA::Long NbFaces();
+  SMESH::smIdType NbFaces();
 
-  CORBA::Long NbFacesOfOrder(SMESH::ElementOrder order);
+  SMESH::smIdType NbFacesOfOrder(SMESH::ElementOrder order);
 
-  CORBA::Long NbTriangles();
+  SMESH::smIdType NbTriangles();
 
-  CORBA::Long NbTrianglesOfOrder(SMESH::ElementOrder order);
+  SMESH::smIdType NbTrianglesOfOrder(SMESH::ElementOrder order);
 
-  CORBA::Long NbBiQuadTriangles();
+  SMESH::smIdType NbBiQuadTriangles();
 
-  CORBA::Long NbQuadrangles();
+  SMESH::smIdType NbQuadrangles();
 
-  CORBA::Long NbQuadranglesOfOrder(SMESH::ElementOrder order);
+  SMESH::smIdType NbQuadranglesOfOrder(SMESH::ElementOrder order);
 
-  CORBA::Long NbBiQuadQuadrangles();
+  SMESH::smIdType NbBiQuadQuadrangles();
 
-  CORBA::Long NbPolygons();
+  SMESH::smIdType NbPolygons();
 
-  CORBA::Long NbPolygonsOfOrder(SMESH::ElementOrder order = SMESH::ORDER_ANY);
+  SMESH::smIdType NbPolygonsOfOrder(SMESH::ElementOrder order = SMESH::ORDER_ANY);
 
-  CORBA::Long NbVolumes();
+  SMESH::smIdType NbVolumes();
 
-  CORBA::Long NbVolumesOfOrder(SMESH::ElementOrder order);
+  SMESH::smIdType NbVolumesOfOrder(SMESH::ElementOrder order);
 
-  CORBA::Long NbTetras();
+  SMESH::smIdType NbTetras();
 
-  CORBA::Long NbTetrasOfOrder(SMESH::ElementOrder order);
+  SMESH::smIdType NbTetrasOfOrder(SMESH::ElementOrder order);
 
-  CORBA::Long NbHexas();
+  SMESH::smIdType NbHexas();
 
-  CORBA::Long NbHexasOfOrder(SMESH::ElementOrder order);
+  SMESH::smIdType NbHexasOfOrder(SMESH::ElementOrder order);
 
-  CORBA::Long NbTriQuadraticHexas();
+  SMESH::smIdType NbTriQuadraticHexas();
 
-  CORBA::Long NbPyramids();
+  SMESH::smIdType NbPyramids();
 
-  CORBA::Long NbPyramidsOfOrder(SMESH::ElementOrder order);
+  SMESH::smIdType NbPyramidsOfOrder(SMESH::ElementOrder order);
 
-  CORBA::Long NbPrisms();
+  SMESH::smIdType NbPrisms();
 
-  CORBA::Long NbPrismsOfOrder(SMESH::ElementOrder order);
+  SMESH::smIdType NbPrismsOfOrder(SMESH::ElementOrder order);
 
-  CORBA::Long NbHexagonalPrisms();
+  SMESH::smIdType NbHexagonalPrisms();
 
-  CORBA::Long NbPolyhedrons();
+  SMESH::smIdType NbPolyhedrons();
 
-  CORBA::Long NbSubMesh();
+  SMESH::smIdType NbSubMesh();
 
   SMESH::long_array* GetElementsId();
 
@@ -504,7 +504,7 @@ public:
   /*!
    * Returns an element based on all given nodes.
    */
-  CORBA::Long FindElementByNodes(const SMESH::long_array& nodes);
+  SMESH::smIdType FindElementByNodes(const SMESH::long_array& nodes);
 
   /*!
    * Return elements including all given nodes.

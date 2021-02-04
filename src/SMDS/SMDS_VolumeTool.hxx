@@ -30,6 +30,7 @@
 #define SMDS_VolumeTool_HeaderFile
 
 #include "SMESH_SMDS.hxx"
+#include <smIdType.hxx>
 
 class SMDS_MeshElement;
 class SMDS_MeshNode;

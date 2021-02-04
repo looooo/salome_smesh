@@ -61,13 +61,13 @@ class SMESH_I_EXPORT SMESH_GroupBase_i:
   void SetName(const char* name);
   char* GetName();
   SMESH::ElementType GetType();
-  CORBA::Long Size();
+  SMESH::smIdType Size();
   CORBA::Boolean IsEmpty();
   CORBA::Boolean Contains(CORBA::Long elem_id);
-  CORBA::Long GetID(CORBA::Long elem_index);
+  SMESH::smIdType GetID(CORBA::Long elem_index);
   SMESH::long_array* GetListOfID();
   SMESH::long_array* GetNodeIDs();
-  CORBA::Long GetNumberOfNodes();
+  SMESH::smIdType GetNumberOfNodes();
   CORBA::Boolean IsNodeInfoAvailable(); // for gui
 
   virtual SMESH::SMESH_Mesh_ptr GetMesh();
@@ -118,7 +118,7 @@ class SMESH_I_EXPORT SMESH_GroupBase_i:
   SALOMEDS::Color GetColor();
 
   void SetColorNumber(CORBA::Long color);
-  CORBA::Long GetColorNumber();
+  SMESH::smIdType GetColorNumber();
 
 protected:
 
@@ -150,13 +150,13 @@ class SMESH_I_EXPORT SMESH_Group_i:
                  const int               theLocalID );
   // CORBA interface implementation
   void Clear();
-  CORBA::Long Add( const SMESH::long_array& theIDs );
-  CORBA::Long Remove( const SMESH::long_array& theIDs );
+  SMESH::smIdType Add( const SMESH::long_array& theIDs );
+  SMESH::smIdType Remove( const SMESH::long_array& theIDs );
 
-  CORBA::Long AddByPredicate( SMESH::Predicate_ptr thePredicate );
-  CORBA::Long RemoveByPredicate( SMESH::Predicate_ptr thePredicate );
+  SMESH::smIdType AddByPredicate( SMESH::Predicate_ptr thePredicate );
+  SMESH::smIdType RemoveByPredicate( SMESH::Predicate_ptr thePredicate );
 
-  CORBA::Long AddFrom( SMESH::SMESH_IDSource_ptr theSource );
+  SMESH::smIdType AddFrom( SMESH::SMESH_IDSource_ptr theSource );
 };
 
 // =========================

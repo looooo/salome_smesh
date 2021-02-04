@@ -220,7 +220,7 @@ bool SMESHDS_Mesh::ChangeElementNodes(const SMDS_MeshElement * elem,
                                       const SMDS_MeshNode    * nodes[],
                                       const smIdType                nbnodes)
 {
-  if ( ! SMDS_Mesh::ChangeElementNodes( elem, nodes, nbnodes ))
+  if ( ! SMDS_Mesh::ChangeElementNodes( elem, nodes, FromIdType<int>(nbnodes) ))
     return false;
 
   std::vector<smIdType> IDs( nbnodes );

@@ -106,7 +106,7 @@ void SMESHDS_SubMesh::AddElement(const SMDS_MeshElement * elem)
       AddNode( static_cast< const SMDS_MeshNode* >( elem ));
       return;
     }
-    int oldShapeId = elem->GetShapeID();
+    smIdType oldShapeId = elem->GetShapeID();
     if ( oldShapeId > 0 )
     {
       if (oldShapeId != myIndex)

@@ -31,6 +31,7 @@
 
 #include "SMDS_ElementHolder.hxx"
 #include "SMDS_Mesh.hxx"
+#include <smIdType.hxx>
 #include <vector>
 
 #include <boost/container/flat_set.hpp>

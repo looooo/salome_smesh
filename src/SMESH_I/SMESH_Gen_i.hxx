@@ -45,6 +45,7 @@
 #include <Utils_CorbaException.hxx>
 
 #include <GEOM_Client.hxx>
+#include <smIdType.hxx>
 
 #include <TCollection_AsciiString.hxx>
 #include <Resource_DataMapOfAsciiStringAsciiString.hxx>
@@ -70,7 +71,7 @@ public:
   // register object in the internal map and return its id
   int         addObject( const std::string& theIOR );
   // find the object id in the internal map by the IOR
-  int         findId( const std::string& theIOR );
+  smIdType    findId( const std::string& theIOR );
   // get object's IOR by id
   std::string getIORbyId( const int theId );
   // get object's IOR by old id
@@ -536,7 +537,7 @@ public:
   int RegisterObject(CORBA::Object_ptr theObject);
 
   // Return id of registered object
-  CORBA::Long GetObjectId(CORBA::Object_ptr theObject);
+  SMESH::smIdType GetObjectId(CORBA::Object_ptr theObject);
 
   // Return an object that previously had an oldID
   template<class TInterface>

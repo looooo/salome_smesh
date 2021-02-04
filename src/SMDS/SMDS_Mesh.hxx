@@ -633,9 +633,9 @@ public:
   }
 
   const SMDS_MeshNode *FindNode(smIdType idnode) const;
-  const SMDS_MeshNode *FindNodeVtk(int idnode) const;
-  const SMDS_MeshElement *FindElementVtk(int IDelem) const;
-  virtual const SMDS_MeshElement * FindElement(int IDelem) const;
+  const SMDS_MeshNode *FindNodeVtk(vtkIdType idnode) const;
+  const SMDS_MeshElement *FindElementVtk(vtkIdType IDelem) const;
+  virtual const SMDS_MeshElement * FindElement(smIdType IDelem) const;
   static const SMDS_Mesh0DElement* Find0DElement(const SMDS_MeshNode * n);
   static const SMDS_BallElement* FindBall(const SMDS_MeshNode * n);
   static const SMDS_MeshEdge* FindEdge(const SMDS_MeshNode * n1,
@@ -701,7 +701,7 @@ public:
   virtual ~SMDS_Mesh();
 
   double getMaxDim();
-  int FromVtkToSmds(int vtkid) const;
+  smIdType FromVtkToSmds(vtkIdType  vtkid) const;
 
   void dumpGrid(std::string ficdump="dumpGrid");
   static int chunkSize;

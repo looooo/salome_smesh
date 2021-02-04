@@ -106,7 +106,7 @@ namespace SMESH
                                                       CORBA::Boolean            isLogarithmic,
                                                       SMESH::SMESH_IDSource_ptr object);
     void                            SetPrecision( CORBA::Long thePrecision );
-    CORBA::Long                     GetPrecision();
+    SMESH::smIdType                     GetPrecision();
     Controls::NumericalFunctorPtr   GetNumericalFunctor();
     
   protected:
@@ -365,7 +365,7 @@ namespace SMESH
   {
   public:
     CORBA::Boolean                  IsSatisfy( CORBA::Long theElementId );
-    CORBA::Long                     NbSatisfying( SMESH::SMESH_IDSource_ptr obj );
+    SMESH::smIdType                 NbSatisfying( SMESH::SMESH_IDSource_ptr obj );
     Controls::PredicatePtr          GetPredicate();
     
   protected:
@@ -1081,7 +1081,7 @@ namespace SMESH
     CORBA::Boolean          SaveAs( const char* aFileName );
     
     CORBA::Boolean          IsPresent( const char* aFilterName );
-    CORBA::Long             NbFilters( ElementType );
+    SMESH::smIdType         NbFilters( ElementType );
     string_array*           GetNames( ElementType );
     string_array*           GetAllNames();
     void                    SetFileName( const char* theFileName );

@@ -93,7 +93,7 @@ public:
   SMESH::SMESH_IDSource_ptr MakeIDSource(const SMESH::long_array& IDsOfElements,
                                          SMESH::ElementType       type);
   static bool               IsTemporaryIDSource( SMESH::SMESH_IDSource_ptr& idSource );
-  static CORBA::Long*       GetTemporaryIDs( SMESH::SMESH_IDSource_ptr& idSource, int& nbIds );
+  static SMESH::smIdType*       GetTemporaryIDs( SMESH::SMESH_IDSource_ptr& idSource, int& nbIds );
 
   /*!
    * \brief Generates the unique group name
@@ -102,23 +102,23 @@ public:
 
   CORBA::Boolean RemoveElements(const SMESH::long_array & IDsOfElements);
   CORBA::Boolean RemoveNodes   (const SMESH::long_array & IDsOfNodes);
-  CORBA::Long    RemoveOrphanNodes();
+  SMESH::smIdType    RemoveOrphanNodes();
 
   /*!
    * Methods for creation new elements.
    * Returns ID of created element or 0 if element not created
    */
-  CORBA::Long AddNode(CORBA::Double x, CORBA::Double y, CORBA::Double z);
-  CORBA::Long Add0DElement(CORBA::Long IDOfNode, CORBA::Boolean DuplicateElements);
-  CORBA::Long AddBall(CORBA::Long IDOfNodem, CORBA::Double diameter);
-  CORBA::Long AddEdge(const SMESH::long_array & IDsOfNodes);
-  CORBA::Long AddFace(const SMESH::long_array & IDsOfNodes);
-  CORBA::Long AddPolygonalFace(const SMESH::long_array & IDsOfNodes);
-  CORBA::Long AddQuadPolygonalFace(const SMESH::long_array & IDsOfNodes);
-  CORBA::Long AddVolume(const SMESH::long_array & IDsOfNodes);
-  CORBA::Long AddPolyhedralVolume(const SMESH::long_array & IDsOfNodes,
+  SMESH::smIdType AddNode(CORBA::Double x, CORBA::Double y, CORBA::Double z);
+  SMESH::smIdType Add0DElement(CORBA::Long IDOfNode, CORBA::Boolean DuplicateElements);
+  SMESH::smIdType AddBall(CORBA::Long IDOfNodem, CORBA::Double diameter);
+  SMESH::smIdType AddEdge(const SMESH::long_array & IDsOfNodes);
+  SMESH::smIdType AddFace(const SMESH::long_array & IDsOfNodes);
+  SMESH::smIdType AddPolygonalFace(const SMESH::long_array & IDsOfNodes);
+  SMESH::smIdType AddQuadPolygonalFace(const SMESH::long_array & IDsOfNodes);
+  SMESH::smIdType AddVolume(const SMESH::long_array & IDsOfNodes);
+  SMESH::smIdType AddPolyhedralVolume(const SMESH::long_array & IDsOfNodes,
                                   const SMESH::long_array & Quantities);
-  CORBA::Long AddPolyhedralVolumeByFaces(const SMESH::long_array & IdsOfFaces);
+  SMESH::smIdType AddPolyhedralVolumeByFaces(const SMESH::long_array & IdsOfFaces);
 
   /*!
    * \brief Create 0D elements on all nodes of the given object except those 
@@ -200,7 +200,7 @@ public:
    *        pointing either \a outside or \a inside the adjacent volumes.
    * \return number of reoriented faces.
    */
-  CORBA::Long Reorient2DBy3D(const SMESH::ListOfIDSources & faces,
+  SMESH::smIdType Reorient2DBy3D(const SMESH::ListOfIDSources & faces,
                              SMESH::SMESH_IDSource_ptr      volumes,
                              CORBA::Boolean                 outsideNormal);
 
@@ -450,7 +450,7 @@ public:
   /*!
    * \brief Return ID of node closest to a given point
    */
-  CORBA::Long FindNodeClosestTo(CORBA::Double x,
+  SMESH::smIdType FindNodeClosestTo(CORBA::Double x,
                                 CORBA::Double y,
                                 CORBA::Double z);
   /*!
@@ -478,7 +478,7 @@ public:
    * and coordinates of the projection point.
    * In the case if nothing found, return -1 and []
    */
-  CORBA::Long ProjectPoint(CORBA::Double             x,
+  SMESH::smIdType ProjectPoint(CORBA::Double             x,
                            CORBA::Double             y,
                            CORBA::Double             z,
                            SMESH::ElementType        type,
@@ -794,7 +794,7 @@ public:
                                          CORBA::Boolean            toCopyMissingBondary,
                                          SMESH::SMESH_Group_out    group);
 
-  CORBA::Long MakeBoundaryElements(SMESH::Bnd_Dimension dimension,
+  SMESH::smIdType MakeBoundaryElements(SMESH::Bnd_Dimension dimension,
                                    const char* groupName,
                                    const char* meshName,
                                    CORBA::Boolean toCopyAll,

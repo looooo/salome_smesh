@@ -209,7 +209,7 @@ SMESH::ElementType SMESH_GroupBase_i::GetType()
  */
 //=============================================================================
 
-CORBA::Long SMESH_GroupBase_i::Size()
+SMESH::smIdType  SMESH_GroupBase_i::Size()
 {
   if ( myPreMeshInfo )
     return GetType() == SMESH::NODE ? myPreMeshInfo->NbNodes() : myPreMeshInfo->NbElements();
@@ -298,7 +298,7 @@ CORBA::Boolean SMESH_GroupBase_i::Contains( CORBA::Long theID )
  */
 //=============================================================================
 
-CORBA::Long SMESH_Group_i::Add( const SMESH::long_array& theIDs )
+SMESH::smIdType  SMESH_Group_i::Add( const SMESH::long_array& theIDs )
 {
   if ( myPreMeshInfo )
     myPreMeshInfo->FullLoadFromFile();
@@ -329,7 +329,7 @@ CORBA::Long SMESH_Group_i::Add( const SMESH::long_array& theIDs )
  */
 //=============================================================================
 
-CORBA::Long SMESH_Group_i::Remove( const SMESH::long_array& theIDs )
+SMESH::smIdType  SMESH_Group_i::Remove( const SMESH::long_array& theIDs )
 {
   if ( myPreMeshInfo )
     myPreMeshInfo->FullLoadFromFile();
@@ -386,7 +386,7 @@ ChangeByPredicate( SMESH::Predicate_i* thePredicate,
   return aNb;
 }
 
-CORBA::Long 
+SMESH::smIdType  
 SMESH_Group_i::
 AddByPredicate( SMESH::Predicate_ptr thePredicate )
 {
@@ -401,7 +401,7 @@ AddByPredicate( SMESH::Predicate_ptr thePredicate )
   return 0;
 }
 
-CORBA::Long 
+SMESH::smIdType  
 SMESH_Group_i::
 RemoveByPredicate( SMESH::Predicate_ptr thePredicate )
 {
@@ -416,7 +416,7 @@ RemoveByPredicate( SMESH::Predicate_ptr thePredicate )
   return 0;
 }
 
-CORBA::Long SMESH_Group_i::AddFrom( SMESH::SMESH_IDSource_ptr theSource )
+SMESH::smIdType  SMESH_Group_i::AddFrom( SMESH::SMESH_IDSource_ptr theSource )
 {
   if ( myPreMeshInfo )
     myPreMeshInfo->FullLoadFromFile();
@@ -445,7 +445,7 @@ CORBA::Long SMESH_Group_i::AddFrom( SMESH::SMESH_IDSource_ptr theSource )
  */
 //=============================================================================
 
-CORBA::Long SMESH_GroupBase_i::GetID( CORBA::Long theIndex )
+SMESH::smIdType  SMESH_GroupBase_i::GetID( CORBA::Long theIndex )
 {
   if ( myPreMeshInfo )
     myPreMeshInfo->FullLoadFromFile();
@@ -509,7 +509,7 @@ namespace
  */
 //================================================================================
 
-CORBA::Long SMESH_GroupBase_i::GetNumberOfNodes()
+SMESH::smIdType  SMESH_GroupBase_i::GetNumberOfNodes()
 {
   if ( GetType() == SMESH::NODE )
     return Size();
@@ -651,7 +651,7 @@ void SMESH_GroupBase_i::SetColor(const SALOMEDS::Color& color)
  *
  */
 //=============================================================================
-CORBA::Long SMESH_GroupBase_i::GetColorNumber()
+SMESH::smIdType  SMESH_GroupBase_i::GetColorNumber()
 {
   SMESHDS_GroupBase* aGroupDS = GetGroupDS();
   if (aGroupDS)

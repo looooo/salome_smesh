@@ -88,7 +88,7 @@ module SMESH
      */
     point_array  ApplyToMeshFaces(in SMESH_Mesh theMesh,
                                   in long_array theFacesIDs,
-                                  in smIdType   theNodeIndexOnKeyPoint1,
+                                  in long       theNodeIndexOnKeyPoint1,
                                   in boolean    theReverse);
 
     /*!
@@ -100,8 +100,8 @@ module SMESH
      */
     point_array  ApplyToHexahedrons(in SMESH_Mesh theMesh,
                                     in long_array theVolumesIDs,
-                                    in smIdType   theNode000Index,
-                                    in smIdType   theNode001Index);
+                                    in long   theNode000Index,
+                                    in long   theNode001Index);
 
     /*!
      * Create nodes and elements in <theMesh> using nodes

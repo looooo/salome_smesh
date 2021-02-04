@@ -162,32 +162,32 @@ module StdMeshers
     /*!
      * Builds and returns point distribution according to passed density function
      */
-    SMESH::double_array BuildDistributionExpr( in string func, in SMESH::smIdType nbSeg, in SMESH::smIdType  conv )
+    SMESH::double_array BuildDistributionExpr( in string func, in long nbSeg, in long  conv )
       raises (SALOME::SALOME_Exception);
-    SMESH::double_array BuildDistributionTab( in SMESH::double_array func, in SMESH::smIdType  nbSeg, in SMESH::smIdType  conv )
+    SMESH::double_array BuildDistributionTab( in SMESH::double_array func, in long  nbSeg, in long  conv )
       raises (SALOME::SALOME_Exception);
   
     /*!
      * Sets <number of segments> parameter value
      */
-    void SetNumberOfSegments(in SMESH::smIdType  segmentsNumber)
+    void SetNumberOfSegments(in long  segmentsNumber)
       raises (SALOME::SALOME_Exception);
 
     /*!
      * Returns <number of segments> parameter value
      */
-    SMESH::smIdType  GetNumberOfSegments();
+    long  GetNumberOfSegments();
 
     /*!
      * Sets <distribution type> parameter value
      */
-    void SetDistrType(in SMESH::smIdType  typ)
+    void SetDistrType(in long  typ)
       raises (SALOME::SALOME_Exception);
 
     /*!
      * Returns <distribution type> parameter value
      */
-    SMESH::smIdType  GetDistrType();
+    long  GetDistrType();
 
     /*!
      * Sets <scale factor> parameter value
@@ -228,13 +228,13 @@ module StdMeshers
     /*!
      * Sets <conversion mode> parameter value for functional distributions
      */
-    void SetConversionMode(in SMESH::smIdType  conv )
+    void SetConversionMode(in long  conv )
       raises (SALOME::SALOME_Exception);
 
     /*!
      * Returns <conversion mode> parameter value for functional distributions
      */
-    SMESH::smIdType  ConversionMode()
+    long  ConversionMode()
       raises (SALOME::SALOME_Exception);
   };
 
@@ -324,13 +324,13 @@ module StdMeshers
     /*!
      * Sets <mode> parameter value
      */
-    void SetMode(in SMESH::smIdType  mode) 
+    void SetMode(in long  mode) 
       raises (SALOME::SALOME_Exception);
 
     /*!
      * Returns <mode> parameter value
      */
-    SMESH::smIdType  GetMode();
+    long  GetMode();
   };
 
   /*!
@@ -520,13 +520,13 @@ module StdMeshers
     /*!
      * Sets <number of segments> parameter value
      */
-    void SetNumberOfLayers(in SMESH::smIdType  numberOfLayers) 
+    void SetNumberOfLayers(in long  numberOfLayers) 
       raises (SALOME::SALOME_Exception);
 
     /*!
      * Returns <number of layers> parameter value
      */
-    SMESH::smIdType  GetNumberOfLayers();
+    long  GetNumberOfLayers();
 
   };
 
@@ -666,7 +666,7 @@ module StdMeshers
      * Result may be nil if association not set.
      * Valid indices are 1 and 2
      */
-    GEOM::GEOM_Object  GetSourceVertex(in SMESH::smIdType  i)
+    GEOM::GEOM_Object  GetSourceVertex(in long  i)
       raises (SALOME::SALOME_Exception);
 
     /*!
@@ -674,7 +674,7 @@ module StdMeshers
      * Result may be nil if association not set.
      * Valid indices are 1 and 2
      */
-    GEOM::GEOM_Object  GetTargetVertex(in SMESH::smIdType  i)
+    GEOM::GEOM_Object  GetTargetVertex(in long  i)
       raises (SALOME::SALOME_Exception);
   };
 
@@ -723,7 +723,7 @@ module StdMeshers
      * Result may be nil if association not set.
      * Valid indices are 1 and 2
      */
-    GEOM::GEOM_Object  GetSourceVertex(in SMESH::smIdType  i)
+    GEOM::GEOM_Object  GetSourceVertex(in long  i)
       raises (SALOME::SALOME_Exception);
 
     /*!
@@ -731,7 +731,7 @@ module StdMeshers
      * Result may be nil if association not set.
      * Valid indices are 1 and 2
      */
-    GEOM::GEOM_Object  GetTargetVertex(in SMESH::smIdType  i)
+    GEOM::GEOM_Object  GetTargetVertex(in long  i)
       raises (SALOME::SALOME_Exception);
   };
 
@@ -772,12 +772,12 @@ module StdMeshers
     /*!
      * Set base vertex for triangles
      */
-    void SetTriaVertex( in SMESH::smIdType  vertID );
+    void SetTriaVertex( in long  vertID );
     
     /*!
      * Returns base vertex for triangles
      */
-    SMESH::smIdType  GetTriaVertex();
+    long  GetTriaVertex();
     
     /*!
      * Set entry of the main object

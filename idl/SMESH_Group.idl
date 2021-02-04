@@ -62,7 +62,7 @@ module SMESH
     /*!
      * Returns the number of elements in the group
      */
-    smIdType Size();
+    long Size();
 
     /*!
      * Returns true if the group does not contain any elements
@@ -72,12 +72,12 @@ module SMESH
     /*!
      * returns true if the group contains an element with ID == <elem_id> 
      */
-    boolean Contains( in smIdType elem_id );
+    boolean Contains( in long elem_id );
 
     /*!
      * Returns ID of an element at position <elem_index> counted from 1
      */
-    smIdType GetID( in smIdType elem_index );
+    long GetID( in long elem_index );
 
     /*!
      * Returns a sequence of all element IDs in the group
@@ -88,7 +88,7 @@ module SMESH
      * Get the number of nodes of cells included to the group
      * For a nodal group returns the same value as Size() function
      */
-    smIdType GetNumberOfNodes();
+    long GetNumberOfNodes();
 
     /*!
      * Get IDs of nodes of cells included to the group
@@ -115,13 +115,13 @@ module SMESH
      * Sets group color number
      * (corresponds to the "hue" parameter of the color - must be in range [0, 360])
      */
-    void SetColorNumber( in smIdType color );
+    void SetColorNumber( in long color );
 
     /*!
      * Returns group color number (obsolete - use GetColor instead)
      * (corresponds to the "hue" parameter of the color - must be in range [0, 360])
      */
-    smIdType GetColorNumber();
+    long GetColorNumber();
 
     /*!
      * Returns \c true if \c this group depends on the \a other via
@@ -143,24 +143,24 @@ module SMESH
     /*!
      * Adds elements or nodes with specified identifiers to the group
      */
-    smIdType Add( in long_array elem_ids );
+    long Add( in long_array elem_ids );
     /*!
      * Adds elements or nodes that match specified predicate to the group
      */
-    smIdType AddByPredicate( in Predicate thePredicate );
+    long AddByPredicate( in Predicate thePredicate );
     /*!
      * Add all elements or nodes from the specified source to the group
      */
-    smIdType AddFrom( in SMESH_IDSource theSource );
+    long AddFrom( in SMESH_IDSource theSource );
 
     /*!
      * Removes elements or nodes with specified identifiers from the group
      */
-    smIdType Remove( in long_array elem_ids );
+    long Remove( in long_array elem_ids );
     /*!
      * Removes elements or nodes that match specified predicate from the group
      */
-    smIdType RemoveByPredicate( in Predicate thePredicate );
+    long RemoveByPredicate( in Predicate thePredicate );
 
   };
 

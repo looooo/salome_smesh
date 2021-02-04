@@ -86,10 +86,10 @@ module SMESH
      * the loaded pattern to mesh faces. The first key-point
      * will be mapped into <theNodeIndexOnKeyPoint1>-th node of each face
      */
-    point_array  ApplyToMeshFaces(in SMESH_Mesh theMesh,
+    point_array  ApplyToMeshFaces(in SMESH_Mesh     theMesh,
                                   in smIdType_array theFacesIDs,
-                                  in smIdType       theNodeIndexOnKeyPoint1,
-                                  in boolean    theReverse);
+                                  in short          theNodeIndexOnKeyPoint1,
+                                  in boolean        theReverse);
 
     /*!
      * Compute nodes coordinates applying
@@ -98,10 +98,10 @@ module SMESH
      * The (0,0,1) key-point will be mapped into <theNode001Index>-th
      * node of each volume.
      */
-    point_array  ApplyToHexahedrons(in SMESH_Mesh theMesh,
+    point_array  ApplyToHexahedrons(in SMESH_Mesh     theMesh,
                                     in smIdType_array theVolumesIDs,
-                                    in smIdType   theNode000Index,
-                                    in smIdType   theNode001Index);
+                                    in short          theNode000Index,
+                                    in short          theNode001Index);
 
     /*!
      * Create nodes and elements in <theMesh> using nodes

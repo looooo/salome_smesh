@@ -28,7 +28,6 @@
 
 #include "SALOME_Exception.idl"
 #include "SALOME_GenericObj.idl"
-#include "SMESH_smIdType.idl"
 
 module SMESH
 {
@@ -58,7 +57,7 @@ module SMESH
     /*!
      * Get the internal Id 
      */
-    smIdType GetId();
+    short GetId();
 
     /*!
      *  Set the variable parameter

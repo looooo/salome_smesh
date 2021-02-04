@@ -108,7 +108,7 @@ module SMESH
    * Node location on a shape
    */
   struct NodePosition {
-    smIdType         shapeID;
+    long             shapeID;
     GEOM::shape_type shapeType;
     double_array     params; // [U] on EDGE, [U,V] on FACE, [] on the rest shapes
   };
@@ -117,7 +117,7 @@ module SMESH
    * Element location on a shape
    */
   struct ElementPosition {
-    smIdType         shapeID;
+    long             shapeID;
     GEOM::shape_type shapeType;
   };
 
@@ -269,7 +269,7 @@ module SMESH
    */
   struct ElementSubType { ElementType SMDS_ElementType;
                           boolean     isPoly;
-                          smIdType    nbNodesInElement; };
+                          short       nbNodesInElement; };
 
   typedef sequence<ElementSubType> types_array;
 
@@ -382,7 +382,7 @@ module SMESH
     /*!
      * Remove all nodes and elements of submesh
      */
-    void ClearSubMesh(in smIdType ShapeID)
+    void ClearSubMesh(in long ShapeID)
       raises (SALOME::SALOME_Exception);
 
     /*!
@@ -609,7 +609,7 @@ module SMESH
     /*!
      * Get the internal Id
      */
-    smIdType GetId();
+    long GetId();
 
     /*!
      * Obtain instance of SMESH_MeshEditor
@@ -860,13 +860,13 @@ module SMESH
     GeometryType GetElementShape( in smIdType id )
       raises (SALOME::SALOME_Exception);
 
-    smIdType_array GetSubMeshElementsId(in smIdType ShapeID)
+    smIdType_array GetSubMeshElementsId(in long ShapeID)
       raises (SALOME::SALOME_Exception);
 
-    smIdType_array GetSubMeshNodesId(in smIdType ShapeID, in boolean all )
+    smIdType_array GetSubMeshNodesId(in long ShapeID, in boolean all )
       raises (SALOME::SALOME_Exception);
     
-    ElementType GetSubMeshElementType(in smIdType ShapeID)
+    ElementType GetSubMeshElementType(in long ShapeID)
       raises (SALOME::SALOME_Exception);
 
 
@@ -926,20 +926,20 @@ module SMESH
      * If given element is node returns IDs of shape from position
      * If there is not node for given ID - returns -1
      */
-    smIdType GetShapeID(in smIdType id);
+    long GetShapeID(in smIdType id);
 
     /*!
      * For given element returns ID of result shape after 
      * ::FindShape() from SMESH_MeshEditor
      * If there is not element for given ID - returns -1
      */
-    smIdType GetShapeIDForElem(in smIdType id);
+    long GetShapeIDForElem(in smIdType id);
 
     /*!
      * Returns number of nodes for given element
      * If there is not element for given ID - returns -1
      */
-    smIdType GetElemNbNodes(in smIdType id);
+    short GetElemNbNodes(in smIdType id);
 
     /*!
      * Returns IDs of nodes of given element
@@ -951,7 +951,7 @@ module SMESH
      * If there is not element for given ID - returns -1
      * If there is not node for given index - returns -2
      */
-    smIdType GetElemNode(in smIdType id, in smIdType index);
+    smIdType GetElemNode(in smIdType id, in short index);
 
     /*!
      * Returns true if given node is medium node
@@ -1090,7 +1090,7 @@ module SMESH
     /*!
      * Get the internal Id
      */
-    smIdType GetId();
+    long GetId();
   };
 
 };

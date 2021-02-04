@@ -151,7 +151,7 @@ module SMESH
     /*!
      * Add all elements or nodes from the specified source to the group
      */
-    long AddFrom( in SMESH_IDSource theSource );
+    smIdType AddFrom( in SMESH_IDSource theSource );
 
     /*!
      * Removes elements or nodes with specified identifiers from the group

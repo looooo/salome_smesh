@@ -445,17 +445,17 @@ module SMESH
      * The returned geometrical object, if not nil, is either found in the
      * study or is published by this method with the given name
      */
-    GEOM::GEOM_Object GetGeometryByMeshElement( in SMESH_Mesh  theMesh,
-                                                in smIdType    theElementID,
-                                                in string      theGeomName)
+    GEOM::GEOM_Object GetGeometryByMeshElement( in SMESH_Mesh theMesh,
+                                                in smIdType   theElementID,
+                                                in string     theGeomName)
       raises ( SALOME::SALOME_Exception );
 
     /*!
      * Return geometrical object the given element is built on.
      * The returned geometrical object not published in study by this method.
      */
-    GEOM::GEOM_Object FindGeometryByMeshElement( in SMESH_Mesh  theMesh,
-                                                 in smIdType    theElementID)
+    GEOM::GEOM_Object FindGeometryByMeshElement( in SMESH_Mesh theMesh,
+                                                 in smIdType   theElementID)
       raises ( SALOME::SALOME_Exception );
 
     /*!
@@ -463,7 +463,7 @@ module SMESH
      *
      * Can be used to check if the object was created in the same container, as this engine.
      */
-    smIdType GetObjectId(in Object theObject);
+    long GetObjectId(in Object theObject);
 
     /*!
      * \brief Get version of MED format being used.

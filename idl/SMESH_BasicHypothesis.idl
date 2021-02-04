@@ -29,7 +29,6 @@
 #include "SALOME_Exception.idl"
 #include "SMESH_Hypothesis.idl"
 #include "SMESH_Mesh.idl"
-#include "SMESH_smIdType.idl"
 
 /*!
  * StdMeshers: interfaces to standard hypotheses and algorithms

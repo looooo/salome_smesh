@@ -83,7 +83,7 @@ module SMESH
   {
     Hypothesis_Status  state;
     string             algoName;
-    long           algoDim;
+    long               algoDim;
     boolean            isGlobalAlgo;
   };
   typedef sequence<AlgoStateError> algo_error_array;
@@ -446,7 +446,7 @@ module SMESH
      * study or is published by this method with the given name
      */
     GEOM::GEOM_Object GetGeometryByMeshElement( in SMESH_Mesh  theMesh,
-                                                in long    theElementID,
+                                                in smIdType    theElementID,
                                                 in string      theGeomName)
       raises ( SALOME::SALOME_Exception );
 
@@ -455,7 +455,7 @@ module SMESH
      * The returned geometrical object not published in study by this method.
      */
     GEOM::GEOM_Object FindGeometryByMeshElement( in SMESH_Mesh  theMesh,
-                                                 in long    theElementID)
+                                                 in smIdType    theElementID)
       raises ( SALOME::SALOME_Exception );
 
     /*!
@@ -463,7 +463,7 @@ module SMESH
      *
      * Can be used to check if the object was created in the same container, as this engine.
      */
-    long GetObjectId(in Object theObject);
+    smIdType GetObjectId(in Object theObject);
 
     /*!
      * \brief Get version of MED format being used.

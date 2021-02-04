@@ -87,8 +87,8 @@ module SMESH
      * will be mapped into <theNodeIndexOnKeyPoint1>-th node of each face
      */
     point_array  ApplyToMeshFaces(in SMESH_Mesh theMesh,
-                                  in long_array theFacesIDs,
-                                  in long       theNodeIndexOnKeyPoint1,
+                                  in smIdType_array theFacesIDs,
+                                  in smIdType       theNodeIndexOnKeyPoint1,
                                   in boolean    theReverse);
 
     /*!
@@ -99,9 +99,9 @@ module SMESH
      * node of each volume.
      */
     point_array  ApplyToHexahedrons(in SMESH_Mesh theMesh,
-                                    in long_array theVolumesIDs,
-                                    in long   theNode000Index,
-                                    in long   theNode001Index);
+                                    in smIdType_array theVolumesIDs,
+                                    in smIdType   theNode000Index,
+                                    in smIdType   theNode001Index);
 
     /*!
      * Create nodes and elements in <theMesh> using nodes

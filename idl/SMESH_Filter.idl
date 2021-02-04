@@ -120,8 +120,8 @@ module SMESH
   */
   interface NumericalFunctor: Functor
   {
-    double  GetValue    ( in long theElementId );
-    boolean IsApplicable( in long theElementId );
+    double  GetValue    ( in smIdType theElementId );
+    boolean IsApplicable( in smIdType theElementId );
 
     Histogram GetHistogram     ( in short nbIntervals, in boolean isLogarithmic );
     Histogram GetLocalHistogram( in short nbIntervals, in boolean isLogarithmic,
@@ -375,7 +375,7 @@ module SMESH
   */
   interface RangeOfIds: Predicate
   {
-    void            SetRange( in long_array theIds );
+    void            SetRange( in smIdType_array theIds );
     boolean         SetRangeStr( in string theRange );
     string          GetRangeStr();
 
@@ -475,7 +475,7 @@ module SMESH
     void            SetElementType( in ElementType type );
     void            SetPoint      ( in double x, in double y, in double z );
     void            SetVertex     ( in GEOM::GEOM_Object vertex );
-    void            SetNode       ( in long nodeID );
+    void            SetNode       ( in smIdType nodeID );
     string          GetThreshold  ( out ThresholdType type );
     void            SetThreshold  ( in string threshold, in ThresholdType type ) 
       raises (SALOME::SALOME_Exception);
@@ -509,16 +509,16 @@ module SMESH
     */
     struct Criterion
     {
-      long    Type;
-      long    Compare;
+      long        Type;
+      long        Compare;
       double      Threshold;
       string      ThresholdStr;
       string      ThresholdID;
-      long    UnaryOp;
-      long    BinaryOp;
+      long        UnaryOp;
+      long        BinaryOp;
       double      Tolerance;
       ElementType TypeOfElement;
-      long    Precision;
+      long        Precision;
     };
 
     typedef sequence<Criterion> Criteria;
@@ -526,8 +526,8 @@ module SMESH
     void          SetPredicate( in Predicate thePredicate );
     void          SetMesh( in SMESH_Mesh theMesh );
 
-    long_array    GetElementsId( in SMESH_Mesh theMesh );
-    long_array    GetElementsIdFromParts( in ListOfIDSources theParts );
+    smIdType_array    GetElementsId( in SMESH_Mesh theMesh );
+    smIdType_array    GetElementsIdFromParts( in ListOfIDSources theParts );
     ElementType   GetElementType();
     Predicate     GetPredicate();
 
@@ -564,7 +564,7 @@ module SMESH
     * Query methods
     */
     boolean       IsPresent( in string aFilterName );
-    long      NbFilters( in ElementType aType );
+    long          NbFilters( in ElementType aType );
     string_array  GetNames( in ElementType aType );
     string_array  GetAllNames();
     void          SetFileName( in string aFilterName );

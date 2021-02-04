@@ -58,7 +58,7 @@ module SMESH
     /*!
      * Get the internal Id 
      */
-    long GetId();
+    smIdType GetId();
 
     /*!
      *  Set the variable parameter

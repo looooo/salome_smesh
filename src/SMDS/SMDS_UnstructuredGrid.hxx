@@ -81,7 +81,7 @@ public:
   virtual vtkMTimeType GetMTime();
   virtual vtkPoints *GetPoints();
 
-  int InsertNextLinkedCell(int type, int npts, vtkIdType *pts);
+  vtkIdType InsertNextLinkedCell(int type, int npts, vtkIdType *pts);
 
   int CellIdToDownId(int vtkCellId);
   void setCellIdToDownId(int vtkCellId, int downId);

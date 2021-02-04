@@ -218,9 +218,9 @@ void SMESHDS_Mesh::MoveNode(const SMDS_MeshNode *n, double x, double y, double z
 
 bool SMESHDS_Mesh::ChangeElementNodes(const SMDS_MeshElement * elem,
                                       const SMDS_MeshNode    * nodes[],
-                                      const smIdType                nbnodes)
+                                      const int                nbnodes)
 {
-  if ( ! SMDS_Mesh::ChangeElementNodes( elem, nodes, FromIdType<int>(nbnodes) ))
+  if ( ! SMDS_Mesh::ChangeElementNodes( elem, nodes, nbnodes ))
     return false;
 
   std::vector<smIdType> IDs( nbnodes );
@@ -2262,7 +2262,7 @@ void SMESHDS_Mesh::BuildDownWardConnectivity(bool withEdges)
  * @param localClonedNodeIds map old node id to new node id.
  * @return ok if success.
  */
-bool SMESHDS_Mesh::ModifyCellNodes(int vtkVolId, std::map<int,int> localClonedNodeIds)
+bool SMESHDS_Mesh::ModifyCellNodes(vtkIdType vtkVolId, std::map<int,int> localClonedNodeIds)
 {
   myGrid->ModifyCellNodes(vtkVolId, localClonedNodeIds);
   return true;

@@ -45,7 +45,7 @@ class SMDS_EXPORT SMDS_CellOfNodes : public SMDS_MeshElement
 public:
 
   virtual smIdType GetID() const;
-  virtual smIdType GetShapeID() const;
+  virtual int      GetShapeID() const;
 
   virtual void setIsMarked( bool is ) const;
   virtual bool isMarked() const;
@@ -54,13 +54,13 @@ public:
 
  protected:
 
-  SMDS_CellOfNodes( smIdType id = -1, smIdType shapeID = 0);
+  SMDS_CellOfNodes( smIdType id = -1, int shapeID = 0);
 
   virtual void setID( const smIdType id);
-  virtual void setShapeID( const smIdType shapeID );
+  virtual void setShapeID( const int shapeID );
 
   smIdType  myID;
-  smIdType  myShapeID;
+  int       myShapeID;
 
   enum Bits { // use the 1st right bit of myShapeId to set/unset a mark
     BIT_IS_MARKED = 1,

@@ -998,12 +998,12 @@ const SMDS_MeshNode * SMDS_Mesh::FindNode(smIdType ID) const
 ///////////////////////////////////////////////////////////////////////////////
 /// Return the node whose VTK ID is 'vtkId'.
 ///////////////////////////////////////////////////////////////////////////////
-const SMDS_MeshNode * SMDS_Mesh::FindNodeVtk(int vtkId) const
+const SMDS_MeshNode * SMDS_Mesh::FindNodeVtk(vtkIdType vtkId) const
 {
   return myNodeFactory->FindNode( vtkId + 1 );
 }
 
-const SMDS_MeshElement * SMDS_Mesh::FindElementVtk(int IDelem) const
+const SMDS_MeshElement * SMDS_Mesh::FindElementVtk(vtkIdType IDelem) const
 {
   return myCellFactory->FindElement( FromVtkToSmds( IDelem ));
 }
@@ -1874,7 +1874,7 @@ void SMDS_Mesh::RemoveElement(const SMDS_MeshElement *               elem,
       n->RemoveInverseElement((*it));
     }
 
-    int vtkid = (*it)->GetVtkID();
+    vtkIdType vtkid = (*it)->GetVtkID();
 
     switch ((*it)->GetType()) {
     case SMDSAbs_Node:
@@ -1919,7 +1919,7 @@ void SMDS_Mesh::RemoveElement(const SMDS_MeshElement *               elem,
 ///////////////////////////////////////////////////////////////////////////////
 void SMDS_Mesh::RemoveFreeElement(const SMDS_MeshElement * elem)
 {
-  const int           vtkId = elem->GetVtkID();
+  const vtkIdType     vtkId = elem->GetVtkID();
   SMDSAbs_ElementType aType = elem->GetType();
   if ( aType == SMDSAbs_Node )
   {
@@ -2991,7 +2991,7 @@ void SMDS_Mesh::CompactMesh()
     idCellsOldToNew.resize( oldCellSize, oldCellSize );
     for ( size_t iNew = 0; iNew < idCellsNewToOld.size(); ++iNew )
     {
-      if ( idCellsNewToOld[ iNew ] >= (int) idCellsOldToNew.size() )
+      if ( idCellsNewToOld[ iNew ] >= (smIdType) idCellsOldToNew.size() )
         idCellsOldToNew.resize( ( 1 + idCellsNewToOld[ iNew ]) * 1.5, oldCellSize );
       idCellsOldToNew[ idCellsNewToOld[ iNew ]] = iNew;
     }

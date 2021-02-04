@@ -104,7 +104,7 @@ int SMDS_ElementFactory::ChunkSize()
 //================================================================================
 /*!
  * \brief Return minimal ID of a non-used element
- *  \return int - minimal element ID
+ *  \return smIdType - minimal element ID
  */
 //================================================================================
 
@@ -133,7 +133,7 @@ smIdType SMDS_ElementFactory::GetMaxID()
   for ( smIdType i = myChunks.size() - 1; i >= 0; --i )
     if ( myChunks[i].GetUsedRanges().GetIndices( true, usedRanges ))
     {
-      smIdType index = usedRanges.back().second-1;
+      int index = usedRanges.back().second-1;
       id = myChunks[i].Get1stID() + index;
       break;
     }
@@ -149,7 +149,7 @@ smIdType SMDS_ElementFactory::GetMaxID()
 
 smIdType SMDS_ElementFactory::GetMinID()
 {
-  int id = 0;
+  smIdType id = 0;
   TIndexRanges usedRanges;
   for ( size_t i = 0; i < myChunks.size(); ++i )
     if ( myChunks[i].GetUsedRanges().GetIndices( true, usedRanges ))
@@ -173,7 +173,7 @@ SMDS_MeshElement* SMDS_ElementFactory::NewElement( const smIdType id )
 {
   smIdType iChunk = ( id - 1 ) / theChunkSize;
   smIdType index  = ( id - 1 ) % theChunkSize;
-  while ((int) myChunks.size() <= iChunk )
+  while ((smIdType) myChunks.size() <= iChunk )
   {
     smIdType id0 = myChunks.size() * theChunkSize + 1;
     myChunks.push_back( new SMDS_ElementChunk( this, id0 ));
@@ -206,7 +206,7 @@ const SMDS_MeshElement* SMDS_ElementFactory::FindElement( const smIdType id ) co
   {
     smIdType iChunk = ( id - 1 ) / theChunkSize;
     smIdType index  = ( id - 1 ) % theChunkSize;
-    if ( iChunk < (int) myChunks.size() )
+    if ( iChunk < (smIdType) myChunks.size() )
     {
       const SMDS_MeshElement* e = myChunks[iChunk].Element( index );
       return e->IsNull() ? 0 : e;
@@ -303,8 +303,8 @@ void SMDS_ElementFactory::Compact( std::vector<smIdType>& theVtkIDsNewToOld )
   }
   else // there are holes in SMDS IDs
   {
-    int newVtkID = 0; // same as new smds ID (-1)
-    for ( int oldID = 1; oldID <= maxCellID; ++oldID ) // smds IDs
+    smIdType newVtkID = 0; // same as new smds ID (-1)
+    for ( smIdType oldID = 1; oldID <= maxCellID; ++oldID ) // smds IDs
     {
       const SMDS_MeshElement* oldElem = FindElement( oldID );
       if ( !oldElem ) continue;
@@ -408,9 +408,9 @@ void SMDS_NodeFactory::Compact( std::vector<smIdType>& theVtkIDsOldToNew )
         const SMDS_MeshElement* newNode = FindElement( newID+1 );
         if ( !newNode )
           newNode = NewElement( newID+1 );
-        smIdType  shapeID = oldNode->GetShapeID();
-        int shapeDim = GetShapeDim( shapeID );
-        smIdType   iChunk = newID / theChunkSize;
+        int     shapeID = oldNode->GetShapeID();
+        int    shapeDim = GetShapeDim( shapeID );
+        smIdType iChunk = newID / theChunkSize;
         myChunks[ iChunk ].SetShapeID( newNode, shapeID );
         if ( shapeDim == 2 || shapeDim == 1 )
         {
@@ -431,7 +431,7 @@ void SMDS_NodeFactory::Compact( std::vector<smIdType>& theVtkIDsOldToNew )
   }
   else // no holes
   {
-    for ( int i = 0; i < newNbNodes; ++i )
+    for ( smIdType i = 0; i < newNbNodes; ++i )
       theVtkIDsOldToNew[ i ] = i;
   }
   myChunks.resize( newNbChunks );
@@ -618,12 +618,12 @@ void SMDS_ElementChunk::SetVTKID( const SMDS_MeshElement* e, const vtkIdType vtk
 {
   if ( e->GetID() - 1 != vtkID )
   {
-    if ((int) myFactory->myVtkIDs.size() <= e->GetID() - 1 )
+    if ((smIdType) myFactory->myVtkIDs.size() <= e->GetID() - 1 )
     {
       size_t i = myFactory->myVtkIDs.size();
       myFactory->myVtkIDs.resize( e->GetID() + 100 );
       for ( ; i < myFactory->myVtkIDs.size(); ++i )
-        myFactory->myVtkIDs[i] = FromIdType<int>(i);
+        myFactory->myVtkIDs[i] = FromIdType<vtkIdType>(i);
     }
     myFactory->myVtkIDs[ e->GetID() - 1 ] = vtkID;
 
@@ -644,10 +644,10 @@ void SMDS_ElementChunk::SetVTKID( const SMDS_MeshElement* e, const vtkIdType vtk
  */
 //================================================================================
 
-int SMDS_ElementChunk::GetVtkID( const SMDS_MeshElement* e ) const
+vtkIdType SMDS_ElementChunk::GetVtkID( const SMDS_MeshElement* e ) const
 {
-  size_t dfltVtkID = e->GetID() - 1;
-  return ( dfltVtkID < myFactory->myVtkIDs.size() ) ? FromIdType<int>(myFactory->myVtkIDs[ dfltVtkID ]) : FromIdType<int>(dfltVtkID);
+  vtkIdType dfltVtkID = e->GetID() - 1;
+  return ( dfltVtkID < (vtkIdType)myFactory->myVtkIDs.size() ) ? myFactory->myVtkIDs[ dfltVtkID ] : dfltVtkID;
 }
 
 //================================================================================

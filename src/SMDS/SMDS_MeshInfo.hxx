@@ -80,7 +80,7 @@ private:
   // methods to count NOT POLY elements
   inline void remove(const SMDS_MeshElement* el);
   inline void add   (const SMDS_MeshElement* el);
-  inline smIdType  index(SMDSAbs_ElementType type, smIdType nbNodes) const;
+  inline smIdType  index(SMDSAbs_ElementType type, int nbNodes) const;
   // methods to remove elements of ANY kind
   inline void RemoveEdge(const SMDS_MeshElement* el);
   inline void RemoveFace(const SMDS_MeshElement* el);
@@ -214,7 +214,7 @@ SMDS_MeshInfo::Clear()
 }
 
 inline smIdType // index
-SMDS_MeshInfo::index(SMDSAbs_ElementType type, smIdType nbNodes) const
+SMDS_MeshInfo::index(SMDSAbs_ElementType type, int nbNodes) const
 { return nbNodes + myShift[ type ]; }
 
 inline void // remove

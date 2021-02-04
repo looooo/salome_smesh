@@ -123,7 +123,7 @@ namespace
         {
           for (int i = 0; i < ncells; i++)
           {
-            int  vtkId = cells[i];
+            vtkIdType vtkId = cells[i];
             smIdType smdsId = myMesh->FromVtkToSmds( vtkId );
             const SMDS_MeshElement* elem = myMesh->FindElement( smdsId );
             if ( elem->GetType() == type )
@@ -142,7 +142,7 @@ namespace
 
     const SMDS_MeshElement* next()
     {
-      int vtkId  = myCellList[ myIter++ ];
+      vtkIdType vtkId = myCellList[ myIter++ ];
       smIdType smdsId = myMesh->FromVtkToSmds( vtkId );
       const SMDS_MeshElement* elem = myMesh->FindElement(smdsId);
       if (!elem)

@@ -70,7 +70,7 @@ protected:
   TChunkPtrSet             myChunksWithUnused; // sorted chunks having unused elements
   std::vector< vtkIdType > myVtkIDs;           // myVtkIDs[ smdsID-1 ] == vtkID
   std::vector< smIdType >  mySmdsIDs;          // mySmdsIDs[ vtkID ] == smdsID - 1
-  int                      myNbUsedElements;   // counter of elements
+  smIdType                 myNbUsedElements;   // counter of elements
 
   friend class SMDS_ElementChunk;
 
@@ -279,7 +279,7 @@ struct _RangeSet
       rNext = mySet.upper_bound( theIndex );
       r     = rNext - 1;
     }
-    smIdType     rSize = Size( r ); // range size
+    int         rSize = Size( r ); // range size
     attr_t      rValue = r->myValue;
     if ( rValue == theValue )
       return rValue; // it happens while compacting
@@ -433,7 +433,7 @@ public:
 
   smIdType  GetID( const SMDS_MeshElement* e ) const;
 
-  int  GetVtkID( const SMDS_MeshElement* e ) const;
+  vtkIdType  GetVtkID( const SMDS_MeshElement* e ) const;
   void SetVTKID( const SMDS_MeshElement* e, const vtkIdType id );
 
   int  GetShapeID( const SMDS_MeshElement* e ) const;

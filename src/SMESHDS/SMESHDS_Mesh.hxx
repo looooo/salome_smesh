@@ -594,14 +594,14 @@ class SMESHDS_EXPORT SMESHDS_Mesh : public SMDS_Mesh
 
   bool ChangeElementNodes(const SMDS_MeshElement * elem,
                           const SMDS_MeshNode    * nodes[],
-                          const smIdType                nbnodes);
+                          const int                nbnodes);
   bool ChangePolygonNodes(const SMDS_MeshElement * elem,
                           std::vector<const SMDS_MeshNode*> nodes);
   bool ChangePolyhedronNodes(const SMDS_MeshElement *                 elem,
                              const std::vector<const SMDS_MeshNode*>& nodes,
                              const std::vector<int>&                  quantities);
-  bool ModifyCellNodes(int smdsVolId, std::map<int,int> localClonedNodeIds);
-  void Renumber (const bool isNodes, const int startID=1, const int deltaID=1);
+  bool ModifyCellNodes(vtkIdType smdsVolId, std::map<int,int> localClonedNodeIds);
+  void Renumber (const bool isNodes, const smIdType startID=1, const smIdType deltaID=1);
 
   void SetNodeInVolume(const SMDS_MeshNode * aNode, const TopoDS_Shell & S);
   void SetNodeInVolume(const SMDS_MeshNode * aNode, const TopoDS_Solid & S);

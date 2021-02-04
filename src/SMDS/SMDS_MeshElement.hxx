@@ -128,10 +128,10 @@ public:
   virtual int GetNodeIndex( const SMDS_MeshNode* node ) const;
 
 
-  virtual smIdType GetID() const;
-  virtual int GetVtkID()   const;
-  virtual smIdType getshapeId() const { return GetShapeID(); }
-  virtual smIdType GetShapeID() const;
+  virtual smIdType  GetID() const;
+  virtual vtkIdType GetVtkID()   const;
+  virtual smIdType  getshapeId() const { return GetShapeID(); }
+  virtual smIdType  GetShapeID() const;
 
   // mark this element; to be used in algos
   virtual void setIsMarked( bool is ) const;
@@ -183,7 +183,7 @@ public:
 
   SMDS_MeshElement();
 
-  void setVtkID(const int vtkID );
+  void setVtkID(const vtkIdType vtkID );
   virtual void setShapeID( const int shapeID ) const;
 
   SMDS_UnstructuredGrid* getGrid() const;

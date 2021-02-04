@@ -87,7 +87,7 @@ class SMDS_EXPORT SMDS_ElementHolder
 
 
   std::vector<const SMDS_MeshElement*>      myExternalElems; //!< elements not contained in the mesh
-  std::vector< int >                        myVtkIDs;        //!< vtk IDs of elements
+  std::vector< vtkIdType >                  myVtkIDs;        //!< vtk IDs of elements
   std::vector< bool >                       myIsNode;
   std::set< SMDS_ElementHolder* >::iterator myPtrInMesh;
 };

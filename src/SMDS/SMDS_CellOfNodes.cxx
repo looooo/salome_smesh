@@ -25,7 +25,7 @@
 
 #include "SMDS_CellOfNodes.hxx"
 
-SMDS_CellOfNodes::SMDS_CellOfNodes( smIdType id, smIdType shapeID )
+SMDS_CellOfNodes::SMDS_CellOfNodes( smIdType id, int shapeID )
   : myID( id )
 {
   setShapeID( shapeID );
@@ -41,12 +41,12 @@ smIdType SMDS_CellOfNodes::GetID() const
   return myID;
 }
 
-void SMDS_CellOfNodes::setShapeID( const smIdType shapeID )
+void SMDS_CellOfNodes::setShapeID( const int shapeID )
 {
   myShapeID = ( shapeID << BITS_SHIFT ) | ( myShapeID & BIT_IS_MARKED );
 }
 
-smIdType SMDS_CellOfNodes::GetShapeID() const
+int SMDS_CellOfNodes::GetShapeID() const
 {
   return myShapeID >> BITS_SHIFT;
 }

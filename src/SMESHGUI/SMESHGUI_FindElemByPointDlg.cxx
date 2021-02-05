@@ -434,7 +434,7 @@ void SMESHGUI_FindElemByPointOp::onFind()
     if (aMeshEditor->_is_nil())
       return;
 
-    SMESH::long_array_var foundIds;
+    SMESH::smIdType_array_var foundIds;
     if ( aMesh->_is_equivalent( myMeshOrPart ) )
       foundIds =
         aMeshEditor->FindElementsByPoint( myDlg->myX->GetValue(),

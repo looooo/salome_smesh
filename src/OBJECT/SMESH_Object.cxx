@@ -908,13 +908,13 @@ SMDSAbs_ElementType SMESH_GroupObj::GetElementType() const
 // function : getNodesFromElems
 // purpose  : Retrieve nodes from elements
 //=================================================================================
-static int getNodesFromElems( SMESH::long_array_var&              theElemIds,
+static int getNodesFromElems( SMESH::smIdType_array_var&              theElemIds,
                               const SMDS_Mesh*                    theMesh,
                               std::list<const SMDS_MeshElement*>& theResList )
 {
   set<const SMDS_MeshElement*> aNodeSet;
 
-  for ( CORBA::Long i = 0, n = theElemIds->length(); i < n; i++ )
+  for ( SMESH::smIdType i = 0, n = theElemIds->length(); i < n; i++ )
   {
     const SMDS_MeshElement* anElem = theMesh->FindElement( theElemIds[ i ] );
     if ( anElem != 0 )
@@ -941,11 +941,11 @@ static int getNodesFromElems( SMESH::long_array_var&              theElemIds,
 // purpose  : Get std::list<const SMDS_MeshElement*> from list of IDs
 //=================================================================================
 static int getPointers( const SMDSAbs_ElementType           theRequestType,
-                        SMESH::long_array_var&              theElemIds,
+                        SMESH::smIdType_array_var&          theElemIds,
                         const SMDS_Mesh*                    theMesh,
                         std::list<const SMDS_MeshElement*>& theResList )
 {
-  for ( CORBA::Long i = 0, n = theElemIds->length(); i < n; i++ )
+  for ( SMESH::smIdType i = 0, n = theElemIds->length(); i < n; i++ )
   {
     const SMDS_MeshElement* anElem = theRequestType == SMDSAbs_Node
       ? theMesh->FindNode( theElemIds[ i ] ) : theMesh->FindElement( theElemIds[ i ] );
@@ -985,7 +985,7 @@ int SMESH_GroupObj::GetEntities( const SMDSAbs_ElementType theType, TEntityList&
   if ( aGrpType != theType && theType != SMDSAbs_Node )
     return 0;
 
-  SMESH::long_array_var anIds = myGroupServer->GetListOfID();
+  SMESH::smIdType_array_var anIds = myGroupServer->GetListOfID();
   if ( anIds->length() == 0 )
     return 0;
 
@@ -1043,7 +1043,7 @@ int SMESH_subMeshObj::GetNbEntities( const SMDSAbs_ElementType theType) const
     case SMDSAbs_Face:
     case SMDSAbs_Volume:
     {
-      SMESH::long_array_var anIds = 
+      SMESH::smIdType_array_var anIds = 
         mySubMeshServer->GetElementsByType( SMESH::ElementType(theType) );
       return anIds->length();
     }
@@ -1067,7 +1067,7 @@ int SMESH_subMeshObj::GetEntities( const SMDSAbs_ElementType theType, TEntityLis
   {
     if ( theType == SMDSAbs_Node )
     {
-      SMESH::long_array_var anIds = mySubMeshServer->GetNodesId();
+      SMESH::smIdType_array_var anIds = mySubMeshServer->GetNodesId();
       return getPointers( SMDSAbs_Node, anIds, aMesh, theResList );
     }
   }
@@ -1075,12 +1075,12 @@ int SMESH_subMeshObj::GetEntities( const SMDSAbs_ElementType theType, TEntityLis
   {
     if ( theType == SMDSAbs_Node )
     {
-      SMESH::long_array_var anIds = mySubMeshServer->GetElementsId();
+      SMESH::smIdType_array_var anIds = mySubMeshServer->GetElementsId();
       return getNodesFromElems( anIds, aMesh, theResList );
     }
     else
     {
-      SMESH::long_array_var anIds = 
+      SMESH::smIdType_array_var anIds = 
         mySubMeshServer->GetElementsByType( SMESH::ElementType(theType) );
       return getPointers( theType, anIds, aMesh, theResList );
     }

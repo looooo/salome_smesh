@@ -1250,7 +1250,7 @@ SMESH::ListOfGroups * SMESH_Mesh_i::GetGroups()
  */
 //=============================================================================
 
-SMESH::smIdType SMESH_Mesh_i::NbGroups()
+CORBA::Long SMESH_Mesh_i::NbGroups()
 {
   Unexpect aCatch(SALOME_SalomeException);
   return _mapGroups.size();
@@ -3391,7 +3391,7 @@ void SMESH_Mesh_i::ClearLog()
  */
 //================================================================================
 
-SMESH::smIdType SMESH_Mesh_i::GetId()
+CORBA::Long SMESH_Mesh_i::GetId()
 {
   return _id;
 }
@@ -4738,7 +4738,7 @@ char* SMESH_Mesh_i::Dump()
  */
 //=============================================================================
 
-SMESH::long_array* SMESH_Mesh_i::GetIDs()
+SMESH::smIdType_array* SMESH_Mesh_i::GetIDs()
 {
   return GetElementsId();
 }
@@ -4749,22 +4749,22 @@ SMESH::long_array* SMESH_Mesh_i::GetIDs()
  */
 //=============================================================================
 
-SMESH::long_array* SMESH_Mesh_i::GetElementsId()
+SMESH::smIdType_array* SMESH_Mesh_i::GetElementsId()
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
     _preMeshInfo->FullLoadFromFile();
 
-  SMESH::long_array_var aResult = new SMESH::long_array();
+  SMESH::smIdType_array_var aResult = new SMESH::smIdType_array();
   SMESHDS_Mesh* aSMESHDS_Mesh = _impl->GetMeshDS();
 
   if ( aSMESHDS_Mesh == NULL )
     return aResult._retn();
 
-  long nbElements = NbElements();
+  smIdType nbElements = NbElements();
   aResult->length( nbElements );
   SMDS_ElemIteratorPtr anIt = aSMESHDS_Mesh->elementsIterator();
-  for ( int i = 0, n = nbElements; i < n && anIt->more(); i++ )
+  for ( smIdType i = 0, n = nbElements; i < n && anIt->more(); i++ )
     aResult[i] = anIt->next()->GetID();
 
   return aResult._retn();
@@ -4777,19 +4777,19 @@ SMESH::long_array* SMESH_Mesh_i::GetElementsId()
  */
 //=============================================================================
 
-SMESH::long_array* SMESH_Mesh_i::GetElementsByType( SMESH::ElementType theElemType )
+SMESH::smIdType_array* SMESH_Mesh_i::GetElementsByType( SMESH::ElementType theElemType )
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
     _preMeshInfo->FullLoadFromFile();
 
-  SMESH::long_array_var aResult = new SMESH::long_array();
+  SMESH::smIdType_array_var aResult = new SMESH::smIdType_array();
   SMESHDS_Mesh* aSMESHDS_Mesh = _impl->GetMeshDS();
 
   if ( aSMESHDS_Mesh == NULL )
     return aResult._retn();
 
-  long nbElements = NbElements();
+  smIdType nbElements = NbElements();
 
   // No sense in returning ids of elements along with ids of nodes:
   // when theElemType == SMESH::ALL, return node ids only if
@@ -4799,7 +4799,7 @@ SMESH::long_array* SMESH_Mesh_i::GetElementsByType( SMESH::ElementType theElemTy
 
   aResult->length( nbElements );
 
-  int i = 0;
+  smIdType i = 0;
 
   SMDS_ElemIteratorPtr anIt = aSMESHDS_Mesh->elementsIterator( (SMDSAbs_ElementType)theElemType );
   while ( i < nbElements && anIt->more() )
@@ -4816,22 +4816,22 @@ SMESH::long_array* SMESH_Mesh_i::GetElementsByType( SMESH::ElementType theElemTy
  */
 //=============================================================================
 
-SMESH::long_array* SMESH_Mesh_i::GetNodesId()
+SMESH::smIdType_array* SMESH_Mesh_i::GetNodesId()
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( _preMeshInfo )
     _preMeshInfo->FullLoadFromFile();
 
-  SMESH::long_array_var aResult = new SMESH::long_array();
+  SMESH::smIdType_array_var aResult = new SMESH::smIdType_array();
   SMESHDS_Mesh* aMeshDS = _impl->GetMeshDS();
 
   if ( aMeshDS == NULL )
     return aResult._retn();
 
-  long nbNodes = NbNodes();
+  smIdType nbNodes = NbNodes();
   aResult->length( nbNodes );
   SMDS_NodeIteratorPtr anIt = aMeshDS->nodesIterator();
-  for ( int i = 0, n = nbNodes; i < n && anIt->more(); i++ )
+  for ( smIdType i = 0, n = nbNodes; i < n && anIt->more(); i++ )
     aResult[i] = anIt->next()->GetID();
 
   return aResult._retn();
@@ -4843,7 +4843,7 @@ SMESH::long_array* SMESH_Mesh_i::GetNodesId()
  */
 //=============================================================================
 
-SMESH::ElementType SMESH_Mesh_i::GetElementType( const CORBA::Long id, const bool iselem )
+SMESH::ElementType SMESH_Mesh_i::GetElementType( const SMESH::smIdType id, const bool iselem )
 {
   SMESH::ElementType type = SMESH::ALL;
   SMESH_TRY;
@@ -4864,7 +4864,7 @@ SMESH::ElementType SMESH_Mesh_i::GetElementType( const CORBA::Long id, const boo
  */
 //=============================================================================
 
-SMESH::EntityType SMESH_Mesh_i::GetElementGeomType( const CORBA::Long id )
+SMESH::EntityType SMESH_Mesh_i::GetElementGeomType( const SMESH::smIdType id )
 {
   if ( _preMeshInfo )
     _preMeshInfo->FullLoadFromFile();
@@ -4882,7 +4882,7 @@ SMESH::EntityType SMESH_Mesh_i::GetElementGeomType( const CORBA::Long id )
  */
 //=============================================================================
 
-SMESH::GeometryType SMESH_Mesh_i::GetElementShape( const CORBA::Long id )
+SMESH::GeometryType SMESH_Mesh_i::GetElementShape( const SMESH::smIdType id )
 {
   if ( _preMeshInfo )
     _preMeshInfo->FullLoadFromFile();
@@ -4900,9 +4900,9 @@ SMESH::GeometryType SMESH_Mesh_i::GetElementShape( const CORBA::Long id )
  */
 //=============================================================================
 
-SMESH::long_array* SMESH_Mesh_i::GetSubMeshElementsId(const CORBA::Long ShapeID)
+SMESH::smIdType_array* SMESH_Mesh_i::GetSubMeshElementsId(const CORBA::Long ShapeID)
 {
-  SMESH::long_array_var aResult = new SMESH::long_array();
+  SMESH::smIdType_array_var aResult = new SMESH::smIdType_array();
 
   SMESH_TRY;
   if ( _preMeshInfo )
@@ -4917,7 +4917,7 @@ SMESH::long_array* SMESH_Mesh_i::GetSubMeshElementsId(const CORBA::Long ShapeID)
   aResult->length(SDSM->NbElements());
 
   SMDS_ElemIteratorPtr eIt = SDSM->GetElements();
-  int i = 0;
+  smIdType i = 0;
   while ( eIt->more() ) {
     aResult[i++] = eIt->next()->GetID();
   }
@@ -4935,10 +4935,10 @@ SMESH::long_array* SMESH_Mesh_i::GetSubMeshElementsId(const CORBA::Long ShapeID)
  */
 //=============================================================================
 
-SMESH::long_array* SMESH_Mesh_i::GetSubMeshNodesId(const CORBA::Long ShapeID,
+SMESH::smIdType_array* SMESH_Mesh_i::GetSubMeshNodesId(const CORBA::Long ShapeID,
                                                    CORBA::Boolean    all)
 {
-  SMESH::long_array_var aResult = new SMESH::long_array();
+  SMESH::smIdType_array_var aResult = new SMESH::smIdType_array();
 
   SMESH_TRY;
   if ( _preMeshInfo )
@@ -4950,7 +4950,7 @@ SMESH::long_array* SMESH_Mesh_i::GetSubMeshNodesId(const CORBA::Long ShapeID,
   SMESHDS_SubMesh* SDSM = SM->GetSubMeshDS();
   if(!SDSM) return aResult._retn();
 
-  set<int> theElems;
+  set<smIdType> theElems;
   if( !all || (SDSM->NbElements()==0) ) { // internal nodes or vertex submesh
     SMDS_NodeIteratorPtr nIt = SDSM->GetNodes();
     while ( nIt->more() ) {
@@ -4971,8 +4971,8 @@ SMESH::long_array* SMESH_Mesh_i::GetSubMeshNodesId(const CORBA::Long ShapeID,
   }
 
   aResult->length(theElems.size());
-  set<int>::iterator itElem;
-  int i = 0;
+  set<smIdType>::iterator itElem;
+  smIdType i = 0;
   for ( itElem = theElems.begin(); itElem != theElems.end(); itElem++ )
     aResult[i++] = *itElem;
 
@@ -5039,7 +5039,7 @@ CORBA::LongLong SMESH_Mesh_i::GetMeshPtr()
  */
 //=============================================================================
 
-SMESH::double_array* SMESH_Mesh_i::GetNodeXYZ(const CORBA::Long id)
+SMESH::double_array* SMESH_Mesh_i::GetNodeXYZ(const SMESH::smIdType id)
 {
   if ( _preMeshInfo )
     _preMeshInfo->FullLoadFromFile();
@@ -5070,13 +5070,13 @@ SMESH::double_array* SMESH_Mesh_i::GetNodeXYZ(const CORBA::Long id)
  */
 //=============================================================================
 
-SMESH::long_array* SMESH_Mesh_i::GetNodeInverseElements(const CORBA::Long  id,
-                                                        SMESH::ElementType elemType)
+SMESH::smIdType_array* SMESH_Mesh_i::GetNodeInverseElements(const SMESH::smIdType  id,
+                                                            SMESH::ElementType elemType)
 {
   if ( _preMeshInfo )
     _preMeshInfo->FullLoadFromFile();
 
-  SMESH::long_array_var aResult = new SMESH::long_array();
+  SMESH::smIdType_array_var aResult = new SMESH::smIdType_array();
   SMESHDS_Mesh* aMeshDS = _impl->GetMeshDS();
   if ( aMeshDS == NULL )
     return aResult._retn();
@@ -5090,7 +5090,7 @@ SMESH::long_array* SMESH_Mesh_i::GetNodeInverseElements(const CORBA::Long  id,
   SMDSAbs_ElementType type = SMDSAbs_ElementType( elemType );
   SMDS_ElemIteratorPtr eIt = aNode->GetInverseElementIterator( type );
   aResult->length( aNode->NbInverseElements( type ));
-  for( int i = 0; eIt->more(); ++i )
+  for( smIdType i = 0; eIt->more(); ++i )
   {
     const SMDS_MeshElement* elem = eIt->next();
     aResult[ i ] = elem->GetID();
@@ -5104,7 +5104,7 @@ SMESH::long_array* SMESH_Mesh_i::GetNodeInverseElements(const CORBA::Long  id,
  */
 //=============================================================================
 
-SMESH::NodePosition* SMESH_Mesh_i::GetNodePosition(CORBA::Long NodeID)
+SMESH::NodePosition* SMESH_Mesh_i::GetNodePosition(SMESH::smIdType NodeID)
 {
   if ( _preMeshInfo )
     _preMeshInfo->FullLoadFromFile();
@@ -5157,7 +5157,7 @@ SMESH::NodePosition* SMESH_Mesh_i::GetNodePosition(CORBA::Long NodeID)
  */
 //=============================================================================
 
-SMESH::ElementPosition SMESH_Mesh_i::GetElementPosition(CORBA::Long ElemID)
+SMESH::ElementPosition SMESH_Mesh_i::GetElementPosition(SMESH::smIdType ElemID)
 {
   if ( _preMeshInfo )
     _preMeshInfo->FullLoadFromFile();
@@ -5204,7 +5204,7 @@ SMESH::ElementPosition SMESH_Mesh_i::GetElementPosition(CORBA::Long ElemID)
  */
 //=============================================================================
 
-CORBA::Long SMESH_Mesh_i::GetShapeID(const CORBA::Long id)
+CORBA::Long SMESH_Mesh_i::GetShapeID(const SMESH::smIdType id)
 {
   if ( _preMeshInfo )
     _preMeshInfo->FullLoadFromFile();
@@ -5231,7 +5231,7 @@ CORBA::Long SMESH_Mesh_i::GetShapeID(const CORBA::Long id)
  */
 //=============================================================================
 
-CORBA::Long SMESH_Mesh_i::GetShapeIDForElem(const CORBA::Long id)
+CORBA::Long SMESH_Mesh_i::GetShapeIDForElem(const SMESH::smIdType id)
 {
   if ( _preMeshInfo )
     _preMeshInfo->FullLoadFromFile();
@@ -5261,7 +5261,7 @@ CORBA::Long SMESH_Mesh_i::GetShapeIDForElem(const CORBA::Long id)
  */
 //=============================================================================
 
-CORBA::Long SMESH_Mesh_i::GetElemNbNodes(const CORBA::Long id)
+CORBA::Short SMESH_Mesh_i::GetElemNbNodes(const SMESH::smIdType id)
 {
   if ( _preMeshInfo )
     _preMeshInfo->FullLoadFromFile();
@@ -5283,7 +5283,7 @@ CORBA::Long SMESH_Mesh_i::GetElemNbNodes(const CORBA::Long id)
  */
 //=============================================================================
 
-CORBA::Long SMESH_Mesh_i::GetElemNode(const CORBA::Long id, const CORBA::Long index)
+SMESH::smIdType SMESH_Mesh_i::GetElemNode(const SMESH::smIdType id, const CORBA::Short index)
 {
   if ( _preMeshInfo )
     _preMeshInfo->FullLoadFromFile();
@@ -5302,18 +5302,18 @@ CORBA::Long SMESH_Mesh_i::GetElemNode(const CORBA::Long id, const CORBA::Long in
  */
 //=============================================================================
 
-SMESH::long_array* SMESH_Mesh_i::GetElemNodes(const CORBA::Long id)
+SMESH::smIdType_array* SMESH_Mesh_i::GetElemNodes(const SMESH::smIdType id)
 {
   if ( _preMeshInfo )
     _preMeshInfo->FullLoadFromFile();
 
-  SMESH::long_array_var aResult = new SMESH::long_array();
+  SMESH::smIdType_array_var aResult = new SMESH::smIdType_array();
   if ( SMESHDS_Mesh* aMeshDS = _impl->GetMeshDS() )
   {
     if ( const SMDS_MeshElement* elem = aMeshDS->FindElement(id) )
     {
       aResult->length( elem->NbNodes() );
-      for ( CORBA::ULong i = 0; i < aResult->length(); ++i )
+      for ( SMESH::smIdType i = 0; i < aResult->length(); ++i )
         if ( const SMDS_MeshNode* n = elem->GetNode( i ))
           aResult[ i ] = n->GetID();
     }
@@ -5328,7 +5328,7 @@ SMESH::long_array* SMESH_Mesh_i::GetElemNodes(const CORBA::Long id)
  */
 //=============================================================================
 
-CORBA::Boolean SMESH_Mesh_i::IsMediumNode(const CORBA::Long ide, const CORBA::Long idn)
+CORBA::Boolean SMESH_Mesh_i::IsMediumNode(const SMESH::smIdType ide, const SMESH::smIdType idn)
 {
   if ( _preMeshInfo )
     _preMeshInfo->FullLoadFromFile();
@@ -5353,7 +5353,7 @@ CORBA::Boolean SMESH_Mesh_i::IsMediumNode(const CORBA::Long ide, const CORBA::Lo
  */
 //=============================================================================
 
-CORBA::Boolean SMESH_Mesh_i::IsMediumNodeOfAnyElem(const CORBA::Long idn,
+CORBA::Boolean SMESH_Mesh_i::IsMediumNodeOfAnyElem(const SMESH::smIdType idn,
                                                    SMESH::ElementType theElemType)
 {
   if ( _preMeshInfo )
@@ -5384,7 +5384,7 @@ CORBA::Boolean SMESH_Mesh_i::IsMediumNodeOfAnyElem(const CORBA::Long idn,
  */
 //=============================================================================
 
-CORBA::Long SMESH_Mesh_i::ElemNbEdges(const CORBA::Long id)
+CORBA::Long SMESH_Mesh_i::ElemNbEdges(const SMESH::smIdType id)
 {
   if ( _preMeshInfo )
     _preMeshInfo->FullLoadFromFile();
@@ -5403,7 +5403,7 @@ CORBA::Long SMESH_Mesh_i::ElemNbEdges(const CORBA::Long id)
  */
 //=============================================================================
 
-CORBA::Long SMESH_Mesh_i::ElemNbFaces(const CORBA::Long id)
+CORBA::Long SMESH_Mesh_i::ElemNbFaces(const SMESH::smIdType id)
 {
   if ( _preMeshInfo )
     _preMeshInfo->FullLoadFromFile();
@@ -5421,13 +5421,13 @@ CORBA::Long SMESH_Mesh_i::ElemNbFaces(const CORBA::Long id)
  */
 //================================================================================
 
-SMESH::long_array* SMESH_Mesh_i::GetElemFaceNodes(CORBA::Long  elemId,
-                                                  CORBA::Short faceIndex)
+SMESH::smIdType_array* SMESH_Mesh_i::GetElemFaceNodes(SMESH::smIdType  elemId,
+                                                      CORBA::Short     faceIndex)
 {
   if ( _preMeshInfo )
     _preMeshInfo->FullLoadFromFile();
 
-  SMESH::long_array_var aResult = new SMESH::long_array();
+  SMESH::smIdType_array_var aResult = new SMESH::smIdType_array();
   if ( SMESHDS_Mesh* aMeshDS = _impl->GetMeshDS() )
   {
     if ( const SMDS_MeshElement* elem = aMeshDS->FindElement(elemId) )
@@ -5437,7 +5437,7 @@ SMESH::long_array* SMESH_Mesh_i::GetElemFaceNodes(CORBA::Long  elemId,
       {
         aResult->length( vtool.NbFaceNodes( faceIndex ));
         const SMDS_MeshNode** nn = vtool.GetFaceNodes( faceIndex );
-        for ( CORBA::ULong i = 0; i < aResult->length(); ++i )
+        for ( SMESH::smIdType i = 0; i < aResult->length(); ++i )
           aResult[ i ] = nn[ i ]->GetID();
       }
     }
@@ -5479,7 +5479,7 @@ SMESH::double_array* SMESH_Mesh_i::GetFaceNormal(CORBA::Long    elemId,
  */
 //================================================================================
 
-SMESH::smIdType SMESH_Mesh_i::FindElementByNodes(const SMESH::long_array& nodes)
+SMESH::smIdType SMESH_Mesh_i::FindElementByNodes(const SMESH::smIdType_array& nodes)
 {
   if ( _preMeshInfo )
     _preMeshInfo->FullLoadFromFile();
@@ -5509,24 +5509,24 @@ SMESH::smIdType SMESH_Mesh_i::FindElementByNodes(const SMESH::long_array& nodes)
  */
 //================================================================================
 
-SMESH::long_array* SMESH_Mesh_i::GetElementsByNodes(const SMESH::long_array& nodes,
-                                                    SMESH::ElementType       elemType)
+SMESH::smIdType_array* SMESH_Mesh_i::GetElementsByNodes(const SMESH::smIdType_array& nodes,
+                                                        SMESH::ElementType       elemType)
 {
   if ( _preMeshInfo )
     _preMeshInfo->FullLoadFromFile();
 
-  SMESH::long_array_var result = new SMESH::long_array();
+  SMESH::smIdType_array_var result = new SMESH::smIdType_array();
 
   if ( SMESHDS_Mesh* mesh = _impl->GetMeshDS() )
   {
     vector< const SMDS_MeshNode * > nn( nodes.length() );
-    for ( CORBA::ULong i = 0; i < nodes.length(); ++i )
+    for ( SMESH::smIdType i = 0; i < nodes.length(); ++i )
       nn[i] = mesh->FindNode( nodes[i] );
 
     std::vector<const SMDS_MeshElement *> elems;
     mesh->GetElementsByNodes( nn, elems, (SMDSAbs_ElementType) elemType );
     result->length( elems.size() );
-    for ( size_t i = 0; i < elems.size(); ++i )
+    for ( smIdType i = 0; i < elems.size(); ++i )
       result[i] = elems[i]->GetID();
   }
   return result._retn();
@@ -5538,7 +5538,7 @@ SMESH::long_array* SMESH_Mesh_i::GetElementsByNodes(const SMESH::long_array& nod
  */
 //=============================================================================
 
-CORBA::Boolean SMESH_Mesh_i::IsPoly(const CORBA::Long id)
+CORBA::Boolean SMESH_Mesh_i::IsPoly(const SMESH::smIdType id)
 {
   if ( _preMeshInfo )
     _preMeshInfo->FullLoadFromFile();
@@ -5557,7 +5557,7 @@ CORBA::Boolean SMESH_Mesh_i::IsPoly(const CORBA::Long id)
  */
 //=============================================================================
 
-CORBA::Boolean SMESH_Mesh_i::IsQuadratic(const CORBA::Long id)
+CORBA::Boolean SMESH_Mesh_i::IsQuadratic(const SMESH::smIdType id)
 {
   if ( _preMeshInfo )
     _preMeshInfo->FullLoadFromFile();
@@ -5575,7 +5575,7 @@ CORBA::Boolean SMESH_Mesh_i::IsQuadratic(const CORBA::Long id)
  */
 //=============================================================================
 
-CORBA::Double SMESH_Mesh_i::GetBallDiameter(CORBA::Long id)
+CORBA::Double SMESH_Mesh_i::GetBallDiameter(SMESH::smIdType id)
 {
   if ( _preMeshInfo )
     _preMeshInfo->FullLoadFromFile();
@@ -5593,7 +5593,7 @@ CORBA::Double SMESH_Mesh_i::GetBallDiameter(CORBA::Long id)
  */
 //=============================================================================
 
-SMESH::double_array* SMESH_Mesh_i::BaryCenter(const CORBA::Long id)
+SMESH::double_array* SMESH_Mesh_i::BaryCenter(const SMESH::smIdType id)
 {
   if ( _preMeshInfo )
     _preMeshInfo->FullLoadFromFile();
@@ -6024,12 +6024,12 @@ bool SMESH_Mesh_i::IsMeshInfoCorrect()
  */
 //=============================================================================
 
-SMESH::long_array* SMESH_Mesh_i::GetMeshInfo()
+SMESH::smIdType_array* SMESH_Mesh_i::GetMeshInfo()
 {
   if ( _preMeshInfo )
     return _preMeshInfo->GetMeshInfo();
 
-  SMESH::long_array_var aRes = new SMESH::long_array();
+  SMESH::smIdType_array_var aRes = new SMESH::smIdType_array();
   aRes->length(SMESH::Entity_Last);
   for (int i = SMESH::Entity_Node; i < SMESH::Entity_Last; i++)
     aRes[i] = 0;
@@ -6048,11 +6048,11 @@ SMESH::long_array* SMESH_Mesh_i::GetMeshInfo()
  */
 //=============================================================================
 
-SMESH::long_array* SMESH_Mesh_i::GetNbElementsByType()
+SMESH::smIdType_array* SMESH_Mesh_i::GetNbElementsByType()
 {
-  SMESH::long_array_var aRes = new SMESH::long_array();
+  SMESH::smIdType_array_var aRes = new SMESH::smIdType_array();
   aRes->length(SMESH::NB_ELEMENT_TYPES);
-  for (int i = 0; i < SMESH::NB_ELEMENT_TYPES; i++)
+  for (smIdType i = 0; i < SMESH::NB_ELEMENT_TYPES; i++)
     aRes[ i ] = 0;
 
   const SMDS_MeshInfo* meshInfo = 0;
@@ -6062,7 +6062,7 @@ SMESH::long_array* SMESH_Mesh_i::GetNbElementsByType()
     meshInfo = & meshDS->GetMeshInfo();
 
   if (meshInfo)
-    for (int i = 0; i < SMESH::NB_ELEMENT_TYPES; i++)
+    for (smIdType i = 0; i < SMESH::NB_ELEMENT_TYPES; i++)
       aRes[i] = meshInfo->NbElements((SMDSAbs_ElementType)i);
 
   return aRes._retn();
@@ -6075,7 +6075,7 @@ SMESH::long_array* SMESH_Mesh_i::GetNbElementsByType()
 //=============================================================================
 
 void SMESH_Mesh_i::CollectMeshInfo(const SMDS_ElemIteratorPtr theItr,
-                                   SMESH::long_array&         theInfo)
+                                   SMESH::smIdType_array&     theInfo)
 {
   if (!theItr) return;
   while (theItr->more())
@@ -6155,25 +6155,25 @@ namespace /* Iterators used in SMESH_Mesh_i::GetElements(SMESH::SMESH_IDSource_v
   //-----------------------------------------------------------------------------
   struct IDSourceIterator : public SMDS_ElemIterator
   {
-    const SMESH::smIdType*    _idPtr;
-    const CORBA::Long*        _idEndPtr;
-    SMESH::long_array_var     _idArray;
-    const SMDS_Mesh*          _mesh;
-    const SMDSAbs_ElementType _type;
-    const SMDS_MeshElement*   _elem;
+    const SMESH::smIdType*        _idPtr;
+    const SMESH::smIdType*        _idEndPtr;
+    SMESH::smIdType_array_var     _idArray;
+    const SMDS_Mesh*              _mesh;
+    const SMDSAbs_ElementType     _type;
+    const SMDS_MeshElement*       _elem;
 
-    IDSourceIterator( const SMDS_Mesh*    mesh,
-                      const CORBA::Long*  ids,
-                      const int           nbIds,
-                      SMDSAbs_ElementType type):
+    IDSourceIterator( const SMDS_Mesh*       mesh,
+                      const SMESH::smIdType* ids,
+                      const smIdType         nbIds,
+                      SMDSAbs_ElementType    type):
       _idPtr( ids ), _idEndPtr( ids + nbIds ), _mesh( mesh ), _type( type ), _elem( 0 )
     {
       if ( _idPtr && nbIds && _mesh )
         next();
     }
-    IDSourceIterator( const SMDS_Mesh*    mesh,
-                      SMESH::long_array*  idArray,
-                      SMDSAbs_ElementType type):
+    IDSourceIterator( const SMDS_Mesh*       mesh,
+                      SMESH::smIdType_array* idArray,
+                      SMDSAbs_ElementType    type):
       _idPtr( 0 ), _idEndPtr( 0 ), _idArray( idArray), _mesh( mesh ), _type( type ), _elem( 0 )
     {
       if ( idArray && _mesh )
@@ -6330,7 +6330,7 @@ SMDS_ElemIteratorPtr SMESH_Mesh_i::GetElements(SMESH::SMESH_IDSource_ptr theObje
     }
     else
     {
-      SMESH::long_array_var ids = theObject->GetIDs();
+      SMESH::smIdType_array_var ids = theObject->GetIDs();
       elemIt = SMDS_ElemIteratorPtr( new IDSourceIterator( meshDS, ids._retn(), iterType ));
     }
     typeOK = ( isNodes == ( elemType == SMDSAbs_Node )) || ( elemType == SMDSAbs_All );
@@ -6978,7 +6978,7 @@ SMESH_MeshPartDS::SMESH_MeshPartDS(SMESH::SMESH_IDSource_ptr meshPart):
   else
   {
     TMeshInfo tmpInfo;
-    SMESH::long_array_var           anIDs = meshPart->GetIDs();
+    SMESH::smIdType_array_var       anIDs = meshPart->GetIDs();
     SMESH::array_of_ElementType_var types = meshPart->GetTypes();
     if ( types->length() == 1 && types[0] == SMESH::NODE ) // group of nodes
     {

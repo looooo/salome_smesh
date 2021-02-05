@@ -497,7 +497,7 @@ bool SMESHGUI_NodesDlg::ClickOnApply()
     }
 
     if ( !aGroupUsed->_is_nil() ) {
-      SMESH::long_array_var anIdList = new SMESH::long_array;
+      SMESH::smIdType_array_var anIdList = new SMESH::smIdType_array;
       anIdList->length( 1 );
       anIdList[0] = aNodeId;
       aGroupUsed->Add( anIdList.inout() );

@@ -553,7 +553,7 @@ void SMESHGUI_AddMeshElementDlg::ClickOnApply()
   if (myNbOkNodes && !SMESHGUI::isStudyLocked()) {
     myBusy = true;
     QStringList aListId = myEditCurrentArgument->text().split(" ", QString::SkipEmptyParts);
-    SMESH::long_array_var anArrayOfIndices = new SMESH::long_array;
+    SMESH::smIdType_array_var anArrayOfIndices = new SMESH::smIdType_array;
     anArrayOfIndices->length(aListId.count());
     const std::vector<int>& revIndex = SMDS_MeshCell::reverseSmdsOrder( myGeomType );
     if ( ReverseOrDulicate && ReverseOrDulicate->isChecked() && (int)revIndex.size() == aListId.count() )
@@ -598,7 +598,7 @@ void SMESHGUI_AddMeshElementDlg::ClickOnApply()
     }
 
     SMESH::SMESH_MeshEditor_var aMeshEditor = myMesh->GetMeshEditor();
-    SMESH::long_array_var anIdList = new SMESH::long_array;
+    SMESH::smIdType_array_var anIdList = new SMESH::smIdType_array;
     anIdList->length( 1 );
     anIdList[0] = -1;
     int nbElemsBefore = 0;

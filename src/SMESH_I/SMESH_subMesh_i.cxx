@@ -217,11 +217,11 @@ SMESH::smIdType SMESH_subMesh_i::GetNumberOfNodes(CORBA::Boolean all)
  */
 //=============================================================================
 
-SMESH::long_array* SMESH_subMesh_i::GetElementsId()
+SMESH::smIdType_array* SMESH_subMesh_i::GetElementsId()
 {
   Unexpect aCatch(SALOME_SalomeException);
 
-  SMESH::long_array_var aResult = new SMESH::long_array();
+  SMESH::smIdType_array_var aResult = new SMESH::smIdType_array();
 
   if ( _mesh_i->_mapSubMesh.find( _localId ) == _mesh_i->_mapSubMesh.end() )
     return aResult._retn();
@@ -261,11 +261,11 @@ SMESH::long_array* SMESH_subMesh_i::GetElementsId()
  */
 //=============================================================================
 
-SMESH::long_array* SMESH_subMesh_i::GetElementsByType( SMESH::ElementType theElemType )
+SMESH::smIdType_array* SMESH_subMesh_i::GetElementsByType( SMESH::ElementType theElemType )
 {
   Unexpect aCatch(SALOME_SalomeException);
 
-  SMESH::long_array_var aResult = new SMESH::long_array();
+  SMESH::smIdType_array_var aResult = new SMESH::smIdType_array();
 
   if ( _mesh_i->_mapSubMesh.find( _localId ) == _mesh_i->_mapSubMesh.end() )
     return aResult._retn();
@@ -276,8 +276,8 @@ SMESH::long_array* SMESH_subMesh_i::GetElementsByType( SMESH::ElementType theEle
   ::SMESH_subMesh* aSubMesh = _mesh_i->_mapSubMesh[_localId];
 
   // PAL5440, return all nodes belonging to elements of the sub-mesh
-  set<int> nodeIds;
-  int nbElems = 0;
+  set<smIdType> nodeIds;
+  smIdType nbElems = 0;
 
   // volumes may be bound to shell instead of solid
   TListOfSubMeshes smList;
@@ -317,7 +317,7 @@ SMESH::long_array* SMESH_subMesh_i::GetElementsByType( SMESH::ElementType theEle
   int i = 0, n = aResult->length();
 
   if ( theElemType == SMESH::NODE && !nodeIds.empty() ) {
-    set<int>::iterator idIt = nodeIds.begin();
+    set<smIdType>::iterator idIt = nodeIds.begin();
     for ( ; i < n && idIt != nodeIds.end() ; i++, idIt++ )
       aResult[i] = *idIt;
   }
@@ -346,11 +346,11 @@ SMESH::long_array* SMESH_subMesh_i::GetElementsByType( SMESH::ElementType theEle
  */
 //=============================================================================
   
-SMESH::long_array* SMESH_subMesh_i::GetNodesId()
+SMESH::smIdType_array* SMESH_subMesh_i::GetNodesId()
 {
   Unexpect aCatch(SALOME_SalomeException);
 
-  SMESH::long_array_var aResult = GetElementsByType( SMESH::NODE );
+  SMESH::smIdType_array_var aResult = GetElementsByType( SMESH::NODE );
   return aResult._retn();
 }
 
@@ -358,7 +358,7 @@ SMESH::long_array* SMESH_subMesh_i::GetNodesId()
 /*!
  *  
  */
-//=============================================================================
+//========error:=====================================================================
   
 SMESH::SMESH_Mesh_ptr SMESH_subMesh_i::GetFather()
 {
@@ -372,7 +372,7 @@ SMESH::SMESH_Mesh_ptr SMESH_subMesh_i::GetFather()
  */
 //=============================================================================
   
-SMESH::smIdType SMESH_subMesh_i::GetId()
+CORBA::Long SMESH_subMesh_i::GetId()
 {
   return _localId;
 }
@@ -410,7 +410,7 @@ GEOM::GEOM_Object_ptr SMESH_subMesh_i::GetSubShape()
  *  
  */
 //=============================================================================
-SMESH::long_array* SMESH_subMesh_i::GetIDs()
+SMESH::smIdType_array* SMESH_subMesh_i::GetIDs()
 {
   return GetElementsId();
 }
@@ -420,7 +420,7 @@ SMESH::long_array* SMESH_subMesh_i::GetIDs()
  *
  */
 //=============================================================================
-SMESH::ElementType SMESH_subMesh_i::GetElementType( const CORBA::Long id, const bool iselem )
+SMESH::ElementType SMESH_subMesh_i::GetElementType( const SMESH::smIdType id, const bool iselem )
 {
   if ( _preMeshInfo )
     _preMeshInfo->FullLoadFromFile();
@@ -434,12 +434,12 @@ SMESH::ElementType SMESH_subMesh_i::GetElementType( const CORBA::Long id, const 
  */
 //=============================================================================
 
-SMESH::long_array* SMESH_subMesh_i::GetMeshInfo()
+SMESH::smIdType_array* SMESH_subMesh_i::GetMeshInfo()
 {
   if ( _preMeshInfo )
     return _preMeshInfo->GetMeshInfo();
 
-  SMESH::long_array_var aRes = new SMESH::long_array();
+  SMESH::smIdType_array_var aRes = new SMESH::smIdType_array();
   aRes->length(SMESH::Entity_Last);
   for (int i = SMESH::Entity_Node; i < SMESH::Entity_Last; i++)
     aRes[i] = 0;
@@ -464,9 +464,9 @@ SMESH::long_array* SMESH_subMesh_i::GetMeshInfo()
  */
 //=======================================================================
 
-SMESH::long_array* SMESH_subMesh_i::GetNbElementsByType()
+SMESH::smIdType_array* SMESH_subMesh_i::GetNbElementsByType()
 {
-  SMESH::long_array_var aRes = new SMESH::long_array();
+  SMESH::smIdType_array_var aRes = new SMESH::smIdType_array();
   aRes->length(SMESH::NB_ELEMENT_TYPES);
   for (int i = 0; i < SMESH::NB_ELEMENT_TYPES; i++)
     if ( _preMeshInfo )

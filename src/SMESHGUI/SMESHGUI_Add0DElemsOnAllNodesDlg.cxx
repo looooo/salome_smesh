@@ -426,7 +426,7 @@ bool SMESHGUI_Add0DElemsOnAllNodesOp::onApply()
         SUIT_MessageBox::warning( myDlg, tr( "SMESH_WRN_WARNING" ), tr( "SMESH_BAD_SELECTION" ) );
         return false;
       }
-      SMESH::long_array_var idArray = new SMESH::long_array;
+      SMESH::smIdType_array_var idArray = new SMESH::smIdType_array;
       idArray->length( idList.count() );
       QStringList::iterator idIt = idList.begin();
       for ( int i = 0; idIt != idList.end(); ++idIt, ++i )

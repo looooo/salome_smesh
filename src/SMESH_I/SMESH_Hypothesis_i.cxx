@@ -114,7 +114,7 @@ void SMESH_Hypothesis_i::SetLibName(const char* theLibName)
  */
 //=============================================================================
 
-SMESH::smIdType SMESH_Hypothesis_i::GetId()
+CORBA::Short SMESH_Hypothesis_i::GetId()
 {
   return myBaseImpl->GetID();
 }

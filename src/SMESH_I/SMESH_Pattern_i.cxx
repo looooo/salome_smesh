@@ -273,10 +273,10 @@ SMESH::point_array* SMESH_Pattern_i::ApplyTo3DBlock(GEOM::GEOM_Object_ptr theBlo
 //=======================================================================
 
 SMESH::point_array*
-  SMESH_Pattern_i::ApplyToMeshFaces(SMESH::SMESH_Mesh_ptr    theMesh,
-                                    const SMESH::long_array& theFacesIDs,
-                                    CORBA::Long              theNodeIndexOnKeyPoint1,
-                                    CORBA::Boolean           theReverse)
+  SMESH_Pattern_i::ApplyToMeshFaces(SMESH::SMESH_Mesh_ptr        theMesh,
+                                    const SMESH::smIdType_array& theFacesIDs,
+                                    CORBA::Short                 theNodeIndexOnKeyPoint1,
+                                    CORBA::Boolean               theReverse)
 {
   SMESH::point_array_var points = new SMESH::point_array;
 
@@ -332,10 +332,10 @@ SMESH::point_array*
 //=======================================================================
 
 SMESH::point_array*
-  SMESH_Pattern_i::ApplyToHexahedrons(SMESH::SMESH_Mesh_ptr    theMesh,
-                                      const SMESH::long_array& theVolumesIDs,
-                                      CORBA::Long              theNode000Index,
-                                      CORBA::Long              theNode001Index)
+  SMESH_Pattern_i::ApplyToHexahedrons(SMESH::SMESH_Mesh_ptr        theMesh,
+                                      const SMESH::smIdType_array& theVolumesIDs,
+                                      CORBA::Short                 theNode000Index,
+                                      CORBA::Short                 theNode001Index)
 {
   SMESH::point_array_var points = new SMESH::point_array;
 

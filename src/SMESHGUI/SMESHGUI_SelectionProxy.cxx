@@ -276,7 +276,7 @@ SMESH::MeshInfo SMESH::SelectionProxy::meshInfo() const
   SMESH::MeshInfo info;
   if ( !isNull() )
   {
-    SMESH::long_array_var data = myObject->GetMeshInfo();
+    SMESH::smIdType_array_var data = myObject->GetMeshInfo();
     for ( uint type = SMESH::Entity_Node; type < SMESH::Entity_Last; type++ )
     {
       if ( type < data->length() )
@@ -494,7 +494,7 @@ bool SMESH::SelectionProxy::nodeConnectivity( int id, SMESH::Connectivity& conne
       SMESH::SMESH_Mesh_var mesh = myObject->GetMesh();
       if ( !CORBA::is_nil( mesh ) )
       {
-        SMESH::long_array_var elements = mesh->GetNodeInverseElements( id, SMESH::ALL );
+        SMESH::smIdType_array_var elements = mesh->GetNodeInverseElements( id, SMESH::ALL );
         for ( int i = 0, n = elements->length(); i < n; i++ )
         {
           SMESH::ElementType type = mesh->GetElementType( elements[i], true );
@@ -589,7 +589,7 @@ bool SMESH::SelectionProxy::hasElement( int id )
       SMESH::SMESH_Mesh_var mesh = myObject->GetMesh();
       if ( !CORBA::is_nil( mesh ) )
       {
-        SMESH::long_array_var nodes = mesh->GetElemNodes( id );
+        SMESH::smIdType_array_var nodes = mesh->GetElemNodes( id );
         result = nodes->length() > 0;
       }
     }
@@ -693,7 +693,7 @@ bool SMESH::SelectionProxy::elementConnectivity( int id, Connectivity& connectiv
       SMESH::SMESH_Mesh_var mesh = myObject->GetMesh();
       if ( !CORBA::is_nil( mesh ) )
       {
-        SMESH::long_array_var nn = mesh->GetElemNodes( id );
+        SMESH::smIdType_array_var nn = mesh->GetElemNodes( id );
         for ( int i = 0, nb = nn->length(); i < nb; i++ )
         {
           if ( !nodes.contains( nn[i] ))
@@ -751,7 +751,7 @@ bool SMESH::SelectionProxy::perFaceConnectivity( int id, Connectivity& connectiv
         CORBA::Long nbFaces = mesh->ElemNbFaces( id );
         for ( CORBA::Long iF = 0; iF < nbFaces; ++iF )
         {
-          SMESH::long_array_var nodes = mesh->GetElemFaceNodes( id, iF );
+          SMESH::smIdType_array_var nodes = mesh->GetElemFaceNodes( id, iF );
           for ( CORBA::ULong iN = 0; iN < nodes->length(); ++iN )
           {
             connectivity[ iF+1 ] << nodes[iN];
@@ -825,7 +825,7 @@ bool SMESH::SelectionProxy::elementGravityCenter( int id, SMESH::XYZ& xyz )
       SMESH::SMESH_Mesh_var mesh = myObject->GetMesh();
       if ( !CORBA::is_nil( mesh ) )
       {
-        SMESH::long_array_var nodes = mesh->GetElemNodes( id );
+        SMESH::smIdType_array_var nodes = mesh->GetElemNodes( id );
         for ( int i = 0, n = nodes->length(); i < n; i++ )
         {
           SMESH::double_array_var coords = mesh->GetNodeXYZ( nodes[i]  );
@@ -1220,7 +1220,7 @@ QSet<uint> SMESH::SelectionProxy::ids() const
     SMESH::SMESH_GroupBase_var group = SMESH::SMESH_GroupBase::_narrow( myObject );
     if ( !CORBA::is_nil( group ) )
     {
-      SMESH::long_array_var seq = group->GetListOfID();
+      SMESH::smIdType_array_var seq = group->GetListOfID();
       for ( int i = 0, n = seq->length(); i < n; i++ )
         result << (uint)seq[i];
     }

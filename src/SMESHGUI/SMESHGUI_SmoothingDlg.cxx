@@ -351,8 +351,8 @@ bool SMESHGUI_SmoothingDlg::ClickOnApply()
     QStringList aListElementsId = LineEditElements->text().split(" ", QString::SkipEmptyParts);
     QStringList aListNodesId    = LineEditNodes->text().split(" ", QString::SkipEmptyParts);
 
-    SMESH::long_array_var anElementsId = new SMESH::long_array;
-    SMESH::long_array_var aNodesId = new SMESH::long_array;
+    SMESH::smIdType_array_var anElementsId = new SMESH::smIdType_array;
+    SMESH::smIdType_array_var aNodesId = new SMESH::smIdType_array;
 
     anElementsId->length(aListElementsId.count());
     for (int i = 0; i < aListElementsId.count(); i++)

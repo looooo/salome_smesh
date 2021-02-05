@@ -113,12 +113,12 @@ protected:
   QWidget*                  createButtonFrame( QWidget* );
   QWidget*                  createMainFrame( QWidget*, const bool );
   virtual bool              isValid( const bool );
-  SMESH::long_array_var     getIds(SMESH::SMESH_IDSource_var& obj);
+  SMESH::smIdType_array_var getIds(SMESH::SMESH_IDSource_var& obj);
   void                      updateButtons();
   virtual void              setSelectionMode();
   virtual bool              isIdValid( const int ) const;
   virtual bool              process( SMESH::SMESH_MeshEditor_ptr, 
-                                     const SMESH::long_array& ,
+                                     const SMESH::smIdType_array& ,
                                      SMESH::SMESH_IDSource_ptr obj) = 0;
   virtual int               nbElemsInMesh() = 0;
   int                       entityType();
@@ -182,7 +182,7 @@ public:
 
 protected:
   virtual bool process( SMESH::SMESH_MeshEditor_ptr,
-                        const SMESH::long_array& ,
+                        const SMESH::smIdType_array& ,
                         SMESH::SMESH_IDSource_ptr obj);
   virtual int  nbElemsInMesh();
 };
@@ -202,7 +202,7 @@ public:
 protected:
   virtual bool      isValid( const bool );
   virtual bool      process( SMESH::SMESH_MeshEditor_ptr,
-                             const SMESH::long_array&,
+                             const SMESH::smIdType_array&,
                              SMESH::SMESH_IDSource_ptr obj );
   virtual int       nbElemsInMesh();
 
@@ -227,7 +227,7 @@ public:
 
 protected:
   virtual bool  process( SMESH::SMESH_MeshEditor_ptr,
-                         const SMESH::long_array& ,
+                         const SMESH::smIdType_array& ,
                          SMESH::SMESH_IDSource_ptr obj);
   virtual int   nbElemsInMesh();
 
@@ -269,7 +269,7 @@ protected slots:
 protected:
 
   virtual bool process( SMESH::SMESH_MeshEditor_ptr,
-                        const SMESH::long_array&,
+                        const SMESH::smIdType_array&,
                         SMESH::SMESH_IDSource_ptr obj );
   virtual int  nbElemsInMesh();
 

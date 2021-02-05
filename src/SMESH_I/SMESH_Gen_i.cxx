@@ -2418,7 +2418,7 @@ SMESH::long_array* SMESH_Gen_i::Evaluate(SMESH::SMESH_Mesh_ptr theMesh,
 
 GEOM::GEOM_Object_ptr
 SMESH_Gen_i::GetGeometryByMeshElement( SMESH::SMESH_Mesh_ptr  theMesh,
-                                       CORBA::Long            theElementID,
+                                       SMESH::smIdType        theElementID,
                                        const char*            theGeomName)
 {
   Unexpect aCatch(SALOME_SalomeException);
@@ -2482,7 +2482,7 @@ SMESH_Gen_i::GetGeometryByMeshElement( SMESH::SMESH_Mesh_ptr  theMesh,
 
 GEOM::GEOM_Object_ptr
 SMESH_Gen_i::FindGeometryByMeshElement( SMESH::SMESH_Mesh_ptr  theMesh,
-                                        CORBA::Long            theElementID)
+                                        SMESH::smIdType            theElementID)
 {
   Unexpect aCatch(SALOME_SalomeException);
   if ( CORBA::is_nil( theMesh ) )
@@ -2670,7 +2670,7 @@ SMESH_Gen_i::ConcatenateCommon(const SMESH::ListOfIDSources& theMeshesArray,
     }
 
     // remember nb of elements before filling in
-    SMESH::long_array_var prevState =  newMesh->GetNbElementsByType();
+    SMESH::smIdType_array_var prevState =  newMesh->GetNbElementsByType();
 
     // copy nodes
 
@@ -2720,7 +2720,7 @@ SMESH_Gen_i::ConcatenateCommon(const SMESH::ListOfIDSources& theMeshesArray,
         int _assert[( nbNames == SMESH::NB_ELEMENT_TYPES ) ? 2 : -1 ]; _assert[0]=_assert[1]=0;
       }
 
-      SMESH::long_array_var curState = newMesh->GetNbElementsByType();
+      SMESH::smIdType_array_var curState = newMesh->GetNbElementsByType();
 
       for( groupType = SMESH::NODE;
            groupType < SMESH::NB_ELEMENT_TYPES;
@@ -2767,7 +2767,7 @@ SMESH_Gen_i::ConcatenateCommon(const SMESH::ListOfIDSources& theMeshesArray,
 
       SMESH::SMESH_GroupBase_ptr group;
       CORBA::String_var          groupName;
-      SMESH::long_array_var newIDs = new SMESH::long_array();
+      SMESH::smIdType_array_var newIDs = new SMESH::smIdType_array();
 
       // loop on groups of a source mesh
       SMESH::ListOfGroups_var listOfGroups = initImpl->GetGroups();
@@ -2932,7 +2932,7 @@ SMESH::SMESH_Mesh_ptr SMESH_Gen_i::CopyMesh(SMESH::SMESH_IDSource_ptr meshPart,
   }
   else
   {
-    SMESH::long_array_var ids = meshPart->GetIDs();
+    SMESH::smIdType_array_var ids = meshPart->GetIDs();
     if ( srcElemTypes->length() == 1 && srcElemTypes[0] == SMESH::NODE ) // group of nodes
     {
       for ( CORBA::ULong i=0; i < ids->length(); i++ )
@@ -3887,7 +3887,7 @@ CORBA::Boolean SMESH_Gen_i::CopyMeshWithGeom( SMESH::SMESH_Mesh_ptr       theSou
     {
       if ( newMeshDS->GetMeshInfo().NbElements( SMDSAbs_ElementType( elemType )) > 0 )
       {
-        SMESH::long_array_var elemIDs = stdlGroup->GetIDs();
+        SMESH::smIdType_array_var elemIDs = stdlGroup->GetIDs();
         const bool isElem = ( elemType != SMESH::NODE );
         CORBA::ULong iE = 0;
         for ( ; iE < elemIDs->length(); ++iE ) // check if any element has been copied
@@ -6248,7 +6248,7 @@ int SMESH_Gen_i::RegisterObject(CORBA::Object_ptr theObject)
  */
 //================================================================================
 
-SMESH::smIdType  SMESH_Gen_i::GetObjectId(CORBA::Object_ptr theObject)
+CORBA::Long  SMESH_Gen_i::GetObjectId(CORBA::Object_ptr theObject)
 {
   if ( myStudyContext && !CORBA::is_nil( theObject )) {
     string iorString = GetORB()->object_to_string( theObject );
@@ -6548,7 +6548,7 @@ std::vector<long> SMESH_Gen_i::_GetInside( SMESH::SMESH_IDSource_ptr meshPart,
   SMESH::SMESH_Group_var gsource = SMESH::SMESH_Group::_narrow(meshPart);
   if ( !gsource->_is_nil() ) {
     if(theElemType == SMESH::NODE) {
-      SMESH::long_array_var nodes = gsource->GetNodeIDs();
+      SMESH::smIdType_array_var nodes = gsource->GetNodeIDs();
       for ( CORBA::ULong i = 0; i < nodes->length(); ++i ) {
         if ( const SMDS_MeshNode* node = meshDS->FindNode( nodes[i] )) {
           long anId = node->GetID();
@@ -6557,7 +6557,7 @@ std::vector<long> SMESH_Gen_i::_GetInside( SMESH::SMESH_IDSource_ptr meshPart,
         }
       }
     } else if (gsource->GetType() == theElemType || theElemType == SMESH::ALL ) {
-      SMESH::long_array_var elems = gsource->GetListOfID();
+      SMESH::smIdType_array_var elems = gsource->GetListOfID();
       for ( CORBA::ULong i = 0; i < elems->length(); ++i ) {
         if ( const SMDS_MeshElement* elem = meshDS->FindElement( elems[i] )) {
           long anId = elem->GetID();
@@ -6569,7 +6569,7 @@ std::vector<long> SMESH_Gen_i::_GetInside( SMESH::SMESH_IDSource_ptr meshPart,
   }
   SMESH::SMESH_subMesh_var smsource = SMESH::SMESH_subMesh::_narrow(meshPart);
   if ( !smsource->_is_nil() ) {
-    SMESH::long_array_var elems = smsource->GetElementsByType( theElemType );
+    SMESH::smIdType_array_var elems = smsource->GetElementsByType( theElemType );
     for ( CORBA::ULong i = 0; i < elems->length(); ++i ) {
       const SMDS_MeshElement* elem = ( theElemType == SMESH::NODE ) ? meshDS->FindNode( elems[i] ) : meshDS->FindElement( elems[i] );
       if (elem) {

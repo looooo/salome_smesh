@@ -322,12 +322,12 @@ public:
 
   // Return geometrical object the given element is built on. Publish it in study.
   GEOM::GEOM_Object_ptr GetGeometryByMeshElement( SMESH::SMESH_Mesh_ptr  theMesh,
-                                                  CORBA::Long            theElementID,
+                                                  SMESH::smIdType        theElementID,
                                                   const char*            theGeomName);
 
   // Return geometrical object the given element is built on. Don't publish it in study.
   GEOM::GEOM_Object_ptr FindGeometryByMeshElement( SMESH::SMESH_Mesh_ptr  theMesh,
-                                                   CORBA::Long            theElementID);
+                                                   SMESH::smIdType        theElementID);
 
   // Concatenate the given meshes into one mesh
   SMESH::SMESH_Mesh_ptr ConcatenateCommon(const SMESH::ListOfIDSources& meshesArray,
@@ -537,7 +537,7 @@ public:
   int RegisterObject(CORBA::Object_ptr theObject);
 
   // Return id of registered object
-  SMESH::smIdType GetObjectId(CORBA::Object_ptr theObject);
+  CORBA::Long GetObjectId(CORBA::Object_ptr theObject);
 
   // Return an object that previously had an oldID
   template<class TInterface>

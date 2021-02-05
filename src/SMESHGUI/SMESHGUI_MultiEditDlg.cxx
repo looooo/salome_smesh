@@ -437,9 +437,9 @@ void SMESHGUI_MultiEditDlg::onOk()
 // Purpose : Retrieve identifiers from list box or the whole object
 //=======================================================================
 
-SMESH::long_array_var SMESHGUI_MultiEditDlg::getIds(SMESH::SMESH_IDSource_var& obj)
+SMESH::smIdType_array_var SMESHGUI_MultiEditDlg::getIds(SMESH::SMESH_IDSource_var& obj)
 {
-  SMESH::long_array_var anIds = new SMESH::long_array;
+  SMESH::smIdType_array_var anIds = new SMESH::smIdType_array;
 
   if (myToAllChk->isChecked())
   {
@@ -709,7 +709,7 @@ void SMESHGUI_MultiEditDlg::onAddBtn()
         SMESH::IObjectToInterface<SMESH::SMESH_subMesh>(anIter.Value());
       if (!aSubMesh->_is_nil()) {
         if (aSubMesh->GetFather()->GetId() == myMesh->GetId()) {
-          SMESH::long_array_var anIds = aSubMesh->GetElementsId();
+          SMESH::smIdType_array_var anIds = aSubMesh->GetElementsId();
           for (int i = 0, n = anIds->length(); i < n; i++) {
             if (isIdValid(anIds[ i ]))
               toBeAdded.Add(anIds[ i ]);
@@ -725,7 +725,7 @@ void SMESHGUI_MultiEditDlg::onAddBtn()
       if (!aGroup->_is_nil() && ((aGroup->GetType() == SMESH::FACE && entityType() == 0) || 
                                  (aGroup->GetType() == SMESH::VOLUME && entityType() == 1))) {
         if (aGroup->GetMesh()->GetId() == myMesh->GetId()) {
-          SMESH::long_array_var anIds = aGroup->GetListOfID();
+          SMESH::smIdType_array_var anIds = aGroup->GetListOfID();
           for (int i = 0, n = anIds->length(); i < n; i++) {
             if (isIdValid(anIds[ i ]))
               toBeAdded.Add(anIds[ i ]);
@@ -1008,7 +1008,7 @@ bool SMESHGUI_MultiEditDlg::onApply()
   SUIT_OverrideCursor aWaitCursor;
 
   SMESH::SMESH_IDSource_var obj;
-  SMESH::long_array_var anIds = getIds(obj);
+  SMESH::smIdType_array_var anIds = getIds(obj);
 
   bool aResult = process(aMeshEditor, anIds.inout(), obj);
   if (aResult) {
@@ -1099,9 +1099,9 @@ SMESHGUI_ChangeOrientationDlg::~SMESHGUI_ChangeOrientationDlg()
 {
 }
 
-bool SMESHGUI_ChangeOrientationDlg::process (SMESH::SMESH_MeshEditor_ptr theEditor,
-                                             const SMESH::long_array&    theIds,
-                                             SMESH::SMESH_IDSource_ptr   obj)
+bool SMESHGUI_ChangeOrientationDlg::process (SMESH::SMESH_MeshEditor_ptr  theEditor,
+                                             const SMESH::smIdType_array& theIds,
+                                             SMESH::SMESH_IDSource_ptr    obj)
 {
   if ( CORBA::is_nil( obj ))
     return theEditor->Reorient(theIds);
@@ -1189,7 +1189,7 @@ bool SMESHGUI_UnionOfTrianglesDlg::isValid (const bool theMess)
 }
 
 bool SMESHGUI_UnionOfTrianglesDlg::process (SMESH::SMESH_MeshEditor_ptr theEditor,
-                                            const SMESH::long_array&    theIds,
+                                            const SMESH::smIdType_array&    theIds,
                                             SMESH::SMESH_IDSource_ptr   obj)
 {
   {
@@ -1220,7 +1220,7 @@ void SMESHGUI_UnionOfTrianglesDlg::onDisplaySimulation( bool toDisplayPreview )
         SUIT_OverrideCursor aWaitCursor;
         // get Ids of elements
         SMESH::SMESH_IDSource_var obj;
-        SMESH::long_array_var anElemIds = getIds( obj );
+        SMESH::smIdType_array_var anElemIds = getIds( obj );
 
         SMESH::NumericalFunctor_var aCriterion  = getNumericalFunctor();
         SMESH::SMESH_MeshEditor_var aMeshEditor = myMesh->GetMeshEditPreviewer();
@@ -1302,7 +1302,7 @@ void SMESHGUI_CuttingOfQuadsDlg::reject()
 }
 
 bool SMESHGUI_CuttingOfQuadsDlg::process (SMESH::SMESH_MeshEditor_ptr theEditor,
-                                          const SMESH::long_array&    theIds,
+                                          const SMESH::smIdType_array&    theIds,
                                           SMESH::SMESH_IDSource_ptr   obj)
 {
   bool hasObj = (! CORBA::is_nil( obj ));
@@ -1382,7 +1382,7 @@ void SMESHGUI_CuttingOfQuadsDlg::displayPreview()
   SUIT_OverrideCursor aWaitCursor;
   // get Ids of elements
   SMESH::SMESH_IDSource_var obj;
-  SMESH::long_array_var anElemIds = getIds(obj);
+  SMESH::smIdType_array_var anElemIds = getIds(obj);
   if (anElemIds->length() == 0 && obj->_is_nil() )
     return;
 
@@ -1648,7 +1648,7 @@ SMESHGUI_SplitVolumesDlg::~SMESHGUI_SplitVolumesDlg()
 }
 
 bool SMESHGUI_SplitVolumesDlg::process (SMESH::SMESH_MeshEditor_ptr theEditor,
-                                        const SMESH::long_array&    theIds,
+                                        const SMESH::smIdType_array&    theIds,
                                         SMESH::SMESH_IDSource_ptr   theObj)
 {
   SMESH::IDSource_wrap obj = theObj;

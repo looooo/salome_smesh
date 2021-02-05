@@ -556,7 +556,7 @@ bool SMESHGUI_MergeDlg::ClickOnApply()
       int i, nb = KeepList->count();
       if ( isKeepIDsSelection() )
       {
-        SMESH::long_array_var anIdList = new SMESH::long_array();
+        SMESH::smIdType_array_var anIdList = new SMESH::smIdType_array();
         anIdList->length(nb);
         for (i = 0; i < nb; i++)
           anIdList[i] = KeepList->item(i)->text().toInt();

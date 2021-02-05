@@ -30,6 +30,7 @@
 #include "SMDS_ElemIterator.hxx"
 
 #include <smIdType.hxx>
+#include <vtkType.h>
 
 #include <vector>
 #include <set>

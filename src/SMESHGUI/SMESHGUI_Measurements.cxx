@@ -546,7 +546,7 @@ void SMESHGUI_MinDistance::compute()
       SMESH::SMESH_Mesh_var m = myFirstSrc->GetMesh();
       long id = myFirstTgt->text().toLong();
       if ( !CORBA::is_nil( m ) && id ) {
-        SMESH::long_array_var ids = new SMESH::long_array();
+        SMESH::smIdType_array_var ids = new SMESH::smIdType_array();
         ids->length( 1 );
         ids[0] = id;
         SMESH::SMESH_MeshEditor_var me = m->GetMeshEditor();
@@ -565,7 +565,7 @@ void SMESHGUI_MinDistance::compute()
       SMESH::SMESH_Mesh_var m = mySecondSrc->GetMesh();
       long id = mySecondTgt->text().toLong();
       if ( !CORBA::is_nil( m ) && id ) {
-        SMESH::long_array_var ids = new SMESH::long_array();
+        SMESH::smIdType_array_var ids = new SMESH::smIdType_array();
         ids->length( 1 );
         ids[0] = id;
         SMESH::SMESH_MeshEditor_var me = m->GetMeshEditor();
@@ -1047,7 +1047,7 @@ void SMESHGUI_BoundingBox::compute()
       SMESH::SMESH_Mesh_var m = mySrc[0]->GetMesh();
       QStringList ids = myIDs.split( " ", QString::SkipEmptyParts );
       if ( !CORBA::is_nil( m ) && ids.count() > 0 ) {
-        SMESH::long_array_var ids_in = new SMESH::long_array();
+        SMESH::smIdType_array_var ids_in = new SMESH::smIdType_array();
         ids_in->length( ids.count() );
         for( int i = 0; i < ids.count(); i++ )
           ids_in[i] = ids[i].trimmed().toLong();

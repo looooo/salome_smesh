@@ -606,7 +606,7 @@ namespace
     }
     if ( ! notSupportedElemTypes.empty() )
     {
-      SMESH::long_array_var nbElems = aMeshOrGroup->GetMeshInfo();
+      SMESH::smIdType_array_var nbElems = aMeshOrGroup->GetMeshInfo();
       for ( size_t iType = 0; iType < notSupportedElemTypes.size(); ++iType )
         if ( nbElems[ notSupportedElemTypes[ iType ]] > 0 )
           presentNotSupported.push_back( notSupportedElemTypes[ iType ]);
@@ -1223,7 +1223,7 @@ namespace
                   SMESH::IObjectToInterface<SMESH::SMESH_IDSource>(anIO);
                 if ( !idSource->_is_nil() )
                 {
-                  SMESH::long_array_var ids = idSource->GetIDs();
+                  SMESH::smIdType_array_var ids = idSource->GetIDs();
                   elements.resize( ids->length() );
                   for ( unsigned i = 0; i < elements.size(); ++i )
                     elements[i] = ids[i];
@@ -2252,7 +2252,7 @@ bool SMESHGUI::automaticUpdate( SMESH::SMESH_IDSource_ptr theMesh,
   long updateLimit = resMgr->integerValue( "SMESH", "update_limit", 500000 );
   bool incrementalLimit = resMgr->booleanValue( "SMESH", "incremental_limit", false );
 
-  SMESH::long_array_var info = theMesh->GetMeshInfo();
+  SMESH::smIdType_array_var info = theMesh->GetMeshInfo();
   long nbOdElems = info[SMDSEntity_0D];
   long nbEdges   = info[SMDSEntity_Edge] + info[SMDSEntity_Quad_Edge];
   long nbFaces   = info[SMDSEntity_Triangle]   + info[SMDSEntity_Quad_Triangle]   + info[SMDSEntity_BiQuad_Triangle] +
@@ -3104,10 +3104,10 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
               try {
                 SMESH::SMESH_Mesh_var aMesh = aSubMesh->GetFather();
                 // get submesh elements list by types
-                SMESH::long_array_var aNodes = aSubMesh->GetElementsByType(SMESH::NODE);
-                SMESH::long_array_var aEdges = aSubMesh->GetElementsByType(SMESH::EDGE);
-                SMESH::long_array_var aFaces = aSubMesh->GetElementsByType(SMESH::FACE);
-                SMESH::long_array_var aVolumes = aSubMesh->GetElementsByType(SMESH::VOLUME);
+                SMESH::smIdType_array_var aNodes = aSubMesh->GetElementsByType(SMESH::NODE);
+                SMESH::smIdType_array_var aEdges = aSubMesh->GetElementsByType(SMESH::EDGE);
+                SMESH::smIdType_array_var aFaces = aSubMesh->GetElementsByType(SMESH::FACE);
+                SMESH::smIdType_array_var aVolumes = aSubMesh->GetElementsByType(SMESH::VOLUME);
                 // create group for each type o elements
                 QString aName = IObject->getName();
                 QStringList anEntryList;

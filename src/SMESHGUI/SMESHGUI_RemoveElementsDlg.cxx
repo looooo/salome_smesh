@@ -231,7 +231,7 @@ void SMESHGUI_RemoveElementsDlg::ClickOnApply()
     SUIT_OverrideCursor wc;
 
     QStringList aListId = myEditCurrentArgument->text().split(" ", QString::SkipEmptyParts);
-    SMESH::long_array_var anArrayOfIdeces = new SMESH::long_array;
+    SMESH::smIdType_array_var anArrayOfIdeces = new SMESH::smIdType_array;
     anArrayOfIdeces->length(aListId.count());
     for (int i = 0; i < aListId.count(); i++)
       anArrayOfIdeces[i] = aListId[ i ].toInt();

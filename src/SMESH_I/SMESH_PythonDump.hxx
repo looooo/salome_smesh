@@ -159,6 +159,9 @@ namespace SMESH
     operator<<(const SMESH::long_array& theArg);
 
     TPythonDump&
+    operator<<(const SMESH::smIdType_array& theArg);
+
+    TPythonDump&
     operator<<(const SMESH::double_array& theArg);
 
     TPythonDump&

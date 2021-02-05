@@ -259,6 +259,13 @@ namespace SMESH
   }
 
   TPythonDump&
+  TPythonDump::operator<<(const SMESH::smIdType_array& theArg)
+  {
+    DumpArray( theArg, *this );
+    return *this;
+  }
+
+  TPythonDump&
   TPythonDump::operator<<(const SMESH::double_array& theArg)
   {
     DumpArray( theArg, *this );
@@ -348,11 +355,11 @@ namespace SMESH
     }
     if ( SMESH_MeshEditor_i::IsTemporaryIDSource( theArg ))
     {
-      SMESH::SMESH_Mesh_var            mesh = theArg->GetMesh();
-      SMESH::long_array_var    anElementsId = theArg->GetIDs();
-      SMESH::array_of_ElementType_var types = theArg->GetTypes();
-      SMESH::ElementType               type = types->length() ? types[0] : SMESH::ALL;
-      SALOMEDS::SObject_wrap         meshSO = SMESH_Gen_i::ObjectToSObject(mesh);
+      SMESH::SMESH_Mesh_var             mesh = theArg->GetMesh();
+      SMESH::smIdType_array_var anElementsId = theArg->GetIDs();
+      SMESH::array_of_ElementType_var  types = theArg->GetTypes();
+      SMESH::ElementType                type = types->length() ? types[0] : SMESH::ALL;
+      SALOMEDS::SObject_wrap          meshSO = SMESH_Gen_i::ObjectToSObject(mesh);
       if ( meshSO->_is_nil() ) // don't waste memory for dumping not published objects
         return *this << mesh << ".GetIDSource([], " << type << ")";
       else

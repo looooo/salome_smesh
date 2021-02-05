@@ -479,9 +479,9 @@ bool SMESHGUI_MeshPatternDlg::onApply()
       }
       QList<int> ids;
       getIds(ids);
-      SMESH::long_array_var varIds = new SMESH::long_array();
+      SMESH::smIdType_array_var varIds = new SMESH::smIdType_array();
       varIds->length(ids.count());
-      int i = 0;
+      smIdType i = 0;
       for (QList<int>::iterator it = ids.begin(); it != ids.end(); ++it)
         varIds[i++] = *it;
       myType == Type_2d
@@ -1258,9 +1258,9 @@ vtkUnstructuredGrid* SMESHGUI_MeshPatternDlg::getGrid()
     SMESH::point_array_var pnts;
     QList<int> ids;
     if (isRefine() && getIds(ids)) {
-      SMESH::long_array_var varIds = new SMESH::long_array();
+      SMESH::smIdType_array_var varIds = new SMESH::smIdType_array();
       varIds->length(ids.count());
-      int i = 0;
+      smIdType i = 0;
       for (QList<int>::iterator it = ids.begin(); it != ids.end(); ++it)
         varIds[i++] = *it;
       pnts = myType == Type_2d

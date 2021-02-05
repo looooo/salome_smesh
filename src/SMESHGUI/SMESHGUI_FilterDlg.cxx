@@ -3536,7 +3536,7 @@ void SMESHGUI_FilterDlg::filterSource (const int theType,
   {
     if (myMesh->_is_nil())
       return;
-    SMESH::long_array_var anIds = myFilter[ theType ]->GetElementsId(myMesh);
+    SMESH::smIdType_array_var anIds = myFilter[ theType ]->GetElementsId(myMesh);
     for (int i = 0, n = anIds->length(); i < n; i++)
       theResIds.append(anIds[ i ]);
   }
@@ -3589,7 +3589,7 @@ void SMESHGUI_FilterDlg::filterSelectionSource (const int theType,
     {
       if (aSubMesh->GetFather()->GetId() == myMesh->GetId())
       {
-        SMESH::long_array_var anIds =
+        SMESH::smIdType_array_var anIds =
           theType == SMESH::NODE ? aSubMesh->GetNodesId() : aSubMesh->GetElementsId();
         for (int i = 0, n = anIds->length(); i < n; i++)
           aToBeFiltered.Add(anIds[ i ]);
@@ -3603,7 +3603,7 @@ void SMESHGUI_FilterDlg::filterSelectionSource (const int theType,
     {
       if (aGroup->GetType() == theType && aGroup->GetMesh()->GetId() == myMesh->GetId())
       {
-        SMESH::long_array_var anIds = aGroup->GetListOfID();
+        SMESH::smIdType_array_var anIds = aGroup->GetListOfID();
         for (int i = 0, n = anIds->length(); i < n; i++)
           aToBeFiltered.Add(anIds[ i ]);
       }

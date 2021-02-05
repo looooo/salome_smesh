@@ -340,7 +340,7 @@ bool SMESHGUI_OffsetDlg::ClickOnApply()
   {
     QStringList aListElementsId = myElementsId.split(" ", QString::SkipEmptyParts);
 
-    SMESH::long_array_var anElementsId = new SMESH::long_array;
+    SMESH::smIdType_array_var anElementsId = new SMESH::smIdType_array;
     anElementsId->length(aListElementsId.count());
     for (int i = 0; i < aListElementsId.count(); i++)
       anElementsId[i] = aListElementsId[i].toInt();
@@ -918,7 +918,7 @@ void SMESHGUI_OffsetDlg::onDisplaySimulation( bool toDisplayPreview )
           }
         else
         {
-          SMESH::long_array_var anElementsId = new SMESH::long_array;
+          SMESH::smIdType_array_var anElementsId = new SMESH::smIdType_array;
           QStringList aListElementsId = myElementsId.split(" ", QString::SkipEmptyParts);
           anElementsId->length(aListElementsId.count());
           for (int i = 0; i < aListElementsId.count(); i++)

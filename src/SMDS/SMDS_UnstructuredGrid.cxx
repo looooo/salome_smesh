@@ -193,7 +193,7 @@ void SMDS_UnstructuredGrid::compactGrid(std::vector<smIdType>& idNodesOldToNew, 
     newPoints->SetDataType( VTK_DOUBLE );
     newPoints->SetNumberOfPoints( FromIdType<int>(newNodeSize) );
 
-    int vtkIdType = 0, alreadyCopied = 0;
+    vtkIdType i = 0, alreadyCopied = 0;
     while ( i < oldNodeSize )
     {
       // skip a hole if any
@@ -239,15 +239,15 @@ void SMDS_UnstructuredGrid::compactGrid(std::vector<smIdType>& idNodesOldToNew, 
   if ((vtkIdType) idNodesOldToNew.size() < oldNodeSize )
   {
     idNodesOldToNew.reserve( oldNodeSize );
-    for ( vvtkIdType i = idNodesOldToNew.size(); i < oldNodeSize; ++i )
+    for ( vtkIdType i = idNodesOldToNew.size(); i < oldNodeSize; ++i )
       idNodesOldToNew.push_back( i );
   }
 
   // --- create new compacted Connectivity, Locations and Types
 
-  vvtkIdType newConnectivitySize = this->Connectivity->GetNumberOfConnectivityEntries();
+  vtkIdType newConnectivitySize = this->Connectivity->GetNumberOfConnectivityEntries();
   if ( newCellSize != oldCellSize )
-    for ( vvtkIdType i = 0; i < oldCellSize - 1; ++i )
+    for ( vtkIdType i = 0; i < oldCellSize - 1; ++i )
       if ( this->Types->GetValue( i ) == VTK_EMPTY_CELL )
         newConnectivitySize -= this->Connectivity->GetCellSize( i );
 
@@ -273,11 +273,11 @@ void SMDS_UnstructuredGrid::compactGrid(std::vector<smIdType>& idNodesOldToNew, 
   {
     vtkDoubleArray* newDiameters = vtkDoubleArray::New();
     newDiameters->SetNumberOfComponents(1);
-    for ( vvtkIdType newCellID = 0; newCellID < newCellSize; newCellID++ )
+    for ( vtkIdType newCellID = 0; newCellID < newCellSize; newCellID++ )
     {
       if ( newTypes->GetValue( newCellID ) == VTK_POLY_VERTEX )
       {
-        vvtkIdType oldCellID = idCellsNewToOld[ newCellID ];
+        vtkIdType oldCellID = idCellsNewToOld[ newCellID ];
         newDiameters->InsertValue( newCellID, diameters->GetValue( oldCellID ));
       }
       vtkDataSet::CellData->SetScalars( newDiameters );
@@ -292,7 +292,7 @@ void SMDS_UnstructuredGrid::compactGrid(std::vector<smIdType>& idNodesOldToNew, 
     vtkIdTypeArray *newFaces = vtkIdTypeArray::New();
     newFaces->Initialize();
     newFaces->Allocate(this->Faces->GetSize());
-    for ( vvtkIdType newCellID = 0; newCellID < newCellSize; newCellID++ )
+    for ( vtkIdType newCellID = 0; newCellID < newCellSize; newCellID++ )
     {
       if ( newTypes->GetValue( newCellID ) == VTK_POLYHEDRON )
       {
@@ -337,13 +337,13 @@ void SMDS_UnstructuredGrid::compactGrid(std::vector<smIdType>& idNodesOldToNew, 
 
 void SMDS_UnstructuredGrid::copyNodes(vtkPoints *       newPoints,
                                       std::vector<smIdType>& /*idNodesOldToNew*/,
-                                      vvtkIdType&              alreadyCopied,
-                                      vvtkIdType               start,
-                                      vvtkIdType               end)
+                                      vtkIdType&              alreadyCopied,
+                                      vtkIdType               start,
+                                      vtkIdType               end)
 {
   void *target = newPoints->GetVoidPointer(3 * alreadyCopied);
   void *source = this->Points->GetVoidPointer(3 * start);
-  vvtkIdType nbPoints = end - start;
+  vtkIdType nbPoints = end - start;
   if (nbPoints > 0)
   {
     memcpy(target, source, 3 * sizeof(double) * nbPoints);
@@ -360,7 +360,7 @@ void SMDS_UnstructuredGrid::copyBloc(vtkUnsignedCharArray *  newTypes,
 {
   for ( size_t iNew = 0; iNew < idCellsNewToOld.size(); iNew++ )
   {
-    vvtkIdType iOld = idCellsNewToOld[ iNew ];
+    vtkIdType iOld = idCellsNewToOld[ iNew ];
     newTypes->SetValue( iNew, this->Types->GetValue( iOld ));
 
     vtkIdType oldLoc = ((vtkIdTypeArray *)(this->Connectivity->GetOffsetsArray()))->GetValue( iOld );
@@ -371,25 +371,25 @@ void SMDS_UnstructuredGrid::copyBloc(vtkUnsignedCharArray *  newTypes,
       pointsCell.resize( nbpts );
     for ( int l = 0; l < nbpts; l++ )
     {
-      vvtkIdType oldval = oldPtsCell[l];
+      vtkIdType oldval = oldPtsCell[l];
       pointsCell[l] = idNodesOldToNew[oldval];
     }
-    /*vvtkIdType newcnt = */newConnectivity->InsertNextCell( nbpts, pointsCell.data() );
-    vvtkIdType newLoc = newConnectivity->GetInsertLocation( nbpts );
+    /*vtkIdType newcnt = */newConnectivity->InsertNextCell( nbpts, pointsCell.data() );
+    vtkIdType newLoc = newConnectivity->GetInsertLocation( nbpts );
     newLocations->SetValue( iNew, newLoc );
   }
 }
 
 int SMDS_UnstructuredGrid::CellIdToDownId(vtkIdType vtkCellId)
 {
-  if ((vtkCellId < 0) || (vtkCellId >= (vvtkIdType)_cellIdToDownId.size()))
+  if ((vtkCellId < 0) || (vtkCellId >= (vtkIdType)_cellIdToDownId.size()))
   {
     return -1;
   }
   return _cellIdToDownId[vtkCellId];
 }
 
-void SMDS_UnstructuredGrid::setCellIdToDownId(vvtkIdType vtkCellId, int downId)
+void SMDS_UnstructuredGrid::setCellIdToDownId(vtkIdType vtkCellId, int downId)
 {
   // ASSERT((vtkCellId >= 0) && (vtkCellId < _cellIdToDownId.size()));
   _cellIdToDownId[vtkCellId] = downId;

@@ -3646,7 +3646,7 @@ void SMESHGUI_CtrlInfo::showInfo( const SMESH::SelectionProxy& proxy )
     for ( int i = 0; i < myButtons.count(); ++i )
       myButtons[i]->setEnabled( true );
 
-  SMESH::long_array_var nbElemsByType = obj->GetNbElementsByType();
+  SMESH::smIdType_array_var nbElemsByType = obj->GetNbElementsByType();
   if ( ! &nbElemsByType.in() ) return;
 
   const CORBA::Long ctrlLimit =

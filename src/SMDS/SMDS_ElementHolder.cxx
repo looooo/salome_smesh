@@ -59,7 +59,7 @@ SMDS_ElementHolder::~SMDS_ElementHolder()
 
 void SMDS_ElementHolder::beforeCompacting()
 {
-  for ( SMDS_ElemIteratorPtr it = getElements(); it->more() )
+  for ( SMDS_ElemIteratorPtr it = getElements(); it->more(); )
   {
     const SMDS_MeshElement* e = it->next();
     if ( !e ) continue;

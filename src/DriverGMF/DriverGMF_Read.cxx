@@ -89,7 +89,7 @@ Driver_Mesh::Status DriverGMF_Read::Perform()
 
   int ref;
 
-  const int nodeIDShift = myMesh->GetMeshInfo().NbNodes();
+  const smIdType nodeIDShift = myMesh->GetMeshInfo().NbNodes();
   if ( version != GmfFloat )
   {
     double x, y, z;
@@ -114,7 +114,7 @@ Driver_Mesh::Status DriverGMF_Read::Perform()
   int iN[28]; // 28 - nb nodes in HEX27 (+ 1 for safety :)
 
   /* Read edges */
-  const int edgeIDShift = myMesh->GetMeshInfo().NbElements();
+  const smIdType edgeIDShift = myMesh->GetMeshInfo().NbElements();
   if ( int nbEdges = GmfStatKwd(meshID, GmfEdges))
   {
     // read extra vertices for quadratic edges
@@ -150,7 +150,7 @@ Driver_Mesh::Status DriverGMF_Read::Perform()
   }
 
   /* Read triangles */
-  const int triaIDShift = myMesh->GetMeshInfo().NbElements();
+  const smIdType triaIDShift = myMesh->GetMeshInfo().NbElements();
   if ( int nbTria = GmfStatKwd(meshID, GmfTriangles))
   {
     // read extra vertices for quadratic triangles
@@ -194,7 +194,7 @@ Driver_Mesh::Status DriverGMF_Read::Perform()
   }
 
   /* Read quadrangles */
-  const int quadIDShift = myMesh->GetMeshInfo().NbElements();
+  const smIdType quadIDShift = myMesh->GetMeshInfo().NbElements();
   if ( int nbQuad = GmfStatKwd(meshID, GmfQuadrilaterals))
   {
     // read extra vertices for quadratic quadrangles
@@ -248,7 +248,7 @@ Driver_Mesh::Status DriverGMF_Read::Perform()
   }
 
   /* Read terahedra */
-  const int tetIDShift = myMesh->GetMeshInfo().NbElements();
+  const smIdType tetIDShift = myMesh->GetMeshInfo().NbElements();
   if ( int nbTet = GmfStatKwd( meshID, GmfTetrahedra ))
   {
     // read extra vertices for quadratic tetrahedra
@@ -293,7 +293,7 @@ Driver_Mesh::Status DriverGMF_Read::Perform()
   }
 
   /* Read pyramids */
-  const int pyrIDShift = myMesh->GetMeshInfo().NbElements();
+  const smIdType pyrIDShift = myMesh->GetMeshInfo().NbElements();
   if ( int nbPyr = GmfStatKwd(meshID, GmfPyramids))
   {
     GmfGotoKwd(meshID, GmfPyramids);
@@ -306,7 +306,7 @@ Driver_Mesh::Status DriverGMF_Read::Perform()
   }
 
   /* Read hexahedra */
-  const int hexIDShift = myMesh->GetMeshInfo().NbElements();
+  const smIdType hexIDShift = myMesh->GetMeshInfo().NbElements();
   if ( int nbHex = GmfStatKwd(meshID, GmfHexahedra))
   {
     // read extra vertices for quadratic hexahedra
@@ -389,7 +389,7 @@ Driver_Mesh::Status DriverGMF_Read::Perform()
   }
 
   /* Read prism */
-  const int prismIDShift = myMesh->GetMeshInfo().NbElements();
+  const smIdType prismIDShift = myMesh->GetMeshInfo().NbElements();
   if ( int nbPrism = GmfStatKwd(meshID, GmfPrisms))
   {
     GmfGotoKwd(meshID, GmfPrisms);

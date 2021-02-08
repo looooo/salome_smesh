@@ -113,7 +113,7 @@ Driver_Mesh::Status DriverUNV_W_SMDS_Mesh::Perform()
           {
             const SMDS_MeshNode* aNode = aNodesIter->next();
             if ( nodeLabelByID.empty() )
-              aRec.node_labels.push_back( aNode->GetID() );
+              aRec.node_labels.push_back( FromIdType<int>(aNode->GetID()) );
             else
               aRec.node_labels.push_back( nodeLabelByID[ aNode->GetID() ]);
           }
@@ -137,7 +137,7 @@ Driver_Mesh::Status DriverUNV_W_SMDS_Mesh::Perform()
           for ( aRec.node_labels.clear(); aNodesIter->more();  ) {
             const SMDS_MeshNode* aNode = aNodesIter->next();
             if ( nodeLabelByID.empty() )
-              aRec.node_labels.push_back( aNode->GetID() );
+              aRec.node_labels.push_back( FromIdType<int>(aNode->GetID()) );
             else
               aRec.node_labels.push_back( nodeLabelByID[ aNode->GetID() ]);
           }
@@ -195,7 +195,7 @@ Driver_Mesh::Status DriverUNV_W_SMDS_Mesh::Perform()
           {
             const SMDS_MeshElement* aNode = aNodesIter->next();
             if ( nodeLabelByID.empty() )
-              aRec.node_labels.push_back( aNode->GetID() );
+              aRec.node_labels.push_back( FromIdType<int>(aNode->GetID()) );
             else
               aRec.node_labels.push_back( nodeLabelByID[ aNode->GetID() ]);
           }
@@ -226,7 +226,7 @@ Driver_Mesh::Status DriverUNV_W_SMDS_Mesh::Perform()
             while ( aIter->more() ) {
               const SMDS_MeshElement* aNode = aIter->next();
               if ( nodeLabelByID.empty() )
-                aRec.NodeList.push_back( aNode->GetID() );
+                aRec.NodeList.push_back( FromIdType<int>(aNode->GetID()) );
               else
                 aRec.NodeList.push_back( nodeLabelByID[ aNode->GetID() ]);
             }
@@ -236,7 +236,7 @@ Driver_Mesh::Status DriverUNV_W_SMDS_Mesh::Perform()
             while ( aIter->more() ) {
               const SMDS_MeshElement* aElem = aIter->next();
               if ( elemLabelByID.empty() )
-                aRec.ElementList.push_back( aElem->GetID() );
+                aRec.ElementList.push_back( FromIdType<int>(aElem->GetID()) );
               else
                 aRec.ElementList.push_back( elemLabelByID[ aElem->GetID() ]);
             }

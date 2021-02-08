@@ -2114,7 +2114,7 @@ double MultiConnection2D::GetValue( long theElementId )
         while (anElemIter->more()) {
           const SMDS_MeshElement* anElem = anElemIter->next();
           if (anElem != 0 && anElem->GetType() == SMDSAbs_Face) {
-            int anId = anElem->GetID();
+            smIdType anId = anElem->GetID();
 
             aMap.Add(anId);
             if (aMapPrev.Contains(anId)) {
@@ -2468,7 +2468,7 @@ void CoincidentNodes::SetMesh( const SMDS_Mesh* theMesh )
       std::list< const SMDS_MeshNode*>& coincNodes = *groupIt;
       std::list< const SMDS_MeshNode*>::iterator n = coincNodes.begin();
       for ( ; n != coincNodes.end(); ++n )
-        myCoincidentIDs.Add( (*n)->GetID() );
+        myCoincidentIDs.Add( FromIdType<int>((*n)->GetID()) );
     }
   }
 }
@@ -2582,7 +2582,7 @@ bool FreeEdges::IsFreeEdge( const SMDS_MeshNode** theNodes, const int theFaceId 
   {
     if ( const SMDS_MeshElement* anElem = anElemIter->next())
     {
-      const int anId = anElem->GetID();
+      const int anId = FromIdType<int>(anElem->GetID());
       if ( anId != theFaceId && anElem->GetNodeIndex( theNodes[1] ) >= 0 )
         return false;
     }
@@ -3084,7 +3084,7 @@ void ConnectedElements::SetPoint( double x, double y, double z )
 
     if ( !foundElems.empty() )
     {
-      myNodeID = foundElems[0]->GetNode(0)->GetID();
+      myNodeID = FromIdType<int>(foundElems[0]->GetNode(0)->GetID());
       if ( myOkIDsReady && !myMeshModifTracer.IsMeshModified() )
         isSameDomain = IsSatisfy( foundElems[0]->GetID() );
     }
@@ -3124,14 +3124,14 @@ bool ConnectedElements::IsSatisfy( long theElementId )
         // keep elements of myType
         const SMDS_MeshElement* element = eIt->next();
         if ( myType == SMDSAbs_All || element->GetType() == myType )
-          myOkIDs.insert( myOkIDs.end(), element->GetID() );
+          myOkIDs.insert( myOkIDs.end(), FromIdType<int>(element->GetID()) );
 
         // enqueue nodes of the element
         SMDS_ElemIteratorPtr nIt = element->nodesIterator();
         while ( nIt->more() )
         {
           const SMDS_MeshNode* n = static_cast< const SMDS_MeshNode* >( nIt->next() );
-          if ( checkedNodeIDs.insert( n->GetID() ).second )
+          if ( checkedNodeIDs.insert( FromIdType<int>(n->GetID()) ).second )
             nodeQueue.push_back( n );
         }
       }
@@ -3217,7 +3217,7 @@ void CoplanarFaces::SetMesh( const SMDS_Mesh* theMesh )
             gp_Vec norm = getNormale( static_cast<const SMDS_MeshFace*>(f), &normOK );
             if (!normOK || isLessAngle( myNorm, norm, cosTol))
             {
-              myCoplanarIDs.Add( f->GetID() );
+              myCoplanarIDs.Add( FromIdType<int>(f->GetID()) );
               faceQueue.push_back( std::make_pair( f, norm ));
             }
           }
@@ -3830,10 +3830,10 @@ bool ManifoldPart::process()
     // as result next time when fi will be equal to aStartIndx
 
     SMDS_MeshFace* aFacePtr = myAllFacePtr[ fi ];
-    if ( aMapOfTreated.Contains( aFacePtr->GetID() ) )
+    if ( aMapOfTreated.Contains( FromIdType<int>(aFacePtr->GetID()) ) )
       continue;
 
-    aMapOfTreated.Add( aFacePtr->GetID() );
+    aMapOfTreated.Add( FromIdType<int>(aFacePtr->GetID()) );
     TColStd_MapOfInteger aResFaces;
     if ( !findConnected( myAllFacePtrIntDMap, aFacePtr,
                          aMapOfNonManifold, aResFaces ) )
@@ -3885,13 +3885,13 @@ bool ManifoldPart::findConnected
 
   if ( getNormale( theStartFace ).SquareModulus() <= gp::Resolution() )
   {
-    myMapBadGeomIds.Add( theStartFace->GetID() );
+    myMapBadGeomIds.Add( FromIdType<int>(theStartFace->GetID()) );
     return false;
   }
 
   ManifoldPart::TMapOfLink aMapOfBoundary, aMapToSkip;
   ManifoldPart::TVectorOfLink aSeqOfBoundary;
-  theResFaces.Add( theStartFace->GetID() );
+  theResFaces.Add( FromIdType<int>(theStartFace->GetID()) );
   ManifoldPart::TDataMapOfLinkFacePtr aDMapLinkFace;
 
   expandBoundary( aMapOfBoundary, aSeqOfBoundary,
@@ -3945,7 +3945,7 @@ bool ManifoldPart::findConnected
         SMDS_MeshFace* aNextFace = *pFace;
         if ( aPrevFace == aNextFace )
           continue;
-        int anNextFaceID = aNextFace->GetID();
+        int anNextFaceID = FromIdType<int>(aNextFace->GetID());
         if ( myIsOnlyManifold && theResFaces.Contains( anNextFaceID ) )
          // should not be with non manifold restriction. probably bad topology
           continue;
@@ -3973,7 +3973,7 @@ bool ManifoldPart::isInPlane( const SMDS_MeshFace* theFace1,
   gp_XYZ aNorm2XYZ = getNormale( theFace2 );
   if ( aNorm2XYZ.SquareModulus() <= gp::Resolution() )
   {
-    myMapBadGeomIds.Add( theFace2->GetID() );
+    myMapBadGeomIds.Add( FromIdType<int>(theFace2->GetID()) );
     return false;
   }
   if ( aNorm1.IsParallel( gp_Dir( aNorm2XYZ ), myAngToler ) )
@@ -4176,7 +4176,7 @@ void ElementsOnSurface::process()
   if ( !myMeshModifTracer.GetMesh() )
     return;
 
-  myIds.ReSize( myMeshModifTracer.GetMesh()->GetMeshInfo().NbElements( myType ));
+  myIds.ReSize( FromIdType<int>(myMeshModifTracer.GetMesh()->GetMeshInfo().NbElements( myType )));
 
   SMDS_ElemIteratorPtr anIter = myMeshModifTracer.GetMesh()->elementsIterator( myType );
   for(; anIter->more(); )
@@ -4197,7 +4197,7 @@ void ElementsOnSurface::process( const SMDS_MeshElement* theElemPtr )
     }
   }
   if ( isSatisfy )
-    myIds.Add( theElemPtr->GetID() );
+    myIds.Add( FromIdType<int>(theElemPtr->GetID()) );
 }
 
 bool ElementsOnSurface::isOnSurface( const SMDS_MeshNode* theNode )

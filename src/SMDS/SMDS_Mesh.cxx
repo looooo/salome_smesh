@@ -815,9 +815,9 @@ SMDS_MeshVolume* SMDS_Mesh::AddVolumeWithID(const SMDS_MeshNode * n1,
 SMDS_MeshFace* SMDS_Mesh::AddPolygonalFaceWithID (const std::vector<smIdType> & nodes_ids,
                                                   const smIdType               ID)
 {
-  int nbNodes = nodes_ids.size();
+  smIdType nbNodes = nodes_ids.size();
   std::vector<const SMDS_MeshNode*> nodes (nbNodes);
-  for (int i = 0; i < nbNodes; i++) {
+  for (smIdType i = 0; i < nbNodes; i++) {
     nodes[i] = myNodeFactory->FindNode( nodes_ids[i] );
     if (!nodes[i]) return NULL;
   }
@@ -911,9 +911,9 @@ SMDS_MeshVolume * SMDS_Mesh::AddPolyhedralVolumeWithID (const std::vector<smIdTy
                                                         const std::vector<int>      & quantities,
                                                         const smIdType                ID)
 {
-  int nbNodes = nodes_ids.size();
+  smIdType nbNodes = nodes_ids.size();
   std::vector<const SMDS_MeshNode*> nodes (nbNodes);
-  for (int i = 0; i < nbNodes; i++) {
+  for (smIdType i = 0; i < nbNodes; i++) {
     nodes[i] = myNodeFactory->FindNode(nodes_ids[i]);
     if (!nodes[i]) return NULL;
   }

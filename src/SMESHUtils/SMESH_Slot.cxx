@@ -391,7 +391,7 @@ namespace
         theWorkGroups.push_back( theGroupsToUpdate[i] );
 
     if ( !theWorkGroups.empty() )
-      theFaceID2Groups.Bind( theFace->GetID(), theWorkGroups );
+      theFaceID2Groups.Bind( FromIdType<int>(theFace->GetID()), theWorkGroups );
   }
 
   //================================================================================

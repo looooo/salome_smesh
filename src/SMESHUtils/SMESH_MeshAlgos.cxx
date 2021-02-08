@@ -281,7 +281,7 @@ namespace // Utils used in SMESH_ElementSearcherImpl::FindElementsByPoint()
                                        double               tolerance)
     :SMESH_Octree( new LimitAndPool() )
   {
-    int nbElems = mesh.GetMeshInfo().NbElements( elemType );
+    smIdType nbElems = mesh.GetMeshInfo().NbElements( elemType );
     _elements.reserve( nbElems );
 
     TElementBoxPool& elBoPool = getLimitAndPool()->_elBoPool;
@@ -1981,7 +1981,7 @@ SMESH_MeshAlgos::FindSharpEdges( SMDS_Mesh* theMesh,
   typedef std::pair< bool, const SMDS_MeshNode* >                            TIsSharpAndMedium;
   typedef NCollection_DataMap< SMESH_TLink, TIsSharpAndMedium, SMESH_TLink > TLinkSharpMap;
 
-  TLinkSharpMap linkIsSharp( theMesh->NbFaces() );
+  TLinkSharpMap linkIsSharp( FromIdType<int>(theMesh->NbFaces()) );
   TIsSharpAndMedium sharpMedium( true, 0 );
   bool                 & isSharp = sharpMedium.first;
   const SMDS_MeshNode* & nMedium = sharpMedium.second;
@@ -2088,7 +2088,7 @@ SMESH_MeshAlgos::SeparateFacesByEdges( SMDS_Mesh* theMesh, const std::vector< Ed
 
   typedef std::vector< const SMDS_MeshElement* >                    TFaceVec;
   typedef NCollection_DataMap< SMESH_TLink, TFaceVec, SMESH_TLink > TFacesByLinks;
-  TFacesByLinks facesByLink( theMesh->NbFaces() );
+  TFacesByLinks facesByLink( FromIdType<int>(theMesh->NbFaces()) );
 
   std::vector< const SMDS_MeshNode* > faceNodes;
   for ( SMDS_FaceIteratorPtr faceIt = theMesh->facesIterator(); faceIt->more(); )

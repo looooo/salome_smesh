@@ -64,7 +64,7 @@ int SMESHDS_GroupBase::GetID (const int theIndex)
   }
   while (myCurIndex < theIndex && myIterator->more()) {
     myCurIndex++;
-    myCurID = myIterator->next()->GetID();
+    myCurID = FromIdType<int>(myIterator->next()->GetID());
   }
   return myCurIndex == theIndex ? myCurID : -1;
 }
@@ -154,7 +154,7 @@ bool SMESHDS_GroupBase::Contains (const int theID)
 bool SMESHDS_GroupBase::Contains (const SMDS_MeshElement* elem)
 {
   if ( elem )
-    return Contains( elem->GetID() );
+    return Contains( FromIdType<int>(elem->GetID()) );
   return false;
 }
 

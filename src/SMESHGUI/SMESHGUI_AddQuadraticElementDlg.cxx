@@ -996,7 +996,7 @@ void SMESHGUI_AddQuadraticElementDlg::onTextChange (const QString& theNewText)
     for (int i = 0; i < aListId.count(); i++) {
       if ( const SMDS_MeshNode * n = aMesh->FindNode( aListId[ i ].toInt() ) )
       {
-        newIndices.Add( n->GetID() );
+        newIndices.Add( FromIdType<int>(n->GetID()) );
       }
       else
       {

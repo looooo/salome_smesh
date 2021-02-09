@@ -69,6 +69,7 @@
 // SALOME KERNEL includes
 #include <SALOMEDSClient_Study.hxx>
 #include <Basics_Utils.hxx>
+#include <smIdType.hxx>
 
 // OCCT includes
 #include <StdSelect_TypeOfFace.hxx>
@@ -3538,7 +3539,7 @@ void SMESHGUI_FilterDlg::filterSource (const int theType,
       return;
     SMESH::smIdType_array_var anIds = myFilter[ theType ]->GetElementsId(myMesh);
     for (int i = 0, n = anIds->length(); i < n; i++)
-      theResIds.append(anIds[ i ]);
+      theResIds.append(FromIdType<int>(anIds[ i ]));
   }
   else if (aSourceId == Selection)
   {
@@ -3592,7 +3593,7 @@ void SMESHGUI_FilterDlg::filterSelectionSource (const int theType,
         SMESH::smIdType_array_var anIds =
           theType == SMESH::NODE ? aSubMesh->GetNodesId() : aSubMesh->GetElementsId();
         for (int i = 0, n = anIds->length(); i < n; i++)
-          aToBeFiltered.Add(anIds[ i ]);
+          aToBeFiltered.Add(FromIdType<int>(anIds[ i ]));
       }
     }
 
@@ -3605,7 +3606,7 @@ void SMESHGUI_FilterDlg::filterSelectionSource (const int theType,
       {
         SMESH::smIdType_array_var anIds = aGroup->GetListOfID();
         for (int i = 0, n = anIds->length(); i < n; i++)
-          aToBeFiltered.Add(anIds[ i ]);
+          aToBeFiltered.Add(FromIdType<int>(anIds[ i ]));
       }
     }
 

@@ -558,7 +558,7 @@ void SMESHGUI_OffsetDlg::onTextChange (const QString& theNewText)
     for (int i = 0; i < aListId.count(); i++)
     {
       if ( const SMDS_MeshElement * e = aMesh->FindElement(aListId[ i ].toInt()))
-        newIndices.Add( e->GetID() );
+        newIndices.Add( FromIdType<int>(e->GetID()) );
       myNbOkElements++;
     }
 

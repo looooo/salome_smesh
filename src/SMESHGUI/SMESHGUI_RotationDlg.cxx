@@ -650,7 +650,7 @@ void SMESHGUI_RotationDlg::onTextChange (const QString& theNewText)
       for (int i = 0; i < aListId.count(); i++) {
         const SMDS_MeshElement * e = aMesh->FindElement(aListId[ i ].toInt());
         if (e)
-          newIndices.Add(e->GetID());
+          newIndices.Add(FromIdType<int>(e->GetID()));
         myNbOkElements++;
       }
 

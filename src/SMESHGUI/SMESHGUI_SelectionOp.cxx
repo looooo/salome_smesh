@@ -483,12 +483,12 @@ void SMESHGUI_SelectionOp::onTextChanged( int, const QStringList& list )
     if ( selectionMode() == NodeSelection )
       for( ; anIt!=aLast; anIt++ ) {
         if( const SMDS_MeshNode * n = aMesh->FindNode( *anIt ) )
-          newIndices.Add( n->GetID() );
+          newIndices.Add( FromIdType<int>(n->GetID()) );
       }
     else 
       for( ; anIt!=aLast; anIt++ ) {
         if( const SMDS_MeshElement* e = aMesh->FindElement( *anIt ) )
-          newIndices.Add( e->GetID() );
+          newIndices.Add( FromIdType<int>(e->GetID()) );
       }
 
     selector()->AddOrRemoveIndex( sel.First(), newIndices, false );

@@ -689,7 +689,7 @@ void SMESHGUI_ExtrusionAlongPathDlg::onTextChange (const QString& theNewText)
           const SMDS_MeshNode* n = aMesh->FindNode(ind);
           if (n) {
             TColStd_MapOfInteger newIndices;
-            newIndices.Add(n->GetID());
+            newIndices.Add(FromIdType<int>(n->GetID()));
             mySelector->AddOrRemoveIndex( aPathActor->getIO(), newIndices, false );
             if ( SVTK_ViewWindow* aViewWindow = SMESH::GetViewWindow( mySMESHGUI ))
               aViewWindow->highlight( aPathActor->getIO(), true, true );

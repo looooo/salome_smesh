@@ -503,7 +503,7 @@ void SMESHGUI_ShapeByMeshOp::onElemIdChanged(const QString& theNewText)
         for ( int i = 0; i < aListId.count(); i++ ) {
           if ( const SMDS_MeshElement * e = aMesh->FindElement( aListId[ i ].toInt() ))
             if ( e->GetType() == type )
-              newIndices.Add( e->GetID() );
+              newIndices.Add( FromIdType<int>(e->GetID()) );
         }
         
         if ( !newIndices.IsEmpty() )

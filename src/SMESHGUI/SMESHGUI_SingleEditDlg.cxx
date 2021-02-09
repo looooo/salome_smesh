@@ -369,8 +369,8 @@ void SMESHGUI_SingleEditDlg::onTextChange (const QString& /*theNewText*/)
 
       if ( findTriangles(aNode1,aNode2,tria1,tria2) )
       {
-	newIndices.push_back( aNode1->GetID() );
-	newIndices.push_back( aNode2->GetID() );
+	newIndices.push_back( FromIdType<int>(aNode1->GetID()) );
+	newIndices.push_back( FromIdType<int>(aNode2->GetID()) );
         
         myOkBtn->setEnabled(true);
         myApplyBtn->setEnabled(true);

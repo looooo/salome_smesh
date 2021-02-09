@@ -1551,7 +1551,7 @@ void SMESHGUI_SewingDlg::onTextChange (const QString& theNewText)
 
       const SMDS_MeshNode * n = aMesh->FindNode(theNewText.toInt());
       if (n) {
-        newIndices.Add(n->GetID());
+        newIndices.Add(FromIdType<int>(n->GetID()));
         mySelector->AddOrRemoveIndex(myActor->getIO(), newIndices, false);
         if ( SVTK_ViewWindow* aViewWindow = SMESH::GetViewWindow( mySMESHGUI ))
           aViewWindow->highlight( myActor->getIO(), true, true );
@@ -1583,7 +1583,7 @@ void SMESHGUI_SewingDlg::onTextChange (const QString& theNewText)
         const SMDS_MeshElement * e = aMesh->FindElement(aListId[ i ].toInt());
         if (e)
         {
-          newIndices.Add(e->GetID());
+          newIndices.Add(FromIdType<int>(e->GetID()));
           atLeastOneExists = true;
         }
       }

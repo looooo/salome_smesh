@@ -694,7 +694,7 @@ void SMESHGUI_CreatePolyhedralVolumeDlg::onTextChange(const QString& theNewText)
         for ( int i = 0; i < aListId.count(); i++ ) {
           const SMDS_MeshNode * n = aMesh->FindNode( aListId[ i ].toInt() );
           if ( n ) {
-            newIndices.Add(n->GetID());
+            newIndices.Add(FromIdType<int>(n->GetID()));
             myNbOkElements++;
           }
         }
@@ -727,7 +727,7 @@ void SMESHGUI_CreatePolyhedralVolumeDlg::onTextChange(const QString& theNewText)
           for ( int i = 0; i < aListId.count(); i++ ) {
             const SMDS_MeshElement * e = aMesh->FindElement( aListId[ i ].toInt() );
             if ( e ) {
-              newIndices.Add(e->GetID());
+              newIndices.Add(FromIdType<int>(e->GetID()));
               myNbOkElements++;  
             }
           }
@@ -992,7 +992,7 @@ void SMESHGUI_CreatePolyhedralVolumeDlg::displaySimulation()
             SMESH::TPolySimulation::TVTKIds aVTKIds_faces;
             while( anIter->more() )
               if ( const SMDS_MeshNode* aNode = (SMDS_MeshNode*)anIter->next() ){
-                vtkIdType aId = myActor->GetObject()->GetNodeVTKId( aNode->GetID() );
+                vtkIdType aId = myActor->GetObject()->GetNodeVTKId( FromIdType<int>(aNode->GetID()) );
                 aVTKIds.push_back(aId);
                 aVTKIds_faces.push_back(aId);
               }

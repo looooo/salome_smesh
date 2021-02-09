@@ -209,7 +209,7 @@ SMESH::ElementType SMESH_GroupBase_i::GetType()
  */
 //=============================================================================
 
-CORBA::Long  SMESH_GroupBase_i::Size()
+CORBA::smIdType SMESH_GroupBase_i::Size()
 {
   if ( myPreMeshInfo )
     return GetType() == SMESH::NODE ? myPreMeshInfo->NbNodes() : myPreMeshInfo->NbElements();

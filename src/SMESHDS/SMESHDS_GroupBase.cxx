@@ -55,7 +55,7 @@ SMESHDS_GroupBase::SMESHDS_GroupBase (const int                 theID,
  */
 //=============================================================================
 
-int SMESHDS_GroupBase::GetID (const int theIndex)
+smIdType SMESHDS_GroupBase::GetID (const int theIndex)
 {
   if (myCurIndex < 1 || myCurIndex > theIndex) {
     myIterator = GetElements();
@@ -64,7 +64,7 @@ int SMESHDS_GroupBase::GetID (const int theIndex)
   }
   while (myCurIndex < theIndex && myIterator->more()) {
     myCurIndex++;
-    myCurID = FromIdType<int>(myIterator->next()->GetID());
+    myCurID = myIterator->next()->GetID();
   }
   return myCurIndex == theIndex ? myCurID : -1;
 }

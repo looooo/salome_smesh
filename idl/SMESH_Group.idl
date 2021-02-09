@@ -62,7 +62,7 @@ module SMESH
     /*!
      * Returns the number of elements in the group
      */
-    long Size();
+    smIdType Size();
 
     /*!
      * Returns true if the group does not contain any elements

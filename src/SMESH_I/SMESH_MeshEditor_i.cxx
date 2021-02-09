@@ -756,11 +756,11 @@ bool SMESH_MeshEditor_i::IsTemporaryIDSource( SMESH::SMESH_IDSource_ptr& idSourc
 }
 
 SMESH::smIdType* SMESH_MeshEditor_i::GetTemporaryIDs( SMESH::SMESH_IDSource_ptr& idSource,
-                                                  int&                       nbIds)
+                                                      SMESH::smIdType&           nbIds)
 {
   if ( _IDSource* tmpIdSource = SMESH::DownCast<SMESH_MeshEditor_i::_IDSource*>( idSource ))
   {
-    nbIds = (int) tmpIdSource->_ids.length();
+    nbIds = (SMESH::smIdType) tmpIdSource->_ids.length();
     return & tmpIdSource->_ids[0];
   }
   nbIds = 0;

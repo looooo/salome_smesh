@@ -2229,9 +2229,7 @@ void SMESHGUI_BaseComputeOp::evaluateMesh()
     SUIT_OverrideCursor aWaitCursor;
     try {
       OCC_CATCH_SIGNALS;
-      SMESH::long_array_var tmp = gen->Evaluate(myMesh, myMainShape);
-      for ( int i = 0; i < tmp->length(); ++i)
-        aRes[ i ] = tmp [ i ];
+      aRes = gen->Evaluate(myMesh, myMainShape);
     }
     catch(const SALOME::SALOME_Exception & S_ex){
       memoryLack = true;

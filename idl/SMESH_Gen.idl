@@ -386,8 +386,8 @@ module SMESH
     /*!
      * Evaluates size of prospective mesh on a shape
      */
-    long_array  Evaluate(in SMESH_Mesh        theMesh,
-                         in GEOM::GEOM_Object theSubObject)
+    smIdType_array  Evaluate(in SMESH_Mesh        theMesh,
+                             in GEOM::GEOM_Object theSubObject)
       raises ( SALOME::SALOME_Exception );
 
     /*!

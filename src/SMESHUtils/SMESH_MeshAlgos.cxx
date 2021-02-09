@@ -1981,7 +1981,11 @@ SMESH_MeshAlgos::FindSharpEdges( SMDS_Mesh* theMesh,
   typedef std::pair< bool, const SMDS_MeshNode* >                            TIsSharpAndMedium;
   typedef NCollection_DataMap< SMESH_TLink, TIsSharpAndMedium, SMESH_TLink > TLinkSharpMap;
 
-  TLinkSharpMap linkIsSharp( FromIdType<int>(theMesh->NbFaces()) );
+  TLinkSharpMap linkIsSharp;
+  Standard_Integer nbBuckets = FromIdType<Standard_Integer>( theMesh->NbFaces() );
+  if ( nbBuckets > 0 )
+    linkIsSharp.ReSize( nbBuckets );
+
   TIsSharpAndMedium sharpMedium( true, 0 );
   bool                 & isSharp = sharpMedium.first;
   const SMDS_MeshNode* & nMedium = sharpMedium.second;
@@ -2088,7 +2092,10 @@ SMESH_MeshAlgos::SeparateFacesByEdges( SMDS_Mesh* theMesh, const std::vector< Ed
 
   typedef std::vector< const SMDS_MeshElement* >                    TFaceVec;
   typedef NCollection_DataMap< SMESH_TLink, TFaceVec, SMESH_TLink > TFacesByLinks;
-  TFacesByLinks facesByLink( FromIdType<int>(theMesh->NbFaces()) );
+  TFacesByLinks facesByLink;
+  Standard_Integer nbBuckets = FromIdType<Standard_Integer>( theMesh->NbFaces() );
+  if ( nbBuckets > 0 )
+    facesByLink.ReSize( nbBuckets );
 
   std::vector< const SMDS_MeshNode* > faceNodes;
   for ( SMDS_FaceIteratorPtr faceIt = theMesh->facesIterator(); faceIt->more(); )

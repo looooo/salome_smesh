@@ -32,8 +32,8 @@
 #include <GeomAPI_ProjectPointOnSurf.hxx>
 #include <Quantity_Color.hxx>
 #include <TColStd_MapOfInteger.hxx>
-#include <TColStd_SequenceOfInteger.hxx>
 #include <TCollection_AsciiString.hxx>
+#include <NCollection_Map.hxx>
 #include <TopAbs.hxx>
 #include <TopoDS_Face.hxx>
 #include <gp_XYZ.hxx>
@@ -57,6 +57,8 @@ class BRepClass3d_SolidClassifier;
 class ShapeAnalysis_Surface;
 class gp_Pln;
 class gp_Pnt;
+
+typedef NCollection_Map< smIdType > TIDsMap;
 
 namespace SMESH{
   namespace Controls{
@@ -130,12 +132,12 @@ namespace SMESH{
       virtual void SetMesh( const SMDS_Mesh* theMesh );
       virtual double GetValue( long theElementId );
       virtual double GetValue(const TSequenceOfXYZ& /*thePoints*/) { return -1.0;};
-      void GetHistogram(int                     nbIntervals,
-                        std::vector<int>&       nbEvents,
-                        std::vector<double>&    funValues,
-                        const std::vector<int>& elements,
-                        const double*           minmax=0,
-                        const bool              isLogarithmic = false);
+      void GetHistogram(int                          nbIntervals,
+                        std::vector<int>&            nbEvents,
+                        std::vector<double>&         funValues,
+                        const std::vector<smIdType>& elements,
+                        const double*                minmax=0,
+                        const bool                   isLogarithmic = false);
       bool IsApplicable( long theElementId ) const;
       virtual bool IsApplicable( const SMDS_MeshElement* element ) const;
       virtual SMDSAbs_ElementType GetType() const = 0;
@@ -144,7 +146,7 @@ namespace SMESH{
       void  SetPrecision( const long thePrecision );
       double Round( const double & value );
       
-      bool GetPoints(const int theId, TSequenceOfXYZ& theRes) const;
+      bool GetPoints(const smIdType theId, TSequenceOfXYZ& theRes) const;
       static bool GetPoints(const SMDS_MeshElement* theElem, TSequenceOfXYZ& theRes);
     protected:
       const SMDS_Mesh*        myMesh;
@@ -423,9 +425,9 @@ namespace SMESH{
       double GetTolerance () const { return myToler; }
 
     private:
-      double               myToler;
-      TColStd_MapOfInteger myCoincidentIDs;
-      TMeshModifTracer     myMeshModifTracer;
+      double           myToler;
+      TIDsMap          myCoincidentIDs;
+      TMeshModifTracer myMeshModifTracer;
     };
     typedef boost::shared_ptr<CoincidentNodes> CoincidentNodesPtr;
    
@@ -591,7 +593,7 @@ namespace SMESH{
       virtual void SetMesh( const SMDS_Mesh* theMesh );
       virtual bool IsSatisfy( long theElementId );
       virtual SMDSAbs_ElementType GetType() const;
-      static bool IsFreeEdge( const SMDS_MeshNode** theNodes, const int theFaceId  );
+      static bool IsFreeEdge( const SMDS_MeshNode** theNodes, const smIdType theFaceId  );
       typedef long TElemId;
       struct Border{
         TElemId myElemId;
@@ -650,9 +652,9 @@ namespace SMESH{
     protected:
       const SMDS_Mesh*              myMesh;
 
-      TColStd_SequenceOfInteger     myMin;
-      TColStd_SequenceOfInteger     myMax;
-      TColStd_MapOfInteger          myIds;
+      std::vector< smIdType>        myMin;
+      std::vector< smIdType >       myMax;
+      TIDsMap                       myIds;
 
       SMDSAbs_ElementType           myType;
     };
@@ -833,7 +835,7 @@ namespace SMESH{
       bool    findConnected( const TDataMapFacePtrInt& theAllFacePtrInt,
                              SMDS_MeshFace*            theStartFace,
                              TMapOfLink&               theNonManifold,
-                             TColStd_MapOfInteger&     theResFaces );
+                             TIDsMap&                  theResFaces );
       bool    isInPlane( const SMDS_MeshFace* theFace1,
                           const SMDS_MeshFace* theFace2 );
       void    expandBoundary( TMapOfLink&            theMapOfBoundary,
@@ -847,8 +849,8 @@ namespace SMESH{
 
     private:
       const SMDS_Mesh*      myMesh;
-      TColStd_MapOfInteger  myMapIds;
-      TColStd_MapOfInteger  myMapBadGeomIds;
+      TIDsMap               myMapIds;
+      TIDsMap               myMapBadGeomIds;
       TVectorOfFacePtr      myAllFacePtr;
       TDataMapFacePtrInt    myAllFacePtrIntDMap;
       double                myAngToler;
@@ -909,7 +911,7 @@ namespace SMESH{
 
     private:
       TMeshModifTracer      myMeshModifTracer;
-      TColStd_MapOfInteger  myIds;
+      TIDsMap               myIds;
       SMDSAbs_ElementType   myType;
       TopoDS_Face           mySurf;
       double                myToler;
@@ -1149,7 +1151,7 @@ namespace SMESH{
       TMeshModifTracer     myMeshModifTracer;
       long                 myFaceID;
       double               myToler;
-      TColStd_MapOfInteger myCoplanarIDs;
+      TIDsMap              myCoplanarIDs;
     };
     typedef boost::shared_ptr<CoplanarFaces> CoplanarFacesPtr;
 
@@ -1176,14 +1178,14 @@ namespace SMESH{
       //const std::set<long>& GetDomainIDs() const { return myOkIDs; }
 
     private:
-      int                 myNodeID;
+      smIdType            myNodeID;
       std::vector<double> myXYZ;
       SMDSAbs_ElementType myType;
       TMeshModifTracer    myMeshModifTracer;
 
       void                clearOkIDs();
       bool                myOkIDsReady;
-      std::set< int >     myOkIDs; // empty means that there is one domain
+      std::set<smIdType>  myOkIDs; // empty means that there is one domain
     };
     typedef boost::shared_ptr<ConnectedElements> ConnectedElementsPtr;
 

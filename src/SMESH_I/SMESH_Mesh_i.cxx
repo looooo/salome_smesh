@@ -6324,7 +6324,7 @@ SMDS_ElemIteratorPtr SMESH_Mesh_i::GetElements(SMESH::SMESH_IDSource_ptr theObje
     SMDSAbs_ElementType iterType = isNodes ? SMDSAbs_Node : elemType;
     if ( SMESH_MeshEditor_i::IsTemporaryIDSource( theObject ))
     {
-      int nbIds;
+      SMESH::smIdType nbIds;
       if ( SMESH::smIdType* ids = SMESH_MeshEditor_i::GetTemporaryIDs( theObject, nbIds ))
         elemIt = SMDS_ElemIteratorPtr( new IDSourceIterator( meshDS, ids, nbIds, iterType ));
     }

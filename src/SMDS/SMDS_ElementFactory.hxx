@@ -405,7 +405,7 @@ public:
   static bool IsUsed( const _UsedRange& r ) { return r.myValue; }
 
   //! Return index of an element in the chunk
-  smIdType Index( const SMDS_MeshElement* e ) const { return e - myElements; }
+  int Index( const SMDS_MeshElement* e ) const { return (int)( e - myElements ); }
 
   //! Return ID of the 1st element in the chunk
   smIdType Get1stID() const { return my1stID; }

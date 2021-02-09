@@ -61,7 +61,7 @@ class SMESH_I_EXPORT SMESH_GroupBase_i:
   void SetName(const char* name);
   char* GetName();
   SMESH::ElementType GetType();
-  CORBA::Long Size();
+  SMESH::smIdType Size();
   CORBA::Boolean IsEmpty();
   CORBA::Boolean Contains(SMESH::smIdType elem_id);
   SMESH::smIdType GetID(SMESH::smIdType elem_index);

@@ -1934,7 +1934,7 @@ namespace SMESH_MeshAlgos
       {
         const CutFace& cf = *cutFacesIt;
         smIdType index = cf.myInitFace->GetID(); // index in theNew2OldFaces
-        if ((int) theNew2OldFaces.size() <= index )
+        if ((smIdType) theNew2OldFaces.size() <= index )
           theNew2OldFaces.resize( index + 1 );
         theNew2OldFaces[ index ] = std::make_pair( cf.myInitFace, index );
       }
@@ -3226,7 +3226,7 @@ SMDS_Mesh* SMESH_MeshAlgos::MakeOffset( SMDS_ElemIteratorPtr theFaceIt,
     for ( SMDS_ElemIteratorPtr fIt = newNode->GetInverseElementIterator(); fIt->more(); )
     {
       const SMDS_MeshElement* newFace = fIt->next();
-      const int             faceIndex = FromIdType<int>(newFace->GetID());
+      const smIdType        faceIndex = newFace->GetID();
       const gp_XYZ&           oldNorm = normals[ faceIndex ];
       const gp_XYZ             newXYZ = oldXYZ + oldNorm * theOffset;
       if ( multiPos.empty() )
@@ -3275,7 +3275,7 @@ SMDS_Mesh* SMESH_MeshAlgos::MakeOffset( SMDS_ElemIteratorPtr theFaceIt,
       for ( SMDS_ElemIteratorPtr fIt = newNode->GetInverseElementIterator(); fIt->more(); )
       {
         const SMDS_MeshElement* newFace = fIt->next();
-        const int             faceIndex = FromIdType<int>(newFace->GetID());
+        const smIdType        faceIndex = newFace->GetID();
         const gp_XYZ&           oldNorm = normals[ faceIndex ];
         if ( !SMESH_MeshAlgos::FaceNormal( newFace, faceNorm, /*normalize=*/false ) ||
              //faceNorm * moveVec < 0 )

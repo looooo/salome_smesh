@@ -315,7 +315,7 @@ int SMESHDS_GroupOnFilter::getElementIds( void* ids, size_t idSize ) const
     if ( IsUpToDate() )
     {
       for ( ; elIt->more(); curID += idSize )
-        (*(int*) curID) = FromIdType<int>(elIt->next()->GetID());
+        (*(smIdType*) curID) = elIt->next()->GetID();
     }
     else
     {
@@ -325,11 +325,11 @@ int SMESHDS_GroupOnFilter::getElementIds( void* ids, size_t idSize ) const
       me->myMeshInfo.assign( SMDSEntity_Last, 0 );
       me->myMeshInfo[ firstOkElem->GetEntityType() ]++;
 
-      (*(int*) curID) = FromIdType<int>(firstOkElem->GetID());
+      (*(smidtype*) curID) = firstOkElem->GetID();
       for ( curID += idSize; elIt->more(); curID += idSize )
       {
         const SMDS_MeshElement* e = elIt->next();
-        (*(int*) curID) = FromIdType<int>(e->GetID());
+        (*(smIdtype*) curID) = e->GetID();
         me->myMeshInfo[ e->GetEntityType() ]++;
       }
     }

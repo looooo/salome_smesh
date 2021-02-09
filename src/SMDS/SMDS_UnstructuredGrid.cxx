@@ -191,7 +191,7 @@ void SMDS_UnstructuredGrid::compactGrid(std::vector<smIdType>& idNodesOldToNew, 
     // Use double type for storing coordinates of nodes instead float.
     vtkPoints *newPoints = vtkPoints::New();
     newPoints->SetDataType( VTK_DOUBLE );
-    newPoints->SetNumberOfPoints( FromIdType<int>(newNodeSize) );
+    newPoints->SetNumberOfPoints( FromIdType<vtkIdType>(newNodeSize) );
 
     vtkIdType i = 0, alreadyCopied = 0;
     while ( i < oldNodeSize )
@@ -298,16 +298,16 @@ void SMDS_UnstructuredGrid::compactGrid(std::vector<smIdType>& idNodesOldToNew, 
       {
         smIdType oldCellId = idCellsNewToOld[ newCellID ];
         newFaceLocations->InsertNextValue( newFaces->GetMaxId()+1 );
-        smIdType oldFaceLoc = this->FaceLocations->GetValue( FromIdType<int>(oldCellId) );
-        smIdType nCellFaces = this->Faces->GetValue( FromIdType<int>(oldFaceLoc++) );
-        newFaces->InsertNextValue( FromIdType<int>(nCellFaces) );
+        smIdType oldFaceLoc = this->FaceLocations->GetValue( FromIdType<vtkIdType>(oldCellId) );
+        smIdType nCellFaces = this->Faces->GetValue( FromIdType<vtkIdType>(oldFaceLoc++) );
+        newFaces->InsertNextValue( FromIdType<vtkIdType>(nCellFaces) );
         for ( int n = 0; n < nCellFaces; n++ )
         {
-          int nptsInFace = this->Faces->GetValue( FromIdType<int>(oldFaceLoc++) );
+          int nptsInFace = this->Faces->GetValue( FromIdType<vtkIdType>(oldFaceLoc++) );
           newFaces->InsertNextValue( nptsInFace );
           for ( int k = 0; k < nptsInFace; k++ )
           {
-            vtkIdType oldpt = this->Faces->GetValue( FromIdType<int>(oldFaceLoc++) );
+            vtkIdType oldpt = this->Faces->GetValue( FromIdType<vtkIdType>(oldFaceLoc++) );
             newFaces->InsertNextValue( idNodesOldToNew[ oldpt ]);
           }
         }

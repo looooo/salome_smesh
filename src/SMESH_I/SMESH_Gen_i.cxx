@@ -2330,9 +2330,8 @@ SMESH::MeshPreviewStruct* SMESH_Gen_i::Precompute( SMESH::SMESH_Mesh_ptr theMesh
  */
 //=============================================================================
 
-SMESH::long_array* SMESH_Gen_i::Evaluate(SMESH::SMESH_Mesh_ptr theMesh,
-                                         GEOM::GEOM_Object_ptr theShapeObject)
-//                                     SMESH::long_array& theNbElems)
+SMESH::smIdType_array* SMESH_Gen_i::Evaluate(SMESH::SMESH_Mesh_ptr theMesh,
+                                             GEOM::GEOM_Object_ptr theShapeObject)
 {
   Unexpect aCatch(SALOME_SalomeException);
   if(MYDEBUG) MESSAGE( "SMESH_Gen_i::Evaluate" );
@@ -2343,7 +2342,7 @@ SMESH::long_array* SMESH_Gen_i::Evaluate(SMESH::SMESH_Mesh_ptr theMesh,
   if ( CORBA::is_nil( theMesh ) )
     THROW_SALOME_CORBA_EXCEPTION( "bad Mesh reference", SALOME::BAD_PARAM );
 
-  SMESH::long_array_var nbels = new SMESH::long_array;
+  SMESH::smIdType_array_var nbels = new SMESH::smIdType_array;
   nbels->length(SMESH::Entity_Last);
   int i = SMESH::Entity_Node;
   for (; i < SMESH::Entity_Last; i++)

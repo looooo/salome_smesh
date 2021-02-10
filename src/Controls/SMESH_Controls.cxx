@@ -2092,7 +2092,7 @@ double MultiConnection2D::GetValue( long theElementId )
       if (!anIter) break;
 
       const SMDS_MeshNode *aNode, *aNode0 = 0;
-      NCollection_Map< smIdType > aMap, aMapPrev;
+      NCollection_Map< smIdType, smIdHasher > aMap, aMapPrev;
 
       for (i = 0; i <= len; i++) {
         aMapPrev = aMap;
@@ -3131,7 +3131,7 @@ bool ConnectedElements::IsSatisfy( long theElementId )
         while ( nIt->more() )
         {
           const SMDS_MeshNode* n = static_cast< const SMDS_MeshNode* >( nIt->next() );
-          if ( checkedNodeIDs.insert( n->GetID()) )
+          if ( checkedNodeIDs.insert( n->GetID()).second )
             nodeQueue.push_back( n );
         }
       }
@@ -3281,7 +3281,7 @@ void RangeOfIds::GetRangeStr( TCollection_AsciiString& theResStr )
   TColStd_SequenceOfInteger     anIntSeq;
   TColStd_SequenceOfAsciiString aStrSeq;
 
-  TColStd_MapIteratorOfMapOfInteger anIter( myIds );
+  TIDsMap::Iterator anIter( myIds );
   for ( ; anIter.More(); anIter.Next() )
   {
     int anId = anIter.Key();
@@ -3290,19 +3290,19 @@ void RangeOfIds::GetRangeStr( TCollection_AsciiString& theResStr )
     aStrSeq.Append( aStr );
   }
 
-  for ( int i = 1, n = myMin.Length(); i <= n; i++ )
+  for ( smIdType i = 1, n = myMin.size(); i <= n; i++ )
   {
-    int aMinId = myMin( i );
-    int aMaxId = myMax( i );
+    smIdType aMinId = myMin[i];
+    smIdType aMaxId = myMax[i];
 
     TCollection_AsciiString aStr;
     if ( aMinId != IntegerFirst() )
-      aStr += aMinId;
+      aStr += FromIdType<int>(aMinId);
 
     aStr += "-";
 
     if ( aMaxId != IntegerLast() )
-      aStr += aMaxId;
+      aStr += FromIdType<int>(aMaxId);
 
     // find position of the string in result sequence and insert string in it
     if ( anIntSeq.Length() == 0 )
@@ -3351,8 +3351,8 @@ void RangeOfIds::GetRangeStr( TCollection_AsciiString& theResStr )
 //=======================================================================
 bool RangeOfIds::SetRangeStr( const TCollection_AsciiString& theStr )
 {
-  myMin.Clear();
-  myMax.Clear();
+  myMin.clear();
+  myMax.clear();
   myIds.Clear();
 
   TCollection_AsciiString aStr = theStr;
@@ -3390,8 +3390,8 @@ bool RangeOfIds::SetRangeStr( const TCollection_AsciiString& theStr )
            (!aMaxStr.IsEmpty() && !aMaxStr.IsIntegerValue()) )
         return false;
 
-      myMin.Append( aMinStr.IsEmpty() ? IntegerFirst() : aMinStr.IntegerValue() );
-      myMax.Append( aMaxStr.IsEmpty() ? IntegerLast()  : aMaxStr.IntegerValue() );
+      myMin.push_back( aMinStr.IsEmpty() ? IntegerFirst() : aMinStr.IntegerValue() );
+      myMax.push_back( aMaxStr.IsEmpty() ? IntegerLast()  : aMaxStr.IntegerValue() );
     }
   }
 
@@ -3440,8 +3440,8 @@ bool RangeOfIds::IsSatisfy( long theId )
   if ( myIds.Contains( theId ) )
     return true;
 
-  for ( int i = 1, n = myMin.Length(); i <= n; i++ )
-    if ( theId >= myMin( i ) && theId <= myMax( i ) )
+  for ( int i = 1, n = myMin.size(); i <= n; i++ )
+    if ( theId >= myMin[i] && theId <= myMax[i] )
       return true;
 
   return false;
@@ -4199,7 +4199,7 @@ void ElementsOnSurface::process( const SMDS_MeshElement* theElemPtr )
     }
   }
   if ( isSatisfy )
-    myIds.Add( heElemPtr->GetID() );
+    myIds.Add( theElemPtr->GetID() );
 }
 
 bool ElementsOnSurface::isOnSurface( const SMDS_MeshNode* theNode )

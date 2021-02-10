@@ -491,10 +491,10 @@ void SMESH_VisualObjDef::buildElemPrs()
 // function : GetEdgeNodes
 // purpose  : Retrieve ids of nodes from edge of elements ( edge is numbered from 0 )
 //=================================================================================
-bool SMESH_VisualObjDef::GetEdgeNodes( const int theElemId,
-                                       const int theEdgeNum,
-                                       int&      theNodeId1,
-                                       int&      theNodeId2 ) const
+bool SMESH_VisualObjDef::GetEdgeNodes( const smIdType theElemId,
+                                       const int      theEdgeNum,
+                                       smIdType&      theNodeId1,
+                                       smIdType&      theNodeId2 ) const
 {
   const SMDS_Mesh* aMesh = GetMesh();
   if ( aMesh == 0 )
@@ -681,7 +681,7 @@ bool SMESH_MeshObj::NulData()
 // function : GetElemDimension
 // purpose  : Get dimension of element
 //=================================================================================
-int SMESH_MeshObj::GetElemDimension( const int theObjId )
+int SMESH_MeshObj::GetElemDimension( const smIdType theObjId )
 {
   const SMDS_MeshElement* anElem = myClient->FindElement( theObjId );
   if ( anElem == 0 )
@@ -703,7 +703,7 @@ int SMESH_MeshObj::GetElemDimension( const int theObjId )
 // function : GetEntities
 // purpose  : Get entities of specified type. Return number of entities
 //=================================================================================
-int SMESH_MeshObj::GetNbEntities( const SMDSAbs_ElementType theType) const
+smIdType SMESH_MeshObj::GetNbEntities( const SMDSAbs_ElementType theType) const
 {
   switch ( theType )
   {
@@ -742,7 +742,7 @@ int SMESH_MeshObj::GetNbEntities( const SMDSAbs_ElementType theType) const
   }
 }
 
-int SMESH_MeshObj::GetEntities( const SMDSAbs_ElementType theType, TEntityList& theObjs ) const
+smIdType SMESH_MeshObj::GetEntities( const SMDSAbs_ElementType theType, TEntityList& theObjs ) const
 {
   theObjs.clear();
 
@@ -834,7 +834,7 @@ SMESH_SubMeshObj::~SMESH_SubMeshObj()
 // function : GetElemDimension
 // purpose  : Get dimension of element
 //=================================================================================
-int SMESH_SubMeshObj::GetElemDimension( const int theObjId )
+int SMESH_SubMeshObj::GetElemDimension( const smIdType theObjId )
 {
   return myMeshObj == 0 ? 0 : myMeshObj->GetElemDimension( theObjId );
 }
@@ -962,7 +962,7 @@ static int getPointers( const SMDSAbs_ElementType           theRequestType,
 // function : GetEntities
 // purpose  : Get entities of specified type. Return number of entities
 //=================================================================================
-int SMESH_GroupObj::GetNbEntities( const SMDSAbs_ElementType theType) const
+smIdType SMESH_GroupObj::GetNbEntities( const SMDSAbs_ElementType theType) const
 {
   if(SMDSAbs_ElementType(myGroupServer->GetType()) == theType) {
     return myGroupServer->Size();
@@ -973,7 +973,7 @@ int SMESH_GroupObj::GetNbEntities( const SMDSAbs_ElementType theType) const
   return 0;
 }
 
-int SMESH_GroupObj::GetEntities( const SMDSAbs_ElementType theType, TEntityList& theResList ) const
+smIdType SMESH_GroupObj::GetEntities( const SMDSAbs_ElementType theType, TEntityList& theResList ) const
 {
   theResList.clear();
   SMDS_Mesh* aMesh = myMeshObj->GetMesh();
@@ -1028,7 +1028,7 @@ SMESH_subMeshObj::~SMESH_subMeshObj()
 // function : GetEntities
 // purpose  : Get entities of specified type. Return number of entities
 //=================================================================================
-int SMESH_subMeshObj::GetNbEntities( const SMDSAbs_ElementType theType) const
+smIdType SMESH_subMeshObj::GetNbEntities( const SMDSAbs_ElementType theType) const
 {
   switch ( theType )
   {
@@ -1053,7 +1053,7 @@ int SMESH_subMeshObj::GetNbEntities( const SMDSAbs_ElementType theType) const
   }
 }
 
-int SMESH_subMeshObj::GetEntities( const SMDSAbs_ElementType theType, TEntityList& theResList ) const
+smIdType SMESH_subMeshObj::GetEntities( const SMDSAbs_ElementType theType, TEntityList& theResList ) const
 {
   theResList.clear();
 

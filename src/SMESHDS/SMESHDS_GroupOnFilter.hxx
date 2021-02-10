@@ -47,7 +47,7 @@ class SMESHDS_EXPORT SMESHDS_GroupOnFilter: public SMESHDS_GroupBase, SMDS_Eleme
 
   SMESH_PredicatePtr GetPredicate() const { return myPredicate; }
 
-  std::vector< int > GetMeshInfo() const;
+  std::vector< smIdType > GetMeshInfo() const;
 
   template< typename IDTYPE >
     smIdType GetElementIds( IDTYPE* ids ) const

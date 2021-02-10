@@ -45,6 +45,7 @@
 #include "SMDSAbs_ElementType.hxx"
 
 #include <SALOMEconfig.h>
+#include <smIdType.hxx>
 #include CORBA_SERVER_HEADER(SMESH_Mesh)
 
 class SMDS_Mesh;

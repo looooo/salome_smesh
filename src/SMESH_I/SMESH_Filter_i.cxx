@@ -228,7 +228,7 @@ SMESH::Histogram* NumericalFunctor_i::GetHistogram(CORBA::Short nbIntervals, COR
 {
   std::vector<int> nbEvents;
   std::vector<double> funValues;
-  std::vector<int> elements;
+  std::vector<SMESH::smIdType> elements;
   myNumericalFunctorPtr->GetHistogram(nbIntervals,nbEvents,funValues,elements,0,isLogarithmic);
 
   SMESH::Histogram_var histogram = new SMESH::Histogram;
@@ -255,9 +255,9 @@ SMESH::Histogram* NumericalFunctor_i::GetLocalHistogram(CORBA::Short            
 {
   SMESH::Histogram_var histogram = new SMESH::Histogram;
 
-  std::vector<int>    nbEvents;
-  std::vector<double> funValues;
-  std::vector<int>    elements;
+  std::vector<int>             nbEvents;
+  std::vector<double>          funValues;
+  std::vector<SMESH::smIdType> elements;
 
   SMDS_ElemIteratorPtr elemIt;
   if ( SMESH::DownCast< SMESH_GroupOnFilter_i* >( object ) ||

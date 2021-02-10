@@ -2146,9 +2146,9 @@ bool StdMeshers_Prism_3D::Evaluate(SMESH_Mesh&         theMesh,
     if( anIt==aResMap.end() )
       return toSM( error( "Submesh can not be evaluated"));
 
-    std::vector<int> aVec = (*anIt).second;
-    int nbtri = Max(aVec[SMDSEntity_Triangle],aVec[SMDSEntity_Quad_Triangle]);
-    int nbqua = Max(aVec[SMDSEntity_Quadrangle],aVec[SMDSEntity_Quad_Quadrangle]);
+    std::vector<smIdType> aVec = (*anIt).second;
+    smIdType nbtri = std::max(aVec[SMDSEntity_Triangle],aVec[SMDSEntity_Quad_Triangle]);
+    smIdType nbqua = std::max(aVec[SMDSEntity_Quadrangle],aVec[SMDSEntity_Quad_Quadrangle]);
     if( nbtri==0 && nbqua>0 ) {
       NbQFs++;
     }
@@ -2158,7 +2158,7 @@ bool StdMeshers_Prism_3D::Evaluate(SMESH_Mesh&         theMesh,
   }
 
   if(NbQFs<4) {
-    std::vector<int> aResVec(SMDSEntity_Last);
+    std::vector<smIdType> aResVec(SMDSEntity_Last);
     for(int i=SMDSEntity_Node; i<SMDSEntity_Last; i++) aResVec[i] = 0;
     SMESH_subMesh * sm = theMesh.GetSubMesh(theShape);
     aResMap.insert(std::make_pair(sm,aResVec));
@@ -2168,7 +2168,7 @@ bool StdMeshers_Prism_3D::Evaluate(SMESH_Mesh&         theMesh,
   if(NumBase==0) NumBase = 1; // only quads => set 1 faces as base
 
   // find number of 1d elems for base face
-  int nb1d = 0;
+  smIdType nb1d = 0;
   TopTools_MapOfShape Edges1;
   for (TopExp_Explorer exp(aFaces.Value(NumBase), TopAbs_EDGE); exp.More(); exp.Next()) {
     Edges1.Add(exp.Current());
@@ -2176,8 +2176,8 @@ bool StdMeshers_Prism_3D::Evaluate(SMESH_Mesh&         theMesh,
     if( sm ) {
       MapShapeNbElemsItr anIt = aResMap.find(sm);
       if( anIt == aResMap.end() ) continue;
-      std::vector<int> aVec = (*anIt).second;
-      nb1d += Max(aVec[SMDSEntity_Edge],aVec[SMDSEntity_Quad_Edge]);
+      std::vector<smIdType> aVec = (*anIt).second;
+      nb1d += std::max(aVec[SMDSEntity_Edge],aVec[SMDSEntity_Quad_Edge]);
     }
   }
   // find face opposite to base face
@@ -2197,25 +2197,25 @@ bool StdMeshers_Prism_3D::Evaluate(SMESH_Mesh&         theMesh,
     }
   }
   // find number of 2d elems on side faces
-  int nb2d = 0;
+  smIdType nb2d = 0;
   for(i=1; i<=6; i++) {
     if( i==OppNum || i==NumBase ) continue;
     MapShapeNbElemsItr anIt = aResMap.find( meshFaces[i-1] );
     if( anIt == aResMap.end() ) continue;
-    std::vector<int> aVec = (*anIt).second;
-    nb2d += Max(aVec[SMDSEntity_Quadrangle],aVec[SMDSEntity_Quad_Quadrangle]);
+    std::vector<smIdType> aVec = (*anIt).second;
+    nb2d += std::max(aVec[SMDSEntity_Quadrangle],aVec[SMDSEntity_Quad_Quadrangle]);
   }
 
   MapShapeNbElemsItr anIt = aResMap.find( meshFaces[NumBase-1] );
-  std::vector<int> aVec = (*anIt).second;
+  std::vector<smIdType> aVec = (*anIt).second;
   bool IsQuadratic = (aVec[SMDSEntity_Quad_Triangle]>aVec[SMDSEntity_Triangle]) ||
                      (aVec[SMDSEntity_Quad_Quadrangle]>aVec[SMDSEntity_Quadrangle]);
-  int nb2d_face0_3 = Max(aVec[SMDSEntity_Triangle],aVec[SMDSEntity_Quad_Triangle]);
-  int nb2d_face0_4 = Max(aVec[SMDSEntity_Quadrangle],aVec[SMDSEntity_Quad_Quadrangle]);
-  int nb0d_face0 = aVec[SMDSEntity_Node];
-  int nb1d_face0_int = ( nb2d_face0_3*3 + nb2d_face0_4*4 - nb1d ) / 2;
+  smIdType nb2d_face0_3 = std::max(aVec[SMDSEntity_Triangle],aVec[SMDSEntity_Quad_Triangle]);
+  smIdType nb2d_face0_4 = std::max(aVec[SMDSEntity_Quadrangle],aVec[SMDSEntity_Quad_Quadrangle]);
+  smIdType nb0d_face0 = aVec[SMDSEntity_Node];
+  smIdType nb1d_face0_int = ( nb2d_face0_3*3 + nb2d_face0_4*4 - nb1d ) / 2;
 
-  std::vector<int> aResVec(SMDSEntity_Last);
+  std::vector<smIdType> aResVec(SMDSEntity_Last);
   for(int i=SMDSEntity_Node; i<SMDSEntity_Last; i++) aResVec[i] = 0;
   if(IsQuadratic) {
     aResVec[SMDSEntity_Quad_Penta] = nb2d_face0_3 * ( nb2d/nb1d );

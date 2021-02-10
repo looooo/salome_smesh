@@ -2372,7 +2372,7 @@ SMESH::smIdType_array* SMESH_Gen_i::Evaluate(SMESH::SMESH_Mesh_ptr theMesh,
       /*CORBA::Boolean ret =*/ myGen.Evaluate( myLocMesh, myLocShape, aResMap);
       MapShapeNbElemsItr anIt = aResMap.begin();
       for(; anIt!=aResMap.end(); anIt++) {
-        const vector<int>& aVec = (*anIt).second;
+        const vector<smIdType>& aVec = (*anIt).second;
         for ( i = SMESH::Entity_Node; i < (int)aVec.size(); i++ ) {
           int nbElem = aVec[i];
           if ( nbElem < 0 ) // algo failed, check that it has reported a message

@@ -1312,7 +1312,7 @@ bool StdMeshers_Regular_1D::Evaluate(SMESH_Mesh &         theMesh,
   ASSERT(!VFirst.IsNull());
   ASSERT(!VLast.IsNull());
 
-  std::vector<int> aVec(SMDSEntity_Last,0);
+  std::vector<smIdType> aVec(SMDSEntity_Last,0);
 
   double length = EdgeLength( E );
   if ( !Curve.IsNull() && length > 0 )

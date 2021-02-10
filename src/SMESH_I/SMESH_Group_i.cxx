@@ -209,7 +209,7 @@ SMESH::ElementType SMESH_GroupBase_i::GetType()
  */
 //=============================================================================
 
-CORBA::smIdType SMESH_GroupBase_i::Size()
+SMESH::smIdType SMESH_GroupBase_i::Size()
 {
   if ( myPreMeshInfo )
     return GetType() == SMESH::NODE ? myPreMeshInfo->NbNodes() : myPreMeshInfo->NbElements();
@@ -361,7 +361,7 @@ SMESH::smIdType  SMESH_Group_i::Remove( const SMESH::smIdType_array& theIDs )
  */
 //=============================================================================
 
-typedef bool (SMESHDS_Group::*TFunChangeGroup)(const int);
+typedef bool (SMESHDS_Group::*TFunChangeGroup)(const smIdType);
 
 CORBA::Long 
 ChangeByPredicate( SMESH::Predicate_i* thePredicate,
@@ -938,7 +938,7 @@ SMESH::smIdType_array* SMESH_GroupOnFilter_i::GetMeshInfo()
 
     if ( g->GetType() != SMDSAbs_Node )
     {
-      std::vector< int > nbElems = static_cast< SMESHDS_GroupOnFilter* >( g )->GetMeshInfo();
+      std::vector< SMESH::smIdType > nbElems = static_cast< SMESHDS_GroupOnFilter* >( g )->GetMeshInfo();
       for ( size_t i = SMESH::Entity_Node; i < SMESH::Entity_Last; i++)
         if ( i < nbElems.size() )
           aRes[i] = nbElems[ i ];

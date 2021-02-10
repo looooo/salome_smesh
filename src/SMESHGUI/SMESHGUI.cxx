@@ -1216,7 +1216,7 @@ namespace
             SMESH::Controls::NumericalFunctor* aNumFun =
               dynamic_cast<SMESH::Controls::NumericalFunctor*>( aFunctor.get() );
             if ( aNumFun ) {
-              std::vector<int> elements;
+              std::vector<SMESH::smIdType> elements;
               SMESH::SMESH_Mesh_var mesh = SMESH::IObjectToInterface<SMESH::SMESH_Mesh>(anIO);
               if ( mesh->_is_nil() ) {
                 SMESH::SMESH_IDSource_var idSource =

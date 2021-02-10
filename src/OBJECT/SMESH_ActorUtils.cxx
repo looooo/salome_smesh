@@ -157,7 +157,7 @@ namespace SMESH
     }
   }
 
-  std::map<SMDSAbs_ElementType,int> GetEntitiesFromObject(SMESH_VisualObj *theObject) {
+  std::map<SMDSAbs_ElementType,smIdType> GetEntitiesFromObject(SMESH_VisualObj *theObject) {
     std::map<SMDSAbs_ElementType,smIdType> entities;
     entities.insert(std::pair<SMDSAbs_ElementType,smIdType>(SMDSAbs_0DElement,
                 theObject ? theObject->GetNbEntities(SMDSAbs_0DElement) : 0));

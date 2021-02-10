@@ -79,7 +79,7 @@ void SMESHDS_GroupOnFilter::SetPredicate( const SMESH_PredicatePtr& thePredicate
  */
 //================================================================================
 
-int SMESHDS_GroupOnFilter::Extent() const
+smIdType SMESHDS_GroupOnFilter::Extent() const
 {
   update();
   return std::accumulate( myMeshInfo.begin(), myMeshInfo.end(), 0 );
@@ -120,7 +120,7 @@ bool SMESHDS_GroupOnFilter::IsEmpty()
  */
 //================================================================================
 
-bool SMESHDS_GroupOnFilter::Contains (const int theID)
+bool SMESHDS_GroupOnFilter::Contains (const smIdType theID)
 {
   return myPredicate && myPredicate->IsSatisfy( theID );
 }
@@ -288,7 +288,7 @@ SMDS_ElemIteratorPtr SMESHDS_GroupOnFilter::GetElements() const
  */
 //================================================================================
 
-std::vector< int > SMESHDS_GroupOnFilter::GetMeshInfo() const
+std::vector< smIdType > SMESHDS_GroupOnFilter::GetMeshInfo() const
 {
   update();
   return myMeshInfo;
@@ -325,11 +325,11 @@ int SMESHDS_GroupOnFilter::getElementIds( void* ids, size_t idSize ) const
       me->myMeshInfo.assign( SMDSEntity_Last, 0 );
       me->myMeshInfo[ firstOkElem->GetEntityType() ]++;
 
-      (*(smidtype*) curID) = firstOkElem->GetID();
+      (*(smIdType*) curID) = firstOkElem->GetID();
       for ( curID += idSize; elIt->more(); curID += idSize )
       {
         const SMDS_MeshElement* e = elIt->next();
-        (*(smIdtype*) curID) = e->GetID();
+        (*(smIdType*) curID) = e->GetID();
         me->myMeshInfo[ e->GetEntityType() ]++;
       }
     }

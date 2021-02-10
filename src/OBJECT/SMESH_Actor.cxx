@@ -2495,7 +2495,7 @@ void SMESH_ActorDef::UpdateDistribution()
     SMESH_VisualObjDef::TEntityList elems;
     if ( dynamic_cast<SMESH_SubMeshObj*>(myVisualObj.get()))
       dynamic_cast<SMESH_SubMeshObj*>(myVisualObj.get())->GetEntities( fun->GetType(), elems );
-    std::vector<int> elemIds; elemIds.reserve( elems.size() );
+    std::vector<smIdType> elemIds; elemIds.reserve( elems.size() );
     for ( SMESH_VisualObjDef::TEntityList::iterator e = elems.begin(); e != elems.end(); ++e)
       elemIds.push_back( (*e)->GetID());
     vtkLookupTable* lookupTable = static_cast<vtkLookupTable*>(myScalarBarActor->GetLookupTable());
@@ -2681,7 +2681,7 @@ SPlot2d_Histogram* SMESH_ActorDef::UpdatePlot2Histogram()
     SMESH_VisualObjDef::TEntityList elems;
     if ( dynamic_cast<SMESH_SubMeshObj*>(myVisualObj.get()))
       dynamic_cast<SMESH_SubMeshObj*>(myVisualObj.get())->GetEntities( fun->GetType(), elems );
-    std::vector<int> elemIds;
+    std::vector<smIdType> elemIds;
 
     for ( SMESH_VisualObjDef::TEntityList::iterator e = elems.begin(); e != elems.end(); ++e)
       elemIds.push_back( (*e)->GetID());

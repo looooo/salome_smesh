@@ -160,7 +160,7 @@ public:
   virtual bool              Update( int theIsClear = true );
   
   virtual void              UpdateFunctor( const SMESH::Controls::FunctorPtr& theFunctor );
-  virtual int               GetElemDimension( const smidtype theObjId );
+  virtual int               GetElemDimension( const smIdType theObjId );
   virtual SMDS_Mesh*        GetMesh() const { return myMeshObj->GetMesh(); }
   virtual SMESH::SMESH_Mesh_ptr GetMeshServer() { return myMeshObj->GetMeshServer(); }
   
@@ -181,8 +181,8 @@ public:
                             SMESH_GroupObj( SMESH::SMESH_GroupBase_ptr, SMESH_MeshObj* );
   virtual                   ~SMESH_GroupObj();
 
-  virtual smidtype          GetNbEntities( const SMDSAbs_ElementType) const;
-  virtual smidtype          GetEntities( const SMDSAbs_ElementType, TEntityList& ) const;
+  virtual smIdType          GetNbEntities( const SMDSAbs_ElementType) const;
+  virtual smIdType          GetEntities( const SMDSAbs_ElementType, TEntityList& ) const;
   virtual bool              IsNodePrs() const;
 
   virtual SMDSAbs_ElementType GetElementType() const;
@@ -206,8 +206,8 @@ public:
                                               SMESH_MeshObj* );
   virtual                   ~SMESH_subMeshObj();
 
-  virtual smIdtype          GetNbEntities( const SMDSAbs_ElementType) const;
-  virtual smIdtype          GetEntities( const SMDSAbs_ElementType, TEntityList& ) const;
+  virtual smIdType          GetNbEntities( const SMDSAbs_ElementType) const;
+  virtual smIdType          GetEntities( const SMDSAbs_ElementType, TEntityList& ) const;
   virtual bool              IsNodePrs() const;    
   
 protected:

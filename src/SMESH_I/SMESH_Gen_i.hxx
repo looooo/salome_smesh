@@ -286,7 +286,7 @@ public:
    *  returns statistic of mesh elements
    * Result array of number enityties
    */
-  SMESH::long_array* Evaluate(SMESH::SMESH_Mesh_ptr theMesh,
+  SMESH::smIdType_array* Evaluate(SMESH::SMESH_Mesh_ptr theMesh,
                               GEOM::GEOM_Object_ptr theShapeObject);
 
   // Returns true if mesh contains enough data to be computed

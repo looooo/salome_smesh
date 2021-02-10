@@ -1796,7 +1796,7 @@ bool StdMeshers_Projection_2D::Evaluate(SMESH_Mesh&         theMesh,
   // Assure that mesh on a source Face is computed/evaluated
   // -------------------------------------------------------
 
-  std::vector<int> aVec;
+  std::vector<smIdType> aVec;
 
   SMESH_subMesh* srcSubMesh = srcMesh->GetSubMesh( srcFace );
   if ( srcSubMesh->IsMeshComputed() )

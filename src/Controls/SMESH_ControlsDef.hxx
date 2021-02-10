@@ -58,7 +58,7 @@ class ShapeAnalysis_Surface;
 class gp_Pln;
 class gp_Pnt;
 
-typedef NCollection_Map< smIdType > TIDsMap;
+typedef NCollection_Map< smIdType, smIdHasher > TIDsMap;
 
 namespace SMESH{
   namespace Controls{

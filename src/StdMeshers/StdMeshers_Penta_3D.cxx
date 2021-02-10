@@ -1870,16 +1870,16 @@ bool StdMeshers_Penta_3D::Evaluate(SMESH_Mesh& aMesh,
       NumBase = 0;
       break;
     }
-    std::vector<int> aVec = (*anIt).second;
-    int nbtri = Max(aVec[SMDSEntity_Triangle],aVec[SMDSEntity_Quad_Triangle]);
-    int nbqua = Max(aVec[SMDSEntity_Quadrangle],aVec[SMDSEntity_Quad_Quadrangle]);
+    std::vector<smIdType> aVec = (*anIt).second;
+    smIdType nbtri = std::max(aVec[SMDSEntity_Triangle],aVec[SMDSEntity_Quad_Triangle]);
+    smIdType nbqua = std::max(aVec[SMDSEntity_Quadrangle],aVec[SMDSEntity_Quad_Quadrangle]);
     if( nbtri>0 && nbqua==0 ) {
       NumBase = i;
     }
   }
 
   if(NumBase==0) {
-    std::vector<int> aResVec(SMDSEntity_Last);
+    std::vector<smIdType> aResVec(SMDSEntity_Last);
     for(int i=SMDSEntity_Node; i<SMDSEntity_Last; i++) aResVec[i] = 0;
     SMESH_subMesh * sm = aMesh.GetSubMesh(aShape);
     aResMap.insert(std::make_pair(sm,aResVec));
@@ -1897,8 +1897,8 @@ bool StdMeshers_Penta_3D::Evaluate(SMESH_Mesh& aMesh,
     if( sm ) {
       MapShapeNbElemsItr anIt = aResMap.find(sm);
       if( anIt == aResMap.end() ) continue;
-      std::vector<int> aVec = (*anIt).second;
-      nb1d += Max(aVec[SMDSEntity_Edge],aVec[SMDSEntity_Quad_Edge]);
+      std::vector<smIdType> aVec = (*anIt).second;
+      nb1d += std::max(aVec[SMDSEntity_Edge],aVec[SMDSEntity_Quad_Edge]);
     }
   }
   // find face opposite to base face
@@ -1923,14 +1923,14 @@ bool StdMeshers_Penta_3D::Evaluate(SMESH_Mesh& aMesh,
     if( i==OppNum || i==NumBase ) continue;
     MapShapeNbElemsItr anIt = aResMap.find( meshFaces[i-1] );
     if( anIt == aResMap.end() ) continue;
-    std::vector<int> aVec = (*anIt).second;
-    nb2d += Max(aVec[SMDSEntity_Quadrangle],aVec[SMDSEntity_Quad_Quadrangle]);
+    std::vector<smIdType> aVec = (*anIt).second;
+    nb2d += std::max(aVec[SMDSEntity_Quadrangle],aVec[SMDSEntity_Quad_Quadrangle]);
   }
 
   MapShapeNbElemsItr anIt = aResMap.find( meshFaces[NumBase-1] );
-  std::vector<int> aVec = (*anIt).second;
-  int nb2d_face0 = Max(aVec[SMDSEntity_Quadrangle],aVec[SMDSEntity_Quad_Quadrangle]);
-  int nb0d_face0 = aVec[SMDSEntity_Node];
+  std::vector<smIdType> aVec = (*anIt).second;
+  smIdType nb2d_face0 = std::max(aVec[SMDSEntity_Quadrangle],aVec[SMDSEntity_Quad_Quadrangle]);
+  smIdType nb0d_face0 = aVec[SMDSEntity_Node];
 
   anIt = aResMap.find( meshFaces[OppNum-1] );
   for(i=SMDSEntity_Node; i<SMDSEntity_Last; i++)
@@ -1939,7 +1939,7 @@ bool StdMeshers_Penta_3D::Evaluate(SMESH_Mesh& aMesh,
   SMESH_MesherHelper aTool (aMesh);
   bool _quadraticMesh = aTool.IsQuadraticSubMesh(aShape);
 
-  std::vector<int> aResVec(SMDSEntity_Last);
+  std::vector<smIdType> aResVec(SMDSEntity_Last);
   for(int i=SMDSEntity_Node; i<SMDSEntity_Last; i++) aResVec[i] = 0;
   if(_quadraticMesh) {
     aResVec[SMDSEntity_Quad_Penta] = nb2d_face0 * ( nb2d/nb1d );

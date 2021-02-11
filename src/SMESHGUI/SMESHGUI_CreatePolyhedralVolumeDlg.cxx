@@ -992,7 +992,7 @@ void SMESHGUI_CreatePolyhedralVolumeDlg::displaySimulation()
             SMESH::TPolySimulation::TVTKIds aVTKIds_faces;
             while( anIter->more() )
               if ( const SMDS_MeshNode* aNode = (SMDS_MeshNode*)anIter->next() ){
-                vtkIdType aId = myActor->GetObject()->GetNodeVTKId( FromIdType<int>(aNode->GetID()) );
+                vtkIdType aId = myActor->GetObject()->GetNodeVTKId( aNode->GetID() );
                 aVTKIds.push_back(aId);
                 aVTKIds_faces.push_back(aId);
               }

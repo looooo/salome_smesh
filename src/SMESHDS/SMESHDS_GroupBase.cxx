@@ -154,7 +154,7 @@ bool SMESHDS_GroupBase::Contains (const smIdType theID)
 bool SMESHDS_GroupBase::Contains (const SMDS_MeshElement* elem)
 {
   if ( elem )
-    return Contains( FromIdType<int>(elem->GetID()) );
+    return Contains( elem->GetID() );
   return false;
 }
 

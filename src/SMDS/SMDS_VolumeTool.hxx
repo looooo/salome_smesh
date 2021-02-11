@@ -31,6 +31,8 @@
 
 #include "SMESH_SMDS.hxx"
 
+#include <smIdType.hxx>
+
 class SMDS_MeshElement;
 class SMDS_MeshNode;
 class SMDS_MeshVolume;
@@ -72,7 +74,7 @@ class SMDS_EXPORT SMDS_VolumeTool
   const SMDS_MeshVolume* Element() const;
   // return element
 
-  int ID() const;
+  smIdType ID() const;
   // return element ID
 
   bool IsPoly() const { return myPolyedre; }

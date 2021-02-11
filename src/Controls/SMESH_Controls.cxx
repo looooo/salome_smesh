@@ -34,6 +34,7 @@
 #include "SMESHDS_Mesh.hxx"
 #include "SMESH_MeshAlgos.hxx"
 #include "SMESH_OctreeNode.hxx"
+#include "SMESH_Comment.hxx"
 
 #include <GEOMUtils.hxx>
 #include <Basics_Utils.hxx>
@@ -3295,39 +3296,39 @@ void RangeOfIds::GetRangeStr( TCollection_AsciiString& theResStr )
     smIdType aMinId = myMin[i];
     smIdType aMaxId = myMax[i];
 
-    TCollection_AsciiString aStr;
+    SMESH_Comment aStr;
     if ( aMinId != IntegerFirst() )
-      aStr += FromIdType<int>(aMinId);
+      aStr << aMinId;
 
     aStr += "-";
 
-    if ( aMaxId != IntegerLast() )
-      aStr += FromIdType<int>(aMaxId);
+    if ( aMaxId != std::numeric_limits<smIdType>::max() )
+      aStr << aMaxId;
 
     // find position of the string in result sequence and insert string in it
     if ( anIntSeq.Length() == 0 )
     {
       anIntSeq.Append( aMinId );
-      aStrSeq.Append( aStr );
+      aStrSeq.Append( (const char*)aStr );
     }
     else
     {
       if ( aMinId < anIntSeq.First() )
       {
         anIntSeq.Prepend( aMinId );
-        aStrSeq.Prepend( aStr );
+        aStrSeq.Prepend( (const char*)aStr );
       }
       else if ( aMinId > anIntSeq.Last() )
       {
         anIntSeq.Append( aMinId );
-        aStrSeq.Append( aStr );
+        aStrSeq.Append( (const char*)aStr );
       }
       else
         for ( int j = 1, k = anIntSeq.Length(); j <= k; j++ )
           if ( aMinId < anIntSeq( j ) )
           {
             anIntSeq.InsertBefore( j, aMinId );
-            aStrSeq.InsertBefore( j, aStr );
+            aStrSeq.InsertBefore( j, (const char*)aStr );
             break;
           }
     }

@@ -402,9 +402,9 @@ SMDS_ElemIteratorPtr SMESH_ProxyMesh::GetFaces() const
  */
 //================================================================================
 
-int SMESH_ProxyMesh::NbFaces() const
+smIdType SMESH_ProxyMesh::NbFaces() const
 {
-  int nb = 0;
+  smIdType nb = 0;
   if ( _mesh->HasShapeToMesh() )
   {
     TopTools_IndexedMapOfShape FF;

@@ -188,7 +188,7 @@ SMESH_MeshEditor::AddElement(const vector<const SMDS_MeshNode*> & node,
   SMDS_MeshElement* e = 0;
   int nbnode = node.size();
   SMESHDS_Mesh* mesh = GetMeshDS();
-  const int ID = features.myID;
+  const smIdType ID = features.myID;
 
   switch ( features.myType ) {
   case SMDSAbs_Face:
@@ -8751,7 +8751,7 @@ smIdType SMESH_MeshEditor::convertElemToQuadratic(SMESHDS_SubMesh *   theSm,
     }
     // get elem data needed to re-create it
     //
-    const int id      = elem->GetID();
+    const smIdType id = elem->GetID();
     const int nbNodes = elem->NbCornerNodes();
     nodes.assign(elem->begin_nodes(), elem->end_nodes());
     if ( aGeomType == SMDSEntity_Polyhedra )

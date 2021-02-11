@@ -59,6 +59,7 @@ class gp_Pln;
 class gp_Pnt;
 
 typedef NCollection_Map< smIdType, smIdHasher > TIDsMap;
+typedef NCollection_Sequence<smIdType> TIDsSeq;
 
 namespace SMESH{
   namespace Controls{
@@ -1164,16 +1165,16 @@ namespace SMESH{
     public:
       ConnectedElements();
       //virtual Predicate*   clone() const { return new ConnectedElements( *this ); }
-      void                 SetNode( int nodeID );
+      void                 SetNode( smIdType nodeID );
       void                 SetPoint( double x, double y, double z );
-      int                  GetNode() const;
+      smIdType             GetNode() const;
       std::vector<double>  GetPoint() const;
 
       void                 SetType( SMDSAbs_ElementType theType );
       virtual              SMDSAbs_ElementType GetType() const;
 
       virtual void         SetMesh( const SMDS_Mesh* theMesh );
-      virtual bool         IsSatisfy( long theElementId );
+      virtual bool         IsSatisfy( smIdType theElementId );
 
       //const std::set<long>& GetDomainIDs() const { return myOkIDs; }
 

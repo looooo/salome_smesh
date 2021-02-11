@@ -2868,8 +2868,8 @@ void GroupColor::SetMesh( const SMDS_Mesh* theMesh )
     SMDSAbs_ElementType aGrpElType = (SMDSAbs_ElementType)aGrp->GetType();
     if ( myType == aGrpElType || (myType == SMDSAbs_All && aGrpElType != SMDSAbs_Node) ) {
       // add elements IDS into control
-      int aSize = aGrp->Extent();
-      for (int i = 0; i < aSize; i++)
+      smIdType aSize = aGrp->Extent();
+      for (smIdType i = 0; i < aSize; i++)
         myIDs.insert( aGrp->GetID(i+1) );
     }
   }
@@ -3020,7 +3020,7 @@ ConnectedElements::ConnectedElements():
 SMDSAbs_ElementType ConnectedElements::GetType() const
 { return myType; }
 
-int ConnectedElements::GetNode() const
+smIdType ConnectedElements::GetNode() const
 { return myXYZ.empty() ? myNodeID : 0; } // myNodeID can be found by myXYZ
 
 std::vector<double> ConnectedElements::GetPoint() const
@@ -3047,7 +3047,7 @@ void ConnectedElements::SetMesh( const SMDS_Mesh* theMesh )
   }
 }
 
-void ConnectedElements::SetNode( int nodeID )
+void ConnectedElements::SetNode( smIdType nodeID )
 {
   myNodeID = nodeID;
   myXYZ.clear();
@@ -3279,14 +3279,14 @@ void RangeOfIds::GetRangeStr( TCollection_AsciiString& theResStr )
 {
   theResStr.Clear();
 
-  TColStd_SequenceOfInteger     anIntSeq;
+  TIDsSeq                             anIntSeq;
   TColStd_SequenceOfAsciiString aStrSeq;
 
   TIDsMap::Iterator anIter( myIds );
   for ( ; anIter.More(); anIter.Next() )
   {
-    int anId = anIter.Key();
-    TCollection_AsciiString aStr( anId );
+    smIdType anId = anIter.Key();
+    TCollection_AsciiString aStr( FromIdType<int>(anId) );
     anIntSeq.Append( anId );
     aStrSeq.Append( aStr );
   }
@@ -3300,7 +3300,7 @@ void RangeOfIds::GetRangeStr( TCollection_AsciiString& theResStr )
     if ( aMinId != IntegerFirst() )
       aStr << aMinId;
 
-    aStr += "-";
+    aStr << "-";
 
     if ( aMaxId != std::numeric_limits<smIdType>::max() )
       aStr << aMaxId;

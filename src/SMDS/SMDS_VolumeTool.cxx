@@ -969,7 +969,7 @@ bool SMDS_VolumeTool::GetFaceNodes (int                             faceIndex,
 
 namespace
 {
-  struct NLink : public std::pair<int,int>
+  struct NLink : public std::pair<smIdType,smIdType>
   {
     int myOri;
     NLink(const SMDS_MeshNode* n1=0, const SMDS_MeshNode* n2=0, int ori=1 )

@@ -1331,12 +1331,12 @@ static void cleanSubMesh( SMESH_subMesh * subMesh )
     if (SMESHDS_SubMesh * subMeshDS = subMesh->GetSubMeshDS())
     {
       SMESHDS_Mesh * meshDS = subMesh->GetFather()->GetMeshDS();
-      int nbElems = subMeshDS->NbElements();
+      smIdType nbElems = subMeshDS->NbElements();
       if ( nbElems > 0 )
         for ( SMDS_ElemIteratorPtr ite = subMeshDS->GetElements(); ite->more(); )
           meshDS->RemoveFreeElement( ite->next(), subMeshDS );
 
-      int nbNodes = subMeshDS->NbNodes();
+      smIdType nbNodes = subMeshDS->NbNodes();
       if ( nbNodes > 0 )
         for ( SMDS_NodeIteratorPtr itn = subMeshDS->GetNodes(); itn->more() ; )
         {

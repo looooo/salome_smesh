@@ -1183,7 +1183,7 @@ void SMESH_Mesh::NotifySubMeshesHypothesisModification(const SMESH_Hypothesis* h
   if ( !GetMeshDS()->IsUsedHypothesis( hyp ))
     return;
 
-  int nbEntities = ( _myMeshDS->NbNodes() + _myMeshDS->NbElements() );
+  smIdType nbEntities = ( _myMeshDS->NbNodes() + _myMeshDS->NbElements() );
   if ( hyp && _callUp && !_callUp->IsLoaded() ) // for not loaded mesh (#16648)
   {
     _callUp->HypothesisModified( hyp->GetID(), /*updateIcons=*/true );
@@ -1257,7 +1257,7 @@ void SMESH_Mesh::NotifySubMeshesHypothesisModification(const SMESH_Hypothesis* h
   HasModificationsToDiscard(); // to reset _isModified flag if mesh becomes empty
   GetMeshDS()->Modified();
 
-  int newNbEntities = ( _myMeshDS->NbNodes() + _myMeshDS->NbElements() );
+  smIdType newNbEntities = ( _myMeshDS->NbNodes() + _myMeshDS->NbElements() );
   if ( hyp && _callUp )
     _callUp->HypothesisModified( hyp->GetID(), newNbEntities != nbEntities );
 }
@@ -1746,7 +1746,7 @@ double SMESH_Mesh::GetComputeProgress() const
  */
 //================================================================================
 
-int SMESH_Mesh::NbNodes() const
+smIdType SMESH_Mesh::NbNodes() const
 {
   Unexpect aCatch(SalomeException);
   return _myMeshDS->NbNodes();
@@ -1758,7 +1758,7 @@ int SMESH_Mesh::NbNodes() const
  */
 //================================================================================
 
-int SMESH_Mesh::Nb0DElements() const
+smIdType SMESH_Mesh::Nb0DElements() const
 {
   Unexpect aCatch(SalomeException);
   return _myMeshDS->GetMeshInfo().Nb0DElements();
@@ -1770,7 +1770,7 @@ int SMESH_Mesh::Nb0DElements() const
  */
 //================================================================================
 
-int SMESH_Mesh::NbEdges(SMDSAbs_ElementOrder order) const
+smIdType SMESH_Mesh::NbEdges(SMDSAbs_ElementOrder order) const
 {
   Unexpect aCatch(SalomeException);
   return _myMeshDS->GetMeshInfo().NbEdges(order);
@@ -1782,7 +1782,7 @@ int SMESH_Mesh::NbEdges(SMDSAbs_ElementOrder order) const
  */
 //================================================================================
 
-int SMESH_Mesh::NbFaces(SMDSAbs_ElementOrder order) const
+smIdType SMESH_Mesh::NbFaces(SMDSAbs_ElementOrder order) const
 {
   Unexpect aCatch(SalomeException);
   return _myMeshDS->GetMeshInfo().NbFaces(order);
@@ -1794,7 +1794,7 @@ int SMESH_Mesh::NbFaces(SMDSAbs_ElementOrder order) const
  */
 //================================================================================
 
-int SMESH_Mesh::NbTriangles(SMDSAbs_ElementOrder order) const
+smIdType SMESH_Mesh::NbTriangles(SMDSAbs_ElementOrder order) const
 {
   Unexpect aCatch(SalomeException);
   return _myMeshDS->GetMeshInfo().NbTriangles(order);
@@ -1806,7 +1806,7 @@ int SMESH_Mesh::NbTriangles(SMDSAbs_ElementOrder order) const
  */
 //================================================================================
 
-int SMESH_Mesh::NbBiQuadTriangles() const
+smIdType SMESH_Mesh::NbBiQuadTriangles() const
 {
   Unexpect aCatch(SalomeException);
   return _myMeshDS->GetMeshInfo().NbBiQuadTriangles();
@@ -1818,7 +1818,7 @@ int SMESH_Mesh::NbBiQuadTriangles() const
  */
 //================================================================================
 
-int SMESH_Mesh::NbQuadrangles(SMDSAbs_ElementOrder order) const
+smIdType SMESH_Mesh::NbQuadrangles(SMDSAbs_ElementOrder order) const
 {
   Unexpect aCatch(SalomeException);
   return _myMeshDS->GetMeshInfo().NbQuadrangles(order);
@@ -1830,7 +1830,7 @@ int SMESH_Mesh::NbQuadrangles(SMDSAbs_ElementOrder order) const
  */
 //================================================================================
 
-int SMESH_Mesh::NbBiQuadQuadrangles() const
+smIdType SMESH_Mesh::NbBiQuadQuadrangles() const
 {
   Unexpect aCatch(SalomeException);
   return _myMeshDS->GetMeshInfo().NbBiQuadQuadrangles();
@@ -1842,7 +1842,7 @@ int SMESH_Mesh::NbBiQuadQuadrangles() const
  */
 //================================================================================
 
-int SMESH_Mesh::NbPolygons(SMDSAbs_ElementOrder order) const
+smIdType SMESH_Mesh::NbPolygons(SMDSAbs_ElementOrder order) const
 {
   Unexpect aCatch(SalomeException);
   return _myMeshDS->GetMeshInfo().NbPolygons(order);
@@ -1854,7 +1854,7 @@ int SMESH_Mesh::NbPolygons(SMDSAbs_ElementOrder order) const
  */
 //================================================================================
 
-int SMESH_Mesh::NbVolumes(SMDSAbs_ElementOrder order) const
+smIdType SMESH_Mesh::NbVolumes(SMDSAbs_ElementOrder order) const
 {
   Unexpect aCatch(SalomeException);
   return _myMeshDS->GetMeshInfo().NbVolumes(order);
@@ -1866,7 +1866,7 @@ int SMESH_Mesh::NbVolumes(SMDSAbs_ElementOrder order) const
  */
 //================================================================================
 
-int SMESH_Mesh::NbTetras(SMDSAbs_ElementOrder order) const
+smIdType SMESH_Mesh::NbTetras(SMDSAbs_ElementOrder order) const
 {
   Unexpect aCatch(SalomeException);
   return _myMeshDS->GetMeshInfo().NbTetras(order);
@@ -1878,7 +1878,7 @@ int SMESH_Mesh::NbTetras(SMDSAbs_ElementOrder order) const
  */
 //================================================================================
 
-int SMESH_Mesh::NbHexas(SMDSAbs_ElementOrder order) const
+smIdType SMESH_Mesh::NbHexas(SMDSAbs_ElementOrder order) const
 {
   Unexpect aCatch(SalomeException);
   return _myMeshDS->GetMeshInfo().NbHexas(order);
@@ -1890,7 +1890,7 @@ int SMESH_Mesh::NbHexas(SMDSAbs_ElementOrder order) const
  */
 //================================================================================
 
-int SMESH_Mesh::NbTriQuadraticHexas() const
+smIdType SMESH_Mesh::NbTriQuadraticHexas() const
 {
   Unexpect aCatch(SalomeException);
   return _myMeshDS->GetMeshInfo().NbTriQuadHexas();
@@ -1902,7 +1902,7 @@ int SMESH_Mesh::NbTriQuadraticHexas() const
  */
 //================================================================================
 
-int SMESH_Mesh::NbPyramids(SMDSAbs_ElementOrder order) const
+smIdType SMESH_Mesh::NbPyramids(SMDSAbs_ElementOrder order) const
 {
   Unexpect aCatch(SalomeException);
   return _myMeshDS->GetMeshInfo().NbPyramids(order);
@@ -1914,19 +1914,19 @@ int SMESH_Mesh::NbPyramids(SMDSAbs_ElementOrder order) const
  */
 //================================================================================
 
-int SMESH_Mesh::NbPrisms(SMDSAbs_ElementOrder order) const
+smIdType SMESH_Mesh::NbPrisms(SMDSAbs_ElementOrder order) const
 {
   Unexpect aCatch(SalomeException);
   return _myMeshDS->GetMeshInfo().NbPrisms(order);
 }
 
-int SMESH_Mesh::NbQuadPrisms() const
+smIdType SMESH_Mesh::NbQuadPrisms() const
 {
   Unexpect aCatch(SalomeException);
   return _myMeshDS->GetMeshInfo().NbQuadPrisms();
 }
 
-int SMESH_Mesh::NbBiQuadPrisms() const
+smIdType SMESH_Mesh::NbBiQuadPrisms() const
 {
   Unexpect aCatch(SalomeException);
   return _myMeshDS->GetMeshInfo().NbBiQuadPrisms();
@@ -1939,7 +1939,7 @@ int SMESH_Mesh::NbBiQuadPrisms() const
  */
 //================================================================================
 
-int SMESH_Mesh::NbHexagonalPrisms() const
+smIdType SMESH_Mesh::NbHexagonalPrisms() const
 {
   Unexpect aCatch(SalomeException);
   return _myMeshDS->GetMeshInfo().NbHexPrisms();
@@ -1951,7 +1951,7 @@ int SMESH_Mesh::NbHexagonalPrisms() const
  */
 //================================================================================
 
-int SMESH_Mesh::NbPolyhedrons() const
+smIdType SMESH_Mesh::NbPolyhedrons() const
 {
   Unexpect aCatch(SalomeException);
   return _myMeshDS->GetMeshInfo().NbPolyhedrons();
@@ -1963,7 +1963,7 @@ int SMESH_Mesh::NbPolyhedrons() const
  */
 //================================================================================
 
-int SMESH_Mesh::NbBalls() const
+smIdType SMESH_Mesh::NbBalls() const
 {
   Unexpect aCatch(SalomeException);
   return _myMeshDS->GetMeshInfo().NbBalls();
@@ -1975,7 +1975,7 @@ int SMESH_Mesh::NbBalls() const
  */
 //================================================================================
 
-int SMESH_Mesh::NbSubMesh() const
+smIdType SMESH_Mesh::NbSubMesh() const
 {
   Unexpect aCatch(SalomeException);
   return _myMeshDS->NbSubMesh();

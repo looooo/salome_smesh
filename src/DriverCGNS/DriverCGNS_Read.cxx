@@ -61,9 +61,9 @@ namespace
   struct TZoneData
   {
     int                    _id;
-    int                    _nodeIdShift; // nb nodes in previously read zones
-    int                    _elemIdShift; // nb faces in previously read zones
-    int                    _nbNodes, _nbElems;
+    smIdType               _nodeIdShift; // nb nodes in previously read zones
+    smIdType               _elemIdShift; // nb faces in previously read zones
+    smIdType               _nbNodes, _nbElems;
     int                    _meshDim;
     int                    _sizeX, _sizeY, _sizeZ, _nbCells; // structured
     cgsize_t               _sizes[NB_ZONE_SIZE_VAL];
@@ -1133,7 +1133,7 @@ Driver_Mesh::Status DriverCGNS_Read::Perform()
             case 2: addElemFun = & add_QUAD_4; break;
             case 3: addElemFun = & add_HEXA_8; break;
             }
-            int elemID = meshInfo.NbElements();
+            smIdType elemID = meshInfo.NbElements();
             const SMDS_MeshElement* elem = 0;
             for ( size_t i = 0; i < ids.size(); i += nbElemNodes )
             {

@@ -201,17 +201,17 @@ namespace
    */
   struct TPolyhedFace
   {
-    int _id; // id of NGON_n
-    vector< int > _nodes; // lowest node IDs used for sorting
+    smIdType _id; // id of NGON_n
+    vector< smIdType > _nodes; // lowest node IDs used for sorting
 
-    TPolyhedFace( const SMDS_MeshNode** nodes, const int nbNodes, int ID):_id(ID)
+    TPolyhedFace( const SMDS_MeshNode** nodes, const smIdType nbNodes, smIdType ID):_id(ID)
     {
-      set< int > ids;
-      for ( int i = 0; i < nbNodes; ++i )
+      set< smIdType > ids;
+      for ( smIdType i = 0; i < nbNodes; ++i )
         ids.insert( nodes[i]->GetID() );
 
       _nodes.resize( 3 ); // std::min( nbNodes, 4 )); hope 3 nodes is enough
-      set< int >::iterator idIt = ids.begin();
+      set< smIdType >::iterator idIt = ids.begin();
       for ( size_t j = 0; j < _nodes.size(); ++j, ++idIt )
         _nodes[j] = *idIt;
     }
@@ -276,7 +276,7 @@ Driver_Mesh::Status DriverCGNS_Write::Perform()
   // create a Zone
   // --------------
 
-  int nbCells = myMesh->NbEdges();
+  smIdType nbCells = myMesh->NbEdges();
   if ( meshDim == 3 )
     nbCells = myMesh->NbVolumes();
   else if ( meshDim == 2 )

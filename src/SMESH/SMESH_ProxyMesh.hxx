@@ -128,7 +128,7 @@ public:
   SMDS_ElemIteratorPtr   GetFaces(const TopoDS_Shape& face) const;
 
   // Return total nb of faces taking into account substitutions
-  int                    NbFaces() const;
+  smIdType               NbFaces() const;
 
   bool                   IsTemporary(const SMDS_MeshElement* elem ) const;
 

@@ -246,7 +246,7 @@ namespace
     const SMDS_MeshNode* GetNode(){
       return myCurrentNode;
     }
-    MED::TIntVector::value_type GetID(){
+    MED::TIDVector::value_type GetID(){
       return myCurrentNode->GetID();
     }
     MED::TFloatVector::value_type GetCoord(TInt theCoodId){

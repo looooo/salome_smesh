@@ -282,31 +282,31 @@ class SMESH_EXPORT SMESH_Mesh
 
   double GetComputeProgress() const;
   
-  int NbNodes() const;
-  int Nb0DElements() const;
-  int NbBalls() const;
+  smIdType NbNodes() const;
+  smIdType Nb0DElements() const;
+  smIdType NbBalls() const;
   
-  int NbEdges(SMDSAbs_ElementOrder order = ORDER_ANY) const;
+  smIdType NbEdges(SMDSAbs_ElementOrder order = ORDER_ANY) const;
   
-  int NbFaces(SMDSAbs_ElementOrder order = ORDER_ANY) const;
-  int NbTriangles(SMDSAbs_ElementOrder order = ORDER_ANY) const;
-  int NbQuadrangles(SMDSAbs_ElementOrder order = ORDER_ANY) const;
-  int NbBiQuadQuadrangles() const;
-  int NbBiQuadTriangles() const;
-  int NbPolygons(SMDSAbs_ElementOrder order = ORDER_ANY) const;
+  smIdType NbFaces(SMDSAbs_ElementOrder order = ORDER_ANY) const;
+  smIdType NbTriangles(SMDSAbs_ElementOrder order = ORDER_ANY) const;
+  smIdType NbQuadrangles(SMDSAbs_ElementOrder order = ORDER_ANY) const;
+  smIdType NbBiQuadQuadrangles() const;
+  smIdType NbBiQuadTriangles() const;
+  smIdType NbPolygons(SMDSAbs_ElementOrder order = ORDER_ANY) const;
   
-  int NbVolumes(SMDSAbs_ElementOrder order = ORDER_ANY) const;
-  int NbTetras(SMDSAbs_ElementOrder order = ORDER_ANY) const;
-  int NbHexas(SMDSAbs_ElementOrder order = ORDER_ANY) const;
-  int NbTriQuadraticHexas() const;
-  int NbPyramids(SMDSAbs_ElementOrder order = ORDER_ANY) const;
-  int NbPrisms(SMDSAbs_ElementOrder order = ORDER_ANY) const;
-  int NbQuadPrisms() const;
-  int NbBiQuadPrisms() const;
-  int NbHexagonalPrisms() const;
-  int NbPolyhedrons() const;
+  smIdType NbVolumes(SMDSAbs_ElementOrder order = ORDER_ANY) const;
+  smIdType NbTetras(SMDSAbs_ElementOrder order = ORDER_ANY) const;
+  smIdType NbHexas(SMDSAbs_ElementOrder order = ORDER_ANY) const;
+  smIdType NbTriQuadraticHexas() const;
+  smIdType NbPyramids(SMDSAbs_ElementOrder order = ORDER_ANY) const;
+  smIdType NbPrisms(SMDSAbs_ElementOrder order = ORDER_ANY) const;
+  smIdType NbQuadPrisms() const;
+  smIdType NbBiQuadPrisms() const;
+  smIdType NbHexagonalPrisms() const;
+  smIdType NbPolyhedrons() const;
   
-  int NbSubMesh() const;
+  smIdType NbSubMesh() const;
   
   int NbGroup() const { return _mapGroup.size(); }
 

@@ -4366,7 +4366,7 @@ void SMESH_Pattern::createElements(SMESH_Mesh*                            theMes
       subMesh->ComputeStateEngine( SMESH_subMesh::CHECK_COMPUTE_STATE );
   }
   if ( onMeshElements ) {
-    list< int > elemIDs;
+    list< smIdType > elemIDs;
     for ( size_t i = 0; i < theElements.size(); i++ )
     {
       subMesh = theMesh->GetSubMeshContaining( shapeIDs[ i ] );

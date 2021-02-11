@@ -135,9 +135,9 @@ namespace MeshEditor_I {
     {
       // copy element nodes
       int anElemNbNodes = anElem->NbNodes();
-      vector< int > anElemNodesID( anElemNbNodes ) ;
+      vector< smIdType > anElemNodesID( anElemNbNodes ) ;
       SMDS_ElemIteratorPtr itElemNodes = anElem->nodesIterator();
-      for ( int i = 0; itElemNodes->more(); i++)
+      for ( smIdType i = 0; itElemNodes->more(); i++)
       {
         const SMDS_MeshNode* anElemNode = cast2Node( itElemNodes->next() );
         Copy( anElemNode );
@@ -787,9 +787,9 @@ SMESH_MeshEditor_i::RemoveElements(const SMESH::smIdType_array & IDsOfElements)
   SMESH_TRY;
   initData();
 
-  list< int > IdList;
+  list< smIdType > IdList;
 
-  for ( CORBA::ULong i = 0; i < IDsOfElements.length(); i++ )
+  for ( SMESH::smIdType i = 0; i < IDsOfElements.length(); i++ )
     IdList.push_back( IDsOfElements[i] );
 
   // Update Python script
@@ -816,8 +816,8 @@ CORBA::Boolean SMESH_MeshEditor_i::RemoveNodes(const SMESH::smIdType_array & IDs
   SMESH_TRY;
   initData();
 
-  list< int > IdList;
-  for ( CORBA::ULong i = 0; i < IDsOfNodes.length(); i++)
+  list< smIdType > IdList;
+  for ( SMESH::smIdType i = 0; i < IDsOfNodes.length(); i++)
     IdList.push_back( IDsOfNodes[i] );
 
   // Update Python script
@@ -852,7 +852,7 @@ SMESH::smIdType SMESH_MeshEditor_i::RemoveOrphanNodes()
   SMESH::Controls::Filter::GetElementsId( getMeshDS(), predicate, seq );
 
   // remove orphan nodes (if there are any)
-  list< int > IdList( seq.begin(), seq.end() );
+  list< smIdType > IdList( seq.begin(), seq.end() );
 
   int nbNodesBefore = myMesh->NbNodes();
   getEditor().Remove( IdList, true );
@@ -4304,10 +4304,10 @@ void SMESH_MeshEditor_i::FindEqualElements(const SMESH::ListOfIDSources&  theObj
     for (CORBA::Long j = 0; arraysIt != aListOfListOfElementsID.end(); ++arraysIt, ++j)
     {
       SMESH::long_array& aGroup = (*theGroupsOfElementsID)[ j ];
-      list<int>&      listOfIDs = *arraysIt;
+      list<smIdType>&      listOfIDs = *arraysIt;
       aGroup.length( listOfIDs.size() );
-      list<int>::iterator idIt = listOfIDs.begin();
-      for (int k = 0; idIt != listOfIDs.end(); ++idIt, ++k )
+      list<smIdType>::iterator idIt = listOfIDs.begin();
+      for (smIdType k = 0; idIt != listOfIDs.end(); ++idIt, ++k )
         aGroup[ k ] = *idIt;
     }
 
@@ -4351,11 +4351,11 @@ void SMESH_MeshEditor_i::MergeElements(const SMESH::array_of_long_array& theGrou
   for ( CORBA::ULong i = 0; i < theGroupsOfElementsID.length(); i++ )
   {
     const SMESH::long_array& anElemsIDGroup = theGroupsOfElementsID[ i ];
-    aListOfListOfElementsID.push_back( list< int >() );
-    list< int >& aListOfElemsID = aListOfListOfElementsID.back();
-    for ( CORBA::ULong j = 0; j < anElemsIDGroup.length(); j++ )
+    aListOfListOfElementsID.push_back( list< smIdType >() );
+    list< smIdType >& aListOfElemsID = aListOfListOfElementsID.back();
+    for ( SMESH::smIdType j = 0; j < anElemsIDGroup.length(); j++ )
     {
-      CORBA::Long id = anElemsIDGroup[ j ];
+      SMESH::smIdType id = anElemsIDGroup[ j ];
       if ( idsToKeep.Contains( id )) aListOfElemsID.push_front( id );
       else                           aListOfElemsID.push_back( id );
     }

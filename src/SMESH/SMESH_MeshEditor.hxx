@@ -87,7 +87,7 @@ public:
   {
     SMDSAbs_ElementType               myType;
     bool                              myIsPoly, myIsQuad;
-    int                               myID;
+    smIdType                          myID;
     double                            myBallDiameter;
     std::vector<int>                  myPolyhedQuantities;
     std::vector<const SMDS_MeshNode*> myNodes; // not managed by ElemFeatures
@@ -113,7 +113,7 @@ public:
 
     SMESH_EXPORT ElemFeatures& SetPoly(bool isPoly) { myIsPoly = isPoly; return *this; }
     SMESH_EXPORT ElemFeatures& SetQuad(bool isQuad) { myIsQuad = isQuad; return *this; }
-    SMESH_EXPORT ElemFeatures& SetID  (int ID)      { myID = ID; return *this; }
+    SMESH_EXPORT ElemFeatures& SetID  (smIdType ID) { myID = ID; return *this; }
   };
 
   /*!
@@ -124,10 +124,10 @@ public:
   /*!
    * \brief Add element
    */
-  SMDS_MeshElement* AddElement(const std::vector<int> & nodeIDs,
-                               const ElemFeatures&      features);
+  SMDS_MeshElement* AddElement(const std::vector<smIdType> & nodeIDs,
+                               const ElemFeatures&           features);
 
-  int Remove (const std::list< int >& theElemIDs, const bool isNodes);
+  smIdType Remove (const std::list< smIdType >& theElemIDs, const bool isNodes);
   // Remove a node or an element.
   // Modify a compute state of sub-meshes which become empty
 
@@ -501,7 +501,7 @@ public:
   // In each group, the cdr of nodes are substituted by the first one
   // in all elements.
 
-  typedef std::list< std::list< int > > TListOfListOfElementsID;
+  typedef std::list< std::list< smIdType > > TListOfListOfElementsID;
 
   void FindEqualElements(TIDSortedElemSet &        theElements,
                          TListOfListOfElementsID & theGroupsOfElementsID);
@@ -735,19 +735,19 @@ public:
 
   /*!
    * \brief Convert elements contained in a submesh to quadratic
-   * \return int - nb of checked elements
+   * \return smIdType - nb of checked elements
    */
-  int convertElemToQuadratic(SMESHDS_SubMesh *   theSm,
-                             SMESH_MesherHelper& theHelper,
-                             const bool          theForce3d);
+  smIdType convertElemToQuadratic(SMESHDS_SubMesh *   theSm,
+                                  SMESH_MesherHelper& theHelper,
+                                  const bool          theForce3d);
 
   /*!
    * \brief Convert quadratic elements to linear ones and remove quadratic nodes
    * \return nb of checked elements
    */
-  int removeQuadElem( SMESHDS_SubMesh *    theSm,
-                      SMDS_ElemIteratorPtr theItr,
-                      const int            theShapeID);
+  smIdType removeQuadElem( SMESHDS_SubMesh *    theSm,
+                           SMDS_ElemIteratorPtr theItr,
+                           const int            theShapeID);
   /*!
    * \brief Create groups of elements made during transformation
    * \param nodeGens - nodes making corresponding myLastCreatedNodes

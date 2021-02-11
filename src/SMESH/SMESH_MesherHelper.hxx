@@ -753,7 +753,7 @@ public:
   SMESH_MesherHelper (const SMESH_MesherHelper& theOther);
 
   // key of a map of bi-quadratic face to it's central node
-  struct TBiQuad: public std::pair<int, std::pair<int, int> >
+  struct TBiQuad: public std::pair<smIdType, std::pair<smIdType, smIdType> >
   {
     TBiQuad(const SMDS_MeshNode* n1,
             const SMDS_MeshNode* n2, 

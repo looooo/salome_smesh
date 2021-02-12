@@ -472,10 +472,10 @@ SMESH::smIdType_array* SMESH_GroupBase_i::GetListOfID()
   SMESHDS_GroupBase* aGroupDS = GetGroupDS();
   if (aGroupDS)
   {
-    int aSize = aGroupDS->Extent();
+    smIdType aSize = aGroupDS->Extent();
     aRes->length(aSize);
     SMDS_ElemIteratorPtr it = aGroupDS->GetElements();
-    for (int i = 0; it->more(); i++)
+    for (smIdType i = 0; it->more(); i++)
       aRes[i] = it->next()->GetID();
 
     if ( 0 < aSize && aSize < 100 ) // for comfortable testing ;)

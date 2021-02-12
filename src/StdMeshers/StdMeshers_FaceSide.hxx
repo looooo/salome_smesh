@@ -346,7 +346,7 @@ protected:
   std::vector<double>               myEdgeLength;
   std::vector<int>                  myIsUniform;
   double                            myLength;
-  int                               myNbPonits, myNbSegments;
+  smIdType                          myNbPonits, myNbSegments;
   SMESH_ProxyMesh::Ptr              myProxyMesh;
   bool                              myMissingVertexNodes, myIgnoreMediumNodes;
   gp_Pnt2d                          myDefaultPnt2d;

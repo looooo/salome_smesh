@@ -339,7 +339,7 @@ public:
    */
   static double EdgeLength(const TopoDS_Edge & E);
 
-  int NumberOfPoints(SMESH_Mesh& aMesh,const TopoDS_Wire& W);
+  smIdType NumberOfPoints(SMESH_Mesh& aMesh,const TopoDS_Wire& W);
 
   /*!
    * \brief Return continuity of two edges

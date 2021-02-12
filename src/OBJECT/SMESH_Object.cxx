@@ -103,7 +103,7 @@ SMESH_VisualObjDef::~SMESH_VisualObjDef()
 // functions : GetNodeObjId, GetNodeVTKId, GetElemObjId, GetElemVTKId
 // purpose   : Methods for retrieving VTK IDs by SMDS IDs and  vice versa
 //=================================================================================
-vtkIdType SMESH_VisualObjDef::GetNodeObjId( int theVTKID )
+vtkIdType SMESH_VisualObjDef::GetNodeObjId( vtkIdType theVTKID )
 {
   if (myLocalGrid)
   {
@@ -114,10 +114,10 @@ vtkIdType SMESH_VisualObjDef::GetNodeObjId( int theVTKID )
   if( this->GetMesh() )
     aNode = this->GetMesh()->FindNodeVtk( theVTKID );
 
-  return aNode ? aNode->GetID() : -1;
+  return aNode ? FromIdType<vtkIdType>(aNode->GetID()) : -1;
 }
 
-vtkIdType SMESH_VisualObjDef::GetNodeVTKId( int theObjID )
+vtkIdType SMESH_VisualObjDef::GetNodeVTKId( vtkIdType theObjID )
 {
   if (myLocalGrid)
   {
@@ -132,17 +132,17 @@ vtkIdType SMESH_VisualObjDef::GetNodeVTKId( int theObjID )
   return aNode ? aNode->GetVtkID() : -1;
 }
 
-vtkIdType SMESH_VisualObjDef::GetElemObjId( int theVTKID )
+vtkIdType SMESH_VisualObjDef::GetElemObjId( vtkIdType theVTKID )
 {
   if (myLocalGrid)
   {
     TMapOfIds::const_iterator i = myVTK2SMDSElems.find(theVTKID);
     return i == myVTK2SMDSElems.end() ? -1 : i->second;
   }
-  return this->GetMesh()->FromVtkToSmds(theVTKID);
+  return FromIdType<vtkIdType>(this->GetMesh()->FromVtkToSmds(theVTKID));
 }
 
-vtkIdType SMESH_VisualObjDef::GetElemVTKId( int theObjID )
+vtkIdType SMESH_VisualObjDef::GetElemVTKId( vtkIdType theObjID )
 {
   if (myLocalGrid)
   {
@@ -171,7 +171,7 @@ void SMESH_VisualObjDef::createPoints( vtkPoints* thePoints )
     return;
 
   TEntityList aNodes;
-  vtkIdType nbNodes = GetEntities( SMDSAbs_Node, aNodes );
+  vtkIdType nbNodes = FromIdType<vtkIdType>(GetEntities( SMDSAbs_Node, aNodes ));
   thePoints->SetNumberOfPoints( nbNodes );
 
   int nbPoints = 0;
@@ -183,7 +183,7 @@ void SMESH_VisualObjDef::createPoints( vtkPoints* thePoints )
     if ( aNode != 0 )
     {
       thePoints->SetPoint( nbPoints, aNode->X(), aNode->Y(), aNode->Z() );
-      int anId = aNode->GetID();
+      smIdType anId = aNode->GetID();
       mySMDS2VTKNodes.insert( mySMDS2VTKNodes.end(), std::make_pair( anId, nbPoints ));
       myVTK2SMDSNodes.insert( myVTK2SMDSNodes.end(), std::make_pair( nbPoints, anId ));
       nbPoints++;
@@ -292,7 +292,7 @@ namespace{
              const SMESH_VisualObjDef::TMapOfIds& theSMDS2VTKNodes, 
              const TConnect& theConnect, 
              int thePosition,
-             int theId)
+             vtkIdType theId)
   {
     theIdList->SetId(thePosition,theSMDS2VTKNodes.find(theConnect[theId]->GetID())->second);
   }
@@ -319,7 +319,7 @@ void SMESH_VisualObjDef::buildElemPrs()
     { SMDSAbs_Edge, SMDSAbs_Face, SMDSAbs_Volume, SMDSAbs_Ball, SMDSAbs_0DElement };
 
   // get entity data
-  map<SMDSAbs_ElementType,int> nbEnts;
+  map<SMDSAbs_ElementType,smIdType> nbEnts;
   map<SMDSAbs_ElementType,TEntityList> anEnts;
 
   vtkIdType aNbCells = 0;
@@ -406,7 +406,7 @@ void SMESH_VisualObjDef::buildElemPrs()
         anIdList->SetNumberOfIds( aNbNodes );
         const vtkIdType vtkElemType = SMDS_MeshCell::toVtkType( anElem->GetEntityType() );
 
-        int anId = anElem->GetID();
+        smIdType anId = anElem->GetID();
 
         mySMDS2VTKElems.insert( mySMDS2VTKElems.end(), std::make_pair( anId, iElem ));
         myVTK2SMDSElems.insert( myVTK2SMDSElems.end(), std::make_pair( iElem, anId ));
@@ -424,7 +424,7 @@ void SMESH_VisualObjDef::buildElemPrs()
                 anIdList->InsertNextId(ph->NbFaceNodes(i));
                 for(int j = 1; j <= ph->NbFaceNodes(i); j++) {
                   if ( const SMDS_MeshNode* n = ph->GetFaceNode( i, j ))
-                    anIdList->InsertNextId( mySMDS2VTKNodes[ n->GetID() ]);
+                    anIdList->InsertNextId( mySMDS2VTKNodes[ FromIdType<vtkIdType>(n->GetID()) ]);
                 }
               }
             }
@@ -441,7 +441,7 @@ void SMESH_VisualObjDef::buildElemPrs()
             else {
               for( vtkIdType aNodeId = 0; aNodesIter->more(); aNodeId++ ){
                 const SMDS_MeshElement* aNode = aNodesIter->next();
-                anIdList->SetId( aNodeId, mySMDS2VTKNodes[aNode->GetID()] );
+                anIdList->SetId( aNodeId, mySMDS2VTKNodes[FromIdType<vtkIdType>(aNode->GetID())] );
               }
             }
           }
@@ -908,7 +908,7 @@ SMDSAbs_ElementType SMESH_GroupObj::GetElementType() const
 // function : getNodesFromElems
 // purpose  : Retrieve nodes from elements
 //=================================================================================
-static int getNodesFromElems( SMESH::smIdType_array_var&              theElemIds,
+static int getNodesFromElems( SMESH::smIdType_array_var&          theElemIds,
                               const SMDS_Mesh*                    theMesh,
                               std::list<const SMDS_MeshElement*>& theResList )
 {

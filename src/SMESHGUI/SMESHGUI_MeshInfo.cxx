@@ -3653,7 +3653,7 @@ void SMESHGUI_CtrlInfo::showInfo( const SMESH::SelectionProxy& proxy )
     meshLoaded ? SMESHGUI::resourceMgr()->integerValue( "SMESH", "info_controls_limit", 3000 ) : -1;
 
   // nodes info
-  const CORBA::Long nbNodes =   nbElemsByType[ SMESH::NODE ];
+  const SMESH::smIdType nbNodes =  nbElemsByType[ SMESH::NODE ];
   // const CORBA::Long nbElems = ( nbElemsByType[ SMESH::EDGE ] +
   //                               nbElemsByType[ SMESH::FACE ] +
   //                               nbElemsByType[ SMESH::VOLUME ] );

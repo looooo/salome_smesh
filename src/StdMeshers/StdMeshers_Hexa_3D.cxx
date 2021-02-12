@@ -689,7 +689,7 @@ bool StdMeshers_Hexa_3D::Compute(SMESH_Mesh &         aMesh,
       // check if the loaded grid corresponds to nb of quadrangles on the FACE
       const SMESHDS_SubMesh* faceSubMesh =
         proxymesh ? proxymesh->GetSubMesh( F ) : meshDS->MeshElements( F );
-      const int nbQuads = faceSubMesh->NbElements();
+      const smIdType nbQuads = faceSubMesh->NbElements();
       const int nbHor = aCubeSide[i]._u2nodesMap.size() - 1;
       const int nbVer = aCubeSide[i]._u2nodesMap.begin()->second.size() - 1;
       ok = ( nbQuads == nbHor * nbVer );
@@ -1064,7 +1064,7 @@ bool StdMeshers_Hexa_3D::Evaluate(SMESH_Mesh & aMesh,
   for(int i=SMDSEntity_Node; i<SMDSEntity_Last; i++) aResVec[i] = 0;
   if(IsQuadratic) {
     aResVec[SMDSEntity_Quad_Hexa] = nb2d_face0 * ( nb2d/nb1d );
-    int nb1d_face0_int = ( nb2d_face0*4 - nb1d ) / 2;
+    smIdType nb1d_face0_int = ( nb2d_face0*4 - nb1d ) / 2;
     aResVec[SMDSEntity_Node] = nb0d_face0 * ( 2*nb2d/nb1d - 1 ) - nb1d_face0_int * nb2d/nb1d;
   }
   else {

@@ -640,7 +640,7 @@ SMESH_Mesh_i::AddHypothesis(GEOM::GEOM_Object_ptr       aSubShape,
 {
   Unexpect aCatch(SALOME_SalomeException);
 
-  const int prevNbMeshEnt = NbNodes() + NbElements();
+  const smIdType prevNbMeshEnt = NbNodes() + NbElements();
 
   if ( _preMeshInfo )
     _preMeshInfo->ForgetOrLoad();
@@ -1148,11 +1148,11 @@ void SMESH_Mesh_i::RemoveGroupWithContents( SMESH::SMESH_GroupBase_ptr theGroup 
     THROW_SALOME_CORBA_EXCEPTION( "RemoveGroupWithContents(): group does not belong to this mesh",
                                   SALOME::BAD_PARAM);
 
-  vector<int> nodeIds; // to remove nodes becoming free
+  vector<smIdType> nodeIds; // to remove nodes becoming free
   bool isNodal = ( theGroup->GetType() == SMESH::NODE );
   if ( !isNodal && !theGroup->IsEmpty() )
   {
-    CORBA::Long elemID = theGroup->GetID( 1 );
+    SMESH::smIdType elemID = theGroup->GetID( 1 );
     int nbElemNodes = GetElemNbNodes( elemID );
     if ( nbElemNodes > 0 )
       nodeIds.reserve( theGroup->Size() * nbElemNodes );
@@ -1857,7 +1857,7 @@ SMESH_Mesh_i::CreateDimGroup(const SMESH::ListOfIDSources& theGroups,
         SMDS_ElemIteratorPtr nIt = elOfType->nodesIterator();
         for ( nbChecked = 1; nIt->more() && !toStopChecking; ++nbChecked )
         {
-          const int nID = nIt->next()->GetID();
+          const smIdType nID = nIt->next()->GetID();
           if ( nID < isNodeInGroupsSize && isNodeInGroups[ nID ] &&
                isToInclude( nbChecked, ++nbCommon, nbNodes, nbCorners, toStopChecking ))
           {
@@ -2090,7 +2090,7 @@ void SMESH_Mesh_i::ReplaceShape(GEOM::GEOM_Object_ptr theNewGeom)
       while ( elemIt->more() )
       {
         const SMDS_MeshElement* e = elemIt->next();
-        const int          elemID = e->GetID();
+        const smIdType     elemID = e->GetID();
         const int         shapeID = e->GetShapeID();
         TRange &        lastRange = ranges.back();
         if ( lastRange.shapeID != shapeID ||
@@ -2407,7 +2407,7 @@ void SMESH_Mesh_i::CheckGeomModif( bool theIsBreakLink )
   if ( !theIsBreakLink )
     if ( mainGO->GetType() == GEOM_GROUP || !geomChanged )  // is group or not modified
     {
-      int nb = NbNodes() + NbElements();
+      smIdType nb = NbNodes() + NbElements();
       CheckGeomGroupModif();
       if ( nb != NbNodes() + NbElements() ) // something removed due to hypotheses change
         _gen_i->UpdateIcons( me );
@@ -2795,7 +2795,7 @@ void SMESH_Mesh_i::CheckGeomGroupModif()
 
   if ( !_impl->HasShapeToMesh() ) return;
 
-  CORBA::Long nbEntities = NbNodes() + NbElements();
+  SMESH::smIdType nbEntities = NbNodes() + NbElements();
 
   // Check if group contents changed
 
@@ -2997,7 +2997,7 @@ void SMESH_Mesh_i::CheckGeomGroupModif()
 
   // Update icons
 
-  CORBA::Long newNbEntities = NbNodes() + NbElements();
+  SMESH::smIdType newNbEntities = NbNodes() + NbElements();
   list< SALOMEDS::SObject_wrap > soToUpdateIcons;
   if ( newNbEntities != nbEntities )
   {
@@ -3342,7 +3342,7 @@ SMESH::log_array * SMESH_Mesh_i::GetLog(CORBA::Boolean clearAfterGet)
   while(its != logDS.end()){
     SMESHDS_Command *com = *its;
     int comType = com->GetType();
-    int lgcom = com->GetNumber();
+    smIdType lgcom = com->GetNumber();
     const list < smIdType >&intList = com->GetIndexes();
     int inum = intList.size();
     list < smIdType >::const_iterator ii = intList.begin();
@@ -7072,20 +7072,20 @@ smIdType SMESH_MeshPartDS::MinNodeID() const
 smIdType SMESH_MeshPartDS::MaxElementID() const
 {
   if ( _meshDS ) return _meshDS->MaxElementID();
-  int maxID = 0;
+  smIdType maxID = 0;
   for ( int iType = SMDSAbs_Edge; iType < SMDSAbs_NbElementTypes; ++iType )
     if ( !_elements[ iType ].empty() )
-      maxID = Max( maxID, (*_elements[ iType ].rbegin())->GetID() );
+      maxID = std::max( maxID, (*_elements[ iType ].rbegin())->GetID() );
   return maxID;
 }
 // -------------------------------------------------------------------------------------
 smIdType SMESH_MeshPartDS::MinElementID() const
 {
   if ( _meshDS ) return _meshDS->MinElementID();
-  int minID = 0;
+  smIdType minID = 0;
   for ( int iType = SMDSAbs_Edge; iType < SMDSAbs_NbElementTypes; ++iType )
     if ( !_elements[ iType ].empty() )
-      minID = Min( minID, (*_elements[ iType ].begin())->GetID() );
+      minID = std::min( minID, (*_elements[ iType ].begin())->GetID() );
   return minID;
 }
 // -------------------------------------------------------------------------------------

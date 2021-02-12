@@ -59,10 +59,10 @@ class SMESHGUI_EXPORT SMESHGUI_PreVisualObj : public SMESH_VisualObj
                              smIdType&      theNodeId1,
                              smIdType&      theNodeId2 ) const;
 
-  virtual vtkIdType GetNodeObjId( int theVTKID );
-  virtual vtkIdType GetNodeVTKId( int theObjID );
-  virtual vtkIdType GetElemObjId( int theVTKID );
-  virtual vtkIdType GetElemVTKId( int theObjID );
+  virtual vtkIdType GetNodeObjId( vtkIdType theVTKID );
+  virtual vtkIdType GetNodeVTKId( vtkIdType theObjID );
+  virtual vtkIdType GetElemObjId( vtkIdType theVTKID );
+  virtual vtkIdType GetElemVTKId( vtkIdType theObjID );
   virtual void                  ClearEntitiesFlags();
   virtual bool                  GetEntitiesFlag();
   virtual unsigned int          GetEntitiesState();

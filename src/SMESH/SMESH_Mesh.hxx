@@ -345,7 +345,7 @@ class SMESH_EXPORT SMESH_Mesh
   bool SynchronizeGroups();
 
 
-  SMDSAbs_ElementType GetElementType( const int id, const bool iselem );
+  SMDSAbs_ElementType GetElementType( const smIdType id, const bool iselem );
 
   void ClearMeshOrder();
   void SetMeshOrder(const TListOfListOfInt& theOrder );

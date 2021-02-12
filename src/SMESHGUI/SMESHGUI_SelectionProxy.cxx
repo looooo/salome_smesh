@@ -663,13 +663,13 @@ int SMESH::SelectionProxy::elementEntityType( int id ) const
   \param connectivity Return element connectivity.
   \return \c true if result is valid; \c false otherwise.
 */
-bool SMESH::SelectionProxy::elementConnectivity( int id, Connectivity& connectivity )
+bool SMESH::SelectionProxy::elementConnectivity( SMESH::smIdType id, Connectivity& connectivity )
 {
   bool result = false;
   connectivity.clear();
   if ( !isNull() )
   {
-    QSet<int> nodes; // order of nodes is important
+    QSet<SMESH::smIdType> nodes; // order of nodes is important
     if ( actor() )
     {
       const SMDS_MeshElement* element = actor()->GetObject()->GetMesh()->FindElement( id );
@@ -678,7 +678,7 @@ bool SMESH::SelectionProxy::elementConnectivity( int id, Connectivity& connectiv
         {
           while ( it->more() )
           {
-            int n = it->next()->GetID();
+            SMESH::smIdType n = it->next()->GetID();
             if ( !nodes.contains( n ))
             {
               connectivity[ SMDSAbs_Node ] << n;
@@ -1159,10 +1159,10 @@ QColor SMESH::SelectionProxy::color() const
   \param autoCompute Compute size if it is unavailable. Defaults to \c false.
   \return Group's size.
 */
-int SMESH::SelectionProxy::size( bool autoCompute ) const
+SMESH::smIdType SMESH::SelectionProxy::size( bool autoCompute ) const
 {
   // note: size is not computed for group on filter for performance reasons, see IPAL52831
-  int result = -1;
+  SMESH::smIdType result = -1;
   if ( !isNull() )
   {
     SMESH::SMESH_GroupBase_var group = SMESH::SMESH_GroupBase::_narrow( myObject );
@@ -1187,10 +1187,10 @@ int SMESH::SelectionProxy::size( bool autoCompute ) const
   \param autoCompute Compute size if it is unavailable. Defaults to \c false.
   \return Number of nodes contained in group.
 */
-int SMESH::SelectionProxy::nbNodes( bool autoCompute ) const
+SMESH::smIdType SMESH::SelectionProxy::nbNodes( bool autoCompute ) const
 {
   // note: nb of nodes is not computed automatically for performance reasons
-  int result = -1;
+  SMESH::smIdType result = -1;
   if ( !isNull() )
   {
     SMESH::SMESH_GroupBase_var group = SMESH::SMESH_GroupBase::_narrow( myObject );

@@ -152,7 +152,7 @@ SMESH::smIdType SMESH_subMesh_i::GetNumberOfElements()
 
   ::SMESH_subMesh* aSubMesh = _mesh_i->_mapSubMesh[_localId];
 
-  int nbElems = 0;
+  SMESH::smIdType nbElems = 0;
 
   TListOfSubMeshes smList;
   if ( getSubMeshes( aSubMesh, smList ))
@@ -197,7 +197,7 @@ SMESH::smIdType SMESH_subMesh_i::GetNumberOfNodes(CORBA::Boolean all)
   }
   if ( all ) // get nodes from aSubMesh and all child sub-meshes
   {
-    int nbNodes = 0;
+    SMESH::smIdType nbNodes = 0;
     SMESH_subMeshIteratorPtr smIt = aSubMesh->getDependsOnIterator( /*includeSelf=*/true );
     while ( smIt->more() )
     {
@@ -231,7 +231,7 @@ SMESH::smIdType_array* SMESH_subMesh_i::GetElementsId()
 
   ::SMESH_subMesh* aSubMesh = _mesh_i->_mapSubMesh[_localId];
 
-  int nbElems = 0;
+  SMESH::smIdType nbElems = 0;
   TListOfSubMeshes smList;
   if ( getSubMeshes( aSubMesh, smList ))
   {

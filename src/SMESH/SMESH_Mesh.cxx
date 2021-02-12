@@ -2215,8 +2215,8 @@ ostream& SMESH_Mesh::Dump(ostream& save)
     save << ++clause << ") Total number of " << orderStr << " edges:\t" << NbEdges(order) << endl;
     save << ++clause << ") Total number of " << orderStr << " faces:\t" << NbFaces(order) << endl;
     if ( NbFaces(order) > 0 ) {
-      int nb3 = NbTriangles(order);
-      int nb4 = NbQuadrangles(order);
+      smIdType nb3 = NbTriangles(order);
+      smIdType nb4 = NbQuadrangles(order);
       save << clause << ".1) Number of " << orderStr << " triangles:  \t" << nb3 << endl;
       save << clause << ".2) Number of " << orderStr << " quadrangles:\t" << nb4 << endl;
       if ( nb3 + nb4 !=  NbFaces(order) ) {
@@ -2236,10 +2236,10 @@ ostream& SMESH_Mesh::Dump(ostream& save)
     }
     save << ++clause << ") Total number of " << orderStr << " volumes:\t" << NbVolumes(order) << endl;
     if ( NbVolumes(order) > 0 ) {
-      int nb8 = NbHexas(order);
-      int nb4 = NbTetras(order);
-      int nb5 = NbPyramids(order);
-      int nb6 = NbPrisms(order);
+      smIdType nb8 = NbHexas(order);
+      smIdType nb4 = NbTetras(order);
+      smIdType nb5 = NbPyramids(order);
+      smIdType nb6 = NbPrisms(order);
       save << clause << ".1) Number of " << orderStr << " hexahedrons: \t" << nb8 << endl;
       save << clause << ".2) Number of " << orderStr << " tetrahedrons:\t" << nb4 << endl;
       save << clause << ".3) Number of " << orderStr << " prisms:      \t" << nb6 << endl;
@@ -2270,7 +2270,7 @@ ostream& SMESH_Mesh::Dump(ostream& save)
 //purpose  : Returns type of mesh element with certain id
 //=======================================================================
 
-SMDSAbs_ElementType SMESH_Mesh::GetElementType( const int id, const bool iselem )
+SMDSAbs_ElementType SMESH_Mesh::GetElementType( const smIdType id, const bool iselem )
 {
   return _myMeshDS->GetElementType( id, iselem );
 }

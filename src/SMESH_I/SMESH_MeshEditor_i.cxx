@@ -573,7 +573,7 @@ SMESH::MeshPreviewStruct* SMESH_MeshEditor_i::GetPreviewData()
          aMeshElem->nodeIterator() );
       while ( itElemNodes->more() ) {
         const SMDS_MeshNode* aMeshNode = itElemNodes->next();
-        int aNodeID = aMeshNode->GetID();
+        smIdType aNodeID = aMeshNode->GetID();
         TNodesMap::iterator anIter = nodesMap.find(aNodeID);
         if ( anIter == nodesMap.end() ) {
           // filling the nodes coordinates
@@ -854,9 +854,9 @@ SMESH::smIdType SMESH_MeshEditor_i::RemoveOrphanNodes()
   // remove orphan nodes (if there are any)
   list< smIdType > IdList( seq.begin(), seq.end() );
 
-  int nbNodesBefore = myMesh->NbNodes();
+  SMESH::smIdType nbNodesBefore = myMesh->NbNodes();
   getEditor().Remove( IdList, true );
-  int nbNodesAfter = myMesh->NbNodes();
+  SMESH::smIdType nbNodesAfter = myMesh->NbNodes();
 
   declareMeshModified( /*isReComputeSafe=*/ IdList.size() == 0 ); // issue 0020693
   return nbNodesBefore - nbNodesAfter;
@@ -959,12 +959,12 @@ SMESH::smIdType SMESH_MeshEditor_i::AddEdge(const SMESH::smIdType_array & IDsOfN
   SMESH_TRY;
   initData();
 
-  int NbNodes = IDsOfNodes.length();
+  SMESH::smIdType NbNodes = IDsOfNodes.length();
   SMDS_MeshElement* elem = 0;
   if (NbNodes == 2)
   {
-    CORBA::Long index1 = IDsOfNodes[0];
-    CORBA::Long index2 = IDsOfNodes[1];
+    SMESH::smIdType index1 = IDsOfNodes[0];
+    SMESH::smIdType index2 = IDsOfNodes[1];
     elem = getMeshDS()->AddEdge( getMeshDS()->FindNode(index1),
                                  getMeshDS()->FindNode(index2));
 
@@ -973,9 +973,9 @@ SMESH::smIdType SMESH_MeshEditor_i::AddEdge(const SMESH::smIdType_array & IDsOfN
                   << index1 << ", " << index2 <<" ])";
   }
   if (NbNodes == 3) {
-    CORBA::Long n1 = IDsOfNodes[0];
-    CORBA::Long n2 = IDsOfNodes[1];
-    CORBA::Long n12 = IDsOfNodes[2];
+    SMESH::smIdType n1 = IDsOfNodes[0];
+    SMESH::smIdType n2 = IDsOfNodes[1];
+    SMESH::smIdType n12 = IDsOfNodes[2];
     elem = getMeshDS()->AddEdge( getMeshDS()->FindNode(n1),
                                  getMeshDS()->FindNode(n2),
                                  getMeshDS()->FindNode(n12));
@@ -1578,9 +1578,9 @@ CORBA::Boolean SMESH_MeshEditor_i::Reorient(const SMESH::smIdType_array & IDsOfE
   SMESH_TRY;
   initData();
 
-  for ( CORBA::ULong i = 0; i < IDsOfElements.length(); i++ )
+  for ( SMESH::smIdType i = 0; i < IDsOfElements.length(); i++ )
   {
-    CORBA::Long index = IDsOfElements[i];
+    SMESH::smIdType index = IDsOfElements[i];
     const SMDS_MeshElement * elem = getMeshDS()->FindElement(index);
     if ( elem )
       getEditor().Reorient( elem );
@@ -2999,7 +2999,7 @@ SMESH_MeshEditor_i::LinearAnglesVariation(SMESH::SMESH_Mesh_ptr       thePathMes
     SMESH_subMesh* aSubMesh = aMeshImp->GetImpl().GetSubMesh( aShape );
     if ( !aSubMesh || !aSubMesh->GetSubMeshDS())
       return aResult._retn();
-    int nbSteps = aSubMesh->GetSubMeshDS()->NbElements();
+    smIdType nbSteps = aSubMesh->GetSubMeshDS()->NbElements();
     if ( nbSteps == nbAngles )
     {
       aResult.inout() = theAngles;
@@ -6723,7 +6723,7 @@ SMESH_MeshEditor_i::AffectedElemGroupsInRegion( const SMESH::ListOfGroups& theEl
     for (; eIt != anAffected.end(); ++eIt)
     {
       const SMDS_MeshElement* anElem = *eIt;
-      int elemId = anElem->GetID();
+      smIdType elemId = anElem->GetID();
       switch ( anElem->GetType() ) {
       case SMDSAbs_Volume: volumeIds[ivol++] = elemId; break;
       case SMDSAbs_Face:    faceIds[iface++] = elemId; break;

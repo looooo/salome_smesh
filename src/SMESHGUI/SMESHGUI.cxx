@@ -3615,7 +3615,7 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
             try {
               SUIT_OverrideCursor wc;
               SMESH::SMESH_MeshEditor_var aMeshEditor = aMesh->GetMeshEditor();
-              int removed = aMeshEditor->RemoveOrphanNodes();
+              smIdType removed = aMeshEditor->RemoveOrphanNodes();
               SUIT_MessageBox::information(SMESHGUI::desktop(),
                                            tr("SMESH_INFORMATION"),
                                            tr("NB_NODES_REMOVED").arg(removed));

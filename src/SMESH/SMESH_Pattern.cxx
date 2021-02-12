@@ -3231,7 +3231,7 @@ bool SMESH_Pattern::Load (SMESH_Mesh*         theMesh,
     return setErrorCode( ERR_LOADV_BAD_SHAPE );
 
   // count nodes
-  smIdType nbNodes = 0, shapeID;
+  smIdType nbNodes = 0; int shapeID;
   for ( shapeID = 1; shapeID <= myShapeIDMap.Extent(); shapeID++ )
   {
     const TopoDS_Shape& S = myShapeIDMap( shapeID );

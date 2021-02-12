@@ -124,7 +124,7 @@ public:
   bool Contain( const TopoDS_Vertex& vertex ) const;
   void AppendSide( const _FaceSide& side );
   void SetBottomSide( int i );
-  int GetNbSegments(SMESH_ProxyMesh& mesh, const SMESHDS_SubMesh* smToCheckEdges=0) const;
+  smIdType GetNbSegments(SMESH_ProxyMesh& mesh, const SMESHDS_SubMesh* smToCheckEdges=0) const;
   bool StoreNodes(SMESH_ProxyMesh& mesh, vector<const SMDS_MeshNode*>& myGrid,
                   bool reverse, bool isProxy, const SMESHDS_SubMesh* smToCheckEdges=0 );
   void SetID(EQuadSides id) { myID = id; }
@@ -2229,9 +2229,9 @@ void _FaceSide::SetBottomSide( int i )
 //purpose  : 
 //=======================================================================
 
-int _FaceSide::GetNbSegments(SMESH_ProxyMesh& mesh, const SMESHDS_SubMesh* smToCheckEdges) const
+smIdType _FaceSide::GetNbSegments(SMESH_ProxyMesh& mesh, const SMESHDS_SubMesh* smToCheckEdges) const
 {
-  int nb = 0;
+  smIdType nb = 0;
   if ( myChildren.empty() )
   {
     nb = mesh.GetSubMesh(myEdge)->NbElements();

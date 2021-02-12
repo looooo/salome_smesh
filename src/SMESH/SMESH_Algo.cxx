@@ -1038,9 +1038,9 @@ void SMESH_Algo::addBadInputElements(const SMESHDS_SubMesh* sm,
  */
 //=============================================================================
 
-int SMESH_Algo::NumberOfPoints(SMESH_Mesh& aMesh, const TopoDS_Wire& W)
+smIdType SMESH_Algo::NumberOfPoints(SMESH_Mesh& aMesh, const TopoDS_Wire& W)
 {
-  int nbPoints = 0;
+  smIdType nbPoints = 0;
   for (TopExp_Explorer exp(W,TopAbs_EDGE); exp.More(); exp.Next()) {
     const TopoDS_Edge& E = TopoDS::Edge(exp.Current());
     smIdType nb = aMesh.GetSubMesh(E)->GetSubMeshDS()->NbNodes();

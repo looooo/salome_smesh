@@ -601,7 +601,7 @@ void SMESHGUI_AddMeshElementDlg::ClickOnApply()
     SMESH::smIdType_array_var anIdList = new SMESH::smIdType_array;
     anIdList->length( 1 );
     anIdList[0] = -1;
-    int nbElemsBefore = 0;
+    smIdType nbElemsBefore = 0;
 
     switch (myElementType) {
     case SMDSAbs_0DElement: {
@@ -611,7 +611,7 @@ void SMESHGUI_AddMeshElementDlg::ClickOnApply()
       for ( size_t i = 0; i < anArrayOfIndices->length(); ++i )
         anIdList[i] = aMeshEditor->Add0DElement(anArrayOfIndices[i], duplicateElements);
 
-      CORBA::ULong nbAdded = myMesh->Nb0DElements() - nbElemsBefore;
+      SMESH::smIdType nbAdded = myMesh->Nb0DElements() - nbElemsBefore;
       if ( !duplicateElements && nbAdded < anArrayOfIndices->length() )
         SUIT_MessageBox::information(SMESHGUI::desktop(),
                                      tr("SMESH_INFORMATION"),

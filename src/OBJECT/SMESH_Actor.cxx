@@ -1035,7 +1035,7 @@ void SMESH_ActorDef::SetControlMode( eControl theMode, bool theCheckEntityMode )
       return;
     }
 
-    int aNbCells = myFunctor ? myVisualObj->GetNbEntities( myFunctor->GetType() ) : 0;
+    smIdType aNbCells = myFunctor ? myVisualObj->GetNbEntities( myFunctor->GetType() ) : 0;
     bool aShowOnlyScalarBarTitle = false;
     if(aNbCells) {
       //myControlMode = theMode;
@@ -1664,11 +1664,11 @@ void SMESH_ActorDef::SetEntityMode(unsigned int theMode)
 
 void SMESH_ActorDef::SetRepresentation (int theMode)
 {
-  int aNbEdges   = myVisualObj->GetNbEntities(SMDSAbs_Edge);
-  int aNbFaces   = myVisualObj->GetNbEntities(SMDSAbs_Face);
-  int aNbVolumes = myVisualObj->GetNbEntities(SMDSAbs_Volume);
-  int aNb0Ds     = myVisualObj->GetNbEntities(SMDSAbs_0DElement);
-  int aNbBalls   = myVisualObj->GetNbEntities(SMDSAbs_Ball);
+  smIdType aNbEdges   = myVisualObj->GetNbEntities(SMDSAbs_Edge);
+  smIdType aNbFaces   = myVisualObj->GetNbEntities(SMDSAbs_Face);
+  smIdType aNbVolumes = myVisualObj->GetNbEntities(SMDSAbs_Volume);
+  smIdType aNb0Ds     = myVisualObj->GetNbEntities(SMDSAbs_0DElement);
+  smIdType aNbBalls   = myVisualObj->GetNbEntities(SMDSAbs_Ball);
 
   if ( myRepresentationCache && aNbEdges + aNbFaces + aNbVolumes + aNb0Ds + aNbBalls )
   {

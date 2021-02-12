@@ -33,6 +33,8 @@
 #include "SMESH_Hypothesis.hxx"
 #include "Utils_SALOME_Exception.hxx"
 
+#include <smIdType.hxx>
+
 #include <vector>
 
 /*!
@@ -179,7 +181,7 @@ public:
   friend std::istream& operator >> (std::istream & load, StdMeshers_NumberOfSegments & hyp);
 
 protected:
-  int                 _numberOfSegments; //!< an edge will be split on to this number of segments
+  smIdType            _numberOfSegments; //!< an edge will be split on to this number of segments
   DistrType           _distrType;        //!< the type of distribution of density function
   double              _scaleFactor;      //!< the scale parameter for DT_Scale
   std::vector<double> _table, _distr;    //!< the table for DT_TabFunc, a sequence of pairs of numbers

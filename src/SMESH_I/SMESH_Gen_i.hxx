@@ -537,7 +537,7 @@ public:
   int RegisterObject(CORBA::Object_ptr theObject);
 
   // Return id of registered object
-  CORBA::Long GetObjectId(CORBA::Object_ptr theObject);
+  SMESH::smIdType GetObjectId(CORBA::Object_ptr theObject);
 
   // Return an object that previously had an oldID
   template<class TInterface>

@@ -835,7 +835,7 @@ bool StdMeshers_FaceSide::GetEdgeNodes(size_t                        i,
     if ( mesh->HasModificationsToDiscard() ) // check nb of nodes on the EDGE sub-mesh
     {
       int iQuad    = sm->NbElements() ? sm->GetElements()->next()->IsQuadratic() : 0;
-      int nbExpect = sm->NbElements() - 1 + iQuad * sm->NbElements();
+      smIdType nbExpect = sm->NbElements() - 1 + iQuad * sm->NbElements();
       if ( nbExpect != sm->NbNodes() ) // some nodes are moved from the EDGE by MergeNodes()
       {
         // add nodes of all segments

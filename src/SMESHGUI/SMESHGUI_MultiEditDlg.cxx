@@ -1464,7 +1464,7 @@ void SMESHGUI_CuttingOfQuadsDlg::displayPreview()
     else // use numerical functor
     {
       // compare two sets of possible triangles
-      int diag = aMeshEditor->BestSplit(anElemIds[i], aCriterion);
+      smIdType diag = aMeshEditor->BestSplit(anElemIds[i], aCriterion);
       if (diag == 1) // 1-3
         isDiag13 = true;
       else if (diag == 2) // 2-4

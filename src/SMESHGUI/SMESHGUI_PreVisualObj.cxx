@@ -107,24 +107,24 @@ vtkUnstructuredGrid* SMESHGUI_PreVisualObj::GetUnstructuredGrid()
 }
 
 
-vtkIdType SMESHGUI_PreVisualObj::GetNodeObjId( int theVTKID )
+vtkIdType SMESHGUI_PreVisualObj::GetNodeObjId( vtkIdType theVTKID )
 {
   const SMDS_MeshNode* aNode = myMesh->FindNodeVtk( theVTKID );
   return aNode ? aNode->GetID() : -1;
 }
 
-vtkIdType SMESHGUI_PreVisualObj::GetNodeVTKId( int theObjID )
+vtkIdType SMESHGUI_PreVisualObj::GetNodeVTKId( vtkIdType theObjID )
 {
   const SMDS_MeshNode* aNode = myMesh->FindNode( theObjID );
   return aNode ? aNode->GetID() : -1;
 }
 
-vtkIdType SMESHGUI_PreVisualObj::GetElemObjId( int theVTKID )
+vtkIdType SMESHGUI_PreVisualObj::GetElemObjId( vtkIdType theVTKID )
 {
   return this->GetMesh()->FromVtkToSmds(theVTKID);
 }
 
-vtkIdType SMESHGUI_PreVisualObj::GetElemVTKId( int theObjID )
+vtkIdType SMESHGUI_PreVisualObj::GetElemVTKId( vtkIdType theObjID )
 {
   const SMDS_MeshElement* e = myMesh->FindElement(theObjID);
   return e ? e->GetVtkID() : -1;

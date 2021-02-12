@@ -3280,13 +3280,13 @@ void RangeOfIds::GetRangeStr( TCollection_AsciiString& theResStr )
   theResStr.Clear();
 
   TIDsSeq                             anIntSeq;
-  TColStd_SequenceOfAsciiString aStrSeq;
+  NCollection_Sequence< std::string > aStrSeq;
 
   TIDsMap::Iterator anIter( myIds );
   for ( ; anIter.More(); anIter.Next() )
   {
     smIdType anId = anIter.Key();
-    TCollection_AsciiString aStr( FromIdType<int>(anId) );
+    SMESH_Comment aStr( anId );
     anIntSeq.Append( anId );
     aStrSeq.Append( aStr );
   }
@@ -3336,13 +3336,14 @@ void RangeOfIds::GetRangeStr( TCollection_AsciiString& theResStr )
 
   if ( aStrSeq.Length() == 0 )
     return;
-
-  theResStr = aStrSeq( 1 );
+  std::string aResStr;
+  aResStr = aStrSeq( 1 );
   for ( int j = 2, k = aStrSeq.Length(); j <= k; j++  )
   {
-    theResStr += ",";
-    theResStr += aStrSeq( j );
+    aResStr += ",";
+    aResStr += aStrSeq( j );
   }
+  theResStr = aResStr.c_str();
 }
 
 //=======================================================================

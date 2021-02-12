@@ -554,7 +554,7 @@ namespace
     {
       SMESH_subMesh* faceSm = *smIt;
       SMESHDS_SubMesh* faceSmDS = faceSm->GetSubMeshDS();
-      int nbQuads = faceSmDS ? faceSmDS->NbElements() : 0;
+      smIdType nbQuads = faceSmDS ? faceSmDS->NbElements() : 0;
       bool toRemove;
       if ( nbQuads > 0 )
         toRemove = helper->IsStructured( faceSm );
@@ -1025,7 +1025,7 @@ bool StdMeshers_Prism_3D::Compute(SMESH_Mesh& theMesh, const TopoDS_Shape& theSh
         SMESH_subMesh*                 faceSM = theMesh.GetSubMesh( face );
         if ( !faceSM->IsEmpty() )
         {
-          int nbFaces = faceSM->GetSubMeshDS()->NbElements();
+          smIdType nbFaces = faceSM->GetSubMeshDS()->NbElements();
           if ( prevNbFaces < nbFaces )
           {
             if ( !meshedFaces.empty() ) meshedFaces.pop_back();
@@ -1749,7 +1749,7 @@ bool StdMeshers_Prism_3D::computeWalls(const Prism_3D::TPrismTopo& thePrism)
       }
 
       // assure that all the source (left) EDGEs are meshed
-      int nbSrcSegments = 0;
+      smIdType nbSrcSegments = 0;
       for ( int i = 0; i < lftSide->NbEdges(); ++i )
       {
         if ( isArtificialQuad )

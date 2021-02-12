@@ -770,7 +770,7 @@ bool StdMeshers_Regular_1D::computeInternalParameters(SMESH_Mesh &     theMesh,
           }
           if (computed) {
             SMESHDS_SubMesh* smds = sm->GetSubMeshDS();
-            int       nb_segments = smds->NbElements();
+            smIdType  nb_segments = smds->NbElements();
             if (nbseg - 1 <= nb_segments && nb_segments <= nbseg + 1) {
               isFound = true;
               nbseg = nb_segments;

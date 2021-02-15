@@ -6247,7 +6247,7 @@ int SMESH_Gen_i::RegisterObject(CORBA::Object_ptr theObject)
  */
 //================================================================================
 
-SMESH::smIdType  SMESH_Gen_i::GetObjectId(CORBA::Object_ptr theObject)
+CORBA::Long  SMESH_Gen_i::GetObjectId(CORBA::Object_ptr theObject)
 {
   if ( myStudyContext && !CORBA::is_nil( theObject )) {
     string iorString = GetORB()->object_to_string( theObject );

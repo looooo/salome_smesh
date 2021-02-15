@@ -463,7 +463,7 @@ module SMESH
      *
      * Can be used to check if the object was created in the same container, as this engine.
      */
-    smIdType GetObjectId(in Object theObject);
+    long GetObjectId(in Object theObject);
 
     /*!
      * \brief Get version of MED format being used.

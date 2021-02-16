@@ -335,7 +335,7 @@ void SMDS_UnstructuredGrid::compactGrid(std::vector<smIdType>& idNodesOldToNew, 
   newConnectivity->Delete();
 }
 
-void SMDS_UnstructuredGrid::copyNodes(vtkPoints *       newPoints,
+void SMDS_UnstructuredGrid::copyNodes(vtkPoints *             newPoints,
                                       std::vector<smIdType>& /*idNodesOldToNew*/,
                                       vtkIdType&              alreadyCopied,
                                       vtkIdType               start,

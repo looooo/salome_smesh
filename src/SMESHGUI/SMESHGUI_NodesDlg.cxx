@@ -55,7 +55,7 @@
 
 #include <SVTK_ViewWindow.h>
 #include <VTKViewer_Algorithm.h>
-#include <VTKViewer_CellLocationsArray.h>
+//#include <VTKViewer_CellLocationsArray.h>
 
 // SALOME KERNEL includes
 #include <SALOMEDS_Study.hxx>
@@ -152,7 +152,7 @@ namespace SMESH
       aCells->InsertNextCell( anIdList );
       aCellTypesArray->InsertNextValue( VTK_VERTEX );
 
-      VTKViewer_CellLocationsArray* aCellLocationsArray = VTKViewer_CellLocationsArray::New();
+      vtkIdTypeArray* aCellLocationsArray = vtkIdTypeArray::New();
       aCellLocationsArray->SetNumberOfComponents( 1 );
       aCellLocationsArray->SetNumberOfTuples( 1 );
 

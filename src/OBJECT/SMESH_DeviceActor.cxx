@@ -31,7 +31,7 @@
 #include "SMESH_ControlsDef.hxx"
 #include "SMESH_ActorUtils.h"
 #include "SMESH_FaceOrientationFilter.h"
-#include "VTKViewer_CellLocationsArray.h"
+//#include "VTKViewer_CellLocationsArray.h"
 #include "VTKViewer_PolyDataMapper.h"
 
 #include <VTKViewer_Transform.h>
@@ -426,7 +426,7 @@ SMESH_DeviceActor
       aCellTypesArray->SetNumberOfTuples( aNbCells );
       aScalars->SetNumberOfTuples( aNbCells );
 
-      VTKViewer_CellLocationsArray* aCellLocationsArray = VTKViewer_CellLocationsArray::New();
+      vtkIdTypeArray* aCellLocationsArray = vtkIdTypeArray::New();
       aCellLocationsArray->SetNumberOfComponents( 1 );
       aCellLocationsArray->SetNumberOfTuples( aNbCells );
 
@@ -491,7 +491,7 @@ SMESH_DeviceActor
       aCellTypesArray->SetNumberOfTuples( aNbCells );
       aScalars->SetNumberOfTuples( aNbCells );
 
-      VTKViewer_CellLocationsArray* aCellLocationsArray = VTKViewer_CellLocationsArray::New();
+      vtkIdTypeArray* aCellLocationsArray = vtkIdTypeArray::New();
       aCellLocationsArray->SetNumberOfComponents( 1 );
       aCellLocationsArray->SetNumberOfTuples( aNbCells );
 
@@ -586,7 +586,7 @@ SMESH_DeviceActor
       }
     }
     
-    VTKViewer_CellLocationsArray* aCellLocationsArray = VTKViewer_CellLocationsArray::New();
+    vtkIdTypeArray* aCellLocationsArray = vtkIdTypeArray::New();
     aCellLocationsArray->SetNumberOfComponents( 1 );
     aCellLocationsArray->SetNumberOfTuples( aNbCells );
     

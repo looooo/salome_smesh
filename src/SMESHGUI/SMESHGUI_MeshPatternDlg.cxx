@@ -58,7 +58,7 @@
 
 #include <SVTK_ViewModel.h>
 #include <SVTK_ViewWindow.h>
-#include <VTKViewer_CellLocationsArray.h>
+//#include <VTKViewer_CellLocationsArray.h>
 
 // SALOME KERNEL includes 
 #include <SALOMEDS_SObject.hxx>
@@ -1339,7 +1339,7 @@ vtkUnstructuredGrid* SMESHGUI_MeshPatternDlg::getGrid()
       else aCellTypesArray->InsertNextValue(VTK_EMPTY_CELL);
     }
 
-    VTKViewer_CellLocationsArray* aCellLocationsArray = VTKViewer_CellLocationsArray::New();
+    vtkIdTypeArray* aCellLocationsArray = vtkIdTypeArray::New();
     aCellLocationsArray->SetNumberOfComponents(1);
     aCellLocationsArray->SetNumberOfTuples(aNbCells);
 

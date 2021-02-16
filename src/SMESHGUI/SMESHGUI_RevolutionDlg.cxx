@@ -57,7 +57,7 @@
 #include <SVTK_ViewWindow.h>
 #include <SVTK_Selector.h>
 #include <SALOME_ListIO.hxx>
-#include <VTKViewer_CellLocationsArray.h>
+//#include <VTKViewer_CellLocationsArray.h>
 
 // OCCT includes
 #include <TColStd_MapOfInteger.hxx>

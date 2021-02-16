@@ -1834,11 +1834,11 @@ public:
     if ( vw->SelectionMode() != EdgeOfCellSelection )
       return;
 
-    SVTK_IndexedMapOfIds idMap;
+    SVTK_IndexedMapOfVtkIds idMap;
     std::vector<std::pair<int, int> >::const_iterator it;
     for ( it = myIds.begin(); it != myIds.end(); ++it )
     {
-      std::vector<int> pair;
+      std::vector<vtkIdType> pair;
       pair.push_back( (*it).first );
       pair.push_back( (*it).second );
       idMap.Add( pair );
@@ -2047,7 +2047,7 @@ public:
     if ( !actor || !actor->hasIO() )
       return;
 
-    SVTK_IndexedMapOfIds idMap;
+    SVTK_IndexedMapOfVtkIds idMap;
     selector->GetCompositeIndex( actor->getIO(), idMap );
 
     for ( int i = 1; i <= idMap.Extent(); i++ ) {

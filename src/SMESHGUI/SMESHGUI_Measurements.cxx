@@ -60,7 +60,7 @@
 #include <vtkCellArray.h>
 #include <vtkUnsignedCharArray.h>
 #include <vtkDataSetMapper.h>
-#include <VTKViewer_CellLocationsArray.h>
+//#include <VTKViewer_CellLocationsArray.h>
 #include <vtkProperty.h>
 
 #include <ElCLib.hxx>
@@ -357,7 +357,7 @@ void SMESHGUI_MinDistance::createPreview( double x1, double y1, double z1, doubl
   aCells->InsertNextCell( anIdList );
   aCellTypesArray->InsertNextValue( VTK_LINE );
   anIdList->Delete();
-  VTKViewer_CellLocationsArray* aCellLocationsArray = VTKViewer_CellLocationsArray::New();
+  vtkIdTypeArray* aCellLocationsArray = vtkIdTypeArray::New();
   aCellLocationsArray->SetNumberOfComponents( 1 );
   aCellLocationsArray->SetNumberOfTuples( 1 );
   aCells->InitTraversal();
@@ -891,7 +891,7 @@ void SMESHGUI_BoundingBox::createPreview( double minX, double maxX, double minY,
   aCells->InsertNextCell( anIdList );
   aCellTypesArray->InsertNextValue( VTK_LINE );
   anIdList->Delete();
-  VTKViewer_CellLocationsArray* aCellLocationsArray = VTKViewer_CellLocationsArray::New();
+  vtkIdTypeArray* aCellLocationsArray = vtkIdTypeArray::New();
   aCellLocationsArray->SetNumberOfComponents( 1 );
   aCellLocationsArray->SetNumberOfTuples( 12 );
   aCells->InitTraversal();

@@ -57,7 +57,7 @@
 
 #include <SVTK_Selector.h>
 #include <SVTK_ViewWindow.h>
-#include <VTKViewer_CellLocationsArray.h>
+//#include <VTKViewer_CellLocationsArray.h>
 
 // OCCT includes
 #include <Bnd_B3d.hxx>
@@ -1503,7 +1503,7 @@ void SMESHGUI_CuttingOfQuadsDlg::displayPreview()
     }
   }
 
-  VTKViewer_CellLocationsArray* aCellLocationsArray = VTKViewer_CellLocationsArray::New();
+  vtkIdTypeArray* aCellLocationsArray = vtkIdTypeArray::New();
   aCellLocationsArray->SetNumberOfComponents(1);
   aCellLocationsArray->SetNumberOfTuples(aNbCells);
 

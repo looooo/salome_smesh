@@ -2934,7 +2934,7 @@ void SMDS_Mesh::dumpGrid(std::string ficdump)
   }
   int nbCells = myGrid->GetNumberOfCells();
   ficcon << "-------------------------------- cells " <<  nbCells << endl;
-  for (int i=0; i<nbCells; i++)
+  for (vtkIdType i=0; i<nbCells; i++)
   {
     ficcon << i << " - " << myGrid->GetCell(i)->GetCellType() << " -";
     int nbptcell = myGrid->GetCell(i)->GetNumberOfPoints();

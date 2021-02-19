@@ -68,12 +68,12 @@ class SMESHOBJECT_EXPORT SMESH_DeviceActor: public vtkLODActor{
   void SetStoreGemetryMapping(bool theStoreMapping);
   void SetStoreIDMapping(bool theStoreMapping);
 
-  virtual int GetNodeObjId(int theVtkID);
-  virtual double* GetNodeCoord(int theObjID);
-  virtual int GetNodeVtkId(int theObjID);
+  virtual vtkIdType GetNodeObjId(vtkIdType theVtkID);
+  virtual double* GetNodeCoord(vtkIdType theObjID);
+  virtual vtkIdType GetNodeVtkId(vtkIdType theObjID);
 
-  virtual int GetElemObjId(int theVtkID);
-  virtual vtkCell* GetElemCell(int theObjID);
+  virtual vtkIdType GetElemObjId(vtkIdType theVtkID);
+  virtual vtkCell* GetElemCell(vtkIdType theObjID);
 
   virtual void SetTransform(VTKViewer_Transform* theTransform); 
   virtual vtkMTimeType GetMTime();

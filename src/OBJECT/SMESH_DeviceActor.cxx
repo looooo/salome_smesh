@@ -839,9 +839,9 @@ SMESH_DeviceActor
 }
 
 
-int
+vtkIdType
 SMESH_DeviceActor
-::GetNodeObjId(int theVtkID)
+::GetNodeObjId(vtkIdType theVtkID)
 {
   vtkIdType anID = theVtkID;
 
@@ -855,7 +855,7 @@ SMESH_DeviceActor
 
 double* 
 SMESH_DeviceActor
-::GetNodeCoord(int theObjID)
+::GetNodeCoord(vtkIdType theObjID)
 {
   vtkDataSet* aDataSet = myMergeFilter->GetOutput();
   vtkIdType anID = myVisualObj->GetNodeVTKId(theObjID);
@@ -864,16 +864,16 @@ SMESH_DeviceActor
   return aCoord;
 }
 
-int
+vtkIdType
 SMESH_DeviceActor
-::GetNodeVtkId(int theObjID) 
+::GetNodeVtkId(vtkIdType theObjID) 
 {
   return myVisualObj->GetNodeVTKId(theObjID);
 }
 
-int
+vtkIdType
 SMESH_DeviceActor
-::GetElemObjId(int theVtkID)
+::GetElemObjId(vtkIdType theVtkID)
 {
   vtkIdType anId = myGeomFilter->GetElemObjId(theVtkID);
   if(anId < 0) 
@@ -897,7 +897,7 @@ SMESH_DeviceActor
 
 vtkCell* 
 SMESH_DeviceActor
-::GetElemCell(int theObjID)
+::GetElemCell(vtkIdType theObjID)
 {
   vtkDataSet* aDataSet = myVisualObj->GetUnstructuredGrid();
   vtkIdType aGridID = myVisualObj->GetElemVTKId(theObjID);

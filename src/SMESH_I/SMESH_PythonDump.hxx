@@ -135,7 +135,7 @@ namespace SMESH
     operator<<(int theArg);
 
     TPythonDump&
-    operator<<(SMESH::smIdType theArg);
+    operator<<(long long theArg);
 
     TPythonDump&
     operator<<(double theArg);

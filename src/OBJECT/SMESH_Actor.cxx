@@ -1453,27 +1453,27 @@ void SMESH_ActorDef::UnShrink()
 }
 
 
-int SMESH_ActorDef::GetNodeObjId(int theVtkID)
+vtkIdType SMESH_ActorDef::GetNodeObjId(vtkIdType theVtkID)
 {
   return myPickableActor->GetNodeObjId(theVtkID);
 }
 
-double* SMESH_ActorDef::GetNodeCoord(int theObjID)
+double* SMESH_ActorDef::GetNodeCoord(vtkIdType theObjID)
 {
   return myPickableActor->GetNodeCoord(theObjID);
 }
 
-int SMESH_ActorDef::GetNodeVtkId(int theObjID)
+vtkIdType SMESH_ActorDef::GetNodeVtkId(vtkIdType theObjID)
 {
   return myPickableActor->GetNodeVtkId(theObjID);
 }
 
-int SMESH_ActorDef::GetElemObjId(int theVtkID)
+vtkIdType SMESH_ActorDef::GetElemObjId(vtkIdType theVtkID)
 {
   return myPickableActor->GetElemObjId(theVtkID);
 }
 
-vtkCell* SMESH_ActorDef::GetElemCell(int theObjID)
+vtkCell* SMESH_ActorDef::GetElemCell(vtkIdType theObjID)
 {
   return myPickableActor->GetElemCell(theObjID);
 }

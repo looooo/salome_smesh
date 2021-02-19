@@ -1174,7 +1174,7 @@ namespace SMESH{
       virtual              SMDSAbs_ElementType GetType() const;
 
       virtual void         SetMesh( const SMDS_Mesh* theMesh );
-      virtual bool         IsSatisfy( smIdType theElementId );
+      virtual bool         IsSatisfy( long theElementId );
 
       //const std::set<long>& GetDomainIDs() const { return myOkIDs; }
 

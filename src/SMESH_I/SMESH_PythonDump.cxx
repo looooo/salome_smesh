@@ -141,6 +141,13 @@ namespace SMESH
 
   TPythonDump&
   TPythonDump::
+  operator<<(SMESH::smIdType theArg){
+    myStream<<theArg;
+    return *this;
+  }
+
+  TPythonDump&
+  TPythonDump::
   operator<<(double theArg){
     myStream<<theArg;
     return *this;

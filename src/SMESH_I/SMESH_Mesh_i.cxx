@@ -2095,7 +2095,7 @@ void SMESH_Mesh_i::ReplaceShape(GEOM::GEOM_Object_ptr theNewGeom)
         TRange &        lastRange = ranges.back();
         if ( lastRange.shapeID != shapeID ||
              lastRange.toID    != elemID )
-          ranges.push_back( TRange{ shapeID, elemID, elemID + 1 });
+          ranges.push_back( TRange{ shapeID, FromIdType<int>(elemID), FromIdType<int>(elemID + 1) });
         else
           lastRange.toID = elemID + 1;
 

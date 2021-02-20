@@ -492,7 +492,7 @@ void SMESHGUI_MinDistance::firstEdited()
   if ( myFirstActor && selector ) {
     Handle(SALOME_InteractiveObject) IO = myFirstActor->getIO();
     if ( myFirst->checkedId() == NodeTgt || myFirst->checkedId() == ElementTgt ) {
-      TColStd_MapOfInteger ID;
+      SVTK_TVtkIDsMap ID;
       ID.Add( myFirstTgt->text().toLong() );
       selector->AddOrRemoveIndex( IO, ID, false );
     }
@@ -520,7 +520,7 @@ void SMESHGUI_MinDistance::secondEdited()
     Handle(SALOME_InteractiveObject) IO = mySecondActor->getIO();
     if ( mySecond->checkedId() == NodeTgt || mySecond->checkedId() == ElementTgt ) {
       if ( !text.isEmpty() ) {
-        TColStd_MapOfInteger ID;
+        SVTK_TVtkIDsMap ID;
         ID.Add( text.toLong() );
         selector->AddOrRemoveIndex( IO, ID, false );
       }
@@ -1022,7 +1022,7 @@ void SMESHGUI_BoundingBox::sourceEdited()
   if ( myActor && selector ) {
     Handle(SALOME_InteractiveObject) IO = myActor->getIO();
     if ( mySourceMode->checkedId() == NodesSrc || mySourceMode->checkedId() == ElementsSrc ) {
-      TColStd_MapOfInteger ID;
+      SVTK_TVtkIDsMap ID;
       if ( !mySource->isReadOnly() )
         myIDs = mySource->text();
       QStringList ids = myIDs.split( " ", QString::SkipEmptyParts );
@@ -1420,7 +1420,7 @@ void SMESHGUI_Angle::selectionChanged()
   clear();
   QString nodesString;
 
-  TColStd_IndexedMapOfInteger idsMap;
+  SVTK_TIndexedMapOfVtkId idsMap;
   SALOME_ListIO selected;
   SMESHGUI::selectionMgr()->selectedObjects( selected );
   selected.Reverse(); // to keep order of selection
@@ -1528,7 +1528,7 @@ void SMESHGUI_Angle::nodesEdited()
 {
   clear();
 
-  TColStd_MapOfInteger ID;
+  SVTK_TVtkIDsMap ID;
   QStringList ids = myNodes->text().split( " ", QString::SkipEmptyParts );
   foreach ( QString idStr, ids )
   {

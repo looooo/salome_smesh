@@ -701,7 +701,7 @@ void SMESHGUI_SymmetryDlg::onTextChange (const QString& theNewText)
   if (aMesh) {
     Handle(SALOME_InteractiveObject) anIO = myActor->getIO();
 
-    TColStd_MapOfInteger newIndices;
+    SVTK_TVtkIDsMap newIndices;
 
     QStringList aListId = theNewText.split(" ", QString::SkipEmptyParts);
 
@@ -709,7 +709,7 @@ void SMESHGUI_SymmetryDlg::onTextChange (const QString& theNewText)
       for (int i = 0; i < aListId.count(); i++) {
         const SMDS_MeshElement * e = aMesh->FindElement(aListId[ i ].toInt());
         if (e)
-          newIndices.Add(FromIdType<int>(e->GetID()));
+          newIndices.Add(e->GetID());
         myNbOkElements++;
       }
 

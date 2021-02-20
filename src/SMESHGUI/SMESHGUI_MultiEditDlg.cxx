@@ -697,7 +697,7 @@ void SMESHGUI_MultiEditDlg::onAddBtn()
   if (nbSelected == 0)
     return;
 
-  TColStd_IndexedMapOfInteger toBeAdded;
+  SVTK_TIndexedMapOfVtkId toBeAdded;
 
   if (!mySubmeshChk->isChecked() && !myGroupChk->isChecked()) {
     if (nbSelected > 0)
@@ -712,7 +712,7 @@ void SMESHGUI_MultiEditDlg::onAddBtn()
           SMESH::smIdType_array_var anIds = aSubMesh->GetElementsId();
           for (int i = 0, n = anIds->length(); i < n; i++) {
             if (isIdValid(FromIdType<int>(anIds[ i ])))
-              toBeAdded.Add(FromIdType<int>(anIds[ i ]));
+              toBeAdded.Add(anIds[ i ]);
           }
         }
       }
@@ -728,7 +728,7 @@ void SMESHGUI_MultiEditDlg::onAddBtn()
           SMESH::smIdType_array_var anIds = aGroup->GetListOfID();
           for (int i = 0, n = anIds->length(); i < n; i++) {
             if (isIdValid(FromIdType<int>(anIds[ i ])))
-              toBeAdded.Add(FromIdType<int>(anIds[ i ]));
+              toBeAdded.Add(anIds[ i ]);
           }
         }
       }
@@ -875,7 +875,7 @@ void SMESHGUI_MultiEditDlg::onListSelectionChanged()
     anActor = myActor;
   TVisualObjPtr anObj = anActor->GetObject();
 
-  TColStd_MapOfInteger anIndexes;
+  SVTK_TVtkIDsMap anIndexes;
   int total = myListBox->count();
   for (int i = 0; i < total; i++)
   {
@@ -1818,7 +1818,7 @@ void SMESHGUI_SplitVolumesDlg::onSelectionDone()
       if (!aSelMesh->_is_nil())
         myMesh = aSelMesh;
 
-      TColStd_IndexedMapOfInteger aMapIndex;
+      SVTK_TIndexedMapOfVtkId aMapIndex;
       mySelector->GetIndex( anIO, aMapIndex );
       if ( !aMapIndex.IsEmpty() )
         showFacetByElement( aMapIndex(1) );

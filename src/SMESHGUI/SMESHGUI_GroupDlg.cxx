@@ -1263,7 +1263,7 @@ void SMESHGUI_GroupDlg::onListSelectionChanged()
 
   if (myCurrentLineEdit == 0) {
     mySelectionMgr->clearSelected();
-    TColStd_MapOfInteger aIndexes;
+    SVTK_TVtkIDsMap aIndexes;
     QList<QListWidgetItem*> selItems = myElements->selectedItems();
     QListWidgetItem* anItem;
     foreach(anItem, selItems) aIndexes.Add(anItem->text().toInt());

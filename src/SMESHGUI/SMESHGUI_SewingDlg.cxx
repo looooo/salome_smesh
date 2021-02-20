@@ -1541,7 +1541,7 @@ void SMESHGUI_SewingDlg::onTextChange (const QString& theNewText)
     send->clear();
 
   if (aMesh) {
-    TColStd_MapOfInteger newIndices;
+    SVTK_TVtkIDsMap newIndices;
     
     if (GetConstructorId() != 3 || (send != LineEdit1 && send != LineEdit4)) {
       SMESH::SetPointRepresentation(true);
@@ -1551,7 +1551,7 @@ void SMESHGUI_SewingDlg::onTextChange (const QString& theNewText)
 
       const SMDS_MeshNode * n = aMesh->FindNode(theNewText.toInt());
       if (n) {
-        newIndices.Add(FromIdType<int>(n->GetID()));
+        newIndices.Add(n->GetID());
         mySelector->AddOrRemoveIndex(myActor->getIO(), newIndices, false);
         if ( SVTK_ViewWindow* aViewWindow = SMESH::GetViewWindow( mySMESHGUI ))
           aViewWindow->highlight( myActor->getIO(), true, true );
@@ -1583,7 +1583,7 @@ void SMESHGUI_SewingDlg::onTextChange (const QString& theNewText)
         const SMDS_MeshElement * e = aMesh->FindElement(aListId[ i ].toInt());
         if (e)
         {
-          newIndices.Add(FromIdType<int>(e->GetID()));
+          newIndices.Add(e->GetID());
           atLeastOneExists = true;
         }
       }

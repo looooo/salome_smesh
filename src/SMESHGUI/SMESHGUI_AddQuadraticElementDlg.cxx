@@ -989,14 +989,14 @@ void SMESHGUI_AddQuadraticElementDlg::onTextChange (const QString& theNewText)
     myCurrentLineEdit = send;
 
   if (aMesh) {
-    TColStd_MapOfInteger newIndices;
+    SVTK_TVtkIDsMap newIndices;
 
     QStringList aListId = theNewText.split(" ", QString::SkipEmptyParts);
     bool allOk = true;
     for (int i = 0; i < aListId.count(); i++) {
       if ( const SMDS_MeshNode * n = aMesh->FindNode( aListId[ i ].toInt() ) )
       {
-        newIndices.Add( FromIdType<int>(n->GetID()) );
+        newIndices.Add( n->GetID() );
       }
       else
       {

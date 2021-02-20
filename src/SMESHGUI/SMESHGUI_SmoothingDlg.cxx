@@ -523,7 +523,7 @@ void SMESHGUI_SmoothingDlg::onTextChange (const QString& theNewText)
   QStringList aListId = theNewText.split(" ", QString::SkipEmptyParts);
 
   if (send == LineEditElements) {
-    TColStd_MapOfInteger newIndices;
+    SVTK_TVtkIDsMap newIndices;
     for (int i = 0; i < aListId.count(); i++) {
       int id = aListId[ i ].toInt();
       if ( id > 0 ) {
@@ -538,7 +538,7 @@ void SMESHGUI_SmoothingDlg::onTextChange (const QString& theNewText)
     }
   }
   else if (send == LineEditNodes) {
-    TColStd_MapOfInteger newIndices;
+    SVTK_TVtkIDsMap newIndices;
     for (int i = 0; i < aListId.count(); i++) {
       int id = aListId[ i ].toInt();
       if ( id > 0 ) {
@@ -619,7 +619,7 @@ void SMESHGUI_SmoothingDlg::SelectionIntoArgument()
         myNbOkElements = true;
       } else {
         // get indices of selected elements
-        TColStd_IndexedMapOfInteger aMapIndex;
+        SVTK_TIndexedMapOfVtkId aMapIndex;
         mySelector->GetIndex(IO,aMapIndex);
         myNbOkElements = aMapIndex.Extent();
 

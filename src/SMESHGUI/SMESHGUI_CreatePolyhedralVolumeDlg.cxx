@@ -688,13 +688,13 @@ void SMESHGUI_CreatePolyhedralVolumeDlg::onTextChange(const QString& theNewText)
   if (GetConstructorId() == 0)
     {
       if ( aMesh ) {
-        TColStd_MapOfInteger newIndices;
+        SVTK_TVtkIDsMap newIndices;
       
         QStringList aListId = theNewText.split( " ", QString::SkipEmptyParts );
         for ( int i = 0; i < aListId.count(); i++ ) {
           const SMDS_MeshNode * n = aMesh->FindNode( aListId[ i ].toInt() );
           if ( n ) {
-            newIndices.Add(FromIdType<int>(n->GetID()));
+            newIndices.Add(n->GetID());
             myNbOkElements++;
           }
         }
@@ -720,14 +720,14 @@ void SMESHGUI_CreatePolyhedralVolumeDlg::onTextChange(const QString& theNewText)
         // check entered ids of faces and highlight them
         QStringList aListId;
         if ( aMesh ) {
-          TColStd_MapOfInteger newIndices;
+          SVTK_TVtkIDsMap newIndices;
       
           aListId = theNewText.split( " ", QString::SkipEmptyParts );
 
           for ( int i = 0; i < aListId.count(); i++ ) {
             const SMDS_MeshElement * e = aMesh->FindElement( aListId[ i ].toInt() );
             if ( e ) {
-              newIndices.Add(FromIdType<int>(e->GetID()));
+              newIndices.Add(e->GetID());
               myNbOkElements++;  
             }
           }
@@ -1147,7 +1147,7 @@ void SMESHGUI_CreatePolyhedralVolumeDlg::onListSelectionChanged()
 
   SALOME_ListIO aList;
   mySelectionMgr->setSelectedObjects( aList );
-  TColStd_MapOfInteger aIndexes;
+  SVTK_TVtkIDsMap aIndexes;
 
   QList<QListWidgetItem*> selItems = myFacesByNodes->selectedItems();
   QListWidgetItem* anItem;

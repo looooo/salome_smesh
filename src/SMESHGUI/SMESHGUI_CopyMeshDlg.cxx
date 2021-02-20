@@ -614,12 +614,12 @@ void SMESHGUI_CopyMeshDlg::onTextChange (const QString& theNewText)
   QStringList aListId = theNewText.split(" ", QString::SkipEmptyParts);
   if (myActor && aMesh)
   {
-    TColStd_MapOfInteger newIndices;
+    SVTK_TVtkIDsMap newIndices;
     if (send == myLineEditElements) {
       for (int i = 0; i < aListId.count(); i++)
         if ( const SMDS_MeshElement * e = aMesh->FindElement(aListId[ i ].toInt()))
         {
-          newIndices.Add(FromIdType<int>(e->GetID()));
+          newIndices.Add(e->GetID());
         }
     }
     myNbOkElements = newIndices.Extent();

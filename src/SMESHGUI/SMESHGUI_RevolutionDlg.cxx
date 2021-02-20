@@ -602,7 +602,7 @@ void SMESHGUI_RevolutionDlg::SelectionIntoArgument()
       return;
 
     Handle(SALOME_InteractiveObject) IO = aList.First();
-    TColStd_IndexedMapOfInteger aMapIndex;
+    SVTK_TIndexedMapOfVtkId aMapIndex;
     mySelector->GetIndex(IO,aMapIndex);
     if ( aMapIndex.Extent() != 1 )
       return;

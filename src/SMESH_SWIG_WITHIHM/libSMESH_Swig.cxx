@@ -1739,7 +1739,7 @@ public:
     if ( vw->SelectionMode() == ActorSelection )
       return;
 
-    TColStd_MapOfInteger idMap;
+    SVTK_TVtkIDsMap idMap;
     std::vector<int>::const_iterator it;
     for ( it = myIds.begin(); it != myIds.end(); ++it )
     {
@@ -1991,7 +1991,7 @@ public:
     if ( !actor || !actor->hasIO() )
       return;
 
-    TColStd_IndexedMapOfInteger idMap;
+    SVTK_TIndexedMapOfVtkId idMap;
     selector->GetIndex( actor->getIO(), idMap );
 
     for ( int i = 1; i <= idMap.Extent(); i++ )

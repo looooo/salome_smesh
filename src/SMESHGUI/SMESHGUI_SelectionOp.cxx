@@ -262,7 +262,7 @@ void SMESHGUI_SelectionOp::highlight( const Handle( SALOME_InteractiveObject )& 
 // Purpose : Select/deselect cells of mesh
 //=======================================================================
 void SMESHGUI_SelectionOp::addOrRemoveIndex( const Handle( SALOME_InteractiveObject )& obj,
-                                             const TColStd_MapOfInteger& indices,
+                                             const SVTK_TVtkIDsMap& indices,
                                              const bool isModeShift )
 {
   SVTK_Selector* sel = selector();
@@ -468,7 +468,7 @@ void SMESHGUI_SelectionOp::onTextChanged( int, const QStringList& list )
     if( !dlg() )
       return;
 
-    TColStd_MapOfInteger newIndices;
+    SVTK_TVtkIDsMap newIndices;
 
     SALOME_ListIO sel; selectionMgr()->selectedObjects( sel );
     SMESH_Actor* anActor = actor();
@@ -483,12 +483,12 @@ void SMESHGUI_SelectionOp::onTextChanged( int, const QStringList& list )
     if ( selectionMode() == NodeSelection )
       for( ; anIt!=aLast; anIt++ ) {
         if( const SMDS_MeshNode * n = aMesh->FindNode( *anIt ) )
-          newIndices.Add( FromIdType<int>(n->GetID()) );
+          newIndices.Add( n->GetID() );
       }
     else 
       for( ; anIt!=aLast; anIt++ ) {
         if( const SMDS_MeshElement* e = aMesh->FindElement( *anIt ) )
-          newIndices.Add( FromIdType<int>(e->GetID()) );
+          newIndices.Add( e->GetID() );
       }
 
     selector()->AddOrRemoveIndex( sel.First(), newIndices, false );

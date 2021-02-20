@@ -498,12 +498,12 @@ void SMESHGUI_ShapeByMeshOp::onElemIdChanged(const QString& theNewText)
         case VOLUME: type = SMDSAbs_Volume; break;
         default: return;
         }
-        TColStd_MapOfInteger newIndices;
+        SVTK_TVtkIDsMap newIndices;
         QStringList aListId = theNewText.split( " ", QString::SkipEmptyParts);
         for ( int i = 0; i < aListId.count(); i++ ) {
           if ( const SMDS_MeshElement * e = aMesh->FindElement( aListId[ i ].toInt() ))
             if ( e->GetType() == type )
-              newIndices.Add( FromIdType<int>(e->GetID()) );
+              newIndices.Add( e->GetID() );
         }
         
         if ( !newIndices.IsEmpty() )

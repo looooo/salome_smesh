@@ -57,12 +57,12 @@ public:
    * \brief Set the number of segments
     * \param segmentsNumber - must be greater than zero
    */
-  void SetNumberOfSegments(int segmentsNumber);
+  void SetNumberOfSegments(smIdType segmentsNumber);
 
   /*!
    * \brief Get the number of segments
    */
-  int GetNumberOfSegments() const;
+  smIdType GetNumberOfSegments() const;
 
   /*!
    * \brief This enumeration presents available types of distribution

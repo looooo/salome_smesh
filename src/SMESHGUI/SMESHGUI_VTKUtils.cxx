@@ -1194,7 +1194,7 @@ namespace SMESH
                              QString&                                theName)
   {
     theName = "";
-    TColStd_IndexedMapOfInteger aMapIndex;
+    SVTK_TIndexedMapOfVtkId aMapIndex;
     theSelector->GetIndex(theIO,aMapIndex);
 
     for(int i = 1; i <= aMapIndex.Extent(); i++)
@@ -1208,7 +1208,7 @@ namespace SMESH
                                 QString& theName)
   {
     theName = "";
-    TColStd_IndexedMapOfInteger aMapIndex;
+    SVTK_TIndexedMapOfVtkId aMapIndex;
     theSelector->GetIndex(theIO,aMapIndex);
 
     typedef std::set<int> TIdContainer;
@@ -1238,7 +1238,7 @@ namespace SMESH
     if ( anIO.IsNull() || !anIO->hasEntry() )
       return -1;
 
-    TColStd_IndexedMapOfInteger aMapIndex;
+    SVTK_TIndexedMapOfVtkId aMapIndex;
     theSelector->GetIndex( anIO, aMapIndex );
     if ( aMapIndex.Extent() != 2 )
       return -1;

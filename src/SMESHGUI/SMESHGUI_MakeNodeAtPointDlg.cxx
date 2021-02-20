@@ -869,7 +869,7 @@ void SMESHGUI_MakeNodeAtPointOp::onTextChange( const QString& theText )
 
       if( const SMDS_MeshNode* aNode = aMesh->FindNode( theText.toInt() ) )
       {
-        TColStd_MapOfInteger aListInd;
+        SVTK_TVtkIDsMap aListInd;
         aListInd.Add( FromIdType<int>(aNode->GetID()) );
         selector()->AddOrRemoveIndex( anIO, aListInd, false );
         if( SVTK_ViewWindow* aViewWindow = SMESH::GetViewWindow( SMESHGUI::GetSMESHGUI() ) )

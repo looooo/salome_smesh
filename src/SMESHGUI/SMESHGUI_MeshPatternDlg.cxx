@@ -1411,7 +1411,7 @@ void SMESHGUI_MeshPatternDlg::onTextChanged (const QString& theNewText)
   if (aMesh) {
     QStringList aListId = theNewText.split(" ", QString::SkipEmptyParts);
 
-    TColStd_MapOfInteger newIndices;
+    SVTK_TVtkIDsMap newIndices;
 
     for (int i = 0; i < aListId.count(); i++) {
       const SMDS_MeshElement * e = aMesh->FindElement(aListId[ i ].toInt());

@@ -3315,7 +3315,7 @@ void SMESHGUI_MeshInfoDlg::idChanged()
   myIDPreview->SetPointsLabeled( false );
 
   if ( myProxy ) {
-    TColStd_MapOfInteger ID;
+    SVTK_TVtkIDsMap      ID;
     QSet<uint>           ids;
     std::vector<int>     idVec;
     std::list< gp_XYZ >  aGrCentersXYZ;

@@ -109,9 +109,9 @@ StdMeshers_NumberOfSegments::BuildDistributionTab( const vector<double>& tab,
  */
 //=============================================================================
 
-void StdMeshers_NumberOfSegments::SetNumberOfSegments(int segmentsNumber)
+void StdMeshers_NumberOfSegments::SetNumberOfSegments(smIdType segmentsNumber)
 {
-  int oldNumberOfSegments = _numberOfSegments;
+  smIdType oldNumberOfSegments = _numberOfSegments;
   if (segmentsNumber <= 0)
     throw SALOME_Exception(LOCALIZED("number of segments must be positive"));
   _numberOfSegments = segmentsNumber;
@@ -126,7 +126,7 @@ void StdMeshers_NumberOfSegments::SetNumberOfSegments(int segmentsNumber)
  */
 //=============================================================================
 
-int StdMeshers_NumberOfSegments::GetNumberOfSegments() const
+smIdType StdMeshers_NumberOfSegments::GetNumberOfSegments() const
 {
   return _numberOfSegments;
 }

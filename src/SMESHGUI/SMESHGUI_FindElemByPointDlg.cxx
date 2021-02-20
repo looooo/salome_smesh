@@ -361,7 +361,7 @@ void SMESHGUI_FindElemByPointOp::onElemSelected()
 
     QList<QListWidgetItem *> ids = myDlg->myFoundList->selectedItems();
     QList<QListWidgetItem*>::iterator id = ids.begin();
-    TColStd_MapOfInteger idMap;
+    SVTK_TVtkIDsMap idMap;
     for ( ; id != ids.end(); ++id )
       idMap.Add( (*id)->text().toInt() );
 

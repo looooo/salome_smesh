@@ -784,7 +784,7 @@ void SMESHGUI_AddMeshElementDlg::onTextChange (const QString& theNewText)
     aMesh = myActor->GetObject()->GetMesh();
 
   if (aMesh) {
-    TColStd_MapOfInteger newIndices;
+    SVTK_TVtkIDsMap newIndices;
 
     QStringList aListId = theNewText.split(" ", QString::SkipEmptyParts);
     bool allOk = true;

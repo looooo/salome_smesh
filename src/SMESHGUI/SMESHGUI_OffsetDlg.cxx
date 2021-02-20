@@ -552,13 +552,13 @@ void SMESHGUI_OffsetDlg::onTextChange (const QString& theNewText)
   if (aMesh) {
     Handle(SALOME_InteractiveObject) anIO = myActor->getIO();
 
-    TColStd_MapOfInteger newIndices;
+    SVTK_TVtkIDsMap newIndices;
 
     QStringList aListId = theNewText.split(" ", QString::SkipEmptyParts);
     for (int i = 0; i < aListId.count(); i++)
     {
       if ( const SMDS_MeshElement * e = aMesh->FindElement(aListId[ i ].toInt()))
-        newIndices.Add( FromIdType<int>(e->GetID()) );
+        newIndices.Add( e->GetID() );
       myNbOkElements++;
     }
 

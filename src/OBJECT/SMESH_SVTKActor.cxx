@@ -108,7 +108,7 @@ SMESH_SVTKActor
 void
 SMESH_SVTKActor
 ::MapCells(SALOME_Actor* theMapActor,
-           const TColStd_IndexedMapOfInteger& theMapIndex)
+           const SVTK_TIndexedMapOfVtkId& theMapIndex)
 {
   myUnstructuredGrid->Initialize();
   myUnstructuredGrid->Allocate();

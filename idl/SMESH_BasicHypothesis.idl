@@ -169,7 +169,7 @@ module StdMeshers
     /*!
      * Sets <number of segments> parameter value
      */
-    void SetNumberOfSegments(in long  segmentsNumber)
+    void SetNumberOfSegments(in SMESH::smIdType  segmentsNumber)
       raises (SALOME::SALOME_Exception);
 
     /*!

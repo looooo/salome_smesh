@@ -99,9 +99,10 @@ namespace SMESH
   {
     std::vector< std::string > myVals;
     bool                       myIsList;
-    TVar(CORBA::Double value);
-    TVar(CORBA::Long   value);
-    TVar(CORBA::Short  value);
+    TVar(CORBA::Double   value);
+    TVar(CORBA::Long     value);
+    TVar(SMESH::smIdType value);
+    TVar(CORBA::Short    value);
     TVar(const SMESH::double_array& value);
     // string used to temporary quote variable names in order
     // not to confuse variables with string arguments

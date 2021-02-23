@@ -20,6 +20,7 @@
 #include "SMESH_Gen_No_Session_i.hxx"
 #include "SALOMEDS_Study_i.hxx"
 #include "SALOME_KernelServices.hxx"
+#include "SALOME_Fake_NamingService.hxx"
 #include "SALOME_ModuleCatalog_impl.hxx"
 
 SMESH_Gen_No_Session_i::SMESH_Gen_No_Session_i( CORBA::ORB_ptr orb,
@@ -35,6 +36,7 @@ GEOM::GEOM_Gen_var SMESH_Gen_No_Session_i::GetGeomEngine( bool isShaper )
 {
   CORBA::Object_var temp = KERNEL::RetrieveCompo(isShaper ? "SHAPERSTUDY" : "GEOM");
   myGeomGen = GEOM::GEOM_Gen::_narrow( temp );
+  myNS = new SALOME_Fake_NamingService;
   return myGeomGen;
 }
 

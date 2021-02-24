@@ -26,3 +26,4 @@
 #include CORBA_SERVER_HEADER(SMESH_Gen)
 
 SMESH_I_EXPORT Engines::EngineComponent_var RetrieveSMESHInstance();
+SMESH_I_EXPORT Engines::EngineComponent_var GetSMESHInstanceHasThis();

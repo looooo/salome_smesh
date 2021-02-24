@@ -53,3 +53,8 @@ Engines::EngineComponent_var RetrieveSMESHInstance()
   }
   return _unique_compo;
 }
+
+Engines::EngineComponent_var GetSMESHInstanceHasThis()
+{
+  return _unique_compo;
+}

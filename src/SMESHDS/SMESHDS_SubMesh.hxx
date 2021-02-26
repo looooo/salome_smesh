@@ -63,7 +63,7 @@ class SMESHDS_EXPORT SMESHDS_SubMesh : public SMDS_ElementHolder
   bool RemoveSubMesh( const SMESHDS_SubMesh* theSubMesh );
   void RemoveAllSubmeshes();
   bool ContainsSubMesh( const SMESHDS_SubMesh* theSubMesh ) const;
-  int  NbSubMeshes() const { return mySubMeshes.size(); }
+  size_t NbSubMeshes() const { return mySubMeshes.size(); }
   SMESHDS_SubMeshIteratorPtr GetSubMeshIterator() const;
 
   // for both types

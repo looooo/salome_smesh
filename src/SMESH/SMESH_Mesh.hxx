@@ -308,7 +308,7 @@ class SMESH_EXPORT SMESH_Mesh
   
   smIdType NbSubMesh() const;
   
-  int NbGroup() const { return _mapGroup.size(); }
+  size_t NbGroup() const { return _mapGroup.size(); }
 
   int NbMeshes() const; // nb meshes in the Study
 

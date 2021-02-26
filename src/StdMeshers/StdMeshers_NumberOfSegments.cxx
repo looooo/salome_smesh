@@ -477,7 +477,7 @@ int StdMeshers_NumberOfSegments::ConversionMode() const
 
 ostream & StdMeshers_NumberOfSegments::SaveTo(ostream & save)
 {
-  int listSize = _edgeIDs.size();
+  size_t listSize = _edgeIDs.size();
   save << _numberOfSegments << " " << (int)_distrType;
   switch (_distrType)
   {
@@ -502,7 +502,7 @@ ostream & StdMeshers_NumberOfSegments::SaveTo(ostream & save)
 
   if ( _distrType != DT_Regular && listSize > 0 ) {
     save << " " << listSize;
-    for ( int i = 0; i < listSize; i++ )
+    for ( size_t i = 0; i < listSize; i++ )
       save << " " << _edgeIDs[i];
     save << " " << _objEntry;
   }

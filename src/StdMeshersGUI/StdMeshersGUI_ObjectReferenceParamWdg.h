@@ -73,7 +73,7 @@ public:
     return TInterface::_nil();
   }
 
-  int NbObjects() const { return myObjects.size(); }
+  size_t NbObjects() const { return myObjects.size(); }
 
   QString GetValue() const { return myParamValue; }
 

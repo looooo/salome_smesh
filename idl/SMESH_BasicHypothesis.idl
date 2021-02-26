@@ -395,7 +395,7 @@ module StdMeshers
      */
     void SetPoints(in SMESH::double_array listParams) 
       raises (SALOME::SALOME_Exception);
-    void SetNbSegments(in SMESH::long_array listNbSeg) 
+    void SetNbSegments(in SMESH::smIdType_array listNbSeg)
       raises (SALOME::SALOME_Exception);
 
     /*!
@@ -406,7 +406,7 @@ module StdMeshers
     /*!
      * Returns list of numbers of segments
      */
-    SMESH::long_array GetNbSegments();
+    SMESH::smIdType_array GetNbSegments();
 
   };
 

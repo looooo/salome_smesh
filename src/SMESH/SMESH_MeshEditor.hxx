@@ -352,7 +352,7 @@ public:
     bool IsScaleVariation()  const { return myFlags & EXTRUSION_FLAG_SCALE_LINEAR_VARIATION; }
     bool IsAngleVariation()  const { return myFlags & EXTRUSION_FLAG_ANGLE_LINEAR_VARIATION; }
     int  NbSteps()           const {
-      return mySteps.IsNull() ? myPathPoints.size() - 1: mySteps->Length();
+      return mySteps.IsNull() ? (int)myPathPoints.size() - 1: mySteps->Length();
     }
     // stores elements to use for extrusion by normal, depending on
     // state of EXTRUSION_FLAG_USE_INPUT_ELEMS_ONLY flag;

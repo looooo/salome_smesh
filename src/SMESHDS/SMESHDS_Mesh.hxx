@@ -641,7 +641,7 @@ class SMESHDS_EXPORT SMESHDS_Mesh : public SMDS_Mesh
   // Groups. SMESHDS_Mesh is not an owner of groups
   void AddGroup (SMESHDS_GroupBase* theGroup)      { myGroups.insert(theGroup); }
   void RemoveGroup (SMESHDS_GroupBase* theGroup)   { myGroups.erase(theGroup); }
-  int GetNbGroups() const                      { return myGroups.size(); }
+  size_t GetNbGroups() const                      { return myGroups.size(); }
   const std::set<SMESHDS_GroupBase*>& GetGroups() const { return myGroups; }
 
   bool IsGroupOfSubShapes (const TopoDS_Shape& aSubShape) const;

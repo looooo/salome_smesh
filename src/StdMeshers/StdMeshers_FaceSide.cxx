@@ -1045,7 +1045,7 @@ void StdMeshers_FaceSide::SetIgnoreMediumNodes(bool toIgnore)
 //           since creation of this side
 //=======================================================================
 
-int StdMeshers_FaceSide::NbPoints(const bool update) const
+smIdType StdMeshers_FaceSide::NbPoints(const bool update) const
 {
   if ( !myPoints.empty() )
     return myPoints.size();
@@ -1112,7 +1112,7 @@ int StdMeshers_FaceSide::NbPoints(const bool update) const
 //           since creation of this side
 //=======================================================================
 
-int StdMeshers_FaceSide::NbSegments(const bool update) const
+smIdType StdMeshers_FaceSide::NbSegments(const bool update) const
 {
   return NbPoints( update ), myNbSegments;
 }

@@ -53,6 +53,10 @@ struct _ChunkCompare {
 typedef boost::ptr_vector<SMDS_ElementChunk>       TChunkVector;
 typedef std::set<SMDS_ElementChunk*,_ChunkCompare> TChunkPtrSet;
 
+const smIdType idShift = 2147483647;
+
+
+
 //------------------------------------------------------------------------------------
 /*!
  * \brief Allocate SMDS_MeshElement's (SMDS_MeshCell's or SMDS_MeshNode's )
@@ -565,7 +569,7 @@ SMDS_ElementFactory::GetShapeIterator( int                     shapeID,
                                        size_t                  nbElemsToReturn,
                                        const SMDS_MeshElement* sm1stElem )
 {
-  smIdType iChunk = sm1stElem ? (( sm1stElem->GetID() - 1 ) / ChunkSize()) : 0;
+  smIdType iChunk = sm1stElem ? (( sm1stElem->GetID() - 1 - idShift) / ChunkSize()) : 0;
   typedef _ChunkIterator< ElemIterator, TSubIDRangeSet > TChuckIterator;
   return boost::make_shared< TChuckIterator >( myChunks,
                                                & SMDS_ElementChunk::GetSubIDRangesMinMax,

@@ -39,8 +39,6 @@ namespace
 
   const int theDefaultShapeDim = 3;
 
-  const smIdType idShift = 2147483647;
-
   // classes allowing to modify parameters of SMDS_Position stored in SMDS_ElementFactory
 
   struct _EdgePosition : public SMDS_EdgePosition
@@ -230,7 +228,7 @@ const SMDS_MeshElement* SMDS_ElementFactory::FindElement( const smIdType ID ) co
 
 smIdType SMDS_ElementFactory::FromVtkToSmds( vtkIdType VTKID )
 {
-  vtkIdType vtkID = VTKID - idShift;
+  vtkIdType vtkID = VTKID;
   if ( vtkID >= 0 && vtkID < (vtkIdType)mySmdsIDs.size() )
     return mySmdsIDs[vtkID] + 1;
   return vtkID + 1 + idShift;
@@ -251,7 +249,7 @@ void SMDS_ElementFactory::Free( const SMDS_MeshElement* e )
   if ( !myVtkIDs.empty() )
   {
     size_t    id = e->GetID() - 1 - idShift;
-    size_t vtkID = e->GetVtkID() - idShift;
+    size_t vtkID = e->GetVtkID();
     if ( id < myVtkIDs.size() )
       myVtkIDs[ id ] = -1;
     if ( vtkID < mySmdsIDs.size() )

@@ -1000,7 +1000,7 @@ const SMDS_MeshNode * SMDS_Mesh::FindNode(smIdType ID) const
 ///////////////////////////////////////////////////////////////////////////////
 const SMDS_MeshNode * SMDS_Mesh::FindNodeVtk(vtkIdType vtkId) const
 {
-  return myNodeFactory->FindNode( vtkId + 1 );
+  return myNodeFactory->FindNode( FromVtkToSmds( vtkId ));
 }
 
 const SMDS_MeshElement * SMDS_Mesh::FindElementVtk(vtkIdType IDelem) const

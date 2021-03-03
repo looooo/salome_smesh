@@ -255,7 +255,7 @@ public:
   /*!
    * \brief Return nb of wrapped edges
    */
-  size_t NbEdges() const { return myEdge.size(); }
+  int NbEdges() const { return (int)myEdge.size(); }
   /*!
    * \brief Return i-th edge (count starts from zero)
    */

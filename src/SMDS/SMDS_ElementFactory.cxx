@@ -39,6 +39,8 @@ namespace
 
   const int theDefaultShapeDim = 3;
 
+  const smIdType idShift = 2147483647;
+
   // classes allowing to modify parameters of SMDS_Position stored in SMDS_ElementFactory
 
   struct _EdgePosition : public SMDS_EdgePosition
@@ -113,6 +115,7 @@ smIdType SMDS_ElementFactory::GetFreeID()
   if ( myChunksWithUnused.empty() )
   {
     smIdType id0 = myChunks.size() * theChunkSize + 1;
+    id0 += idShift;
     myChunks.push_back( new SMDS_ElementChunk( this, id0 ));
   }
   SMDS_ElementChunk * chunk = (*myChunksWithUnused.begin());
@@ -169,8 +172,9 @@ smIdType SMDS_ElementFactory::GetMinID()
  */
 //================================================================================
 
-SMDS_MeshElement* SMDS_ElementFactory::NewElement( const smIdType id )
+SMDS_MeshElement* SMDS_ElementFactory::NewElement( const smIdType ID )
 {
+  smIdType id = ID - idShift;
   smIdType iChunk = ( id - 1 ) / theChunkSize;
   smIdType index  = ( id - 1 ) % theChunkSize;
   while ((smIdType) myChunks.size() <= iChunk )
@@ -200,8 +204,9 @@ SMDS_MeshElement* SMDS_ElementFactory::NewElement( const smIdType id )
  */
 //================================================================================
 
-const SMDS_MeshElement* SMDS_ElementFactory::FindElement( const smIdType id ) const
+const SMDS_MeshElement* SMDS_ElementFactory::FindElement( const smIdType ID ) const
 {
+  smIdType id = ID -idShift;
   if ( id > 0 )
   {
     smIdType iChunk = ( id - 1 ) / theChunkSize;
@@ -223,11 +228,12 @@ const SMDS_MeshElement* SMDS_ElementFactory::FindElement( const smIdType id ) co
  */
 //================================================================================
 
-smIdType SMDS_ElementFactory::FromVtkToSmds( vtkIdType vtkID )
+smIdType SMDS_ElementFactory::FromVtkToSmds( vtkIdType VTKID )
 {
+  vtkIdType vtkID = VTKID - idShift;
   if ( vtkID >= 0 && vtkID < (vtkIdType)mySmdsIDs.size() )
     return mySmdsIDs[vtkID] + 1;
-  return vtkID + 1;
+  return vtkID + 1 + idShift;
 }
 
 //================================================================================
@@ -244,8 +250,8 @@ void SMDS_ElementFactory::Free( const SMDS_MeshElement* e )
 
   if ( !myVtkIDs.empty() )
   {
-    size_t    id = e->GetID() - 1;
-    size_t vtkID = e->GetVtkID();
+    size_t    id = e->GetID() - 1 - idShift;
+    size_t vtkID = e->GetVtkID() - idShift;
     if ( id < myVtkIDs.size() )
       myVtkIDs[ id ] = -1;
     if ( vtkID < mySmdsIDs.size() )
@@ -616,17 +622,18 @@ smIdType SMDS_ElementChunk::GetID( const SMDS_MeshElement* e ) const
 
 void SMDS_ElementChunk::SetVTKID( const SMDS_MeshElement* e, const vtkIdType vtkID )
 {
-  if ( e->GetID() - 1 != vtkID )
+  smIdType id = e->GetID() - idShift;
+  if ( id - 1 != vtkID )
   {
-    if ((smIdType) myFactory->myVtkIDs.size() <= e->GetID() - 1 )
+    if ((smIdType) myFactory->myVtkIDs.size() <= id - 1 )
     {
       vtkIdType i = (vtkIdType) myFactory->myVtkIDs.size();
-      myFactory->myVtkIDs.resize( e->GetID() + 100 );
+      myFactory->myVtkIDs.resize( id + 100 );
       vtkIdType newSize = (vtkIdType) myFactory->myVtkIDs.size();
       for ( ; i < newSize; ++i )
         myFactory->myVtkIDs[i] = i;
     }
-    myFactory->myVtkIDs[ e->GetID() - 1 ] = vtkID;
+    myFactory->myVtkIDs[ id - 1 ] = vtkID;
 
     if ((vtkIdType) myFactory->mySmdsIDs.size() <= vtkID )
     {
@@ -647,7 +654,7 @@ void SMDS_ElementChunk::SetVTKID( const SMDS_MeshElement* e, const vtkIdType vtk
 
 vtkIdType SMDS_ElementChunk::GetVtkID( const SMDS_MeshElement* e ) const
 {
-  vtkIdType dfltVtkID = FromIdType<vtkIdType>(e->GetID() - 1);
+  vtkIdType dfltVtkID = FromIdType<vtkIdType>(e->GetID() - 1) - idShift;
   return ( dfltVtkID < (vtkIdType)myFactory->myVtkIDs.size() ) ? myFactory->myVtkIDs[ dfltVtkID ] : dfltVtkID;
 }
 

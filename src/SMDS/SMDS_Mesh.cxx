@@ -2964,6 +2964,7 @@ void SMDS_Mesh::dumpGrid(std::string ficdump)
 
 void SMDS_Mesh::CompactMesh()
 {
+  return;
   this->myCompactTime = this->myModifTime;
 
   bool idsChange = HasNumerationHoles();

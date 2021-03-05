@@ -146,14 +146,14 @@ void SMESH_NodeLabelActor::SetPointsLabeled(bool theIsPointsLabeled)
     myPointsNumDataSet->ShallowCopy(aGrid);
     vtkUnstructuredGrid *aDataSet = myPointsNumDataSet;
     
-    int aNbElem = aDataSet->GetNumberOfPoints();
+	vtkIdType aNbElem = aDataSet->GetNumberOfPoints();
     
-    vtkIntArray *anArray = vtkIntArray::New();
+	vtkIdTypeArray *anArray = vtkIdTypeArray::New();
     anArray->SetNumberOfValues( aNbElem );
     
     for ( vtkIdType anId = 0; anId < aNbElem; anId++ )
     {
-      int aSMDSId = myVisualObj->GetNodeObjId( anId );
+	    vtkIdType aSMDSId = myVisualObj->GetNodeObjId( anId );
       anArray->SetValue( anId, aSMDSId );
     }
     

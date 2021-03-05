@@ -43,6 +43,7 @@
 #include <vtkRenderer.h>
 #include <vtkUnstructuredGrid.h>
 #include <vtkCellData.h>
+#include <iostream>
 
 vtkStandardNewMacro(SMESH_CellLabelActor)
 
@@ -156,18 +157,21 @@ void SMESH_CellLabelActor::SetCellsLabeled(bool theIsCellsLabeled)
   {
     myCellsNumDataSet->ShallowCopy(aGrid);
     vtkUnstructuredGrid *aDataSet = myCellsNumDataSet;
-    int aNbElem = aDataSet->GetNumberOfCells();
-    vtkIntArray *anArray = vtkIntArray::New();
+    vtkIdType aNbElem = aDataSet->GetNumberOfCells();
+    vtkIdTypeArray *anArray = vtkIdTypeArray::New();
+    //
+    std::cout << "\n\n\n***********\nSizeof vtkIdType: " << sizeof(vtkIdType) << "\nSizeof smIdType: " << sizeof(smIdType) << "\n";
+    //
     anArray->SetNumberOfValues(aNbElem);
     myExtractUnstructuredGrid->BuildOut2InMap();
-    for(int anId = 0; anId < aNbElem; anId++)
+    for(vtkIdType anId = 0; anId < aNbElem; anId++)
     {
       vtkIdType id = anId;
       if(IsImplicitFunctionUsed())
         id = myExtractGeometry->GetElemObjId(id);
       id = myExtractUnstructuredGrid->GetInputId(id);
       id = (id >=0) ? id : anId;
-      int aSMDSId = myVisualObj->GetElemObjId(id);
+      vtkIdType aSMDSId = myVisualObj->GetElemObjId(id);
       anArray->SetValue(anId,aSMDSId);
     }
     aDataSet->GetCellData()->SetScalars(anArray);

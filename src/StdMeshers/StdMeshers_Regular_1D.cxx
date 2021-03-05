@@ -1096,7 +1096,9 @@ bool StdMeshers_Regular_1D::computeInternalParameters(SMESH_Mesh &     theMesh,
         double    r = double( nbSegPerDiap * ( iDiap + 1 )) / double( nbTot );
         double parI = par0 + ( par1 - par0 ) * r;
         Params.InsertBefore( i, parI );
-        nbsegs.insert( nbsegs.begin() + i-2 + iDiap, nbSegPerDiap );
+        auto it = nbsegs.begin();
+		    auto incr_it = i - 2 + iDiap;
+        nbsegs.insert( it + incr_it, nbSegPerDiap );
       }
       nbsegs[ i-2 + nbDiapason - 1 ] = nbSegPerDiap + nbTot % nbDiapason;
     }

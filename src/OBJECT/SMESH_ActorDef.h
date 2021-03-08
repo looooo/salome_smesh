@@ -151,7 +151,7 @@ class SMESH_ActorDef : public SMESH_Actor
   virtual vtkIdType GetElemObjId(vtkIdType theVtkID);
   virtual vtkCell* GetElemCell(vtkIdType theObjID);
 
-  virtual int GetObjDimension( const int theObjId );
+  virtual int GetObjDimension( const vtkIdType theObjId ) override;
 
   virtual void SetVisibility(int theMode);
   void SetVisibility(int theMode, bool theIsUpdateRepersentation);

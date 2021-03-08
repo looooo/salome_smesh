@@ -1211,7 +1211,7 @@ namespace SMESH
     SVTK_TIndexedMapOfVtkId aMapIndex;
     theSelector->GetIndex(theIO,aMapIndex);
 
-    typedef std::set<int> TIdContainer;
+    typedef std::set<vtkIdType> TIdContainer;
     TIdContainer anIdContainer;
     for( int i = 1; i <= aMapIndex.Extent(); i++)
       anIdContainer.insert(aMapIndex(i));

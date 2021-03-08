@@ -2225,7 +2225,7 @@ void SMESH_ActorDef::SetBallScale( double theVal )
   Modified();
 }
 
-int SMESH_ActorDef::GetObjDimension( const int theObjId )
+int SMESH_ActorDef::GetObjDimension( const vtkIdType theObjId )
 {
   return myVisualObj->GetElemDimension( theObjId );
 }

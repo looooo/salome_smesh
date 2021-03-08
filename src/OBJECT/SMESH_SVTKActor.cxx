@@ -124,7 +124,7 @@ SMESH_SVTKActor
   myBallGrid->SetPoints( aSourceGrid->GetPoints() );
   my0DGrid->SetPoints( aSourceGrid->GetPoints() );
 
-  int aNbOfParts = theMapIndex.Extent();
+  vtkIdType aNbOfParts = theMapIndex.Extent();
 
   vtkCellData* cd = 0;
   vtkCellData* outputCD = 0;
@@ -134,8 +134,8 @@ SMESH_SVTKActor
     cd = aSourceGrid->GetCellData();
   }
   outputCD->CopyAllocate(cd,aNbOfParts,aNbOfParts/2);
-  for(int ind = 1; ind <= aNbOfParts; ind++){
-    int aPartId = theMapIndex( ind );
+  for(vtkIdType ind = 1; ind <= aNbOfParts; ind++){
+	vtkIdType aPartId = theMapIndex( ind );
     if(vtkCell* aCell = theMapActor->GetElemCell(aPartId))
     {
       if (aCell->GetCellType() != VTK_POLYHEDRON)

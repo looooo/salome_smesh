@@ -71,7 +71,7 @@ SMESH_CellLabelActor::SMESH_CellLabelActor()
   myClsLabeledDataMapper = vtkLabeledDataMapper::New();
   myClsLabeledDataMapper->SetInputConnection(myClsSelectVisiblePoints->GetOutputPort());
 
-  myClsLabeledDataMapper->SetLabelFormat("%d");
+  //myClsLabeledDataMapper->SetLabelFormat("%d");
   myClsLabeledDataMapper->SetLabelModeToLabelScalars();
 
   myClsTextProp = vtkTextProperty::New();
@@ -159,9 +159,6 @@ void SMESH_CellLabelActor::SetCellsLabeled(bool theIsCellsLabeled)
     vtkUnstructuredGrid *aDataSet = myCellsNumDataSet;
     vtkIdType aNbElem = aDataSet->GetNumberOfCells();
     vtkIdTypeArray *anArray = vtkIdTypeArray::New();
-    //
-    std::cout << "\n\n\n***********\nSizeof vtkIdType: " << sizeof(vtkIdType) << "\nSizeof smIdType: " << sizeof(smIdType) << "\n";
-    //
     anArray->SetNumberOfValues(aNbElem);
     myExtractUnstructuredGrid->BuildOut2InMap();
     for(vtkIdType anId = 0; anId < aNbElem; anId++)

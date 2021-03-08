@@ -61,7 +61,7 @@ SMESH_NodeLabelActor::SMESH_NodeLabelActor()
 
   myPtsLabeledDataMapper = vtkLabeledDataMapper::New();
   myPtsLabeledDataMapper->SetInputConnection(myPtsSelectVisiblePoints->GetOutputPort());
-  myPtsLabeledDataMapper->SetLabelFormat("%d");
+  //myPtsLabeledDataMapper->SetLabelFormat("%d");
   myPtsLabeledDataMapper->SetLabelModeToLabelScalars();
 
   myPtsTextProp = vtkTextProperty::New();

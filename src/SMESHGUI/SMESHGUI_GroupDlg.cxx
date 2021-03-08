@@ -2213,15 +2213,19 @@ void SMESHGUI_GroupDlg::onSort()
   // PAL5412: sorts items in ascending by "string" value
   // myElements->sort(true);
   // myElements->update();
-  int i, k = myElements->count();
+  vtkIdType i, k = myElements->count();
   if (k > 0) {
     myIsBusy = true;
-    QList<int> aSelected;
-    std::vector<int> anArray(k);
+    QList<vtkIdType> aSelected;
+    std::vector<vtkIdType> anArray(k);
     //    QMemArray<int> anArray(k);
     // fill the array
     for (i = 0; i < k; i++) {
-      int id = myElements->item(i)->text().toInt();
+	  vtkIdType id;
+	  if (sizeof(vtkIdType)==8)
+		id = myElements->item(i)->text().toLongLong();
+	  else
+		id = myElements->item(i)->text().toInt();
       anArray[i] = id;
       if (myElements->item(i)->isSelected())
         aSelected.append(id);

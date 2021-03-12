@@ -2483,7 +2483,7 @@ bool StdMeshers_Prism_3D::assocOrProjBottom2Top( const gp_Trsf & bottomToTopTrsf
 
   // Fill myBotToColumnMap
 
-  int zSize = myBlock.VerticalSize();
+  size_t zSize = myBlock.VerticalSize();
   TNodeNodeMap::const_iterator bN_tN = n2nMapPtr->begin();
   for ( ; bN_tN != n2nMapPtr->end(); ++bN_tN )
   {
@@ -2555,7 +2555,7 @@ bool StdMeshers_Prism_3D::projectBottomToTop( const gp_Trsf &             bottom
 
   // Fill myBotToColumnMap
 
-  int zSize = myBlock.VerticalSize();
+  size_t zSize = myBlock.VerticalSize();
   Prism_3D::TNode prevTNode;
   SMDS_NodeIteratorPtr nIt = botSMDS->GetNodes();
   while ( nIt->more() )
@@ -3910,7 +3910,7 @@ bool StdMeshers_PrismAsBlock::Init(SMESH_MesherHelper*         helper,
         return error(COMPERR_BAD_INPUT_MESH, TCom("Can't find regular quadrangle mesh ")
                      << "on a side face #" << MeshDS()->ShapeToIndex( (*quad)->face ));
     }
-    if ( !faceColumns.empty() && (int)faceColumns.begin()->second.size() != VerticalSize() )
+    if ( !faceColumns.empty() && faceColumns.begin()->second.size() != VerticalSize() )
       return error(COMPERR_BAD_INPUT_MESH, "Different 'vertical' discretization");
 
     // edge columns
@@ -4226,7 +4226,7 @@ bool StdMeshers_PrismAsBlock::GetLayersTransformation(vector<gp_Trsf> &         
                                                       const Prism_3D::TPrismTopo& prism) const
 {
   const bool itTopMeshed = !SubMesh( ID_BOT_FACE )->IsEmpty();
-  const int zSize = VerticalSize();
+  const size_t zSize = VerticalSize();
   if ( zSize < 3 && !itTopMeshed ) return true;
   trsf.resize( zSize - 1 );
 
@@ -4273,7 +4273,7 @@ bool StdMeshers_PrismAsBlock::GetLayersTransformation(vector<gp_Trsf> &         
   gp_Ax3 cs0 = getLayerCoordSys(0, columns, xCol );
   //double dist0 = cs0.Location().Distance( gpXYZ( (*columns[0])[0]));
   toCs0.SetTransformation( cs0 );
-  for ( int z = 1; z < zSize; ++z )
+  for ( size_t z = 1; z < zSize; ++z )
   {
     gp_Ax3 csZ = getLayerCoordSys(z, columns, xCol );
     //double distZ = csZ.Location().Distance( gpXYZ( (*columns[0])[z]));
@@ -5614,7 +5614,7 @@ bool StdMeshers_Sweeper::ComputeNodesOnStraight()
   int    botTriaNodes[3], topTriaNodes[3];
   bool   checkUV = true;
 
-  int nbInternalNodes = myIntColumns.size();
+  size_t nbInternalNodes = myIntColumns.size();
   myBotDelaunay->InitTraversal( nbInternalNodes );
 
   while (( botNode = myBotDelaunay->NextNode( botBC, botTriaNodes )))
@@ -5763,7 +5763,7 @@ bool StdMeshers_Sweeper::findDelaunayTriangles()
   TopBotTriangles          tbTrias;
   bool  checkUV = true;
 
-  int nbInternalNodes = myIntColumns.size();
+  size_t nbInternalNodes = myIntColumns.size();
   myTopBotTriangles.resize( nbInternalNodes );
 
   myBotDelaunay->InitTraversal( nbInternalNodes );

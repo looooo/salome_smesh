@@ -622,7 +622,7 @@ SMESH::smIdType_array* SMESH_MeshEditor_i::GetLastCreatedNodes()
 
   const SMESH_SequenceOfElemPtr& aSeq = getEditor().GetLastCreatedNodes();
   myLastCreatedNodes->length( aSeq.size() );
-  for ( smIdType i = 0; i < aSeq.size(); i++)
+  for ( size_t i = 0; i < aSeq.size(); i++)
     myLastCreatedNodes[i] = aSeq[i]->GetID();
 
   return myLastCreatedNodes._retn();
@@ -644,7 +644,7 @@ SMESH::smIdType_array* SMESH_MeshEditor_i::GetLastCreatedElems()
 
   const SMESH_SequenceOfElemPtr& aSeq = getEditor().GetLastCreatedElems();
   myLastCreatedElems->length( aSeq.size() );
-  for ( smIdType i = 0; i < aSeq.size(); i++ )
+  for ( size_t i = 0; i < aSeq.size(); i++ )
     myLastCreatedElems[i] = aSeq[i]->GetID();
 
   return myLastCreatedElems._retn();
@@ -1275,7 +1275,7 @@ SMESH_MeshEditor_i::Create0DElementsOnAllNodes(SMESH::SMESH_IDSource_ptr theObje
   SMESH::smIdType_array_var newElems = new SMESH::smIdType_array;
   newElems->length( elems0D.size() );
   TIDSortedElemSet::iterator eIt = elems0D.begin();
-  for ( smIdType i = 0; i < elems0D.size(); ++i, ++eIt )
+  for ( size_t i = 0; i < elems0D.size(); ++i, ++eIt )
     newElems[ i ] = (*eIt)->GetID();
 
   SMESH::SMESH_GroupBase_var groupToFill;
@@ -4575,7 +4575,7 @@ SMESH::smIdType_array* SMESH_MeshEditor_i::FindElementsByPoint(CORBA::Double    
                                            SMDSAbs_ElementType( type ),
                                            foundElems);
   res->length( foundElems.size() );
-  for ( smIdType i = 0; i < foundElems.size(); ++i )
+  for ( size_t i = 0; i < foundElems.size(); ++i )
     res[i] = foundElems[i]->GetID();
 
   return res._retn();
@@ -4646,7 +4646,7 @@ SMESH_MeshEditor_i::FindAmongElementsByPoint(SMESH::SMESH_IDSource_ptr elementID
                                            SMDSAbs_ElementType( type ),
                                            foundElems);
   res->length( foundElems.size() );
-  for ( smIdType i = 0; i < foundElems.size(); ++i )
+  for ( size_t i = 0; i < foundElems.size(); ++i )
     res[i] = foundElems[i]->GetID();
 
   return res._retn();

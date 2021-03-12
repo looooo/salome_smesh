@@ -1531,7 +1531,7 @@ int StdMeshers_Quadrangle_2D::getCorners(const TopoDS_Face&          theFace,
 
   if ( theConsiderMesh )
   {
-    const size_t nbSegments = std::max( faceSide.NbPoints()-1, faceSide.NbSegments() );
+    const smIdType nbSegments = std::max( faceSide.NbPoints()-1, faceSide.NbSegments() );
     if ( nbSegments < nbCorners )
       return error(COMPERR_BAD_INPUT_MESH, TComm("Too few boundary nodes: ") << nbSegments);
   }

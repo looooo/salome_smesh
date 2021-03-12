@@ -70,7 +70,7 @@ Driver_Mesh::Status DriverDAT_W_SMDS_Mesh::Perform()
   SCRUTE(nb_of_volumes);
 
   //fprintf(stdout, "%d %d\n", nbNodes, nbCells);
-  fprintf(aFileId, "%d %d\n", nbNodes, nbCells);
+  fprintf(aFileId, "%ld %ld\n", nbNodes, nbCells);
 
   /****************************************************************************
    *                       ECRITURE DES NOEUDS                                 *
@@ -107,7 +107,7 @@ Driver_Mesh::Status DriverDAT_W_SMDS_Mesh::Perform()
       smIdType nodeID = it->next()->GetID();
       if ( !nodeNumByID.empty() )
         nodeID = nodeNumByID[ nodeID ];
-      fprintf(aFileId, "%d ", nodeID );
+      fprintf(aFileId, "%ld ", nodeID );
     }
     fprintf(aFileId, "\n");
   }
@@ -123,7 +123,7 @@ Driver_Mesh::Status DriverDAT_W_SMDS_Mesh::Perform()
       smIdType nodeID = it->next()->GetID();
       if ( !nodeNumByID.empty() )
         nodeID = nodeNumByID[ nodeID ];
-      fprintf(aFileId, "%d ", nodeID );
+      fprintf(aFileId, "%ld ", nodeID );
     }
     fprintf(aFileId, "\n");
   }
@@ -158,7 +158,7 @@ Driver_Mesh::Status DriverDAT_W_SMDS_Mesh::Perform()
       smIdType nodeID = it->next()->GetID();
       if ( !nodeNumByID.empty() )
         nodeID = nodeNumByID[ nodeID ];
-      fprintf(aFileId, "%d ", nodeID );
+      fprintf(aFileId, "%ld ", nodeID );
     }
 
     fprintf(aFileId, "\n");

@@ -2221,11 +2221,11 @@ void SMESHGUI_GroupDlg::onSort()
     //    QMemArray<int> anArray(k);
     // fill the array
     for (i = 0; i < k; i++) {
-	  vtkIdType id;
-	  if (sizeof(vtkIdType)==8)
-		id = myElements->item(i)->text().toLongLong();
-	  else
-		id = myElements->item(i)->text().toInt();
+      vtkIdType id;
+      if (sizeof(vtkIdType)==8)
+        id = myElements->item(i)->text().toLongLong();
+      else
+        id = myElements->item(i)->text().toInt();
       anArray[i] = id;
       if (myElements->item(i)->isSelected())
         aSelected.append(id);

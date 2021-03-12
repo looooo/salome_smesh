@@ -4237,7 +4237,7 @@ SALOMEDS::TMPFile* SMESH_Gen_i::Save( SALOMEDS::SComponent_ptr theComponent,
               if ( grImpl )
               {
                 CORBA::String_var objStr = GetORB()->object_to_string( grImpl->_this() );
-                smIdType anId = myStudyContext->findId( string( objStr.in() ) );
+                int anId = myStudyContext->findId( string( objStr.in() ) );
                 char grpName[ 30 ];
                 sprintf( grpName, "Group %d %d", anId, grImpl->GetLocalID() );
                 SMESHDS_GroupBase* aGrpBaseDS = grImpl->GetGroupDS();
@@ -4294,7 +4294,7 @@ SALOMEDS::TMPFile* SMESH_Gen_i::Save( SALOMEDS::SComponent_ptr theComponent,
 #endif
               CORBA::String_var  objStr = GetORB()->object_to_string( anObject );
               CORBA::String_var hypdata = myImpl->SaveTo();
-              smIdType               id = myStudyContext->findId( string( objStr.in() ));
+              int                    id = myStudyContext->findId( string( objStr.in() ));
 
               // for each hypothesis create HDF group basing on its id
               char hypGrpName[30];
@@ -4362,7 +4362,7 @@ SALOMEDS::TMPFile* SMESH_Gen_i::Save( SALOMEDS::SComponent_ptr theComponent,
 #endif
               CORBA::String_var  objStr = GetORB()->object_to_string( anObject );
               CORBA::String_var hypdata = myImpl->SaveTo();
-              smIdType               id = myStudyContext->findId( string( objStr.in() ) );
+              int                    id = myStudyContext->findId( string( objStr.in() ) );
 
               // for each algorithm create HDF group basing on its id
               char hypGrpName[30];
@@ -4405,7 +4405,7 @@ SALOMEDS::TMPFile* SMESH_Gen_i::Save( SALOMEDS::SComponent_ptr theComponent,
           SMESH_Mesh_i* myImpl = dynamic_cast<SMESH_Mesh_i*>( GetServant( myMesh ).in() );
           if ( myImpl ) {
             CORBA::String_var objStr = GetORB()->object_to_string( anObject );
-            smIdType id = myStudyContext->findId( string( objStr.in() ) );
+            int id = myStudyContext->findId( string( objStr.in() ) );
             ::SMESH_Mesh& myLocMesh = myImpl->GetImpl();
             SMESHDS_Mesh* mySMESHDSMesh = myLocMesh.GetMeshDS();
             bool hasShape = myLocMesh.HasShapeToMesh();
@@ -4524,7 +4524,7 @@ SALOMEDS::TMPFile* SMESH_Gen_i::Save( SALOMEDS::SComponent_ptr theComponent,
                   //string myRefOnObject = myRefOnHyp->GetID();
                   CORBA::Object_var anObject = SObjectToObject( myRefOnHyp );
                   CORBA::String_var objStr = GetORB()->object_to_string( anObject );
-                  smIdType id = myStudyContext->findId( string( objStr.in() ) );
+                  int id = myStudyContext->findId( string( objStr.in() ) );
                   //if ( myRefOnObject.length() > 0 ) {
                   //aSize[ 0 ] = myRefOnObject.length() + 1;
                   char hypName[ 30 ], hypId[ 30 ];
@@ -4568,7 +4568,7 @@ SALOMEDS::TMPFile* SMESH_Gen_i::Save( SALOMEDS::SComponent_ptr theComponent,
                   //string myRefOnObject = myRefOnAlgo->GetID();
                   CORBA::Object_var anObject = SObjectToObject( myRefOnAlgo );
                   CORBA::String_var objStr = GetORB()->object_to_string( anObject );
-                  smIdType id = myStudyContext->findId( string( objStr.in() ) );
+                  int id = myStudyContext->findId( string( objStr.in() ) );
                   //if ( myRefOnObject.length() > 0 ) {
                   //aSize[ 0 ] = myRefOnObject.length() + 1;
                   char algoName[ 30 ], algoId[ 30 ];
@@ -4659,7 +4659,7 @@ SALOMEDS::TMPFile* SMESH_Gen_i::Save( SALOMEDS::SComponent_ptr theComponent,
                   {
                     SMESH::SMESH_subMesh_var mySubMesh = SMESH::SMESH_subMesh::_narrow( anSubObject ) ;
                     CORBA::String_var objStr = GetORB()->object_to_string( anSubObject );
-                    smIdType subid = myStudyContext->findId( string( objStr.in() ) );
+                    int subid = myStudyContext->findId( string( objStr.in() ) );
 
                     // for each mesh open the HDF group basing on its id
                     char submeshGrpName[ 30 ];
@@ -4698,7 +4698,7 @@ SALOMEDS::TMPFile* SMESH_Gen_i::Save( SALOMEDS::SComponent_ptr theComponent,
                           //string myRefOnObject = myRefOnHyp->GetID();
                           CORBA::Object_var anObject = SObjectToObject( myRefOnHyp );
                           CORBA::String_var objStr = GetORB()->object_to_string( anObject );
-                          smIdType id = myStudyContext->findId( string( objStr.in() ) );
+                          int id = myStudyContext->findId( string( objStr.in() ) );
                           //if ( myRefOnObject.length() > 0 ) {
                           //aSize[ 0 ] = myRefOnObject.length() + 1;
                           char hypName[ 30 ], hypId[ 30 ];
@@ -4735,7 +4735,7 @@ SALOMEDS::TMPFile* SMESH_Gen_i::Save( SALOMEDS::SComponent_ptr theComponent,
                           //string myRefOnObject = myRefOnAlgo->GetID();
                           CORBA::Object_var anObject = SObjectToObject( myRefOnAlgo );
                           CORBA::String_var objStr = GetORB()->object_to_string( anObject );
-                          smIdType id = myStudyContext->findId( string( objStr.in() ) );
+                          int id = myStudyContext->findId( string( objStr.in() ) );
                           //if ( myRefOnObject.length() > 0 ) {
                           //aSize[ 0 ] = myRefOnObject.length() + 1;
                           char algoName[ 30 ], algoId[ 30 ];
@@ -4864,7 +4864,7 @@ SALOMEDS::TMPFile* SMESH_Gen_i::Save( SALOMEDS::SComponent_ptr theComponent,
                       continue;
 
                     CORBA::String_var objStr = GetORB()->object_to_string( aSubObject );
-                    smIdType anId = myStudyContext->findId( string( objStr.in() ) );
+                    int anId = myStudyContext->findId( string( objStr.in() ) );
 
                     // For each group, create a dataset named "Group <group_persistent_id>"
                     // and store the group's user name into it
@@ -5330,7 +5330,7 @@ bool SMESH_Gen_i::Load( SALOMEDS::SComponent_ptr theComponent,
               // myImpl->LoadFrom( hypdata.c_str() );
               hypDataList.push_back( make_pair( myImpl, hypdata ));
               CORBA::String_var iorString = GetORB()->object_to_string( myHyp );
-              smIdType newId = myStudyContext->findId( iorString.in() );
+              int newId = myStudyContext->findId( iorString.in() );
               myStudyContext->mapOldToNew( id, newId );
             }
             else
@@ -5434,7 +5434,7 @@ bool SMESH_Gen_i::Load( SALOMEDS::SComponent_ptr theComponent,
               //myImpl->LoadFrom( hypdata.c_str() );
               hypDataList.push_back( make_pair( myImpl, hypdata ));
               CORBA::String_var iorString = GetORB()->object_to_string( myHyp );
-              smIdType newId = myStudyContext->findId( iorString.in() );
+              int newId = myStudyContext->findId( iorString.in() );
               myStudyContext->mapOldToNew( id, newId );
             }
             else
@@ -5475,7 +5475,7 @@ bool SMESH_Gen_i::Load( SALOMEDS::SComponent_ptr theComponent,
           meshGroupList.push_back( make_pair( myNewMeshImpl, aTopGroup ));
 
           CORBA::String_var iorString = GetORB()->object_to_string( myNewMesh );
-          smIdType newId = myStudyContext->findId( iorString.in() );
+          int newId = myStudyContext->findId( iorString.in() );
           myStudyContext->mapOldToNew( id, newId );
 
           // ouv : NPAL12872
@@ -5578,7 +5578,7 @@ bool SMESH_Gen_i::Load( SALOMEDS::SComponent_ptr theComponent,
 
       // get mesh old id
       CORBA::String_var iorString = GetORB()->object_to_string( myNewMeshImpl->_this() );
-      smIdType newId = myStudyContext->findId( iorString.in() );
+      int newId = myStudyContext->findId( iorString.in() );
       int meshOldId = myStudyContext->getOldId( newId );
 
       // try to find mesh data dataset
@@ -5730,7 +5730,7 @@ bool SMESH_Gen_i::Load( SALOMEDS::SComponent_ptr theComponent,
                     if ( aSubMesh->_is_nil() )
                       continue;
                     string iorSubString = GetORB()->object_to_string( aSubMesh );
-                    smIdType newSubId = myStudyContext->findId( iorSubString );
+                    int        newSubId = myStudyContext->findId( iorSubString );
                     myStudyContext->mapOldToNew( subid, newSubId );
                   }
                 }
@@ -5923,7 +5923,7 @@ bool SMESH_Gen_i::Load( SALOMEDS::SComponent_ptr theComponent,
                 continue;
 
               string iorSubString = GetORB()->object_to_string( aNewGroup );
-              smIdType   newSubId = myStudyContext->findId( iorSubString );
+              int        newSubId = myStudyContext->findId( iorSubString );
               myStudyContext->mapOldToNew( subid, newSubId );
 
               SMESH_GroupBase_i* aGroupImpl = SMESH::DownCast< SMESH_GroupBase_i*>( aNewGroup );
@@ -6192,7 +6192,7 @@ char* SMESH_Gen_i::IORToLocalPersistentID( SALOMEDS::SObject_ptr /*theSObject*/,
   if(MYDEBUG) MESSAGE( "SMESH_Gen_i::IORToLocalPersistentID" );
 
   if ( myStudyContext && strcmp( IORString, "" ) != 0 ) {
-    smIdType anId = myStudyContext->findId( IORString );
+    int anId = myStudyContext->findId( IORString );
     if ( anId ) {
       if(MYDEBUG) MESSAGE( "VSR " << anId )
       char strId[ 20 ];

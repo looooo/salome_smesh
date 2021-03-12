@@ -35,7 +35,8 @@ typedef std::list<SMESHDS_GroupBase*> TGroupList;
 class MESHDRIVERUNV_EXPORT DriverUNV_W_SMDS_Mesh: public Driver_SMDS_Mesh
 {
  public:
-  virtual Status Perform();
+
+  virtual Status Perform() override;
 
   void AddGroup(SMESHDS_GroupBase* theGroup) { myGroups.push_back(theGroup); }
 

@@ -135,7 +135,7 @@ SMESH_SVTKActor
   }
   outputCD->CopyAllocate(cd,aNbOfParts,aNbOfParts/2);
   for(vtkIdType ind = 1; ind <= aNbOfParts; ind++){
-	vtkIdType aPartId = theMapIndex( ind );
+    vtkIdType aPartId = theMapIndex( ind );
     if(vtkCell* aCell = theMapActor->GetElemCell(aPartId))
     {
       if (aCell->GetCellType() != VTK_POLYHEDRON)

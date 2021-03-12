@@ -248,6 +248,9 @@ Driver_Mesh::Status DriverCGNS_Write::Perform()
   if ( !myMesh || myMesh->GetMeshInfo().NbElements() < 1 )
     return addMessage( !myMesh ? "NULL mesh" : "Empty mesh (no elements)", /*fatal = */true );
 
+  if ( Driver_Mesh::IsMeshTooLarge< cgsize_t >( myMesh, /*checkIDs =*/ false))
+    return DRS_TOO_LARGE_MESH;
+
   // open the file
   if ( cg_open(myFile.c_str(), CG_MODE_MODIFY, &_fn) != CG_OK &&
        cg_open(myFile.c_str(), CG_MODE_WRITE,  &_fn) != CG_OK )
@@ -282,7 +285,9 @@ Driver_Mesh::Status DriverCGNS_Write::Perform()
   else if ( meshDim == 2 )
     nbCells = myMesh->NbFaces();
 
-  cgsize_t size[9] = { myMesh->NbNodes(), nbCells, /*NBoundVertex=*/0, 0,0,0,0,0,0 };
+  cgsize_t size[9] = { FromIdType<cgsize_t>( myMesh->NbNodes() ),
+                       FromIdType<cgsize_t>( nbCells ),
+                       /*NBoundVertex=*/0, 0,0,0,0,0,0 };
   int iZone;
   if ( cg_zone_write( _fn, iBase, "SMESH_Mesh", size,
                       CGNS_ENUMV( Unstructured ), &iZone) != CG_OK )

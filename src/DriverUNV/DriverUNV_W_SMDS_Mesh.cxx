@@ -45,6 +45,10 @@ Driver_Mesh::Status DriverUNV_W_SMDS_Mesh::Perform()
 {
   Kernel_Utils::Localizer loc;
   Status aResult = DRS_OK;
+
+  if ( Driver_Mesh::IsMeshTooLarge< int >( myMesh, /*checkIDs =*/ false))
+    return DRS_TOO_LARGE_MESH;
+
 #if defined(WIN32) && defined(UNICODE)
   std::wstring aFile = Kernel_Utils::utf8_decode_s(myFile);
   std::ofstream out_stream(aFile.c_str());
@@ -256,11 +260,11 @@ Driver_Mesh::Status DriverUNV_W_SMDS_Mesh::Perform()
       EXCEPTION(runtime_error,"ERROR: Output file not good.");
   }
   catch(const std::exception& exc){
-    INFOS("Follow exception was cought:\n\t"<<exc.what());
+    INFOS("Follow exception was caught:\n\t"<<exc.what());
     throw;
   }
   catch(...){
-    INFOS("Unknown exception was cought !!!");
+    INFOS("Unknown exception was caught !!!");
     throw;
   }
   return aResult;

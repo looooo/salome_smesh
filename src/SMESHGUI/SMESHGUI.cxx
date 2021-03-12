@@ -992,11 +992,19 @@ namespace
           aMesh->ExportGMF( aMeshOrGroup, aFilename.toUtf8().data(), toCreateGroups );
         }
       }
-      catch (const SALOME::SALOME_Exception& S_ex){
+      catch (const SALOME::SALOME_Exception& S_ex)
+      {
         wc.suspend();
-        SUIT_MessageBox::warning(SMESHGUI::desktop(),
-                                 QObject::tr("SMESH_WRN_WARNING"),
-                                 QObject::tr("SMESH_EXPORT_FAILED") + SalomeApp_Tools::ExceptionToString(S_ex));
+        if ( S_ex.details.type == SALOME::COMM && // communicate about too large mesh
+             strncmp( "format=", S_ex.details.sourceFile.in(), 7 ) == 0 )
+
+          SUIT_MessageBox::critical(SMESHGUI::desktop(),
+                                    QObject::tr("SMESH_WRN_WARNING"),
+                                    QObject::tr(S_ex.details.text.in() ));
+        else
+          SUIT_MessageBox::warning(SMESHGUI::desktop(),
+                                   QObject::tr("SMESH_WRN_WARNING"),
+                                   QObject::tr("SMESH_EXPORT_FAILED") + SalomeApp_Tools::ExceptionToString(S_ex));
         wc.resume();
       }
     }
@@ -5131,7 +5139,7 @@ bool SMESHGUI::activateModule( SUIT_Study* study )
   lab = lab + tr("INFO_COMPUTE") + "<br/>";
   lab = lab + tr("INFO_REFINE") + ":";
   items << wrap(tr("INFO_REFINE_LOCAL_SIZE"), "li")
-	<< wrap(tr("INFO_REFINE_SUBMESH"), "li");
+        << wrap(tr("INFO_REFINE_SUBMESH"), "li");
   lab = lab + wrap(items.join(""), "ul");
   items.clear();
 
@@ -5139,22 +5147,22 @@ bool SMESHGUI::activateModule( SUIT_Study* study )
 
   gb = app->infoPanel()->addGroup(tr("INFO_GRP_IMPORT_MESH"));
   items << wrap("UNV", "li")
-	<< wrap("MED", "li")
-	<< wrap("STL", "li")
-	<< wrap("CGNS", "li")
-	<< wrap("SAUV", "li")
-	<< wrap("GMF", "li");
+        << wrap("MED", "li")
+        << wrap("STL", "li")
+        << wrap("CGNS", "li")
+        << wrap("SAUV", "li")
+        << wrap("GMF", "li");
   lab = tr("INFO_AVAILABLE_FORMATS") + ":" + wrap(items.join(""), "ul");
   items.clear();
-  
+
   app->infoPanel()->addLabel(lab, gb);
     
   gb = app->infoPanel()->addGroup(tr("INFO_GRP_CHECK_MESH"));
   lab = tr("INFO_DISPLAY") + "<br/>";
   items << wrap(tr("INFO_QUALITY_AREA"), "li")
-	<< wrap(tr("INFO_QUALITY_VOLUME"), "li")
-	<< wrap(tr("INFO_QUALITY_ASPECT_RATION"), "li")
-	<< wrap("...", "li");
+        << wrap(tr("INFO_QUALITY_VOLUME"), "li")
+        << wrap(tr("INFO_QUALITY_ASPECT_RATION"), "li")
+        << wrap("...", "li");
   lab = lab + tr("INFO_QUALITY_INFO") + ":" + wrap(items.join(""), "ul");
   items.clear();
   lab = lab + tr("INFO_CLIPPING");

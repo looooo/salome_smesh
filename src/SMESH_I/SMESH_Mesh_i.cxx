@@ -84,8 +84,15 @@
 
 #include <vtkUnstructuredGridWriter.h>
 
-// to pass CORBA exception through SMESH_TRY
-#define SMY_OWN_CATCH catch( SALOME::SALOME_Exception& se ) { throw se; }
+// to pass CORBA exception and TooLargeForExport exception through SMESH_TRY
+#define SMY_OWN_CATCH                                                                           \
+  catch( SALOME::SALOME_Exception& se ) { throw se; }                                           \
+  catch( ::SMESH_Mesh::TooLargeForExport& ex )                                                  \
+  { SALOME::ExceptionStruct se = {                                                              \
+      SALOME::COMM,                                                                             \
+      CORBA::string_dup(SMESH_Comment("Mesh is too large for export in format ") << ex.what()), \
+      CORBA::string_dup(SMESH_Comment("format=") <<  ex.what() ), 0 };                          \
+    throw SALOME::SALOME_Exception( se );  }
 
 #include "SMESH_TryCatch.hxx" // include after OCCT headers!
 
@@ -461,8 +468,7 @@ SMESH::DriverMED_ReadStatus SMESH_Mesh_i::ImportCGNSFile( const char*  theFileNa
 
 char* SMESH_Mesh_i::GetVersionString(CORBA::Long minor, CORBA::Short nbDigits)
 {
-  string ver = DriverMED_W_SMESHDS_Mesh::GetVersionString(minor,
-                                                          nbDigits);
+  string ver = DriverMED_W_SMESHDS_Mesh::GetVersionString(minor, nbDigits);
   return CORBA::string_dup( ver.c_str() );
 }
 
@@ -3732,11 +3738,11 @@ string SMESH_Mesh_i::prepareMeshNameAndGroups(const char*    file,
  */
 //================================================================================
 
-void SMESH_Mesh_i::ExportMED(const char*        file,
-                             CORBA::Boolean     auto_groups,
-                             CORBA::Long        version,
-                             CORBA::Boolean     overwrite,
-                             CORBA::Boolean     autoDimension)
+void SMESH_Mesh_i::ExportMED(const char*    file,
+                             CORBA::Boolean auto_groups,
+                             CORBA::Long    version,
+                             CORBA::Boolean overwrite,
+                             CORBA::Boolean autoDimension)
 {
   //MESSAGE("MED minor version: "<< minor);
   SMESH_TRY;
@@ -3763,10 +3769,9 @@ void SMESH_Mesh_i::ExportMED(const char*        file,
  */
 //================================================================================
 
-void SMESH_Mesh_i::ExportSAUV (const char* file,
-                               CORBA::Boolean auto_groups)
+void SMESH_Mesh_i::ExportSAUV( const char* file, CORBA::Boolean auto_groups )
 {
-  Unexpect aCatch(SALOME_SalomeException);
+  SMESH_TRY;
   if ( _preMeshInfo )
     _preMeshInfo->FullLoadFromFile();
 
@@ -3774,6 +3779,8 @@ void SMESH_Mesh_i::ExportSAUV (const char* file,
   TPythonDump() << SMESH::SMESH_Mesh_var( _this())
                 << ".ExportSAUV( r'" << file << "', " << auto_groups << " )";
   _impl->ExportSAUV(file, aMeshName.c_str(), auto_groups);
+
+  SMESH_CATCH( SMESH::throwCorbaException );
 }
 
 
@@ -3785,18 +3792,20 @@ void SMESH_Mesh_i::ExportSAUV (const char* file,
 
 void SMESH_Mesh_i::ExportDAT (const char *file)
 {
-  Unexpect aCatch(SALOME_SalomeException);
+  SMESH_TRY;
   if ( _preMeshInfo )
     _preMeshInfo->FullLoadFromFile();
 
-  // Update Python script
   // check names of groups
   checkGroupNames();
+  // Update Python script
   TPythonDump() << SMESH::SMESH_Mesh_var(_this()) << ".ExportDAT( r'" << file << "' )";
 
   // Perform Export
   PrepareForWriting(file);
   _impl->ExportDAT(file);
+
+  SMESH_CATCH( SMESH::throwCorbaException );
 }
 
 //================================================================================
@@ -3807,18 +3816,20 @@ void SMESH_Mesh_i::ExportDAT (const char *file)
 
 void SMESH_Mesh_i::ExportUNV (const char *file)
 {
-  Unexpect aCatch(SALOME_SalomeException);
+  SMESH_TRY;
   if ( _preMeshInfo )
     _preMeshInfo->FullLoadFromFile();
 
-  // Update Python script
   // check names of groups
   checkGroupNames();
+  // Update Python script
   TPythonDump() << SMESH::SMESH_Mesh_var(_this()) << ".ExportUNV( r'" << file << "' )";
 
   // Perform Export
   PrepareForWriting(file);
   _impl->ExportUNV(file);
+
+  SMESH_CATCH( SMESH::throwCorbaException );
 }
 
 //================================================================================
@@ -3829,13 +3840,13 @@ void SMESH_Mesh_i::ExportUNV (const char *file)
 
 void SMESH_Mesh_i::ExportSTL (const char *file, const bool isascii)
 {
-  Unexpect aCatch(SALOME_SalomeException);
+  SMESH_TRY;
   if ( _preMeshInfo )
     _preMeshInfo->FullLoadFromFile();
 
-  // Update Python script
   // check names of groups
   checkGroupNames();
+  // Update Python script
   TPythonDump() << SMESH::SMESH_Mesh_var(_this())
                 << ".ExportSTL( r'" << file << "', " << isascii << " )";
 
@@ -3847,6 +3858,8 @@ void SMESH_Mesh_i::ExportSTL (const char *file, const bool isascii)
   // Perform Export
   PrepareForWriting( file );
   _impl->ExportSTL( file, isascii, name.in() );
+
+  SMESH_CATCH( SMESH::throwCorbaException );
 }
 
 //================================================================================
@@ -4249,7 +4262,7 @@ void SMESH_Mesh_i::exportMEDFields( DriverMED_W_Field&        fieldWriter,
 void SMESH_Mesh_i::ExportPartToDAT(::SMESH::SMESH_IDSource_ptr meshPart,
                                    const char*                 file)
 {
-  Unexpect aCatch(SALOME_SalomeException);
+  SMESH_TRY;
   if ( _preMeshInfo )
     _preMeshInfo->FullLoadFromFile();
 
@@ -4260,6 +4273,8 @@ void SMESH_Mesh_i::ExportPartToDAT(::SMESH::SMESH_IDSource_ptr meshPart,
 
   TPythonDump() << SMESH::SMESH_Mesh_var(_this())
                 << ".ExportPartToDAT( " << meshPart << ", r'" << file << "' )";
+
+  SMESH_CATCH( SMESH::throwCorbaException );
 }
 //================================================================================
 /*!
@@ -4270,7 +4285,7 @@ void SMESH_Mesh_i::ExportPartToDAT(::SMESH::SMESH_IDSource_ptr meshPart,
 void SMESH_Mesh_i::ExportPartToUNV(::SMESH::SMESH_IDSource_ptr meshPart,
                                    const char*                 file)
 {
-  Unexpect aCatch(SALOME_SalomeException);
+  SMESH_TRY;
   if ( _preMeshInfo )
     _preMeshInfo->FullLoadFromFile();
 
@@ -4281,6 +4296,8 @@ void SMESH_Mesh_i::ExportPartToUNV(::SMESH::SMESH_IDSource_ptr meshPart,
 
   TPythonDump() << SMESH::SMESH_Mesh_var(_this())
                 << ".ExportPartToUNV( " << meshPart<< ", r'" << file << "' )";
+
+  SMESH_CATCH( SMESH::throwCorbaException );
 }
 //================================================================================
 /*!
@@ -4292,7 +4309,7 @@ void SMESH_Mesh_i::ExportPartToSTL(::SMESH::SMESH_IDSource_ptr meshPart,
                                    const char*                 file,
                                    ::CORBA::Boolean            isascii)
 {
-  Unexpect aCatch(SALOME_SalomeException);
+  SMESH_TRY;
   if ( _preMeshInfo )
     _preMeshInfo->FullLoadFromFile();
 
@@ -4308,6 +4325,8 @@ void SMESH_Mesh_i::ExportPartToSTL(::SMESH::SMESH_IDSource_ptr meshPart,
 
   TPythonDump() << SMESH::SMESH_Mesh_var(_this()) << ".ExportPartToSTL( "
                 << meshPart<< ", r'" << file << "', " << isascii << ")";
+
+  SMESH_CATCH( SMESH::throwCorbaException );
 }
 
 //================================================================================
@@ -4322,7 +4341,7 @@ void SMESH_Mesh_i::ExportCGNS(::SMESH::SMESH_IDSource_ptr meshPart,
                               CORBA::Boolean              groupElemsByType)
 {
 #ifdef WITH_CGNS
-  Unexpect aCatch(SALOME_SalomeException);
+  SMESH_TRY;
   if ( _preMeshInfo )
     _preMeshInfo->FullLoadFromFile();
 
@@ -4344,6 +4363,9 @@ void SMESH_Mesh_i::ExportCGNS(::SMESH::SMESH_IDSource_ptr meshPart,
 
   TPythonDump() << SMESH::SMESH_Mesh_var(_this()) << ".ExportCGNS( "
                 << meshPart<< ", r'" << file << "', " << overwrite << ")";
+
+  SMESH_CATCH( SMESH::throwCorbaException );
+
 #else
   THROW_SALOME_CORBA_EXCEPTION("CGNS library is unavailable", SALOME::INTERNAL_ERROR);
 #endif
@@ -4359,7 +4381,7 @@ void SMESH_Mesh_i::ExportGMF(::SMESH::SMESH_IDSource_ptr meshPart,
                              const char*                 file,
                              bool                        withRequiredGroups)
 {
-  Unexpect aCatch(SALOME_SalomeException);
+  SMESH_TRY;
   if ( _preMeshInfo )
     _preMeshInfo->FullLoadFromFile();
 
@@ -4372,6 +4394,8 @@ void SMESH_Mesh_i::ExportGMF(::SMESH::SMESH_IDSource_ptr meshPart,
                 << meshPart<< ", r'"
                 << file << "', "
                 << withRequiredGroups << ")";
+
+  SMESH_CATCH( SMESH::throwCorbaException );
 }
 
 //=============================================================================
@@ -5526,7 +5550,7 @@ SMESH::smIdType_array* SMESH_Mesh_i::GetElementsByNodes(const SMESH::smIdType_ar
     std::vector<const SMDS_MeshElement *> elems;
     mesh->GetElementsByNodes( nn, elems, (SMDSAbs_ElementType) elemType );
     result->length( elems.size() );
-    for ( smIdType i = 0; i < elems.size(); ++i )
+    for ( size_t i = 0; i < elems.size(); ++i )
       result[i] = elems[i]->GetID();
   }
   return result._retn();

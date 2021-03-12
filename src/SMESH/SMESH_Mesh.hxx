@@ -245,11 +245,21 @@ class SMESH_EXPORT SMESH_Mesh
    */
   typedef TopTools_IndexedDataMapOfShapeListOfShape TAncestorMap;
   const TAncestorMap& GetAncestorMap() const { return _mapAncestors; }
+
   /*!
    * \brief Check group names for duplications.
    *  Consider maximum group name length stored in MED file
    */
   bool HasDuplicatedGroupNamesMED();
+
+  /*!
+   * \brief Exception thrown by Export*() in case if a mesh is too large for export
+   *        due to limitation of a format
+   */
+  struct TooLargeForExport : public std::runtime_error
+  {
+    TooLargeForExport(const char* format):runtime_error(format) {}
+  };
 
   void ExportMED(const char *        theFile,
                  const char*         theMeshName = NULL,

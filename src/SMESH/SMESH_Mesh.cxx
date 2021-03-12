@@ -1428,6 +1428,8 @@ void SMESH_Mesh::ExportMED(const char *        file,
                            bool                theAllElemsToGroup)
 {
   MESSAGE("MED_VERSION:"<< theVersion);
+
+  Driver_Mesh::Status status;
   SMESH_TRY;
 
   DriverMED_W_SMESHDS_Mesh myWriter;
@@ -1482,9 +1484,12 @@ void SMESH_Mesh::ExportMED(const char *        file,
     }
   }
   // Perform export
-  myWriter.Perform();
+  status = myWriter.Perform();
 
   SMESH_CATCH( SMESH::throwSalomeEx );
+
+  if ( status == Driver_Mesh::DRS_TOO_LARGE_MESH )
+    throw TooLargeForExport("MED");
 }
 
 //================================================================================
@@ -1509,9 +1514,15 @@ void SMESH_Mesh::ExportSAUV(const char *file,
   cmd += "from medutilities import my_remove ; my_remove(r'" + medfilename + "')";
   cmd += "\"";
   system(cmd.c_str());
-  ExportMED(medfilename.c_str(), theMeshName, theAutoGroups, /*minor=*/-1,
-            /*meshPart=*/NULL, /*theAutoDimension=*/false, /*theAddODOnVertices=*/false,
-            /*zTol=*/-1, /*theAllElemsToGroup=*/true ); // theAllElemsToGroup is for PAL0023413
+  try {
+    ExportMED(medfilename.c_str(), theMeshName, theAutoGroups, /*minor=*/-1,
+              /*meshPart=*/NULL, /*theAutoDimension=*/false, /*theAddODOnVertices=*/false,
+              /*zTol=*/-1, /*theAllElemsToGroup=*/true ); // theAllElemsToGroup is for PAL0023413
+  }
+  catch ( TooLargeForExport )
+  {
+    throw TooLargeForExport("SAUV");
+  }
 #ifdef WIN32
   cmd = "%PYTHONBIN% ";
 #else
@@ -1541,12 +1552,19 @@ void SMESH_Mesh::ExportSAUV(const char *file,
 void SMESH_Mesh::ExportDAT(const char *        file,
                            const SMESHDS_Mesh* meshPart)
 {
-  Unexpect aCatch(SalomeException);
+  Driver_Mesh::Status status;
+  SMESH_TRY;
+
   DriverDAT_W_SMDS_Mesh myWriter;
   myWriter.SetFile( file );
   myWriter.SetMesh( meshPart ? (SMESHDS_Mesh*) meshPart : _myMeshDS );
   myWriter.SetMeshId(_id);
-  myWriter.Perform();
+  status = myWriter.Perform();
+
+  SMESH_CATCH( SMESH::throwSalomeEx );
+
+  if ( status == Driver_Mesh::DRS_TOO_LARGE_MESH )
+    throw TooLargeForExport("DAT");
 }
 
 //================================================================================
@@ -1558,7 +1576,9 @@ void SMESH_Mesh::ExportDAT(const char *        file,
 void SMESH_Mesh::ExportUNV(const char *        file,
                            const SMESHDS_Mesh* meshPart)
 {
-  Unexpect aCatch(SalomeException);
+  Driver_Mesh::Status status;
+
+  SMESH_TRY;
   DriverUNV_W_SMDS_Mesh myWriter;
   myWriter.SetFile( file );
   myWriter.SetMesh( meshPart ? (SMESHDS_Mesh*) meshPart : _myMeshDS );
@@ -1579,7 +1599,12 @@ void SMESH_Mesh::ExportUNV(const char *        file,
       }
     }
   }
-  myWriter.Perform();
+  status = myWriter.Perform();
+
+  SMESH_CATCH( SMESH::throwSalomeEx );
+
+  if ( status == Driver_Mesh::DRS_TOO_LARGE_MESH )
+    throw TooLargeForExport("UNV");
 }
 
 //================================================================================
@@ -1593,14 +1618,21 @@ void SMESH_Mesh::ExportSTL(const char *        file,
                            const char *        name,
                            const SMESHDS_Mesh* meshPart)
 {
-  Unexpect aCatch(SalomeException);
+  Driver_Mesh::Status status;
+  SMESH_TRY;
+
   DriverSTL_W_SMDS_Mesh myWriter;
   myWriter.SetFile( file );
   myWriter.SetIsAscii( isascii );
   myWriter.SetMesh( meshPart ? (SMESHDS_Mesh*) meshPart : _myMeshDS);
   myWriter.SetMeshId(_id);
   if ( name ) myWriter.SetName( name );
-  myWriter.Perform();
+  status = myWriter.Perform();
+
+  SMESH_CATCH( SMESH::throwSalomeEx );
+
+  if ( status == Driver_Mesh::DRS_TOO_LARGE_MESH )
+    throw TooLargeForExport("STL");
 }
 
 //================================================================================
@@ -1614,7 +1646,9 @@ void SMESH_Mesh::ExportCGNS(const char *        file,
                             const char *        meshName,
                             const bool          groupElemsByType)
 {
+
   int res = Driver_Mesh::DRS_FAIL;
+  SMESH_TRY;
 
   // pass group names to SMESHDS
   std::map<int, SMESH_Group*>::iterator it = _mapGroup.begin();
@@ -1644,6 +1678,11 @@ void SMESH_Mesh::ExportCGNS(const char *        file,
   }
 
 #endif
+  SMESH_CATCH( SMESH::throwSalomeEx );
+
+  if ( res == Driver_Mesh::DRS_TOO_LARGE_MESH )
+    throw TooLargeForExport("CGNS");
+
   if ( res != Driver_Mesh::DRS_OK )
     throw SALOME_Exception("Export failed");
 }
@@ -1658,12 +1697,20 @@ void SMESH_Mesh::ExportGMF(const char *        file,
                            const SMESHDS_Mesh* meshDS,
                            bool                withRequiredGroups)
 {
+  Driver_Mesh::Status status;
+  SMESH_TRY;
+
   DriverGMF_Write myWriter;
   myWriter.SetFile( file );
   myWriter.SetMesh( const_cast<SMESHDS_Mesh*>( meshDS ));
   myWriter.SetExportRequiredGroups( withRequiredGroups );
 
-  myWriter.Perform();
+  status = myWriter.Perform();
+
+  SMESH_CATCH( SMESH::throwSalomeEx );
+
+  if ( status == Driver_Mesh::DRS_TOO_LARGE_MESH )
+    throw TooLargeForExport("GMF");
 }
 
 //================================================================================

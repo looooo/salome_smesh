@@ -100,6 +100,9 @@ Driver_Mesh::Status DriverGMF_Write::Perform()
 {
   Kernel_Utils::Localizer loc;
 
+  if ( Driver_Mesh::IsMeshTooLarge< int >( myMesh, /*checkIDs =*/ false))
+    return DRS_TOO_LARGE_MESH;
+
   const int dim = 3, version = sizeof(double) < 8 ? 1 : 2;
 
   int meshID = GmfOpenMesh( myFile.c_str(), GmfWrite, version, dim );

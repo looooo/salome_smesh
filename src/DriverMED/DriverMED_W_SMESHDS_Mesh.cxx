@@ -343,11 +343,20 @@ namespace
   }
 }
 
+//================================================================================
+/*!
+ * \brief Write my mesh
+ */
+//================================================================================
+
 Driver_Mesh::Status DriverMED_W_SMESHDS_Mesh::Perform()
 {
   Status aResult = DRS_OK;
   try {
     //MESSAGE("Perform - myFile : "<<myFile);
+
+    if ( Driver_Mesh::IsMeshTooLarge< TInt >( myMesh, /*checkIDs =*/ true ))
+      return DRS_TOO_LARGE_MESH;
 
     // Creating the MED mesh for corresponding SMDS structure
     //-------------------------------------------------------
@@ -559,7 +568,7 @@ Driver_Mesh::Status DriverMED_W_SMESHDS_Mesh::Perform()
         aTCoordSlice[2] = 0.;
 
       // node number
-      int aNodeID = aCoordHelperPtr->GetID();
+      TInt aNodeID = FromIdType<TInt>( aCoordHelperPtr->GetID() );
       aNodeInfo->SetElemNum( iNode, aNodeID );
 #ifdef _EDF_NODE_IDS_
       aNodeIdMap.insert( aNodeIdMap.end(), make_pair( aNodeID, iNode+1 ));

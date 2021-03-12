@@ -172,12 +172,12 @@ smIdType SMDS_ElementFactory::GetMinID()
 
 SMDS_MeshElement* SMDS_ElementFactory::NewElement( const smIdType ID )
 {
-  smIdType id = ID - idShift;
+  smIdType id = ID > idShift ? ID - idShift : ID;
   smIdType iChunk = ( id - 1 ) / theChunkSize;
   smIdType index  = ( id - 1 ) % theChunkSize;
   while ((smIdType) myChunks.size() <= iChunk )
   {
-    smIdType id0 = myChunks.size() * theChunkSize + 1;
+    smIdType id0 = myChunks.size() * theChunkSize + 1 + idShift;
     myChunks.push_back( new SMDS_ElementChunk( this, id0 ));
   }
   SMDS_MeshElement* e = myChunks[iChunk].Element( FromIdType<int>(index) );

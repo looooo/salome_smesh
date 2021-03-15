@@ -97,7 +97,7 @@ class SMDS_EXPORT SMDS_VolumeTool
   const SMDS_MeshNode** GetNodes() const { return (const SMDS_MeshNode**) &myVolumeNodes[0]; }
   // Return array of volume nodes
 
-  int NbNodes() const { return myVolumeNodes.size(); }
+  int NbNodes() const { return (int) myVolumeNodes.size(); }
   // Return array of volume nodes
 
   double GetSize() const;

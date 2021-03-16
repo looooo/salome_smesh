@@ -653,7 +653,7 @@ namespace SMESH{
     protected:
       const SMDS_Mesh*              myMesh;
 
-      std::vector< smIdType>        myMin;
+      std::vector< smIdType >       myMin;
       std::vector< smIdType >       myMax;
       TIDsMap                       myIds;
 

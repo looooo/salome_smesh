@@ -1000,7 +1000,7 @@ const SMDS_MeshNode * SMDS_Mesh::FindNode(smIdType ID) const
 ///////////////////////////////////////////////////////////////////////////////
 const SMDS_MeshNode * SMDS_Mesh::FindNodeVtk(vtkIdType vtkId) const
 {
-  return myNodeFactory->FindNode( FromVtkToSmds( vtkId ));
+  return myNodeFactory->FindNode( vtkId + 1 );
 }
 
 const SMDS_MeshElement * SMDS_Mesh::FindElementVtk(vtkIdType IDelem) const
@@ -2964,7 +2964,6 @@ void SMDS_Mesh::dumpGrid(std::string ficdump)
 
 void SMDS_Mesh::CompactMesh()
 {
-  return;
   this->myCompactTime = this->myModifTime;
 
   bool idsChange = HasNumerationHoles();

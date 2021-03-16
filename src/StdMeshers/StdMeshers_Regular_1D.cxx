@@ -1125,11 +1125,7 @@ bool StdMeshers_Regular_1D::computeInternalParameters(SMESH_Mesh &     theMesh,
       par1 = uVec[ i   ];
       par2 = uVec[ i+1 ];
       smIdType nbseg = ( i < (int) nbsegs.size() ) ? nbsegs[i] : nbsegs[0];
-      if ( nbseg == 1 )
-      {
-        theParams.push_back( par2 );
-      }
-      else
+      if ( nbseg > 1 )
       {
         segmentSize = ( Params( i+2 ) - Params( i+1 )) * theLength;
         eltSize     = segmentSize / double( nbseg );
@@ -1138,6 +1134,7 @@ bool StdMeshers_Regular_1D::computeInternalParameters(SMESH_Mesh &     theMesh,
                                        segmentSize, par1, par2, theParams ))
           return false;
       }
+      theParams.push_back( par2 );
     }
     theParams.pop_back();
 

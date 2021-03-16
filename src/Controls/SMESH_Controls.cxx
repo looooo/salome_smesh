@@ -3442,7 +3442,7 @@ bool RangeOfIds::IsSatisfy( long theId )
   if ( myIds.Contains( theId ) )
     return true;
 
-  for ( int i = 1, n = myMin.size(); i <= n; i++ )
+  for ( size_t i = 0; i < myMin.size(); i++ )
     if ( theId >= myMin[i] && theId <= myMax[i] )
       return true;
 

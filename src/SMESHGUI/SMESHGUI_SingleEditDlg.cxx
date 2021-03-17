@@ -349,8 +349,8 @@ void SMESHGUI_SingleEditDlg::onTextChange (const QString& /*theNewText*/)
       aList.Append(anIO);
       mySelectionMgr->setSelectedObjects(aList,false);
       
-      SVTK_IndexedMapOfIds selectedIndices;
-      SVTK_ListOfInteger newIndices;
+      SVTK_IndexedMapOfVtkIds selectedIndices;
+      SVTK_ListOfVtk newIndices;
       mySelector->GetCompositeIndex(anIO,selectedIndices);
 
       int id1, id2;
@@ -369,9 +369,9 @@ void SMESHGUI_SingleEditDlg::onTextChange (const QString& /*theNewText*/)
 
       if ( findTriangles(aNode1,aNode2,tria1,tria2) )
       {
-	newIndices.push_back( aNode1->GetID() );
-	newIndices.push_back( aNode2->GetID() );
-        
+        newIndices.push_back( aNode1->GetID() );
+        newIndices.push_back( aNode2->GetID() );
+
         myOkBtn->setEnabled(true);
         myApplyBtn->setEnabled(true);
       }
@@ -410,22 +410,22 @@ void SMESHGUI_SingleEditDlg::onSelectionDone()
     if(SMDS_Mesh* aMesh = aVisualObj->GetMesh())
     {
       const SMDS_MeshElement* tria[2];
-      
-      bool valid = false;      
-      SVTK_IndexedMapOfIds anIds;
+
+      bool valid = false;
+      SVTK_IndexedMapOfVtkIds anIds;
       mySelector->GetCompositeIndex(anIO,anIds);
       if( anIds.Extent() == 1 && anIds(1).size() == 2 ) {
-	anId1 = anIds(1)[0];
-	anId2 = anIds(1)[1];
-	valid = true;
+        anId1 = anIds(1)[0];
+        anId2 = anIds(1)[1];
+        valid = true;
       }
-	      
+
       if( valid &&
           findTriangles( aMesh->FindNode( anId1 ), aMesh->FindNode( anId2 ), tria[0],tria[1] ) )
       {
         QString aText = QString("%1-%2").arg(anId1).arg(anId2);
         myEdge->setText(aText);
-        
+
         myOkBtn->setEnabled(true);
         myApplyBtn->setEnabled(true);
       }

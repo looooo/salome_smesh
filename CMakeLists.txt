@@ -71,7 +71,6 @@ OPTION(SALOME_BUILD_GUI           "Enable GUI" ON)
 OPTION(SALOME_SMESH_USE_CGNS      "Enable import/export to CGNS format" OFF)
 OPTION(SALOME_SMESH_USE_TBB       "Enable parallel computation" OFF)
 OPTION(SALOME_SMESH_DYNLOAD_LOCAL "Load plug-ins' symbols locally (Linux only)" ON)
-OPTION(SALOME_USE_64BIT_IDS "Size of IDs to refer cells and nodes. 32 bits when OFF (default), 64 bits when ON." OFF)
 OPTION(SMESH_USE_MESHGEMS_HYPOSET "Prefer MeshGems algorithms in sets of hypotheses" OFF)
 CMAKE_DEPENDENT_OPTION(SALOME_SMESH_BUILD_FRENCH_DOC "Generate SALOME SMESH French documentation" OFF
                        "SALOME_BUILD_DOC" OFF)

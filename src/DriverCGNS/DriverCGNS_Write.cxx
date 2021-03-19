@@ -285,8 +285,8 @@ Driver_Mesh::Status DriverCGNS_Write::Perform()
   else if ( meshDim == 2 )
     nbCells = myMesh->NbFaces();
 
-  cgsize_t size[9] = { FromIdType<cgsize_t>( myMesh->NbNodes() ),
-                       FromIdType<cgsize_t>( nbCells ),
+  cgsize_t size[9] = { FromSmIdType<cgsize_t>( myMesh->NbNodes() ),
+                       FromSmIdType<cgsize_t>( nbCells ),
                        /*NBoundVertex=*/0, 0,0,0,0,0,0 };
   int iZone;
   if ( cg_zone_write( _fn, iBase, "SMESH_Mesh", size,

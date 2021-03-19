@@ -4178,7 +4178,7 @@ void ElementsOnSurface::process()
   if ( !myMeshModifTracer.GetMesh() )
     return;
 
-  int nbElems = FromIdType<int>( myMeshModifTracer.GetMesh()->GetMeshInfo().NbElements( myType ));
+  int nbElems = FromSmIdType<int>( myMeshModifTracer.GetMesh()->GetMeshInfo().NbElements( myType ));
   if ( nbElems > 0 )
     myIds.ReSize( nbElems );
 

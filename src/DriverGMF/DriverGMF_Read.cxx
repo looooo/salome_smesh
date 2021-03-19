@@ -429,7 +429,7 @@ Driver_Mesh::Status DriverGMF_Read::Perform()
     };
     for ( int i = 0; i < 4; ++i )
     {
-      int                 gmfKwd = FromIdType<int>( kes[i][0] );
+      int                 gmfKwd = FromSmIdType<int>( kes[i][0] );
       SMDSAbs_ElementType entity = (SMDSAbs_ElementType) kes[i][1];
       smIdType            shift  = kes[i][2];
       if ( int nb = GmfStatKwd(meshID, gmfKwd))
@@ -472,7 +472,7 @@ Driver_Mesh::Status DriverGMF_Read::Perform()
     };
     for ( int i = 0; i < 7; ++i )
     {
-      int                 gmfKwd = FromIdType<int>( kes[i][0] );
+      int                 gmfKwd = FromSmIdType<int>( kes[i][0] );
       SMDSAbs_ElementType entity = (SMDSAbs_ElementType) kes[i][1];
       smIdType            shift  = kes[i][2];
       if ( int nb = GmfStatKwd(meshID, gmfKwd))

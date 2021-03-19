@@ -178,11 +178,11 @@ SMDS_MeshElement* SMDS_ElementFactory::NewElement( const smIdType id )
     smIdType id0 = myChunks.size() * theChunkSize + 1;
     myChunks.push_back( new SMDS_ElementChunk( this, id0 ));
   }
-  SMDS_MeshElement* e = myChunks[iChunk].Element( FromIdType<int>(index) );
+  SMDS_MeshElement* e = myChunks[iChunk].Element( FromSmIdType<int>(index) );
   if ( !e->IsNull() )
     return 0; // element with given ID already exists
 
-  myChunks[iChunk].UseElement( FromIdType<int>(index) );
+  myChunks[iChunk].UseElement( FromSmIdType<int>(index) );
   ++myNbUsedElements;
 
   e->myHolder = & myChunks[iChunk];
@@ -208,7 +208,7 @@ const SMDS_MeshElement* SMDS_ElementFactory::FindElement( const smIdType id ) co
     smIdType index  = ( id - 1 ) % theChunkSize;
     if ( iChunk < (smIdType) myChunks.size() )
     {
-      const SMDS_MeshElement* e = myChunks[iChunk].Element( FromIdType<int>(index) );
+      const SMDS_MeshElement* e = myChunks[iChunk].Element( FromSmIdType<int>(index) );
       return e->IsNull() ? 0 : e;
     }
   }
@@ -647,7 +647,7 @@ void SMDS_ElementChunk::SetVTKID( const SMDS_MeshElement* e, const vtkIdType vtk
 
 vtkIdType SMDS_ElementChunk::GetVtkID( const SMDS_MeshElement* e ) const
 {
-  vtkIdType dfltVtkID = FromIdType<vtkIdType>(e->GetID() - 1);
+  vtkIdType dfltVtkID = FromSmIdType<vtkIdType>(e->GetID() - 1);
   return ( dfltVtkID < (vtkIdType)myFactory->myVtkIDs.size() ) ? myFactory->myVtkIDs[ dfltVtkID ] : dfltVtkID;
 }
 

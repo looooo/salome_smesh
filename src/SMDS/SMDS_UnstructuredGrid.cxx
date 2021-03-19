@@ -191,7 +191,7 @@ void SMDS_UnstructuredGrid::compactGrid(std::vector<smIdType>& idNodesOldToNew, 
     // Use double type for storing coordinates of nodes instead float.
     vtkPoints *newPoints = vtkPoints::New();
     newPoints->SetDataType( VTK_DOUBLE );
-    newPoints->SetNumberOfPoints( FromIdType<vtkIdType>(newNodeSize) );
+    newPoints->SetNumberOfPoints( FromSmIdType<vtkIdType>(newNodeSize) );
 
     vtkIdType i = 0, alreadyCopied = 0;
     while ( i < oldNodeSize )
@@ -257,11 +257,11 @@ void SMDS_UnstructuredGrid::compactGrid(std::vector<smIdType>& idNodesOldToNew, 
 
   vtkUnsignedCharArray *newTypes = vtkUnsignedCharArray::New();
   newTypes->Initialize();
-  newTypes->SetNumberOfValues(FromIdType<vtkIdType>(newCellSize));
+  newTypes->SetNumberOfValues(FromSmIdType<vtkIdType>(newCellSize));
 
   vtkIdTypeArray *newLocations = vtkIdTypeArray::New();
   newLocations->Initialize();
-  newLocations->SetNumberOfValues(FromIdType<vtkIdType>(newCellSize));
+  newLocations->SetNumberOfValues(FromSmIdType<vtkIdType>(newCellSize));
 
   std::vector< vtkIdType > pointsCell(1024); // --- points id to fill a new cell
 
@@ -298,16 +298,16 @@ void SMDS_UnstructuredGrid::compactGrid(std::vector<smIdType>& idNodesOldToNew, 
       {
         smIdType oldCellId = idCellsNewToOld[ newCellID ];
         newFaceLocations->InsertNextValue( newFaces->GetMaxId()+1 );
-        smIdType oldFaceLoc = this->FaceLocations->GetValue( FromIdType<vtkIdType>(oldCellId) );
-        smIdType nCellFaces = this->Faces->GetValue( FromIdType<vtkIdType>(oldFaceLoc++) );
-        newFaces->InsertNextValue( FromIdType<vtkIdType>(nCellFaces) );
+        smIdType oldFaceLoc = this->FaceLocations->GetValue( FromSmIdType<vtkIdType>(oldCellId) );
+        smIdType nCellFaces = this->Faces->GetValue( FromSmIdType<vtkIdType>(oldFaceLoc++) );
+        newFaces->InsertNextValue( FromSmIdType<vtkIdType>(nCellFaces) );
         for ( int n = 0; n < nCellFaces; n++ )
         {
-          int nptsInFace = this->Faces->GetValue( FromIdType<vtkIdType>(oldFaceLoc++) );
+          int nptsInFace = this->Faces->GetValue( FromSmIdType<vtkIdType>(oldFaceLoc++) );
           newFaces->InsertNextValue( nptsInFace );
           for ( int k = 0; k < nptsInFace; k++ )
           {
-            vtkIdType oldpt = this->Faces->GetValue( FromIdType<vtkIdType>(oldFaceLoc++) );
+            vtkIdType oldpt = this->Faces->GetValue( FromSmIdType<vtkIdType>(oldFaceLoc++) );
             newFaces->InsertNextValue( idNodesOldToNew[ oldpt ]);
           }
         }
@@ -446,15 +446,15 @@ void SMDS_UnstructuredGrid::BuildDownwardConnectivity(bool /*withEdges*/)
 
   const SMDS_MeshInfo &meshInfo = _mesh->GetMeshInfo();
 
-  int nbLinTetra  = FromIdType<int>(meshInfo.NbTetras  (ORDER_LINEAR));
-  int nbQuadTetra = FromIdType<int>(meshInfo.NbTetras  (ORDER_QUADRATIC));
-  int nbLinPyra   = FromIdType<int>(meshInfo.NbPyramids(ORDER_LINEAR));
-  int nbQuadPyra  = FromIdType<int>(meshInfo.NbPyramids(ORDER_QUADRATIC));
-  int nbLinPrism  = FromIdType<int>(meshInfo.NbPrisms  (ORDER_LINEAR));
-  int nbQuadPrism = FromIdType<int>(meshInfo.NbPrisms  (ORDER_QUADRATIC));
-  int nbLinHexa   = FromIdType<int>(meshInfo.NbHexas   (ORDER_LINEAR));
-  int nbQuadHexa  = FromIdType<int>(meshInfo.NbHexas   (ORDER_QUADRATIC));
-  int nbHexPrism  = FromIdType<int>(meshInfo.NbHexPrisms());
+  int nbLinTetra  = FromSmIdType<int>(meshInfo.NbTetras  (ORDER_LINEAR));
+  int nbQuadTetra = FromSmIdType<int>(meshInfo.NbTetras  (ORDER_QUADRATIC));
+  int nbLinPyra   = FromSmIdType<int>(meshInfo.NbPyramids(ORDER_LINEAR));
+  int nbQuadPyra  = FromSmIdType<int>(meshInfo.NbPyramids(ORDER_QUADRATIC));
+  int nbLinPrism  = FromSmIdType<int>(meshInfo.NbPrisms  (ORDER_LINEAR));
+  int nbQuadPrism = FromSmIdType<int>(meshInfo.NbPrisms  (ORDER_QUADRATIC));
+  int nbLinHexa   = FromSmIdType<int>(meshInfo.NbHexas   (ORDER_LINEAR));
+  int nbQuadHexa  = FromSmIdType<int>(meshInfo.NbHexas   (ORDER_QUADRATIC));
+  int nbHexPrism  = FromSmIdType<int>(meshInfo.NbHexPrisms());
 
   int nbLineGuess     = int((4.0 / 3.0) * nbLinTetra + 2 * nbLinPrism + 2.5 * nbLinPyra + 3 * nbLinHexa);
   int nbQuadEdgeGuess = int((4.0 / 3.0) * nbQuadTetra + 2 * nbQuadPrism + 2.5 * nbQuadPyra + 3 * nbQuadHexa);

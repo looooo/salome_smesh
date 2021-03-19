@@ -551,7 +551,7 @@ namespace
     vector<smIdType> idVec( ids[0] );
     for ( int i = 0; i < ids[0]; ++i )
       idVec[ i ] = (smIdType) ids[ i + 1];
-    return mesh->AddPolygonalFaceWithID( idVec, ToIdType(ID) );
+    return mesh->AddPolygonalFaceWithID( idVec, ID );
   }
 
   typedef SMDS_MeshElement* (* PAddElemFun) (cgsize_t* ids, SMESHDS_Mesh* mesh, int ID);

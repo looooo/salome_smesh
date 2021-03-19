@@ -7474,7 +7474,7 @@ public:
 
   static int HashCode(const ComparableElement& se, int limit )
   {
-    return ::HashCode( FromIdType<int>(se.mySumID), limit );
+    return ::HashCode( FromSmIdType<int>(se.mySumID), limit );
   }
   static Standard_Boolean IsEqual(const ComparableElement& se1, const ComparableElement& se2 )
   {

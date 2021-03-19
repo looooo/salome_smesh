@@ -114,7 +114,7 @@ vtkIdType SMESH_VisualObjDef::GetNodeObjId( vtkIdType theVTKID )
   if( this->GetMesh() )
     aNode = this->GetMesh()->FindNodeVtk( theVTKID );
 
-  return aNode ? FromIdType<vtkIdType>(aNode->GetID()) : -1;
+  return aNode ? FromSmIdType<vtkIdType>(aNode->GetID()) : -1;
 }
 
 vtkIdType SMESH_VisualObjDef::GetNodeVTKId( vtkIdType theObjID )
@@ -139,7 +139,7 @@ vtkIdType SMESH_VisualObjDef::GetElemObjId( vtkIdType theVTKID )
     TMapOfIds::const_iterator i = myVTK2SMDSElems.find(theVTKID);
     return i == myVTK2SMDSElems.end() ? -1 : i->second;
   }
-  return FromIdType<vtkIdType>(this->GetMesh()->FromVtkToSmds(theVTKID));
+  return FromSmIdType<vtkIdType>(this->GetMesh()->FromVtkToSmds(theVTKID));
 }
 
 vtkIdType SMESH_VisualObjDef::GetElemVTKId( vtkIdType theObjID )
@@ -171,7 +171,7 @@ void SMESH_VisualObjDef::createPoints( vtkPoints* thePoints )
     return;
 
   TEntityList aNodes;
-  vtkIdType nbNodes = FromIdType<vtkIdType>(GetEntities( SMDSAbs_Node, aNodes ));
+  vtkIdType nbNodes = FromSmIdType<vtkIdType>(GetEntities( SMDSAbs_Node, aNodes ));
   thePoints->SetNumberOfPoints( nbNodes );
 
   int nbPoints = 0;
@@ -424,7 +424,7 @@ void SMESH_VisualObjDef::buildElemPrs()
                 anIdList->InsertNextId(ph->NbFaceNodes(i));
                 for(int j = 1; j <= ph->NbFaceNodes(i); j++) {
                   if ( const SMDS_MeshNode* n = ph->GetFaceNode( i, j ))
-                    anIdList->InsertNextId( mySMDS2VTKNodes[ FromIdType<vtkIdType>(n->GetID()) ]);
+                    anIdList->InsertNextId( mySMDS2VTKNodes[ FromSmIdType<vtkIdType>(n->GetID()) ]);
                 }
               }
             }
@@ -441,7 +441,7 @@ void SMESH_VisualObjDef::buildElemPrs()
             else {
               for( vtkIdType aNodeId = 0; aNodesIter->more(); aNodeId++ ){
                 const SMDS_MeshElement* aNode = aNodesIter->next();
-                anIdList->SetId( aNodeId, mySMDS2VTKNodes[FromIdType<vtkIdType>(aNode->GetID())] );
+                anIdList->SetId( aNodeId, mySMDS2VTKNodes[FromSmIdType<vtkIdType>(aNode->GetID())]);
               }
             }
           }

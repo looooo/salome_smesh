@@ -583,7 +583,7 @@ bool StdMeshers_Regular_1D::divideIntoEqualSegments( SMESH_Mesh &        theMesh
   bool ok = false;
   if ( theNbPoints < IntegerLast() )
   {
-    int nbPnt = FromIdType<int>( theNbPoints );
+    int nbPnt = FromSmIdType<int>( theNbPoints );
     GCPnts_UniformAbscissa discret(theC3d, nbPnt, theFirstU, theLastU, theTol );
     if ( !discret.IsDone() )
       return error( "GCPnts_UniformAbscissa failed");
@@ -801,7 +801,7 @@ bool StdMeshers_Regular_1D::computeInternalParameters(SMESH_Mesh &     theMesh,
       if (nbseg <= 0)
         nbseg = 1; // degenerated edge
       eltSize = theLength / nbseg * ( 1. - 1e-9 );
-      nbSegments = ToIdType( nbseg );
+      nbSegments = ToSmIdType( nbseg );
     }
     else if ( _hypType == LOCAL_LENGTH )
     {
@@ -827,7 +827,7 @@ bool StdMeshers_Regular_1D::computeInternalParameters(SMESH_Mesh &     theMesh,
             smIdType  nb_segments = smds->NbElements();
             if (nbseg - 1 <= nb_segments && nb_segments <= nbseg + 1) {
               isFound = true;
-              nbseg = FromIdType<double>( nb_segments );
+              nbseg = FromSmIdType<double>( nb_segments );
             }
           }
         }
@@ -842,7 +842,7 @@ bool StdMeshers_Regular_1D::computeInternalParameters(SMESH_Mesh &     theMesh,
       if (nbseg <= 0)
         nbseg = 1;                        // degenerated edge
       eltSize = theLength / nbseg;
-      nbSegments = ToIdType( nbseg );
+      nbSegments = ToSmIdType( nbseg );
     }
     else
     {
@@ -891,7 +891,7 @@ bool StdMeshers_Regular_1D::computeInternalParameters(SMESH_Mesh &     theMesh,
         break;
       case StdMeshers_NumberOfSegments::DT_TabFunc:
         {
-          FunctionTable func(_vvalue[ TAB_FUNC_IND ], FromIdType<int>( _ivalue[ CONV_MODE_IND ]));
+          FunctionTable func(_vvalue[ TAB_FUNC_IND ], FromSmIdType<int>( _ivalue[ CONV_MODE_IND ]));
           return computeParamByFunc(theC3d, f, l, theLength, theReverse,
                                     _ivalue[ NB_SEGMENTS_IND ], func,
                                     theParams);
@@ -900,7 +900,7 @@ bool StdMeshers_Regular_1D::computeInternalParameters(SMESH_Mesh &     theMesh,
       case StdMeshers_NumberOfSegments::DT_ExprFunc:
         {
           FunctionExpr func(_svalue[ EXPR_FUNC_IND ].c_str(),
-                            FromIdType<int>( _ivalue[ CONV_MODE_IND ]));
+                            FromSmIdType<int>( _ivalue[ CONV_MODE_IND ]));
           return computeParamByFunc(theC3d, f, l, theLength, theReverse,
                                     _ivalue[ NB_SEGMENTS_IND ], func,
                                     theParams);

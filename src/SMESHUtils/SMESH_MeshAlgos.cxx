@@ -1985,7 +1985,7 @@ SMESH_MeshAlgos::FindSharpEdges( SMDS_Mesh* theMesh,
   typedef NCollection_DataMap< SMESH_TLink, TIsSharpAndMedium, SMESH_TLink > TLinkSharpMap;
 
   TLinkSharpMap linkIsSharp;
-  Standard_Integer nbBuckets = FromIdType<Standard_Integer>( theMesh->NbFaces() );
+  Standard_Integer nbBuckets = FromSmIdType<Standard_Integer>( theMesh->NbFaces() );
   if ( nbBuckets > 0 )
     linkIsSharp.ReSize( nbBuckets );
 
@@ -2096,7 +2096,7 @@ SMESH_MeshAlgos::SeparateFacesByEdges( SMDS_Mesh* theMesh, const std::vector< Ed
   typedef std::vector< const SMDS_MeshElement* >                    TFaceVec;
   typedef NCollection_DataMap< SMESH_TLink, TFaceVec, SMESH_TLink > TFacesByLinks;
   TFacesByLinks facesByLink;
-  Standard_Integer nbBuckets = FromIdType<Standard_Integer>( theMesh->NbFaces() );
+  Standard_Integer nbBuckets = FromSmIdType<Standard_Integer>( theMesh->NbFaces() );
   if ( nbBuckets > 0 )
     facesByLink.ReSize( nbBuckets );
 

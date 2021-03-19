@@ -3539,7 +3539,7 @@ void SMESHGUI_FilterDlg::filterSource (const int theType,
       return;
     SMESH::smIdType_array_var anIds = myFilter[ theType ]->GetElementsId(myMesh);
     for (int i = 0, n = anIds->length(); i < n; i++)
-      theResIds.append(FromIdType<int>(anIds[ i ]));
+      theResIds.append(FromSmIdType<int>(anIds[ i ]));
   }
   else if (aSourceId == Selection)
   {
@@ -3593,7 +3593,7 @@ void SMESHGUI_FilterDlg::filterSelectionSource (const int theType,
         SMESH::smIdType_array_var anIds =
           theType == SMESH::NODE ? aSubMesh->GetNodesId() : aSubMesh->GetElementsId();
         for (int i = 0, n = anIds->length(); i < n; i++)
-          aToBeFiltered.Add(FromIdType<int>(anIds[ i ]));
+          aToBeFiltered.Add(FromSmIdType<int>(anIds[ i ]));
       }
     }
 
@@ -3606,7 +3606,7 @@ void SMESHGUI_FilterDlg::filterSelectionSource (const int theType,
       {
         SMESH::smIdType_array_var anIds = aGroup->GetListOfID();
         for (int i = 0, n = anIds->length(); i < n; i++)
-          aToBeFiltered.Add(FromIdType<int>(anIds[ i ]));
+          aToBeFiltered.Add(FromSmIdType<int>(anIds[ i ]));
       }
     }
 

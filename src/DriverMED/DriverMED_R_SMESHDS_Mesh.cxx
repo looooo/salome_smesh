@@ -270,7 +270,7 @@ Driver_Mesh::Status DriverMED_R_SMESHDS_Mesh::Perform()
               aNodeIds.assign( aBallInfo->myConn->begin(), aBallInfo->myConn->end());
 
             // allocate array of diameters
-            vtkIdType maxID = FromIdType<vtkIdType>(myMesh->MaxElementID() + aNbBalls);
+            vtkIdType maxID = FromSmIdType<vtkIdType>(myMesh->MaxElementID() + aNbBalls);
             if ( anIsElemNum && !aBallInfo->myElemNum->empty() )
               maxID = *std::max_element( aBallInfo->myElemNum->begin(),
                                          aBallInfo->myElemNum->end() );
@@ -356,7 +356,7 @@ Driver_Mesh::Status DriverMED_R_SMESHDS_Mesh::Perform()
 #endif
                 if ( anIsElemNum ) {
                   TInt anElemId = aPolygoneInfo->GetElemNum( iElem );
-                  anElement = (myMesh->*addPolyWithID)( aNodeIds, ToIdType(anElemId) );
+                  anElement = (myMesh->*addPolyWithID)( aNodeIds, ToSmIdType(anElemId) );
                 }
                 if ( !anElement ) {
                   aNodes.resize( aNbConn );
@@ -437,7 +437,7 @@ Driver_Mesh::Status DriverMED_R_SMESHDS_Mesh::Perform()
 #endif
                 if(anIsElemNum){
                   TInt anElemId = aPolyedreInfo->GetElemNum(iElem);
-                  anElement = myMesh->AddPolyhedralVolumeWithID(aNodeIds,aQuantities,ToIdType(anElemId));
+                  anElement = myMesh->AddPolyhedralVolumeWithID(aNodeIds,aQuantities,ToSmIdType(anElemId));
                 }
                 if(!anElement){
                   vector<const SMDS_MeshNode*> aNodes(aNbNodes);

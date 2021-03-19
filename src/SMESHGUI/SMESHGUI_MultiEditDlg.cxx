@@ -711,7 +711,7 @@ void SMESHGUI_MultiEditDlg::onAddBtn()
         if (aSubMesh->GetFather()->GetId() == myMesh->GetId()) {
           SMESH::smIdType_array_var anIds = aSubMesh->GetElementsId();
           for (int i = 0, n = anIds->length(); i < n; i++) {
-            if (isIdValid(FromIdType<int>(anIds[ i ])))
+            if (isIdValid(FromSmIdType<int>(anIds[ i ])))
               toBeAdded.Add(anIds[ i ]);
           }
         }
@@ -727,7 +727,7 @@ void SMESHGUI_MultiEditDlg::onAddBtn()
         if (aGroup->GetMesh()->GetId() == myMesh->GetId()) {
           SMESH::smIdType_array_var anIds = aGroup->GetListOfID();
           for (int i = 0, n = anIds->length(); i < n; i++) {
-            if (isIdValid(FromIdType<int>(anIds[ i ])))
+            if (isIdValid(FromSmIdType<int>(anIds[ i ])))
               toBeAdded.Add(anIds[ i ]);
           }
         }
@@ -1109,9 +1109,9 @@ bool SMESHGUI_ChangeOrientationDlg::process (SMESH::SMESH_MeshEditor_ptr  theEdi
     return theEditor->ReorientObject( obj );
 }
 
-int SMESHGUI_ChangeOrientationDlg::nbElemsInMesh()
+smIdType SMESHGUI_ChangeOrientationDlg::nbElemsInMesh()
 {
-  return ( myFilterType == SMESH::FaceFilter ) ? FromIdType<int>(myMesh->NbFaces()) : FromIdType<int>(myMesh->NbVolumes());
+  return ( myFilterType == SMESH::FaceFilter ) ? myMesh->NbFaces() : myMesh->NbVolumes();
 }
 
 /*!
@@ -1207,9 +1207,9 @@ bool SMESHGUI_UnionOfTrianglesDlg::process (SMESH::SMESH_MeshEditor_ptr theEdito
   return ok;
 }
 
-int SMESHGUI_UnionOfTrianglesDlg::nbElemsInMesh()
+smIdType SMESHGUI_UnionOfTrianglesDlg::nbElemsInMesh()
 {
-  return FromIdType<int>(myMesh->NbTriangles());
+  return myMesh->NbTriangles();
 }
   
 void SMESHGUI_UnionOfTrianglesDlg::onDisplaySimulation( bool toDisplayPreview )
@@ -1327,9 +1327,9 @@ bool SMESHGUI_CuttingOfQuadsDlg::process (SMESH::SMESH_MeshEditor_ptr theEditor,
   return hasObj ? theEditor->QuadToTriObject(obj, aCrit) : theEditor->QuadToTri(theIds, aCrit);
 }
 
-int SMESHGUI_CuttingOfQuadsDlg::nbElemsInMesh()
+smIdType SMESHGUI_CuttingOfQuadsDlg::nbElemsInMesh()
 {
-  return FromIdType<int>(myMesh->NbQuadrangles());
+  return myMesh->NbQuadrangles();
 }
 
 
@@ -1439,13 +1439,13 @@ void SMESHGUI_CuttingOfQuadsDlg::displayPreview()
       const SMDS_MeshNode* aNode = static_cast<const SMDS_MeshNode*>(anIter->next());
       if (aNode)
       {
-        if (!anIdToVtk.IsBound(FromIdType<int>(aNode->GetID())))
+        if (!anIdToVtk.IsBound(FromSmIdType<int>(aNode->GetID())))
         {
           aPoints->SetPoint(++nbPoints, aNode->X(), aNode->Y(), aNode->Z());
-          anIdToVtk.Bind(FromIdType<int>(aNode->GetID()), nbPoints);
+          anIdToVtk.Bind(FromSmIdType<int>(aNode->GetID()), nbPoints);
         }
 
-        aNodes[ k++ ] = FromIdType<int>(aNode->GetID());
+        aNodes[ k++ ] = FromSmIdType<int>(aNode->GetID());
       }
     }
 
@@ -1696,9 +1696,9 @@ bool SMESHGUI_SplitVolumesDlg::process (SMESH::SMESH_MeshEditor_ptr theEditor,
   return true;
 }
 
-int SMESHGUI_SplitVolumesDlg::nbElemsInMesh()
+smIdType SMESHGUI_SplitVolumesDlg::nbElemsInMesh()
 {
-  return isIntoPrisms() ? FromIdType<int>(myMesh->NbHexas()) : FromIdType<int>(myMesh->NbVolumes() - myMesh->NbTetras());
+  return isIntoPrisms() ? myMesh->NbHexas() : myMesh->NbVolumes() - myMesh->NbTetras();
 }
 
 bool SMESHGUI_SplitVolumesDlg::isIntoPrisms()

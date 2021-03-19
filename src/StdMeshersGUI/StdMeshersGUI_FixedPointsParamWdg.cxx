@@ -305,14 +305,14 @@ void StdMeshersGUI_FixedPointsParamWdg::setNbSegments( int idx, SMESH::smIdType 
 {
   if ( idx >= 0 && idx < myTreeWidget->topLevelItemCount() )
   {
-    myTreeWidget->topLevelItem( idx )->setData( 1, Qt::UserRole, FromIdType<int>( val ));
+    myTreeWidget->topLevelItem( idx )->setData( 1, Qt::UserRole, qlonglong( val ));
     myTreeWidget->topLevelItem( idx )->setText( 1, idx > 0 && mySameValues->isChecked() ? QString( SAME_TEXT ) : QString::number( val ) );
   }
 }
 
 smIdType StdMeshersGUI_FixedPointsParamWdg::nbSegments( int idx ) const
 {
-  return ToIdType( idx >= 0 && idx < myTreeWidget->topLevelItemCount() ? myTreeWidget->topLevelItem( idx )->data( 1, Qt::UserRole ).toInt() : 1 );
+  return idx >= 0 && idx < myTreeWidget->topLevelItemCount() ? myTreeWidget->topLevelItem( idx )->data( 1, Qt::UserRole ).toLongLong() : 1;
 }
 
 //=================================================================================

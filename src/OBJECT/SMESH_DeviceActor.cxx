@@ -604,7 +604,7 @@ SMESH_DeviceActor
            ( aPredicate = dynamic_cast<CoincidentNodes*>(theFunctor.get())))
   {
     myExtractUnstructuredGrid->SetModeOfChanging(VTKViewer_ExtractUnstructuredGrid::eAdding);
-    vtkIdType aNbNodes = FromIdType<vtkIdType>(myVisualObj->GetNbEntities(SMDSAbs_Node));
+    vtkIdType aNbNodes = FromSmIdType<vtkIdType>(myVisualObj->GetNbEntities(SMDSAbs_Node));
     for( vtkIdType i = 0; i < aNbNodes; i++ ){
       vtkIdType anObjId = myVisualObj->GetNodeObjId(i);
       if(aPredicate->IsSatisfy(anObjId))

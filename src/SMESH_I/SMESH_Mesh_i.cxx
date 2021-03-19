@@ -2065,7 +2065,7 @@ void SMESH_Mesh_i::ReplaceShape(GEOM::GEOM_Object_ptr theNewGeom)
   }
 
   typedef struct {
-    int shapeID, fromID, toID; // indices of elements of a sub-mesh
+    int shapeID; smIdType fromID, toID; // indices of elements of a sub-mesh
   } TRange;
   std::vector< TRange > elemRanges, nodeRanges; // elements of sub-meshes
   std::vector< SMDS_PositionPtr > positions; // node positions
@@ -2101,7 +2101,7 @@ void SMESH_Mesh_i::ReplaceShape(GEOM::GEOM_Object_ptr theNewGeom)
         TRange &        lastRange = ranges.back();
         if ( lastRange.shapeID != shapeID ||
              lastRange.toID    != elemID )
-          ranges.push_back( TRange{ shapeID, FromIdType<int>(elemID), FromIdType<int>(elemID + 1) });
+          ranges.push_back( TRange{ shapeID, elemID, elemID + 1 });
         else
           lastRange.toID = elemID + 1;
 

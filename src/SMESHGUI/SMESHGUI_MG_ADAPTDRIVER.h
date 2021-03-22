@@ -26,7 +26,7 @@
 #include "SMESH_SMESHGUI.hxx"
 
 // model
-#include "MG_ADAPTGUI.h"
+#include "SMESHGUI_MgAdaptDlg.h"
 
 // IDL includes
 #include <SALOMEconfig.h>

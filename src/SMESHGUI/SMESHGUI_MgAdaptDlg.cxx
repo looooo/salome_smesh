@@ -21,7 +21,7 @@
 //
 //  file : MG_ADAPTGUI.cxx
 
-#include "MG_ADAPTGUI.h"
+#include "SMESHGUI_MgAdaptDlg.h"
 
 #include "MED_Factory.hxx"
 
@@ -55,8 +55,6 @@
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
 #include <QVBoxLayout>
-
-//#include <SALOMEDS_wrap.hxx>
 
 const int SPACING = 6;            // layout spacing
 const int MARGIN  = 9;            // layout margin

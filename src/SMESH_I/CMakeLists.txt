@@ -40,7 +40,6 @@ INCLUDE_DIRECTORIES(
   ${PROJECT_SOURCE_DIR}/src/SMESHUtils
   ${PROJECT_BINARY_DIR}
   ${PROJECT_BINARY_DIR}/idl
-  ${MEDCOUPLING_INCLUDE_DIRS}
 )
 
 # additional preprocessor / compiler flags
@@ -85,7 +84,6 @@ SET(_link_LIBRARIES
   SMESHDS
   SMESHControls
   MeshDriverMED
-  ${MEDCoupling_medloader}
 )
 
 # --- headers ---

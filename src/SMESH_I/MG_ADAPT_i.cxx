@@ -19,23 +19,14 @@
 
 #include "MG_ADAPT_i.hxx"
 
-#include "string.h"
+#include "MG_ADAPT.hxx"
+#include "SMESH_File.hxx"
 #include "SMESH_Gen_i.hxx"
-#include <SMESH_Gen.hxx>
-#include <SALOMEconfig.h>
-#include CORBA_CLIENT_HEADER(SALOMEDS)
-
-
-//=============================================================================
-/*!
- *  SMESH_Gen_i::CreateMG_ADAPT
- *
- *  Create measurement instance
- */
-//=============================================================================
-
+#include "SMESH_PythonDump.hxx"
+#include "SMESH_TryCatch.hxx"
 
 using namespace SMESH;
+
 void MG_ADAPT_i::copyHypothesisDataToImpl(const SMESH::MgAdaptHypothesisData& from, ::MG_ADAPT::MgAdaptHypothesisData* to) const
 {
   to->myFileInDir = from.myFileInDir;
@@ -94,6 +85,15 @@ void MG_ADAPT_i::copyHypothesisDataFromImpl(const ::MG_ADAPT::MgAdaptHypothesisD
   to->myRemoveLogOnSuccess = from->myRemoveLogOnSuccess;
   to->myVerboseLevel = from->myVerboseLevel;
 }
+
+//=============================================================================
+/*!
+ *  SMESH_Gen_i::CreateMG_ADAPT
+ *
+ *  Create measurement instance
+ */
+//=============================================================================
+
 SMESH::MG_ADAPT_ptr SMESH_Gen_i::CreateMG_ADAPT()
 {
   SMESH::MG_ADAPT_i* aMGadapt = new SMESH::MG_ADAPT_i();
@@ -115,16 +115,8 @@ SMESH::MG_ADAPT_OBJECT_ptr SMESH_Gen_i::Adaptation( const char* adaptationType)
     SMESH::MG_ADAPT_OBJECT_var anObj = mg_adapt_object->_this();
     return anObj._retn();
   }
-
+  return SMESH::MG_ADAPT_OBJECT_ptr();
 }
-//~SMESH::MG_ADAPT_ptr MG_ADAPT_i::CreateMG_ADAPT()
-//~{
-
-  //~SMESH_Gen_i* smeshGen_i = SMESH_Gen_i::GetSMESHGen();
-  //~SMESH::MG_ADAPT_i* aMGadapt = new SMESH::MG_ADAPT_i(smeshGen_i->GetPOA());
-  //~SMESH::MG_ADAPT_var anObj = aMGadapt->_this();
-  //~return anObj._retn();
-//~}
 //=============================================================================
 /*!
  *  standard constructor
@@ -134,24 +126,6 @@ MG_ADAPT_i::MG_ADAPT_i(): SALOME::GenericObj_i( SMESH_Gen_i::GetPOA() )
 {
   myMgAdapt = new ::MG_ADAPT::MgAdapt();
 }
-//~MG_ADAPT_i::MG_ADAPT_i(PortableServer::POA_var myPoa): SALOME::GenericObj_i( myPoa )
-//~{
-  //~myMgAdapt = new ::MG_ADAPT::MgAdapt();
-//~}
-
-//=============================================================================
-/*!
- *  standard constructor
- */
-//=============================================================================
-//~MG_ADAPT_i::MG_ADAPT_i( CORBA::ORB_ptr orb,
-                            //~ADAPT::ADAPT_Gen_var engine )
-//~{
-
-  //~_gen_i = engine;
-  //~_orb = orb;
-  //~myMgAdapt = new MgAdapt();
-//~}
 
 //=============================================================================
 /*!
@@ -160,6 +134,7 @@ MG_ADAPT_i::MG_ADAPT_i(): SALOME::GenericObj_i( SMESH_Gen_i::GetPOA() )
 //=============================================================================
 MG_ADAPT_i::~MG_ADAPT_i()
 {
+  delete myMgAdapt;
 }
 void MG_ADAPT_i::setData( SMESH::MgAdaptHypothesisData& data)
 {
@@ -272,7 +247,7 @@ void MG_ADAPT_i::setRemoveOnSuccess(bool mybool)
 }
 bool MG_ADAPT_i::getRemoveOnSuccess()
 {
-  myMgAdapt->getRemoveOnSuccess();
+  return myMgAdapt->getRemoveOnSuccess();
 }
 SMESH::MgAdaptHypothesisData* MG_ADAPT_i::getData()
 {
@@ -372,19 +347,38 @@ char* MG_ADAPT_i::getCommandToRun()
   return CORBA::string_dup(myMgAdapt->getCommandToRun().c_str());
 }
 
+// macro used to initialize excStr by exception description
+// returned by SMESH_CATCH( SMESH::returnError )
+#undef SMESH_CAUGHT
+#define SMESH_CAUGHT excStr =
+
 void MG_ADAPT_i::compute()
 {
+  SMESH::TPythonDump noDumpSoFar;
+
   errStr = "";
-  try
+  std::string excStr;
+  SMESH_TRY;
+
+  myMgAdapt->compute(errStr);
+
+  SMESH_CATCH( SMESH::returnError );
+
+  SMESH_Comment errMsg;
+  if ( !excStr.empty() )
   {
-    myMgAdapt->compute(errStr);
+    errMsg << "Exception thrown on MG_ADAPT_i::compute invocation with error message \""
+           << errStr << "\" with exception \"" << excStr << "\"";
   }
-  catch (const std::exception& e)
+  else if ( !errStr.empty() )
   {
-    std::ostringstream oss; oss << "Exception thrown on MG_ADAPT_i::compute invocation with error message \"" << errStr
-		 << "\" with exception message \"" << e.what() << "\"";
-		THROW_SALOME_CORBA_EXCEPTION(oss.str().c_str(),SALOME::INTERNAL_ERROR);
+    errMsg << "MG_ADAPT_i::compute invocation returned error message \"" << errStr << "\"";
   }
+  if ( !errMsg.empty() )
+  {
+    THROW_SALOME_CORBA_EXCEPTION( errMsg.c_str(), SALOME::INTERNAL_ERROR);
+  }
+
   if(myMgAdapt->getPublish())
   {
     SMESH_Gen_i* smeshGen_i = SMESH_Gen_i::GetSMESHGen();
@@ -392,6 +386,9 @@ void MG_ADAPT_i::compute()
     smeshGen_i->CreateMeshesFromMED(myMgAdapt->getMedFileOut().c_str(), theStatus);
   }
 }
+#undef SMESH_CAUGHT
+#define SMESH_CAUGHT
+
 char* MG_ADAPT_i::getErrMsg()
 {
   return CORBA::string_dup(errStr.c_str());
@@ -422,31 +419,36 @@ bool MG_ADAPT_i::hasOptionDefined( const char* optionName )
   return myMgAdapt->hasOptionDefined(optionName);
 }
 void MG_ADAPT_i::setOptionValue(const char* optionName,
-          const char* optionValue) throw (std::invalid_argument)
+                                const char* optionValue)
 {
+  SMESH_TRY;
   myMgAdapt->setOptionValue(optionName, optionValue);
+  SMESH_CATCH( SMESH::throwCorbaException );
 }
 
 char* MG_ADAPT_i::getOptionValue(const char* optionName,
-               bool&              isDefault)  throw (std::invalid_argument)
+                                 bool&       isDefault)
 {
+  SMESH_TRY;
   return CORBA::string_dup(myMgAdapt->getOptionValue(optionName, &isDefault).c_str());
+  SMESH_CATCH( SMESH::throwCorbaException );
+  return 0;
 }
-str_array* MG_ADAPT_i::getCustomOptionValuesStrVec()
+SMESH::string_array* MG_ADAPT_i::getCustomOptionValuesStrVec()
 {
-  SMESH::str_array_var result = new SMESH::str_array();
+  SMESH::string_array_var result = new SMESH::string_array();
   std::vector <std::string> vals = myMgAdapt->getCustomOptionValuesStrVec();
-  result->length(vals.size());
-  for (int i = 0; i<vals.size(); i++) result[i] = CORBA::string_dup(vals[i].c_str());
+  result->length((CORBA::ULong) vals.size()) ;
+  for (CORBA::ULong i = 0; i<vals.size(); i++) result[i] = CORBA::string_dup(vals[i].c_str());
   return result._retn();
 }
-str_array*  MG_ADAPT_i::getOptionValuesStrVec()
+SMESH::string_array*  MG_ADAPT_i::getOptionValuesStrVec()
 {
 
-  SMESH::str_array_var result = new SMESH::str_array();
+  SMESH::string_array_var result = new SMESH::string_array();
   std::vector <std::string> vals = myMgAdapt->getOptionValuesStrVec();
-  result->length(vals.size());
-  for (int i = 0; i<vals.size(); i++) result[i] = CORBA::string_dup(vals[i].c_str());
+  result->length((CORBA::ULong) vals.size());
+  for (CORBA::ULong i = 0; i<vals.size(); i++) result[i] = CORBA::string_dup(vals[i].c_str());
   return result._retn();
 }
 
@@ -493,9 +495,12 @@ void MG_ADAPT_OBJECT_i::AddHypothesis(SMESH::MG_ADAPT_ptr mg)
   mg->setMedFileOut(medFileOut.c_str());
   mg->setSizeMapFile(medFileBackground.c_str());
   hypothesis = SMESH::MG_ADAPT::_duplicate(mg);
+  hypothesis->Register();
 }
 CORBA::Long MG_ADAPT_OBJECT_i::Compute(bool publish)
 {
+  SMESH::TPythonDump noDumpSoFar;
+
   if(!checkMeshFileIn()){
     std::cerr<< "\n Error : Please check the MED file input or mesh input. \n";
     return -1;
@@ -507,22 +512,22 @@ CORBA::Long MG_ADAPT_OBJECT_i::Compute(bool publish)
 
 bool MG_ADAPT_OBJECT_i::checkMeshFileIn()
 {
+  SMESH::TPythonDump noDumpSoFar;
+
   bool ret = false; // 1 ok , 0 nook
-  if(!::MG_ADAPT::MgAdapt::isFileExist(medFileIn))
+  if ( !( ret = SMESH_File( medFileIn ).exists()))
   {
     if(!myMesh->_is_nil())
     {
       bool toOverwrite  = true;
       bool toFindOutDim = true;
-      medFileIn = hypothesis->getFileName();
+      medFileIn = (CORBA::String_var( hypothesis->getFileName() )).in();
       medFileIn+= ".med";
       myMesh->ExportMED(medFileIn.c_str(), false, -1, toOverwrite, toFindOutDim);
       hypothesis->setMedFileIn(medFileIn.c_str());
       ret = true;
     }
   }
-  else
-    ret = true;
 
   return ret;
 }

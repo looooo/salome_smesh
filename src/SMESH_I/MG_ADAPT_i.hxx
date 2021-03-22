@@ -1,25 +1,21 @@
 #ifndef MG_ADAPT_I_HXX
 #define MG_ADAPT_I_HXX
 
-#include "MG_ADAPT.hxx"
 #include "SMESH.hxx"
-#include <SALOMEconfig.h>
-//~#include CORBA_SERVER_HEADER(ADAPT_Gen)
-#include CORBA_SERVER_HEADER(MG_ADAPT)
 
+#include <SALOMEconfig.h>
+#include CORBA_SERVER_HEADER(MG_ADAPT)
 #include "SALOME_GenericObj_i.hh"
-#include "SALOME_Component_i.hxx"
-#include "SALOME_NamingService.hxx"
-#include "Utils_CorbaException.hxx"
-#include <vector>
-#include <algorithm>
-#include <iterator>
+#include <SALOME_GenericObj_wrap.hxx>
+
 #include <string>
 
-//~struct MgAdaptHypothesisData;
-//~static void copyHypothesisDataToImpl(SMESH::MgAdaptHypothesisData& from, MG_ADAPT::MgAdaptHypothesisData* to);
-//~static void copyHypothesisDataFromImpl(MG_ADAPT::MgAdaptHypothesisData* from, SMESH::MgAdaptHypothesisData& to);
-//~class MgAdapt;
+namespace MG_ADAPT
+{
+  class MgAdaptHypothesisData;
+  class MgAdapt;
+}
+
 namespace SMESH
 {
 
@@ -28,12 +24,8 @@ class SMESH_I_EXPORT MG_ADAPT_i :
     public virtual POA_SMESH::MG_ADAPT
 {
 public:
-  //~MG_ADAPT_i( CORBA::ORB_ptr orb, ADAPT::ADAPT_Gen_var gen_i );
-  //~static SMESH::MG_ADAPT_ptr CreateMG_ADAPT();
-  //~MG_ADAPT_i(PortableServer::POA_var poa);
   MG_ADAPT_i();
   virtual ~MG_ADAPT_i();
-  //~void setData( SMESH::MgAdaptHypothesisData* data);
   void setData( SMESH::MgAdaptHypothesisData& data);
 
   void setMedFileIn(const char* str);
@@ -121,21 +113,19 @@ public:
 
   bool hasOptionDefined( const char* optionName ) ;
   void setOptionValue(const char* optionName,
-                                          const char* optionValue) throw (std::invalid_argument);
+                      const char* optionValue);
   char* getOptionValue(const char* optionName,
-                      bool&              isDefault)  throw (std::invalid_argument);
-  str_array* getCustomOptionValuesStrVec() ;
-  str_array* getOptionValuesStrVec() ;
+                       bool&       isDefault);
+  SMESH::string_array* getCustomOptionValuesStrVec() ;
+  SMESH::string_array* getOptionValuesStrVec() ;
   void copyHypothesisDataFromImpl(const ::MG_ADAPT::MgAdaptHypothesisData* from, SMESH::MgAdaptHypothesisData* to) const;
   void copyHypothesisDataToImpl(const SMESH::MgAdaptHypothesisData& from, ::MG_ADAPT::MgAdaptHypothesisData* to) const;
   //~TOptionValues        getOptionValues()       const;
   //~const TOptionValues& getCustomOptionValues() const ;
   char* getErrMsg();
 private:
-  ::MG_ADAPT::MgAdapt*          myMgAdapt;
-  std::string errStr;
-  //~CORBA::ORB_ptr         _orb;
-  //~ADAPT::ADAPT_Gen_var _gen_i;
+  ::MG_ADAPT::MgAdapt* myMgAdapt;
+  std::string          errStr;
 
 };
 
@@ -154,8 +144,8 @@ private:
 std::string medFileIn, medFileOut, medFileBackground;
 bool checkMeshFileIn();
 bool publish;
-SMESH::SMESH_Mesh_ptr myMesh;
-SMESH::MG_ADAPT_ptr hypothesis;
+SMESH::SMESH_Mesh_var myMesh;
+SALOME::GenericObj_wrap<SMESH::MG_ADAPT> hypothesis;
 };
 
 }

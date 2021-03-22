@@ -22,25 +22,21 @@
 
 #include "MG_ADAPT.hxx"
 
-#include "MeshFormatReader.hxx"
-#include "MeshFormatWriter.hxx"
-#include "MEDFileMesh.hxx"
-#include "MCAuto.hxx"
-#include "MEDFileData.hxx"
-#include "MEDFileField.hxx"
-#include "MEDCouplingFieldDouble.hxx"
+#include "SMESH_File.hxx"
+#include "SMESH_Comment.hxx"
 
-#include <SALOME_NamingService.hxx>
+#include <MEDFileData.hxx>
+#include <MEDFileField.hxx>
+#include <MEDFileMesh.hxx>
+#include <MeshFormatReader.hxx>
+#include <MeshFormatWriter.hxx>
+
 #include <Utils_SALOME_Exception.hxx>
-#include "Utils_CorbaException.hxx"
 
-#include <utilities.h>
-#include <iostream>
-#include <unistd.h>
-#include <TCollection_AsciiString.hxx>
-#include <cstring>
-#include <cstdlib>
-#include <boost/filesystem.hpp>
+#include <unistd.h> // getpid()
+#include <memory>   // unique_ptr
+
+typedef SMESH_Comment ToComment;
 
 using namespace MG_ADAPT;
 static std::string removeFile(std::string fileName, int& notOk)
@@ -52,19 +48,115 @@ static std::string removeFile(std::string fileName, int& notOk)
 
   return errStr;
 }
-std::string remove_extension(const std::string& filename) {
+std::string MG_ADAPT::remove_extension(const std::string& filename) {
   size_t lastdot = filename.find_last_of(".");
   if (lastdot == std::string::npos) return filename;
   return filename.substr(0, lastdot);
 }
 namespace
 {
+
+  bool isFileExist( const std::string& fName )
+  {
+    return SMESH_File( fName ).exists();
+  }
+
+// =======================================================================
+med_idt openMedFile(const std::string aFile)
+// =======================================================================
+// renvoie le medId associe au fichier Med apres ouverture
+{
+  med_idt medIdt = MEDfileOpen(aFile.c_str(),MED_ACC_RDONLY);
+  if (medIdt <0)
+  {
+    THROW_SALOME_EXCEPTION("\nThe med file " << aFile << " cannot be opened.\n");
+  }
+  return medIdt;
+}
+
+
+// =======================================================================
+void getTimeStepInfos(std::string aFile, med_int& numdt, med_int& numit, std::string fieldName)
+// =======================================================================
+{
+// Il faut voir si plusieurs maillages
+
+  herr_t erreur = 0 ;
+  med_idt medIdt ;
+
+
+  // Ouverture du fichier
+  //~SCRUTE(aFile.toStdString());
+  medIdt = openMedFile(aFile);
+  if ( medIdt < 0 ) return ;
+  // Lecture du nombre de champs
+  med_int ncha = MEDnField(medIdt) ;
+  if (ncha < 1 )
+  {
+    //~addMessage( ToComment(" error: there is no field in  ") << aFile, /*fatal=*/true );
+    return;
+  }
+  // Lecture des caracteristiques du champs
+
+  //       Lecture du type du champ, des noms des composantes et du nom de l'unite
+  char nomcha  [MED_NAME_SIZE+1];
+  strcpy(nomcha, fieldName.c_str());
+//       Lecture du nombre de composantes
+  med_int ncomp = MEDfieldnComponentByName(medIdt, nomcha);
+  char meshname[MED_NAME_SIZE+1];
+  char * comp = (char*) malloc(ncomp*MED_SNAME_SIZE+1);
+  char * unit = (char*) malloc(ncomp*MED_SNAME_SIZE+1);
+  char dtunit[MED_SNAME_SIZE+1];
+  med_bool local;
+  med_field_type typcha;
+  med_int nbofcstp;
+  erreur =  MEDfieldInfoByName (medIdt, nomcha, meshname,&local,&typcha,comp,unit,dtunit, &nbofcstp);
+  free(comp);
+  free(unit);
+  if ( erreur < 0 )
+  {
+      //~addMessage( ToComment(" error: error while reading field  ") << nomcha << " in file " << aFile , /*fatal=*/true );
+    return;
+  }
+
+  med_float dt;
+  med_int tmp_numdt, tmp_numit;
+
+  //~med_int step = data->myUseLastTimeStep ? nbofcstp : data->myTimeStep+1;
+  //~myPrint("step ", step);
+  erreur = MEDfieldComputingStepInfo ( medIdt, nomcha, 1, &numdt, &numit, &dt );
+  for( int step = 1; step <= nbofcstp; step++ )
+  {
+    erreur = MEDfieldComputingStepInfo ( medIdt, nomcha, step, &tmp_numdt, &tmp_numit, &dt );
+    if(tmp_numdt > numdt)
+    {
+      numdt = tmp_numdt;
+      numit = tmp_numit;
+    }
+  }
+  if ( erreur < 0 )
+  {
+    //~addMessage( ToComment(" error: error while reading field ") << nomcha << "step (numdt, numit) = " <<"("<< numdt<< ", " 
+    //numit<< ")" <<" in file " << aFile , /*fatal=*/true );
+    return;
+  }
+
+  // Fermeture du fichier
+  if ( medIdt > 0 ) MEDfileClose(medIdt);
+
+}
+  
 struct GET_DEFAULT // struct used to get default value from GetOptionValue()
 {
   bool isDefault;
   operator bool* () {
       return &isDefault;
   }
+};
+
+class outFileStream : public std::ofstream{
+public:
+    ~outFileStream(){close();} //to close file at dtor
 };
 }
 
@@ -232,11 +324,7 @@ void MgAdapt::setMedFileIn(std::string fileName)
   }
   else
   {
-    SALOME::ExceptionStruct es;
-    es.type = SALOME::BAD_PARAM;
-    std::string text = "\nThe file " + fileName + " does not exist.\n" ;
-    es.text = CORBA::string_dup(text.c_str());
-    throw SALOME::SALOME_Exception(es);
+    THROW_SALOME_EXCEPTION("\nThe file "<< fileName <<" does not exist.\n");
   }
 }
 
@@ -384,11 +472,7 @@ void MgAdapt::setSizeMapFile(std::string mapFile)
   }
   else
   {
-    SALOME::ExceptionStruct es;
-    es.type = SALOME::BAD_PARAM;
-    std::string text = "\nThe file " + mapFile + " does not exist.\n" ;
-    es.text = CORBA::string_dup(text.c_str());
-    throw SALOME::SALOME_Exception(es);
+    THROW_SALOME_EXCEPTION("\nThe file "<< mapFile <<" does not exist.\n");
   }
 }
 std::string MgAdapt::getSizeMapFile()
@@ -525,7 +609,6 @@ void MgAdapt::checkDirPath(std::string& dirPath)
 //=============================================================================
 void MgAdapt::setOptionValue(const std::string& optionName,
                              const std::string& optionValue)
-throw (std::invalid_argument)
 {
 //   INFOS("setOptionValue");
 //   std::cout << "optionName: " << optionName << ", optionValue: " << optionValue << std::endl;
@@ -544,7 +627,7 @@ throw (std::invalid_argument)
     // strip white spaces
     while (ptr[0] == ' ')
       ptr++;
-    int i = strlen(ptr);
+    size_t i = strlen(ptr);
     while (i != 0 && ptr[i - 1] == ' ')
       i--;
     // check value type
@@ -597,7 +680,6 @@ throw (std::invalid_argument)
 //  then *isDefault == true. If isDefault is not provided, the value will be
 //  empty if it equals a default one.
 std::string MgAdapt::getOptionValue(const std::string& optionName, bool* isDefault) const
-throw (std::invalid_argument)
 {
 //   INFOS("getOptionValue");
 //   std::cout << "optionName: " << optionName << ", isDefault: " << isDefault << std::endl;
@@ -630,7 +712,6 @@ throw (std::invalid_argument)
 //================================================================================
 
 double MgAdapt::toDbl(const std::string& str, bool* isOk )
-throw (std::invalid_argument)
 {
   if ( str.empty() ) throw std::invalid_argument("Empty value provided");
 
@@ -656,7 +737,7 @@ std::string MgAdapt::toLowerStr(const std::string& str)
 {
   std::string s = str;
   for ( size_t i = 0; i <= s.size(); ++i )
-    s[i] = tolower( s[i] );
+    s[i] = (char) tolower( s[i] );
   return s;
 }
 //================================================================================
@@ -666,13 +747,12 @@ std::string MgAdapt::toLowerStr(const std::string& str)
 //================================================================================
 
 bool MgAdapt::toBool(const std::string& str, bool* isOk )
-throw (std::invalid_argument)
 {
   std::string s = str;
   if ( isOk ) *isOk = true;
 
   for ( size_t i = 0; i <= s.size(); ++i )
-    s[i] = tolower( s[i] );
+    s[i] = (char) tolower( s[i] );
 
   if ( s == "1" || s == "true" || s == "active" || s == "yes" )
     return true;
@@ -696,7 +776,6 @@ throw (std::invalid_argument)
 //================================================================================
 
 int MgAdapt::toInt(const std::string& str, bool* isOk )
-throw (std::invalid_argument)
 {
   if ( str.empty() ) throw std::invalid_argument("Empty value provided");
 
@@ -729,7 +808,7 @@ bool MgAdapt::hasOptionDefined( const std::string& optionName ) const
 }
 //================================================================================
 /*!
- * \brief Return command to run MG-Tetra mesher excluding file prefix (-f)
+ * \brief Return command to run MG-Adapt mesher excluding file prefix (-f)
  */
 //================================================================================
 
@@ -737,8 +816,6 @@ std::string MgAdapt::getCommandToRun(MgAdapt* hyp)
 {
   return hyp ? hyp->getCommandToRun() : ToComment("error with hypothesis!");
 }
-
-
 
 int MgAdapt::compute(std::string& errStr)
 {
@@ -751,6 +828,11 @@ int MgAdapt::compute(std::string& errStr)
   if ( err )
   {
     errStr = ToComment("system(mg-adapt.exe ...) command failed with error: ") << strerror( errno );
+  }
+  else if ( !isFileExist( meshFormatOutputMesh ))
+  {
+    errStr = ToComment(" failed to find file ") << meshFormatOutputMesh
+                                                << " output from MG-Adapt run";
   }
   else
   {
@@ -765,11 +847,11 @@ void MgAdapt::execCmd( const char* cmd, int& err)
   err = 1;
   std::array <char, 128> buffer;
   std::streambuf* buf;
-outFileStream fileStream;
+  outFileStream fileStream;
   if (printLogInFile)
   {
-  fileStream.open(logFile);
-  buf = fileStream.rdbuf();
+    fileStream.open(logFile);
+    buf = fileStream.rdbuf();
   }
   else
   {
@@ -928,16 +1010,6 @@ std::string MgAdapt::getCommandToRun()
   return cmd;
 }
 
-bool MgAdapt::isFileExist(const std::string& fName)
-{
-
-  if ( fName.empty() ) return false;
-
-  boost::system::error_code err;
-  bool res = boost::filesystem::exists( fName, err );
-
-  return err ? false : res;
-}
 //=======================================================================
 //function : defaultMaximumMemory
 //=======================================================================
@@ -966,7 +1038,7 @@ double MgAdapt::defaultMaximumMemory()
   if ( err == 0 )
   {
     long ramMB = si.totalram * si.mem_unit / 1024 / 1024;
-    return ( 0.7 * ramMB );
+    return ( 0.7 * double( ramMB ));
   }
 #endif
   return 1024;
@@ -978,7 +1050,7 @@ double MgAdapt::defaultMaximumMemory()
 
 std::string MgAdapt::defaultWorkingDirectory()
 {
-  TCollection_AsciiString aTmpDir;
+  std::string aTmpDir;
 
   char *Tmp_dir = getenv("SALOME_TMP_DIR");
   if(Tmp_dir != NULL)
@@ -987,12 +1059,12 @@ std::string MgAdapt::defaultWorkingDirectory()
   }
   else {
 #ifdef WIN32
-    aTmpDir = TCollection_AsciiString("C:\\");
+    aTmpDir = "C:\\";
 #else
-    aTmpDir = TCollection_AsciiString("/tmp/");
+    aTmpDir = "/tmp/";
 #endif
   }
-  return aTmpDir.ToCString();
+  return aTmpDir;
 }
 //================================================================================
 /*!
@@ -1010,13 +1082,13 @@ std::string MgAdapt::getFileName() const
   if(lastChar != '/') aTmpDir+='/';
 #endif
 
-  TCollection_AsciiString aGenericName = (char*)aTmpDir.c_str();
-  aGenericName += "MgAdapt_";
-  aGenericName += getpid();
-  aGenericName += "_";
-  aGenericName += Abs((Standard_Integer)(long) aGenericName.ToCString());
+  SMESH_Comment aGenericName( aTmpDir );
+  aGenericName << "MgAdapt_";
+  aGenericName << getpid();
+  aGenericName << "_";
+  aGenericName << std::abs((int)(long) aGenericName.data());
 
-  return aGenericName.ToCString();
+  return aGenericName;
 }
 //=======================================================================
 //function : defaultLogFile
@@ -1203,11 +1275,8 @@ void MgAdapt::checkDimensionOptionAdaptation()
       {
         if ( optionValue != "surface" )
         {
-          SALOME::ExceptionStruct es;
-          es.type = SALOME::BAD_PARAM;
-          std::string text = "Mesh dimension is 2; the option should be 'surface' instead of '" + optionValue + "'." ;
-          es.text = CORBA::string_dup(text.c_str());
-          throw SALOME::SALOME_Exception(es);
+          THROW_SALOME_EXCEPTION("Mesh dimension is 2; the option should be 'surface'"
+                                 " instead of '" << optionValue << "'.");
         }
       }
     }
@@ -1232,11 +1301,7 @@ void MgAdapt::checkFieldName(std::string fileIn)
     std::cout << "Available field names:" << std::endl;
     for(std::size_t j=0;j<jaux;j++)
     { std::cout << listFieldsNames[j] << std::endl;}
-    SALOME::ExceptionStruct es;
-    es.type = SALOME::BAD_PARAM;
-    std::string text = "Field " + fieldName + " is not found." ;
-    es.text = CORBA::string_dup(text.c_str());
-    throw SALOME::SALOME_Exception(es);
+    THROW_SALOME_EXCEPTION( "Field " << fieldName << " is not found.");
   }
 }
 
@@ -1261,11 +1326,7 @@ void MgAdapt::checkTimeStepRank(std::string fileIn)
     std::cout << "Available (Time step, Rank):" << std::endl;
     for(std::size_t j=0;j<jaux;j++)
     { std::cout << "(Time step = " << timesteprank[j].first << ", Rank = " << timesteprank[j].second << ")" << std::endl;}
-    SALOME::ExceptionStruct es;
-    es.type = SALOME::BAD_PARAM;
-    std::string text = "(Time step = " + std::to_string(timeStep) + ", Rank = " + std::to_string(rank) + ") is not found." ;
-    es.text = CORBA::string_dup(text.c_str());
-    throw SALOME::SALOME_Exception(es);
+    THROW_SALOME_EXCEPTION("(Time step = " << timeStep << ", Rank = " << rank << ") is not found.");
   }
 }
 
@@ -1356,15 +1417,14 @@ void MgAdapt::storeGroups(MEDCoupling::MEDFileMesh* fileMesh)
 
   for ( ; g2ff != grpFams.end(); ++g2ff )
   {
-    std::string        groupName = g2ff->first;
+    std::string             groupName = g2ff->first;
     std::vector<std::string> famNames = g2ff->second;
 
     if ( famNames.empty() ) continue;
-    std::size_t k = 0;
-    std::vector< mcIdType> famListId;
+    std::vector< int> famListId;
     for ( size_t i = 0; i < famNames.size(); ++i )
     {
-      famListId.push_back( fileMesh->getFamilyId( famNames[i].c_str() ) );
+      famListId.push_back( FromIdType<int>( fileMesh->getFamilyId( famNames[i].c_str() )));
     }
     group grp(groupName, famListId, famNames);
     groupVec.push_back(grp);
@@ -1379,7 +1439,7 @@ void MgAdapt::storefams(MEDCoupling::MEDFileMesh* fileMesh)
   for ( ; f != grpFams.end(); ++f )
   {
     if(!f->second) continue;  // FAMILLE_ZERO
-    family fs(f->first, f->second);
+    family fs(f->first, FromIdType<int>( f->second ));
     famVec.push_back(fs);
   }
 
@@ -1417,14 +1477,14 @@ void MgAdapt::restoreGroups(MEDCoupling::MEDFileMesh* fileMesh) const
   fileMesh->setGroupInfo(info);
 }
 
-void MgAdapt::buildConstantSizeMapSolFile(const std::string& solFormatFieldFileName, const int dim, const int version, const mcIdType nbNodes) const
+void MgAdapt::buildConstantSizeMapSolFile(const std::string& solFormatFieldFileName, const int dim, const int version, const size_t nbNodes) const
 {
   MeshFormat::Localizer loc;
   MeshFormat::MeshFormatParser writer;
   int fileId = writer.GmfOpenMesh( solFormatFieldFileName.c_str(), GmfWrite, version, dim);
   int typTab[] = {GmfSca};
   writer.GmfSetKwd(fileId, MeshFormat::GmfSolAtVertices, (int)nbNodes, 1, typTab);
-  for (mcIdType i = 0; i<nbNodes; i++)
+  for (size_t i = 0; i<nbNodes; i++)
   {
     double valTab[1] = {constantValue};
     writer.GmfSetLin( fileId, MeshFormat::GmfSolAtVertices, valTab);
@@ -1452,22 +1512,6 @@ void MgAdapt::buildBackGroundMeshAndSolFiles(const std::vector<std::string>& fie
   tmpWriter.setMEDFileDS(tmpMfd);
   tmpWriter.write();
 }
-// =======================================================================
-med_idt MgAdapt::openMedFile(const std::string aFile)
-// =======================================================================
-// renvoie le medId associe au fichier Med apres ouverture
-{
-  med_idt medIdt = MEDfileOpen(aFile.c_str(),MED_ACC_RDONLY);
-  if (medIdt <0)
-  {
-    SALOME::ExceptionStruct es;
-    es.type = SALOME::BAD_PARAM;
-    std::string text = "\nThe med file " + aFile + " cannot be opened.\n" ;
-    es.text = CORBA::string_dup(text.c_str());
-    throw SALOME::SALOME_Exception(es);
-  }
-  return medIdt;
-}
 
 MgAdapt::Status MgAdapt::addMessage(const std::string& msg,
                                   const bool         isFatal/*=false*/)
@@ -1484,77 +1528,6 @@ MgAdapt::Status MgAdapt::addMessage(const std::string& msg,
   return ( _myStatus = isFatal ? MgAdapt::DRS_FAIL : MgAdapt::DRS_WARN_SKIP_ELEM );
 }
 
-// =======================================================================
-void MgAdapt::getTimeStepInfos(std::string aFile, med_int& numdt, med_int& numit)
-// =======================================================================
-{
-// Il faut voir si plusieurs maillages
-
-  herr_t erreur = 0 ;
-  med_idt medIdt ;
-
-
-  // Ouverture du fichier
-  //~SCRUTE(aFile.toStdString());
-  medIdt = openMedFile(aFile);
-  if ( medIdt < 0 ) return ;
-  // Lecture du nombre de champs
-  med_int ncha = MEDnField(medIdt) ;
-  if (ncha < 1 )
-  {
-    //~addMessage( ToComment(" error: there is no field in  ") << aFile, /*fatal=*/true );
-    return;
-  }
-  // Lecture des caracteristiques du champs
-
-  //       Lecture du type du champ, des noms des composantes et du nom de l'unite
-  char nomcha  [MED_NAME_SIZE+1];
-  strcpy(nomcha, fieldName.c_str());
-//       Lecture du nombre de composantes
-  med_int ncomp = MEDfieldnComponentByName(medIdt, nomcha);
-  char meshname[MED_NAME_SIZE+1];
-  char * comp = (char*) malloc(ncomp*MED_SNAME_SIZE+1);
-  char * unit = (char*) malloc(ncomp*MED_SNAME_SIZE+1);
-  char dtunit[MED_SNAME_SIZE+1];
-  med_bool local;
-  med_field_type typcha;
-  med_int nbofcstp;
-  erreur =  MEDfieldInfoByName (medIdt, nomcha, meshname,&local,&typcha,comp,unit,dtunit, &nbofcstp);
-  free(comp);
-  free(unit);
-  if ( erreur < 0 )
-  {
-      //~addMessage( ToComment(" error: error while reading field  ") << nomcha << " in file " << aFile , /*fatal=*/true );
-    return;
-  }
-
-  med_float dt;
-  med_int tmp_numdt, tmp_numit;
-
-  //~med_int step = data->myUseLastTimeStep ? nbofcstp : data->myTimeStep+1;
-  //~myPrint("step ", step);
-  erreur = MEDfieldComputingStepInfo ( medIdt, nomcha, 1, &numdt, &numit, &dt );
-  for(med_int step = 1; step <= nbofcstp; step++ )
-  {
-    erreur = MEDfieldComputingStepInfo ( medIdt, nomcha, step, &tmp_numdt, &tmp_numit, &dt );
-    if(tmp_numdt > numdt)
-    {
-      numdt = tmp_numdt;
-      numit = tmp_numit;
-    }
-  }
-  if ( erreur < 0 )
-  {
-    //~addMessage( ToComment(" error: error while reading field ") << nomcha << "step (numdt, numit) = " <<"("<< numdt<< ", " \
-    numit<< ")" <<" in file " << aFile , /*fatal=*/true );
-    return;
-  }
-
-  // Fermeture du fichier
-  if ( medIdt > 0 ) MEDfileClose(medIdt);
-
-}
-
 void MgAdapt::updateTimeStepRank()
 {
 
@@ -1569,7 +1542,7 @@ void MgAdapt::updateTimeStepRank()
   else if (myUseLastTimeStep)
   {
     std::string fieldFile = useBackgroundMap ? sizeMapFile : medFileIn;
-    getTimeStepInfos(fieldFile, tmst, arank);
+    getTimeStepInfos(fieldFile, tmst, arank, fieldName);
     setRankTimeStep((int)tmst, (int)arank);
   }
 }

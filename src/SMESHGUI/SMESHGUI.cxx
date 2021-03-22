@@ -30,7 +30,6 @@
 
 //  SMESH includes
 #include "SMESHGUI.h"
-#include "SMESHGUI_AdaptDlg.h"
 #include "SMESHGUI_Add0DElemsOnAllNodesDlg.h"
 #include "SMESHGUI_AddMeshElementDlg.h"
 #include "SMESHGUI_AddQuadraticElementDlg.h"
@@ -61,6 +60,7 @@
 #include "SMESHGUI_GroupUtils.h"
 #include "SMESHGUI_Hypotheses.h"
 #include "SMESHGUI_HypothesesUtils.h"
+#include "SMESHGUI_MG_ADAPTDRIVER.h"
 #include "SMESHGUI_Make2DFrom3DOp.h"
 #include "SMESHGUI_MakeNodeAtPointDlg.h"
 #include "SMESHGUI_Measurements.h"
@@ -168,21 +168,21 @@
 #include <vtkRenderer.h>
 
 // SALOME KERNEL includes
+#include <Basics_Utils.hxx>
 #include <SALOMEDSClient_ClientFactory.hxx>
 #include <SALOMEDSClient_IParameters.hxx>
 #include <SALOMEDSClient_SComponent.hxx>
 #include <SALOMEDSClient_StudyBuilder.hxx>
-#include <SALOMEDS_Study.hxx>
 #include <SALOMEDS_SObject.hxx>
-#include "utilities.h"
+#include <SALOMEDS_Study.hxx>
+#include <SALOME_GenericObj_wrap.hxx>
 #include <SALOME_LifeCycleCORBA.hxx>
+#include <utilities.h>
 
 // OCCT includes
 #include <Standard_ErrorHandler.hxx>
 #include <NCollection_DataMap.hxx>
 #include <NCollection_DoubleMap.hxx>
-
-#include <Basics_Utils.hxx>
 
 // Below macro, when uncommented, switches on simplified (more performant) algorithm
 // of auto-color picking up
@@ -3046,8 +3046,14 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
   // Adaptation - begin
   case SMESHOp::OpMGAdapt:
     {
-      SMESH::SMESH_Mesh_var aMesh = SMESH::SMESH_Mesh::_nil();
-      SMESHGUI_AdaptDlg *objet = new SMESHGUI_AdaptDlg( this, theCommandID, aMesh);
+      if ( isStudyLocked() )
+        break;
+      EmitSignalDeactivateDialog();
+
+      SALOME::GenericObj_wrap< SMESH::MG_ADAPT > model = GetSMESHGen()->CreateMG_ADAPT();
+      bool isCreation = false;
+      ( new SMESHGUI_MG_ADAPTDRIVER( this, model, isCreation ))->show();
+      break;
     }
   // Adaptation - end
   case SMESHOp::OpSplitBiQuadratic:

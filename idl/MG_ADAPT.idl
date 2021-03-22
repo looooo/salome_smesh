@@ -29,7 +29,6 @@
 
 module SMESH{
 
-  typedef sequence<string> str_array ;
   struct MgAdaptHypothesisData
   {
     string  myFileInDir, myMeshFileIn, myInMeshName, myMeshFileBackground, myOutMeshName,
@@ -48,7 +47,6 @@ module SMESH{
 
   interface MG_ADAPT : SALOME::GenericObj
   {
-    //MG_ADAPT CreateMG_ADAPT(in PortableServer::POA_var poa);
     void setData( inout MgAdaptHypothesisData data);
 
     void setMedFileIn(in string MedFileIn );
@@ -133,8 +131,8 @@ module SMESH{
     boolean hasOptionDefined( in string optionName ) ;
     void setOptionValue(in string optionName, in string optionValue) raises (SALOME::SALOME_Exception);
     string getOptionValue(in string optionName, inout boolean isDefault) raises (SALOME::SALOME_Exception);
-    str_array getCustomOptionValuesStrVec() ;
-    str_array getOptionValuesStrVec() ;
+    SMESH::string_array getCustomOptionValuesStrVec() ;
+    SMESH::string_array getOptionValuesStrVec() ;
   };
 
   typedef MG_ADAPT MG_ADAPT_HYPOTHESIS;

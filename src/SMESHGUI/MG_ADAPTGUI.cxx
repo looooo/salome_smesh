@@ -21,84 +21,152 @@
 //
 //  file : MG_ADAPTGUI.cxx
 
-#include "MG_ADAPTGUI.hxx"
+#include "MG_ADAPTGUI.h"
 
-#include "MEDFileData.hxx"
-#include "MEDLoader.hxx"
+#include "MED_Factory.hxx"
 
-#include "SUIT_Desktop.h"
-#include "SUIT_Application.h"
-#include "SUIT_Session.h"
-
-#include "SalomeApp_Application.h"
-#include "SalomeApp_Module.h"
-#include "SalomeApp_Study.h"
+#include <SalomeApp_Tools.h>
+#include <SalomeApp_Module.h>
 #include <SUIT_MessageBox.h>
-#include <LightApp_SelectionMgr.h>
 #include <SUIT_OverrideCursor.h>
-#include <SUIT_ResourceMgr.h>
-#include <SVTK_ViewWindow.h>
-#include <SALOME_ListIO.hxx>
 #include <SUIT_FileDlg.h>
+
 #include <QApplication>
 #include <QButtonGroup>
+#include <QCheckBox>
+#include <QComboBox>
+#include <QDoubleSpinBox>
+#include <QFileDialog>
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QHBoxLayout>
+#include <QHeaderView>
+#include <QItemDelegate>
 #include <QKeyEvent>
 #include <QLabel>
 #include <QLineEdit>
-#include <QCheckBox>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QRadioButton>
-#include <QTabWidget>
-#include <QVBoxLayout>
-#include <QDoubleSpinBox>
+#include <QSpacerItem>
 #include <QSpinBox>
+#include <QString>
+#include <QTabWidget>
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
-#include <QSpacerItem>
-#include <QString>
-#include <QHeaderView>
-#include <QItemDelegate>
-#include <QFileDialog>
-#include <QMessageBox>
-#include <QComboBox>
+#include <QVBoxLayout>
 
-#include <vtkPoints.h>
-#include <vtkUnstructuredGrid.h>
-#include <vtkIdList.h>
-#include <vtkCellArray.h>
-#include <vtkUnsignedCharArray.h>
-#include <vtkDataSetMapper.h>
-#include <VTKViewer_CellLocationsArray.h>
-#include <vtkProperty.h>
-
-#include <ElCLib.hxx>
-// SALOME KERNEL includes
-#include <SALOMEDS_SComponent.hxx>
-#include <SALOMEDS_SObject.hxx>
-#include <SALOMEDS_Study.hxx>
-#include <SALOMEDS_wrap.hxx>
-#include "SalomeApp_Tools.h"
-#include <SALOMEconfig.h>
-#include <med.h>
-#include <utilities.h>
-
-#include <TCollection_AsciiString.hxx>
+//#include <SALOMEDS_wrap.hxx>
 
 const int SPACING = 6;            // layout spacing
 const int MARGIN  = 9;            // layout margin
+
+namespace
+{
+
+  // ======================================================
+  QString lireNomDimMaillage(QString aFile, int& meshdim)
+  // ========================================================
+  {
+    QString nomMaillage = QString::null ;
+
+    try {
+      while ( true )
+      {
+
+        MED::PWrapper aMed = MED::CrWrapperR( aFile.toUtf8().data() );
+        MED::TInt numberOfMeshes = aMed->GetNbMeshes();
+
+        if (numberOfMeshes == 0 )
+        {
+          QMessageBox::critical( 0, QObject::tr("MG_ADAPT_ERROR"),
+                                 QObject::tr("MG_ADAPT_MED_FILE_2") );
+          break ;
+        }
+        if (numberOfMeshes > 1 )
+        {
+          QMessageBox::critical( 0, QObject::tr("MG_ADAPT_ERROR"),
+                                 QObject::tr("MG_ADAPT_MED_FILE_3") );
+          break ;
+        }
+
+        MED::PMeshInfo aMeshInfo = aMed->GetPMeshInfo( 1 );
+        nomMaillage = aMeshInfo->GetName().c_str();
+        meshdim = (int) aMeshInfo->GetDim();
+
+        break ;
+      }
+    }
+    catch ( const SALOME::SALOME_Exception & S_ex )
+    {
+      SalomeApp_Tools::QtCatchCorbaException(S_ex);
+    }
+
+    return nomMaillage;
+  }
+
+  // =======================================================================
+  std::map<QString, int> GetListeChamps(QString aFile, bool errorMessage=true)
+  // =======================================================================
+  {
+    // Il faut voir si plusieurs maillages
+
+    std::map<QString, int> ListeChamp ;
+
+    try
+    {
+      while ( true )
+      {
+        MED::PWrapper aMed = MED::CrWrapperR( aFile.toUtf8().data() );
+        MED::TInt jaux = aMed->GetNbFields();
+        if (jaux < 1 )
+        {
+          if(errorMessage)
+          {
+            QMessageBox::critical( 0, QObject::tr("_ERROR"),
+                                   QObject::tr("HOM_MED_FILE_5") );
+          }
+          break ;
+        }
+        // nbofcstp inutile pour le moment
+        MED::PMeshInfo aMeshInfo = aMed->GetPMeshInfo( 1 );
+        int nbofcstp = 1;
+        for( MED::TInt j=0;j<jaux;j++)
+        {
+          MED::PFieldInfo aFiledInfo = aMed->GetPFieldInfo( aMeshInfo, j + 1 );
+          ListeChamp.insert({ QString( aFiledInfo->GetName().c_str()), nbofcstp });
+        }
+        break ;
+      }
+    }
+    catch ( const SALOME::SALOME_Exception & S_ex )
+    {
+      SalomeApp_Tools::QtCatchCorbaException(S_ex);
+    }
+
+    return ListeChamp;
+  }
+
+  // =======================================================================
+  std::string remove_extension(const std::string& filename)
+  // =======================================================================
+  {
+    size_t lastdot = filename.find_last_of(".");
+    if (lastdot == std::string::npos) return filename;
+    return filename.substr(0, lastdot);
+  }
+}
 
 //=================================================================================
 // function : SMESHGUI_MgAdaptDlg()
 // purpose  :
 //=================================================================================
 SMESHGUI_MgAdaptDlg::SMESHGUI_MgAdaptDlg( SalomeApp_Module* theModule, SMESH::MG_ADAPT_ptr myModel, QWidget* parent, bool isCreation )
-    : mySMESHGUI( theModule ), QDialog(parent)
+  : QDialog(parent), mySMESHGUI( theModule )
 {
   //~model = new MgAdapt(*myModel);
   model = SMESH::MG_ADAPT::_duplicate(myModel);
+  model->Register();
   myData = model->getData();
   buildDlg();
   if (!isCreation) readParamsFromHypo();
@@ -116,17 +184,17 @@ void SMESHGUI_MgAdaptDlg::buildDlg()
   // Arguments
 
   myArgs = new SMESHGUI_MgAdaptArguments( myTabWidget );
-  SMESH::str_array* str = model->getOptionValuesStrVec();
-  SMESH::str_array* str2 = model->getCustomOptionValuesStrVec();
+  SMESH::string_array_var str = model->getOptionValuesStrVec();
+  SMESH::string_array_var str2 = model->getCustomOptionValuesStrVec();
   std::vector<std::string> s;
-  for (int i = 0; i< str->length(); i++) s.push_back( (*str)[i].in());
-  for (int j = str->length(); j< str2->length(); j++) s.push_back((*str2)[ j - str->length() ].in() );
+  for (CORBA::ULong i = 0; i< str->length(); i++) s.push_back( str[i].in());
+  for (CORBA::ULong j = str->length(); j< str2->length(); j++) s.push_back(str[ j - str->length() ].in() );
   //~str.insert( str.end(), str2.begin(), str2.end() );
 
   myAdvOpt = new MgAdaptAdvWidget(myTabWidget, &s);
 
-  int argsTab = myTabWidget->addTab( myArgs, tr( "Args" ) );
-  int advTab = myTabWidget->addTab( myAdvOpt, tr( "ADVOP" ) );
+  /*int argsTab =*/ myTabWidget->addTab( myArgs, tr( "Args" ) );
+  /*int advTab  =*/ myTabWidget->addTab( myAdvOpt, tr( "ADVOP" ) );
 
   myAdvOpt->workingDirectoryLabel         ->setText (tr( "WORKING_DIR" ));
   myAdvOpt->workingDirectoryPushButton    ->setText (tr( "SELECT_DIR" ));
@@ -214,7 +282,7 @@ bool SMESHGUI_MgAdaptDlg::readParamsFromHypo( ) const
   if (myData->fromMedFile)
   {
 
-    *(myArgs->myFileInDir) = QString(myData->myFileInDir) ;
+    myArgs->myFileInDir = myData->myFileInDir;
     myArgs->selectMedFileLineEdit->setText(QString(myData->myMeshFileIn)) ;
     // myData->myInMeshName = // TODO
 
@@ -230,12 +298,12 @@ bool SMESHGUI_MgAdaptDlg::readParamsFromHypo( ) const
 
   if(myData->myMeshOutMed)
   {
-    *(myArgs->myFileOutDir) = QString(myData->myFileOutDir);
-    myArgs->selectOutMedFileLineEdit->setText(QString(myData->myMeshFileOut));
+    myArgs->myFileOutDir = QString(myData->myFileOutDir);
+    myArgs->selectOutMedFileLineEdit->setText(myData->myMeshFileOut.in());
   }
   else
   {
-    *(myArgs->myFileOutDir) = QString(""); //TODO
+    myArgs->myFileOutDir = ""; //TODO
   }
 
   myArgs->publishOut->setChecked(myData->myPublish);
@@ -256,12 +324,12 @@ bool SMESHGUI_MgAdaptDlg::readParamsFromHypo( ) const
   if (myData->myUseBackgroundMap)
   {
 
-    *(myArgs->myFileSizeMapDir) = QString(myData->myFileSizeMapDir) ;
+    myArgs->myFileSizeMapDir = QString(myData->myFileSizeMapDir) ;
     myArgs->selectMedFileBackgroundLineEdit->setText(QString(myData->myMeshFileBackground));
   }
   else
   {
-    *(myArgs->myFileSizeMapDir) = QString("") ;  //TODO
+    myArgs->myFileSizeMapDir = "";  //TODO
     myArgs->selectMedFileBackgroundLineEdit->setText(""); //TODO
   }
 
@@ -288,17 +356,16 @@ bool SMESHGUI_MgAdaptDlg::readParamsFromHypo( ) const
 
 bool SMESHGUI_MgAdaptDlg::readParamsFromWidgets()
 {
-  MESSAGE ("readParamsFromWidgets") ;
   bool ret = true ;
-  SMESH::MgAdaptHypothesisData* aData = new SMESH::MgAdaptHypothesisData();
+  SMESH::MgAdaptHypothesisData data, *aData = &data;
   while ( ret )
   {
     // 1. Fichier du maillage de départ
     aData->fromMedFile = myArgs->aMedfile->isChecked();
     if (aData->fromMedFile)
     {
-      aData->myFileInDir = CORBA::string_dup(myArgs->myFileInDir->toStdString().c_str());
-      aData->myMeshFileIn = CORBA::string_dup(myArgs->selectMedFileLineEdit->text().toStdString().c_str());
+      aData->myFileInDir = CORBA::string_dup(myArgs->myFileInDir.toUtf8().data());
+      aData->myMeshFileIn = CORBA::string_dup(myArgs->selectMedFileLineEdit->text().toUtf8().data());
         // aData->myInMeshName = // TODO
     }
     else // TODO browser
@@ -325,8 +392,8 @@ bool SMESHGUI_MgAdaptDlg::readParamsFromWidgets()
     aData->myMeshOutMed = myArgs->medFileCheckBox->isChecked();
     if(aData->myMeshOutMed)
     {
-      aData->myFileOutDir = CORBA::string_dup(myArgs->myFileOutDir->toStdString().c_str());
-      aData->myMeshFileOut = CORBA::string_dup(myArgs->selectOutMedFileLineEdit->text().toStdString().c_str());
+      aData->myFileOutDir = CORBA::string_dup(myArgs->myFileOutDir.toUtf8().data());
+      aData->myMeshFileOut = CORBA::string_dup(myArgs->selectOutMedFileLineEdit->text().toUtf8().data());
     }
     else
     {
@@ -350,8 +417,8 @@ bool SMESHGUI_MgAdaptDlg::readParamsFromWidgets()
     // 3.2. Arrière-plan
     if (aData->myUseBackgroundMap)
     {
-      aData->myFileSizeMapDir = CORBA::string_dup(myArgs->myFileSizeMapDir->toStdString().c_str());
-      aData->myMeshFileBackground = CORBA::string_dup(myArgs->selectMedFileBackgroundLineEdit->text().toStdString().c_str());
+      aData->myFileSizeMapDir = CORBA::string_dup(myArgs->myFileSizeMapDir.toUtf8().data());
+      aData->myMeshFileBackground = CORBA::string_dup(myArgs->selectMedFileBackgroundLineEdit->text().toUtf8().data());
     }
     else
     {
@@ -394,12 +461,11 @@ bool SMESHGUI_MgAdaptDlg::readParamsFromWidgets()
     break ;
   }
 
-  delete aData;
-
   return ret;
 }
 bool SMESHGUI_MgAdaptDlg::storeParamsToHypo( const SMESH::MgAdaptHypothesisData& ) const
 {
+  return true;
 }
 /*!
   \brief Show help page
@@ -467,23 +533,20 @@ bool SMESHGUI_MgAdaptDlg::checkParams(QString& msg)
 // purpose  :
 //=================================================================================
 SMESHGUI_MgAdaptArguments::SMESHGUI_MgAdaptArguments( QWidget* parent )
-    :QWidget(parent)
+  :QWidget(parent)
 {
 
-  myFileInDir = new QString("");
-  myFileOutDir = new QString("");
-  myFileSizeMapDir = new QString("");
   if ( SUIT_FileDlg::getLastVisitedPath().isEmpty() )
   {
-    *myFileInDir = QDir::currentPath();
-    *myFileOutDir = QDir::currentPath();
-    *myFileSizeMapDir = QDir::currentPath();
+    myFileInDir = QDir::currentPath();
+    myFileOutDir = QDir::currentPath();
+    myFileSizeMapDir = QDir::currentPath();
   }
   else
   {
-    *myFileInDir = SUIT_FileDlg::getLastVisitedPath();
-    *myFileOutDir = SUIT_FileDlg::getLastVisitedPath();
-    *myFileSizeMapDir = SUIT_FileDlg::getLastVisitedPath();
+    myFileInDir = SUIT_FileDlg::getLastVisitedPath();
+    myFileOutDir = SUIT_FileDlg::getLastVisitedPath();
+    myFileSizeMapDir = SUIT_FileDlg::getLastVisitedPath();
   }
 
   meshDim = 0;
@@ -648,7 +711,7 @@ void SMESHGUI_MgAdaptArguments::onLastTimeStep(bool disableOther)
   timeStep->setValue(-1);
   noTimeStep->setDisabled(disableOther);
 }
-void SMESHGUI_MgAdaptArguments::onChosenTimeStep(bool disableOther, int vmax)
+void SMESHGUI_MgAdaptArguments::onChosenTimeStep(bool /*disableOther*/, int vmax)
 {
   chosenTimeStep->setChecked(true);
 
@@ -675,7 +738,7 @@ void SMESHGUI_MgAdaptArguments::onSelectOutMedFilebutton()
   QString fileName = QFileDialog::getSaveFileName(this, tr("SAVE_MED"), QString(""), filtre);
   QFileInfo myFileInfo(fileName);
   selectOutMedFileLineEdit->setText(myFileInfo.fileName());
-  *myFileOutDir = myFileInfo.path();
+  myFileOutDir = myFileInfo.path();
 
 }
 void SMESHGUI_MgAdaptArguments::onSelectMedFileBackgroundbutton()
@@ -703,8 +766,7 @@ void SMESHGUI_MgAdaptArguments::onSelectMedFileBackgroundbutton()
         timeStepGroupChanged(typeStepInField, false);
       }
       // Dimension du maillage de fonds
-      MEDCoupling::MCAuto<MEDCoupling::MEDFileData> mfd = MEDCoupling::MEDFileData::New(fileName.toStdString());
-      meshDimBG = mfd->getMeshes()->getMeshAtPos(0)->getMeshDimension() ;
+      lireNomDimMaillage( fileName, meshDimBG );
       valueAdaptation ();
     }
   }
@@ -715,7 +777,7 @@ void SMESHGUI_MgAdaptArguments::onSelectMedFileBackgroundbutton()
   }
 
   QFileInfo myFileInfo(fileName);
-  *myFileSizeMapDir = myFileInfo.path();
+  myFileSizeMapDir = myFileInfo.path();
   selectMedFileBackgroundLineEdit->setText(myFileInfo.fileName());
 
 }
@@ -751,8 +813,8 @@ void SMESHGUI_MgAdaptArguments::onSelectMedFilebuttonClicked()
   QString fileName = getMedFileName(false);
   if(fileName != QString::null)
   {
-    QString aMeshName = lireNomMaillage(fileName.trimmed(), meshDim);
-    if (aMeshName == QString::null )
+    QString aMeshName = lireNomDimMaillage(fileName.trimmed(), meshDim);
+    if (aMeshName.isEmpty() )
     {
       QMessageBox::critical( 0, QObject::tr("MG_ADAPT_ERROR"),
                                 QObject::tr("MG_ADAPT_MED_FILE_2") );
@@ -772,8 +834,8 @@ void SMESHGUI_MgAdaptArguments::onSelectMedFilebuttonClicked()
   }
 
   QFileInfo myFileInfo(fileName);
-  *myFileInDir = myFileInfo.path();
-  *myFileOutDir = myFileInfo.path();
+  myFileInDir = myFileInfo.path();
+  myFileOutDir = myFileInfo.path();
   selectMedFileLineEdit->setText(myFileInfo.fileName());
   QString outF = fileName == QString::null ? myFileInfo.fileName() :
   QString( remove_extension(myFileInfo.fileName().toStdString() ).c_str() )+ QString(".adapt.med");
@@ -828,7 +890,7 @@ void SMESHGUI_MgAdaptArguments::onLocalSelected(QString filePath)
 // 2) retourne le nom du fichier asocie a l objet
 //    selectionne dans l arbre d etude
 // =======================================================================
-QString SMESHGUI_MgAdaptArguments::getMedFileName(bool avertir)
+QString SMESHGUI_MgAdaptArguments::getMedFileName(bool /*avertir*/)
 {
 
   QString aFile = QString::null;
@@ -893,7 +955,7 @@ void SMESHGUI_MgAdaptArguments::sizeMapDefChanged( int  theSizeMap )
     sizeMapField->setEnabled(true);
     if (!selectMedFileLineEdit->text().isEmpty())
     {
-      QFileInfo myFileInfo(QDir(*myFileInDir), selectMedFileLineEdit->text());
+      QFileInfo myFileInfo(QDir(myFileInDir), selectMedFileLineEdit->text());
       onLocalSelected(myFileInfo.filePath());
     }
   }
@@ -967,7 +1029,7 @@ MgAdaptAdvWidget::MgAdaptAdvWidget( QWidget* parent, std::vector <std::string>* 
   myOptionTable->header()->setSectionResizeMode( QHeaderView::ResizeToContents );
   myOptionTable->setItemDelegate( new ItemDelegate( myOptionTable ) );
 
-  for ( int i = 0, nb = myOptions->size(); i < nb; ++i )
+  for ( size_t i = 0, nb = myOptions->size(); i < nb; ++i )
   {
     AddOption( (*myOptions)[i].c_str() );
   }
@@ -1279,87 +1341,4 @@ void MgAdaptAdvWidgetTreeWidget::keyPressEvent( QKeyEvent* e )
       break;
   }
   QTreeWidget::keyPressEvent( e );
-}
-
-// ======================================================
-// ========================================================
-QString lireNomMaillage(QString aFile, med_int& meshdim)
-{
-  QString nomMaillage = QString::null ;
-
-  while ( true )
-  {
-    std::vector<std::string> listMeshesNames = MEDCoupling::GetMeshNames(aFile.toStdString());
-
-    std::size_t numberOfMeshes(listMeshesNames.size());
-  //   std::cout << "numberOfMeshes:" << numberOfMeshes << std::endl;
-    if (numberOfMeshes == 0 )
-    {
-      QMessageBox::critical( 0, QObject::tr("MG_ADAPT_ERROR"),
-                                QObject::tr("MG_ADAPT_MED_FILE_2") );
-      break ;
-    }
-    if (numberOfMeshes > 1 )
-    {
-      QMessageBox::critical( 0, QObject::tr("MG_ADAPT_ERROR"),
-                                QObject::tr("MG_ADAPT_MED_FILE_3") );
-      break ;
-    }
-
-//     std::cout << "nomMaillage:" << listMeshesNames[0] << std::endl;
-    nomMaillage = QString(listMeshesNames[0].c_str());
-
-    // Dimension du maillage
-    MEDCoupling::MCAuto<MEDCoupling::MEDFileData> mfd = MEDCoupling::MEDFileData::New(aFile.toStdString());
-    meshdim = mfd->getMeshes()->getMeshAtPos(0)->getMeshDimension() ;
-//     std::cout << "meshdim:" << meshdim << std::endl;
-
-    break ;
-  }
-
-  return nomMaillage;
-}
-
-// =======================================================================
-std::map<QString, int> GetListeChamps(QString aFile, bool errorMessage)
-// =======================================================================
-{
-// Il faut voir si plusieurs maillages
-
-  std::map<QString, int> ListeChamp ;
-
-  while ( true )
-  {
-    MEDCoupling::MCAuto<MEDCoupling::MEDFileData> mfd = MEDCoupling::MEDFileData::New(aFile.toStdString());
-    std::vector<std::string> listFieldsNames(mfd->getFields()->getFieldsNames());
-    std::size_t jaux(listFieldsNames.size());
-    if (jaux < 1 )
-    {
-      if(errorMessage)
-      {
-        QMessageBox::critical( 0, QObject::tr("_ERROR"),
-                                  QObject::tr("HOM_MED_FILE_5") );
-      }
-      break ;
-    }
-    // nbofcstp inutile pour le moment
-    med_int nbofcstp = 1;
-    for(std::size_t j=0;j<jaux;j++)
-    {
-//       std::cout << listFieldsNames[j] << std::endl;
-      ListeChamp.insert(std::pair<QString, int> (QString(listFieldsNames[j].c_str()), nbofcstp));
-    }
-    break ;
-  }
-
-  return ListeChamp;
-}
-
-// =======================================================================
-std::string remove_extension(const std::string& filename)
-// =======================================================================
-{
-  size_t lastdot = filename.find_last_of(".");
-  if (lastdot == std::string::npos) return filename;
-  return filename.substr(0, lastdot);
 }

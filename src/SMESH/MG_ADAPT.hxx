@@ -26,6 +26,8 @@
 #include <vector>
 #include <set>
 
+#include "SMESH_SMESH.hxx"
+
 namespace MEDCoupling
 {
   class MEDFileMesh;
@@ -54,7 +56,7 @@ struct MgAdaptHypothesisData
 };
 
 
-class MgAdapt
+class SMESH_EXPORT MgAdapt
 {
 
 public:

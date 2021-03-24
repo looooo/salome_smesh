@@ -3044,7 +3044,7 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
       break;
     }
   // Adaptation - begin
-#if defined(MGADAPT_ENABLE)
+#ifndef DISABLE_MG_ADAPT
   case SMESHOp::OpMGAdapt:
     {
       if ( isStudyLocked() )
@@ -4296,7 +4296,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   createSMESHAction( SMESHOp::OpDisableAutoColor, "DISABLE_AUTO_COLOR" );
 
   // Adaptation - begin
-#if defined(MGADAPT_ENABLE)
+#ifndef DISABLE_MG_ADAPT
   createSMESHAction( SMESHOp::OpMGAdapt,              "MG_ADAPT",                "ICON_MG_ADAPT" );
 #endif
   // Adaptation - end
@@ -4516,7 +4516,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   createMenu( SMESHOp::OpPatternMapping,         modifyId, -1 );
 
   // Adaptation - begin
-#if defined(MGADAPT_ENABLE)
+#ifndef DISABLE_MG_ADAPT
   createMenu( SMESHOp::OpMGAdapt,              adaptId, -1 );
 #endif
   // Adaptation - end
@@ -4665,7 +4665,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   createTool( SMESHOp::OpPatternMapping,         modifyTb );
 
   // Adaptation - begin
-#if defined(MGADAPT_ENABLE)
+#ifndef DISABLE_MG_ADAPT
   int adaptTb      = createTool( tr( "TB_ADAPTATION" ),QString( "SMESHAdaptationToolbar" ) ) ;
   createTool( SMESHOp::OpMGAdapt,              adaptTb );
 #endif
@@ -4753,7 +4753,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   popupMgr()->insert( separator(), -1, 0 );
 
   // Adaptation - begin
-#if defined(MGADAPT_ENABLE)
+#ifndef DISABLE_MG_ADAPT
   createPopupItem( SMESHOp::OpMGAdapt,              OB, mesh );
 #endif
   // Adaptation - end
@@ -6027,7 +6027,7 @@ LightApp_Operation* SMESHGUI::createOperation( const int id ) const
     op = new SMESHGUI_Add0DElemsOnAllNodesOp();
     break;
   // Adaptation - begin
-#if defined(MGADAPT_ENABLE)
+#ifndef DISABLE_MG_ADAPT
   case SMESHOp::OpMGAdapt:
     break;
 #endif

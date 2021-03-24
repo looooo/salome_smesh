@@ -96,7 +96,7 @@ void MG_ADAPT_i::copyHypothesisDataFromImpl(const ::MG_ADAPT::MgAdaptHypothesisD
 
 SMESH::MG_ADAPT_ptr SMESH_Gen_i::CreateMG_ADAPT()
 {
-#if defined(MGADAPT_ENABLE)
+#ifndef DISABLE_MG_ADAPT
   SMESH::MG_ADAPT_i* aMGadapt = new SMESH::MG_ADAPT_i();
   SMESH::MG_ADAPT_var anObj = aMGadapt->_this();
   return anObj._retn();
@@ -106,7 +106,7 @@ SMESH::MG_ADAPT_ptr SMESH_Gen_i::CreateMG_ADAPT()
 }
 SMESH::MG_ADAPT_ptr SMESH_Gen_i::CreateAdaptationHypothesis()
 {
-#if defined(MGADAPT_ENABLE)
+#ifndef DISABLE_MG_ADAPT
   SMESH::MG_ADAPT_i* aMGadapt = new SMESH::MG_ADAPT_i();
   SMESH::MG_ADAPT_var anObj = aMGadapt->_this();
   return anObj._retn();
@@ -116,7 +116,7 @@ SMESH::MG_ADAPT_ptr SMESH_Gen_i::CreateAdaptationHypothesis()
 }
 SMESH::MG_ADAPT_OBJECT_ptr SMESH_Gen_i::Adaptation( const char* adaptationType)
 {
-#if defined(MGADAPT_ENABLE)
+#ifndef DISABLE_MG_ADAPT
   if (!strcmp(adaptationType, "MG_Adapt"))
   {
     SMESH::MG_ADAPT_OBJECT_i* mg_adapt_object = new SMESH::MG_ADAPT_OBJECT_i();

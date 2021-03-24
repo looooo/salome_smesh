@@ -96,25 +96,34 @@ void MG_ADAPT_i::copyHypothesisDataFromImpl(const ::MG_ADAPT::MgAdaptHypothesisD
 
 SMESH::MG_ADAPT_ptr SMESH_Gen_i::CreateMG_ADAPT()
 {
+#if defined(MGADAPT_ENABLE)
   SMESH::MG_ADAPT_i* aMGadapt = new SMESH::MG_ADAPT_i();
   SMESH::MG_ADAPT_var anObj = aMGadapt->_this();
   return anObj._retn();
+#else
+  return SMESH::MG_ADAPT_ptr();
+#endif
 }
 SMESH::MG_ADAPT_ptr SMESH_Gen_i::CreateAdaptationHypothesis()
 {
+#if defined(MGADAPT_ENABLE)
   SMESH::MG_ADAPT_i* aMGadapt = new SMESH::MG_ADAPT_i();
   SMESH::MG_ADAPT_var anObj = aMGadapt->_this();
   return anObj._retn();
+#else
+  return SMESH::MG_ADAPT_ptr();
+#endif
 }
 SMESH::MG_ADAPT_OBJECT_ptr SMESH_Gen_i::Adaptation( const char* adaptationType)
 {
-
+#if defined(MGADAPT_ENABLE)
   if (!strcmp(adaptationType, "MG_Adapt"))
   {
     SMESH::MG_ADAPT_OBJECT_i* mg_adapt_object = new SMESH::MG_ADAPT_OBJECT_i();
     SMESH::MG_ADAPT_OBJECT_var anObj = mg_adapt_object->_this();
     return anObj._retn();
   }
+#endif
   return SMESH::MG_ADAPT_OBJECT_ptr();
 }
 //=============================================================================

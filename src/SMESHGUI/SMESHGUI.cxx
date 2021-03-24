@@ -3044,6 +3044,7 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
       break;
     }
   // Adaptation - begin
+#if defined(MGADAPT_ENABLE)
   case SMESHOp::OpMGAdapt:
     {
       if ( isStudyLocked() )
@@ -3055,6 +3056,7 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
       ( new SMESHGUI_MG_ADAPTDRIVER( this, model, isCreation ))->show();
       break;
     }
+#endif
   // Adaptation - end
   case SMESHOp::OpSplitBiQuadratic:
   case SMESHOp::OpConvertMeshToQuadratic:
@@ -4294,7 +4296,9 @@ void SMESHGUI::initialize( CAM_Application* app )
   createSMESHAction( SMESHOp::OpDisableAutoColor, "DISABLE_AUTO_COLOR" );
 
   // Adaptation - begin
+#if defined(MGADAPT_ENABLE)
   createSMESHAction( SMESHOp::OpMGAdapt,              "MG_ADAPT",                "ICON_MG_ADAPT" );
+#endif
   // Adaptation - end
 
   createSMESHAction( SMESHOp::OpMinimumDistance,  "MEASURE_MIN_DIST", "ICON_MEASURE_MIN_DIST" );
@@ -4512,7 +4516,9 @@ void SMESHGUI::initialize( CAM_Application* app )
   createMenu( SMESHOp::OpPatternMapping,         modifyId, -1 );
 
   // Adaptation - begin
+#if defined(MGADAPT_ENABLE)
   createMenu( SMESHOp::OpMGAdapt,              adaptId, -1 );
+#endif
   // Adaptation - end
 
   createMenu( SMESHOp::OpMinimumDistance,  measureId,   -1 );
@@ -4659,8 +4665,10 @@ void SMESHGUI::initialize( CAM_Application* app )
   createTool( SMESHOp::OpPatternMapping,         modifyTb );
 
   // Adaptation - begin
+#if defined(MGADAPT_ENABLE)
   int adaptTb      = createTool( tr( "TB_ADAPTATION" ),QString( "SMESHAdaptationToolbar" ) ) ;
   createTool( SMESHOp::OpMGAdapt,              adaptTb );
+#endif
   // Adaptation - end
 
   int measuremTb   = createTool( tr( "TB_MEASUREM" ),  QString( "SMESHMeasurementsToolbar" ) ) ;
@@ -4745,7 +4753,9 @@ void SMESHGUI::initialize( CAM_Application* app )
   popupMgr()->insert( separator(), -1, 0 );
 
   // Adaptation - begin
+#if defined(MGADAPT_ENABLE)
   createPopupItem( SMESHOp::OpMGAdapt,              OB, mesh );
+#endif
   // Adaptation - end
 
   QString only_one_non_empty = QString( " && %1=1 && numberOfNodes>0" ).arg( dc );
@@ -6017,8 +6027,10 @@ LightApp_Operation* SMESHGUI::createOperation( const int id ) const
     op = new SMESHGUI_Add0DElemsOnAllNodesOp();
     break;
   // Adaptation - begin
+#if defined(MGADAPT_ENABLE)
   case SMESHOp::OpMGAdapt:
     break;
+#endif
   // Adaptation - end
   default:
     break;

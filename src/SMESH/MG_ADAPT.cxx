@@ -32,12 +32,14 @@
 #include <MeshFormatWriter.hxx>
 
 #include <Utils_SALOME_Exception.hxx>
+#include <Basics_Utils.hxx>
 
 #ifndef WIN32
 #include <unistd.h> // getpid()
 #else
 #include <process.h>
 #endif
+#include <fcntl.h>
 #include <array>
 #include <memory>   // unique_ptr
 
@@ -866,8 +868,9 @@ void MgAdapt::execCmd( const char* cmd, int& err)
 
   
 #if defined(WIN32)
-#if defined(INICODE)
-  std::unique_ptr <FILE, decltype(&_pclose)> pipe(_wopen(cmd, "r"), _pclose );
+#if defined(UNICODE)
+  const wchar_t * aCmd = Kernel_Utils::utf8_decode(cmd);
+  std::unique_ptr <FILE, decltype(&_pclose)> pipe(_wpopen(aCmd, O_RDONLY), _pclose );
 #else
   std::unique_ptr <FILE, decltype(&_pclose)> pipe(_popen(cmd, "r"), _pclose );
 #endif

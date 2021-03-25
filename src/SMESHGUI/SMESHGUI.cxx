@@ -4342,7 +4342,9 @@ void SMESHGUI::initialize( CAM_Application* app )
       meshId    = createMenu( tr( "MEN_MESH" ),    -1, 70, 10 ),
       ctrlId    = createMenu( tr( "MEN_CTRL" ),    -1, 60, 10 ),
       modifyId  = createMenu( tr( "MEN_MODIFY" ),  -1, 40, 10 ),
+#ifndef DISABLE_MG_ADAPT
       adaptId   = createMenu( tr( "MEN_ADAPT" ),   -1, 80, 10 ),
+#endif
       measureId = createMenu( tr( "MEN_MEASURE" ), -1, 50, 10 ),
       viewId    = createMenu( tr( "MEN_VIEW" ),    -1,  2 );
 

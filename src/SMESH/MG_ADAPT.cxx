@@ -32,8 +32,15 @@
 #include <MeshFormatWriter.hxx>
 
 #include <Utils_SALOME_Exception.hxx>
+#include <Basics_Utils.hxx>
 
+#ifndef WIN32
 #include <unistd.h> // getpid()
+#else
+#include <process.h>
+#endif
+#include <fcntl.h>
+#include <array>
 #include <memory>   // unique_ptr
 
 typedef SMESH_Comment ToComment;
@@ -859,7 +866,18 @@ void MgAdapt::execCmd( const char* cmd, int& err)
   }
   std::ostream logStream(buf);
 
+  
+#if defined(WIN32)
+#if defined(UNICODE)
+  const wchar_t * aCmd = Kernel_Utils::utf8_decode(cmd);
+  std::unique_ptr <FILE, decltype(&_pclose)> pipe(_wpopen(aCmd, O_RDONLY), _pclose );
+#else
+  std::unique_ptr <FILE, decltype(&_pclose)> pipe(_popen(cmd, "r"), _pclose );
+#endif
+#else
   std::unique_ptr <FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose );
+#endif
+
   if(!pipe)
   {
     throw std::runtime_error("popen() failed!");
@@ -1084,7 +1102,11 @@ std::string MgAdapt::getFileName() const
 
   SMESH_Comment aGenericName( aTmpDir );
   aGenericName << "MgAdapt_";
+#ifndef WIN32
   aGenericName << getpid();
+#else
+aGenericName << _getpid();
+#endif
   aGenericName << "_";
   aGenericName << std::abs((int)(long) aGenericName.data());
 

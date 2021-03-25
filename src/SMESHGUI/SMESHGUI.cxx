@@ -3044,6 +3044,7 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
       break;
     }
   // Adaptation - begin
+#ifndef DISABLE_MG_ADAPT
   case SMESHOp::OpMGAdapt:
     {
       if ( isStudyLocked() )
@@ -3055,6 +3056,7 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
       ( new SMESHGUI_MG_ADAPTDRIVER( this, model, isCreation ))->show();
       break;
     }
+#endif
   // Adaptation - end
   case SMESHOp::OpSplitBiQuadratic:
   case SMESHOp::OpConvertMeshToQuadratic:
@@ -4294,7 +4296,9 @@ void SMESHGUI::initialize( CAM_Application* app )
   createSMESHAction( SMESHOp::OpDisableAutoColor, "DISABLE_AUTO_COLOR" );
 
   // Adaptation - begin
+#ifndef DISABLE_MG_ADAPT
   createSMESHAction( SMESHOp::OpMGAdapt,              "MG_ADAPT",                "ICON_MG_ADAPT" );
+#endif
   // Adaptation - end
 
   createSMESHAction( SMESHOp::OpMinimumDistance,  "MEASURE_MIN_DIST", "ICON_MEASURE_MIN_DIST" );
@@ -4338,7 +4342,9 @@ void SMESHGUI::initialize( CAM_Application* app )
       meshId    = createMenu( tr( "MEN_MESH" ),    -1, 70, 10 ),
       ctrlId    = createMenu( tr( "MEN_CTRL" ),    -1, 60, 10 ),
       modifyId  = createMenu( tr( "MEN_MODIFY" ),  -1, 40, 10 ),
+#ifndef DISABLE_MG_ADAPT
       adaptId   = createMenu( tr( "MEN_ADAPT" ),   -1, 80, 10 ),
+#endif
       measureId = createMenu( tr( "MEN_MEASURE" ), -1, 50, 10 ),
       viewId    = createMenu( tr( "MEN_VIEW" ),    -1,  2 );
 
@@ -4512,7 +4518,9 @@ void SMESHGUI::initialize( CAM_Application* app )
   createMenu( SMESHOp::OpPatternMapping,         modifyId, -1 );
 
   // Adaptation - begin
+#ifndef DISABLE_MG_ADAPT
   createMenu( SMESHOp::OpMGAdapt,              adaptId, -1 );
+#endif
   // Adaptation - end
 
   createMenu( SMESHOp::OpMinimumDistance,  measureId,   -1 );
@@ -4659,8 +4667,10 @@ void SMESHGUI::initialize( CAM_Application* app )
   createTool( SMESHOp::OpPatternMapping,         modifyTb );
 
   // Adaptation - begin
+#ifndef DISABLE_MG_ADAPT
   int adaptTb      = createTool( tr( "TB_ADAPTATION" ),QString( "SMESHAdaptationToolbar" ) ) ;
   createTool( SMESHOp::OpMGAdapt,              adaptTb );
+#endif
   // Adaptation - end
 
   int measuremTb   = createTool( tr( "TB_MEASUREM" ),  QString( "SMESHMeasurementsToolbar" ) ) ;
@@ -4745,7 +4755,9 @@ void SMESHGUI::initialize( CAM_Application* app )
   popupMgr()->insert( separator(), -1, 0 );
 
   // Adaptation - begin
+#ifndef DISABLE_MG_ADAPT
   createPopupItem( SMESHOp::OpMGAdapt,              OB, mesh );
+#endif
   // Adaptation - end
 
   QString only_one_non_empty = QString( " && %1=1 && numberOfNodes>0" ).arg( dc );
@@ -6017,8 +6029,10 @@ LightApp_Operation* SMESHGUI::createOperation( const int id ) const
     op = new SMESHGUI_Add0DElemsOnAllNodesOp();
     break;
   // Adaptation - begin
+#ifndef DISABLE_MG_ADAPT
   case SMESHOp::OpMGAdapt:
     break;
+#endif
   // Adaptation - end
   default:
     break;

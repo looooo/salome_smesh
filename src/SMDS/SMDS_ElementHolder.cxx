@@ -73,7 +73,7 @@ void SMDS_ElementHolder::beforeCompacting()
     else
     {
       myExternalElems.push_back( e );
-      myVtkIDs.push_back( -1 * (int)myExternalElems.size() );
+      myVtkIDs.push_back( -1 * (vtkIdType)myExternalElems.size() );
     }
   }
 }

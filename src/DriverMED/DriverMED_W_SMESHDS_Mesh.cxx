@@ -30,6 +30,7 @@
 #include "DriverMED_Family.h"
 #include "MED_Factory.hxx"
 #include "MED_Utilities.hxx"
+#include "MEDCoupling_Wrapper.hxx"
 #include "SMDS_IteratorOnIterators.hxx"
 #include "SMDS_MeshNode.hxx"
 #include "SMDS_SetIterator.hxx"
@@ -343,13 +344,26 @@ namespace
   }
 }
 
+Driver_Mesh::Status DriverMED_W_SMESHDS_Mesh::Perform()
+{
+  MED::PWrapper myMed = CrWrapperW(myFile, myVersion);
+  return this->PerformInternal<MED::PWrapper>(myMed);
+}
+
+Driver_Mesh::Status DriverMED_W_SMESHDS_Mesh::PerformMedcoupling()
+{
+  MED::MCPWrapper myMed(new MED::MCTWrapper);
+  return this->PerformInternal<MED::MCPWrapper>(myMed);
+}
+
 //================================================================================
 /*!
  * \brief Write my mesh
  */
 //================================================================================
 
-Driver_Mesh::Status DriverMED_W_SMESHDS_Mesh::Perform()
+template<class LowLevelWriter>
+Driver_Mesh::Status DriverMED_W_SMESHDS_Mesh::PerformInternal(LowLevelWriter myMed)
 {
   Status aResult = DRS_OK;
   try {
@@ -471,7 +485,6 @@ Driver_Mesh::Status DriverMED_W_SMESHDS_Mesh::Perform()
       }
     }
 
-    MED::PWrapper myMed = CrWrapperW(myFile, myVersion);
     PMeshInfo aMeshInfo = myMed->CrMeshInfo(aMeshDimension,aSpaceDimension,aMeshName);
     //MESSAGE("Add - aMeshName : "<<aMeshName<<"; "<<aMeshInfo->GetName());
     myMed->SetMeshInfo(aMeshInfo);
@@ -532,7 +545,7 @@ Driver_Mesh::Status DriverMED_W_SMESHDS_Mesh::Perform()
     list<DriverMED_FamilyPtr>::iterator aFamsIter;
     for (aFamsIter = aFamilies.begin(); aFamsIter != aFamilies.end(); aFamsIter++)
     {
-      PFamilyInfo aFamilyInfo = (*aFamsIter)->GetFamilyInfo(myMed,aMeshInfo);
+      PFamilyInfo aFamilyInfo = (*aFamsIter)->GetFamilyInfo<LowLevelWriter>(myMed,aMeshInfo);
       myMed->SetFamilyInfo(aFamilyInfo);
     }
 

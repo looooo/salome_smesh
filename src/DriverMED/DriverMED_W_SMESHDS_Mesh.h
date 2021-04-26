@@ -76,6 +76,11 @@ class MESHDRIVERMED_EXPORT DriverMED_W_SMESHDS_Mesh: public Driver_SMESHDS_Mesh
    */
   virtual Status Perform();
 
+  Status PerformMedcoupling();
+
+  template<class LowLevelWriter>
+  Driver_Mesh::Status PerformInternal(LowLevelWriter myMed);
+
  private:
 
   std::list<SMESHDS_GroupBase*> myGroups;

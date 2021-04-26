@@ -33,7 +33,7 @@ namespace MED
 {
   //----------------------------------------------------------------------------
   class TFile;
-  typedef boost::shared_ptr<TFile> PFile;
+  typedef std::shared_ptr<TFile> PFile;
 
   typedef enum {eLECTURE, eLECTURE_ECRITURE, eLECTURE_AJOUT, eCREATION} EModeAcces;
 
@@ -963,23 +963,23 @@ namespace MED
   //----------------------------------------------------------------------------
   //! Specialization of SharedPtr for TWrapper
   template<>
-  class MEDWRAPPER_EXPORT SharedPtr<TWrapper>: public boost::shared_ptr<TWrapper>
+  class MEDWRAPPER_EXPORT SharedPtr<TWrapper>: public std::shared_ptr<TWrapper>
   {
   public:
     SharedPtr() {}
 
     SharedPtr(TWrapper* p):
-      boost::shared_ptr<TWrapper>(p)
+      std::shared_ptr<TWrapper>(p)
     {}
 
     template<class Y>
     explicit SharedPtr(Y* p):
-      boost::shared_ptr<TWrapper>(p)
+      std::shared_ptr<TWrapper>(p)
     {}
 
     template<class Y>
     SharedPtr(const SharedPtr<Y>& r):
-      boost::shared_ptr<TWrapper>(boost::dynamic_pointer_cast<TWrapper,Y>(r))
+      std::shared_ptr<TWrapper>(boost::dynamic_pointer_cast<TWrapper,Y>(r))
     {}
 
     template<class Y>
@@ -1021,7 +1021,7 @@ namespace MED
     TWrapper*
     get() const // never throws
     {
-      return boost::shared_ptr<TWrapper>::get();
+      return std::shared_ptr<TWrapper>::get();
     }
   };
 }

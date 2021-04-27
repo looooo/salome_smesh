@@ -24,6 +24,7 @@ INCLUDE_DIRECTORIES(
   ${HDF5_INCLUDE_DIRS}
   ${MEDFILE_INCLUDE_DIRS}
   ${KERNEL_INCLUDE_DIRS}
+  ${MEDCOUPLING_INCLUDE_DIRS}
 )
 
 # additional preprocessor / compiler flags
@@ -37,6 +38,7 @@ SET(_link_LIBRARIES
   ${HDF5_LIBS}
   ${MEDFILE_C_LIBRARIES}
   ${KERNEL_SALOMELocalTrace}
+  ${MEDCoupling_medloader}
 )
 
 # --- headers ---
@@ -72,6 +74,7 @@ SET(MEDWrapper_SOURCES
   MED_Structures.cxx
   MED_Utilities.cxx
   MED_Wrapper.cxx
+  MEDCoupling_Wrapper.cxx
 )
 
 # --- rules ---

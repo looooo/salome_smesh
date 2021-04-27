@@ -21,9 +21,7 @@
 
 #include "MED_Wrapper.hxx"
 
-#include "med.h"
-
-#include <memory>
+#include "MEDFileMesh.hxx"
 
 namespace MED
 {
@@ -38,13 +36,9 @@ namespace MED
                EMaillage theType = eNON_STRUCTURE,
                const std::string& theDesc = "");
     //! Write the MEDWrapper MED Mesh representation into the MED file
-    void
-    SetMeshInfo(const TMeshInfo& theInfo,
-                TErr* theErr = NULL);
+    void SetMeshInfo(const TMeshInfo& theInfo);
     //! Write a MEDWrapper MED Family representation into the MED file
-    void
-    SetFamilyInfo(const TFamilyInfo& theInfo,
-                  TErr* theErr = NULL);
+    void SetFamilyInfo(const TFamilyInfo& theInfo) { }
     //! Create a MEDWrapper MED Nodes representation
     PNodeInfo
     CrNodeInfo(const PMeshInfo& theMeshInfo,
@@ -54,15 +48,10 @@ namespace MED
                EBooleen theIsElemNum = eVRAI,
                EBooleen theIsElemNames = eFAUX);
     //! Write the MEDWrapper MED Nodes representation into the MED file
-    void
-    SetNodeInfo(const TNodeInfo& theInfo,
-                TErr* theErr = NULL);
+    void SetNodeInfo(const TNodeInfo& theInfo);
                 
     //! Read a MEDWrapper MED Family representation by its numbers
-    void
-    GetFamilyInfo(TInt theFamId,
-                  TFamilyInfo& theInfo,
-                  TErr* theErr = NULL);
+    void GetFamilyInfo(TInt theFamId, TFamilyInfo& theInfo);
                   
     //! Create a MEDWrapper MED Family representation
     PFamilyInfo
@@ -72,7 +61,7 @@ namespace MED
                  const TStringSet& theGroupNames,
                  const TStringVector& theAttrDescs = TStringVector(),
                  const TIntVector& theAttrIds = TIntVector(),
-                 const TIntVector& theAttrVals = TIntVector());
+                 const TIntVector& theAttrVals = TIntVector()) { }
     
     //! Create a MEDWrapper MED Polygones representation
     virtual
@@ -84,7 +73,7 @@ namespace MED
                    TInt theConnSize,
                    EConnectivite theConnMode = eNOD,
                    EBooleen theIsElemNum = eVRAI,
-                   EBooleen theIsElemNames = eVRAI);
+                   EBooleen theIsElemNames = eVRAI) { }
     
     //! Create a MEDWrapper MED Polygones representation
     virtual
@@ -97,18 +86,14 @@ namespace MED
                    EConnectivite theConnMode = eNOD,
                    const TIntVector& theFamilyNums = TIntVector(),
                    const TIntVector& theElemNums = TIntVector(),
-                   const TStringVector& theElemNames = TStringVector());
+                   const TStringVector& theElemNames = TStringVector()) { }
                    
                    
     //! Write a MEDWrapper MED Polygones representation into the MED file
-    virtual
-    void
-    SetPolygoneInfo(const TPolygoneInfo& theInfo,
-                    TErr* theErr = NULL);
+    void SetPolygoneInfo(const TPolygoneInfo& theInfo) { }
     
 
-        //! Create a MEDWrapper MED Polyedres representation
-    virtual
+    //! Create a MEDWrapper MED Polyedres representation
     PPolyedreInfo
     CrPolyedreInfo(const PMeshInfo& theMeshInfo,
                    EEntiteMaillage theEntity,
@@ -118,19 +103,15 @@ namespace MED
                    TInt theConnSize,
                    EConnectivite theConnMode = eNOD,
                    EBooleen theIsElemNum = eVRAI,
-                   EBooleen theIsElemNames = eVRAI);
+                   EBooleen theIsElemNames = eVRAI) { }
                    
                    
     //! Write a MEDWrapper MED Polyedres representation into the MED file
-    virtual
-    void
-    SetPolyedreInfo(const TPolyedreInfo& theInfo,
-                    TErr* theErr = NULL);
+    void SetPolyedreInfo(const TPolyedreInfo& theInfo) { }
                     
                     
     //! Create a MEDWrapper MED Balls representation
     /*! This feature is supported since version 3.0 */
-    virtual
     PBallInfo
     CrBallInfo(const PMeshInfo& theMeshInfo,
                TInt theNbBalls,
@@ -138,10 +119,8 @@ namespace MED
 
     //! Write a MEDWrapper representation of MED_BALL into the MED file
     /*! This feature is supported since version 3.0 */
-    virtual
     void
-    SetBallInfo(const TBallInfo& theInfo,
-                TErr* theErr = NULL);
+    SetBallInfo(const TBallInfo& theInfo) { }
 
     
     //! Create a MEDWrapper MED Cells representation
@@ -157,11 +136,13 @@ namespace MED
                EModeSwitch theMode = eFULL_INTERLACE);
 
     //! Write the MEDWrapper MED Cells representation into the MED file
-    virtual
-    void
-    SetCellInfo(const TCellInfo& theInfo,
-                TErr* theErr = NULL);
-    
+    void SetCellInfo(const TCellInfo& theInfo) { }
+  private:
+    MEDCoupling::MCAuto<MEDCoupling::MEDFileUMesh> _mc_mesh;
+    MEDCoupling::MCAuto<MEDCoupling::DataArrayDouble> _coords;
+    std::string _mesh_name;
+    int _space_dim;
+    int _mesh_dim;
   };
 
   using MCPWrapper = std::shared_ptr<MCTWrapper>;

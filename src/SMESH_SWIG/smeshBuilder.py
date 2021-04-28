@@ -2357,8 +2357,10 @@ class Mesh(metaclass = MeshMeta):
 
             return self.mesh.ExportPartToMEDCoupling(meshPart, auto_groups, autoDimension, fields, geomAssocFields, z_tolerance)
         else:
-            return self.mesh.ExportMEDCoupling(auto_groups, autoDimension)
-
+            intPtr = self.mesh.ExportMEDCoupling(auto_groups, autoDimension)
+            import medcoupling
+            dab = medcoupling.FromPyIntPtrToDataArrayByte(intPtr)
+            return medcoupling.MEDFileMesh.New(dab)
 
     def ExportMED(self, *args, **kwargs):
         """

@@ -229,6 +229,16 @@ public:
                  const char*               file,
                  CORBA::Boolean            withRequiredGroups);
 
+    
+  template<class SPECLS>
+  void ExportPartToMEDCommon(SPECLS& speCls,
+      SMESH::SMESH_IDSource_ptr meshPart,
+      CORBA::Boolean            auto_groups,
+      CORBA::Boolean            autoDim,
+      const GEOM::ListOfFields& fields,
+      const char*               geomAssocFields,
+      CORBA::Double             ZTolerance);
+
   void ExportPartToMED(SMESH::SMESH_IDSource_ptr meshPart,
                        const char*               file,
                        CORBA::Boolean            auto_groups,
@@ -238,6 +248,14 @@ public:
                        const GEOM::ListOfFields& fields,
                        const char*               geomAssocFields,
                        CORBA::Double             ZTolerance);
+
+  CORBA::LongLong ExportPartToMEDCoupling(SMESH::SMESH_IDSource_ptr meshPart,
+                       CORBA::Boolean            auto_groups,
+                       CORBA::Boolean            autoDim,
+                       const GEOM::ListOfFields& fields,
+                       const char*               geomAssocFields,
+                       CORBA::Double             ZTolerance);
+
   void ExportPartToDAT(SMESH::SMESH_IDSource_ptr meshPart,
                        const char*               file);
   void ExportPartToUNV(SMESH::SMESH_IDSource_ptr meshPart,
@@ -630,15 +648,9 @@ public:
   std::map<int, SMESH_subMesh_i*> _mapSubMesh_i; //NRI
   std::map<int, ::SMESH_subMesh*> _mapSubMesh;   //NRI
 
-private:
+public:
   std::string generateMeshName( );
   std::string prepareMeshNameAndGroups( const char* file, CORBA::Boolean overwrite );
-
-  /*!
-   * Check and correct names of mesh groups
-   */
-  void checkGroupNames();
-
   /*
    * Write GEOM fields to MED file
    */
@@ -646,6 +658,12 @@ private:
                         SMESHDS_Mesh*             meshDS,
                         const GEOM::ListOfFields& fields,
                         const char*               geomAssocFields);
+private:
+  /*!
+   * Check and correct names of mesh groups
+   */
+  void checkGroupNames();
+
   /*!
    * Convert submesh ids into submesh interfaces
    */

@@ -2355,11 +2355,9 @@ class Mesh(metaclass = MeshMeta):
             z_tolerance,Parameters,hasVars = ParseParameters(z_tolerance)
             self.mesh.SetParameters(Parameters)
 
-            self.mesh.ExportPartToMEDCoupling( meshPart, auto_groups,
-                                        autoDimension,
-                                        fields, geomAssocFields, z_tolerance)
+            return self.mesh.ExportPartToMEDCoupling(meshPart, auto_groups, autoDimension, fields, geomAssocFields, z_tolerance)
         else:
-            self.mesh.ExportMEDCoupling(auto_groups, autoDimension)
+            return self.mesh.ExportMEDCoupling(auto_groups, autoDimension)
 
 
     def ExportMED(self, *args, **kwargs):

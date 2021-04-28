@@ -705,6 +705,13 @@ module SMESH
                           in string             geomAssocFields,
                           in double             ZTolerance) raises (SALOME::SALOME_Exception);
 
+    long long ExportPartToMEDCoupling( in SMESH_IDSource     meshPart,
+                          in boolean            auto_groups,
+                          in boolean            autoDimension,
+                          in GEOM::ListOfFields fields,
+                          in string             geomAssocFields,
+                          in double             ZTolerance) raises (SALOME::SALOME_Exception);
+
     /*!
      * Export Mesh to SAUV formatted file
      * Write a temporary med file and use med2sauv

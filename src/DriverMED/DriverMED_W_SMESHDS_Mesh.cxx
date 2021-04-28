@@ -352,12 +352,19 @@ Driver_Mesh::Status DriverMED_W_SMESHDS_Mesh::Perform()
 
 Driver_Mesh::Status DriverMED_W_SMESHDS_Mesh_Mem::Perform()
 {
-  TMemFile *tfileInst = new TMemFile;
-  MED::PWrapper myMed = CrWrapperW(myFile, -1, tfileInst);
-  Driver_Mesh::Status status = this->PerformInternal<MED::PWrapper>(myMed);
+  void *ptr(nullptr);
+  std::size_t sz(0);
+  Driver_Mesh::Status status = Driver_Mesh::DRS_OK;
+  bool isClosed(false);
+  {// let braces to flush (call of MED::PWrapper myMed destructor)
+    TMemFile *tfileInst = new TMemFile(&isClosed);
+    MED::PWrapper myMed = CrWrapperW(myFile, -1, tfileInst);
+    status = this->PerformInternal<MED::PWrapper>(myMed);
+    ptr = tfileInst->getData(); sz = tfileInst->getSize();
+  }
   _data = MEDCoupling::DataArrayByte::New();
-  _data->useArray(reinterpret_cast<char *>(tfileInst->getData()),true,MEDCoupling::DeallocType::C_DEALLOC,tfileInst->getSize(),1);
-  if(!tfileInst->IsClosed())
+  _data->useArray(reinterpret_cast<char *>(ptr),true,MEDCoupling::DeallocType::C_DEALLOC,sz,1);
+  if(!isClosed)
     THROW_SALOME_EXCEPTION("DriverMED_W_SMESHDS_Mesh_Mem::Perform - MED memory file id is supposed to be closed !");
   return status;
 }

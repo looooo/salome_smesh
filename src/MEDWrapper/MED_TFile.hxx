@@ -29,31 +29,32 @@ namespace MED
     virtual ~TFileInternal() = default;
     virtual void Open(EModeAcces theMode, TErr* theErr = nullptr) = 0;
     virtual void Close() = 0;
-    virtual bool IsClosed() const = 0;
     virtual const TIdt& Id() const = 0;
   };
 
   class MEDIDTHoder : public TFileInternal
   {
   protected:
-    MEDIDTHoder() = default;
+    MEDIDTHoder(bool *isClosedStatus = nullptr):_isClosedStatus(isClosedStatus) { }
     void UnRefFid()
     {
       if (--myCount == 0)
       {
         MEDfileClose(myFid);
         myIsClosed = true;
+        if(_isClosedStatus)
+          *_isClosedStatus = true;
       }
     }
   public:
     const TIdt& Id() const override;
     ~MEDIDTHoder() { this->UnRefFid(); }
     void Close() override { this->UnRefFid(); }
-    bool IsClosed() const override { return myIsClosed; }
   protected:
     TInt myCount = 0;
     TIdt myFid = 0;
     bool myIsClosed = false;
+    bool *_isClosedStatus = nullptr;
   };
 
   class TFileDecorator : public TFileInternal
@@ -63,7 +64,6 @@ namespace MED
     void Open(EModeAcces theMode, TErr* theErr = nullptr) override { if(_effective) _effective->Open(theMode,theErr); }
     void Close() override { if(_effective) _effective->Close(); }
     const TIdt& Id() const override { if(_effective) return _effective->Id(); EXCEPTION(std::runtime_error, "TFileDecorator - GetFid() : no effective TFile !"); }
-    bool IsClosed() const override { if(_effective) return _effective->IsClosed(); EXCEPTION(std::runtime_error, "TFileDecorator - IsClosed() : no effective TFile !"); }
     ~TFileDecorator() { delete _effective; }
   private:
     TFileInternal *_effective = nullptr;
@@ -72,7 +72,7 @@ namespace MED
   class TMemFile : public MEDIDTHoder
   {
   public:
-    TMemFile() = default;
+    TMemFile(bool* isClosedStatus = nullptr):MEDIDTHoder(isClosedStatus) { }
     void Open(EModeAcces theMode, TErr* theErr = nullptr) override;
     void *getData() const { return memfile.app_image_ptr; }
     std::size_t getSize() const { return memfile.app_image_size; }

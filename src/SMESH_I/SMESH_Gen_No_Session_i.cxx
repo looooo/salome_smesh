@@ -27,7 +27,7 @@ SMESH_Gen_No_Session_i::SMESH_Gen_No_Session_i( CORBA::ORB_ptr orb,
                                                 PortableServer::POA_ptr   poa,
                                                 PortableServer::ObjectId* contId,
                                                 const char*               instanceName,
-                                                const char*               interfaceName):SMESH_Gen_i(orb,poa,contId,instanceName,interfaceName,true)
+                                                const char*               interfaceName):SMESH_Gen_i(orb,poa,contId,instanceName,interfaceName,false)
 {
 }
 

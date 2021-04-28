@@ -346,6 +346,7 @@ namespace
 
 Driver_Mesh::Status DriverMED_W_SMESHDS_Mesh::Perform()
 {
+  PerformMedcoupling();
   MED::PWrapper myMed = CrWrapperW(myFile, myVersion);
   return this->PerformInternal<MED::PWrapper>(myMed);
 }

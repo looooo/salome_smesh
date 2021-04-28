@@ -64,9 +64,20 @@ void MCTWrapper::SetNodeInfo(const TNodeInfo& theInfo)
   MED::TInt aNbElem(anInfo.myNbElem);
   std::string aCoordNames(anInfo.myCoordNames.data());
   std::string aCoordUnits(anInfo.myCoordUnits.data());
+  std::vector<std::string> comps( DataArray::SplitStringInChuncks(aCoordNames,MED_SNAME_SIZE) );
+  std::vector<std::string> units( DataArray::SplitStringInChuncks(aCoordUnits,MED_SNAME_SIZE) );
+  std::size_t nbComps( comps.size() );
+  if( nbComps != units.size() )
+    THROW_IK_EXCEPTION("MCTWrapper::SetNodeInfo : mismatch length " << nbComps << " != " << units.size() << " !");
+  std::vector<std::string> compUnits(nbComps);
+  for( std::size_t i = 0 ; i < nbComps ; ++i )
+  {
+    compUnits[i] = DataArray::BuildInfoFromVarAndUnit(comps[i],units[i]) ;
+  }
   _coords = DataArrayDouble::New();
   _coords->alloc(aNbElem,this->_space_dim);
   std::copy(aCoord->data(),aCoord->data()+aNbElem*this->_space_dim,_coords->getPointer());
+  _coords->setInfoOnComponents(compUnits);
 }
 
 void MCTWrapper::GetFamilyInfo(TInt theFamId, TFamilyInfo& theInfo)
@@ -75,3 +86,127 @@ void MCTWrapper::GetFamilyInfo(TInt theFamId, TFamilyInfo& theInfo)
   MED::TInt aFamilyId(theInfo.myId);
   std::string aGroupNames(theInfo.myGroupNames.data());
 }
+
+//copie
+  PFamilyInfo
+  MCTWrapper::CrFamilyInfo(const PMeshInfo& theMeshInfo,
+                 const std::string& theValue,
+                 TInt theId,
+                 const MED::TStringSet& theGroupNames,
+                 const MED::TStringVector& theAttrDescs,
+                 const MED::TIntVector& theAttrIds,
+                 const MED::TIntVector& theAttrVals)
+  {
+    return PFamilyInfo(new TTFamilyInfo
+                       (theMeshInfo,
+                        theValue,
+                        theId,
+                        theGroupNames,
+                        theAttrDescs,
+                        theAttrIds,
+                        theAttrVals));
+  }
+
+  //copie
+  PPolygoneInfo
+  MCTWrapper::CrPolygoneInfo(const PMeshInfo& theMeshInfo,
+                   EEntiteMaillage theEntity,
+                   EGeometrieElement theGeom,
+                   TInt theNbElem,
+                   TInt theConnSize,
+                   EConnectivite theConnMode,
+                   EBooleen theIsElemNum,
+                   EBooleen theIsElemNames)
+  {
+    return PPolygoneInfo(new TTPolygoneInfo
+                         (theMeshInfo,
+                          theEntity,
+                          theGeom,
+                          theNbElem,
+                          theConnSize,
+                          theConnMode,
+                          theIsElemNum,
+                          theIsElemNames));
+  }
+
+  //copie
+  PPolygoneInfo
+  MCTWrapper
+  ::CrPolygoneInfo(const PMeshInfo& theMeshInfo,
+                   EEntiteMaillage theEntity,
+                   EGeometrieElement theGeom,
+                   const TIntVector& theIndexes,
+                   const TIntVector& theConnectivities,
+                   EConnectivite theConnMode,
+                   const TIntVector& theFamilyNums,
+                   const TIntVector& theElemNums,
+                   const TStringVector& theElemNames)
+  {
+    return PPolygoneInfo(new TTPolygoneInfo
+                         (theMeshInfo,
+                          theEntity,
+                          theGeom,
+                          theIndexes,
+                          theConnectivities,
+                          theConnMode,
+                          theFamilyNums,
+                          theElemNums,
+                          theElemNames));
+  }
+
+  //copie
+  PPolyedreInfo
+  MCTWrapper
+  ::CrPolyedreInfo(const PMeshInfo& theMeshInfo,
+                   EEntiteMaillage theEntity,
+                   EGeometrieElement theGeom,
+                   TInt theNbElem,
+                   TInt theNbFaces,
+                   TInt theConnSize,
+                   EConnectivite theConnMode,
+                   EBooleen theIsElemNum,
+                   EBooleen theIsElemNames)
+  {
+    return PPolyedreInfo(new TTPolyedreInfo
+                         (theMeshInfo,
+                          theEntity,
+                          theGeom,
+                          theNbElem,
+                          theNbFaces,
+                          theConnSize,
+                          theConnMode,
+                          theIsElemNum,
+                          theIsElemNames));
+  }
+
+//copie
+    PBallInfo
+  MCTWrapper
+  ::CrBallInfo(const PMeshInfo& theMeshInfo,
+               TInt theNbBalls,
+               EBooleen theIsElemNum)
+  {
+    return PBallInfo(new TTBallInfo(theMeshInfo, theNbBalls, theIsElemNum));
+  }
+
+    PCellInfo
+  MCTWrapper
+  ::CrCellInfo(const PMeshInfo& theMeshInfo,
+               EEntiteMaillage theEntity,
+               EGeometrieElement theGeom,
+               TInt theNbElem,
+               EConnectivite theConnMode,
+               EBooleen theIsElemNum,
+               EBooleen theIsElemNames,
+               EModeSwitch theMode)
+  {
+    return PCellInfo(new TTCellInfo
+                     (theMeshInfo,
+                      theEntity,
+                      theGeom,
+                      theNbElem,
+                      theConnMode,
+                      theIsElemNum,
+                      theIsElemNames,
+                      theMode));
+  }

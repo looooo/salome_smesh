@@ -61,7 +61,7 @@ namespace MED
                  const TStringSet& theGroupNames,
                  const TStringVector& theAttrDescs = TStringVector(),
                  const TIntVector& theAttrIds = TIntVector(),
-                 const TIntVector& theAttrVals = TIntVector()) { }
+                 const TIntVector& theAttrVals = TIntVector());
     
     //! Create a MEDWrapper MED Polygones representation
     virtual
@@ -73,7 +73,7 @@ namespace MED
                    TInt theConnSize,
                    EConnectivite theConnMode = eNOD,
                    EBooleen theIsElemNum = eVRAI,
-                   EBooleen theIsElemNames = eVRAI) { }
+                   EBooleen theIsElemNames = eVRAI);
     
     //! Create a MEDWrapper MED Polygones representation
     virtual
@@ -86,7 +86,7 @@ namespace MED
                    EConnectivite theConnMode = eNOD,
                    const TIntVector& theFamilyNums = TIntVector(),
                    const TIntVector& theElemNums = TIntVector(),
-                   const TStringVector& theElemNames = TStringVector()) { }
+                   const TStringVector& theElemNames = TStringVector());
                    
                    
     //! Write a MEDWrapper MED Polygones representation into the MED file
@@ -103,7 +103,7 @@ namespace MED
                    TInt theConnSize,
                    EConnectivite theConnMode = eNOD,
                    EBooleen theIsElemNum = eVRAI,
-                   EBooleen theIsElemNames = eVRAI) { }
+                   EBooleen theIsElemNames = eVRAI);
                    
                    
     //! Write a MEDWrapper MED Polyedres representation into the MED file

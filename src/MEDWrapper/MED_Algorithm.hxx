@@ -51,44 +51,50 @@ namespace MED
 
   //---------------------------------------------------------------
   //! Get set of TElemInfo by its geometrical type and corresponding MED ENTITY
+  template<class TFILECLS>
   MEDWRAPPER_EXPORT
   TEntity2TGeom2ElemInfo
-  GetEntity2TGeom2ElemInfo(const PWrapper& theWrapper,
+  GetEntity2TGeom2ElemInfo(const PWrapper<TFILECLS>& theWrapper,
                            const PMeshInfo& theMeshInfo,
                            const MED::TEntityInfo& theEntityInfo);
 
   //---------------------------------------------------------------
   //! Read set of MED FAMILIES for defined MED file
+  template<class TFILECLS>
   MEDWRAPPER_EXPORT
   TFamilyInfoSet
-  GetFamilyInfoSet(const PWrapper& theWrapper,
+  GetFamilyInfoSet(const PWrapper<TFILECLS>& theWrapper,
                    const PMeshInfo& theMeshInfo);
 
   //---------------------------------------------------------------
   //! Compare two MED FAMILIES
+  template<class TFILECLS>
   MEDWRAPPER_EXPORT
   bool
   operator<(const TFamilyTSize& theLeft, const TFamilyTSize& theRight);
 
   //---------------------------------------------------------------
   //! Split set of MED FAMILIES by corresponding MED ENTITY
+  template<class TFILECLS>
   MEDWRAPPER_EXPORT
   TEntity2FamilySet
-  GetEntity2FamilySet(const PWrapper& theWrapper,
+  GetEntity2FamilySet(const PWrapper<TFILECLS>& theWrapper,
                       const TEntity2TGeom2ElemInfo& theEntity2TGeom2ElemInfo,
                       const TFamilyInfoSet& theFamilyInfoSet);
 
   //---------------------------------------------------------------
   //! Split the input set of MED FAMILIES by corresponding MED GROUPS
+  template<class TFILECLS>
   MEDWRAPPER_EXPORT
   TGroupInfo
   GetGroupInfo(const TFamilyInfoSet& theFamilyInfoSet);
 
   //---------------------------------------------------------------
   //! Read set of MED TIMESTAMPS groupped by corresponding MED FIELDS
+  template<class TFILECLS>
   MEDWRAPPER_EXPORT
   TFieldInfo2TimeStampInfoSet
-  GetFieldInfo2TimeStampInfoSet(const PWrapper& theWrapper,
+  GetFieldInfo2TimeStampInfoSet(const PWrapper<TFILECLS>& theWrapper,
                                 const PMeshInfo& theMeshInfo,
                                 const MED::TEntityInfo& theEntityInfo);
 
@@ -100,26 +106,29 @@ namespace MED
 
   //---------------------------------------------------------------
   //! Read set of MED GAUSS
+  template<class TFILECLS>
   MEDWRAPPER_EXPORT
   TKey2Gauss
-  GetKey2Gauss(const PWrapper& theWrapper,
+  GetKey2Gauss(const PWrapper<TFILECLS>& theWrapper,
                TErr* theErr = NULL,
                EModeSwitch theMode = eFULL_INTERLACE);
 
   //---------------------------------------------------------------
   //! Get MED PROFILE by its name
+  template<class TFILECLS>
   MEDWRAPPER_EXPORT
   PProfileInfo
-  GetProfileInfo(const PWrapper& theWrapper,
+  GetProfileInfo(const PWrapper<TFILECLS>& theWrapper,
                  const std::string& theProfileName,
                  TErr* theErr = NULL,
                  EModeProfil theMode = eCOMPACT);
 
   //---------------------------------------------------------------
   //! Read set of MED PROFILES
+  template<class TFILECLS>
   MEDWRAPPER_EXPORT
   TMKey2Profile
-  GetMKey2Profile(const PWrapper& theWrapper,
+  GetMKey2Profile(const PWrapper<TFILECLS>& theWrapper,
                   TErr* theErr = NULL,
                   EModeProfil theMode = eCOMPACT);
 

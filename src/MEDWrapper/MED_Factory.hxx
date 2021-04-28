@@ -44,10 +44,10 @@ namespace MED
   std::vector<int> GetMEDVersionsAppendCompatible();
 
   MEDWRAPPER_EXPORT
-  PWrapper CrWrapperR( const std::string& );
+  PWrapper<TFile> CrWrapperR( const std::string& );
 
   MEDWRAPPER_EXPORT
-  PWrapper CrWrapperW( const std::string&, int theVersion=-1 );
+  PWrapper<TFile> CrWrapperW( const std::string&, int theVersion=-1 );
 }
 
 #endif // MED_Factory_HeaderFile

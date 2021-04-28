@@ -39,6 +39,7 @@ namespace MED
 
   //----------------------------------------------------------------------------
   //! Class that wraps the MED API
+  template<class TFILECLS>
   class MEDWRAPPER_EXPORT TWrapper
   {
     friend class TLockProxy;
@@ -938,55 +939,57 @@ namespace MED
                     TErr* theErr = NULL);
 
   protected:
-    PFile myFile;
+    TFILECLS myFile;
     TInt myMajor;
     TInt myMinor;
   };
 
   //----------------------------------------------------------------------------
-  typedef SharedPtr<TWrapper> PWrapper;
+  template<class TFILECLS>
+  using PWrapper = class SharedPtr<TWrapper<TFILECLS> >;
 
   //----------------------------------------------------------------------------
   //! This class provides thread-safety for MEDWrapper interaction
+  template<class TFILECLS>
   class MEDWRAPPER_EXPORT TLockProxy
   {
     TLockProxy& operator=(const TLockProxy& );
-    TWrapper* myWrapper;
+    typedef TWrapper<TFILECLS>* myWrapper;
 
   public:
-    TLockProxy(TWrapper* theWrapper);
+    TLockProxy(TWrapper<TFILECLS>* theWrapper);
     ~TLockProxy();
 
-    TWrapper* operator->() const;
+    TWrapper<TFILECLS>* operator->() const;
   };
 
   //----------------------------------------------------------------------------
   //! Specialization of SharedPtr for TWrapper
-  template<>
-  class MEDWRAPPER_EXPORT SharedPtr<TWrapper>: public std::shared_ptr<TWrapper>
+  template<class TFILECLS>
+  class MEDWRAPPER_EXPORT SharedPtr<TWrapper<TFILECLS>>: public std::shared_ptr<TWrapper<TFILECLS>>
   {
   public:
     SharedPtr() {}
 
-    SharedPtr(TWrapper* p):
-      std::shared_ptr<TWrapper>(p)
+    SharedPtr(TWrapper<TFILECLS>* p):
+      std::shared_ptr<TWrapper<TFILECLS>>(p)
     {}
 
     template<class Y>
     explicit SharedPtr(Y* p):
-      std::shared_ptr<TWrapper>(p)
+      std::shared_ptr<TWrapper<TFILECLS>>(p)
     {}
 
     template<class Y>
     SharedPtr(const SharedPtr<Y>& r):
-      std::shared_ptr<TWrapper>(boost::dynamic_pointer_cast<TWrapper,Y>(r))
+      std::shared_ptr<TWrapper<TFILECLS>>(boost::dynamic_pointer_cast<TWrapper<TFILECLS>,Y>(r))
     {}
 
     template<class Y>
     SharedPtr&
     operator=(const SharedPtr<Y>& r)
     {
-      SharedPtr<TWrapper>(r).swap(*this);
+      SharedPtr<TWrapper<TFILECLS>>(r).swap(*this);
       return *this;
     }
 
@@ -1004,24 +1007,24 @@ namespace MED
       return operator=<Y>(SharedPtr<Y>(r));
     }
 
-    TLockProxy
+    TLockProxy<TFILECLS>
     operator->() const // never throws
     {
-      return TLockProxy(this->get());
+      return TLockProxy<TFILECLS>(this->get());
     }
 
   protected:
-    operator const TWrapper&() const;
+    operator const TWrapper<TFILECLS>&() const;
 
-    operator TWrapper&();
+    operator TWrapper<TFILECLS>&();
 
-    TWrapper&
+    TWrapper<TFILECLS>&
     operator*() const;
 
-    TWrapper*
+    TWrapper<TFILECLS>*
     get() const // never throws
     {
-      return std::shared_ptr<TWrapper>::get();
+      return std::shared_ptr<TWrapper<TFILECLS>>::get();
     }
   };
 }

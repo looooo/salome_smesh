@@ -134,8 +134,10 @@ namespace MED
   struct TTimeStampValueBase;
   typedef SharedPtr<TTimeStampValueBase> PTimeStampValueBase;
 
+  template<class TFILECLS>
   struct TWrapper;
-  typedef SharedPtr<TWrapper> PWrapper;
+  template<class TFILECLS>
+  using PWrapper = class SharedPtr<TWrapper<TFILECLS> >;
 
   MEDWRAPPER_EXPORT
   TInt

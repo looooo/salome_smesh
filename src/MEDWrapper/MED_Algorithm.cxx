@@ -35,8 +35,9 @@ static int MYVALUEDEBUG = 0;
 namespace MED
 {
   //---------------------------------------------------------------
+  template<class TFILECLS>
   TEntity2TGeom2ElemInfo
-  GetEntity2TGeom2ElemInfo(const PWrapper& theWrapper,
+  GetEntity2TGeom2ElemInfo(const PWrapper<TFILECLS>& theWrapper,
                            const PMeshInfo& theMeshInfo,
                            const MED::TEntityInfo& theEntityInfo)
   {
@@ -66,8 +67,9 @@ namespace MED
   }
 
   //---------------------------------------------------------------
+  template<class TFILECLS>
   TFamilyInfoSet
-  GetFamilyInfoSet(const PWrapper& theWrapper,
+  GetFamilyInfoSet(const PWrapper<TFILECLS>& theWrapper,
                    const PMeshInfo& theMeshInfo)
   {
     MSG(MYDEBUG,"GetFamilies(...)");
@@ -120,8 +122,9 @@ namespace MED
   }
 
   //---------------------------------------------------------------
+  template<class TFILECLS>
   TFieldInfo2TimeStampInfoSet
-  GetFieldInfo2TimeStampInfoSet(const PWrapper& theWrapper,
+  GetFieldInfo2TimeStampInfoSet(const PWrapper<TFILECLS>& theWrapper,
                                 const PMeshInfo& theMeshInfo,
                                 const MED::TEntityInfo& theEntityInfo)
   {
@@ -177,8 +180,9 @@ namespace MED
   }
 
   //---------------------------------------------------------------
+  template<class TFILECLS>
   TEntity2FamilySet
-  GetEntity2FamilySet(const PWrapper& /*theWrapper*/,
+  GetEntity2FamilySet(const PWrapper<TFILECLS>& /*theWrapper*/,
                       const TEntity2TGeom2ElemInfo& theEntity2TGeom2ElemInfo,
                       const TFamilyInfoSet& theFamilyInfoSet)
   {
@@ -243,8 +247,9 @@ namespace MED
   }
 
   //---------------------------------------------------------------
+  template<class TFILECLS>
   TKey2Gauss
-  GetKey2Gauss(const PWrapper& theWrapper,
+  GetKey2Gauss(const PWrapper<TFILECLS>& theWrapper,
                TErr* theErr,
                EModeSwitch theMode)
   {
@@ -272,8 +277,9 @@ namespace MED
   }
 
   //---------------------------------------------------------------
+  template<class TFILECLS>
   PProfileInfo
-  GetProfileInfo(const PWrapper& theWrapper,
+  GetProfileInfo(const PWrapper<TFILECLS>& theWrapper,
                  const std::string& theProfileName,
                  TErr* theErr,
                  EModeProfil theMode)
@@ -290,8 +296,9 @@ namespace MED
   }
 
   //---------------------------------------------------------------
+  template<class TFILECLS>
   TMKey2Profile
-  GetMKey2Profile(const PWrapper& theWrapper,
+  GetMKey2Profile(const PWrapper<TFILECLS>& theWrapper,
                   TErr* theErr,
                   EModeProfil theMode)
   {

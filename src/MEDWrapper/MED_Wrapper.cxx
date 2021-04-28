@@ -45,31 +45,34 @@ static int MYVALUEDEBUG = 0;
 namespace MED
 {
   //---------------------------------------------------------------
-  TLockProxy
-  ::TLockProxy(TWrapper* theWrapper):
+  template<class TFILECLS>
+  TLockProxy<TFILECLS>
+  ::TLockProxy(TWrapper<TFILECLS>* theWrapper):
     myWrapper(theWrapper)
   {
 #if BOOST_VERSION >= 103500
     myWrapper->myMutex.lock();
 #else
-    boost::detail::thread::lock_ops<TWrapper::TMutex>::lock(myWrapper->myMutex);
+    boost::detail::thread::lock_ops<TWrapper<TFILECLS>::TMutex>::lock(myWrapper->myMutex);
 #endif
     INITMSG(MYDEBUG, "TLockProxy() - this -"<<this<<"; myWrapper = "<<myWrapper<<std::endl);
   }
 
-  TLockProxy
+  template<class TFILECLS>
+  TLockProxy<TFILECLS>
   ::~TLockProxy()
   {
     INITMSG(MYDEBUG, "~TLockProxy() - this -"<<this<<"; myWrapper = "<<myWrapper<<std::endl);
 #if BOOST_VERSION >= 103500
     myWrapper->myMutex.unlock();
 #else
-    boost::detail::thread::lock_ops<TWrapper::TMutex>::unlock(myWrapper->myMutex);
+    boost::detail::thread::lock_ops<TWrapper<TFILECLS>::TMutex>::unlock(myWrapper->myMutex);
 #endif
   }
 
-  TWrapper*
-  TLockProxy
+  template<class TFILECLS>
+  typedef TWrapper<TFILECLS>*
+  TLockProxy<TFILECLS>
   ::operator->() const // never throws
   {
     return myWrapper;
@@ -210,7 +213,8 @@ namespace MED
   }
 
   //---------------------------------------------------------------
-  TWrapper
+  template<class TFILECLS>
+  TWrapper<TFILECLS>
   ::TWrapper(const std::string& theFileName, bool write, TInt theMajor, TInt theMinor):
     myFile(new TFile(theFileName, theMajor, theMinor)),
     myMajor(theMajor),
@@ -230,14 +234,16 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
-  TWrapper::
+  template<class TFILECLS>
+  TWrapper<TFILECLS>::
   ~TWrapper()
   {
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   TInt
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetNbMeshes(TErr* theErr)
   {
     TFileWrapper aFileWrapper(myFile, eLECTURE, theErr, myMinor);
@@ -249,8 +255,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetMeshInfo(TInt theMeshId,
                 MED::TMeshInfo& theInfo,
                 TErr* theErr)
@@ -291,8 +298,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::SetMeshInfo(const MED::TMeshInfo& theInfo,
                 TErr* theErr)
   {
@@ -310,8 +318,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::SetMeshInfo(const MED::TMeshInfo& theInfo,
                 EModeAcces theMode,
                 TErr* theErr)
@@ -359,8 +368,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PMeshInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::CrMeshInfo(TInt theDim,
                TInt theSpaceDim,
                const std::string& theValue,
@@ -376,16 +386,18 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PMeshInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::CrMeshInfo(const PMeshInfo& theInfo)
   {
     return PMeshInfo(new TTMeshInfo(theInfo));
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PMeshInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetPMeshInfo(TInt theId,
                  TErr* theErr)
   {
@@ -395,8 +407,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   TInt
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetNbFamilies(const MED::TMeshInfo& theInfo,
                   TErr* theErr)
   {
@@ -411,8 +424,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   TInt
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetNbFamAttr(TInt theFamId,
                  const MED::TMeshInfo& theInfo,
                  TErr* theErr)
@@ -430,8 +444,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS> 
   TInt
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetNbFamGroup(TInt theFamId,
                   const MED::TMeshInfo& theInfo,
                   TErr* theErr)
@@ -449,8 +464,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetFamilyInfo(TInt theFamId,
                   MED::TFamilyInfo& theInfo,
                   TErr* theErr)
@@ -491,8 +507,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::SetFamilyInfo(const MED::TFamilyInfo& theInfo,
                   TErr* theErr)
   {
@@ -507,8 +524,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::SetFamilyInfo(const MED::TFamilyInfo& theInfo,
                   EModeAcces theMode,
                   TErr* theErr)
@@ -547,8 +565,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PFamilyInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::CrFamilyInfo(const PMeshInfo& theMeshInfo,
                  TInt theNbGroup,
                  TInt theNbAttr,
@@ -564,8 +583,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
-  PFamilyInfo
-  TWrapper
+  template<class TFILECLS>
+  template<class TFILECLS>PFamilyInfo
+  TWrapper<TFILECLS>
   ::CrFamilyInfo(const PMeshInfo& theMeshInfo,
                  const std::string& theValue,
                  TInt theId,
@@ -585,8 +605,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PFamilyInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::CrFamilyInfo(const PMeshInfo& theMeshInfo,
                  const PFamilyInfo& theInfo)
   {
@@ -596,8 +617,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PFamilyInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetPFamilyInfo(const PMeshInfo& theMeshInfo,
                    TInt theId,
                    TErr* theErr)
@@ -627,8 +649,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetNames(TElemInfo& theInfo,
              TInt /*theNb*/,
              EEntiteMaillage theEntity,
@@ -665,8 +688,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::SetNames(const TElemInfo& theInfo,
              EEntiteMaillage theEntity,
              EGeometrieElement theGeom,
@@ -676,8 +700,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::SetNames(const TElemInfo& theInfo,
              EModeAcces theMode,
              EEntiteMaillage theEntity,
@@ -718,8 +743,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetNumeration(TElemInfo& theInfo,
                   TInt /*theNb*/,
                   EEntiteMaillage theEntity,
@@ -756,8 +782,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::SetNumeration(const TElemInfo& theInfo,
                   EEntiteMaillage theEntity,
                   EGeometrieElement theGeom,
@@ -767,8 +794,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::SetNumeration(const TElemInfo& theInfo,
                   EModeAcces theMode,
                   EEntiteMaillage theEntity,
@@ -809,8 +837,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetFamilies(TElemInfo& theInfo,
                 TInt /*theNb*/,
                 EEntiteMaillage theEntity,
@@ -856,8 +885,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::SetFamilies(const TElemInfo& theInfo,
                 EEntiteMaillage theEntity,
                 EGeometrieElement theGeom,
@@ -867,8 +897,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::SetFamilies(const TElemInfo& theInfo,
                 EModeAcces theMode,
                 EEntiteMaillage theEntity,
@@ -907,8 +938,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   TInt
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetNbNodes(const MED::TMeshInfo& theMeshInfo,
                TErr* theErr)
   {
@@ -916,8 +948,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   TInt
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetNbNodes(const MED::TMeshInfo& theMeshInfo,
                ETable theTable,
                TErr* theErr)
@@ -945,8 +978,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetNodeInfo(MED::TNodeInfo& theInfo,
                 TErr* theErr)
   {
@@ -1019,8 +1053,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::SetNodeInfo(const MED::TNodeInfo& theInfo,
                 TErr* theErr)
   {
@@ -1035,8 +1070,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::SetNodeInfo(const MED::TNodeInfo& theInfo,
                 EModeAcces theMode,
                 TErr* theErr)
@@ -1104,8 +1140,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PNodeInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::CrNodeInfo(const PMeshInfo& theMeshInfo,
                TInt theNbElem,
                EModeSwitch theMode,
@@ -1123,8 +1160,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PNodeInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::CrNodeInfo(const PMeshInfo& theMeshInfo,
                const TFloatVector& theNodeCoords,
                EModeSwitch theMode,
@@ -1148,8 +1186,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PNodeInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::CrNodeInfo(const PMeshInfo& theMeshInfo,
                const PNodeInfo& theInfo)
   {
@@ -1160,7 +1199,7 @@ namespace MED
 
   //----------------------------------------------------------------------------
   PNodeInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetPNodeInfo(const PMeshInfo& theMeshInfo,
                  TErr* theErr)
   {
@@ -1208,8 +1247,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PElemInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::CrElemInfo(const PMeshInfo& theMeshInfo,
                TInt theNbElem,
                EBooleen theIsElemNum,
@@ -1223,8 +1263,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PElemInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::CrElemInfo(const PMeshInfo& theMeshInfo,
                TInt theNbElem,
                const TIntVector& theFamNum,
@@ -1240,8 +1281,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PElemInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetPElemInfo(const PMeshInfo& theMeshInfo,
                  EEntiteMaillage theEntity,
                  EGeometrieElement theGeom,
@@ -1332,8 +1374,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   TInt
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetNbPolygones(const MED::TMeshInfo& theMeshInfo,
                    EEntiteMaillage theEntity,
                    EGeometrieElement theGeom,
@@ -1344,8 +1387,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   TInt
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetPolygoneConnSize(const MED::TMeshInfo& theMeshInfo,
                         EEntiteMaillage theEntity,
                         EGeometrieElement theGeom,
@@ -1380,8 +1424,9 @@ namespace MED
   }
 
   //-----------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetPolygoneInfo(MED::TPolygoneInfo& theInfo,
                     TErr* theErr)
   {
@@ -1429,8 +1474,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::SetPolygoneInfo(const MED::TPolygoneInfo& theInfo,
                     TErr* theErr)
   {
@@ -1438,8 +1484,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::SetPolygoneInfo(const MED::TPolygoneInfo& theInfo,
                     EModeAcces theMode,
                     TErr* theErr)
@@ -1483,8 +1530,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PPolygoneInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::CrPolygoneInfo(const PMeshInfo& theMeshInfo,
                    EEntiteMaillage theEntity,
                    EGeometrieElement theGeom,
@@ -1506,8 +1554,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PPolygoneInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::CrPolygoneInfo(const PMeshInfo& theMeshInfo,
                    EEntiteMaillage theEntity,
                    EGeometrieElement theGeom,
@@ -1531,8 +1580,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PPolygoneInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::CrPolygoneInfo(const PMeshInfo& theMeshInfo,
                    const PPolygoneInfo& theInfo)
   {
@@ -1542,8 +1592,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PPolygoneInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetPPolygoneInfo(const PMeshInfo& theMeshInfo,
                      EEntiteMaillage theEntity,
                      EGeometrieElement theGeom,
@@ -1576,8 +1627,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   TInt
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetNbPolyedres(const MED::TMeshInfo& theMeshInfo,
                    EEntiteMaillage theEntity,
                    EGeometrieElement theGeom,
@@ -1588,8 +1640,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetPolyedreConnSize(const TMeshInfo& theMeshInfo,
                         TInt& theNbFaces,
                         TInt& theConnSize,
@@ -1637,8 +1690,9 @@ namespace MED
   }
 
   //-----------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetPolyedreInfo(TPolyedreInfo& theInfo,
                     TErr* theErr)
   {
@@ -1690,8 +1744,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::SetPolyedreInfo(const TPolyedreInfo& theInfo,
                     TErr* theErr)
   {
@@ -1699,8 +1754,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::SetPolyedreInfo(const MED::TPolyedreInfo& theInfo,
                     EModeAcces theMode,
                     TErr* theErr)
@@ -1789,8 +1845,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PPolyedreInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::CrPolyedreInfo(const PMeshInfo& theMeshInfo,
                    EEntiteMaillage theEntity,
                    EGeometrieElement theGeom,
@@ -1814,8 +1871,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PPolyedreInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::CrPolyedreInfo(const PMeshInfo& theMeshInfo,
                    EEntiteMaillage theEntity,
                    EGeometrieElement theGeom,
@@ -1841,8 +1899,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PPolyedreInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::CrPolyedreInfo(const PMeshInfo& theMeshInfo,
                    const PPolyedreInfo& theInfo)
   {
@@ -1852,8 +1911,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PPolyedreInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetPPolyedreInfo(const PMeshInfo& theMeshInfo,
                      EEntiteMaillage theEntity,
                      EGeometrieElement theGeom,
@@ -1893,8 +1953,9 @@ namespace MED
   }
 
   //-----------------------------------------------------------------
+  template<class TFILECLS>
   TEntityInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetEntityInfo(const MED::TMeshInfo& theMeshInfo,
                   EConnectivite theConnMode,
                   TErr* theErr)
@@ -2005,8 +2066,9 @@ namespace MED
   }
 
   //-----------------------------------------------------------------
+  template<class TFILECLS>
   TInt
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetNbCells(const MED::TMeshInfo& theMeshInfo,
                EEntiteMaillage theEntity,
                EGeometrieElement theGeom,
@@ -2057,8 +2119,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetCellInfo(MED::TCellInfo& theInfo,
                 TErr* theErr)
   {
@@ -2132,8 +2195,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::SetCellInfo(const MED::TCellInfo& theInfo,
                 TErr* theErr)
   {
@@ -2141,8 +2205,10 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::SetCellInfo(const MED::TCellInfo& theInfo,
                 EModeAcces theMode,
                 TErr* theErr)
@@ -2215,8 +2281,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PCellInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::CrCellInfo(const PMeshInfo& theMeshInfo,
                EEntiteMaillage theEntity,
                EGeometrieElement theGeom,
@@ -2238,8 +2305,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PCellInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::CrCellInfo(const PMeshInfo& theMeshInfo,
                EEntiteMaillage theEntity,
                EGeometrieElement theGeom,
@@ -2263,8 +2331,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PCellInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::CrCellInfo(const PMeshInfo& theMeshInfo,
                const PCellInfo& theInfo)
   {
@@ -2274,8 +2343,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PCellInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetPCellInfo(const PMeshInfo& theMeshInfo,
                  EEntiteMaillage theEntity,
                  EGeometrieElement theGeom,
@@ -2321,8 +2391,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   EGeometrieElement
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetBallGeom(const TMeshInfo& /*theMeshInfo*/)
   {
     TErr anError;
@@ -2334,8 +2405,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   TInt
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetNbBalls(const TMeshInfo& theMeshInfo)
   {
     TErr anError;
@@ -2349,8 +2421,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetBallInfo(TBallInfo& theInfo,
                 TErr* theErr)
   {
@@ -2389,8 +2462,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::SetBallInfo(const TBallInfo& theInfo,
                 TErr* theErr)
   {
@@ -2398,8 +2472,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::SetBallInfo(const TBallInfo& theInfo,
                 EModeAcces theMode,
                 TErr* theErr)
@@ -2482,8 +2557,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PBallInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::CrBallInfo(const PMeshInfo& theMeshInfo,
                TInt theNbBalls,
                EBooleen theIsElemNum)
@@ -2492,8 +2568,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PBallInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::CrBallInfo(const PMeshInfo& theMeshInfo,
                const TIntVector& theNodes,
                TFloatVector& theDiameters,
@@ -2505,8 +2582,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PBallInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::CrBallInfo(const PMeshInfo& theMeshInfo,
                const PBallInfo& theInfo)
   {
@@ -2514,8 +2592,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PBallInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetPBallInfo(const PMeshInfo& theMeshInfo)
   {
     TInt nbBalls = GetNbBalls(theMeshInfo);
@@ -2528,8 +2607,9 @@ namespace MED
   }
 
   //-----------------------------------------------------------------
+  template<class TFILECLS>
   TInt
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetNbFields(TErr* theErr)
   {
     TFileWrapper aFileWrapper(myFile, eLECTURE, theErr, myMinor);
@@ -2541,8 +2621,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   TInt
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetNbComp(TInt theFieldId,
               TErr* theErr)
   {
@@ -2555,8 +2636,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetFieldInfo(TInt theFieldId,
                  MED::TFieldInfo& theInfo,
                  TErr* theErr)
@@ -2604,8 +2686,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::SetFieldInfo(const MED::TFieldInfo& theInfo,
                  TErr* theErr)
   {
@@ -2620,8 +2703,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::SetFieldInfo(const MED::TFieldInfo& theInfo,
                  EModeAcces theMode,
                  TErr* theErr)
@@ -2656,8 +2740,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PFieldInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::CrFieldInfo(const PMeshInfo& theMeshInfo,
                 TInt theNbComp,
                 ETypeChamp theType,
@@ -2675,8 +2760,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PFieldInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::CrFieldInfo(const PMeshInfo& theMeshInfo,
                 const PFieldInfo& theInfo)
   {
@@ -2686,8 +2772,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PFieldInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetPFieldInfo(const PMeshInfo& theMeshInfo,
                   TInt theId,
                   TErr* theErr)
@@ -2709,8 +2796,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   TInt
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetNbGauss(TErr* theErr)
   {
     TFileWrapper aFileWrapper(myFile, eLECTURE, theErr, myMinor);
@@ -2722,8 +2810,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   TGaussInfo::TInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetGaussPreInfo(TInt theId,
                     TErr* theErr)
   {
@@ -2761,8 +2850,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetGaussInfo(TInt /*theId*/,
                  TGaussInfo& theInfo,
                  TErr* theErr)
@@ -2793,8 +2883,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PGaussInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::CrGaussInfo(const TGaussInfo::TInfo& theInfo,
                 EModeSwitch theMode)
   {
@@ -2804,8 +2895,9 @@ namespace MED
   }
 
   //-----------------------------------------------------------------
+  template<class TFILECLS>
   TInt
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetNbTimeStamps(const MED::TFieldInfo& theInfo,
                     const MED::TEntityInfo& theEntityInfo,
                     EEntiteMaillage& theEntity,
@@ -2930,8 +3022,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetTimeStampInfo(TInt theTimeStampId,
                      MED::TTimeStampInfo& theInfo,
                      TErr* theErr)
@@ -3024,8 +3117,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PTimeStampInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::CrTimeStampInfo(const PFieldInfo& theFieldInfo,
                     EEntiteMaillage theEntity,
                     const TGeom2Size& theGeom2Size,
@@ -3049,8 +3143,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PTimeStampInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::CrTimeStampInfo(const PFieldInfo& theFieldInfo,
                     const PTimeStampInfo& theInfo)
   {
@@ -3060,8 +3155,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PTimeStampInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetPTimeStampInfo(const PFieldInfo& theFieldInfo,
                       EEntiteMaillage theEntity,
                       const TGeom2Size& theGeom2Size,
@@ -3085,8 +3181,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   TInt
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetNbProfiles(TErr* theErr)
   {
     TFileWrapper aFileWrapper(myFile, eLECTURE, theErr, myMinor);
@@ -3098,8 +3195,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   TProfileInfo::TInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetProfilePreInfo(TInt theId,
                       TErr* theErr)
   {
@@ -3125,8 +3223,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetProfileInfo(TInt /*theId*/,
                    TProfileInfo& theInfo,
                    TErr* theErr)
@@ -3151,8 +3250,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::SetProfileInfo(const TProfileInfo& theInfo,
                    TErr* theErr)
   {
@@ -3170,8 +3270,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::SetProfileInfo(const TProfileInfo& theInfo,
                    EModeAcces theMode,
                    TErr* theErr)
@@ -3197,8 +3298,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PProfileInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::CrProfileInfo(const TProfileInfo::TInfo& theInfo,
                   EModeProfil theMode)
   {
@@ -3208,8 +3310,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PProfileInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetPProfileInfo(TInt theId,
                     EModeProfil theMode,
                     TErr* theErr)
@@ -3222,8 +3325,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetTimeStampValue(const PTimeStampValueBase& theTimeStampValue,
                       const TMKey2Profile& theMKey2Profile,
                       const TKey2Gauss& theKey2Gauss,
@@ -3391,8 +3495,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::SetTimeStampValue(const PTimeStampValueBase& theTimeStampValue,
                       TErr* theErr)
   {
@@ -3407,8 +3512,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::SetTimeStampValue(const MED::PTimeStampValueBase& theTimeStampValue,
                       EModeAcces theMode,
                       TErr* theErr)
@@ -3489,8 +3595,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PTimeStampValueBase
-  TWrapper
+  TWrapper<TFILECLS>
   ::CrTimeStampValue(const PTimeStampInfo& theTimeStampInfo,
                      ETypeChamp theTypeChamp,
                      const TGeom2Profile& theGeom2Profile,
@@ -3510,8 +3617,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PTimeStampValueBase
-  TWrapper
+  TWrapper<TFILECLS>
   ::CrTimeStampValue(const PTimeStampInfo& theTimeStampInfo,
                      const TGeom2Profile& theGeom2Profile,
                      EModeSwitch theMode)
@@ -3524,8 +3632,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PTimeStampValueBase
-  TWrapper
+  TWrapper<TFILECLS>
   ::CrTimeStampValue(const PTimeStampInfo& theTimeStampInfo,
                      const PTimeStampValueBase& theInfo,
                      ETypeChamp theTypeChamp)
@@ -3542,8 +3651,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PTimeStampValueBase
-  TWrapper
+  TWrapper<TFILECLS>
   ::CrTimeStampValue(const PTimeStampInfo& theTimeStampInfo,
                      const PTimeStampValueBase& theInfo)
   {
@@ -3554,8 +3664,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PTimeStampValueBase
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetPTimeStampValue(const PTimeStampInfo& theTimeStampInfo,
                        const TMKey2Profile& theMKey2Profile,
                        const TKey2Gauss& theKey2Gauss,
@@ -3578,8 +3689,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetTimeStampVal(const PTimeStampVal& theVal,
                     const TMKey2Profile& theMKey2Profile,
                     const TKey2Gauss& theKey2Gauss,
@@ -3605,8 +3717,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::SetTimeStamp(const PTimeStampVal& theVal,
                  TErr* theErr)
   {
@@ -3625,8 +3738,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PTimeStampVal
-  TWrapper
+  TWrapper<TFILECLS>
   ::CrTimeStampVal(const PTimeStampInfo& theTimeStampInfo,
                    const TGeom2Profile& theGeom2Profile,
                    EModeSwitch theMode)
@@ -3638,8 +3752,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PTimeStampVal
-  TWrapper
+  TWrapper<TFILECLS>
   ::CrTimeStampVal(const PTimeStampInfo& theTimeStampInfo,
                    const PTimeStampVal& theInfo)
   {
@@ -3649,8 +3764,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PTimeStampVal
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetPTimeStampVal(const PTimeStampInfo& theTimeStampInfo,
                      const TMKey2Profile& theMKey2Profile,
                      const TKey2Gauss& theKey2Gauss,
@@ -3665,8 +3781,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PGrilleInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetPGrilleInfo(const PMeshInfo& theMeshInfo)
   {
     if (theMeshInfo->GetType() != eSTRUCTURE)
@@ -3735,8 +3852,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PGrilleInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetPGrilleInfo(const PMeshInfo& theMeshInfo,
                    const PGrilleInfo& theInfo)
   {
@@ -3745,8 +3863,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetGrilleInfo(TGrilleInfo& theInfo,
                   TErr* theErr)
   {
@@ -3903,8 +4022,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::SetGrilleInfo(const MED::TGrilleInfo& theInfo,
                   TErr* theErr)
   {
@@ -3912,8 +4032,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::SetGrilleInfo(const MED::TGrilleInfo& theInfo,
                   EModeAcces theMode,
                   TErr* theErr)
@@ -3993,8 +4114,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PGrilleInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::CrGrilleInfo(const PMeshInfo& theMeshInfo,
                  const PGrilleInfo& theInfo)
   {
@@ -4004,16 +4126,18 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PGrilleInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::CrGrilleInfo(const PMeshInfo& /*theMeshInfo*/)
   {
     return PGrilleInfo(); // not implemented????
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PGrilleInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::CrGrilleInfo(const PMeshInfo& theMeshInfo,
                  const EGrilleType& type)
   {
@@ -4023,8 +4147,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PGrilleInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::CrGrilleInfo(const PMeshInfo& theMeshInfo,
                  const EGrilleType& type,
                  const TInt& nbNodes)
@@ -4036,8 +4161,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   PGrilleInfo
-  TWrapper
+  TWrapper<TFILECLS>
   ::CrGrilleInfo(const PMeshInfo& theMeshInfo,
                  const EGrilleType& type,
                  const MED::TIntVector& nbNodeVec)
@@ -4049,8 +4175,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetGrilleType(const MED::TMeshInfo& theMeshInfo,
                   EGrilleType& theGridType,
                   TErr* theErr)
@@ -4075,8 +4202,9 @@ namespace MED
   }
 
   //----------------------------------------------------------------------------
+  template<class TFILECLS>
   void
-  TWrapper
+  TWrapper<TFILECLS>
   ::GetGrilleStruct(const MED::TMeshInfo& theMeshInfo,
                     TIntVector& theStruct,
                     TErr* theErr)
@@ -4103,3 +4231,6 @@ namespace MED
       EXCEPTION(std::runtime_error, "GetGrilleInfo - MEDmeshGridStructRd(...)");
   }
 }
+
+template class MEDWRAPPER_EXPORT MED::TWrapper<MED::TFile>;
+template class MEDWRAPPER_EXPORT MED::TLockProxy<MED::TFile>;

@@ -32,8 +32,8 @@
 namespace MED
 {
   //----------------------------------------------------------------------------
-  class TFile;
-  typedef std::shared_ptr<TFile> PFile;
+  class TFileInternal;
+  typedef std::shared_ptr<TFileInternal> PFileInternal;
 
   typedef enum {eLECTURE, eLECTURE_ECRITURE, eLECTURE_AJOUT, eCREATION} EModeAcces;
 
@@ -52,7 +52,7 @@ namespace MED
     TWrapper& operator=(const TWrapper&);
 
   public:
-    TWrapper(const std::string& theFileName, bool write, TInt theMajor=-1, TInt theVersion=-1);
+    TWrapper(const std::string& theFileName, bool write, TFileInternal *tfileInst = nullptr, TInt theMajor=-1, TInt theVersion=-1);
 
     virtual
     ~TWrapper();
@@ -938,7 +938,7 @@ namespace MED
                     TErr* theErr = NULL);
 
   protected:
-    PFile myFile;
+    PFileInternal myFile;
     TInt myMajor;
     TInt myMinor;
   };

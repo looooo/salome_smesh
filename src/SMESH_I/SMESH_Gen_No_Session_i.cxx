@@ -27,9 +27,8 @@ SMESH_Gen_No_Session_i::SMESH_Gen_No_Session_i( CORBA::ORB_ptr orb,
                                                 PortableServer::POA_ptr   poa,
                                                 PortableServer::ObjectId* contId,
                                                 const char*               instanceName,
-                                                const char*               interfaceName):SMESH_Gen_i(orb,poa,contId,instanceName,interfaceName,false)
+                                                const char*               interfaceName):SMESH_Gen_i(orb,poa,contId,instanceName,interfaceName,true)
 {
-  myNS = new SALOME_Fake_NamingService;
 }
 
 GEOM::GEOM_Gen_var SMESH_Gen_No_Session_i::GetGeomEngine( bool isShaper )

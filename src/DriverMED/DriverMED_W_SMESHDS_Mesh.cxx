@@ -30,12 +30,12 @@
 #include "DriverMED_Family.h"
 #include "MED_Factory.hxx"
 #include "MED_Utilities.hxx"
-#include "MEDCoupling_Wrapper.hxx"
 #include "SMDS_IteratorOnIterators.hxx"
 #include "SMDS_MeshNode.hxx"
 #include "SMDS_SetIterator.hxx"
 #include "SMESHDS_Mesh.hxx"
 #include "MED_Common.hxx"
+#include "MED_TFile.hxx"
 
 #include <med.h>
 
@@ -346,15 +346,20 @@ namespace
 
 Driver_Mesh::Status DriverMED_W_SMESHDS_Mesh::Perform()
 {
-  PerformMedcoupling();
   MED::PWrapper myMed = CrWrapperW(myFile, myVersion);
   return this->PerformInternal<MED::PWrapper>(myMed);
 }
 
-Driver_Mesh::Status DriverMED_W_SMESHDS_Mesh::PerformMedcoupling()
+Driver_Mesh::Status DriverMED_W_SMESHDS_Mesh_Mem::Perform()
 {
-  MED::MCPWrapper myMed(new MED::MCTWrapper);
-  return this->PerformInternal<MED::MCPWrapper>(myMed);
+  TMemFile *tfileInst = new TMemFile;
+  MED::PWrapper myMed = CrWrapperW(myFile, -1, tfileInst);
+  Driver_Mesh::Status status = this->PerformInternal<MED::PWrapper>(myMed);
+  _data = MEDCoupling::DataArrayByte::New();
+  _data->useArray(reinterpret_cast<char *>(tfileInst->getData()),true,MEDCoupling::DeallocType::C_DEALLOC,tfileInst->getSize(),1);
+  if(!tfileInst->IsClosed())
+    THROW_SALOME_EXCEPTION("DriverMED_W_SMESHDS_Mesh_Mem::Perform - MED memory file id is supposed to be closed !");
+  return status;
 }
 
 //================================================================================

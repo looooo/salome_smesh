@@ -212,6 +212,10 @@ public:
                   CORBA::Boolean     overwrite,
                   CORBA::Boolean     autoDimension = true);
 
+  CORBA::LongLong ExportMEDCoupling(CORBA::Boolean     auto_groups,
+  CORBA::Boolean     autoDimension = true
+  );
+
   void ExportSAUV( const char* file, CORBA::Boolean auto_groups );
 
   void ExportDAT( const char* file );
@@ -627,6 +631,7 @@ public:
   std::map<int, ::SMESH_subMesh*> _mapSubMesh;   //NRI
 
 private:
+  std::string generateMeshName( );
   std::string prepareMeshNameAndGroups( const char* file, CORBA::Boolean overwrite );
 
   /*!

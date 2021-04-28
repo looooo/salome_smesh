@@ -3684,6 +3684,25 @@ void SMESH_Mesh_i::PrepareForWriting (const char* file, bool overwrite)
   }
 }
 
+/*!
+  Return a MeshName
+ */
+std::string SMESH_Mesh_i::generateMeshName()
+{
+  string aMeshName = "Mesh";
+  SALOMEDS::Study_var aStudy = SMESH_Gen_i::GetSMESHGen()->getStudyServant();
+  if ( !aStudy->_is_nil() )
+  {
+    SALOMEDS::SObject_wrap aMeshSO = _gen_i->ObjectToSObject(  _this() );
+    if ( !aMeshSO->_is_nil() )
+    {
+      CORBA::String_var name = aMeshSO->GetName();
+      aMeshName = name;
+    }
+  }
+  return aMeshName;
+}
+
 //================================================================================
 /*!
  * \brief Prepare a file for export and pass names of mesh groups from study to mesh DS
@@ -3698,13 +3717,11 @@ string SMESH_Mesh_i::prepareMeshNameAndGroups(const char*    file,
 {
   // Perform Export
   PrepareForWriting(file, overwrite);
-  string aMeshName = "Mesh";
+  string aMeshName(this->generateMeshName());
   SALOMEDS::Study_var aStudy = SMESH_Gen_i::GetSMESHGen()->getStudyServant();
   if ( !aStudy->_is_nil() ) {
     SALOMEDS::SObject_wrap aMeshSO = _gen_i->ObjectToSObject(  _this() );
     if ( !aMeshSO->_is_nil() ) {
-      CORBA::String_var name = aMeshSO->GetName();
-      aMeshName = name;
       // asv : 27.10.04 : fix of 6903: check for StudyLocked before adding attributes
       if ( !aStudy->GetProperties()->IsLocked() )
       {
@@ -3761,6 +3778,22 @@ void SMESH_Mesh_i::ExportMED(const char*    file,
                 << "autoDimension=" << autoDimension << " )";
 
   SMESH_CATCH( SMESH::throwCorbaException );
+}
+
+CORBA::LongLong SMESH_Mesh_i::ExportMEDCoupling(CORBA::Boolean auto_groups, CORBA::Boolean autoDimension)
+{
+  MEDCoupling::MCAuto<MEDCoupling::DataArrayByte> data;
+  SMESH_TRY;
+  if( !this->_gen_i->IsEmbeddedMode() )
+    SMESH::throwCorbaException("SMESH_Mesh_i::ExportMEDCoupling : only for embedded mode !");
+  if ( _preMeshInfo )
+    _preMeshInfo->FullLoadFromFile();
+
+  string aMeshName = this->generateMeshName();
+  data = _impl->ExportMEDCoupling( aMeshName.c_str(), auto_groups, 0, autoDimension );
+  SMESH_CATCH( SMESH::throwCorbaException );
+  MEDCoupling::DataArrayByte *ret(data.retn());
+  return reinterpret_cast<CORBA::LongLong>(ret);
 }
 
 //================================================================================

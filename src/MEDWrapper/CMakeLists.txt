@@ -74,7 +74,6 @@ SET(MEDWrapper_SOURCES
   MED_Structures.cxx
   MED_Utilities.cxx
   MED_Wrapper.cxx
-  MEDCoupling_Wrapper.cxx
 )
 
 # --- rules ---

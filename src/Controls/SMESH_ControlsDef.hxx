@@ -136,7 +136,7 @@ namespace SMESH{
       void GetHistogram(int                          nbIntervals,
                         std::vector<int>&            nbEvents,
                         std::vector<double>&         funValues,
-                        const std::vector<smIdType>& elements,
+                        const std::vector<::smIdType>& elements,
                         const double*                minmax=0,
                         const bool                   isLogarithmic = false);
       bool IsApplicable( long theElementId ) const;
@@ -147,7 +147,7 @@ namespace SMESH{
       void  SetPrecision( const long thePrecision );
       double Round( const double & value );
       
-      bool GetPoints(const smIdType theId, TSequenceOfXYZ& theRes) const;
+      bool GetPoints(const ::smIdType theId, TSequenceOfXYZ& theRes) const;
       static bool GetPoints(const SMDS_MeshElement* theElem, TSequenceOfXYZ& theRes);
     protected:
       const SMDS_Mesh*        myMesh;
@@ -594,7 +594,7 @@ namespace SMESH{
       virtual void SetMesh( const SMDS_Mesh* theMesh );
       virtual bool IsSatisfy( long theElementId );
       virtual SMDSAbs_ElementType GetType() const;
-      static bool IsFreeEdge( const SMDS_MeshNode** theNodes, const smIdType theFaceId  );
+      static bool IsFreeEdge( const SMDS_MeshNode** theNodes, const ::smIdType theFaceId  );
       typedef long TElemId;
       struct Border{
         TElemId myElemId;
@@ -653,8 +653,8 @@ namespace SMESH{
     protected:
       const SMDS_Mesh*              myMesh;
 
-      std::vector< smIdType >       myMin;
-      std::vector< smIdType >       myMax;
+      std::vector< ::smIdType >       myMin;
+      std::vector< ::smIdType >       myMax;
       TIDsMap                       myIds;
 
       SMDSAbs_ElementType           myType;
@@ -1165,9 +1165,9 @@ namespace SMESH{
     public:
       ConnectedElements();
       //virtual Predicate*   clone() const { return new ConnectedElements( *this ); }
-      void                 SetNode( smIdType nodeID );
+      void                 SetNode( ::smIdType nodeID );
       void                 SetPoint( double x, double y, double z );
-      smIdType             GetNode() const;
+      ::smIdType           GetNode() const;
       std::vector<double>  GetPoint() const;
 
       void                 SetType( SMDSAbs_ElementType theType );
@@ -1179,14 +1179,14 @@ namespace SMESH{
       //const std::set<long>& GetDomainIDs() const { return myOkIDs; }
 
     private:
-      smIdType            myNodeID;
-      std::vector<double> myXYZ;
-      SMDSAbs_ElementType myType;
-      TMeshModifTracer    myMeshModifTracer;
+      ::smIdType            myNodeID;
+      std::vector<double>   myXYZ;
+      SMDSAbs_ElementType   myType;
+      TMeshModifTracer      myMeshModifTracer;
 
-      void                clearOkIDs();
-      bool                myOkIDsReady;
-      std::set<smIdType>  myOkIDs; // empty means that there is one domain
+      void                  clearOkIDs();
+      bool                  myOkIDsReady;
+      std::set<::smIdType>  myOkIDs; // empty means that there is one domain
     };
     typedef boost::shared_ptr<ConnectedElements> ConnectedElementsPtr;
 

@@ -4200,7 +4200,7 @@ namespace SMESH {
    */
   //================================================================================
 
-  const char* SMESH::FunctorTypeToString(SMESH::FunctorType ft)
+  const char* FunctorTypeToString(FunctorType ft)
   {
     if ( ft < 0 || ft > SMESH::FT_Undefined )
       return "FT_Undefined";
@@ -4213,7 +4213,7 @@ namespace SMESH {
    */
   //================================================================================
 
-  SMESH::FunctorType SMESH::StringToFunctorType(const char* str)
+  FunctorType StringToFunctorType(const char* str)
   {
     std::string name( str + 3 ); // skip "FT_"
     const char** functNames = getFunctNames();

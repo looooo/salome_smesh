@@ -362,10 +362,10 @@ SMESH::smIdType  SMESH_Group_i::Remove( const SMESH::smIdType_array& theIDs )
 typedef bool (SMESHDS_Group::*TFunChangeGroup)(const smIdType);
 
 CORBA::Long 
-ChangeByPredicate( SMESH::Predicate_i* thePredicate,
-                   SMESHDS_GroupBase*  theGroupBase,
-                   SMESH::NotifyerAndWaiter*  theGroupImpl,
-                   TFunChangeGroup     theFun)
+ChangeByPredicate( SMESH::Predicate_i*       thePredicate,
+                   SMESHDS_GroupBase*        theGroupBase,
+                   SMESH::NotifyerAndWaiter* theGroupImpl,
+                   TFunChangeGroup           theFun)
 {
   CORBA::Long aNb = 0;
   if(SMESHDS_Group* aGroupDS = dynamic_cast<SMESHDS_Group*>(theGroupBase)){

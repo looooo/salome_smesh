@@ -1265,12 +1265,20 @@ bool SMESH_ActorDef::Init(TVisualObjPtr theVisualObj,
   my2DExtActor->GetMapper()->SetLookupTable(myLookupTable);
   my3DActor->GetMapper()->SetLookupTable(myLookupTable);
   my3DExtActor->GetMapper()->SetLookupTable(myLookupTable);
-    
+
+  // vuzlov: Fix polygons and edges artifacts without Paraview
+  // coincident patch. See also #18940.
+  // NOTE: use Resolve coincident topology for actors in the same 
+  // mapper. If several mappers, then use Relative coincident topology
   double aFactor, aUnits;
   my2DActor->GetPolygonOffsetParameters(aFactor,aUnits);
-  my2DActor->SetPolygonOffsetParameters(aFactor,aUnits*0.75);
+  my2DActor->SetPolygonOffsetParameters(aFactor,aUnits);
   my2DExtActor->SetPolygonOffsetParameters(aFactor,aUnits*0.5);
-  my3DActor->SetPolygonOffsetParameters(2*aFactor,aUnits);
+  my3DActor->SetPolygonOffsetParameters(aFactor*2,aUnits*2);
+  myHighlitableActor->GetMapper()->SetRelativeCoincidentTopologyLineOffsetParameters(aFactor*(-1.0),
+                                                                                     aUnits*(-50));
+  my2DActor->GetMapper()->SetRelativeCoincidentTopologyPolygonOffsetParameters(-aFactor, -aUnits);
+  my3DActor->GetMapper()->SetRelativeCoincidentTopologyLineOffsetParameters(-aUnits-1, -aUnits-1);
 
   SUIT_ResourceMgr* mgr = SUIT_Session::session()->resourceMgr();
   if( !mgr )

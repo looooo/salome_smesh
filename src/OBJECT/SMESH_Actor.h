@@ -176,6 +176,9 @@ class SMESHOBJECT_EXPORT SMESH_Actor: public SALOME_Actor
 
   virtual void UpdateFilter() = 0;
 
+  virtual void SetRelativeTopologyOffsetParameters(double f, double u,
+                                                   double f_delta = 0, double u_delta = 0) = 0;
+
 #ifndef DISABLE_PLOT2DVIEWER
   virtual SPlot2d_Histogram* GetPlot2Histogram() = 0;
   virtual SPlot2d_Histogram* UpdatePlot2Histogram() = 0;

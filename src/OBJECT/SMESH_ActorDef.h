@@ -239,6 +239,9 @@ class SMESH_ActorDef : public SMESH_Actor
   virtual void SetMarkerStd( VTK::MarkerType, VTK::MarkerScale );
   virtual void SetMarkerTexture( int, VTK::MarkerTexture );
 
+  virtual void SetRelativeTopologyOffsetParameters(double f, double u,
+                                                   double f_delta = 0, double u_delta = 0);
+
   virtual void UpdateFilter();
 
  protected:

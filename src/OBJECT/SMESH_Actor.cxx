@@ -1270,15 +1270,7 @@ bool SMESH_ActorDef::Init(TVisualObjPtr theVisualObj,
   // coincident patch. See also #18940.
   // NOTE: use Resolve coincident topology for actors in the same 
   // mapper. If several mappers, then use Relative coincident topology
-  double aFactor, aUnits;
-  my2DActor->GetPolygonOffsetParameters(aFactor,aUnits);
-  my2DActor->SetPolygonOffsetParameters(aFactor,aUnits);
-  my2DExtActor->SetPolygonOffsetParameters(aFactor,aUnits*0.5);
-  my3DActor->SetPolygonOffsetParameters(aFactor*2,aUnits*2);
-  myHighlitableActor->GetMapper()->SetRelativeCoincidentTopologyLineOffsetParameters(aFactor*(-1.0),
-                                                                                     aUnits*(-50));
-  my2DActor->GetMapper()->SetRelativeCoincidentTopologyPolygonOffsetParameters(-aFactor, -aUnits);
-  my3DActor->GetMapper()->SetRelativeCoincidentTopologyLineOffsetParameters(-aUnits-1, -aUnits-1);
+  SetRelativeTopologyOffsetParameters(2, 2);
 
   SUIT_ResourceMgr* mgr = SUIT_Session::session()->resourceMgr();
   if( !mgr )
@@ -2557,6 +2549,16 @@ void SMESH_ActorDef::SetMarkerTexture( int theMarkerId, VTK::MarkerTexture theMa
   myNodeActor->SetMarkerTexture( theMarkerId, theMarkerTexture );
   myNodeExtActor->SetMarkerTexture( theMarkerId, theMarkerTexture );
   myMarkerTexture = theMarkerTexture; // for deferred update of myHighlightActor
+}
+
+void SMESH_ActorDef::SetRelativeTopologyOffsetParameters(double f, double u,
+                                                         double f_delta, double u_delta)
+{
+  my2DActor->SetPolygonOffsetParameters(f,u + u_delta);
+  my2DExtActor->SetPolygonOffsetParameters(f,u*0.5 + u_delta);
+  my3DActor->SetPolygonOffsetParameters(f,u*2 + u_delta);
+  myHighlitableActor->GetMapper()->SetRelativeCoincidentTopologyLineOffsetParameters(-f + f_delta,
+                                                                                     u*(-50) + 10*u_delta);
 }
 
 void SMESH_ActorDef::UpdateFilter()

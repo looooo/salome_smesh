@@ -676,6 +676,7 @@ namespace SMESH
             anActor->SetVolumeColor( aColor.R, aColor.G, aColor.B, deltaV );
           else
             anActor->SetSufaceColor( aColor.R, aColor.G, aColor.B, deltaF );
+          anActor->SetRelativeTopologyOffsetParameters(2, 2, 1, 3);
         }
       }
     }

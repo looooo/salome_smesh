@@ -2555,10 +2555,20 @@ void SMESH_ActorDef::SetRelativeTopologyOffsetParameters(double f, double u,
                                                          double f_delta, double u_delta)
 {
   my2DActor->SetPolygonOffsetParameters(f,u + u_delta);
-  my2DExtActor->SetPolygonOffsetParameters(f,u*0.5 + u_delta);
-  my3DActor->SetPolygonOffsetParameters(f,u*2 + u_delta);
-  myHighlitableActor->GetMapper()->SetRelativeCoincidentTopologyLineOffsetParameters(-f + f_delta,
-                                                                                     u*(-50) + 10*u_delta);
+  my2DExtActor->SetPolygonOffsetParameters(f,u + 0.1 + u_delta);
+  my3DActor->SetPolygonOffsetParameters(f,u + 0.2 + u_delta);
+  
+  // vuzlov: Fix coincident topology depends on mesh size
+  // NOTE: in future need use 2 actors:
+  // 1 - with only surface representation
+  // 2 - vtkExtractEdges algorithm with surface representation
+  myHighlitableActor->GetMapper()->SetResolveCoincidentTopologyLineOffsetParameters(0, 0);
+  double* aBounds = myVisualObj->GetUnstructuredGrid()->GetPoints()->GetBounds();
+  double theSize = pow( pow( aBounds[1] - aBounds[0], 2 ) +
+                 pow( aBounds[3] - aBounds[2], 2 ) +
+                 pow( aBounds[5] - aBounds[4], 2 ), 0.5 );
+  theSize = u + 0.2 + u_delta - theSize/3;
+  myHighlitableActor->GetMapper()->SetRelativeCoincidentTopologyLineOffsetParameters(f, theSize);
 }
 
 void SMESH_ActorDef::UpdateFilter()

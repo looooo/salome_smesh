@@ -48,11 +48,12 @@ static std::string removeFile(std::string fileName, int& notOk)
   std::string errStr;
   notOk = std::remove(fileName.c_str());
   if (notOk) errStr = ToComment("\n error while removing file : ") << fileName;
-        else errStr = ToComment("\n file : ") << fileName << " succesfully deleted! \n ";
+  else       errStr = ToComment("\n file : ") << fileName << " succesfully deleted! \n ";
 
   return errStr;
 }
-std::string MG_ADAPT::remove_extension(const std::string& filename) {
+std::string MG_ADAPT::remove_extension(const std::string& filename)
+{
   size_t lastdot = filename.find_last_of(".");
   if (lastdot == std::string::npos) return filename;
   return filename.substr(0, lastdot);
@@ -65,104 +66,103 @@ namespace
     return SMESH_File( fName ).exists();
   }
 
-// =======================================================================
-med_idt openMedFile(const std::string aFile)
-// =======================================================================
-// renvoie le medId associe au fichier Med apres ouverture
-{
-  med_idt medIdt = MEDfileOpen(aFile.c_str(),MED_ACC_RDONLY);
-  if (medIdt <0)
+  // =======================================================================
+  med_idt openMedFile(const std::string aFile)
+  // =======================================================================
+  // renvoie le medId associe au fichier Med apres ouverture
   {
-    THROW_SALOME_EXCEPTION("\nThe med file " << aFile << " cannot be opened.\n");
-  }
-  return medIdt;
-}
-
-
-// =======================================================================
-void getTimeStepInfos(std::string aFile, med_int& numdt, med_int& numit, std::string fieldName)
-// =======================================================================
-{
-// Il faut voir si plusieurs maillages
-
-  herr_t erreur = 0 ;
-  med_idt medIdt ;
-
-
-  // Ouverture du fichier
-  //~SCRUTE(aFile.toStdString());
-  medIdt = openMedFile(aFile);
-  if ( medIdt < 0 ) return ;
-  // Lecture du nombre de champs
-  med_int ncha = MEDnField(medIdt) ;
-  if (ncha < 1 )
-  {
-    //~addMessage( ToComment(" error: there is no field in  ") << aFile, /*fatal=*/true );
-    return;
-  }
-  // Lecture des caracteristiques du champs
-
-  //       Lecture du type du champ, des noms des composantes et du nom de l'unite
-  char nomcha  [MED_NAME_SIZE+1];
-  strcpy(nomcha, fieldName.c_str());
-//       Lecture du nombre de composantes
-  med_int ncomp = MEDfieldnComponentByName(medIdt, nomcha);
-  char meshname[MED_NAME_SIZE+1];
-  char * comp = (char*) malloc(ncomp*MED_SNAME_SIZE+1);
-  char * unit = (char*) malloc(ncomp*MED_SNAME_SIZE+1);
-  char dtunit[MED_SNAME_SIZE+1];
-  med_bool local;
-  med_field_type typcha;
-  med_int nbofcstp;
-  erreur =  MEDfieldInfoByName (medIdt, nomcha, meshname,&local,&typcha,comp,unit,dtunit, &nbofcstp);
-  free(comp);
-  free(unit);
-  if ( erreur < 0 )
-  {
-      //~addMessage( ToComment(" error: error while reading field  ") << nomcha << " in file " << aFile , /*fatal=*/true );
-    return;
-  }
-
-  med_float dt;
-  med_int tmp_numdt, tmp_numit;
-
-  //~med_int step = data->myUseLastTimeStep ? nbofcstp : data->myTimeStep+1;
-  //~myPrint("step ", step);
-  erreur = MEDfieldComputingStepInfo ( medIdt, nomcha, 1, &numdt, &numit, &dt );
-  for( int step = 1; step <= nbofcstp; step++ )
-  {
-    erreur = MEDfieldComputingStepInfo ( medIdt, nomcha, step, &tmp_numdt, &tmp_numit, &dt );
-    if(tmp_numdt > numdt)
+    med_idt medIdt = MEDfileOpen(aFile.c_str(),MED_ACC_RDONLY);
+    if (medIdt <0)
     {
-      numdt = tmp_numdt;
-      numit = tmp_numit;
+      THROW_SALOME_EXCEPTION("\nThe med file " << aFile << " cannot be opened.\n");
     }
+    return medIdt;
   }
-  if ( erreur < 0 )
+
+  // =======================================================================
+  void getTimeStepInfos(std::string aFile, med_int& numdt, med_int& numit, std::string fieldName)
+  // =======================================================================
   {
-    //~addMessage( ToComment(" error: error while reading field ") << nomcha << "step (numdt, numit) = " <<"("<< numdt<< ", " 
-    //numit<< ")" <<" in file " << aFile , /*fatal=*/true );
-    return;
+    // Il faut voir si plusieurs maillages
+
+    herr_t erreur = 0 ;
+    med_idt medIdt ;
+
+    // Ouverture du fichier
+    //~SCRUTE(aFile.toStdString());
+    medIdt = openMedFile(aFile);
+    if ( medIdt < 0 ) return ;
+    // Lecture du nombre de champs
+    med_int ncha = MEDnField(medIdt) ;
+    if (ncha < 1 )
+    {
+      //~addMessage( ToComment(" error: there is no field in  ") << aFile, /*fatal=*/true );
+      return;
+    }
+    // Lecture des caracteristiques du champs
+
+    //       Lecture du type du champ, des noms des composantes et du nom de l'unite
+    char nomcha  [MED_NAME_SIZE+1];
+    strcpy(nomcha, fieldName.c_str());
+    //       Lecture du nombre de composantes
+    med_int ncomp = MEDfieldnComponentByName(medIdt, nomcha);
+    char meshname[MED_NAME_SIZE+1];
+    char * comp = (char*) malloc(ncomp*MED_SNAME_SIZE+1);
+    char * unit = (char*) malloc(ncomp*MED_SNAME_SIZE+1);
+    char dtunit[MED_SNAME_SIZE+1];
+    med_bool local;
+    med_field_type typcha;
+    med_int nbofcstp;
+    erreur =  MEDfieldInfoByName (medIdt, nomcha, meshname,&local,&typcha,comp,unit,dtunit, &nbofcstp);
+    free(comp);
+    free(unit);
+    if ( erreur < 0 )
+    {
+      //~addMessage( ToComment(" error: error while reading field  ") << nomcha << " in file " << aFile , /*fatal=*/true );
+      return;
+    }
+
+    med_float dt;
+    med_int tmp_numdt, tmp_numit;
+
+    //~med_int step = data->myUseLastTimeStep ? nbofcstp : data->myTimeStep+1;
+    //~myPrint("step ", step);
+    erreur = MEDfieldComputingStepInfo ( medIdt, nomcha, 1, &numdt, &numit, &dt );
+    for( int step = 1; step <= nbofcstp; step++ )
+    {
+      erreur = MEDfieldComputingStepInfo ( medIdt, nomcha, step, &tmp_numdt, &tmp_numit, &dt );
+      if(tmp_numdt > numdt)
+      {
+        numdt = tmp_numdt;
+        numit = tmp_numit;
+      }
+    }
+    if ( erreur < 0 )
+    {
+      //~addMessage( ToComment(" error: error while reading field ") << nomcha << "step (numdt, numit) = " <<"("<< numdt<< ", "
+      //numit<< ")" <<" in file " << aFile , /*fatal=*/true );
+      return;
+    }
+
+    // Fermeture du fichier
+    if ( medIdt > 0 ) MEDfileClose(medIdt);
+
   }
 
-  // Fermeture du fichier
-  if ( medIdt > 0 ) MEDfileClose(medIdt);
-
-}
-  
-struct GET_DEFAULT // struct used to get default value from GetOptionValue()
-{
-  bool isDefault;
-  operator bool* () {
+  struct GET_DEFAULT // struct used to get default value from GetOptionValue()
+  {
+    bool isDefault;
+    operator bool* () {
       return &isDefault;
-  }
-};
+    }
+  };
 
-class outFileStream : public std::ofstream{
-public:
+  class outFileStream : public std::ofstream{
+  public:
     ~outFileStream(){close();} //to close file at dtor
-};
-}
+  };
+
+} // anonymous namespace
 
 //----------------------------------------------------------------------------------------
 MgAdapt::MgAdapt()
@@ -863,14 +863,15 @@ void MgAdapt::execCmd( const char* cmd, int& err)
   }
   std::ostream logStream(buf);
 
-  
+
 #if defined(WIN32)
-#if defined(UNICODE)
+#  if defined(UNICODE)
   const wchar_t * aCmd = Kernel_Utils::utf8_decode(cmd);
+  SMESHUtils::ArrayDeleter<const wchar_t> deleter( aCmd );
   std::unique_ptr <FILE, decltype(&_pclose)> pipe(_wpopen(aCmd, O_RDONLY), _pclose );
-#else
+#  else
   std::unique_ptr <FILE, decltype(&_pclose)> pipe(_popen(cmd, "r"), _pclose );
-#endif
+#  endif
 #else
   std::unique_ptr <FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose );
 #endif
@@ -961,12 +962,12 @@ std::string MgAdapt::getCommandToRun()
   }
   //~else
   //~{
-      //~// constant value TODO
+  //~// constant value TODO
   //~}
   // Check coherence between mesh dimension and option fo adaptation
   checkDimensionOptionAdaptation();
 
-//   sizemap file is written only if level is higher than 3
+  //   sizemap file is written only if level is higher than 3
   if ( verbosityLevel > 3)
   {
     std::string solFileOut = getFileName()+".sol";
@@ -1357,7 +1358,7 @@ void MgAdapt::convertMedFile(std::string& meshFormatMeshFileName, std::string& s
   MEDCoupling::MEDFileMeshes* meshes = mfd->getMeshes();
   MEDCoupling::MEDFileMesh* fileMesh = meshes->getMeshAtPos(0); // ok only one mesh in file!
   if (meshNameOut =="")
-      meshNameOut = fileMesh->getName();
+    meshNameOut = fileMesh->getName();
   storeGroupsAndFams(fileMesh);
 
   MEDCoupling::MCAuto<MEDCoupling::MEDFileFields> fields = MEDCoupling::MEDFileFields::New();
@@ -1533,18 +1534,18 @@ void MgAdapt::buildBackGroundMeshAndSolFiles(const std::vector<std::string>& fie
 }
 
 MgAdapt::Status MgAdapt::addMessage(const std::string& msg,
-                                  const bool         isFatal/*=false*/)
+                                    const bool         isFatal/*=false*/)
 {
   if ( isFatal )
-    _myErrorMessages.clear(); // warnings are useless if a fatal error encounters
+    _errorMessages.clear(); // warnings are useless if a fatal error encounters
 
-  _myErrorMessages.push_back( msg );
+  _errorMessages.push_back( msg );
 
-//~MESSAGE(msg);
+  //~MESSAGE(msg);
 #ifdef _DEBUG_
   std::cout << msg << std::endl;
 #endif
-  return ( _myStatus = isFatal ? MgAdapt::DRS_FAIL : MgAdapt::DRS_WARN_SKIP_ELEM );
+  return ( _status = isFatal ? MgAdapt::DRS_FAIL : MgAdapt::DRS_WARN_SKIP_ELEM );
 }
 
 void MgAdapt::updateTimeStepRank()

@@ -23,6 +23,8 @@
 #include "SALOME_Container_i.hxx"
 #include "SALOME_KernelServices.hxx"
 
+#include "SALOME_Fake_NamingService.hxx"
+
 #include <cstring>
 
 static Engines::EngineComponent_var _unique_compo;
@@ -41,10 +43,12 @@ Engines::EngineComponent_var RetrieveSMESHInstance()
     PortableServer::POAManager_var pman = poa->the_POAManager();
     CORBA::PolicyList policies;
     policies.length(0);
-    Engines_Container_i *cont(KERNEL::getContainerSA());
+    auto *cont(KERNEL::getContainerSA());
     PortableServer::ObjectId *conId(cont->getCORBAId());
     //
     pman->activate();
+    //
+    SMESH_Gen_i::SetNS(new SALOME_Fake_NamingService);
     //
     SMESH_Gen_No_Session_i *servant = new SMESH_Gen_No_Session_i(orb, poa, conId, "SMESH_inst_2", "SMESH");
     PortableServer::ObjectId *zeId = servant->getId();

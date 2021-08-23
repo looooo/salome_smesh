@@ -29,12 +29,14 @@
 #include "DriverMED.hxx"
 #include "DriverMED_W_SMESHDS_Mesh.h"
 #include "MED_Factory.hxx"
+#include "MED_TFile.hxx"
 #include "MED_Utilities.hxx"
 #include "MED_Wrapper.hxx"
 #include "SMDS_IteratorOnIterators.hxx"
 #include "SMDS_MeshElement.hxx"
 #include "SMDS_SetIterator.hxx"
 #include "SMESHDS_Mesh.hxx"
+#include "SMESH_TypeDefs.hxx"
 
 //================================================================================
 /*!
@@ -97,10 +99,10 @@ bool DriverMED_W_Field::Set(SMESHDS_Mesh *      mesh,
     _nbElemsByGeom.resize( 1, std::make_pair( SMDSEntity_Last, 0 ));
 
     // count nb of elems of each geometry
-    for ( int iG = 0; iG < SMDSEntity_Last; ++iG )
+    SMDSAbs_EntityType geom = SMDSEntity_0D;
+    for ( ; geom < SMDSEntity_Last; SMESHUtils::Increment( geom ))
     {
-      SMDSAbs_EntityType  geom = (SMDSAbs_EntityType) iG;
-      SMDSAbs_ElementType    t = SMDS_MeshCell::ElemType( geom );
+      SMDSAbs_ElementType t = SMDS_MeshCell::ElemType( geom );
       if ( t != _elemType ) continue;
 
       nbElems = mesh->GetMeshInfo().NbElements( geom );
@@ -236,16 +238,8 @@ SMDS_ElemIteratorPtr DriverMED_W_Field::GetOrderedElems()
   return SMDS_ElemIteratorPtr( new TItIterator( iterVec ));
 }
 
-//================================================================================
-/*!
- * Writes a field to the file
- */
-//================================================================================
-
-Driver_Mesh::Status DriverMED_W_Field::Perform()
+Driver_Mesh::Status DriverMED_W_Field::PerformInternal(MED::PWrapper& medFile)
 {
-  if ( myFile.empty() )
-    return addMessage("File name not set", /*isFatal=*/true ); // 'fatal' means 'bug'
   if ( myMeshId < 0 && myMeshName.empty() )
     return addMessage("Mesh in file not specified", /*isFatal=*/true );
   if ( _nbElemsByGeom.size() < 2 )
@@ -253,11 +247,6 @@ Driver_Mesh::Status DriverMED_W_Field::Perform()
   if ( !myMesh )
     return addMessage("Supporting mesh not set", /*isFatal=*/true );
 
-  int version = -1, major, minor, release;
-  if ( MED::GetMEDVersion( myFile, major, minor, release ))
-    version = major * 10 + minor;
-
-  MED::PWrapper medFile = MED::CrWrapperW( myFile, version );
   MED::PMeshInfo meshInfo;
   if ( myMeshId > 0 )
   {
@@ -359,6 +348,44 @@ Driver_Mesh::Status DriverMED_W_Field::Perform()
   _intValues.clear();
 
   return DRS_OK;
+}
+
+/*!
+ * Writes a field to the file
+ */
+Driver_Mesh::Status DriverMED_W_Field::Perform()
+{
+  if ( myFile.empty() )
+    return addMessage("File name not set", /*isFatal=*/true ); // 'fatal' means 'bug'
+  int version = -1, major, minor, release;
+  if ( MED::GetMEDVersion( myFile, major, minor, release ))
+    version = major * 10 + minor;
+
+  MED::PWrapper medFile = MED::CrWrapperW( myFile, version );
+  return this->PerformInternal(medFile);
+}
+
+/*!
+ * Writes a field to a chunck of memory
+ */
+Driver_Mesh::Status DriverMED_W_Field_Mem::Perform()
+{
+  Driver_Mesh::Status status = Driver_Mesh::DRS_OK;
+  bool isClosed(false);
+  void *ptr(_data->getPointer());
+  std::size_t sz(_data->getNumberOfTuples());
+  _data->accessToMemArray().setSpecificDeallocator(nullptr);
+  _data->useArray(nullptr,false,MEDCoupling::DeallocType::C_DEALLOC,0,1);
+  {// let braces to flush (call of MED::PWrapper myMed destructor)
+    MED::TMemFile *tfileInst = new MED::TMemFile(&ptr,&sz,&isClosed);
+    MED::PWrapper myMed = MED::CrWrapperW(myFile, -1, tfileInst);
+    status = this->PerformInternal(myMed);
+  }
+  if(!isClosed)
+    EXCEPTION(std::runtime_error, "TFTMemFile destructor : on destruction file has not been closed properly -> chunk of memory data may be invalid !");
+  _data = MEDCoupling::DataArrayByte::New();
+  _data->useArray(reinterpret_cast<char *>(ptr),true,MEDCoupling::DeallocType::C_DEALLOC,sz,1);
+  return status;
 }
 
 namespace DriverMED // Implementation of functions declared in DriverMED.hxx

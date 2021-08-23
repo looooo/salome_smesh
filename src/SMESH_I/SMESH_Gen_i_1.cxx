@@ -548,8 +548,11 @@ SALOMEDS::SComponent_ptr SMESH_Gen_i::PublishComponent()
   SALOMEDS::UseCaseBuilder_wrap useCaseBuilder = getStudyServant()->GetUseCaseBuilder();
 
   std::string compDataType = ComponentDataType(); // SMESH module's data type
-  std::string ior = SMESH_Gen_i::GetORB()->object_to_string( SMESH_Gen::_this() ); // IOR of this SMESH engine
-
+  std::string ior;
+  {
+    CORBA::String_var iorString = GetORB()->object_to_string( SMESH_Gen::_this() );
+    ior = std::string( iorString.in() ); // IOR of this SMESH engine
+  }
   // Find study component which corresponds to this SMESH engine
 
   SALOMEDS::SComponent_wrap father;
@@ -558,7 +561,8 @@ SALOMEDS::SComponent_ptr SMESH_Gen_i::PublishComponent()
     SALOMEDS::SComponent_wrap f_i = citer->Value();
     CORBA::String_var ior_i;
     bool ok = f_i->ComponentIOR(ior_i.out());
-    if ( ok && compDataType == f_i->ComponentDataType() && ior == ior_i.in()) {
+    CORBA::String_var cdt(f_i->ComponentDataType());
+    if ( ok && compDataType == cdt.in() && ior == ior_i.in()) {
       father = f_i;
       break;
     }

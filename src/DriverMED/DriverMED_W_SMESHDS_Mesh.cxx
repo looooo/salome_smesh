@@ -35,6 +35,7 @@
 #include "SMDS_SetIterator.hxx"
 #include "SMESHDS_Mesh.hxx"
 #include "MED_Common.hxx"
+#include "MED_TFile.hxx"
 
 #include <med.h>
 
@@ -52,6 +53,12 @@ using namespace std;
 using namespace MED;
 
 
+//================================================================================
+/*!
+ * \brief Constructor
+ */
+//================================================================================
+
 DriverMED_W_SMESHDS_Mesh::DriverMED_W_SMESHDS_Mesh():
   myAllSubMeshes (false),
   myDoGroupOfNodes (false),
@@ -64,8 +71,17 @@ DriverMED_W_SMESHDS_Mesh::DriverMED_W_SMESHDS_Mesh():
   myAddODOnVertices(false),
   myDoAllInGroups(false),
   myVersion(-1),
-  myZTolerance(-1.)
+  myZTolerance(-1.),
+  mySaveNumbers(true)
 {}
+
+//================================================================================
+/*!
+ * \brief Set a file name and a version
+ *  \param [in] theFileName - output file name
+ *  \param [in] theVersion - desired MED file version == major * 10 + minor
+ */
+//================================================================================
 
 void DriverMED_W_SMESHDS_Mesh::SetFile(const std::string& theFileName, int theVersion)
 {
@@ -73,10 +89,13 @@ void DriverMED_W_SMESHDS_Mesh::SetFile(const std::string& theFileName, int theVe
   Driver_SMESHDS_Mesh::SetFile(theFileName);
 }
 
+//================================================================================
 /*!
  * MED version is either the latest available, or with an inferior minor,
  * to ensure backward compatibility on writing med files.
  */
+//================================================================================
+
 string DriverMED_W_SMESHDS_Mesh::GetVersionString(int theMinor, int theNbDigits)
 {
   TInt majeur, mineur, release;
@@ -165,6 +184,12 @@ void DriverMED_W_SMESHDS_Mesh::AddAllToGroup()
 
 namespace
 {
+  //---------------------------------------------
+  /*!
+   * \brief Retrieving node coordinates utilities
+   */
+  //---------------------------------------------
+
   typedef double (SMDS_MeshNode::* TGetCoord)() const;
   typedef const char* TName;
   typedef const char* TUnit;
@@ -345,11 +370,50 @@ namespace
 
 //================================================================================
 /*!
- * \brief Write my mesh
+ * \brief Write my mesh to a file
  */
 //================================================================================
 
 Driver_Mesh::Status DriverMED_W_SMESHDS_Mesh::Perform()
+{
+  MED::PWrapper myMed = CrWrapperW(myFile, myVersion);
+  return this->PerformInternal<MED::PWrapper>(myMed);
+}
+
+//================================================================================
+/*!
+ * \brief Write my mesh to a MEDCoupling DS
+ */
+//================================================================================
+
+Driver_Mesh::Status DriverMED_W_SMESHDS_Mesh_Mem::Perform()
+{
+  void *ptr(nullptr);
+  std::size_t sz(0);
+  Driver_Mesh::Status status = Driver_Mesh::DRS_OK;
+  bool isClosed(false);
+  {// let braces to flush (call of MED::PWrapper myMed destructor)
+    TMemFile *tfileInst = new TMemFile(&ptr,&sz,&isClosed);// this new will be destroyed by destructor of myMed
+    MED::PWrapper myMed = CrWrapperW(myFile, -1, tfileInst);
+    status = this->PerformInternal<MED::PWrapper>(myMed);
+  }
+  if(!isClosed)
+    EXCEPTION(std::runtime_error, "TFTMemFile destructor : on destruction file has not been closed properly -> chunk of memory data may be invalid !");
+  _data = MEDCoupling::DataArrayByte::New();
+  _data->useArray(reinterpret_cast<char *>(ptr),true,MEDCoupling::DeallocType::C_DEALLOC,sz,1);
+  if(!isClosed)
+    THROW_SALOME_EXCEPTION("DriverMED_W_SMESHDS_Mesh_Mem::Perform - MED memory file id is supposed to be closed !");
+  return status;
+}
+
+//================================================================================
+/*!
+ * \brief Write my mesh
+ */
+//================================================================================
+
+template<class LowLevelWriter>
+Driver_Mesh::Status DriverMED_W_SMESHDS_Mesh::PerformInternal(LowLevelWriter myMed)
 {
   Status aResult = DRS_OK;
   try {
@@ -471,7 +535,6 @@ Driver_Mesh::Status DriverMED_W_SMESHDS_Mesh::Perform()
       }
     }
 
-    MED::PWrapper myMed = CrWrapperW(myFile, myVersion);
     PMeshInfo aMeshInfo = myMed->CrMeshInfo(aMeshDimension,aSpaceDimension,aMeshName);
     //MESSAGE("Add - aMeshName : "<<aMeshName<<"; "<<aMeshInfo->GetName());
     myMed->SetMeshInfo(aMeshInfo);
@@ -532,7 +595,7 @@ Driver_Mesh::Status DriverMED_W_SMESHDS_Mesh::Perform()
     list<DriverMED_FamilyPtr>::iterator aFamsIter;
     for (aFamsIter = aFamilies.begin(); aFamsIter != aFamilies.end(); aFamsIter++)
     {
-      PFamilyInfo aFamilyInfo = (*aFamsIter)->GetFamilyInfo(myMed,aMeshInfo);
+      PFamilyInfo aFamilyInfo = (*aFamsIter)->GetFamilyInfo<LowLevelWriter>(myMed,aMeshInfo);
       myMed->SetFamilyInfo(aFamilyInfo);
     }
 
@@ -544,7 +607,7 @@ Driver_Mesh::Status DriverMED_W_SMESHDS_Mesh::Perform()
 #endif
     const EModeSwitch   theMode        = eFULL_INTERLACE;
     const ERepere       theSystem      = eCART;
-    const EBooleen      theIsElemNum   = eVRAI;
+    const EBooleen      theIsElemNum   = mySaveNumbers ? eVRAI : eFAUX;
     const EBooleen      theIsElemNames = eFAUX;
     const EConnectivite theConnMode    = eNOD;
 
@@ -973,9 +1036,11 @@ Driver_Mesh::Status DriverMED_W_SMESHDS_Mesh::Perform()
                                                  theIsElemNames);
 
         TInt aNbNodes = MED::GetNbNodes(aElemTypeData->_geomType);
+
         elemIterator = myMesh->elementsIterator( aElemTypeData->_smdsType );
         if ( aElemTypeData->_smdsType == SMDSAbs_0DElement && ! nodesOf0D.empty() )
           elemIterator = iterVecIter;
+
         while ( elemIterator->more() )
         {
           const SMDS_MeshElement* anElem = elemIterator->next();
@@ -1002,6 +1067,15 @@ Driver_Mesh::Status DriverMED_W_SMESHDS_Mesh::Perform()
           if ( ++iElem == aCellInfo->GetNbElem() )
             break;
         }
+        // fix numbers of added SMDSAbs_0DElement
+        if ( aElemTypeData->_smdsType == SMDSAbs_0DElement && ! nodesOf0D.empty() )
+        {
+          iElem = myMesh->Nb0DElements();
+          TInt elem0DNum = FromSmIdType<TInt>( myMesh->MaxElementID() + 1 );
+          for ( size_t i = 0; i < nodesOf0D.size(); ++i )
+            aCellInfo->SetElemNum( iElem++, elem0DNum++);
+        }
+
         // store data in a file
         myMed->SetCellInfo(aCellInfo);
       }

@@ -29,12 +29,19 @@ SMESH_Gen_No_Session_i::SMESH_Gen_No_Session_i( CORBA::ORB_ptr orb,
                                                 const char*               instanceName,
                                                 const char*               interfaceName):SMESH_Gen_i(orb,poa,contId,instanceName,interfaceName,false)
 {
-  myNS = new SALOME_Fake_NamingService;
 }
 
 GEOM::GEOM_Gen_var SMESH_Gen_No_Session_i::GetGeomEngine( bool isShaper )
 {
-  CORBA::Object_var temp = KERNEL::RetrieveCompo(isShaper ? "SHAPERSTUDY" : "GEOM");
+  CORBA::Object_var temp;
+  try
+  {
+    temp = KERNEL::RetrieveCompo(isShaper ? "SHAPERSTUDY" : "GEOM");
+  }
+  catch(...)
+  {
+    return GEOM::GEOM_Gen::_nil();
+  }
   myGeomGen = GEOM::GEOM_Gen::_narrow( temp );
   return myGeomGen;
 }

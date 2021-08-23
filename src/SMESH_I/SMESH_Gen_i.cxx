@@ -102,6 +102,7 @@
 #include "SMESH_PreMeshInfo.hxx"
 #include "SMESH_PythonDump.hxx"
 #include "SMESH_ControlsDef.hxx"
+#include <SMESH_BoostTxtArchive.hxx>
 
 // to pass CORBA exception through SMESH_TRY
 #define SMY_OWN_CATCH catch( SALOME::SALOME_Exception& se ) { throw se; }
@@ -237,6 +238,14 @@ CORBA::Object_var SMESH_Gen_i::SObjectToObject( SALOMEDS::SObject_ptr theSObject
   return anObj;
 }
 
+// Set Naming Service object
+void SMESH_Gen_i::SetNS(SALOME_NamingService_Abstract *ns)
+{
+  if(myNS)
+    delete myNS;
+  myNS = ns;
+}
+
 //=============================================================================
 /*!
  *  GetNS [ static ]
@@ -247,7 +256,7 @@ CORBA::Object_var SMESH_Gen_i::SObjectToObject( SALOMEDS::SObject_ptr theSObject
 
 SALOME_NamingService_Abstract* SMESH_Gen_i::GetNS()
 {
-  if ( myNS == NULL ) {
+  if ( !myNS ) {
     myNS = SINGLETON_<SALOME_NamingService>::Instance();
     ASSERT(SINGLETON_<SALOME_NamingService>::IsAlreadyExisting());
     myNS->init_orb( GetORB() );
@@ -452,18 +461,17 @@ GenericHypothesisCreator_i* SMESH_Gen_i::getHypothesisCreator(const char* theHyp
       // load plugin library
       if(MYDEBUG) MESSAGE("Loading server meshers plugin library ...");
 #ifdef WIN32
-#ifdef UNICODE
+#  ifdef UNICODE
       const wchar_t* path = Kernel_Utils::decode_s(aPlatformLibName);
-#else
+      SMESHUtils::ArrayDeleter<const wchar_t> deleter( path );
+#  else
       const char* path = aPlatformLibName.c_str();
-#endif
+#  endif
 #else
       const char* path = aPlatformLibName.c_str();
 #endif
       LibHandle libHandle = LoadLib( path );
-#if defined(WIN32) && defined(UNICODE)
-      delete path;
-#endif
+
       if (!libHandle)
       {
         // report any error, if occurred
@@ -2699,10 +2707,10 @@ SMESH_Gen_i::ConcatenateCommon(const SMESH::ListOfIDSources& theMeshesArray,
     {
       // type names
       const char* typeNames[] = { "All","Nodes","Edges","Faces","Volumes","0DElems","Balls" };
-      { // check of typeNames: compilation failure mains that NB_ELEMENT_TYPES changed:
-        const int nbNames = sizeof(typeNames) / sizeof(const char*);
-        int _assert[( nbNames == SMESH::NB_ELEMENT_TYPES ) ? 2 : -1 ]; _assert[0]=_assert[1]=0;
-      }
+
+      // check of typeNames: compilation failure mains that NB_ELEMENT_TYPES changed:
+      static_assert( sizeof(typeNames) / sizeof(const char*) ==SMESH::NB_ELEMENT_TYPES,
+                     "Update names of ElementType's!!!" );
 
       SMESH::smIdType_array_var curState = newMesh->GetNbElementsByType();
 
@@ -4198,8 +4206,9 @@ SALOMEDS::TMPFile* SMESH_Gen_i::Save( SALOMEDS::SComponent_ptr theComponent,
   system(cmd.ToCString());
 
   // MED writer to be used by storage process
-  DriverMED_W_SMESHDS_Mesh myWriter;
-  myWriter.SetFile( meshfile.ToCString() );
+  DriverMED_W_SMESHDS_Mesh writer;
+  writer.SetFile( meshfile.ToCString() );
+  //writer.SetSaveNumbers( false ); // bos #24400 -- it leads to change of element IDs
 
   // IMP issue 20918
   // SetStoreName() to groups before storing hypotheses to let them refer to
@@ -4406,8 +4415,8 @@ SALOMEDS::TMPFile* SMESH_Gen_i::Save( SALOMEDS::SComponent_ptr theComponent,
             // check if the mesh is not empty
             if ( mySMESHDSMesh->NbNodes() > 0 ) {
               // write mesh data to med file
-              myWriter.SetMesh( mySMESHDSMesh );
-              myWriter.SetMeshId( id );
+              writer.SetMesh( mySMESHDSMesh );
+              writer.SetMeshId( id );
               strHasData = "1";
             }
             aSize[ 0 ] = strHasData.length() + 1;
@@ -4881,7 +4890,7 @@ SALOMEDS::TMPFile* SMESH_Gen_i::Save( SALOMEDS::SComponent_ptr theComponent,
                     // Pass SMESHDS_Group to MED writer
                     SMESHDS_Group* aGrpDS = dynamic_cast<SMESHDS_Group*>( aGrpBaseDS );
                     if ( aGrpDS )
-                      myWriter.AddGroup( aGrpDS );
+                      writer.AddGroup( aGrpDS );
 
                     // write reference on a shape if exists
                     SMESHDS_GroupOnGeom* aGeomGrp =
@@ -4906,7 +4915,7 @@ SALOMEDS::TMPFile* SMESH_Gen_i::Save( SALOMEDS::SComponent_ptr theComponent,
                       else // shape ref is invalid:
                       {
                         // save a group on geometry as ordinary group
-                        myWriter.AddGroup( aGeomGrp );
+                        writer.AddGroup( aGeomGrp );
                       }
                     }
                     else if ( SMESH_GroupOnFilter_i* aFilterGrp_i =
@@ -4929,7 +4938,7 @@ SALOMEDS::TMPFile* SMESH_Gen_i::Save( SALOMEDS::SComponent_ptr theComponent,
             if ( strcmp( strHasData.c_str(), "1" ) == 0 )
             {
               // Flush current mesh information into MED file
-              myWriter.Perform();
+              writer.Perform();
 
               // save info on nb of elements
               SMESH_PreMeshInfo::SaveToFile( myImpl, id, aFile );
@@ -5185,7 +5194,8 @@ bool SMESH_Gen_i::Load( SALOMEDS::SComponent_ptr theComponent,
   TCollection_AsciiString aStudyName( "" );
   if ( isMultiFile ) {
     CORBA::WString_var url = aStudy->URL();
-    aStudyName = (char*)SALOMEDS_Tool::GetNameFromPath( Kernel_Utils::encode(url.in()) ).c_str();
+    SMESHUtils::ArrayDeleter<const char> urlMulibyte( Kernel_Utils::encode( url.in()) );
+    aStudyName = (char*)SALOMEDS_Tool::GetNameFromPath( urlMulibyte.get() ).c_str();
   }
   // Set names of temporary files
   TCollection_AsciiString filename = tmpDir + aStudyName + "_SMESH.hdf";
@@ -5539,7 +5549,7 @@ bool SMESH_Gen_i::Load( SALOMEDS::SComponent_ptr theComponent,
       }
     } // reading MESHes
 
-    // As all object that can be referred by hypothesis are created,
+    // As all objects that can be referred by hypothesis are created,
     // we can restore hypothesis data
 
     list< pair< SMESH_Hypothesis_i*, string > >::iterator hyp_data;
@@ -5907,7 +5917,8 @@ bool SMESH_Gen_i::Load( SALOMEDS::SComponent_ptr theComponent,
               if ( aNewGroup->_is_nil() )
                 continue;
 
-              string iorSubString = GetORB()->object_to_string( aNewGroup );
+              CORBA::String_var iorSubStringVar = GetORB()->object_to_string( aNewGroup );
+              string iorSubString(iorSubStringVar.in());
               int        newSubId = myStudyContext->findId( iorSubString );
               myStudyContext->mapOldToNew( subid, newSubId );
 
@@ -5986,13 +5997,8 @@ bool SMESH_Gen_i::Load( SALOMEDS::SComponent_ptr theComponent,
         aDataset->ReadFromDisk((char*) dataString.data() );
         aDataset->CloseOnDisk();
 
-        std::istringstream istream( dataString.data() );
-        boost::archive::text_iarchive archive( istream );
         std::list< std::list< std::string > > orderEntryLists;
-        try {
-          archive >> orderEntryLists;
-        }
-        catch (...) {}
+        SMESHUtils::BoostTxtArchive( dataString ) >> orderEntryLists;
 
         TListOfListOfInt anOrderIds;
         for ( const std::list< std::string >& entryList : orderEntryLists )
@@ -6235,8 +6241,9 @@ int SMESH_Gen_i::RegisterObject(CORBA::Object_ptr theObject)
 CORBA::Long  SMESH_Gen_i::GetObjectId(CORBA::Object_ptr theObject)
 {
   if ( myStudyContext && !CORBA::is_nil( theObject )) {
-    string iorString = GetORB()->object_to_string( theObject );
-    return myStudyContext->findId( iorString );
+    CORBA::String_var iorString = GetORB()->object_to_string( theObject );
+    string iorStringCpp(iorString.in()); 
+    return myStudyContext->findId( iorStringCpp );
   }
   return 0;
 }

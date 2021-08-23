@@ -23,7 +23,9 @@
 #include "MED_Wrapper.hxx"
 #include "MED_TStructures.hxx"
 #include "MED_Utilities.hxx"
+#include "MED_TFile.hxx"
 
+#include "MEDFileUtilities.hxx"
 #include <med.h>
 #include <med_err.h>
 #include <med_proto.h>
@@ -76,93 +78,78 @@ namespace MED
   }
 
   //---------------------------------------------------------------
-  class TFile
+  const TIdt& MEDIDTHoder::Id() const
   {
-    TFile();
-    TFile(const TFile&);
+    if (myFid < 0)
+      EXCEPTION(std::runtime_error, "TFile - GetFid() < 0");
+    return myFid;
+  }
 
-  public:
-    TFile(const std::string& theFileName, TInt theMajor=-1, TInt theMinor=-1):
-      myCount(0),
-      myFid(0),
-      myFileName(theFileName),
-      myMajor(theMajor),
-      myMinor(theMinor)
+  void TMemFile::Open(EModeAcces theMode, TErr* theErr)
+  {
+    if (this->myCount++ == 0)
     {
-      if ((myMajor < 0) || (myMajor > MED_MAJOR_NUM)) myMajor = MED_MAJOR_NUM;
-      if ((myMinor < 0) || (myMajor == MED_MAJOR_NUM && myMinor > MED_MINOR_NUM)) myMinor = MED_MINOR_NUM;
+      std::string dftFileName = MEDCoupling::MEDFileWritableStandAlone::GenerateUniqueDftFileNameInMem();
+      med_access_mode modeTmp(MED_ACC_CREAT);
+      if(memfile.app_image_ptr)
+        modeTmp = med_access_mode(theMode);
+      myFid = MEDmemFileOpen(dftFileName.c_str(),&memfile,MED_FALSE,modeTmp);
     }
+    if (theErr)
+      *theErr = TErr(myFid);
+    else if (myFid < 0)
+      EXCEPTION(std::runtime_error,"TMemFile - MEDmemFileOpen");
+  }
 
-    ~TFile()
-    {
-      Close();
-    }
+  TFile::TFile(const std::string& theFileName, TInt theMajor, TInt theMinor):
+    myFileName(theFileName),
+    myMajor(theMajor),
+    myMinor(theMinor)
+  {
+    if ((myMajor < 0) || (myMajor > MED_MAJOR_NUM)) myMajor = MED_MAJOR_NUM;
+    if ((myMinor < 0) || (myMajor == MED_MAJOR_NUM && myMinor > MED_MINOR_NUM)) myMinor = MED_MINOR_NUM;
+  }
 
-    void
-    Open(EModeAcces theMode,
-         TErr* theErr = NULL)
-    {
-      if (myCount++ == 0) {
-        const char* aFileName = myFileName.c_str();
+  void TFile::Open(EModeAcces theMode, TErr* theErr)
+  {
+    if (myCount++ == 0) {
+      const char* aFileName = myFileName.c_str();
 #ifdef WIN32
-        if (med_access_mode(theMode) == MED_ACC_RDWR) {
-          // Force removing readonly attribute from a file under Windows, because of a bug in the HDF5
-          std::string aReadOlnyRmCmd = "attrib -r \"" + myFileName + "\"> nul 2>&1";
+      if (med_access_mode(theMode) == MED_ACC_RDWR) {
+        // Force removing readonly attribute from a file under Windows, because of a bug in the HDF5
+        std::string aReadOlnyRmCmd = "attrib -r \"" + myFileName + "\"> nul 2>&1";
 #ifdef UNICODE
-          const char* to_decode = aReadOlnyRmCmd.c_str();
-          int size_needed = MultiByteToWideChar(CP_UTF8, 0, to_decode, strlen(to_decode), NULL, 0);
-          wchar_t* awReadOlnyRmCmd = new wchar_t[size_needed + 1];
-          MultiByteToWideChar(CP_UTF8, 0, to_decode, strlen(to_decode), awReadOlnyRmCmd, size_needed);
-          awReadOlnyRmCmd[size_needed] = '\0';
-          _wsystem(awReadOlnyRmCmd);
-          delete[] awReadOlnyRmCmd;
+        const char* to_decode = aReadOlnyRmCmd.c_str();
+        int size_needed = MultiByteToWideChar(CP_UTF8, 0, to_decode, strlen(to_decode), NULL, 0);
+        wchar_t* awReadOlnyRmCmd = new wchar_t[size_needed + 1];
+        MultiByteToWideChar(CP_UTF8, 0, to_decode, strlen(to_decode), awReadOlnyRmCmd, size_needed);
+        awReadOlnyRmCmd[size_needed] = '\0';
+        _wsystem(awReadOlnyRmCmd);
+        delete[] awReadOlnyRmCmd;
 #else
-          system(aReadOlnyRmCmd.c_str());
+        system(aReadOlnyRmCmd.c_str());
 #endif
-        }
-#endif
-        myFid = MEDfileVersionOpen(aFileName,med_access_mode(theMode), myMajor, myMinor, MED_RELEASE_NUM);
       }
-      if (theErr)
-        *theErr = TErr(myFid);
-      else if (myFid < 0)
-        EXCEPTION(std::runtime_error,"TFile - MEDfileVersionOpen('"<<myFileName<<"',"<<theMode<<"',"<< myMajor <<"',"<< myMinor<<"',"<< MED_RELEASE_NUM<<")");
+#endif
+      myFid = MEDfileVersionOpen(aFileName,med_access_mode(theMode), myMajor, myMinor, MED_RELEASE_NUM);
     }
-
-    const TIdt&
-    Id() const
-    {
-      if (myFid < 0)
-        EXCEPTION(std::runtime_error, "TFile - GetFid() < 0");
-      return myFid;
-    }
-
-    void
-    Close()
-    {
-      if (--myCount == 0)
-        MEDfileClose(myFid);
-    }
-
-  protected:
-    TInt myCount;
-    TIdt myFid;
-    std::string myFileName;
-    TInt myMajor;
-    TInt myMinor;
-  };
+    if (theErr)
+      *theErr = TErr(myFid);
+    else if (myFid < 0)
+      EXCEPTION(std::runtime_error,"TFile - MEDfileVersionOpen('"<<myFileName<<"',"<<theMode<<"',"<< myMajor <<"',"<< myMinor<<"',"<< MED_RELEASE_NUM<<")");
+  }
 
   //---------------------------------------------------------------
   class TFileWrapper
   {
-    PFile myFile;
+    PFileInternal myFile;
     TInt myMinor;
 
   public:
-    TFileWrapper(const PFile& theFile,
-                 EModeAcces theMode,
-                 TErr* theErr = NULL,
-                 TInt theMinor=-1):
+    TFileWrapper(const PFileInternal& theFile,
+                 EModeAcces           theMode,
+                 TErr*                theErr = NULL,
+                 TInt                 theMinor=-1):
       myFile(theFile),
       myMinor(theMinor)
     {
@@ -211,11 +198,15 @@ namespace MED
 
   //---------------------------------------------------------------
   TWrapper
-  ::TWrapper(const std::string& theFileName, bool write, TInt theMajor, TInt theMinor):
-    myFile(new TFile(theFileName, theMajor, theMinor)),
+  ::TWrapper(const std::string& theFileName, bool write, TFileInternal *tfileInst, TInt theMajor, TInt theMinor):
     myMajor(theMajor),
     myMinor(theMinor)
   {
+    if(!tfileInst)
+      myFile.reset(new TFile(theFileName, theMajor, theMinor) );
+    else
+      myFile.reset(new TFileDecorator(tfileInst) );
+    
     TErr aRet;
     if ( write ) {
       myFile->Open(eLECTURE_ECRITURE, &aRet);
@@ -251,9 +242,9 @@ namespace MED
   //----------------------------------------------------------------------------
   void
   TWrapper
-  ::GetMeshInfo(TInt theMeshId,
+  ::GetMeshInfo(TInt            theMeshId,
                 MED::TMeshInfo& theInfo,
-                TErr* theErr)
+                TErr*           theErr)
   {
     TFileWrapper aFileWrapper(myFile, eLECTURE, theErr, myMinor);
 
@@ -294,7 +285,7 @@ namespace MED
   void
   TWrapper
   ::SetMeshInfo(const MED::TMeshInfo& theInfo,
-                TErr* theErr)
+                TErr*                 theErr)
   {
     TErr aRet;
     SetMeshInfo(theInfo, eLECTURE_ECRITURE, &aRet);
@@ -313,8 +304,8 @@ namespace MED
   void
   TWrapper
   ::SetMeshInfo(const MED::TMeshInfo& theInfo,
-                EModeAcces theMode,
-                TErr* theErr)
+                EModeAcces            theMode,
+                TErr*                 theErr)
   {
     TFileWrapper aFileWrapper(myFile, theMode, theErr, myMinor);
 
@@ -361,10 +352,10 @@ namespace MED
   //----------------------------------------------------------------------------
   PMeshInfo
   TWrapper
-  ::CrMeshInfo(TInt theDim,
-               TInt theSpaceDim,
+  ::CrMeshInfo(TInt               theDim,
+               TInt               theSpaceDim,
                const std::string& theValue,
-               EMaillage theType,
+               EMaillage          theType,
                const std::string& theDesc)
   {
     return PMeshInfo(new TTMeshInfo
@@ -386,7 +377,7 @@ namespace MED
   //----------------------------------------------------------------------------
   PMeshInfo
   TWrapper
-  ::GetPMeshInfo(TInt theId,
+  ::GetPMeshInfo(TInt  theId,
                  TErr* theErr)
   {
     PMeshInfo anInfo = CrMeshInfo();
@@ -398,7 +389,7 @@ namespace MED
   TInt
   TWrapper
   ::GetNbFamilies(const MED::TMeshInfo& theInfo,
-                  TErr* theErr)
+                  TErr*                 theErr)
   {
     TFileWrapper aFileWrapper(myFile, eLECTURE, theErr, myMinor);
 
@@ -413,9 +404,9 @@ namespace MED
   //----------------------------------------------------------------------------
   TInt
   TWrapper
-  ::GetNbFamAttr(TInt theFamId,
+  ::GetNbFamAttr(TInt                  theFamId,
                  const MED::TMeshInfo& theInfo,
-                 TErr* theErr)
+                 TErr*                 theErr)
   {
     TFileWrapper aFileWrapper(myFile, eLECTURE, theErr, myMinor);
 
@@ -432,9 +423,9 @@ namespace MED
   //----------------------------------------------------------------------------
   TInt
   TWrapper
-  ::GetNbFamGroup(TInt theFamId,
+  ::GetNbFamGroup(TInt                  theFamId,
                   const MED::TMeshInfo& theInfo,
-                  TErr* theErr)
+                  TErr*                 theErr)
   {
     TFileWrapper aFileWrapper(myFile, eLECTURE, theErr, myMinor);
 
@@ -451,9 +442,9 @@ namespace MED
   //----------------------------------------------------------------------------
   void
   TWrapper
-  ::GetFamilyInfo(TInt theFamId,
+  ::GetFamilyInfo(TInt              theFamId,
                   MED::TFamilyInfo& theInfo,
-                  TErr* theErr)
+                  TErr*             theErr)
   {
     TFileWrapper aFileWrapper(myFile, eLECTURE, theErr, myMinor);
 
@@ -494,7 +485,7 @@ namespace MED
   void
   TWrapper
   ::SetFamilyInfo(const MED::TFamilyInfo& theInfo,
-                  TErr* theErr)
+                  TErr*                   theErr)
   {
     TErr aRet;
     SetFamilyInfo(theInfo, eLECTURE_ECRITURE, &aRet);
@@ -510,8 +501,8 @@ namespace MED
   void
   TWrapper
   ::SetFamilyInfo(const MED::TFamilyInfo& theInfo,
-                  EModeAcces theMode,
-                  TErr* theErr)
+                  EModeAcces              theMode,
+                  TErr*                   theErr)
   {
     TFileWrapper aFileWrapper(myFile, theMode, theErr, myMinor);
 
@@ -549,10 +540,10 @@ namespace MED
   //----------------------------------------------------------------------------
   PFamilyInfo
   TWrapper
-  ::CrFamilyInfo(const PMeshInfo& theMeshInfo,
-                 TInt theNbGroup,
-                 TInt theNbAttr,
-                 TInt theId,
+  ::CrFamilyInfo(const PMeshInfo&   theMeshInfo,
+                 TInt               theNbGroup,
+                 TInt               theNbAttr,
+                 TInt               theId,
                  const std::string& theValue)
   {
     return PFamilyInfo(new TTFamilyInfo
@@ -566,13 +557,13 @@ namespace MED
   //----------------------------------------------------------------------------
   PFamilyInfo
   TWrapper
-  ::CrFamilyInfo(const PMeshInfo& theMeshInfo,
-                 const std::string& theValue,
-                 TInt theId,
-                 const MED::TStringSet& theGroupNames,
+  ::CrFamilyInfo(const PMeshInfo&          theMeshInfo,
+                 const std::string&        theValue,
+                 TInt                      theId,
+                 const MED::TStringSet&    theGroupNames,
                  const MED::TStringVector& theAttrDescs,
-                 const MED::TIntVector& theAttrIds,
-                 const MED::TIntVector& theAttrVals)
+                 const MED::TIntVector&    theAttrIds,
+                 const MED::TIntVector&    theAttrVals)
   {
     return PFamilyInfo(new TTFamilyInfo
                        (theMeshInfo,
@@ -587,7 +578,7 @@ namespace MED
   //----------------------------------------------------------------------------
   PFamilyInfo
   TWrapper
-  ::CrFamilyInfo(const PMeshInfo& theMeshInfo,
+  ::CrFamilyInfo(const PMeshInfo&   theMeshInfo,
                  const PFamilyInfo& theInfo)
   {
     return PFamilyInfo(new TTFamilyInfo
@@ -599,8 +590,8 @@ namespace MED
   PFamilyInfo
   TWrapper
   ::GetPFamilyInfo(const PMeshInfo& theMeshInfo,
-                   TInt theId,
-                   TErr* theErr)
+                   TInt             theId,
+                   TErr*            theErr)
   {
     // must be reimplemented in connection with mesh type eSTRUCTURE
     //     if (theMeshInfo->GetType() != eNON_STRUCTURE)
@@ -629,11 +620,11 @@ namespace MED
   //----------------------------------------------------------------------------
   void
   TWrapper
-  ::GetNames(TElemInfo& theInfo,
-             TInt /*theNb*/,
-             EEntiteMaillage theEntity,
+  ::GetNames(TElemInfo&        theInfo,
+             TInt            /*theNb*/,
+             EEntiteMaillage   theEntity,
              EGeometrieElement theGeom,
-             TErr* theErr)
+             TErr*             theErr)
   {
     TFileWrapper aFileWrapper(myFile, eLECTURE, theErr, myMinor);
 
@@ -667,10 +658,10 @@ namespace MED
   //----------------------------------------------------------------------------
   void
   TWrapper
-  ::SetNames(const TElemInfo& theInfo,
-             EEntiteMaillage theEntity,
+  ::SetNames(const TElemInfo&  theInfo,
+             EEntiteMaillage   theEntity,
              EGeometrieElement theGeom,
-             TErr* theErr)
+             TErr*             theErr)
   {
     SetNames(theInfo, eLECTURE_ECRITURE, theEntity, theGeom, theErr);
   }
@@ -678,11 +669,11 @@ namespace MED
   //----------------------------------------------------------------------------
   void
   TWrapper
-  ::SetNames(const TElemInfo& theInfo,
-             EModeAcces theMode,
-             EEntiteMaillage theEntity,
+  ::SetNames(const TElemInfo&  theInfo,
+             EModeAcces        theMode,
+             EEntiteMaillage   theEntity,
              EGeometrieElement theGeom,
-             TErr* theErr)
+             TErr*             theErr)
   {
     TFileWrapper aFileWrapper(myFile, theMode, theErr, myMinor);
 
@@ -707,7 +698,7 @@ namespace MED
                                  MED_NO_DT,
                                  MED_NO_IT,
                                  anEntity,
-                                  aGeom,
+                                 aGeom,
                                  (TInt)anInfo.myElemNames->size(),
                                  &anElemNames);
       if (theErr)
@@ -720,11 +711,11 @@ namespace MED
   //----------------------------------------------------------------------------
   void
   TWrapper
-  ::GetNumeration(TElemInfo& theInfo,
-                  TInt /*theNb*/,
-                  EEntiteMaillage theEntity,
+  ::GetNumeration(TElemInfo&        theInfo,
+                  TInt            /*theNb*/,
+                  EEntiteMaillage   theEntity,
                   EGeometrieElement theGeom,
-                  TErr* theErr)
+                  TErr*             theErr)
   {
     TFileWrapper aFileWrapper(myFile, eLECTURE, theErr, myMinor);
 
@@ -758,10 +749,10 @@ namespace MED
   //----------------------------------------------------------------------------
   void
   TWrapper
-  ::SetNumeration(const TElemInfo& theInfo,
-                  EEntiteMaillage theEntity,
+  ::SetNumeration(const TElemInfo&  theInfo,
+                  EEntiteMaillage   theEntity,
                   EGeometrieElement theGeom,
-                  TErr* theErr)
+                  TErr*             theErr)
   {
     SetNumeration(theInfo, eLECTURE_ECRITURE, theEntity, theGeom, theErr);
   }
@@ -769,11 +760,11 @@ namespace MED
   //----------------------------------------------------------------------------
   void
   TWrapper
-  ::SetNumeration(const TElemInfo& theInfo,
-                  EModeAcces theMode,
-                  EEntiteMaillage theEntity,
+  ::SetNumeration(const TElemInfo&  theInfo,
+                  EModeAcces        theMode,
+                  EEntiteMaillage   theEntity,
                   EGeometrieElement theGeom,
-                  TErr* theErr)
+                  TErr*             theErr)
   {
     TFileWrapper aFileWrapper(myFile, theMode, theErr, myMinor);
 
@@ -811,11 +802,11 @@ namespace MED
   //----------------------------------------------------------------------------
   void
   TWrapper
-  ::GetFamilies(TElemInfo& theInfo,
-                TInt /*theNb*/,
-                EEntiteMaillage theEntity,
+  ::GetFamilies(TElemInfo&        theInfo,
+                TInt            /*theNb*/,
+                EEntiteMaillage   theEntity,
                 EGeometrieElement theGeom,
-                TErr* theErr)
+                TErr*             theErr)
   {
     TFileWrapper aFileWrapper(myFile, eLECTURE, theErr, myMinor);
 
@@ -858,10 +849,10 @@ namespace MED
   //----------------------------------------------------------------------------
   void
   TWrapper
-  ::SetFamilies(const TElemInfo& theInfo,
-                EEntiteMaillage theEntity,
+  ::SetFamilies(const TElemInfo&  theInfo,
+                EEntiteMaillage   theEntity,
                 EGeometrieElement theGeom,
-                TErr* theErr)
+                TErr*             theErr)
   {
     SetFamilies(theInfo, eLECTURE_ECRITURE, theEntity, theGeom, theErr);
   }
@@ -869,11 +860,11 @@ namespace MED
   //----------------------------------------------------------------------------
   void
   TWrapper
-  ::SetFamilies(const TElemInfo& theInfo,
-                EModeAcces theMode,
-                EEntiteMaillage theEntity,
+  ::SetFamilies(const TElemInfo&  theInfo,
+                EModeAcces        theMode,
+                EEntiteMaillage   theEntity,
                 EGeometrieElement theGeom,
-                TErr* theErr)
+                TErr*             theErr)
   {
     TFileWrapper aFileWrapper(myFile, theMode, theErr, myMinor);
 
@@ -910,7 +901,7 @@ namespace MED
   TInt
   TWrapper
   ::GetNbNodes(const MED::TMeshInfo& theMeshInfo,
-               TErr* theErr)
+               TErr*                 theErr)
   {
     return GetNbNodes(theMeshInfo, eCOOR, theErr);
   }
@@ -2217,14 +2208,14 @@ namespace MED
   //----------------------------------------------------------------------------
   PCellInfo
   TWrapper
-  ::CrCellInfo(const PMeshInfo& theMeshInfo,
-               EEntiteMaillage theEntity,
+  ::CrCellInfo(const PMeshInfo&  theMeshInfo,
+               EEntiteMaillage   theEntity,
                EGeometrieElement theGeom,
-               TInt theNbElem,
-               EConnectivite theConnMode,
-               EBooleen theIsElemNum,
-               EBooleen theIsElemNames,
-               EModeSwitch theMode)
+               TInt              theNbElem,
+               EConnectivite     theConnMode,
+               EBooleen          theIsElemNum,
+               EBooleen          theIsElemNames,
+               EModeSwitch       theMode)
   {
     return PCellInfo(new TTCellInfo
                      (theMeshInfo,

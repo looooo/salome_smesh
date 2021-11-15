@@ -730,7 +730,7 @@ bool SMESHGUI_ReorientFacesOp::onApply()
     }
     case CONSTRUCTOR_FACE_GROUPS:
     {
-      aResult = aMeshEditor->ReOrient2DByNeighbours( myObjects, myRefGroups );
+      aResult = aMeshEditor->Reorient2DByNeighbours( myObjects, myRefGroups );
 
       break;
     }

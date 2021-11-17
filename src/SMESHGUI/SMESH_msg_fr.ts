@@ -674,15 +674,15 @@
     </message>
     <message>
         <source>TOP_REORIENT_2D</source>
-        <translation>Réorienter des faces selon un vecteur</translation>
+        <translation>Réorienter des faces</translation>
     </message>
     <message>
         <source>MEN_REORIENT_2D</source>
-        <translation>Réorienter des faces selon un vecteur</translation>
+        <translation>Réorienter des faces</translation>
     </message>
     <message>
         <source>STB_REORIENT_2D</source>
-        <translation>Réorienter des faces selon un vecteur</translation>
+        <translation>Réorienter des faces</translation>
     </message>
     <message>
         <source>TOP_FIND_ELEM</source>
@@ -8609,7 +8609,7 @@ en rouge dans le browser.</translation>
     <name>SMESHGUI_ReorientFacesDlg</name>
     <message>
         <source>CAPTION</source>
-        <translation>Réorienter des faces selon un vector</translation>
+        <translation>Réorienter des faces</translation>
     </message>
     <message>
         <source>REORIENT_FACES</source>
@@ -8623,6 +8623,10 @@ en rouge dans le browser.</translation>
         <source>OBJECT</source>
         <translation>Objet</translation>
     </message>
+     <message>
+         <source>OBJECTS</source>
+         <translation>Objets</translation>
+     </message>
     <message>
         <source>POINT</source>
         <translation>Point</translation>
@@ -8642,6 +8646,10 @@ en rouge dans le browser.</translation>
     <message>
         <source>VOLUMES</source>
         <translation>Volumes</translation>
+    </message>
+    <message>
+        <source>REF_GROUPS</source>
+        <translation>Objets de référence (optionnel)</translation>
     </message>
     <message>
         <source>OUTSIDE_VOLUME_NORMAL</source>

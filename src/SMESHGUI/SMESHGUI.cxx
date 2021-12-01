@@ -61,6 +61,7 @@
 #include "SMESHGUI_Hypotheses.h"
 #include "SMESHGUI_HypothesesUtils.h"
 #include "SMESHGUI_MG_ADAPTDRIVER.h"
+#include "SMESHGUI_HomardAdaptDlg.h"
 #include "SMESHGUI_Make2DFrom3DOp.h"
 #include "SMESHGUI_MakeNodeAtPointDlg.h"
 #include "SMESHGUI_Measurements.h"
@@ -145,6 +146,7 @@
 #include CORBA_CLIENT_HEADER(SMESH_MeshEditor)
 #include CORBA_CLIENT_HEADER(SMESH_Measurements)
 #include CORBA_CLIENT_HEADER(SMESH_Mesh)
+#include CORBA_CLIENT_HEADER(SMESH_Homard)
 
 // Qt includes
 // #define       INCLUDE_MENUITEM_DEF // VSR commented ????????
@@ -3015,6 +3017,18 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
       break;
     }
 #endif
+  case SMESHOp::OpHomardAdapt:
+    {
+      if ( isStudyLocked() )
+        break;
+      EmitSignalDeactivateDialog();
+
+      SALOME::GenericObj_wrap< SMESHHOMARD::HOMARD_Gen > homardGen =
+        GetSMESHGen()->CreateHOMARD_ADAPT();
+      SMESHGUI_HomardAdaptDlg *aDlg = new SMESHGUI_HomardAdaptDlg(homardGen);
+      aDlg->show();
+      break;
+    }
   // Adaptation - end
   case SMESHOp::OpSplitBiQuadratic:
   case SMESHOp::OpConvertMeshToQuadratic:
@@ -4253,6 +4267,7 @@ void SMESHGUI::initialize( CAM_Application* app )
 #ifndef DISABLE_MG_ADAPT
   createSMESHAction( SMESHOp::OpMGAdapt, "MG_ADAPT", "ICON_MG_ADAPT" );
 #endif
+  createSMESHAction( SMESHOp::OpHomardAdapt, "HOMARD_ADAPT", "ICON_HOMARD_ADAPT" );
   // Adaptation - end
 
   createSMESHAction( SMESHOp::OpMinimumDistance,  "MEASURE_MIN_DIST", "ICON_MEASURE_MIN_DIST" );
@@ -4473,6 +4488,7 @@ void SMESHGUI::initialize( CAM_Application* app )
 #ifndef DISABLE_MG_ADAPT
   createMenu( SMESHOp::OpMGAdapt, adaptId, -1 );
 #endif
+  createMenu( SMESHOp::OpHomardAdapt, adaptId, -1 );
   // Adaptation - end
 
   createMenu( SMESHOp::OpMinimumDistance,  measureId,   -1 );
@@ -4623,6 +4639,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   int adaptTb = createTool( tr( "TB_ADAPTATION" ), QString( "SMESHAdaptationToolbar" ) ) ;
   createTool( SMESHOp::OpMGAdapt, adaptTb );
 #endif
+  createTool( SMESHOp::OpHomardAdapt, adaptTb );
   // Adaptation - end
 
   int measuremTb = createTool( tr( "TB_MEASUREM" ), QString( "SMESHMeasurementsToolbar" ) ) ;
@@ -4706,11 +4723,12 @@ void SMESHGUI::initialize( CAM_Application* app )
   createPopupItem( SMESHOp::OpCreateBoundaryElements, OB, mesh_group, "&& selcount=1 && dim>=2");
 
   // Adaptation - begin
+  popupMgr()->insert( separator(), -1, 0 );
 #ifndef DISABLE_MG_ADAPT
-  popupMgr()->insert( separator(), -1, 0 );
   createPopupItem( SMESHOp::OpMGAdapt, OB, mesh );
-  popupMgr()->insert( separator(), -1, 0 );
 #endif
+  createPopupItem( SMESHOp::OpHomardAdapt, OB, mesh );
+  popupMgr()->insert( separator(), -1, 0 );
   // Adaptation - end
 
   QString only_one_non_empty = QString( " && %1=1 && numberOfNodes>0" ).arg( dc );

@@ -341,6 +341,10 @@
         <translation>Remesh with MG_Adapt</translation>
     </message>
     <message>
+        <source>MEN_HOMARD_ADAPT</source>
+        <translation>Remesh with HOMARD</translation>
+    </message>
+    <message>
         <source>Args</source>
         <translation>Arguments</translation>
     </message>
@@ -3313,6 +3317,10 @@ Use Display Entity menu command to show them.
         <translation>Remesh with MG_Adapt</translation>
     </message>
     <message>
+        <source>STB_HOMARD_ADAPT</source>
+        <translation>Remesh with HOMARD</translation>
+    </message>
+    <message>
         <source>STB_CONV_TO_QUAD</source>
         <translation>Convert to/from quadratic</translation>
     </message>
@@ -4007,6 +4015,10 @@ Use Display Entity menu command to show them.
     <message>
         <source>TOP_MG_ADAPT</source>
         <translation>Remesh with MG_Adapt</translation>
+    </message>
+    <message>
+        <source>TOP_HOMARD_ADAPT</source>
+        <translation>Remesh with HOMARD</translation>
     </message>
     <message>
         <source>TOP_CONV_TO_QUAD</source>

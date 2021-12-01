@@ -1,0 +1,1247 @@
+// Copyright (C) 2011-2021  CEA/DEN, EDF R&D
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 2.1 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+//
+// See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
+//
+
+#include "SMESHGUI_HomardAdaptDlg.h"
+
+#include "SMESHGUI.h"
+#include "SMESHGUI_HomardBoundaryDlg.h"
+#include "SMESHGUI_HomardUtils.h"
+#include "SMESHGUI_Utils.h"
+#include "SMESHGUI_VTKUtils.h"
+#include "SMESHGUI_MeshUtils.h"
+#include "SMESH_TryCatch.hxx"
+
+#include <SalomeApp_Tools.h>
+#include <SalomeApp_Module.h>
+#include <SalomeApp_Application.h>
+#include <LightApp_SelectionMgr.h>
+#include <SUIT_MessageBox.h>
+#include <SUIT_OverrideCursor.h>
+#include <SUIT_FileDlg.h>
+#include <SUIT_Desktop.h>
+#include <SUIT_Session.h>
+#include <SVTK_ViewWindow.h>
+
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QButtonGroup>
+
+#include <utilities.h>
+
+#ifdef WIN32
+#include <direct.h>
+#endif
+
+using namespace std;
+
+// La gestion des repertoires
+#ifndef CHDIR
+  #ifdef WIN32
+    #define CHDIR _chdir
+  #else
+    #define CHDIR chdir
+  #endif
+#endif
+
+const int SPACING = 6;            // layout spacing
+const int MARGIN  = 9;            // layout margin
+
+//================================================================================
+/*!
+ * \brief Constructor
+ */
+//================================================================================
+SMESHGUI_HomardAdaptDlg::SMESHGUI_HomardAdaptDlg(SMESHHOMARD::HOMARD_Gen_ptr myHomardGen0)
+  : QDialog(SMESHGUI::desktop()),
+    myWorkingDir("")
+{
+  MESSAGE("Debut du constructeur de SMESHGUI_HomardAdaptDlg");
+  myHomardGen = SMESHHOMARD::HOMARD_Gen::_duplicate(myHomardGen0);
+  myHomardGen->Register();
+
+  setModal(false);
+  setAttribute( Qt::WA_DeleteOnClose, true );
+  setWindowTitle( tr( "ADAPT_WITH_HOMARD" ) );
+  setSizeGripEnabled( true );
+
+  QTabWidget* myTabWidget = new QTabWidget( this );
+
+  // Arguments
+  myArgs = new SMESHGUI_HomardAdaptArguments(myTabWidget);
+
+  // Advanced options
+  myAdvOpt = new SMESHGUI_HomardAdaptAdvanced(myTabWidget);
+
+  myTabWidget->addTab( myArgs, tr( "Args" ) );
+  //myTabWidget->addTab( myAdvOpt, tr( "ADVOP" ) );
+  myTabWidget->addTab( myAdvOpt, tr( "LOG_GROUP_TITLE" ) );
+
+  //myAdvOpt->logGroupBox               ->setTitle(tr( "LOG_GROUP_TITLE" ));
+  myAdvOpt->workingDirectoryLabel     ->setText (tr( "WORKING_DIR" ));
+  myAdvOpt->workingDirectoryPushButton->setText (tr( "SELECT_DIR" ));
+  myAdvOpt->verboseLevelLabel         ->setText (tr( "VERBOSE_LEVEL" ));
+  myAdvOpt->logInFileCheck            ->setText (tr( "LOG_IN_FILE" ));
+  myAdvOpt->removeLogOnSuccessCheck   ->setText (tr( "REMOVE_LOG_ON_SUCCESS" ));
+  myAdvOpt->keepWorkingFilesCheck     ->setText (tr( "KEEP_WORKING_FILES" ));
+
+  // disable // TODO???
+  myAdvOpt->logInFileCheck->setChecked(true);
+  myAdvOpt->removeLogOnSuccessCheck->setChecked(false);
+
+  // Working directory
+  myWorkingDir = QDir::tempPath();
+  char *aTmp_dir = getenv("SALOME_TMP_DIR");
+  if (aTmp_dir != NULL) {
+    QDir aTmpDir (aTmp_dir);
+    if (aTmpDir.exists()) {
+      myWorkingDir = aTmpDir.absolutePath();
+    }
+  }
+  myAdvOpt->workingDirectoryLineEdit->setText(myWorkingDir);
+  QFileInfo anOutMedFile (QDir(myWorkingDir), "Uniform_01_R.med");
+
+  // Out med file and/or mesh publication
+  myArgs->myOutMedFileChk->setChecked(true);
+  myArgs->mySelectOutMedFileLineEdit->setText(anOutMedFile.absoluteFilePath());
+  myArgs->myOutPublishChk->setChecked(true);
+
+  // buttons
+  QHBoxLayout* btnLayout = new QHBoxLayout;
+  btnLayout->setSpacing( 6 );
+  btnLayout->setMargin( 0 );
+
+  buttonOk = new QPushButton(tr("SMESH_BUT_APPLY_AND_CLOSE"), this);
+  buttonOk->setAutoDefault(false);
+  btnLayout->addWidget(buttonOk);
+  btnLayout->addStretch( 10 );
+
+  buttonApply = new QPushButton(tr("SMESH_BUT_APPLY"), this);
+  buttonApply->setAutoDefault(false);
+  btnLayout->addWidget(buttonApply);
+  btnLayout->addStretch( 10 );
+
+  buttonCancel = new QPushButton(tr( "SMESH_BUT_CANCEL" ), this);
+  buttonCancel->setAutoDefault(false);
+  btnLayout->addWidget(buttonCancel);
+  btnLayout->addStretch( 10 );
+
+  buttonHelp = new QPushButton(tr( "SMESH_BUT_HELP" ), this);
+  buttonHelp->setAutoDefault(false);
+  btnLayout->addWidget(buttonHelp);
+
+  // dialog layout
+  QVBoxLayout* l = new QVBoxLayout ( this );
+  l->setMargin( 9 );
+  l->setSpacing( 6 );
+  l->addWidget( myTabWidget );
+  l->addStretch();
+  l->addLayout( btnLayout );
+
+  // dialog name and size
+  /*
+  resize(600, 1150);
+  QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+  sizePolicy.setHorizontalStretch(0);
+  sizePolicy.setVerticalStretch(0);
+  sizePolicy.setHeightForWidth(this->sizePolicy().hasHeightForWidth());
+  setSizePolicy(sizePolicy);
+  setMinimumSize(QSize(600, 320));
+  setSizeIncrement(QSize(1, 1));
+  setBaseSize(QSize(600, 320));
+  setAutoFillBackground(true);
+  */
+
+  SetBoundaryNo();
+  InitConnect();
+
+  myArgs->GBBoundaryC->setVisible(0);
+  myArgs->GBBoundaryN->setVisible(0);
+  myArgs->GBBoundaryA->setVisible(0);
+  myArgs->GBBoundaryD->setVisible(0);
+
+  adjustSize();
+
+  //MESSAGE("Fin du constructeur de SMESHGUI_HomardAdaptDlg");
+}
+
+//=================================================================================
+// function : ~SMESHGUI_HomardAdaptDlg()
+// purpose  : Destroys the object and frees any allocated resources
+//=================================================================================
+SMESHGUI_HomardAdaptDlg::~SMESHGUI_HomardAdaptDlg()
+{
+  // no need to delete child widgets, Qt does it all for us
+}
+
+//=================================================================================
+// function : InitConnect
+// purpose  : 
+//=================================================================================
+void SMESHGUI_HomardAdaptDlg::InitConnect()
+{
+  connect( myArgs->mySelectInMedFileButton, SIGNAL(pressed()), this, SLOT(SetFileName()));
+
+  connect( myArgs->RBBoundaryNo,      SIGNAL(clicked()), this, SLOT(SetBoundaryNo()));
+  connect( myArgs->RBBoundaryCAO,     SIGNAL(clicked()), this, SLOT(SetBoundaryCAO()));
+  connect( myArgs->RBBoundaryNonCAO,  SIGNAL(clicked()), this, SLOT(SetBoundaryNonCAO()));
+
+  connect( myArgs->PBBoundaryCAONew,  SIGNAL(pressed()), this, SLOT(PushBoundaryCAONew()));
+  connect( myArgs->PBBoundaryCAOEdit, SIGNAL(pressed()), this, SLOT(PushBoundaryCAOEdit()) );
+  connect( myArgs->PBBoundaryCAOHelp, SIGNAL(pressed()), this, SLOT(PushBoundaryCAOHelp()) );
+  connect( myArgs->CBBoundaryD,       SIGNAL(stateChanged(int)), this, SLOT(SetBoundaryD()));
+  connect( myArgs->PBBoundaryDiNew,   SIGNAL(pressed()), this, SLOT(PushBoundaryDiNew()));
+  connect( myArgs->PBBoundaryDiEdit,  SIGNAL(pressed()), this, SLOT(PushBoundaryDiEdit()) );
+  connect( myArgs->PBBoundaryDiHelp,  SIGNAL(pressed()), this, SLOT(PushBoundaryDiHelp()) );
+  connect( myArgs->CBBoundaryA,       SIGNAL(stateChanged(int)), this, SLOT(SetBoundaryA()));
+  connect( myArgs->PBBoundaryAnNew,   SIGNAL(pressed()), this, SLOT(PushBoundaryAnNew()));
+  connect( myArgs->PBBoundaryAnEdit,  SIGNAL(pressed()), this, SLOT(PushBoundaryAnEdit()) );
+  connect( myArgs->PBBoundaryAnHelp,  SIGNAL(pressed()), this, SLOT(PushBoundaryAnHelp()) );
+
+  connect( buttonOk,       SIGNAL(pressed()), this, SLOT(PushOnOK()));
+  connect( buttonApply,    SIGNAL(pressed()), this, SLOT(PushOnApply()));
+  connect( buttonCancel,   SIGNAL(pressed()), this, SLOT(close()));
+  connect( buttonHelp,     SIGNAL(pressed()), this, SLOT(PushOnHelp()));
+
+  connect(myArgs, SIGNAL(updateSelection()), this, SLOT(updateSelection()));
+  connect(myArgs, SIGNAL(toExportMED(const char*)), this, SLOT(exportMED(const char*)));
+}
+
+//=================================================================================
+// function : InitBoundarys
+// purpose  : Initialisation des menus avec les frontieres deja enregistrees
+//=================================================================================
+void SMESHGUI_HomardAdaptDlg::InitBoundarys()
+{
+  MESSAGE("InitBoundarys");
+  // Pour les frontieres analytiques : la colonne des groupes
+  SMESHHOMARD::ListGroupType_var _listeGroupesCas = myCase->GetGroups();
+  QTableWidgetItem *__colItem = new QTableWidgetItem();
+  __colItem->setText(QApplication::translate("CreateCase", "", 0));
+  myArgs->TWBoundary->setHorizontalHeaderItem(0, __colItem);
+  for ( int i = 0; i < (int)_listeGroupesCas->length(); i++ ) {
+    myArgs->TWBoundary->insertRow(i);
+    myArgs->TWBoundary->setItem( i, 0, new QTableWidgetItem(QString((_listeGroupesCas)[i]).trimmed()));
+    myArgs->TWBoundary->item( i, 0 )->setFlags(Qt::ItemIsEnabled |Qt::ItemIsSelectable );
+  }
+  // Pour les frontieres CAO : la liste a saisir
+  // Pour les frontieres discretes : la liste a saisir
+  // Pour les frontieres analytiques : les colonnes de chaque frontiere
+  SMESHHOMARD::HOMARD_Boundary_var myBoundary ;
+  SMESHHOMARD::listeBoundarys_var  mesBoundarys = myHomardGen->GetAllBoundarysName();
+  //MESSAGE("Nombre de frontieres enregistrees : "<<mesBoundarys->length());
+  for (int i=0; i < (int)mesBoundarys->length(); i++) {
+    myBoundary = myHomardGen->GetBoundary(mesBoundarys[i]);
+    int type_obj = myBoundary->GetType() ;
+    if ( type_obj==-1 )     { myArgs->CBBoundaryCAO->addItem(QString(mesBoundarys[i])); }
+    else if ( type_obj==0 ) { myArgs->CBBoundaryDi->addItem(QString(mesBoundarys[i])); }
+    else                    { AddBoundaryAn(QString(mesBoundarys[i])); }
+  }
+  // Ajustement
+  myArgs->TWBoundary->resizeColumnsToContents();
+  myArgs->TWBoundary->resizeRowsToContents();
+  myArgs->TWBoundary->clearSelection();
+}
+
+//=================================================================================
+// function : CheckCase
+// purpose  : 
+//=================================================================================
+bool SMESHGUI_HomardAdaptDlg::CheckCase()
+{
+  MESSAGE("CheckCase");
+  QString aCaseName = "Case_1";
+
+  QString aWorkingDir = myAdvOpt->workingDirectoryLineEdit->text().trimmed();
+  if (aWorkingDir == QString("")) {
+    QMessageBox::critical( 0, QObject::tr("HOM_ERROR"),
+                              QObject::tr("HOM_CASE_DIRECTORY_1") );
+    return false;
+  }
+  if (aWorkingDir != myWorkingDir) {
+    QString CaseNameDir = myHomardGen->VerifieDir( aWorkingDir.toStdString().c_str());
+    if ( ( CaseNameDir != "" ) & ( CaseNameDir != aCaseName ) ) {
+      QString texte  = QObject::tr("HOM_CASE_DIRECTORY_2") + CaseNameDir;
+      QMessageBox::critical( 0, QObject::tr("HOM_ERROR"), texte );
+      return false;
+    }
+  }
+
+  if (CHDIR(aWorkingDir.toStdString().c_str()) != 0) {
+    QMessageBox::critical( 0, QObject::tr("HOM_ERROR"),
+                              QObject::tr("HOM_CASE_DIRECTORY_3") );
+    return false;
+  }
+
+  QString aFileName = myArgs->mySelectInMedFileLineEdit->text().trimmed();
+  if (aFileName == QString("")) {
+    QMessageBox::critical( 0, QObject::tr("HOM_ERROR"),
+                              QObject::tr("HOM_CASE_MESH") );
+    return false;
+  }
+
+  // In mesh name
+  QString aMeshName = SMESH_HOMARD_QT_COMMUN::LireNomMaillage(aFileName);
+  if (aMeshName == "" ) {
+    QMessageBox::critical( 0, QObject::tr("HOM_ERROR"),
+                              QObject::tr("HOM_MED_FILE_2") );
+    return false;
+  }
+
+  // Out mesh name (initialize, if not yet)
+  if (myArgs->myOutMeshNameLineEdit->text().isEmpty()) {
+    myArgs->myOutMeshNameLineEdit->setText(aMeshName);
+  }
+
+  // On verifie qu'un groupe n'est pas associe a deux frontieres differentes
+  if (myArgs->CBBoundaryA->isChecked()) {
+    QStringList ListeGroup ;
+    QString NomGroup ;
+    int nbcol = myArgs->TWBoundary->columnCount();
+    int nbrow = myArgs->TWBoundary->rowCount();
+    for ( int col=1; col< nbcol; col++) {
+      for ( int row=0; row< nbrow; row++) {
+        if ( myArgs->TWBoundary->item( row, col )->checkState() ==  Qt::Checked ) {
+          // Nom du groupe
+          NomGroup = QString(myArgs->TWBoundary->item(row, 0)->text()) ;
+          //MESSAGE("NomGroup "<<NomGroup.toStdString().c_str());
+          for ( int nugr = 0 ; nugr<ListeGroup.size(); nugr++) {
+            //MESSAGE("....... "<<ListeGroup[nugr].toStdString().c_str());
+            if ( NomGroup == ListeGroup[nugr] ) {
+              QMessageBox::critical( 0, QObject::tr("HOM_ERROR"),
+                                        QObject::tr("HOM_CASE_GROUP").arg(NomGroup) );
+              return false;
+            }
+          }
+          ListeGroup.insert(0, NomGroup );
+        }
+      }
+    }
+  }
+
+  // Creation du cas
+  if (myCase->_is_nil()) {
+    try {
+      myCase = myHomardGen->CreateCase
+        (CORBA::string_dup(aCaseName.toStdString().c_str()),
+         CORBA::string_dup(aMeshName.toStdString().c_str()),
+         CORBA::string_dup(aFileName.toStdString().c_str()));
+    }
+    catch( SALOME::SALOME_Exception& S_ex ) {
+      QMessageBox::critical( 0, QObject::tr("HOM_ERROR"),
+                             QObject::tr(CORBA::string_dup(S_ex.details.text)) );
+      return false;
+    }
+    //myArgs->mySelectInMedFileLineEdit->setReadOnly(true);
+    //myArgs->mySelectInMedFileButton->hide();
+    InitBoundarys();
+  }
+
+  // Repertoire et type
+  myCase->SetDirName(aWorkingDir.toStdString().c_str());
+  myWorkingDir = aWorkingDir;
+  myCase->SetConfType(myArgs->RBConforme->isChecked() ? 0 : 1);
+  //myCase->SetExtType(0); // ExtType
+
+  // Menage des eventuelles frontieres deja enregistrees
+  myCase->SupprBoundaryGroup();
+
+  return true;
+}
+
+//=================================================================================
+// function : PushOnApply
+// purpose  : 
+//=================================================================================
+bool SMESHGUI_HomardAdaptDlg::PushOnApply()
+{
+  MESSAGE("PushOnApply");
+
+  // Check data, create Case if not yet
+  if (!CheckCase())
+    return false;
+
+  MESSAGE("PushOnApply: *** aaajfa *** 11");
+
+  // Create boundaries
+  if (myArgs->RBBoundaryCAO->isChecked()) {
+    QString monBoundaryCAOName = myArgs->CBBoundaryCAO->currentText();
+    if (monBoundaryCAOName != "" ) {
+      myCase->AddBoundary(monBoundaryCAOName.toStdString().c_str());
+    }
+  }
+  if (myArgs->CBBoundaryD->isChecked()) {
+    QString monBoundaryDiName = myArgs->CBBoundaryDi->currentText();
+    if (monBoundaryDiName != "" ) {
+      myCase->AddBoundary(monBoundaryDiName.toStdString().c_str());
+    }
+  }
+  if (myArgs->CBBoundaryA->isChecked()) {
+    QString NomGroup;
+    int nbcol = myArgs->TWBoundary->columnCount();
+    int nbrow = myArgs->TWBoundary->rowCount();
+    for ( int col=1; col< nbcol; col++) {
+      for ( int row=0; row< nbrow; row++) {
+        if ( myArgs->TWBoundary->item( row, col )->checkState() == Qt::Checked ) {
+          // Nom du groupe
+          NomGroup = QString(myArgs->TWBoundary->item(row, 0)->text()) ;
+          // Nom de la frontiere
+          QTableWidgetItem *__colItem = new QTableWidgetItem();
+          __colItem = myArgs->TWBoundary->horizontalHeaderItem(col);
+          myCase->AddBoundaryGroup(QString(__colItem->text()).toStdString().c_str(),
+                                  NomGroup.toStdString().c_str());
+        }
+      }
+    }
+  }
+  MESSAGE("PushOnApply: *** aaajfa *** 12");
+
+  // create hypothesis
+  if (myHypothesis->_is_nil()) {
+    try {
+      myHypothesis = myHomardGen->CreateHypothesis("Hypo_1");
+      myHypothesis->SetUnifRefinUnRef(1);
+    }
+    catch( SALOME::SALOME_Exception& S_ex ) {
+      QMessageBox::critical( 0, QObject::tr("HOM_ERROR"),
+                             QString(CORBA::string_dup(S_ex.details.text)) );
+      //if (!myHypothesis->_is_nil()) {
+      //  myHypothesis->Delete();
+      //  myHypothesis = SMESHHOMARD::HOMARD_Hypothesis::_nil();
+      //}
+      return false;
+    }
+  }
+  MESSAGE("PushOnApply: *** aaajfa *** 13");
+
+  // create iteration
+  if (myIteration->_is_nil()) {
+    try {
+      myIteration = myCase->NextIteration("Iter_1");
+      myIteration->AssociateHypo("Hypo_1");
+    }
+    catch( SALOME::SALOME_Exception& S_ex ) {
+      QMessageBox::critical( 0, QObject::tr("HOM_ERROR"),
+                             QString(CORBA::string_dup(S_ex.details.text)) );
+      return false;
+    }
+  }
+  // Verbose level?
+  myIteration->SetInfoCompute(myAdvOpt->verboseLevelSpin->value());
+  // Output mesh name
+  myIteration->SetMeshName(myArgs->myOutMeshNameLineEdit->text().toStdString().c_str());
+  // Output med file
+  if (myArgs->myOutMedFileChk->isChecked()) {
+    QString anOutMed = myArgs->mySelectOutMedFileLineEdit->text();
+    if (anOutMed.isEmpty()) {
+      // store in working directory and with default name
+      QString aMedFileIn = myArgs->mySelectInMedFileLineEdit->text().trimmed();
+      QFileInfo aFileInfoIn (aMedFileIn);
+      aMedFileIn = aFileInfoIn.completeBaseName(); // name without path and last extension
+      QFileInfo aFileInfo (QDir(myWorkingDir), aMedFileIn + "_Uniform_01_R.med");
+      anOutMed = aFileInfo.absoluteFilePath();
+      // show it
+      myArgs->mySelectOutMedFileLineEdit->setText(anOutMed);
+    }
+    else {
+      QFileInfo aFileInfo (anOutMed);
+      anOutMed = aFileInfo.absoluteFilePath();
+    }
+    myIteration->SetMeshFile(anOutMed.toStdString().c_str());
+  }
+  // Log file
+  if (myAdvOpt->logInFileCheck->isChecked()) {
+    // Write log file in the working dir
+    // Name of log file will be "<base_name_of_input_med>_Uniform_01_R.med.log"
+    QString aMedFileIn = myArgs->mySelectInMedFileLineEdit->text().trimmed();
+    QFileInfo aFileInfoIn (aMedFileIn);
+    aMedFileIn = aFileInfoIn.completeBaseName(); // name without path and last extension
+    QFileInfo aFileInfo (QDir(myWorkingDir), aMedFileIn + "_Uniform_01_R.med.log");
+    QString anOutLog = aFileInfo.absoluteFilePath();
+    MESSAGE("myIteration->SetLogFile(" << anOutLog.toStdString().c_str() << ")");
+    myIteration->SetLogFile(anOutLog.toStdString().c_str());
+    MESSAGE("myIteration->GetLogFile() = " << myIteration->GetLogFile());
+  }
+  MESSAGE("PushOnApply: *** aaajfa *** 14");
+
+  // compute and publish
+  bool isSuccess = true;
+  try {
+    int aCleanOption = 0; // report an error if output mesh file exists
+    int aModeHOMARD = 1; // adaptation
+    int anOption1 = -1; // appel depuis GUI
+    int anOption2 = 1; // do not publish to SMESH
+    if (myArgs->myOutPublishChk->isChecked())
+      anOption2 = 2; // publish to SMESH
+    isSuccess = myHomardGen->Compute("Iter_1", aCleanOption, aModeHOMARD,
+                                     anOption1, anOption2) == 0;
+  }
+  catch( SALOME::SALOME_Exception& S_ex ) {
+    QMessageBox::critical( 0, QObject::tr("HOM_ERROR"),
+                           QObject::tr(CORBA::string_dup(S_ex.details.text)) );
+    isSuccess = false;
+  }
+  MESSAGE("PushOnApply: *** aaajfa *** 15");
+  //  case 1131: // Publication du maillage de l'iteration
+  //    homardGen->PublishMeshIterInSmesh(_ObjectName.toStdString().c_str());
+  //  case 1132: // Publication du maillage de l'iteration a partir du fichier
+  //    homardGen->PublishResultInSmesh(_ObjectName.toStdString().c_str(), 1);
+
+  if (isSuccess)
+    SMESHGUI::GetSMESHGUI()->updateObjBrowser();
+
+  // Remove log file and delete iteration object
+  MESSAGE("myIteration->GetLogFile() = " << myIteration->GetLogFile());
+  if (isSuccess &&
+      myAdvOpt->logInFileCheck->isChecked() &&
+      myAdvOpt->removeLogOnSuccessCheck->isChecked()) {
+    // Remove log file on success
+    QFile(myIteration->GetLogFile()).remove();
+  }
+  MESSAGE("PushOnApply: *** aaajfa *** 16");
+
+  // Delete iteration object
+  // This also removes all working files, if keepWorkingFilesCheck is not checked
+  myIteration->Delete(0, !myAdvOpt->keepWorkingFilesCheck->isChecked());
+
+  // Delete hypothesis and case
+  if (!myHypothesis->_is_nil()) myHypothesis->Delete();
+  if (!myCase->_is_nil()) myCase->Delete(1);
+
+  MESSAGE("PushOnApply: *** aaajfa *** 17");
+  myIteration = SMESHHOMARD::HOMARD_Iteration::_nil();
+  myHypothesis = SMESHHOMARD::HOMARD_Hypothesis::_nil();
+  myCase = SMESHHOMARD::HOMARD_Cas::_nil();
+  MESSAGE("PushOnApply: *** aaajfa *** THE END");
+
+  return isSuccess;
+}
+
+//=================================================================================
+// function : PushOnOK
+// purpose  : 
+//=================================================================================
+void SMESHGUI_HomardAdaptDlg::PushOnOK()
+{
+  bool bOK = PushOnApply();
+  if ( bOK ) this->close();
+}
+
+void SMESHGUI_HomardAdaptDlg::PushOnHelp()
+{
+  //SMESH::ShowHelpFile(QString("gui_create_case.html"));
+  SMESH::ShowHelpFile("adaptation.html#_homard_adapt_anchor");
+}
+
+void SMESHGUI_HomardAdaptDlg::updateSelection()
+{
+  LightApp_SelectionMgr *selMgr = SMESHGUI::selectionMgr();
+  disconnect( selMgr, 0, this, 0 );
+  selMgr->clearFilters();
+
+  SMESH::SetPointRepresentation( false );
+  if ( SVTK_ViewWindow* aViewWindow = SMESH::GetViewWindow() )
+    aViewWindow->SetSelectionMode( ActorSelection );
+  if (myArgs->myInBrowserRadio->isChecked())
+  {
+    connect( selMgr, SIGNAL( currentSelectionChanged() ), this, SLOT( selectionChanged() ));
+    selectionChanged();
+  }
+
+}
+void SMESHGUI_HomardAdaptDlg::selectionChanged()
+{
+  LightApp_SelectionMgr *selMgr = SMESHGUI::selectionMgr();
+
+  //~ get selected mesh
+  SALOME_ListIO aList;
+  selMgr->selectedObjects(aList);
+  QString aString = "";
+  int nbSel = aList.Extent();
+  if (nbSel != 1)
+    return;
+
+  Handle(SALOME_InteractiveObject) IO = aList.First();
+  SMESH::SMESH_Mesh_var mesh = SMESH::GetMeshByIO(IO);
+  if ( !mesh->_is_nil() )
+  {
+    myMesh = mesh;
+
+    SMESH::SMESH_IDSource_var sSelectedObj = SMESH::IObjectToInterface<SMESH::SMESH_IDSource>( IO );
+    if ( sSelectedObj->_is_nil() )
+      return;
+  }
+  else
+    return;
+
+  SMESH::GetNameOfSelectedIObjects( selMgr, aString );
+  if ( aString.isEmpty() ) aString = " ";
+  else                     aString = aString.trimmed();
+
+  //bool ok = !aString.isEmpty();
+  if ( !mesh->_is_nil() )
+  {
+    myArgs->myInBrowserObject->setText( aString );
+    myArgs->myOutMeshNameLineEdit->setText( aString );
+    myArgs->mySelectOutMedFileLineEdit->setText(aString + QString("_Uniform_01_R.med"));
+  }
+}
+
+void SMESHGUI_HomardAdaptDlg::setMyMesh(SMESH::SMESH_Mesh_var mesh)
+{
+  myMesh = mesh;
+}
+
+SMESH::SMESH_Mesh_var SMESHGUI_HomardAdaptDlg::getMyMesh()
+{
+  return myMesh;
+}
+
+void SMESHGUI_HomardAdaptDlg::SetFileName()
+{
+  // Input med file
+  QString fileName0 = myArgs->mySelectInMedFileLineEdit->text().trimmed();
+  QString fileName = SMESH_HOMARD_QT_COMMUN::PushNomFichier(false, QString("med"));
+  if (fileName.isEmpty()) {
+    fileName = fileName0;
+    if (fileName.isEmpty()) return;
+  }
+  QFileInfo aFileInfo (fileName);
+  fileName = aFileInfo.absoluteFilePath();
+  myArgs->mySelectInMedFileLineEdit->setText(fileName);
+
+  // Output med file default value
+  if (myArgs->myOutMedFileChk->isChecked()) {
+    std::string fname = fileName.toStdString();
+    size_t lastdot = fname.find_last_of(".");
+    if (lastdot != std::string::npos)
+      fname = fname.substr(0, lastdot);
+    QString outF = QString(fname.c_str()) + QString("_Uniform_01_R.med");
+    myArgs->mySelectOutMedFileLineEdit->setText(outF);
+  }
+
+  // Check data
+  CheckCase();
+}
+
+// ------------------------------------------------------------------------
+void SMESHGUI_HomardAdaptDlg::SetBoundaryNo()
+{
+  myArgs->GBBoundaryC->setVisible(0);
+  myArgs->GBBoundaryN->setVisible(0);
+  adjustSize();
+}
+
+// ------------------------------------------------------------------------
+void SMESHGUI_HomardAdaptDlg::SetBoundaryCAO()
+{
+  myArgs->GBBoundaryC->setVisible(1);
+  myArgs->GBBoundaryN->setVisible(0);
+  adjustSize();
+}
+// ------------------------------------------------------------------------
+void SMESHGUI_HomardAdaptDlg::SetBoundaryNonCAO()
+{
+  myArgs->GBBoundaryC->setVisible(0);
+  myArgs->GBBoundaryN->setVisible(1);
+  adjustSize();
+}
+// ------------------------------------------------------------------------
+void SMESHGUI_HomardAdaptDlg::AddBoundaryCAO(QString newBoundary)
+// ------------------------------------------------------------------------
+{
+  myArgs->CBBoundaryCAO->insertItem(0,newBoundary);
+  myArgs->CBBoundaryCAO->setCurrentIndex(0);
+}
+// ------------------------------------------------------------------------
+void SMESHGUI_HomardAdaptDlg::PushBoundaryCAONew()
+// ------------------------------------------------------------------------
+{
+   SMESH_CreateBoundaryCAO *BoundaryDlg = new SMESH_CreateBoundaryCAO
+     (this, true, SMESHHOMARD::HOMARD_Gen::_duplicate(myHomardGen), "Case_1", "");
+   BoundaryDlg->show();
+}
+// ------------------------------------------------------------------------
+void SMESHGUI_HomardAdaptDlg::PushBoundaryCAOEdit()
+// ------------------------------------------------------------------------
+{
+  if (myArgs->CBBoundaryCAO->currentText() == QString(""))  return;
+  SMESH_EditBoundaryCAO *BoundaryDlg = new SMESH_EditBoundaryCAO
+    (this, true, SMESHHOMARD::HOMARD_Gen::_duplicate(myHomardGen),
+     "Case_1", myArgs->CBBoundaryCAO->currentText());
+  BoundaryDlg->show();
+}
+
+// ------------------------------------------------------------------------
+void SMESHGUI_HomardAdaptDlg::PushBoundaryCAOHelp()
+{
+  SMESH::ShowHelpFile(QString("gui_create_boundary.html"));
+}
+
+// ------------------------------------------------------------------------
+void SMESHGUI_HomardAdaptDlg::SetBoundaryD()
+{
+  MESSAGE("Debut de SetBoundaryD ");
+  if (myArgs->CBBoundaryD->isChecked()) {
+    bool bOK = CheckCase();
+    if (bOK) {
+      myArgs->GBBoundaryD->setVisible(1);
+    }
+    else {
+      myArgs->GBBoundaryD->setVisible(0);
+      myArgs->CBBoundaryD->setChecked(0);
+      myArgs->CBBoundaryD->setCheckState(Qt::Unchecked);
+    }
+  }
+  else {
+    myArgs->GBBoundaryD->setVisible(0);
+  }
+
+  myArgs->mySelectInMedFileLineEdit->setReadOnly(true);
+  myArgs->mySelectInMedFileButton->hide();
+
+  adjustSize();
+}
+// ------------------------------------------------------------------------
+void SMESHGUI_HomardAdaptDlg::AddBoundaryDi(QString newBoundary)
+// ------------------------------------------------------------------------
+{
+  myArgs->CBBoundaryDi->insertItem(0,newBoundary);
+  myArgs->CBBoundaryDi->setCurrentIndex(0);
+}
+// ------------------------------------------------------------------------
+void SMESHGUI_HomardAdaptDlg::PushBoundaryDiNew()
+// ------------------------------------------------------------------------
+{
+   SMESH_CreateBoundaryDi *BoundaryDlg = new SMESH_CreateBoundaryDi(this, true,
+                SMESHHOMARD::HOMARD_Gen::_duplicate(myHomardGen), "Case_1", "");
+   BoundaryDlg->show();
+}
+// ------------------------------------------------------------------------
+void SMESHGUI_HomardAdaptDlg::PushBoundaryDiEdit()
+// ------------------------------------------------------------------------
+{
+  if (myArgs->CBBoundaryDi->currentText() == QString(""))  return;
+  SMESH_EditBoundaryDi *BoundaryDlg = new SMESH_EditBoundaryDi
+    (this, true, SMESHHOMARD::HOMARD_Gen::_duplicate(myHomardGen),
+     "Case_1", myArgs->CBBoundaryDi->currentText());
+  BoundaryDlg->show();
+}
+
+// ------------------------------------------------------------------------
+void SMESHGUI_HomardAdaptDlg::PushBoundaryDiHelp()
+{
+  SMESH::ShowHelpFile(QString("gui_create_boundary.html"));
+  //std::string LanguageShort = myHomardGen->GetLanguageShort();
+  //HOMARD_UTILS::PushOnHelp(QString("gui_create_boundary.html"), QString("frontiere-discrete"), QString(LanguageShort.c_str()));
+}
+
+// ------------------------------------------------------------------------
+void SMESHGUI_HomardAdaptDlg::SetBoundaryA()
+{
+  MESSAGE("Debut de SetBoundaryA ");
+  if (myArgs->CBBoundaryA->isChecked()) {
+    bool bOK = CheckCase();
+    if (bOK) {
+      myArgs->GBBoundaryA->setVisible(1);
+    }
+    else {
+      myArgs->GBBoundaryA->setVisible(0);
+      myArgs->CBBoundaryA->setChecked(0);
+      myArgs->CBBoundaryA->setCheckState(Qt::Unchecked);
+    }
+  }
+  else {
+    myArgs->GBBoundaryA->setVisible(0);
+  }
+
+  myArgs->mySelectInMedFileLineEdit->setReadOnly(true);
+  myArgs->mySelectInMedFileButton->hide();
+
+  adjustSize();
+}
+// ------------------------------------------------------------------------
+void SMESHGUI_HomardAdaptDlg::AddBoundaryAn(QString newBoundary)
+// ------------------------------------------------------------------------
+{
+  MESSAGE("Debut de AddBoundaryAn ");
+// Ajout d'une nouvelle colonne
+  int nbcol = myArgs->TWBoundary->columnCount();
+//   MESSAGE("nbcol " <<  nbcol);
+  nbcol += 1 ;
+  myArgs->TWBoundary->setColumnCount ( nbcol ) ;
+  QTableWidgetItem *__colItem = new QTableWidgetItem();
+  __colItem->setText(QApplication::translate("CreateCase", newBoundary.toStdString().c_str(), 0));
+  myArgs->TWBoundary->setHorizontalHeaderItem(nbcol-1, __colItem);
+/*  TWBoundary->horizontalHeaderItem(nbcol-1)->setFlags( Qt::ItemIsSelectable|Qt::ItemIsEnabled );*/
+// Chaque case est a cocher
+  int nbrow = myArgs->TWBoundary->rowCount();
+//   MESSAGE("nbrow " <<  nbrow);
+  for ( int i = 0; i < nbrow; i++ )
+  {
+    myArgs->TWBoundary->setItem( i, nbcol-1, new QTableWidgetItem( QString ("") ) );
+    myArgs->TWBoundary->item( i, nbcol-1 )->setFlags( 0 );
+    myArgs->TWBoundary->item( i, nbcol-1 )->setFlags( Qt::ItemIsUserCheckable|Qt::ItemIsEnabled  );
+    myArgs->TWBoundary->item( i, nbcol-1 )->setCheckState( Qt::Unchecked );
+  }
+  myArgs->TWBoundary->resizeColumnToContents(nbcol-1);
+//   TWBoundary->resizeRowsToContents();
+//   MESSAGE("Fin de AddBoundaryAn ");
+}
+// ------------------------------------------------------------------------
+void SMESHGUI_HomardAdaptDlg::PushBoundaryAnNew()
+// ------------------------------------------------------------------------
+{
+   SMESH_CreateBoundaryAn *BoundaryDlg = new SMESH_CreateBoundaryAn
+     (this, true, SMESHHOMARD::HOMARD_Gen::_duplicate(myHomardGen), "Case_1");
+   BoundaryDlg->show();
+}
+// ------------------------------------------------------------------------
+void SMESHGUI_HomardAdaptDlg::PushBoundaryAnEdit()
+// ------------------------------------------------------------------------
+{
+  QString nom="";
+  int nbcol = myArgs->TWBoundary->columnCount();
+  for ( int i = 1; i < nbcol; i++ ) {
+    QTableWidgetItem *__colItem = new QTableWidgetItem();
+    __colItem = myArgs->TWBoundary->horizontalHeaderItem(i);
+    nom = QString(__colItem->text()) ;
+    MESSAGE("nom "<<nom.toStdString().c_str());
+    if (nom != QString("")) {
+      SMESH_EditBoundaryAn *BoundaryDlg = new SMESH_EditBoundaryAn
+        (this, true, SMESHHOMARD::HOMARD_Gen::_duplicate(myHomardGen), "Case_1", nom);
+      BoundaryDlg->show();
+    }
+  }
+}
+// ------------------------------------------------------------------------
+void SMESHGUI_HomardAdaptDlg::PushBoundaryAnHelp()
+// ------------------------------------------------------------------------
+{
+  SMESH::ShowHelpFile(QString("gui_create_boundary.html"));
+  //std::string LanguageShort = myHomardGen->GetLanguageShort();
+  //HOMARD_UTILS::PushOnHelp(QString("gui_create_boundary.html"), QString("frontiere-analytique"), QString(LanguageShort.c_str()));
+}
+
+//=================================================================================
+// function : SMESHGUI_HomardAdaptArguments()
+// purpose  :
+//=================================================================================
+SMESHGUI_HomardAdaptArguments::SMESHGUI_HomardAdaptArguments(QWidget* parent)
+  : QWidget(parent)
+{
+  setupUi(this);
+}
+
+SMESHGUI_HomardAdaptArguments::~SMESHGUI_HomardAdaptArguments()
+{
+}
+
+void SMESHGUI_HomardAdaptArguments::setupUi(QWidget *CreateCase)
+{
+  // Mesh in
+  QGroupBox* aMeshIn    = new QGroupBox( tr( "MeshIn" ), this );
+  myInMedFileRadio      = new QRadioButton( tr( "MEDFile" ), aMeshIn );
+  myInBrowserRadio      = new QRadioButton( tr( "Browser" ), aMeshIn );
+  myInBrowserObject       = new QLineEdit( aMeshIn );
+  mySelectInMedFileButton   = new QPushButton("...", aMeshIn);
+  mySelectInMedFileLineEdit = new QLineEdit( aMeshIn );
+
+  QGridLayout* meshIn = new QGridLayout( aMeshIn );
+
+  meshIn->setMargin( 9 );
+  meshIn->setSpacing( 6 );
+  meshIn->addWidget( myInMedFileRadio,          0, 0, 1, 1 );
+  meshIn->addWidget( myInBrowserRadio,          0, 1, 1, 1 );
+  meshIn->addWidget( mySelectInMedFileButton,   1, 0, 1, 1 );
+  meshIn->addWidget( mySelectInMedFileLineEdit, 1, 1, 1, 2 );
+  meshIn->addWidget( myInBrowserObject,         0, 2, 1, 1 );
+
+  myInMeshGroup = new QButtonGroup( this );
+  myInMeshGroup->addButton( myInMedFileRadio, 0 );
+  myInMeshGroup->addButton( myInBrowserRadio, 1 );
+
+  // Mesh out
+  QGroupBox* aMeshOut = new QGroupBox( tr( "MeshOut" ), this );
+  QLabel* meshName = new QLabel(tr("MeshName"), aMeshOut);
+  QSpacerItem* secondHspacer = new QSpacerItem(100, 30);
+  myOutMeshNameLineEdit = new QLineEdit(aMeshOut);
+  myOutMedFileChk = new QCheckBox(tr("MEDFile"), aMeshOut);
+  mySelectOutMedFileButton = new QPushButton("...", aMeshOut);
+  mySelectOutMedFileLineEdit = new QLineEdit(aMeshOut);
+  myOutPublishChk = new QCheckBox(tr("Publish_MG_ADAPT"), aMeshOut);
+
+  QGridLayout* meshOut = new QGridLayout( aMeshOut );
+
+  meshOut->setMargin( 9 );
+  meshOut->setSpacing( 6 );
+  meshOut->addWidget( meshName,  0, 0, 1,1 );
+  meshOut->addItem( secondHspacer,  0, 1, 1, 1 );
+  meshOut->addWidget( myOutMeshNameLineEdit, 0, 2,1,1);
+  meshOut->addWidget( myOutMedFileChk,  1, 0,1,1 );
+  meshOut->addWidget( mySelectOutMedFileButton,  1, 1,1,1 );
+  meshOut->addWidget( mySelectOutMedFileLineEdit,  1, 2,1,1);
+  meshOut->addWidget( myOutPublishChk,  2, 0,1,1 );
+
+  // Conformity type
+  QGroupBox *GBTypeConf = new QGroupBox(tr("Conformity type"), CreateCase);
+  RBConforme = new QRadioButton(tr("Conformal"), GBTypeConf);
+  RBNonConforme = new QRadioButton(tr("Non conformal"), GBTypeConf);
+  RBConforme->setChecked(true);
+
+  QHBoxLayout *hboxLayout2 = new QHBoxLayout(GBTypeConf);
+  hboxLayout2->setSpacing(6);
+  hboxLayout2->setContentsMargins(9, 9, 9, 9);
+  hboxLayout2->addWidget(RBConforme);
+  hboxLayout2->addWidget(RBNonConforme);
+
+  // Boundary type
+  GBTypeBoun = new QGroupBox(tr("Boundary type"), CreateCase);
+
+  RBBoundaryNo     = new QRadioButton(tr("No boundary"), GBTypeBoun);
+  RBBoundaryCAO    = new QRadioButton(tr("CAO"), GBTypeBoun);
+  RBBoundaryNonCAO = new QRadioButton(tr("Non CAO"), GBTypeBoun);
+  RBBoundaryNo->setChecked(true);
+
+  //     CAO
+  GBBoundaryC = new QGroupBox(tr("CAO"), GBTypeBoun);
+  QSizePolicy sizePolicy1(QSizePolicy::Fixed, QSizePolicy::Fixed);
+  sizePolicy1.setHorizontalStretch(0);
+  sizePolicy1.setVerticalStretch(0);
+  sizePolicy1.setHeightForWidth(GBBoundaryC->sizePolicy().hasHeightForWidth());
+  GBBoundaryC->setSizePolicy(sizePolicy1);
+
+  CBBoundaryCAO = new QComboBox(GBBoundaryC);
+  CBBoundaryCAO->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+
+  PBBoundaryCAONew = new QPushButton(tr("CAO_NEW_BTN"), GBBoundaryC);
+  PBBoundaryCAOEdit = new QPushButton(tr("CAO_EDIT_BTN"), GBBoundaryC);
+  PBBoundaryCAOHelp = new QPushButton(tr("CAO_HELP_BTN"), GBBoundaryC);
+
+  PBBoundaryCAONew->setAutoDefault(false);
+  PBBoundaryCAOEdit->setAutoDefault(false);
+  PBBoundaryCAOHelp->setAutoDefault(false);
+
+  _2 = new QGridLayout(GBBoundaryC);
+  _2->setSpacing(6);
+  _2->setContentsMargins(9, 9, 9, 9);
+  _2->addWidget(CBBoundaryCAO, 0, 0, 1, 1);
+  QSpacerItem* spacerItem3 = new QSpacerItem(40, 13, QSizePolicy::Fixed, QSizePolicy::Minimum);
+  _2->addItem(spacerItem3, 0, 1, 1, 1);
+  _2->addWidget(PBBoundaryCAONew, 0, 2, 1, 1);
+  _2->addWidget(PBBoundaryCAOEdit, 0, 3, 1, 1);
+  _2->addWidget(PBBoundaryCAOHelp, 0, 4, 1, 1);
+
+  //     Non CAO (discrete / analytical)
+  GBBoundaryN = new QGroupBox(GBTypeBoun);
+  CBBoundaryD = new QCheckBox(tr("BOUNDARY_DISCRETE"), GBBoundaryN);
+  CBBoundaryA = new QCheckBox(tr("BOUNDARY_ANALYTICAL"), GBBoundaryN);
+
+  hboxLayout3 = new QHBoxLayout(GBBoundaryN);
+  hboxLayout3->setSpacing(6);
+  hboxLayout3->setContentsMargins(0, 0, 0, 0);
+  hboxLayout3->addWidget(CBBoundaryD);
+  hboxLayout3->addWidget(CBBoundaryA);
+
+  //          discrete
+  GBBoundaryD = new QGroupBox(tr("Discrete boundary"), GBBoundaryN);
+  sizePolicy1.setHeightForWidth(GBBoundaryD->sizePolicy().hasHeightForWidth());
+  GBBoundaryD->setSizePolicy(sizePolicy1);
+  gridLayout = new QGridLayout(GBBoundaryD);
+  gridLayout->setSpacing(6);
+  gridLayout->setContentsMargins(9, 9, 9, 9);
+  gridLayout->setObjectName(QString::fromUtf8("gridLayout"));
+  CBBoundaryDi = new QComboBox(GBBoundaryD);
+  CBBoundaryDi->setObjectName(QString::fromUtf8("CBBoundaryDi"));
+  CBBoundaryDi->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+
+  gridLayout->addWidget(CBBoundaryDi, 0, 0, 1, 1);
+
+  QSpacerItem* spacerItem5 = new QSpacerItem(40, 13, QSizePolicy::Fixed, QSizePolicy::Minimum);
+  gridLayout->addItem(spacerItem5, 0, 1, 1, 1);
+
+  PBBoundaryDiEdit = new QPushButton(GBBoundaryD);
+  PBBoundaryDiEdit->setObjectName(QString::fromUtf8("PBBoundaryDiEdit"));
+  PBBoundaryDiEdit->setAutoDefault(false);
+
+  gridLayout->addWidget(PBBoundaryDiEdit, 0, 3, 1, 1);
+
+  PBBoundaryDiHelp = new QPushButton(GBBoundaryD);
+  PBBoundaryDiHelp->setObjectName(QString::fromUtf8("PBBoundaryDiHelp"));
+  PBBoundaryDiHelp->setAutoDefault(false);
+
+  gridLayout->addWidget(PBBoundaryDiHelp, 0, 4, 1, 1);
+
+  PBBoundaryDiNew = new QPushButton(GBBoundaryD);
+  PBBoundaryDiNew->setAutoDefault(false);
+
+  gridLayout->addWidget(PBBoundaryDiNew, 0, 2, 1, 1);
+
+  //          analytical
+  GBBoundaryA = new QGroupBox(tr("Analytical boundary"), GBBoundaryN);
+  GBBoundaryA->setMinimumSize(QSize(548, 200));
+  formLayout = new QFormLayout(GBBoundaryA);
+  formLayout->setObjectName(QString::fromUtf8("formLayout"));
+  TWBoundary = new QTableWidget(GBBoundaryA);
+  if (TWBoundary->columnCount() < 1)
+    TWBoundary->setColumnCount(1);
+  QTableWidgetItem *__qtablewidgetitem = new QTableWidgetItem();
+  TWBoundary->setHorizontalHeaderItem(0, __qtablewidgetitem);
+  TWBoundary->setObjectName(QString::fromUtf8("TWBoundary"));
+  TWBoundary->setEditTriggers(QAbstractItemView::AnyKeyPressed|QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed|QAbstractItemView::SelectedClicked);
+  TWBoundary->setShowGrid(true);
+  TWBoundary->setRowCount(0);
+  TWBoundary->setColumnCount(1);
+
+  formLayout->setWidget(0, QFormLayout::LabelRole, TWBoundary);
+
+  gridLayout1 = new QGridLayout();
+  gridLayout1->setSpacing(6);
+  gridLayout1->setContentsMargins(0, 0, 0, 0);
+  gridLayout1->setObjectName(QString::fromUtf8("gridLayout1"));
+  PBBoundaryAnEdit = new QPushButton(GBBoundaryA);
+  PBBoundaryAnEdit->setObjectName(QString::fromUtf8("PBBoundaryAnEdit"));
+  PBBoundaryAnEdit->setAutoDefault(false);
+
+  gridLayout1->addWidget(PBBoundaryAnEdit, 1, 0, 1, 1);
+
+  PBBoundaryAnNew = new QPushButton(GBBoundaryA);
+  PBBoundaryAnNew->setObjectName(QString::fromUtf8("PBBoundaryAnNew"));
+  PBBoundaryAnNew->setAutoDefault(false);
+
+  gridLayout1->addWidget(PBBoundaryAnNew, 0, 0, 1, 1);
+
+  PBBoundaryAnHelp = new QPushButton(GBBoundaryA);
+  PBBoundaryAnHelp->setObjectName(QString::fromUtf8("PBBoundaryAnHelp"));
+  PBBoundaryAnHelp->setAutoDefault(false);
+
+  gridLayout1->addWidget(PBBoundaryAnHelp, 2, 0, 1, 1);
+
+  formLayout->setLayout(0, QFormLayout::FieldRole, gridLayout1);
+
+  // Boundary type Layout
+  QGridLayout* aBoundTypeLayout = new QGridLayout(GBTypeBoun);
+  aBoundTypeLayout->addWidget(RBBoundaryNo,     0, 0);
+  aBoundTypeLayout->addWidget(RBBoundaryCAO,    0, 1);
+  aBoundTypeLayout->addWidget(RBBoundaryNonCAO, 0, 2);
+
+  aBoundTypeLayout->addWidget(GBBoundaryC, 1, 0, 1, 3);
+  aBoundTypeLayout->addWidget(GBBoundaryN, 2, 0, 1, 3);
+
+  // Arguments layout
+  QGridLayout *argumentsLayout = new QGridLayout(CreateCase);
+  argumentsLayout->addWidget(aMeshIn,     0, 0, 1, 3);
+  argumentsLayout->addWidget(aMeshOut,    1, 0, 1, 3);
+  argumentsLayout->addWidget(GBTypeConf,  2, 0, 1, 3);
+  argumentsLayout->addWidget(GBTypeBoun,  3, 0, 1, 3);
+  argumentsLayout->setColumnStretch( 1, 5 );
+  argumentsLayout->setRowStretch( 4, 5 );
+
+  mySelectInMedFileButton->setText(QString());
+  CBBoundaryD->setText(QApplication::translate("CreateCase", "Discrete boundary", nullptr));
+  CBBoundaryA->setText(QApplication::translate("CreateCase", "Analytical boundary", nullptr));
+  PBBoundaryCAOEdit->setText(QApplication::translate("CreateCase", "Edit", nullptr));
+  PBBoundaryCAOHelp->setText(QApplication::translate("CreateCase", "Help", nullptr));
+  PBBoundaryCAONew->setText(QApplication::translate("CreateCase", "New", nullptr));
+  PBBoundaryDiEdit->setText(QApplication::translate("CreateCase", "Edit", nullptr));
+  PBBoundaryDiHelp->setText(QApplication::translate("CreateCase", "Help", nullptr));
+  PBBoundaryDiNew->setText(QApplication::translate("CreateCase", "New", nullptr));
+  QTableWidgetItem *___qtablewidgetitem = TWBoundary->horizontalHeaderItem(0);
+  ___qtablewidgetitem->setText(QApplication::translate("CreateCase", "a_virer", nullptr));
+  PBBoundaryAnEdit->setText(QApplication::translate("CreateCase", "Edit", nullptr));
+  PBBoundaryAnNew->setText(QApplication::translate("CreateCase", "New", nullptr));
+  PBBoundaryAnHelp->setText(QApplication::translate("CreateCase", "Help", nullptr));
+
+  // Initial state
+  myInMedFileRadio->setChecked( true );
+  modeInChanged( MedFile );
+  RBBoundaryNo->setChecked( true );
+  //SetBoundaryNo();
+
+  myOutMedFileChk->setChecked(true);
+  CBBoundaryCAO->setCurrentIndex(-1);
+  CBBoundaryDi->setCurrentIndex(-1);
+
+  // Connections
+  QMetaObject::connectSlotsByName(CreateCase);
+  connect(myInMeshGroup,            SIGNAL(buttonClicked(int)), this, SLOT(modeInChanged(int)));
+  connect(myOutMedFileChk,          SIGNAL(stateChanged(int)),  this, SLOT(onOutMedFileChk(int)));
+  connect(myOutPublishChk,          SIGNAL(stateChanged(int)),  this, SLOT(onOutPublishChk(int)));
+  connect(mySelectOutMedFileButton, SIGNAL(pressed()),          this, SLOT(onSelectOutMedFileButton()));
+  emit updateSelection();
+}
+
+void SMESHGUI_HomardAdaptArguments::modeInChanged( int theMode )
+{
+  clear();
+  if (theMode == MedFile) {
+    mySelectInMedFileLineEdit->show();
+    mySelectInMedFileButton->show();
+    myInBrowserObject->hide();
+  }
+  else {
+    mySelectInMedFileLineEdit->hide();
+    mySelectInMedFileButton->hide();
+    myInBrowserObject->show();
+    emit updateSelection();
+  }
+}
+
+void SMESHGUI_HomardAdaptArguments::onSelectOutMedFileButton()
+{
+  // Current value
+  QString fileName0 = mySelectOutMedFileLineEdit->text().trimmed();
+
+  // Ask user for the new value
+  QString filtre = QString("Med");
+  filtre += QString(" files (*.") + QString("med") + QString(");;");
+  QString fileName = QFileDialog::getSaveFileName(this, tr("SAVE_MED"), QString(""), filtre);
+
+  // Check the new value
+  if (fileName.isEmpty()) fileName = fileName0;
+
+  QFileInfo aFileInfo (fileName);
+  mySelectOutMedFileLineEdit->setText(aFileInfo.absoluteFilePath());
+}
+
+void SMESHGUI_HomardAdaptArguments::clear()
+{
+  mySelectInMedFileLineEdit->clear();
+  myInBrowserObject->clear();
+
+  myOutMeshNameLineEdit->clear();
+  mySelectOutMedFileLineEdit->clear();
+}
+
+void SMESHGUI_HomardAdaptArguments::onOutMedFileChk(int state)
+{
+  if (state == Qt::Checked) {
+    mySelectOutMedFileButton->show();
+    mySelectOutMedFileLineEdit->show();
+    mySelectOutMedFileButton->setEnabled(true);
+    mySelectOutMedFileLineEdit->setEnabled(true);
+  }
+  else {
+    mySelectOutMedFileButton->setEnabled(false);
+    mySelectOutMedFileLineEdit->setEnabled(false);
+    myOutPublishChk->setChecked(true);
+  }
+}
+
+void SMESHGUI_HomardAdaptArguments::onOutPublishChk(int state)
+{
+  if (state == Qt::Unchecked) {
+    myOutMedFileChk->setChecked(true);
+  }
+}
+
+//////////////////////////////////////////
+// SMESHGUI_HomardAdaptAdvanced
+//////////////////////////////////////////
+
+SMESHGUI_HomardAdaptAdvanced::SMESHGUI_HomardAdaptAdvanced( QWidget* parent, Qt::WindowFlags f )
+  : QWidget( parent, f )
+{
+  setupWidget();
+  connect(workingDirectoryPushButton, SIGNAL(pressed()), this, SLOT(onWorkingDirectoryPushButton()));
+}
+
+SMESHGUI_HomardAdaptAdvanced::~SMESHGUI_HomardAdaptAdvanced()
+{
+}
+
+void SMESHGUI_HomardAdaptAdvanced::setupWidget()
+{
+  if (this->objectName().isEmpty())
+    this->setObjectName(QString(tr("MG-ADAPT-ADV")));
+  this->resize(337, 369);
+
+  // Logs and debug
+  logGroupBox = new QGroupBox(this);
+  logGroupBox->setObjectName(QString("logGroupBox"));
+
+  QGridLayout* logsLayout = new QGridLayout(logGroupBox);
+  logsLayout->setObjectName(QString("logsLayout"));
+
+  // Working directory + Verbose level layout
+  QGridLayout* gridLayout = new QGridLayout();
+  gridLayout->setObjectName(QString("gridLayout"));
+
+  // Working directory
+  workingDirectoryLabel = new QLabel(logGroupBox);
+  workingDirectoryLabel->setObjectName(QString("workingDirectoryLabel"));
+
+  gridLayout->addWidget(workingDirectoryLabel, 0, 0, 1, 1);
+
+  workingDirectoryLineEdit = new QLineEdit(logGroupBox);
+  workingDirectoryLineEdit->setObjectName(QString("workingDirectoryLineEdit"));
+
+  gridLayout->addWidget(workingDirectoryLineEdit, 0, 1, 1, 1);
+
+  workingDirectoryPushButton = new QPushButton(logGroupBox);
+  workingDirectoryPushButton->setObjectName(QString("workingDirectoryPushButton"));
+
+  gridLayout->addWidget(workingDirectoryPushButton, 0, 2, 1, 1);
+
+  // Verbose level
+  verboseLevelLabel = new QLabel(logGroupBox);
+  verboseLevelLabel->setObjectName(QString("verboseLevelLabel"));
+
+  gridLayout->addWidget(verboseLevelLabel, 1, 0, 1, 1);
+
+  verboseLevelSpin = new QSpinBox(logGroupBox);
+  verboseLevelSpin->setObjectName(QString("verboseLevelSpin"));
+
+  gridLayout->addWidget(verboseLevelSpin, 1, 1, 1, 1);
+
+  logsLayout->addLayout(gridLayout, 0, 0, 1, 1);
+
+  // logInFileCheck + removeLogOnSuccessCheck
+  QHBoxLayout* horizontalLayout = new QHBoxLayout();
+  horizontalLayout->setObjectName(QString("horizontalLayout"));
+
+  // Log In File Check
+  logInFileCheck = new QCheckBox(logGroupBox);
+  logInFileCheck->setObjectName(QString("logInFileCheck"));
+  logInFileCheck->setChecked(true);
+
+  horizontalLayout->addWidget(logInFileCheck);
+
+  // Remove Log On Success Check
+  removeLogOnSuccessCheck = new QCheckBox(logGroupBox);
+  removeLogOnSuccessCheck->setObjectName(QString("removeLogOnSuccessCheck"));
+  removeLogOnSuccessCheck->setChecked(true);
+
+  horizontalLayout->addWidget(removeLogOnSuccessCheck);
+
+  logsLayout->addLayout(horizontalLayout, 1, 0, 1, 1);
+
+  // Keep Working Files Check
+  keepWorkingFilesCheck = new QCheckBox(logGroupBox);
+  keepWorkingFilesCheck->setObjectName(QString("keepWorkingFilesCheck"));
+  keepWorkingFilesCheck->setAutoExclusive(false);
+  keepWorkingFilesCheck->setChecked(false);
+
+  logsLayout->addWidget(keepWorkingFilesCheck, 2, 0, 1, 1);
+}
+
+void SMESHGUI_HomardAdaptAdvanced::onWorkingDirectoryPushButton()
+{
+  QString aWorkingDir = QFileDialog::getExistingDirectory();
+  if (!(aWorkingDir.isEmpty())) workingDirectoryLineEdit->setText(aWorkingDir);
+}

@@ -1,0 +1,430 @@
+// Copyright (C) 2011-2021  CEA/DEN, EDF R&D
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation; either
+// version 2.1 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+//
+// See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
+//
+
+#ifndef _SMESH_HOMARD_IDL
+#define _SMESH_HOMARD_IDL
+
+#include "SALOME_Component.idl"
+#include "SALOME_Exception.idl"
+#include "SALOMEDS.idl"
+
+module SMESHHOMARD
+{
+  typedef sequence<double> double_array;
+  typedef sequence<double> extrema;
+  typedef sequence<string> ListGroupType;
+  typedef sequence<string> ListBoundaryGroupType;
+  typedef sequence<string> listeIterFilles;
+  typedef sequence<string> listeFieldInterpsIter;
+  typedef sequence<string> listeFieldInterpTSRsIter;
+  typedef sequence<string> listeFieldInterpsHypo;
+  typedef sequence<string> listeIters;
+  typedef sequence<string> listeComposantsHypo;
+  typedef sequence<long>   listeTypes;
+
+  typedef sequence<string> listeHypotheses;
+  typedef sequence<string> listeIterations;
+  typedef sequence<string> listeCases;
+  typedef sequence<string> listeBoundarys;
+
+  struct InfosHypo
+  {
+      string FieldName;
+      long UsCmpI;
+      long UsField;
+      long TypeThR;
+      double ThreshR;
+      long TypeThC;
+      double ThreshC;
+  };
+
+  interface HOMARD_Boundary : Engines::EngineComponent
+  {
+    // Generalites
+    void     SetName(in string Name)                       raises (SALOME::SALOME_Exception);
+    string   GetName()                                     raises (SALOME::SALOME_Exception);
+
+    long     Delete()                                      raises (SALOME::SALOME_Exception);
+
+    string   GetDumpPython()                               raises (SALOME::SALOME_Exception);
+
+    // Caracteristiques
+    void     SetType (in long Type)                        raises (SALOME::SALOME_Exception);
+    long     GetType()                                     raises (SALOME::SALOME_Exception);
+
+    void     SetDataFile(in string DataFile)               raises (SALOME::SALOME_Exception);
+    string   GetDataFile()                                 raises (SALOME::SALOME_Exception);
+
+    void     SetMeshName(in string MeshName)               raises (SALOME::SALOME_Exception);
+    string   GetMeshName()                                 raises (SALOME::SALOME_Exception);
+
+    void     SetCylinder (in double Xcentre, in double Ycentre, in double Zcentre,
+                          in double Xaxe, in double Yaxe, in double Zaxe, in double rayon)
+                                                           raises (SALOME::SALOME_Exception);
+
+    void     SetSphere (in double Xcentre, in double Ycentre, in double Zcentre, in double rayon)
+                                                           raises (SALOME::SALOME_Exception);
+
+    void     SetConeR (in double Xcentre1, in double Ycentre1, in double Zcentre1, in double Rayon1,
+                       in double Xcentre2, in double Ycentre2, in double Zcentre2, in double Rayon2)
+                                                           raises (SALOME::SALOME_Exception);
+
+    void     SetConeA(in double Xaxe,in double Yaxe,in double Zaxe,in double Angle,
+                      in double Xcentre,in double Ycentre,in double ZCentre)
+                                                           raises (SALOME::SALOME_Exception);
+
+    void     SetTorus (in double Xcentre, in double Ycentre, in double Zcentre,
+                       in double Xaxe, in double Yaxe, in double Zaxe,
+                       in double rayonRev, in double rayonPri)
+      raises (SALOME::SALOME_Exception);
+
+
+    SMESHHOMARD::double_array GetCoords() raises (SALOME::SALOME_Exception);
+
+    void     SetLimit (in double Xincr, in double Yincr, in double Zincr)
+      raises (SALOME::SALOME_Exception);
+    SMESHHOMARD::double_array GetLimit() raises (SALOME::SALOME_Exception);
+
+    void       AddGroup(in string LeGroupe)                raises (SALOME::SALOME_Exception);
+    void       SetGroups(in ListGroupType ListGroup)       raises (SALOME::SALOME_Exception);
+    ListGroupType GetGroups()                              raises (SALOME::SALOME_Exception);
+
+    // Liens avec les autres iterations
+    void     SetCaseCreation(in string NomCas)             raises (SALOME::SALOME_Exception);
+    string   GetCaseCreation()                             raises (SALOME::SALOME_Exception);
+
+  };
+
+  interface HOMARD_Iteration : Engines::EngineComponent
+  {
+    // Generalites
+    void     SetName(in string Name)                       raises (SALOME::SALOME_Exception);
+    string   GetName()                                     raises (SALOME::SALOME_Exception);
+
+    long     Delete(in long Option,
+                    in boolean doRemoveWorkingFiles) raises (SALOME::SALOME_Exception);
+
+    string   GetDumpPython()                               raises (SALOME::SALOME_Exception);
+
+    // Caracteristiques
+    void     SetDirNameLoc(in string NomDir)               raises (SALOME::SALOME_Exception);
+    string   GetDirNameLoc()                               raises (SALOME::SALOME_Exception);
+
+    string   GetDirName()                                  raises (SALOME::SALOME_Exception);
+
+    void     SetNumber(in long NumIter)                    raises (SALOME::SALOME_Exception);
+    long     GetNumber()                                   raises (SALOME::SALOME_Exception);
+
+    void     SetState(in long State)                       raises (SALOME::SALOME_Exception);
+    long     GetState()                                    raises (SALOME::SALOME_Exception);
+
+    void     SetMeshName(in string NomMesh)                raises (SALOME::SALOME_Exception);
+    string   GetMeshName()                                 raises (SALOME::SALOME_Exception);
+
+    void     SetMeshFile(in string MeshFile)               raises (SALOME::SALOME_Exception);
+    string   GetMeshFile()                                 raises (SALOME::SALOME_Exception);
+
+    void     SetFieldFile(in string FieldFile)             raises (SALOME::SALOME_Exception);
+    string   GetFieldFile()                                raises (SALOME::SALOME_Exception);
+
+    // Instants pour le champ de pilotage
+    void     SetTimeStep(in long TimeStep)                 raises (SALOME::SALOME_Exception);
+    void     SetTimeStepRank(in long TimeStep, in long Rank)
+                                                           raises (SALOME::SALOME_Exception);
+    void     SetTimeStepRankLast()                         raises (SALOME::SALOME_Exception);
+    long     GetTimeStep()                                 raises (SALOME::SALOME_Exception);
+    long     GetRank()                                     raises (SALOME::SALOME_Exception);
+
+    // Instants pour un champ a interpoler
+    void     SetFieldInterpTimeStep(in string FieldInterp, in long TimeStep)
+                                                           raises (SALOME::SALOME_Exception);
+    void     SetFieldInterpTimeStepRank(in string FieldInterp, in long TimeStep, in long Rank)
+                                                           raises (SALOME::SALOME_Exception);
+    listeFieldInterpTSRsIter GetFieldInterpsTimeStepRank() raises (SALOME::SALOME_Exception);
+    void     SetFieldInterp(in string FieldInterp)         raises (SALOME::SALOME_Exception);
+    listeFieldInterpsIter GetFieldInterps()                raises (SALOME::SALOME_Exception);
+    void     SupprFieldInterps()                           raises (SALOME::SALOME_Exception);
+
+    // Fichier des messages
+    void     SetLogFile(in string LogFile)                 raises (SALOME::SALOME_Exception);
+    string   GetLogFile()                                  raises (SALOME::SALOME_Exception);
+
+    long     Compute(in long etatMenage, in long Option)   raises (SALOME::SALOME_Exception);
+
+    void     MeshInfo(in long Qual, in long Diam, in long Conn, in long Tail, in long Inte)
+                                                           raises (SALOME::SALOME_Exception);
+    void     MeshInfoOption(in long Qual, in long Diam, in long Conn, in long Tail, in long Inte, in long Option)
+                                                           raises (SALOME::SALOME_Exception);
+
+    void     SetFileInfo(in string FileInfo)               raises (SALOME::SALOME_Exception);
+    string   GetFileInfo()                                 raises (SALOME::SALOME_Exception);
+
+    // Liens avec les autres iterations
+    HOMARD_Iteration NextIteration(in string NomIter)      raises (SALOME::SALOME_Exception);
+
+    void     LinkNextIteration(in string NomIter)          raises (SALOME::SALOME_Exception);
+    void     UnLinkNextIteration(in string NomIter)        raises (SALOME::SALOME_Exception);
+    listeIterFilles GetIterations()                        raises (SALOME::SALOME_Exception);
+
+    void     SetIterParentName(in string NomIterParent)    raises (SALOME::SALOME_Exception);
+    string   GetIterParentName()                           raises (SALOME::SALOME_Exception);
+    HOMARD_Iteration GetIterParent()                       raises (SALOME::SALOME_Exception);
+
+    // Liens avec les autres structures
+    void     SetCaseName(in string NomCas)                 raises (SALOME::SALOME_Exception);
+    string   GetCaseName()                                 raises (SALOME::SALOME_Exception);
+
+    void     AssociateHypo(in string NomHypo)              raises (SALOME::SALOME_Exception);
+    void     SetHypoName(in string NomHypo)                raises (SALOME::SALOME_Exception);
+    string   GetHypoName()                                 raises (SALOME::SALOME_Exception);
+
+    // Divers
+    void     SetInfoCompute(in long MessInfo)              raises (SALOME::SALOME_Exception);
+    long     GetInfoCompute()                              raises (SALOME::SALOME_Exception);
+  };
+
+  interface HOMARD_Cas : Engines::EngineComponent
+  {
+    // Generalites
+    void     SetName(in string Name)                       raises (SALOME::SALOME_Exception);
+    string   GetName()                                     raises (SALOME::SALOME_Exception);
+
+    long     Delete(in long Option)                        raises (SALOME::SALOME_Exception);
+
+    string   GetDumpPython()                               raises (SALOME::SALOME_Exception);
+
+    // Caracteristiques
+    void     SetDirName(in string NomDir)                  raises (SALOME::SALOME_Exception);
+    string   GetDirName()                                  raises (SALOME::SALOME_Exception);
+
+    long     GetState()                                    raises (SALOME::SALOME_Exception);
+
+    long     GetNumberofIter()                             raises (SALOME::SALOME_Exception);
+
+    void     SetConfType(in long ConfType)                 raises (SALOME::SALOME_Exception);
+    long     GetConfType()                                 raises (SALOME::SALOME_Exception);
+
+    void     SetExtType(in long ExtType)                   raises (SALOME::SALOME_Exception);
+    long     GetExtType()                                  raises (SALOME::SALOME_Exception);
+
+    void     SetBoundingBox(in extrema LesExtremes)        raises (SALOME::SALOME_Exception);
+    extrema  GetBoundingBox()                              raises (SALOME::SALOME_Exception);
+
+    void     AddGroup(in string Group)                     raises (SALOME::SALOME_Exception);
+    void     SetGroups(in ListGroupType ListGroup)         raises (SALOME::SALOME_Exception);
+    ListGroupType GetGroups()                              raises (SALOME::SALOME_Exception);
+
+    void     AddBoundary(in string BoundaryName)           raises (SALOME::SALOME_Exception);
+    void     AddBoundaryGroup(in string BoundaryName, in string Group)
+                                                           raises (SALOME::SALOME_Exception);
+    ListBoundaryGroupType GetBoundaryGroup()               raises (SALOME::SALOME_Exception);
+    void     SupprBoundaryGroup()                          raises (SALOME::SALOME_Exception);
+
+    void     SetPyram(in long Pyram)                       raises (SALOME::SALOME_Exception);
+    long     GetPyram()                                    raises (SALOME::SALOME_Exception);
+
+    void     MeshInfo(in long Qual, in long Diam, in long Conn, in long Tail, in long Inte)
+                                                           raises (SALOME::SALOME_Exception);
+
+    // Liens avec les autres structures
+    string   GetIter0Name ()                               raises (SALOME::SALOME_Exception);
+    HOMARD_Iteration GetIter0 ()                           raises (SALOME::SALOME_Exception);
+
+    HOMARD_Iteration NextIteration(in string IterName)     raises (SALOME::SALOME_Exception);
+
+    HOMARD_Iteration LastIteration()                       raises (SALOME::SALOME_Exception);
+
+    void     AddIteration (in string IterName)             raises (SALOME::SALOME_Exception);
+  };
+
+  interface HOMARD_Hypothesis : Engines::EngineComponent
+  {
+    // Generalites
+    void     SetName(in string Name)                       raises (SALOME::SALOME_Exception);
+    string   GetName()                                     raises (SALOME::SALOME_Exception);
+
+    long     Delete()                                      raises (SALOME::SALOME_Exception);
+
+    string   GetDumpPython()                               raises (SALOME::SALOME_Exception);
+
+    // Caracteristiques
+    void     SetUnifRefinUnRef(in long RaffDera)           raises (SALOME::SALOME_Exception);
+    listeTypes GetAdapRefinUnRef()                         raises (SALOME::SALOME_Exception);
+    long     GetAdapType()                                 raises (SALOME::SALOME_Exception);
+    long     GetRefinType()                                raises (SALOME::SALOME_Exception);
+    long     GetUnRefType()                                raises (SALOME::SALOME_Exception);
+
+    void     SetField(in string FieldName)                 raises (SALOME::SALOME_Exception);
+    string   GetFieldName()                                raises (SALOME::SALOME_Exception);
+    void     SetUseField(in long UsField)                  raises (SALOME::SALOME_Exception);
+    InfosHypo GetField()                                   raises (SALOME::SALOME_Exception);
+
+    void     SetUseComp(in long UsCmpI)                    raises (SALOME::SALOME_Exception);
+    void     AddComp(in string NomComp)                    raises (SALOME::SALOME_Exception);
+    void     SupprComp(in string NomComp)                  raises (SALOME::SALOME_Exception);
+    void     SupprComps()                                  raises (SALOME::SALOME_Exception);
+    listeComposantsHypo GetComps()                         raises (SALOME::SALOME_Exception);
+
+    void     SetRefinThr(in long TypeThR, in double ThreshR) raises (SALOME::SALOME_Exception);
+    long     GetRefinThrType()                               raises (SALOME::SALOME_Exception);
+    void     SetUnRefThr(in long TypeThC, in double ThreshC) raises (SALOME::SALOME_Exception);
+    long     GetUnRefThrType()                               raises (SALOME::SALOME_Exception);
+
+    void     SetNivMax(in long NivMax)                     raises (SALOME::SALOME_Exception);
+    long     GetNivMax()                                   raises (SALOME::SALOME_Exception);
+
+    void     SetDiamMin(in double DiamMin)                 raises (SALOME::SALOME_Exception);
+    double   GetDiamMin()                                  raises (SALOME::SALOME_Exception);
+
+    void     SetAdapInit(in long AdapInit)                 raises (SALOME::SALOME_Exception);
+    long     GetAdapInit()                                 raises (SALOME::SALOME_Exception);
+
+    void     SetExtraOutput(in long ExtraOutput)           raises (SALOME::SALOME_Exception);
+    long     GetExtraOutput()                              raises (SALOME::SALOME_Exception);
+
+    void     AddGroup(in string LeGroupe)                  raises (SALOME::SALOME_Exception);
+    void     SupprGroup(in string LeGroupe)                raises (SALOME::SALOME_Exception);
+    void     SupprGroups()                                 raises (SALOME::SALOME_Exception);
+    void     SetGroups(in ListGroupType ListGroup)         raises (SALOME::SALOME_Exception);
+    ListGroupType GetGroups()                              raises (SALOME::SALOME_Exception);
+
+    void     SetTypeFieldInterp(in long TypeFieldInterp)   raises (SALOME::SALOME_Exception);
+    long     GetTypeFieldInterp()                          raises (SALOME::SALOME_Exception);
+    void     AddFieldInterp(in string FieldInterp)         raises (SALOME::SALOME_Exception);
+    void     AddFieldInterpType(in string FieldInterp, in long TypeInterp)
+                                                           raises (SALOME::SALOME_Exception);
+    void     SupprFieldInterp(in string FieldInterp)       raises (SALOME::SALOME_Exception);
+    void     SupprFieldInterps()                           raises (SALOME::SALOME_Exception);
+    listeFieldInterpsHypo GetFieldInterps()                raises (SALOME::SALOME_Exception);
+
+    // Liens avec les autres structures
+    void     SetCaseCreation(in string NomCas)             raises (SALOME::SALOME_Exception);
+    string   GetCaseCreation()                             raises (SALOME::SALOME_Exception);
+
+    void     LinkIteration(in string NomIteration)         raises (SALOME::SALOME_Exception);
+    void     UnLinkIteration(in string NomIteration)       raises (SALOME::SALOME_Exception);
+    listeIters GetIterations()                             raises (SALOME::SALOME_Exception);
+  };
+
+  interface HOMARD_Gen : SALOME::GenericObj
+  {
+    //
+    // Creation
+    //
+    HOMARD_Boundary   CreateBoundaryCAO (in string BoundaryName, in string FileName)
+    raises(SALOME::SALOME_Exception);
+    HOMARD_Boundary   CreateBoundaryDi (in string BoundaryName, in string MeshName, in string FileName)
+    raises(SALOME::SALOME_Exception);
+    HOMARD_Boundary   CreateBoundaryCylinder (in string BoundaryName,
+                                      in double Xcentre, in double Ycentre, in double Zcentre,
+                                      in double Xaxis, in double Yaxis, in double Zaxis,
+                                      in double Radius)
+    raises (SALOME::SALOME_Exception);
+    HOMARD_Boundary   CreateBoundarySphere (in string BoundaryName,
+                                      in double Xcentre, in double Ycentre, in double Zcentre,
+                                      in double Radius)
+    raises(SALOME::SALOME_Exception);
+    HOMARD_Boundary   CreateBoundaryConeR (in string BoundaryName,
+                                      in double Xcentre1, in double Ycentre1, in double Zcentre1, in double Radius1,
+                                      in double Xcentre2, in double Ycentre2, in double Zcentre2, in double Radius2)
+    raises(SALOME::SALOME_Exception);
+    HOMARD_Boundary   CreateBoundaryConeA (in string BoundaryName,
+                                      in double Xaxis, in double Yaxis, in double Zaxis, in double Angle,
+                                      in double Xcentre, in double Ycentre, in double Zcentre)
+    raises(SALOME::SALOME_Exception);
+    HOMARD_Boundary   CreateBoundaryTorus (in string BoundaryName,
+                                      in double Xcentre, in double Ycentre, in double Zcentre,
+                                      in double Xaxis, in double Yaxis, in double Zaxis,
+                                      in double RadiusRev, in double RadiusPri)
+    raises (SALOME::SALOME_Exception);
+    HOMARD_Cas        CreateCase(in string CaseName, in string MeshName, in string FileName )
+    raises(SALOME::SALOME_Exception);
+    HOMARD_Hypothesis CreateHypothesis(in string HypoName )
+    raises(SALOME::SALOME_Exception);
+
+    //
+    // A.2. Les informations
+    //
+    HOMARD_Boundary   GetBoundary(in string BoundaryName)  raises (SALOME::SALOME_Exception);
+    HOMARD_Cas        GetCase(in string CaseName)          raises (SALOME::SALOME_Exception);
+    HOMARD_Hypothesis GetHypothesis(in string HypoName)    raises (SALOME::SALOME_Exception);
+    HOMARD_Iteration  GetIteration(in string IterName)     raises (SALOME::SALOME_Exception);
+
+    listeBoundarys  GetAllBoundarysName()                  raises (SALOME::SALOME_Exception);
+    listeCases      GetAllCasesName()                      raises (SALOME::SALOME_Exception);
+    listeHypotheses GetAllHypothesesName()                 raises (SALOME::SALOME_Exception);
+    listeIterations GetAllIterationsName()                 raises (SALOME::SALOME_Exception);
+
+    void MeshInfo(in string CaseName, in string MeshName, in string FileName,  in string DirName, in long Qual, in long Diam, in long Conn, in long Tail, in long Inte )
+    raises(SALOME::SALOME_Exception);
+
+    HOMARD_Iteration LastIteration(in string CaseName)     raises (SALOME::SALOME_Exception);
+    //
+    // A.4. Les caracteristiques generales
+    //
+    void SetLanguageShort (in string LanguageShort)        raises (SALOME::SALOME_Exception);
+    string GetLanguageShort ()                             raises (SALOME::SALOME_Exception);
+    //
+    // B. Les methodes qui suivent n'apparaissent pas dans le composant HOMARD dans YACS
+    //    L'utilisateur ne devrait pas les connaitre (ni s'en servir, a fortiori)
+    //
+    HOMARD_Iteration CreateIteration(in string IterName, in string PreviousIterName )
+      raises(SALOME::SALOME_Exception);
+    //
+    void InvalideBoundary (in string BoundaryName)         raises (SALOME::SALOME_Exception);
+    void InvalideHypo (in string HypoName)                 raises (SALOME::SALOME_Exception);
+    void InvalideIter (in string IterName)                 raises (SALOME::SALOME_Exception);
+    void InvalideIterOption (in string IterName, in long Option,
+                             in boolean doRemoveWorkingFiles) raises(SALOME::SALOME_Exception);
+
+    long DeleteBoundary (in string BoundaryName)           raises (SALOME::SALOME_Exception);
+    long DeleteCase(in string CaseName, in long Option)    raises(SALOME::SALOME_Exception);
+    long DeleteHypo(in string HypoName)                    raises (SALOME::SALOME_Exception);
+    long DeleteIteration(in string IterName, in long Option,
+                         in boolean doRemoveWorkingFiles) raises(SALOME::SALOME_Exception);
+    long DeleteIterationOption(in string IterName,
+                               in long Option1, in long Option2,
+                               in boolean doRemoveWorkingFiles) raises(SALOME::SALOME_Exception);
+    //
+    void AssociateIterHypo(in string IterName, in string HypoName)
+      raises(SALOME::SALOME_Exception);
+
+    long Compute (in string IterName, in long CleanOption, in long modeHOMARD,
+                  in long Option1, in long Option2)
+      raises(SALOME::SALOME_Exception);
+    //
+    string CreateDirNameIter(in string NomDir, in long option )
+      raises(SALOME::SALOME_Exception);
+    string VerifieDir (in string NomDir)                   raises (SALOME::SALOME_Exception);
+    //
+    void PublishResultInSmesh(in string FileName, in long Option)
+    raises(SALOME::SALOME_Exception);
+    void PublishMeshIterInSmesh (in string IterName)       raises(SALOME::SALOME_Exception);
+    //
+    //  Les preferences
+    //
+    void SetPublisMesh (in long PublisMeshIN, in long PublisMeshOUT)
+      raises (SALOME::SALOME_Exception);
+    long GetPublisMeshIN () raises (SALOME::SALOME_Exception);
+    long GetPublisMeshOUT () raises (SALOME::SALOME_Exception);
+  };
+
+}; // module SMESHHOMARD
+
+#endif

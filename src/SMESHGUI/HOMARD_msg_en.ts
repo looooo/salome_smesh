@@ -72,14 +72,6 @@
         <translation>The mesh in this MED file cannot be read.</translation>
     </message>
     <message>
-        <source>HOM_MED_FILE_5</source>
-        <translation>No field in this MED file.</translation>
-    </message>
-    <message>
-        <source>HOM_MED_FILE_6</source>
-        <translation>The field(s) in this MED file cannot be read.</translation>
-    </message>
-    <message>
         <source>HOM_SELECT_STUDY</source>
         <translation>Select a study object with associated MED file \n or select a MED file.</translation>
     </message>
@@ -152,10 +144,6 @@
         <translation>A hypothesis must be selected.</translation>
     </message>
     <message>
-        <source>HOM_ITER_FIELD_FILE</source>
-        <translation>With this hypothesis, a file for the field must be given.</translation>
-    </message>
-    <message>
         <source>HOM_ITER_STARTING_POINT_0</source>
         <translation>Mesh</translation>
     </message>
@@ -174,10 +162,6 @@
     <message>
         <source>HOM_HYPO_NAME</source>
         <translation>The hypothesis must be named.</translation>
-    </message>
-    <message>
-        <source>HOM_HYPO_FIELD_FILE</source>
-        <translation>A file for the field must be given.</translation>
     </message>
     <message>
         <source>HOM_HYPO_NORM_L2</source>

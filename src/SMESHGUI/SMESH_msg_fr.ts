@@ -3012,6 +3012,10 @@ Référez-vous à la documentation sur l'algorithme et la géométrie supportée
         <translation>Sans</translation>
     </message>
     <message>
+        <source>ADAPT_WITH_HOMARD</source>
+        <translation>Adaptation avec HOMARD</translation>
+    </message>
+    <message>
         <source>ADAPT_PREF_MG_ADAPT</source>
         <translation>Adaptation avec MG-Adapt</translation>
     </message>

@@ -25,7 +25,6 @@
 #include <SALOMEconfig.h>
 #include <SalomeApp_Module.h>
 
-//#include CORBA_CLIENT_HEADER(SALOMEDS_Attributes)
 #include CORBA_CLIENT_HEADER(SMESH_Homard)
 
 #include <QDialog>
@@ -44,8 +43,6 @@
 #include <QtWidgets/QRadioButton>
 
 class SMESHGUI_HomardAdaptDlg;
-
-QT_BEGIN_NAMESPACE
 
 class SMESH_Ui_CreateBoundaryAn
 {
@@ -812,12 +809,7 @@ public:
         buttonApply->setText(QApplication::translate("CreateBoundaryAn", "Apply", nullptr));
         buttonOk->setText(QApplication::translate("CreateBoundaryAn", "OK", nullptr));
     } // retranslateUi
-
 };
-
-namespace Ui {
-    class CreateBoundaryAn: public SMESH_Ui_CreateBoundaryAn {};
-} // namespace Ui
 
 class SMESH_Ui_CreateBoundaryCAO
 {
@@ -941,12 +933,7 @@ public:
         XAO->setText(QApplication::translate("CreateBoundaryCAO", "XAO", nullptr));
         Name->setText(QApplication::translate("CreateBoundaryCAO", "Name", nullptr));
     } // retranslateUi
-
 };
-
-namespace Ui {
-    class CreateBoundaryCAO: public SMESH_Ui_CreateBoundaryCAO {};
-} // namespace Ui
 
 class SMESH_Ui_CreateBoundaryDi
 {
@@ -1070,60 +1057,52 @@ public:
         Mesh->setText(QApplication::translate("CreateBoundaryDi", "Mesh", nullptr));
         Name->setText(QApplication::translate("CreateBoundaryDi", "Name", nullptr));
     } // retranslateUi
-
 };
-
-namespace Ui {
-    class CreateBoundaryDi: public SMESH_Ui_CreateBoundaryDi {};
-} // namespace Ui
-
-QT_END_NAMESPACE
 
 class SMESHGUI_EXPORT SMESH_CreateBoundaryAn : public QDialog, public SMESH_Ui_CreateBoundaryAn
 {
-    Q_OBJECT
+  Q_OBJECT
 
 public:
-    SMESH_CreateBoundaryAn( SMESHGUI_HomardAdaptDlg* parent, bool modal,
-                         SMESHHOMARD::HOMARD_Gen_var myHomardGen,
-                         QString caseName);
-    virtual ~SMESH_CreateBoundaryAn();
+  SMESH_CreateBoundaryAn (SMESHGUI_HomardAdaptDlg* parent, bool modal,
+                          SMESHHOMARD::HOMARD_Gen_var myHomardGen,
+                          QString caseName);
+  virtual ~SMESH_CreateBoundaryAn();
 
 protected :
-    SMESH_CreateBoundaryAn( SMESHGUI_HomardAdaptDlg* parent,
-                         SMESHHOMARD::HOMARD_Gen_var myHomardGen,
-                         QString caseName);
+  SMESH_CreateBoundaryAn (SMESHGUI_HomardAdaptDlg* parent,
+                          SMESHHOMARD::HOMARD_Gen_var myHomardGen,
+                          QString caseName);
 
-    SMESHGUI_HomardAdaptDlg * _parent;
+  SMESHGUI_HomardAdaptDlg * _parent;
 
-    QString _Name;
-    QString _aCaseName;
+  QString _Name;
 
-    int _Type;
-    double _BoundaryAnXcentre, _BoundaryAnYcentre, _BoundaryAnZcentre, _BoundaryAnRayon;
-    double _BoundaryAnXaxis, _BoundaryAnYaxis, _BoundaryAnZaxis;
-    double _Xcentre, _Ycentre, _Zcentre, _Rayon ;
-    double _Xmin, _Xmax, _Xincr, _Ymin, _Ymax, _Yincr, _Zmin, _Zmax, _Zincr, _DMax ;
-    double _BoundaryAnXcone1, _BoundaryAnYcone1, _BoundaryAnZcone1, _BoundaryAnRayon1;
-    double _BoundaryAnXcone2, _BoundaryAnYcone2, _BoundaryAnZcone2, _BoundaryAnRayon2;
-    double _BoundaryAnXaxisCone, _BoundaryAnYaxisCone, _BoundaryAnZaxisCone;
-    double _BoundaryAnXorigCone, _BoundaryAnYorigCone, _BoundaryAnZorigCone;
-    double _BoundaryAngle;
-    double _BoundaryAnToreXcentre, _BoundaryAnToreYcentre, _BoundaryAnToreZcentre;
-    double _BoundaryAnToreXaxe, _BoundaryAnToreYaxe, _BoundaryAnToreZaxe;
-    double _BoundaryAnToreRRev, _BoundaryAnToreRPri;
+  int _Type;
+  double _BoundaryAnXcentre, _BoundaryAnYcentre, _BoundaryAnZcentre, _BoundaryAnRayon;
+  double _BoundaryAnXaxis, _BoundaryAnYaxis, _BoundaryAnZaxis;
+  double _Xcentre, _Ycentre, _Zcentre, _Rayon ;
+  double _Xmin, _Xmax, _Xincr, _Ymin, _Ymax, _Yincr, _Zmin, _Zmax, _Zincr, _DMax ;
+  double _BoundaryAnXcone1, _BoundaryAnYcone1, _BoundaryAnZcone1, _BoundaryAnRayon1;
+  double _BoundaryAnXcone2, _BoundaryAnYcone2, _BoundaryAnZcone2, _BoundaryAnRayon2;
+  double _BoundaryAnXaxisCone, _BoundaryAnYaxisCone, _BoundaryAnZaxisCone;
+  double _BoundaryAnXorigCone, _BoundaryAnYorigCone, _BoundaryAnZorigCone;
+  double _BoundaryAngle;
+  double _BoundaryAnToreXcentre, _BoundaryAnToreYcentre, _BoundaryAnToreZcentre;
+  double _BoundaryAnToreXaxe, _BoundaryAnToreYaxe, _BoundaryAnToreZaxe;
+  double _BoundaryAnToreRRev, _BoundaryAnToreRPri;
 
-    bool Chgt;
+  bool Chgt;
 
-    SMESHHOMARD::HOMARD_Boundary_var aBoundaryAn ;
-    SMESHHOMARD::HOMARD_Gen_var myHomardGen;
+  SMESHHOMARD::HOMARD_Boundary_var aBoundaryAn;
+  SMESHHOMARD::HOMARD_Gen_var myHomardGen;
 
-    virtual void InitConnect();
-    virtual void InitValBoundaryAn();
-    virtual void InitMinMax();
-    virtual void SetNewName();
-    virtual bool CreateOrUpdateBoundaryAn();
-    virtual void convertRayonAngle(int option);
+  virtual void InitConnect();
+  virtual void InitValBoundaryAn();
+  virtual void InitMinMax();
+  virtual void SetNewName();
+  virtual bool CreateOrUpdateBoundaryAn();
+  virtual void convertRayonAngle(int option);
 
 public slots:
     virtual void SetCylinder();
@@ -1135,7 +1114,6 @@ public slots:
     virtual void PushOnOK();
     virtual bool PushOnApply();
     virtual void PushOnHelp();
-
 };
 
 class SMESHGUI_EXPORT SMESH_EditBoundaryAn : public SMESH_CreateBoundaryAn
@@ -1161,9 +1139,6 @@ protected :
     void InitValBoundaryAnConeR();
     void InitValBoundaryAnConeA();
     void InitValBoundaryAnTore();
-
-public slots:
-
 };
 
 class SMESHGUI_EXPORT SMESH_CreateBoundaryCAO : public QDialog, public SMESH_Ui_CreateBoundaryCAO
@@ -1182,8 +1157,6 @@ protected :
     SMESHGUI_HomardAdaptDlg *_parent;
 
     QString _aName;
-    QString _aCaseName;
-
 
     SMESHHOMARD::HOMARD_Boundary_var aBoundary;
     SMESHHOMARD::HOMARD_Gen_var myHomardGen;
@@ -1216,9 +1189,6 @@ protected :
     virtual void InitValEdit();
     virtual bool PushOnApply();
     virtual void SetFiltrage();
-
-public slots:
-
 };
 
 class SMESHGUI_EXPORT SMESH_CreateBoundaryDi : public QDialog, public SMESH_Ui_CreateBoundaryDi
@@ -1237,8 +1207,6 @@ protected :
     SMESHGUI_HomardAdaptDlg *_parent;
 
     QString _aName;
-    QString _aCaseName;
-
 
     SMESHHOMARD::HOMARD_Boundary_var aBoundary;
     SMESHHOMARD::HOMARD_Gen_var myHomardGen;
@@ -1271,9 +1239,6 @@ protected :
     virtual void InitValEdit();
     virtual bool PushOnApply();
     virtual void SetFiltrage();
-
-public slots:
-
 };
 
 #endif // MON_CREATEBOUNDARY_H

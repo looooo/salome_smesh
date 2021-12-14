@@ -53,7 +53,6 @@ SMESH_CreateBoundaryAn::SMESH_CreateBoundaryAn(SMESHGUI_HomardAdaptDlg* parent, 
     QDialog(0), SMESH_Ui_CreateBoundaryAn(),
     _parent(parent),
     _Name (""),
-    _aCaseName(caseName),
     _Type(1),
     _BoundaryAnXcentre(0), _BoundaryAnYcentre(0), _BoundaryAnZcentre(0), _BoundaryAnRayon(0),
     _BoundaryAnXaxis(0), _BoundaryAnYaxis(0), _BoundaryAnZaxis(0),
@@ -112,7 +111,6 @@ SMESH_CreateBoundaryAn::SMESH_CreateBoundaryAn(SMESHGUI_HomardAdaptDlg* parent,
     QDialog(0), SMESH_Ui_CreateBoundaryAn(),
     _parent(parent),
     _Name (""),
-    _aCaseName(caseName),
     _Type(1),
     _BoundaryAnXcentre(0), _BoundaryAnYcentre(0), _BoundaryAnZcentre(0), _BoundaryAnRayon(0),
     _BoundaryAnXaxis(0), _BoundaryAnYaxis(0), _BoundaryAnZaxis(0),
@@ -169,12 +167,10 @@ void SMESH_CreateBoundaryAn::InitConnect()
 void SMESH_CreateBoundaryAn::InitValBoundaryAn()
 // ------------------------------------------------------------------------
 {
-//
-//  1. Les coordonnees extremes du maillage
-//
-    if (_aCaseName == QString("")) { return; }
-
-    SMESHHOMARD::HOMARD_Cas_var aCas = myHomardGen->GetCase(_aCaseName.toStdString().c_str());
+  //
+  //  1. Les coordonnees extremes du maillage
+  //
+    SMESHHOMARD::HOMARD_Cas_var aCas = myHomardGen->GetCase();
     SMESHHOMARD::extrema_var  MesExtremes = aCas->GetBoundingBox();
     int num = MesExtremes->length() ;
     ASSERT(num == 10);
@@ -818,8 +814,7 @@ SMESH_CreateBoundaryCAO::SMESH_CreateBoundaryCAO(SMESHGUI_HomardAdaptDlg* parent
     :
     QDialog(0), SMESH_Ui_CreateBoundaryCAO(),
     _parent(parent), _aName(aName),
-    myHomardGen(SMESHHOMARD::HOMARD_Gen::_duplicate(myHomardGen0)),
-    _aCaseName(caseName)
+    myHomardGen(SMESHHOMARD::HOMARD_Gen::_duplicate(myHomardGen0))
     {
       MESSAGE("Constructeur") ;
       setupUi(this);
@@ -879,7 +874,7 @@ bool SMESH_CreateBoundaryCAO::PushOnApply()
      _aName=aName;
      aBoundary=myHomardGen->CreateBoundaryCAO(CORBA::string_dup(_aName.toStdString().c_str()), aCAOFile.toStdString().c_str());
      _parent->AddBoundaryCAO(_aName);
-     aBoundary->SetCaseCreation(_aCaseName.toStdString().c_str());
+     aBoundary->SetCaseCreation("Case_1");
    }
    catch( SALOME::SALOME_Exception& S_ex )
    {
@@ -968,14 +963,10 @@ void SMESH_CreateBoundaryCAO::SetFiltrage()
 // // ------------------------------------------------------------------------
 {
   if (!CBGroupe->isChecked()) return;
-  if (_aCaseName.toStdString().c_str() == QString()) {
-    QMessageBox::critical( 0, QObject::tr("HOM_ERROR"),
-                              QObject::tr("HOM_BOUN_CASE") );
-    return;
-  }
 
-  SMESH_CreateListGroupCAO *aDlg = new SMESH_CreateListGroupCAO(this, true, SMESHHOMARD::HOMARD_Gen::_duplicate(myHomardGen),
-                            _aCaseName, _listeGroupesBoundary) ;
+  SMESH_CreateListGroupCAO *aDlg = new SMESH_CreateListGroupCAO
+    (this, true, SMESHHOMARD::HOMARD_Gen::_duplicate(myHomardGen),
+     "Case_1", _listeGroupesBoundary);
   aDlg->show();
 }
 
@@ -988,8 +979,7 @@ SMESH_CreateBoundaryDi::SMESH_CreateBoundaryDi(SMESHGUI_HomardAdaptDlg* parent, 
     :
     QDialog(0), SMESH_Ui_CreateBoundaryDi(),
     _parent(parent), _aName(aName),
-    myHomardGen(SMESHHOMARD::HOMARD_Gen::_duplicate(myHomardGen0)),
-    _aCaseName(caseName)
+    myHomardGen(SMESHHOMARD::HOMARD_Gen::_duplicate(myHomardGen0))
     {
       MESSAGE("Constructeur") ;
       setupUi(this);
@@ -1058,7 +1048,7 @@ bool SMESH_CreateBoundaryDi::PushOnApply()
      _aName=aName;
      aBoundary=myHomardGen->CreateBoundaryDi(CORBA::string_dup(_aName.toStdString().c_str()), aMeshName.toStdString().c_str(), aMeshFile.toStdString().c_str());
      _parent->AddBoundaryDi(_aName);
-     aBoundary->SetCaseCreation(_aCaseName.toStdString().c_str());
+     aBoundary->SetCaseCreation("Case_1");
    }
    catch( SALOME::SALOME_Exception& S_ex )
    {
@@ -1147,15 +1137,10 @@ void SMESH_CreateBoundaryDi::SetFiltrage()
 // // ------------------------------------------------------------------------
 {
   if (!CBGroupe->isChecked()) return;
-  if (_aCaseName.toStdString().c_str() == QString()) {
-    QMessageBox::critical( 0, QObject::tr("HOM_ERROR"),
-                              QObject::tr("HOM_BOUN_CASE") );
-    return;
-  }
 
   SMESH_CreateListGroup *aDlg = new SMESH_CreateListGroup
     (this, true, SMESHHOMARD::HOMARD_Gen::_duplicate(myHomardGen),
-     _aCaseName, _listeGroupesBoundary);
+     "Case_1", _listeGroupesBoundary);
   aDlg->show();
 }
 
@@ -1190,7 +1175,7 @@ void SMESH_EditBoundaryAn::InitValEdit()
   _Type = aBoundaryAn->GetType();
   MESSAGE("_Type : "<<_Type);
   InitValBoundaryAnLimit();
-  if (_aCaseName != QString("")) InitValBoundaryAn();
+  InitValBoundaryAn();
   switch (_Type)
   {
     case 1 : // il s agit d un cylindre
@@ -1543,14 +1528,11 @@ SMESH_EditBoundaryCAO::SMESH_EditBoundaryCAO( SMESHGUI_HomardAdaptDlg* parent, b
 {
     MESSAGE("Debut de Boundary pour " << Name.toStdString().c_str());
     setWindowTitle(QObject::tr("HOM_BOUN_C_EDIT_WINDOW_TITLE"));
-    try
-    {
-     aBoundary=myHomardGen->GetBoundary(CORBA::string_dup(_aName.toStdString().c_str()));
-     if (caseName==QString("")) { _aCaseName=aBoundary->GetCaseCreation();}
-     InitValEdit();
+    try {
+      aBoundary = myHomardGen->GetBoundary(CORBA::string_dup(_aName.toStdString().c_str()));
+      InitValEdit();
     }
-    catch( SALOME::SALOME_Exception& S_ex )
-    {
+    catch( SALOME::SALOME_Exception& S_ex ) {
       QMessageBox::critical( 0, QObject::tr("HOM_ERROR"),
                                 QObject::tr(CORBA::string_dup(S_ex.details.text)) );
       return;
@@ -1591,18 +1573,12 @@ void SMESH_EditBoundaryCAO::SetFiltrage()
 // // ------------------------------------------------------------------------
 {
   if (!CBGroupe->isChecked()) return;
-  if (_aCaseName.toStdString().c_str() == QString())
-  {
-    QMessageBox::critical( 0, QObject::tr("HOM_ERROR"),
-                              QObject::tr("HOM_BOUN_CASE") );
-    return;
-  }
-  SMESHHOMARD::HOMARD_Cas_var monCas= myHomardGen->GetCase(_aCaseName.toStdString().c_str());
+  SMESHHOMARD::HOMARD_Cas_var monCas = myHomardGen->GetCase();
   SMESHHOMARD::ListGroupType_var _listeGroupesCas = monCas->GetGroups();
 
   SMESH_EditListGroupCAO *aDlg = new SMESH_EditListGroupCAO
     (this, true, SMESHHOMARD::HOMARD_Gen::_duplicate(myHomardGen),
-     _aCaseName, _listeGroupesBoundary) ;
+     "Case_1", _listeGroupesBoundary) ;
   aDlg->show();
 }
 
@@ -1618,14 +1594,11 @@ SMESH_EditBoundaryDi::SMESH_EditBoundaryDi( SMESHGUI_HomardAdaptDlg* parent, boo
 {
     MESSAGE("Debut de Boundary pour " << Name.toStdString().c_str());
     setWindowTitle(QObject::tr("HOM_BOUN_D_EDIT_WINDOW_TITLE"));
-    try
-    {
-     aBoundary=myHomardGen->GetBoundary(CORBA::string_dup(_aName.toStdString().c_str()));
-     if (caseName==QString("")) { _aCaseName=aBoundary->GetCaseCreation();}
-     InitValEdit();
+    try {
+      aBoundary = myHomardGen->GetBoundary(CORBA::string_dup(_aName.toStdString().c_str()));
+      InitValEdit();
     }
-    catch( SALOME::SALOME_Exception& S_ex )
-    {
+    catch( SALOME::SALOME_Exception& S_ex ) {
       QMessageBox::critical( 0, QObject::tr("HOM_ERROR"),
                                 QObject::tr(CORBA::string_dup(S_ex.details.text)) );
       return;
@@ -1666,17 +1639,11 @@ void SMESH_EditBoundaryDi::SetFiltrage()
 // // ------------------------------------------------------------------------
 {
   if (!CBGroupe->isChecked()) return;
-  if (_aCaseName.toStdString().c_str() == QString())
-  {
-    QMessageBox::critical( 0, QObject::tr("HOM_ERROR"),
-                              QObject::tr("HOM_BOUN_CASE") );
-    return;
-  }
-  SMESHHOMARD::HOMARD_Cas_var monCas= myHomardGen->GetCase(_aCaseName.toStdString().c_str());
+  SMESHHOMARD::HOMARD_Cas_var monCas = myHomardGen->GetCase();
   SMESHHOMARD::ListGroupType_var _listeGroupesCas = monCas->GetGroups();
 
   SMESH_EditListGroup *aDlg = new SMESH_EditListGroup
     (this, true, SMESHHOMARD::HOMARD_Gen::_duplicate(myHomardGen),
-     _aCaseName, _listeGroupesBoundary);
+     "Case_1", _listeGroupesBoundary);
   aDlg->show();
 }

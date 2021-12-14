@@ -217,10 +217,6 @@
       <translation>仮説を選択します。</translation>
     </message>
     <message>
-      <source>HOM_ITER_FIELD_FILE</source>
-      <translation>この前提には、ファイルのフィールドを指定する必要があります。</translation>
-    </message>
-    <message>
       <source>HOM_ITER_STARTING_POINT_0</source>
       <translation>メッシュ</translation>
     </message>
@@ -401,30 +397,6 @@
       <translation>メッシュ n + 1</translation>
     </message>
     <message>
-      <source>Field information</source>
-      <translation>フィールド情報</translation>
-    </message>
-    <message>
-      <source>Field file</source>
-      <translation>フィールド ファイル</translation>
-    </message>
-    <message>
-      <source>No time step</source>
-      <translation>タイムステップなし</translation>
-    </message>
-    <message>
-      <source>Last time step</source>
-      <translation>最終タイムステップ</translation>
-    </message>
-    <message>
-      <source>Chosen time step</source>
-      <translation>選択されたタイムステップ</translation>
-    </message>
-    <message>
-      <source>Time step</source>
-      <translation>タイムステップ</translation>
-    </message>
-    <message>
       <source>Rank</source>
       <translation>ランク</translation>
     </message>
@@ -439,10 +411,6 @@
     <message>
       <source>HOM_HYPO_NAME</source>
       <translation>仮説に名前を付ける必要があります。</translation>
-    </message>
-    <message>
-      <source>HOM_HYPO_FIELD_FILE</source>
-      <translation>それはフィールドのファイルを提供する必要があります。</translation>
     </message>
     <message>
       <source>HOM_HYPO_NORM_L2</source>
@@ -477,10 +445,6 @@
       <translation>均一</translation>
     </message>
     <message>
-      <source>Driven by a field</source>
-      <translation>フィールドによって駆動</translation>
-    </message>
-    <message>
       <source>Uniform adaptation</source>
       <translation>均一な適応</translation>
     </message>
@@ -491,18 +455,6 @@
     <message>
       <source>Nothing</source>
       <translation>なし</translation>
-    </message>
-    <message>
-      <source>File of the fields</source>
-      <translation>フィールドファイル</translation>
-    </message>
-    <message>
-      <source>Governing field for the adaptation</source>
-      <translation>適合のためにフィールドを管理</translation>
-    </message>
-    <message>
-      <source>Field name</source>
-      <translation>フィールド名</translation>
     </message>
     <message>
       <source>Jump between elements</source>
@@ -539,10 +491,6 @@
     <message>
       <source>No coarsening</source>
       <translation>粗大化なし</translation>
-    </message>
-    <message>
-      <source>Field Interpolation</source>
-      <translation>フィールド補間</translation>
     </message>
     <message>
       <source>Chosen</source>

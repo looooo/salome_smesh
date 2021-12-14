@@ -123,7 +123,7 @@ void SMESH_CreateListGroupCAO::InitGroupes()
       TWGroupe->removeRow(row);
   TWGroupe->setRowCount(0);
   if (_aCaseName == QString("")) { return; };
-  SMESHHOMARD::HOMARD_Cas_var monCas= myHomardGen->GetCase(_aCaseName.toStdString().c_str());
+  SMESHHOMARD::HOMARD_Cas_var monCas = myHomardGen->GetCase();
   SMESHHOMARD::ListGroupType_var _listeGroupesCas = monCas->GetGroups();
   for ( int i = 0; i < _listeGroupesCas->length(); i++ ) {
     TWGroupe->insertRow(i);
@@ -231,7 +231,7 @@ void SMESH_CreateListGroup::InitGroupes()
       TWGroupe->removeRow(row);
   TWGroupe->setRowCount(0);
   if (_aCaseName == QString("")) { return; };
-  SMESHHOMARD::HOMARD_Cas_var monCas= myHomardGen->GetCase(_aCaseName.toStdString().c_str());
+  SMESHHOMARD::HOMARD_Cas_var monCas = myHomardGen->GetCase();
   SMESHHOMARD::ListGroupType_var _listeGroupesCas = monCas->GetGroups();
   for ( int i = 0; i < _listeGroupesCas->length(); i++ )
   {

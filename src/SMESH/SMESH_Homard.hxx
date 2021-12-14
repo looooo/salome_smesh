@@ -70,13 +70,13 @@ public:
   HOMARD_Boundary();
   ~HOMARD_Boundary();
 
-// Generalites
+  // Generalites
   void                          SetName( const char* Name );
   std::string                   GetName() const;
 
   std::string                   GetDumpPython() const;
 
-// Caracteristiques
+  // Caracteristiques
   void                          SetType( int Type );
   int                           GetType() const;
 
@@ -133,13 +133,13 @@ public:
   HOMARD_Cas();
   ~HOMARD_Cas();
 
-// Generalites
+  // Generalites
   void                          SetName( const char* Name );
   std::string                   GetName() const;
 
   std::string                   GetDumpPython() const;
 
-// Caracteristiques
+  // Caracteristiques
   int                           SetDirName( const char* NomDir );
   std::string                   GetDirName() const;
 
@@ -147,9 +147,6 @@ public:
 
   void                          SetConfType( int ConfType );
   const int                     GetConfType() const;
-
-  void                          SetExtType( int ExtType );
-  const int                     GetExtType() const;
 
   void                          SetBoundingBox( const std::vector<double>& extremas );
   const std::vector<double>&    GetBoundingBox() const;
@@ -164,9 +161,6 @@ public:
   const std::list<std::string>& GetBoundaryGroup() const;
   void                          SupprBoundaryGroup();
 
-  void                          SetPyram( int Pyram );
-  const int                     GetPyram() const;
-
 // Liens avec les autres structures
   std::string                   GetIter0Name() const;
 
@@ -178,14 +172,11 @@ private:
   std::string                   _Name;
   std::string                   _NomDir;
   int                           _ConfType;
-  int                           _ExtType;
   int                           _Etat;
 
   std::vector<double>           _Boite;         // cf HomardQTCommun pour structure du vecteur
   std::list<std::string>        _ListGroup;
   std::list<std::string>        _ListBoundaryGroup;
-
-  int                           _Pyram;
 
   typedef std::string           IterName;
   typedef std::list<IterName>   IterNames;
@@ -202,7 +193,7 @@ public:
   void        TexteInfo( int TypeBila, int NumeIter );
   void        TexteMajCoords( int NumeIter );
   void        CreeFichierDonn();
-  void        TexteAdap( int ExtType );
+  void        TexteAdap();
   void        CreeFichier();
   void        TexteMaillage( const std::string NomMesh, const std::string MeshFile, int apres );
   void        TexteMaillageHOMARD( const std::string Dir, const std::string liter, int apres );
@@ -225,11 +216,10 @@ public:
   void        TexteFieldInterp( const std::string FieldFile, const std::string MeshFile );
   void        TexteFieldInterpAll();
   void        TexteFieldInterpNameType( int NumeChamp, const std::string FieldName, const std::string TypeInterp, int TimeStep, int Rank );
-  void        TexteAdvanced( int Pyram, int NivMax, double DiamMin, int AdapInit, int LevelOutput );
+  void        TexteAdvanced( int NivMax, double DiamMin, int AdapInit, int LevelOutput );
   void        TexteInfoCompute( int MessInfo );
   //
-  int         ExecuteHomard(int option);
-  //
+  int         ExecuteHomard();
 
 public:
   int         _modeHOMARD;
@@ -292,8 +282,6 @@ public:
 // Generalites
   void                          SetName( const char* Name );
   std::string                   GetName() const;
-
-  std::string                   GetDumpPython() const;
 
 // Caracteristiques
   void                          SetAdapType( int TypeAdap );
@@ -399,13 +387,11 @@ public:
   HOMARD_Iteration();
   ~HOMARD_Iteration();
 
-// Generalites
+  // Generalites
   void                          SetName( const char* Name );
   std::string                   GetName() const;
 
-  std::string                   GetDumpPython() const;
-
-// Caracteristiques
+  // Caracteristiques
   void                          SetDirNameLoc( const char* NomDir );
   std::string                   GetDirNameLoc() const;
 

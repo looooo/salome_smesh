@@ -68,8 +68,7 @@ const int MARGIN  = 9;            // layout margin
  */
 //================================================================================
 SMESHGUI_HomardAdaptDlg::SMESHGUI_HomardAdaptDlg(SMESHHOMARD::HOMARD_Gen_ptr myHomardGen0)
-  : QDialog(SMESHGUI::desktop()),
-    myWorkingDir("")
+  : QDialog(SMESHGUI::desktop())
 {
   MESSAGE("Debut du constructeur de SMESHGUI_HomardAdaptDlg");
   myHomardGen = SMESHHOMARD::HOMARD_Gen::_duplicate(myHomardGen0);
@@ -105,20 +104,18 @@ SMESHGUI_HomardAdaptDlg::SMESHGUI_HomardAdaptDlg(SMESHHOMARD::HOMARD_Gen_ptr myH
   myAdvOpt->removeLogOnSuccessCheck->setChecked(false);
 
   // Working directory
-  myWorkingDir = QDir::tempPath();
+  QString aWorkingDir = QDir::tempPath();
   char *aTmp_dir = getenv("SALOME_TMP_DIR");
   if (aTmp_dir != NULL) {
     QDir aTmpDir (aTmp_dir);
     if (aTmpDir.exists()) {
-      myWorkingDir = aTmpDir.absolutePath();
+      aWorkingDir = aTmpDir.absolutePath();
     }
   }
-  myAdvOpt->workingDirectoryLineEdit->setText(myWorkingDir);
-  QFileInfo anOutMedFile (QDir(myWorkingDir), "Uniform_01_R.med");
+  myAdvOpt->workingDirectoryLineEdit->setText(aWorkingDir);
 
   // Out med file and/or mesh publication
   myArgs->myOutMedFileChk->setChecked(true);
-  myArgs->mySelectOutMedFileLineEdit->setText(anOutMedFile.absoluteFilePath());
   myArgs->myOutPublishChk->setChecked(true);
 
   // buttons
@@ -229,6 +226,8 @@ void SMESHGUI_HomardAdaptDlg::InitConnect()
 void SMESHGUI_HomardAdaptDlg::InitBoundarys()
 {
   MESSAGE("InitBoundarys");
+  //myArgs->TWBoundary->clearContents();
+  //myArgs->TWBoundary->clear();
   // Pour les frontieres analytiques : la colonne des groupes
   SMESHHOMARD::ListGroupType_var _listeGroupesCas = myCase->GetGroups();
   QTableWidgetItem *__colItem = new QTableWidgetItem();
@@ -262,24 +261,15 @@ void SMESHGUI_HomardAdaptDlg::InitBoundarys()
 // function : CheckCase
 // purpose  : 
 //=================================================================================
-bool SMESHGUI_HomardAdaptDlg::CheckCase()
+bool SMESHGUI_HomardAdaptDlg::CheckCase(bool fixCase)
 {
   MESSAGE("CheckCase");
-  QString aCaseName = "Case_1";
 
   QString aWorkingDir = myAdvOpt->workingDirectoryLineEdit->text().trimmed();
   if (aWorkingDir == QString("")) {
     QMessageBox::critical( 0, QObject::tr("HOM_ERROR"),
                               QObject::tr("HOM_CASE_DIRECTORY_1") );
     return false;
-  }
-  if (aWorkingDir != myWorkingDir) {
-    QString CaseNameDir = myHomardGen->VerifieDir( aWorkingDir.toStdString().c_str());
-    if ( ( CaseNameDir != "" ) & ( CaseNameDir != aCaseName ) ) {
-      QString texte  = QObject::tr("HOM_CASE_DIRECTORY_2") + CaseNameDir;
-      QMessageBox::critical( 0, QObject::tr("HOM_ERROR"), texte );
-      return false;
-    }
   }
 
   if (CHDIR(aWorkingDir.toStdString().c_str()) != 0) {
@@ -288,40 +278,42 @@ bool SMESHGUI_HomardAdaptDlg::CheckCase()
     return false;
   }
 
-  QString aFileName = myArgs->mySelectInMedFileLineEdit->text().trimmed();
-  if (aFileName == QString("")) {
-    QMessageBox::critical( 0, QObject::tr("HOM_ERROR"),
-                              QObject::tr("HOM_CASE_MESH") );
-    return false;
-  }
+  QString aMeshName, aFileName;
+  if (myArgs->myInMedFileRadio->isChecked()) {
+    aFileName = myArgs->mySelectInMedFileLineEdit->text().trimmed();
+    if (aFileName == QString("")) {
+      QMessageBox::critical(0, QObject::tr("HOM_ERROR"), QObject::tr("HOM_CASE_MESH"));
+      return false;
+    }
 
-  // In mesh name
-  QString aMeshName = SMESH_HOMARD_QT_COMMUN::LireNomMaillage(aFileName);
-  if (aMeshName == "" ) {
-    QMessageBox::critical( 0, QObject::tr("HOM_ERROR"),
-                              QObject::tr("HOM_MED_FILE_2") );
-    return false;
+    // In mesh name
+    aMeshName = SMESH_HOMARD_QT_COMMUN::LireNomMaillage(aFileName);
+    if (aMeshName == "") {
+      QMessageBox::critical(0, QObject::tr("HOM_ERROR"), QObject::tr("HOM_MED_FILE_2"));
+      return false;
+    }
   }
-
-  // Out mesh name (initialize, if not yet)
-  if (myArgs->myOutMeshNameLineEdit->text().isEmpty()) {
-    myArgs->myOutMeshNameLineEdit->setText(aMeshName);
+  else {
+    aMeshName = myArgs->myInBrowserObject->text();
+    if (aMeshName == "" || myMesh->_is_nil()) {
+      QMessageBox::critical(0, QObject::tr("HOM_ERROR"),
+                            QObject::tr("Mesh object is not selected"));
+      return false;
+    }
   }
 
   // On verifie qu'un groupe n'est pas associe a deux frontieres differentes
   if (myArgs->CBBoundaryA->isChecked()) {
-    QStringList ListeGroup ;
-    QString NomGroup ;
+    QStringList ListeGroup;
+    QString NomGroup;
     int nbcol = myArgs->TWBoundary->columnCount();
     int nbrow = myArgs->TWBoundary->rowCount();
     for ( int col=1; col< nbcol; col++) {
       for ( int row=0; row< nbrow; row++) {
         if ( myArgs->TWBoundary->item( row, col )->checkState() ==  Qt::Checked ) {
-          // Nom du groupe
+          // Group name
           NomGroup = QString(myArgs->TWBoundary->item(row, 0)->text()) ;
-          //MESSAGE("NomGroup "<<NomGroup.toStdString().c_str());
-          for ( int nugr = 0 ; nugr<ListeGroup.size(); nugr++) {
-            //MESSAGE("....... "<<ListeGroup[nugr].toStdString().c_str());
+          for ( int nugr = 0 ; nugr < ListeGroup.size(); nugr++) {
             if ( NomGroup == ListeGroup[nugr] ) {
               QMessageBox::critical( 0, QObject::tr("HOM_ERROR"),
                                         QObject::tr("HOM_CASE_GROUP").arg(NomGroup) );
@@ -334,29 +326,44 @@ bool SMESHGUI_HomardAdaptDlg::CheckCase()
     }
   }
 
+  if (!fixCase) return true;
+
   // Creation du cas
   if (myCase->_is_nil()) {
     try {
-      myCase = myHomardGen->CreateCase
-        (CORBA::string_dup(aCaseName.toStdString().c_str()),
-         CORBA::string_dup(aMeshName.toStdString().c_str()),
-         CORBA::string_dup(aFileName.toStdString().c_str()));
+      if (myArgs->myInMedFileRadio->isChecked()) {
+        // create case from MED file
+        myCase = myHomardGen->CreateCase
+          (CORBA::string_dup(aMeshName.toStdString().c_str()),
+           CORBA::string_dup(aFileName.toStdString().c_str()),
+           aWorkingDir.toStdString().c_str());
+      }
+      else {
+        // create case from SMESH_Mesh
+        myCase = myHomardGen->CreateCaseOnMesh
+          (CORBA::string_dup(aMeshName.toStdString().c_str()),
+           myMesh,
+           aWorkingDir.toStdString().c_str());
+      }
     }
     catch( SALOME::SALOME_Exception& S_ex ) {
       QMessageBox::critical( 0, QObject::tr("HOM_ERROR"),
                              QObject::tr(CORBA::string_dup(S_ex.details.text)) );
       return false;
     }
-    //myArgs->mySelectInMedFileLineEdit->setReadOnly(true);
-    //myArgs->mySelectInMedFileButton->hide();
+    // Prevent changing case data
+    myArgs->myInMedFileRadio->setEnabled(false);
+    myArgs->myInBrowserRadio->setEnabled(false);
+    myArgs->mySelectInMedFileLineEdit->setReadOnly(true);
+    myArgs->mySelectInMedFileButton->setEnabled(false);
+    myArgs->myInBrowserObject->setReadOnly(true);
+    myAdvOpt->workingDirectoryLineEdit->setReadOnly(true);
+    myAdvOpt->workingDirectoryPushButton->setEnabled(false);
     InitBoundarys();
   }
 
   // Repertoire et type
-  myCase->SetDirName(aWorkingDir.toStdString().c_str());
-  myWorkingDir = aWorkingDir;
   myCase->SetConfType(myArgs->RBConforme->isChecked() ? 0 : 1);
-  //myCase->SetExtType(0); // ExtType
 
   // Menage des eventuelles frontieres deja enregistrees
   myCase->SupprBoundaryGroup();
@@ -373,10 +380,10 @@ bool SMESHGUI_HomardAdaptDlg::PushOnApply()
   MESSAGE("PushOnApply");
 
   // Check data, create Case if not yet
-  if (!CheckCase())
+  if (!CheckCase(true))
     return false;
 
-  MESSAGE("PushOnApply: *** aaajfa *** 11");
+  MESSAGE("PushOnApply: *** aaajfa *** 12");
 
   // Create boundaries
   if (myArgs->RBBoundaryCAO->isChecked()) {
@@ -395,65 +402,35 @@ bool SMESHGUI_HomardAdaptDlg::PushOnApply()
     QString NomGroup;
     int nbcol = myArgs->TWBoundary->columnCount();
     int nbrow = myArgs->TWBoundary->rowCount();
-    for ( int col=1; col< nbcol; col++) {
-      for ( int row=0; row< nbrow; row++) {
+    for ( int col = 1; col < nbcol; col++) {
+      for ( int row = 0; row < nbrow; row++) {
         if ( myArgs->TWBoundary->item( row, col )->checkState() == Qt::Checked ) {
           // Nom du groupe
           NomGroup = QString(myArgs->TWBoundary->item(row, 0)->text()) ;
           // Nom de la frontiere
-          QTableWidgetItem *__colItem = new QTableWidgetItem();
-          __colItem = myArgs->TWBoundary->horizontalHeaderItem(col);
+          QTableWidgetItem *__colItem = myArgs->TWBoundary->horizontalHeaderItem(col);
           myCase->AddBoundaryGroup(QString(__colItem->text()).toStdString().c_str(),
-                                  NomGroup.toStdString().c_str());
+                                   NomGroup.toStdString().c_str());
         }
       }
     }
   }
-  MESSAGE("PushOnApply: *** aaajfa *** 12");
-
-  // create hypothesis
-  if (myHypothesis->_is_nil()) {
-    try {
-      myHypothesis = myHomardGen->CreateHypothesis("Hypo_1");
-      myHypothesis->SetUnifRefinUnRef(1);
-    }
-    catch( SALOME::SALOME_Exception& S_ex ) {
-      QMessageBox::critical( 0, QObject::tr("HOM_ERROR"),
-                             QString(CORBA::string_dup(S_ex.details.text)) );
-      //if (!myHypothesis->_is_nil()) {
-      //  myHypothesis->Delete();
-      //  myHypothesis = SMESHHOMARD::HOMARD_Hypothesis::_nil();
-      //}
-      return false;
-    }
-  }
   MESSAGE("PushOnApply: *** aaajfa *** 13");
 
-  // create iteration
-  if (myIteration->_is_nil()) {
-    try {
-      myIteration = myCase->NextIteration("Iter_1");
-      myIteration->AssociateHypo("Hypo_1");
-    }
-    catch( SALOME::SALOME_Exception& S_ex ) {
-      QMessageBox::critical( 0, QObject::tr("HOM_ERROR"),
-                             QString(CORBA::string_dup(S_ex.details.text)) );
-      return false;
-    }
-  }
-  // Verbose level?
-  myIteration->SetInfoCompute(myAdvOpt->verboseLevelSpin->value());
-  // Output mesh name
-  myIteration->SetMeshName(myArgs->myOutMeshNameLineEdit->text().toStdString().c_str());
-  // Output med file
+  // Output MED and MESH parameters
+  myHomardGen->SetKeepMedOUT(myArgs->myOutMedFileChk->isChecked());
+  myHomardGen->SetPublishMeshOUT(myArgs->myOutPublishChk->isChecked());
+  QString anOutMeshName = myArgs->myOutMeshNameLineEdit->text();
+  if (anOutMeshName.isEmpty()) anOutMeshName = "DEFAULT_MESH_NAME";
+  myHomardGen->SetMeshNameOUT(anOutMeshName.toStdString().c_str());
+
+  std::string aMeshFileOUT;
   if (myArgs->myOutMedFileChk->isChecked()) {
     QString anOutMed = myArgs->mySelectOutMedFileLineEdit->text();
     if (anOutMed.isEmpty()) {
       // store in working directory and with default name
-      QString aMedFileIn = myArgs->mySelectInMedFileLineEdit->text().trimmed();
-      QFileInfo aFileInfoIn (aMedFileIn);
-      aMedFileIn = aFileInfoIn.completeBaseName(); // name without path and last extension
-      QFileInfo aFileInfo (QDir(myWorkingDir), aMedFileIn + "_Uniform_01_R.med");
+      QString aWorkingDir = myAdvOpt->workingDirectoryLineEdit->text().trimmed();
+      QFileInfo aFileInfo (QDir(aWorkingDir), "Uniform_01_R.med");
       anOutMed = aFileInfo.absoluteFilePath();
       // show it
       myArgs->mySelectOutMedFileLineEdit->setText(anOutMed);
@@ -462,34 +439,48 @@ bool SMESHGUI_HomardAdaptDlg::PushOnApply()
       QFileInfo aFileInfo (anOutMed);
       anOutMed = aFileInfo.absoluteFilePath();
     }
-    myIteration->SetMeshFile(anOutMed.toStdString().c_str());
+    aMeshFileOUT = anOutMed.toStdString();
   }
+  else {
+    // Set file name without path for it to be created in current directory
+    // (it will be iteration's dir, and it will be destroyed after)
+    aMeshFileOUT = "Uniform_01_R.med";
+  }
+  myHomardGen->SetMeshFileOUT(aMeshFileOUT.c_str());
+
+  // Advanced options
+  myHomardGen->SetVerboseLevel(myAdvOpt->verboseLevelSpin->value());
+  myHomardGen->SetKeepWorkingFiles(myAdvOpt->keepWorkingFilesCheck->isChecked());
+  myHomardGen->SetLogInFile(myAdvOpt->logInFileCheck->isChecked());
+  myHomardGen->SetRemoveLogOnSuccess(myAdvOpt->removeLogOnSuccessCheck->isChecked());
+
   // Log file
   if (myAdvOpt->logInFileCheck->isChecked()) {
     // Write log file in the working dir
-    // Name of log file will be "<base_name_of_input_med>_Uniform_01_R.med.log"
-    QString aMedFileIn = myArgs->mySelectInMedFileLineEdit->text().trimmed();
-    QFileInfo aFileInfoIn (aMedFileIn);
-    aMedFileIn = aFileInfoIn.completeBaseName(); // name without path and last extension
-    QFileInfo aFileInfo (QDir(myWorkingDir), aMedFileIn + "_Uniform_01_R.med.log");
+    QString aLogBaseName;
+    if (myArgs->myInMedFileRadio->isChecked()) {
+      // Name of log file will be "<name_of_input_med_file>_Uniform_R.log"
+      QString aMedFileIn = myArgs->mySelectInMedFileLineEdit->text().trimmed();
+      QFileInfo aFileInfoIn (aMedFileIn);
+      aLogBaseName = aFileInfoIn.fileName();
+    }
+    else {
+      // Name of log file will be "SMESH_Mesh_<name_of_input_mesh>_Uniform_R.log"
+      aLogBaseName = "SMESH_Mesh_";
+      aLogBaseName += myArgs->myInBrowserObject->text();
+    }
+    QString aWorkingDir = myAdvOpt->workingDirectoryLineEdit->text().trimmed();
+    QFileInfo aFileInfo (QDir(aWorkingDir), aLogBaseName + "_Uniform_R.log");
     QString anOutLog = aFileInfo.absoluteFilePath();
-    MESSAGE("myIteration->SetLogFile(" << anOutLog.toStdString().c_str() << ")");
-    myIteration->SetLogFile(anOutLog.toStdString().c_str());
-    MESSAGE("myIteration->GetLogFile() = " << myIteration->GetLogFile());
+    MESSAGE("myHomardGen->SetLogFile(" << anOutLog.toStdString().c_str() << ")");
+    myHomardGen->SetLogFile(anOutLog.toStdString().c_str());
   }
   MESSAGE("PushOnApply: *** aaajfa *** 14");
 
-  // compute and publish
+  // Compute and publish
   bool isSuccess = true;
   try {
-    int aCleanOption = 0; // report an error if output mesh file exists
-    int aModeHOMARD = 1; // adaptation
-    int anOption1 = -1; // appel depuis GUI
-    int anOption2 = 1; // do not publish to SMESH
-    if (myArgs->myOutPublishChk->isChecked())
-      anOption2 = 2; // publish to SMESH
-    isSuccess = myHomardGen->Compute("Iter_1", aCleanOption, aModeHOMARD,
-                                     anOption1, anOption2) == 0;
+    isSuccess = myHomardGen->Compute() == 0;
   }
   catch( SALOME::SALOME_Exception& S_ex ) {
     QMessageBox::critical( 0, QObject::tr("HOM_ERROR"),
@@ -497,38 +488,26 @@ bool SMESHGUI_HomardAdaptDlg::PushOnApply()
     isSuccess = false;
   }
   MESSAGE("PushOnApply: *** aaajfa *** 15");
-  //  case 1131: // Publication du maillage de l'iteration
-  //    homardGen->PublishMeshIterInSmesh(_ObjectName.toStdString().c_str());
-  //  case 1132: // Publication du maillage de l'iteration a partir du fichier
-  //    homardGen->PublishResultInSmesh(_ObjectName.toStdString().c_str(), 1);
 
-  if (isSuccess)
+  // Update Object Browser
+  if (isSuccess) {
     SMESHGUI::GetSMESHGUI()->updateObjBrowser();
 
-  // Remove log file and delete iteration object
-  MESSAGE("myIteration->GetLogFile() = " << myIteration->GetLogFile());
-  if (isSuccess &&
-      myAdvOpt->logInFileCheck->isChecked() &&
-      myAdvOpt->removeLogOnSuccessCheck->isChecked()) {
-    // Remove log file on success
-    QFile(myIteration->GetLogFile()).remove();
+    // Clean case, as it is deleted after successful Compute
+    myCase = SMESHHOMARD::HOMARD_Cas::_nil();
   }
-  MESSAGE("PushOnApply: *** aaajfa *** 16");
 
-  // Delete iteration object
-  // This also removes all working files, if keepWorkingFilesCheck is not checked
-  myIteration->Delete(0, !myAdvOpt->keepWorkingFilesCheck->isChecked());
+  // Enable new case data selection
+  myArgs->myInMedFileRadio->setEnabled(true);
+  myArgs->myInBrowserRadio->setEnabled(true);
+  myArgs->mySelectInMedFileLineEdit->setReadOnly(false);
+  //myArgs->mySelectInMedFileButton->hide();
+  myArgs->mySelectInMedFileButton->setEnabled(true);
+  myArgs->myInBrowserObject->setReadOnly(false);
+  myAdvOpt->workingDirectoryLineEdit->setReadOnly(false);
+  myAdvOpt->workingDirectoryPushButton->setEnabled(true);
 
-  // Delete hypothesis and case
-  if (!myHypothesis->_is_nil()) myHypothesis->Delete();
-  if (!myCase->_is_nil()) myCase->Delete(1);
-
-  MESSAGE("PushOnApply: *** aaajfa *** 17");
-  myIteration = SMESHHOMARD::HOMARD_Iteration::_nil();
-  myHypothesis = SMESHHOMARD::HOMARD_Hypothesis::_nil();
-  myCase = SMESHHOMARD::HOMARD_Cas::_nil();
   MESSAGE("PushOnApply: *** aaajfa *** THE END");
-
   return isSuccess;
 }
 
@@ -551,65 +530,66 @@ void SMESHGUI_HomardAdaptDlg::PushOnHelp()
 void SMESHGUI_HomardAdaptDlg::updateSelection()
 {
   LightApp_SelectionMgr *selMgr = SMESHGUI::selectionMgr();
-  disconnect( selMgr, 0, this, 0 );
+  disconnect(selMgr, 0, this, 0);
   selMgr->clearFilters();
 
-  SMESH::SetPointRepresentation( false );
-  if ( SVTK_ViewWindow* aViewWindow = SMESH::GetViewWindow() )
-    aViewWindow->SetSelectionMode( ActorSelection );
-  if (myArgs->myInBrowserRadio->isChecked())
-  {
-    connect( selMgr, SIGNAL( currentSelectionChanged() ), this, SLOT( selectionChanged() ));
+  if (!myArgs->myInBrowserRadio->isChecked())
+    return;
+
+  SMESH::SetPointRepresentation(false);
+  if (SVTK_ViewWindow* aViewWindow = SMESH::GetViewWindow())
+    aViewWindow->SetSelectionMode(ActorSelection);
+  if (myArgs->myInBrowserRadio->isChecked()) {
+    connect(selMgr, SIGNAL(currentSelectionChanged()), this, SLOT(selectionChanged()));
     selectionChanged();
   }
-
 }
+
 void SMESHGUI_HomardAdaptDlg::selectionChanged()
 {
+  if (!myArgs->myInBrowserRadio->isChecked())
+    return;
+
   LightApp_SelectionMgr *selMgr = SMESHGUI::selectionMgr();
 
-  //~ get selected mesh
+  // get selected mesh
   SALOME_ListIO aList;
   selMgr->selectedObjects(aList);
-  QString aString = "";
-  int nbSel = aList.Extent();
-  if (nbSel != 1)
-    return;
+  QString aMeshName = "";
 
-  Handle(SALOME_InteractiveObject) IO = aList.First();
-  SMESH::SMESH_Mesh_var mesh = SMESH::GetMeshByIO(IO);
-  if ( !mesh->_is_nil() )
-  {
-    myMesh = mesh;
-
-    SMESH::SMESH_IDSource_var sSelectedObj = SMESH::IObjectToInterface<SMESH::SMESH_IDSource>( IO );
-    if ( sSelectedObj->_is_nil() )
-      return;
+  if (aList.Extent() == 1) {
+    Handle(SALOME_InteractiveObject) IO = aList.First();
+    myMesh = SMESH::GetMeshByIO(IO);
+    SMESH::GetNameOfSelectedIObjects(selMgr, aMeshName);
+    if (aMeshName.isEmpty()) aMeshName = " ";
+    else                     aMeshName = aMeshName.trimmed();
   }
-  else
-    return;
-
-  SMESH::GetNameOfSelectedIObjects( selMgr, aString );
-  if ( aString.isEmpty() ) aString = " ";
-  else                     aString = aString.trimmed();
-
-  //bool ok = !aString.isEmpty();
-  if ( !mesh->_is_nil() )
-  {
-    myArgs->myInBrowserObject->setText( aString );
-    myArgs->myOutMeshNameLineEdit->setText( aString );
-    myArgs->mySelectOutMedFileLineEdit->setText(aString + QString("_Uniform_01_R.med"));
+  else {
+    myMesh = SMESH::SMESH_Mesh::_nil();
   }
-}
 
-void SMESHGUI_HomardAdaptDlg::setMyMesh(SMESH::SMESH_Mesh_var mesh)
-{
-  myMesh = mesh;
-}
+  myArgs->myInBrowserObject->setText(aMeshName);
 
-SMESH::SMESH_Mesh_var SMESHGUI_HomardAdaptDlg::getMyMesh()
-{
-  return myMesh;
+  // Out mesh name default value
+  // TODO: add some suffix? "_R" or "_UnifRefin", or "_Uniform_01_R"
+  myArgs->myOutMeshNameLineEdit->setText(aMeshName);
+
+  // Output med file default value
+  // Construct it from Input mesh name and working directory
+  //if (myArgs->myOutMedFileChk->isChecked()) {
+  if (aMeshName.isEmpty()) {
+    myArgs->mySelectOutMedFileLineEdit->setText("");
+  }
+  else {
+    QString aWorkingDir = myAdvOpt->workingDirectoryLineEdit->text().trimmed();
+    QFileInfo aFileInfo (QDir(aWorkingDir), aMeshName + QString("_Uniform_01_R.med"));
+    for (int ii = 1; aFileInfo.exists(); ii++) {
+      QString anUniqueName = QString("%1_Uniform_01_R_%2.med").arg(aMeshName).arg(ii);
+      aFileInfo.setFile(QDir(aWorkingDir), anUniqueName);
+    }
+    myArgs->mySelectOutMedFileLineEdit->setText(aFileInfo.absoluteFilePath());
+  }
+  //}
 }
 
 void SMESHGUI_HomardAdaptDlg::SetFileName()
@@ -621,22 +601,33 @@ void SMESHGUI_HomardAdaptDlg::SetFileName()
     fileName = fileName0;
     if (fileName.isEmpty()) return;
   }
-  QFileInfo aFileInfo (fileName);
-  fileName = aFileInfo.absoluteFilePath();
+  QFileInfo aFileInInfo (fileName);
+  fileName = aFileInInfo.absoluteFilePath();
   myArgs->mySelectInMedFileLineEdit->setText(fileName);
 
+  // Out mesh name default value
+  // TODO: add some suffix? "_R" or "_UnifRefin", or "_Uniform_01_R"
+  QString aMeshName = SMESH_HOMARD_QT_COMMUN::LireNomMaillage(fileName);
+  myArgs->myOutMeshNameLineEdit->setText(aMeshName);
+
   // Output med file default value
-  if (myArgs->myOutMedFileChk->isChecked()) {
-    std::string fname = fileName.toStdString();
-    size_t lastdot = fname.find_last_of(".");
-    if (lastdot != std::string::npos)
-      fname = fname.substr(0, lastdot);
-    QString outF = QString(fname.c_str()) + QString("_Uniform_01_R.med");
-    myArgs->mySelectOutMedFileLineEdit->setText(outF);
+  // Construct it from Input med file name and path
+  //if (myArgs->myOutMedFileChk->isChecked()) {
+  std::string fname = fileName.toStdString();
+  size_t lastdot = fname.find_last_of(".");
+  if (lastdot != std::string::npos)
+    fname = fname.substr(0, lastdot);
+  QString fileNameOut = fname.c_str();
+  QFileInfo aFileInfo (fileNameOut + QString("_Uniform_01_R.med"));
+  for (int ii = 1; aFileInfo.exists(); ii++) {
+    QString anUniqueName = QString("%1_Uniform_01_R_%2.med").arg(fileNameOut).arg(ii);
+    aFileInfo.setFile(anUniqueName);
   }
+  myArgs->mySelectOutMedFileLineEdit->setText(aFileInfo.absoluteFilePath());
+  //}
 
   // Check data
-  CheckCase();
+  CheckCase(false);
 }
 
 // ------------------------------------------------------------------------
@@ -698,7 +689,7 @@ void SMESHGUI_HomardAdaptDlg::SetBoundaryD()
 {
   MESSAGE("Debut de SetBoundaryD ");
   if (myArgs->CBBoundaryD->isChecked()) {
-    bool bOK = CheckCase();
+    bool bOK = CheckCase(true);
     if (bOK) {
       myArgs->GBBoundaryD->setVisible(1);
     }
@@ -712,8 +703,8 @@ void SMESHGUI_HomardAdaptDlg::SetBoundaryD()
     myArgs->GBBoundaryD->setVisible(0);
   }
 
-  myArgs->mySelectInMedFileLineEdit->setReadOnly(true);
-  myArgs->mySelectInMedFileButton->hide();
+  //myArgs->mySelectInMedFileLineEdit->setReadOnly(true);
+  //myArgs->mySelectInMedFileButton->hide();
 
   adjustSize();
 }
@@ -756,7 +747,7 @@ void SMESHGUI_HomardAdaptDlg::SetBoundaryA()
 {
   MESSAGE("Debut de SetBoundaryA ");
   if (myArgs->CBBoundaryA->isChecked()) {
-    bool bOK = CheckCase();
+    bool bOK = CheckCase(true);
     if (bOK) {
       myArgs->GBBoundaryA->setVisible(1);
     }
@@ -770,8 +761,8 @@ void SMESHGUI_HomardAdaptDlg::SetBoundaryA()
     myArgs->GBBoundaryA->setVisible(0);
   }
 
-  myArgs->mySelectInMedFileLineEdit->setReadOnly(true);
-  myArgs->mySelectInMedFileButton->hide();
+  //myArgs->mySelectInMedFileLineEdit->setReadOnly(true);
+  //myArgs->mySelectInMedFileButton->hide();
 
   adjustSize();
 }
@@ -858,7 +849,7 @@ void SMESHGUI_HomardAdaptArguments::setupUi(QWidget *CreateCase)
   QGroupBox* aMeshIn    = new QGroupBox( tr( "MeshIn" ), this );
   myInMedFileRadio      = new QRadioButton( tr( "MEDFile" ), aMeshIn );
   myInBrowserRadio      = new QRadioButton( tr( "Browser" ), aMeshIn );
-  myInBrowserObject       = new QLineEdit( aMeshIn );
+  myInBrowserObject     = new QLineEdit( aMeshIn );
   mySelectInMedFileButton   = new QPushButton("...", aMeshIn);
   mySelectInMedFileLineEdit = new QLineEdit( aMeshIn );
 
@@ -952,11 +943,11 @@ void SMESHGUI_HomardAdaptArguments::setupUi(QWidget *CreateCase)
   CBBoundaryD = new QCheckBox(tr("BOUNDARY_DISCRETE"), GBBoundaryN);
   CBBoundaryA = new QCheckBox(tr("BOUNDARY_ANALYTICAL"), GBBoundaryN);
 
-  hboxLayout3 = new QHBoxLayout(GBBoundaryN);
-  hboxLayout3->setSpacing(6);
-  hboxLayout3->setContentsMargins(0, 0, 0, 0);
-  hboxLayout3->addWidget(CBBoundaryD);
-  hboxLayout3->addWidget(CBBoundaryA);
+  //hboxLayout3 = new QHBoxLayout(GBBoundaryN);
+  //hboxLayout3->setSpacing(6);
+  //hboxLayout3->setContentsMargins(0, 0, 0, 0);
+  //hboxLayout3->addWidget(CBBoundaryD);
+  //hboxLayout3->addWidget(CBBoundaryA);
 
   //          discrete
   GBBoundaryD = new QGroupBox(tr("Discrete boundary"), GBBoundaryN);
@@ -1033,6 +1024,14 @@ void SMESHGUI_HomardAdaptArguments::setupUi(QWidget *CreateCase)
   gridLayout1->addWidget(PBBoundaryAnHelp, 2, 0, 1, 1);
 
   formLayout->setLayout(0, QFormLayout::FieldRole, gridLayout1);
+
+  // Boundary No Layout
+  QGridLayout* aBoundaryNoLayout = new QGridLayout(GBBoundaryN);
+  //aBoundaryNoLayout->addLayout(hboxLayout3, 0, 0);
+  aBoundaryNoLayout->addWidget(CBBoundaryD, 0, 0);
+  aBoundaryNoLayout->addWidget(CBBoundaryA, 0, 1);
+  aBoundaryNoLayout->addWidget(GBBoundaryD, 1, 0, 1, 2);
+  aBoundaryNoLayout->addWidget(GBBoundaryA, 2, 0, 1, 2);
 
   // Boundary type Layout
   QGridLayout* aBoundTypeLayout = new QGridLayout(GBTypeBoun);

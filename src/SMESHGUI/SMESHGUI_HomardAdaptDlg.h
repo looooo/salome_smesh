@@ -64,9 +64,6 @@ class SMESHGUI_EXPORT SMESHGUI_HomardAdaptDlg : public QDialog
   SMESHGUI_HomardAdaptDlg(SMESHHOMARD::HOMARD_Gen_ptr theHomardGen);
   ~SMESHGUI_HomardAdaptDlg();
 
-  void setMyMesh(SMESH::SMESH_Mesh_var);
-  SMESH::SMESH_Mesh_var getMyMesh();
-
   void AddBoundaryCAO(QString newBoundary);
   void AddBoundaryAn(QString newBoundary);
   void AddBoundaryDi(QString newBoundary);
@@ -75,8 +72,6 @@ class SMESHGUI_EXPORT SMESHGUI_HomardAdaptDlg : public QDialog
   QString myWorkingDir;
 
   SMESHHOMARD::HOMARD_Cas_var myCase;
-  SMESHHOMARD::HOMARD_Hypothesis_var myHypothesis;
-  SMESHHOMARD::HOMARD_Iteration_var myIteration;
   SALOME::GenericObj_wrap< SMESHHOMARD::HOMARD_Gen > myHomardGen;
 
   virtual void InitConnect();
@@ -103,7 +98,7 @@ class SMESHGUI_EXPORT SMESHGUI_HomardAdaptDlg : public QDialog
   virtual void PushBoundaryAnEdit();
   virtual void PushBoundaryAnHelp();
 
-  bool CheckCase();
+  bool CheckCase(bool fixCase);
 
   virtual void PushOnOK();
   virtual bool PushOnApply();

@@ -120,32 +120,8 @@
         <translation>Impossible de lire le maillage de ce fichier MED.</translation>
     </message>
     <message>
-        <source>HOM_MED_FILE_5</source>
-        <translation>Ce fichier MED ne contient aucun champ.</translation>
-    </message>
-    <message>
-        <source>HOM_MED_FILE_6</source>
-        <translation>Impossible de lire le(s) champ(s) de ce fichier MED.</translation>
-    </message>
-    <message>
         <source>HOM_SELECT_STUDY</source>
         <translation>Sélectionner une étude avec un fichier MED associé\n ou sélectionner un fichier MED.</translation>
-    </message>
-    <message>
-        <source>Create a case</source>
-        <translation>Création d'un cas</translation>
-    </message>
-    <message>
-        <source>HOM_CASE_NAME</source>
-        <translation>Il faut donner un nom au cas.</translation>
-    </message>
-    <message>
-        <source>HOM_CASE_DIRECTORY_1</source>
-        <translation>Il faut choisir un répertoire de travail pour le cas.</translation>
-    </message>
-    <message>
-        <source>HOM_CASE_DIRECTORY_2</source>
-        <translation>Ce répertoire est déjà utilisé par le cas </translation>
     </message>
     <message>
         <source>HOM_CASE_DIRECTORY_3</source>
@@ -214,10 +190,6 @@
     <message>
         <source>HOM_ITER_HYPO</source>
         <translation>Choisir une hypothèse.</translation>
-    </message>
-    <message>
-        <source>HOM_ITER_FIELD_FILE</source>
-        <translation>Avec cette hypothèse, il faut fournir le fichier du champ.</translation>
     </message>
     <message>
         <source>HOM_ITER_STARTING_POINT_0</source>
@@ -412,30 +384,6 @@
         <translation>Maillage n+1</translation>
     </message>
     <message>
-        <source>Field information</source>
-        <translation>Information sur les champs</translation>
-    </message>
-    <message>
-        <source>Field file</source>
-        <translation>Fichier des champs</translation>
-    </message>
-    <message>
-        <source>No time step</source>
-        <translation>Sans pas de temps</translation>
-    </message>
-    <message>
-        <source>Last time step</source>
-        <translation>Dernier pas de temps</translation>
-    </message>
-    <message>
-        <source>Chosen time step</source>
-        <translation>Pas de temps choisi</translation>
-    </message>
-    <message>
-        <source>Time step</source>
-        <translation>Pas de temps</translation>
-    </message>
-    <message>
         <source>Rank</source>
         <translation>Numéro d'ordre</translation>
     </message>
@@ -450,10 +398,6 @@
     <message>
         <source>HOM_HYPO_NAME</source>
         <translation>Il faut donner un nom à l'hypothèse.</translation>
-    </message>
-    <message>
-        <source>HOM_HYPO_FIELD_FILE</source>
-        <translation>Il faut fournir le fichier du champ.</translation>
     </message>
     <message>
         <source>HOM_HYPO_NORM_L2</source>
@@ -488,10 +432,6 @@
         <translation>Uniforme</translation>
     </message>
     <message>
-        <source>Driven by a field</source>
-        <translation>Pilotage par un champ</translation>
-    </message>
-    <message>
         <source>Uniform adaptation</source>
         <translation>Adaptation uniforme</translation>
     </message>
@@ -506,18 +446,6 @@
     <message>
         <source>Nothing</source>
         <translation>Rien</translation>
-    </message>
-    <message>
-        <source>File of the fields</source>
-        <translation>Fichier des champs</translation>
-    </message>
-    <message>
-        <source>Governing field for the adaptation</source>
-        <translation>Champ pilotant l'adaptation</translation>
-    </message>
-    <message>
-        <source>Field name</source>
-        <translation>Nom du champ</translation>
     </message>
     <message>
         <source>Jump between elements</source>
@@ -554,10 +482,6 @@
     <message>
         <source>No coarsening</source>
         <translation>Sans déraffinement</translation>
-    </message>
-    <message>
-        <source>Field Interpolation</source>
-        <translation>Interpolation des champs</translation>
     </message>
     <message>
         <source>Chosen</source>

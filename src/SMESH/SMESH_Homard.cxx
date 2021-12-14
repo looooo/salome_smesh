@@ -126,7 +126,6 @@ namespace SMESHHOMARDImpl
     os << cas.GetName();
     os << separator() << cas.GetDirName();
     os << separator() << cas.GetConfType();
-    os << separator() << cas.GetExtType();
 
     std::vector<double> coor = cas.GetBoundingBox();
     os << separator() << coor.size();
@@ -148,7 +147,7 @@ namespace SMESHHOMARDImpl
     for ( it = ListString.begin(); it != ListString.end(); ++it )
          os << separator() << *it;
 
-    os << separator() << cas.GetPyram();
+    os << separator() << 0; //cas.GetPyram()
 
     saux = os.str();
 //     MESSAGE( ". Fin avec "<<saux);
@@ -343,10 +342,6 @@ namespace SMESHHOMARDImpl
 
     chunk = getNextChunk( stream, start, ok );
     if ( !ok ) return false;
-    cas.SetExtType( atoi( chunk.c_str() ) );
-
-    chunk = getNextChunk( stream, start, ok );
-    if ( !ok ) return false;
 
     int size = atoi( chunk.c_str() );
     std::vector<double> boite;
@@ -392,7 +387,7 @@ namespace SMESHHOMARDImpl
 
     chunk = getNextChunk( stream, start, ok );
     if ( !ok ) return false;
-    cas.SetPyram( atoi( chunk.c_str() ) );
+    //cas.SetPyram( atoi( chunk.c_str() ) );
 
     return true;
   }
@@ -737,57 +732,47 @@ std::string HOMARD_Boundary::GetName() const
 std::string HOMARD_Boundary::GetDumpPython() const
 {
   std::ostringstream aScript;
-  aScript << "\n# Creation of the ";
-//
-  switch (_Type)
-  {
+  switch (_Type) {
     case -1:
     {
-      aScript << "CAO boundary " << _Name << "\n";
-      aScript << "\t" << _Name << " = homard.CreateBoundaryCAO(\"" << _Name << "\", ";
+      aScript << _Name << " = smeshhomard.CreateBoundaryCAO(\"" << _Name << "\", ";
       aScript << "\"" << _DataFile << "\")\n";
       break ;
     }
     case 0:
     {
-      aScript << "discrete boundary " << _Name << "\n";
-      aScript << "\t" << _Name << " = homard.CreateBoundaryDi(\"" << _Name << "\", ";
+      aScript << _Name << " = smeshhomard.CreateBoundaryDi(\"" << _Name << "\", ";
       aScript << "\"" << _MeshName << "\", ";
       aScript << "\"" << _DataFile << "\")\n";
       break ;
     }
     case 1:
     {
-      aScript << "cylinder " << _Name << "\n";
-      aScript << "\t" << _Name << " = homard.CreateBoundaryCylinder(\"" << _Name << "\", ";
+      aScript << _Name << " = smeshhomard.CreateBoundaryCylinder(\"" << _Name << "\", ";
       aScript << _Xcentre << ", " << _Ycentre << ", " << _Zcentre << ", " << _Xaxe << ", " << _Yaxe << ", " << _Zaxe << ", " << _rayon << ")\n";
       break ;
     }
     case 2:
     {
-      aScript << "sphere " << _Name << "\n";
-      aScript << "\t" << _Name << " = homard.CreateBoundarySphere(\"" << _Name << "\", ";
+      aScript << _Name << " = smeshhomard.CreateBoundarySphere(\"" << _Name << "\", ";
       aScript << _Xcentre << ", " << _Ycentre << ", " << _Zcentre << ", " << _rayon << ")\n";
       break ;
     }
     case 3:
     {
-      aScript << "cone " << _Name << "\n";
-      aScript << "\t" << _Name << " = homard.CreateBoundaryConeA(\"" << _Name << "\", ";
+      aScript << _Name << " = smeshhomard.CreateBoundaryConeA(\"" << _Name << "\", ";
       aScript << _Xaxe << ", " << _Yaxe << ", " << _Zaxe << ", " << _Angle << ", " << _Xcentre << ", " << _Ycentre << ", " << _Zcentre << ")\n";
       break ;
     }
     case 4:
     {
-      aScript << "cone " << _Name << "\n";
-      aScript << "\t" << _Name << " = homard.CreateBoundaryConeR(\"" << _Name << "\", ";
+      aScript << _Name << " = smeshhomard.CreateBoundaryConeR(\"" << _Name << "\", ";
       aScript << _Xcentre1 << ", " << _Ycentre1 << ", " << _Zcentre1 << ", " << _Rayon1 << ", " << _Xcentre2 << ", " << _Ycentre2 << ", " << _Zcentre2 << ", " << _Rayon2 << ")\n";
       break ;
     }
     case 5:
     {
-      aScript << "tore " << _Name << "\n";
-      aScript << "\t" << _Name << " = homard.CreateBoundaryTorus(\"" << _Name << "\", ";
+      aScript << _Name << " = smeshhomard.CreateBoundaryTorus(\"" << _Name << "\", ";
       aScript << _Xcentre << ", " << _Ycentre << ", " << _Zcentre << ", " << _Xaxe << ", " << _Yaxe << ", " << _Zaxe << ", " << _Rayon1 << ", " << _Rayon2 << ")\n";
       break ;
     }
@@ -994,7 +979,7 @@ std::string HOMARD_Boundary::GetCaseCreation() const
  */
 //=============================================================================
 HOMARD_Cas::HOMARD_Cas():
-  _Name(""), _NomDir("/tmp"), _ConfType(0), _ExtType(0)
+  _Name(""), _NomDir("/tmp"), _ConfType(0)
 {
   MESSAGE("HOMARD_Cas");
 }
@@ -1022,26 +1007,15 @@ std::string HOMARD_Cas::GetName() const
 std::string HOMARD_Cas::GetDumpPython() const
 {
   std::ostringstream aScript;
-  aScript << "\t" <<_Name << ".SetDirName(\"";
-  aScript << _NomDir << "\")\n";
-  aScript << "\t" <<_Name << ".SetConfType(";
-  aScript << _ConfType << ")\n";
-  aScript << "\t" <<_Name << ".SetExtType(";
-  aScript << _ExtType << ")\n";
-// Suivi de frontieres
+  //aScript << _Name << ".SetDirName(\"" << _NomDir << "\")\n";
+  aScript << _Name << ".SetConfType(" << _ConfType << ")\n";
+  // Suivi de frontieres
   std::list<std::string>::const_iterator it = _ListBoundaryGroup.begin();
-  while(it != _ListBoundaryGroup.end())
-  {
-    aScript << "\t" <<_Name << ".AddBoundaryGroup(\"";
-    aScript << *it << "\", \"";
+  while (it != _ListBoundaryGroup.end()) {
+    aScript << _Name << ".AddBoundaryGroup(\"" << *it << "\", \"";
     it++;
     aScript << *it << "\")\n";
     it++;
-  }
-  if ( _Pyram > 0 )
-  {
-    aScript << "\t" <<_Name << ".SetPyram(";
-    aScript << _Pyram << ")\n";
   }
 
   return aScript.str();
@@ -1101,20 +1075,6 @@ void HOMARD_Cas::SetConfType( int Conftype )
 const int HOMARD_Cas::GetConfType() const
 {
   return _ConfType;
-}
-//
-// Le type exterieur
-//
-//=============================================================================
-void HOMARD_Cas::SetExtType( int ExtType )
-{
-//   VERIFICATION( (ExtType>=0) && (ExtType<=2) );
-  _ExtType = ExtType;
-}
-//=============================================================================
-const int HOMARD_Cas::GetExtType() const
-{
-  return _ExtType;
 }
 //
 // La boite englobante
@@ -1189,16 +1149,6 @@ void HOMARD_Cas::SupprBoundaryGroup()
   _ListBoundaryGroup.clear();
 }
 //=============================================================================
-void HOMARD_Cas::SetPyram( int Pyram )
-{
-  _Pyram = Pyram;
-}
-//=============================================================================
-const int HOMARD_Cas::GetPyram() const
-{
-  return _Pyram;
-}
-//=============================================================================
 //=============================================================================
 // Liens avec les autres structures
 //=============================================================================
@@ -1268,18 +1218,15 @@ void HomardDriver::TexteInit( const std::string DirCompute, const std::string Lo
 //
 }
 //===============================================================================
-void HomardDriver::TexteAdap( int ExtType )
+void HomardDriver::TexteAdap()
 {
   MESSAGE("TexteAdap");
-//
-  _Texte += "Action   homa\n" ;
-  if ( ExtType ==  0 )      { _Texte += "CCAssoci med\n" ; }
-  else if ( ExtType ==  1 ) { _Texte += "CCAssoci saturne\n" ; }
-  else                      { _Texte += "CCAssoci saturne_2d\n" ; }
-  _Texte += "ModeHOMA 1\n" ;
-  _Texte += "NumeIter " + _siter + "\n" ;
-  _modeHOMARD = 1 ;
-//
+
+  _Texte += "Action   homa\n";
+  _Texte += "CCAssoci med\n";
+  _Texte += "ModeHOMA 1\n";
+  _Texte += "NumeIter " + _siter + "\n";
+  _modeHOMARD = 1;
 }
 //===============================================================================
 void HomardDriver::TexteInfo( int TypeBila, int NumeIter )
@@ -2163,15 +2110,10 @@ void HomardDriver::TexteFieldInterpNameType( int NumeChamp, const std::string Fi
 //===============================================================================
 // F. Les options avancees
 //===============================================================================
-void HomardDriver::TexteAdvanced( int Pyram, int NivMax, double DiamMin, int AdapInit, int ExtraOutput )
+void HomardDriver::TexteAdvanced( int NivMax, double DiamMin, int AdapInit, int ExtraOutput )
 {
-  MESSAGE("TexteAdvanced, Pyram ="<<Pyram<<", NivMax ="<<NivMax<<", DiamMin ="<<DiamMin<<", AdapInit ="<<AdapInit<<", ExtraOutput ="<<ExtraOutput);
+  MESSAGE("TexteAdvanced, NivMax ="<<NivMax<<", DiamMin ="<<DiamMin<<", AdapInit ="<<AdapInit<<", ExtraOutput ="<<ExtraOutput);
 
-  if ( Pyram > 0 )
-  {
-    _Texte += "# Autorisation de pyramides dans le maillage initial\n" ;
-    _Texte += "TypeElem ignore_pyra\n" ;
-  }
   if ( NivMax > 0 )
   {
     _Texte += "# Niveaux extremes\n" ;
@@ -2277,12 +2219,12 @@ void HomardDriver::CreeFichierDonn( )
 //
 }
 //===============================================================================
-int HomardDriver::ExecuteHomard(int option)
+int HomardDriver::ExecuteHomard()
 {
-  MESSAGE("ExecuteHomard, avec option = "<<option);
+  MESSAGE("ExecuteHomard");
   std::string commande ;
   int codret ;
-// Copie des Fichiers HOMARD
+  // Copie des Fichiers HOMARD
   commande = "cp " + _NomFichierConf + " " + _NomFichierConfBase ;
   codret = system(commande.c_str()) ;
 
@@ -2322,9 +2264,11 @@ HOMARD_Hypothesis::HOMARD_Hypothesis():
   _Name(""), _NomCasCreation(""),
   _TypeAdap(-1), _TypeRaff(0), _TypeDera(0),
   _Field(""),
-  _TypeThR(0), _ThreshR(0),
-  _TypeThC(0), _ThreshC(0),
-  _UsField(0), _UsCmpI(0),  _TypeFieldInterp(0)
+  _TypeThR(0), _TypeThC(0),
+  _ThreshR(0), _ThreshC(0),
+  _UsField(0), _UsCmpI(0), _TypeFieldInterp(0),
+
+  _NivMax(-1), _DiamMin(-1.0), _AdapInit(0), _ExtraOutput(1)
 {
   MESSAGE("HOMARD_Hypothesis");
 }
@@ -2350,94 +2294,6 @@ void HOMARD_Hypothesis::SetName( const char* Name )
 std::string HOMARD_Hypothesis::GetName() const
 {
   return _Name;
-}
-//=============================================================================
-std::string HOMARD_Hypothesis::GetDumpPython() const
-{
-  std::ostringstream aScript;
-  aScript << "\n# Creation of the hypothesis " << _Name << "\n" ;
-  aScript << "\t" << _Name << " = homard.CreateHypothesis(\"" << _Name << "\")\n";
-  if ( _TypeAdap == -1 )
-  {
-    int TypeRaffDera ;
-    if ( _TypeRaff == 1 ) { TypeRaffDera = 1 ; }
-    else                  { TypeRaffDera = -1 ; }
-    aScript << "\t" << _Name << ".SetUnifRefinUnRef(" << TypeRaffDera << ")\n";
-  }
-
-// Raffinement selon des zones geometriques
-  std::list<std::string>::const_iterator it = _ListZone.begin();
-  int TypeUse ;
-  while(it != _ListZone.end())
-  {
-      aScript << "\t" << _Name << ".AddZone(\"" << *it;
-      it++;
-      if ( *it == "1" ) { TypeUse =  1 ; }
-      else              { TypeUse = -1 ; }
-      aScript << "\", " << TypeUse << ")\n";
-      it++;
-  }
-
-// Raffinement selon un champ
-  if ( _TypeAdap == 1 )
-  {
-    aScript << "\t" << _Name << ".SetField(\"" << _Field << "\")\n";
-    aScript << "\t" << _Name << ".SetUseField(" << _UsField << ")\n";
-    aScript << "\t" << _Name << ".SetUseComp(" << _UsCmpI << ")\n";
-    std::list<std::string>::const_iterator it_comp = _ListComp.begin();
-    while(it_comp != _ListComp.end())
-    {
-      aScript << "\t" << _Name << ".AddComp(\"" << *it_comp << "\")\n";
-      it_comp++;
-    }
-    if ( _TypeRaff == 1 )
-    {
-      aScript << "\t" << _Name << ".SetRefinThr(" << _TypeThR << ", " << _ThreshR << ")\n";
-    }
-    if ( _TypeDera == 1 )
-    {
-      aScript << "\t" << _Name << ".SetUnRefThr(" << _TypeThC << ", " << _ThreshC << ")\n";
-    }
-  }
-
-// Filtrage du raffinement par des groupes
-   for ( it=_ListGroupSelected.begin(); it!=_ListGroupSelected.end();it++)
-       aScript << "\t" << _Name << ".AddGroup(\""  << (*it) <<  "\")\n" ;
-
-// Interpolation des champs
-  if ( _TypeFieldInterp == 2 )
-  {
-    std::list<std::string>::const_iterator it_champ = _ListFieldInterp.begin();
-    while(it_champ != _ListFieldInterp.end())
-    {
-      aScript << "\t" << _Name << ".AddFieldInterpType( \"" << *it_champ  <<  "\" " ;
-      it_champ++;
-      aScript << ", " << *it_champ << ")\n";
-      it_champ++;
-    }
-  }
-  else if ( _TypeFieldInterp != 0 )
-  {
-    aScript << "\t" << _Name << ".SetTypeFieldInterp(" << _TypeFieldInterp << ")\n";
-  }
-  if ( _NivMax > 0 )
-  {
-    aScript << "\t" <<_Name << ".SetNivMax(" << _NivMax << ")\n";
-  }
-  if ( _DiamMin > 0 )
-  {
-    aScript << "\t" <<_Name << ".SetDiamMin(" << _DiamMin << ")\n";
-  }
-  if ( _AdapInit != 0 )
-  {
-    aScript << "\t" <<_Name << ".SetAdapInit(" << _AdapInit << ")\n";
-  }
-  if ( _ExtraOutput != 1 )
-  {
-    aScript << "\t" <<_Name << ".SetExtraOutput(" << _ExtraOutput << ")\n";
-  }
-
-  return aScript.str();
 }
 //=============================================================================
 //=============================================================================
@@ -2841,83 +2697,6 @@ void HOMARD_Iteration::SetName( const char* Name )
 std::string HOMARD_Iteration::GetName() const
 {
   return _Name;
-}
-//=============================================================================
-std::string HOMARD_Iteration::GetDumpPython() const
-{
-  if (_IterParent == "") return std::string(" ") ;   // Pas de creation explicite de iteration 0";
-
-  MESSAGE (". Ecriture de l iteration " << _Name );
-  std::ostringstream aScript;
-  aScript << "\n# Creation of the iteration " << _Name << "\n";
-  if( _NumIter == 1 )
-  {
-       aScript << "\t" << _Name << " = " << _NomCas << ".NextIteration(\"" << _Name << "\")\n";
-  }
-   else
-  {
-       aScript << "\t" << _Name << " = " << _IterParent << ".NextIteration(\"" << _Name << "\")\n";
-  }
-// L'hypothese (doit etre au debut)
-  aScript << "\t" << _Name << ".AssociateHypo(\"" << _NomHypo << "\")\n";
-// Le nom du maillage produit
-//   MESSAGE (".. maillage produit " << _NomMesh );
-  aScript << "\t" << _Name << ".SetMeshName(\"" << _NomMesh << "\")\n" ;
-// Le fichier du maillage produit
-  aScript << "\t" << _Name << ".SetMeshFile(\"" << _MeshFile << "\")\n";
-// Le fichier des champs
-  if ( _FieldFile != "" )
-  {
-    aScript << "\t" << _Name << ".SetFieldFile(\"" << _FieldFile << "\")\n";
-  }
-// Si champ de pilotage, valeurs de pas de temps
-  MESSAGE (". champ de pilotage : _TimeStep = " << _TimeStep << ", _Rank : " << _Rank);
-  if ( _TimeStep != -1 )
-  {
-    if ( _TimeStep == -2 ) {
-      aScript << "\t" << _Name << ".SetTimeStepRankLast()\n";
-    }
-    else
-    {
-      if ( _TimeStep != -1 )
-      {
-        if ( _Rank == -1 )
-        {
-          aScript << "\t" << _Name << ".SetTimeStep( " << _TimeStep << " )\n";
-        }
-        else
-        {
-          aScript << "\t" << _Name << ".SetTimeStepRank( " << _TimeStep << ", " << _Rank << " )\n";
-        }
-      }
-    }
-  }
-// Les instants d'interpolation
-  MESSAGE (". instants d'interpolation ");
-  std::list<std::string>::const_iterator it = _ListFieldInterpTSR.begin() ;
-  while(it != _ListFieldInterpTSR.end())
-  {
-    std::string FieldName = std::string((*it)) ;
-//     MESSAGE ("... FieldName = "<< FieldName);
-    (*it++);
-    std::string TimeStepstr = std::string((*it)) ;
-//     MESSAGE ("... TimeStepstr = "<< TimeStepstr);
-    (*it++);
-    std::string Rankstr = std::string((*it)) ;
-//     MESSAGE ("... Rankstr = "<< Rankstr);
-    (*it++);
-    aScript << "\t" << _Name << ".SetFieldInterpTimeStepRank( \"" << FieldName << "\"" ;
-    aScript << ", " << TimeStepstr ;
-    aScript << ", " << Rankstr << " )\n" ;
-  }
-
-// Compute
-  MESSAGE (". Compute ");
-  if ( _Etat == 2 ) { aScript << "\tcodret = "  <<_Name << ".Compute(1, 1)\n"; }
-  else              { aScript << "\t#codret = " <<_Name << ".Compute(1, 1)\n"; }
-//   MESSAGE (". Fin de l ecriture de l iteration " << _Name );
-
-  return aScript.str();
 }
 //=============================================================================
 //=============================================================================

@@ -3030,6 +3030,10 @@ Check algorithm documentation for supported geometry</translation>
         <translation>None</translation>
     </message>
     <message>
+        <source>ADAPT_WITH_HOMARD</source>
+        <translation>Adaptation with HOMARD</translation>
+    </message>
+    <message>
         <source>ADAPT_PREF_MG_ADAPT</source>
         <translation>Adaptation with MG-Adapt</translation>
     </message>

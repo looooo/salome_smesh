@@ -86,13 +86,16 @@
 
 namespace
 {
-  enum { MANUAL_MODE = 0, SEARCH_MODE }; // how a node to move is specified
+  enum { MANUAL_MODE = 0, SEARCH_MODE, INTERACTIVE_MODE };
 }
 
+//=======================================================================
 /*!
  * \brief Dialog to publish a sub-shape of the mesh main shape
  *        by selecting mesh elements
  */
+//=======================================================================
+
 SMESHGUI_MakeNodeAtPointDlg::SMESHGUI_MakeNodeAtPointDlg()
   : SMESHGUI_Dialog( 0, false, true )
 {
@@ -112,6 +115,7 @@ SMESHGUI_MakeNodeAtPointDlg::SMESHGUI_MakeNodeAtPointDlg()
 // function : createMainFrame()
 // purpose  : Create frame containing dialog's input fields
 //=======================================================================
+
 QWidget* SMESHGUI_MakeNodeAtPointDlg::createMainFrame (QWidget* theParent)
 {
   QWidget* aFrame = new QWidget(theParent);
@@ -119,6 +123,7 @@ QWidget* SMESHGUI_MakeNodeAtPointDlg::createMainFrame (QWidget* theParent)
   SUIT_ResourceMgr* rm = SMESH::GetResourceMgr( SMESHGUI::GetSMESHGUI() );
   QPixmap iconMoveNode        (rm->loadPixmap("SMESH", tr("ICON_DLG_MOVE_NODE")));
   QPixmap iconMoveWithoutNode (rm->loadPixmap("SMESH", tr("ICON_DLG_MOVE_WITHOUT_NODE")));
+  QPixmap iconMoveInteractive (rm->loadPixmap("SMESH", tr("ICON_DLG_MOVE_NODE_INTERACTIVE")));
   QPixmap iconSelect          (rm->loadPixmap("SMESH", tr("ICON_SELECT")));
 
   // constructor
@@ -129,16 +134,20 @@ QWidget* SMESHGUI_MakeNodeAtPointDlg::createMainFrame (QWidget* theParent)
   aPixGrpLayout->setMargin(MARGIN);
   aPixGrpLayout->setSpacing(SPACING);
 
-  myRButNodeToMove = new QRadioButton(aPixGrp);
+  myRButNodeToMove      = new QRadioButton(aPixGrp);
   myRButMoveWithoutNode = new QRadioButton(aPixGrp);
+  myRButMoveInteractive = new QRadioButton(aPixGrp);
   myRButNodeToMove->setIcon(iconMoveNode);
   myRButMoveWithoutNode->setIcon(iconMoveWithoutNode);
+  myRButMoveInteractive->setIcon(iconMoveInteractive);
   myRButNodeToMove->setChecked(true);
 
   aPixGrpLayout->addWidget(myRButNodeToMove);
   aPixGrpLayout->addWidget(myRButMoveWithoutNode);
-  myButtonGroup->addButton(myRButNodeToMove, 0);
+  aPixGrpLayout->addWidget(myRButMoveInteractive);
+  myButtonGroup->addButton(myRButNodeToMove,      0);
   myButtonGroup->addButton(myRButMoveWithoutNode, 1);
+  myButtonGroup->addButton(myRButMoveInteractive, 2);
 
   // Node to move
 
@@ -302,11 +311,15 @@ void SMESHGUI_MakeNodeAtPointDlg::ButtonToggled (bool on)
   * \param int - number of the button
  */
 //================================================================================
+
 void SMESHGUI_MakeNodeAtPointDlg::ConstructorsClicked (int constructorId)
 {
   switch (constructorId) {
-  case 0:
+  case MANUAL_MODE:
+  case INTERACTIVE_MODE:
     {
+      myUpdateBtn->setVisible( constructorId == MANUAL_MODE );
+      myDestinationGrp->setTitle( tr( constructorId == MANUAL_MODE ? "DESTINATION" : "DESTINATION_BY_MOUSE"));
       myDestDXLabel->show();
       myDestDYLabel->show();
       myDestDZLabel->show();
@@ -319,7 +332,7 @@ void SMESHGUI_MakeNodeAtPointDlg::ConstructorsClicked (int constructorId)
       if (!myNodeToMoveGrp->isVisible()) myNodeToMoveGrp->show();
       break;
     }
-  case 1:
+  case SEARCH_MODE:
     {
       myId->setText("");
       myCurrentX->SetValue(0);
@@ -336,6 +349,7 @@ void SMESHGUI_MakeNodeAtPointDlg::ConstructorsClicked (int constructorId)
       break;
     }
   }
+
   QApplication::instance()->processEvents();
   myMainFrame->hide();
   myMainFrame->show();
@@ -349,8 +363,9 @@ void SMESHGUI_MakeNodeAtPointDlg::ConstructorsClicked (int constructorId)
 */
 //================================================================================
 
-SMESHGUI_MakeNodeAtPointOp::SMESHGUI_MakeNodeAtPointOp()
+SMESHGUI_MakeNodeAtPointOp::SMESHGUI_MakeNodeAtPointOp(int defaultConstructor)
 {
+  myDefaultConstructor = defaultConstructor;
   mySimulation = 0;
   mySMESHGUI = 0;
   myDlg = new SMESHGUI_MakeNodeAtPointDlg;
@@ -378,12 +393,24 @@ SMESHGUI_MakeNodeAtPointOp::SMESHGUI_MakeNodeAtPointOp()
   connect(myDlg->myUpdateBtn, SIGNAL (clicked()), this, SLOT(onUpdateDestination()));
 }
 
+//================================================================================
+/*!
+ * \brief SLOT. Update preview upon [Update destination] clicked
+ */
+//================================================================================
+
 void SMESHGUI_MakeNodeAtPointOp::onUpdateDestination()
 {
   myUpdateDestination = true;
   redisplayPreview();
   myUpdateDestination = false;
 }
+
+//================================================================================
+/*!
+ * \brief SLOT. Update preview upon Destination coordinates change
+ */
+//================================================================================
 
 void SMESHGUI_MakeNodeAtPointOp::onDestCoordChanged()
 {
@@ -396,6 +423,7 @@ void SMESHGUI_MakeNodeAtPointOp::onDestCoordChanged()
 // function : startOperation()
 // purpose  : Init dialog fields, connect signals and slots, show dialog
 //=======================================================================
+
 void SMESHGUI_MakeNodeAtPointOp::startOperation()
 {
   myNoPreview = false;
@@ -442,6 +470,8 @@ void SMESHGUI_MakeNodeAtPointOp::startOperation()
   myDlg->myDestDZ->setReadOnly(true);
   myDlg->myRButNodeToMove->setChecked(true);
 
+  if ( myDefaultConstructor == INTERACTIVE_MODE )
+    myDlg->myButtonGroup->button( INTERACTIVE_MODE )->setChecked(true);
   myDlg->ConstructorsClicked( GetConstructorId() );
 
   myDlg->show();
@@ -453,6 +483,7 @@ void SMESHGUI_MakeNodeAtPointOp::startOperation()
 // function : GetConstructorId()
 // purpose  :
 //=================================================================================
+
 int SMESHGUI_MakeNodeAtPointOp::GetConstructorId()
 {
   return myDlg->myButtonGroup->checkedId();
@@ -828,6 +859,7 @@ void SMESHGUI_MakeNodeAtPointOp::redisplayPreview()
  * \brief SLOT called when the viewer opened
  */
 //=================================================================================
+
 void SMESHGUI_MakeNodeAtPointOp::onOpenView()
 {
   if ( mySimulation ) {
@@ -844,6 +876,7 @@ void SMESHGUI_MakeNodeAtPointOp::onOpenView()
  * \brief SLOT called when the viewer closed
  */
 //=================================================================================
+
 void SMESHGUI_MakeNodeAtPointOp::onCloseView()
 {
   delete mySimulation;

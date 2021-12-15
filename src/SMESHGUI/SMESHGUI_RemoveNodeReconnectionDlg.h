@@ -20,14 +20,11 @@
 // See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 //
 
-// File   : SMESHGUI_MakeNodeAtPointDlg.h
+// File   : SMESHGUI_RemoveNodeReconnectionDlg.h
 // Author : Edward AGAPOV, Open CASCADE S.A.S.
 //
-#ifndef SMESHGUI_MAKENODEATPOINTDLG_H
-#define SMESHGUI_MAKENODEATPOINTDLG_H
-
-// SMESH includes
-#include "SMESH_SMESHGUI.hxx"
+#ifndef __SMESHGUI_RemoveNodeReconnection_HXX__
+#define __SMESHGUI_RemoveNodeReconnection_HXX__
 
 #include "SMESHGUI_Dialog.h"
 #include "SMESHGUI_SelectionOp.h"
@@ -40,18 +37,18 @@ class QPushButton;
 class QRadioButton;
 class SMESHGUI_SpinBox;
 class SMESHGUI_MeshEditPreview;
-class SMESHGUI_MakeNodeAtPointDlg;
+class SMESHGUI_RemoveNodeReconnectionDlg;
 
 /*!
- * \brief Operation to make a mesh pass through a point
+ * \brief Remove a node with elements re-connection
  */
-class SMESHGUI_EXPORT SMESHGUI_MakeNodeAtPointOp: public SMESHGUI_SelectionOp
+class SMESHGUI_EXPORT SMESHGUI_RemoveNodeReconnectionOp: public SMESHGUI_SelectionOp
 {
   Q_OBJECT
 
 public:
-  SMESHGUI_MakeNodeAtPointOp(int defaultConstructor = 0);
-  virtual ~SMESHGUI_MakeNodeAtPointOp();
+  SMESHGUI_RemoveNodeReconnectionOp();
+  virtual ~SMESHGUI_RemoveNodeReconnectionOp();
 
   virtual LightApp_Dialog*       dlg() const;  
 
@@ -71,73 +68,43 @@ private slots:
   void                           onSelectionDone();
   void                           redisplayPreview();
   void                           onTextChange( const QString& );
-  void                           onUpdateDestination();
-  void                           onDestCoordChanged();
   void                           onOpenView();
   void                           onCloseView();
 
 private:
-  int                           GetConstructorId();
 
-  int                           myDefaultConstructor;
-  SMESHGUI_MakeNodeAtPointDlg*  myDlg;
+  SMESHGUI_RemoveNodeReconnectionDlg*  myDlg;
 
   SUIT_SelectionFilter*         myFilter;
   SMESHGUI*                     mySMESHGUI;
   SMESHGUI_MeshEditPreview*     mySimulation;
   SMESH_Actor*                  myMeshActor;
   bool                          myNoPreview;
-  bool                          myUpdateDestination;
-  bool                          myDestCoordChanged;
 };
 
 /*!
  * \brief Dialog to make a mesh pass through a point
  */
 
-class SMESHGUI_EXPORT SMESHGUI_MakeNodeAtPointDlg : public SMESHGUI_Dialog
+class SMESHGUI_EXPORT SMESHGUI_RemoveNodeReconnectionDlg : public SMESHGUI_Dialog
 {
   Q_OBJECT
 
 public:
-  SMESHGUI_MakeNodeAtPointDlg();
+  SMESHGUI_RemoveNodeReconnectionDlg();
 
 private:
   QWidget*                      createMainFrame( QWidget* );
 
   QWidget*                      myMainFrame;
-
-  QButtonGroup*                 myButtonGroup;
-  QRadioButton*                 myRButNodeToMove;
-  QRadioButton*                 myRButMoveWithoutNode;
-  QRadioButton*                 myRButMoveInteractive;
-  QPushButton*                  myDestBtn;
-  QPushButton*                  myUpdateBtn;
-  QGroupBox*                    myDestinationGrp;
   QGroupBox*                    myNodeToMoveGrp;
-  QPushButton*                  myIdBtn;
   QLineEdit*                    myId;
-  SMESHGUI_SpinBox*             myCurrentX;
-  SMESHGUI_SpinBox*             myCurrentY;
-  SMESHGUI_SpinBox*             myCurrentZ;
-  SMESHGUI_SpinBox*             myDestinationX;
-  SMESHGUI_SpinBox*             myDestinationY;
-  SMESHGUI_SpinBox*             myDestinationZ;
-  QLabel*                       myDestDXLabel;
-  QLabel*                       myDestDYLabel;
-  QLabel*                       myDestDZLabel;
-  SMESHGUI_SpinBox*             myDestDX;
-  SMESHGUI_SpinBox*             myDestDY;
-  SMESHGUI_SpinBox*             myDestDZ;
   QCheckBox*                    myPreviewChkBox;
 
   QString                       myHelpFileName;
 
-  friend class SMESHGUI_MakeNodeAtPointOp;
+  friend class SMESHGUI_RemoveNodeReconnectionOp;
 
-private slots:
-  void                          ButtonToggled( bool );
-  void                          ConstructorsClicked( int );
 };
 
-#endif // SMESHGUI_MAKENODEATPOINTDLG_H
+#endif // SMESHGUI_RemoveNodeReconnectionDLG_H

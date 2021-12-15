@@ -150,6 +150,9 @@ SET(_moc_HEADERS
   SMESHGUI_PreVisualObj.h
   SMESHGUI_MG_ADAPTDRIVER.h
   SMESHGUI_MgAdaptDlg.h
+  SMESHGUI_RemoveNodeReconnectionDlg.h
+  SMESHGUI_AddNodeOnSegmentDlg.h
+  SMESHGUI_AddNodeOnFaceDlg.h
 )
 
 # header files / no moc processing
@@ -267,6 +270,9 @@ SET(_other_SOURCES
   SMESHGUI_IdPreview.cxx
   SMESHGUI_MG_ADAPTDRIVER.cxx
   SMESHGUI_MgAdaptDlg.cxx
+  SMESHGUI_RemoveNodeReconnectionDlg.cxx
+  SMESHGUI_AddNodeOnSegmentDlg.cxx
+  SMESHGUI_AddNodeOnFaceDlg.cxx
 )
 
 # sources / to compile

@@ -32,6 +32,8 @@
 #include "SMESHGUI.h"
 #include "SMESHGUI_Add0DElemsOnAllNodesDlg.h"
 #include "SMESHGUI_AddMeshElementDlg.h"
+#include "SMESHGUI_AddNodeOnSegmentDlg.h"
+#include "SMESHGUI_AddNodeOnFaceDlg.h"
 #include "SMESHGUI_AddQuadraticElementDlg.h"
 #include "SMESHGUI_BuildCompoundDlg.h"
 #include "SMESHGUI_ClippingDlg.h"
@@ -78,6 +80,7 @@
 #include "SMESHGUI_Preferences_ScalarBarDlg.h"
 #include "SMESHGUI_PropertiesDlg.h"
 #include "SMESHGUI_RemoveElementsDlg.h"
+#include "SMESHGUI_RemoveNodeReconnectionDlg.h"
 #include "SMESHGUI_RemoveNodesDlg.h"
 #include "SMESHGUI_RenumberingDlg.h"
 #include "SMESHGUI_ReorientFacesDlg.h"
@@ -3531,6 +3534,14 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
       }
       break;
     }
+  case SMESHOp::OpRemoveNodeWithReconn:
+    {
+      if(isStudyLocked()) break;
+      if ( warnOnGeomModif() )
+        break; // action forbidden as geometry modified
+      startOperation( SMESHOp::OpRemoveNodeWithReconn );
+      break;
+    }
   case SMESHOp::OpRemoveElements:                                    // REMOVES ELEMENTS
     {
       if(isStudyLocked()) break;
@@ -3787,6 +3798,24 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
     if ( warnOnGeomModif() )
       break; // action forbidden as geometry modified
     startOperation( SMESHOp::OpMoveNode );
+    break;
+
+  case SMESHOp::OpMoveNodeInteractive:
+    if ( warnOnGeomModif() )
+      break; // action forbidden as geometry modified
+    startOperation( SMESHOp::OpMoveNodeInteractive );
+    break;
+
+  case SMESHOp::OpSplitEdgeInteract:
+    if ( warnOnGeomModif() )
+      break; // action forbidden as geometry modified
+    startOperation( SMESHOp::OpSplitEdgeInteract );
+    break;
+
+  case SMESHOp::OpSplitFaceInteract:
+    if ( warnOnGeomModif() )
+      break; // action forbidden as geometry modified
+    startOperation( SMESHOp::OpSplitFaceInteract );
     break;
 
   case SMESHOp::OpDuplicateNodes:
@@ -4196,6 +4225,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   createSMESHAction( SMESHOp::OpRemoveNodes,       "REMOVE_NODES",          "ICON_DLG_REM_NODE" );
   createSMESHAction( SMESHOp::OpRemoveElements,    "REMOVE_ELEMENTS",       "ICON_DLG_REM_ELEMENT" );
   createSMESHAction( SMESHOp::OpRemoveOrphanNodes, "REMOVE_ORPHAN_NODES",   "ICON_DLG_REM_ORPHAN_NODES" );
+  createSMESHAction( SMESHOp::OpRemoveNodeWithReconn, "REMOVE_NODE_RECON",  "ICON_REM_NODE_RECON" );
   createSMESHAction( SMESHOp::OpClearMesh,         "CLEAR_MESH",            "ICON_CLEAR_MESH" );
 
   //createSMESHAction( SMESHOp::OpRenumberingNodes,    "RENUM_NODES",     "ICON_DLG_RENUMBERING_NODES" );
@@ -4210,6 +4240,9 @@ void SMESHGUI::initialize( CAM_Application* app )
   createSMESHAction( SMESHOp::OpMergeNodes,             "MERGE",           "ICON_SMESH_MERGE_NODES" );
   createSMESHAction( SMESHOp::OpMergeElements,          "MERGE_ELEMENTS",  "ICON_DLG_MERGE_ELEMENTS" );
   createSMESHAction( SMESHOp::OpMoveNode,               "MESH_THROU_POINT","ICON_DLG_MOVE_NODE" );
+  createSMESHAction( SMESHOp::OpMoveNodeInteractive,    "MOVE_NODE_INTRCT","ICON_DLG_MOVE_NODE_INTERACTIVE" );
+  createSMESHAction( SMESHOp::OpSplitEdgeInteract,  "SPLIT_DIAG_INTRC","ICON_SPLIT_DIAG_INTERACTIVE" );
+  createSMESHAction( SMESHOp::OpSplitFaceInteract,      "SPLIT_FACE_INTRC","ICON_SPLIT_FACE_INTERACTIVE" );
   createSMESHAction( SMESHOp::OpDuplicateNodes,         "DUPLICATE_NODES", "ICON_SMESH_DUPLICATE_NODES" );
   createSMESHAction( SMESHOp::OpDiagonalInversion,      "INV",             "ICON_DLG_MESH_DIAGONAL" );
   createSMESHAction( SMESHOp::OpUnionOfTwoTriangle,     "UNION2",          "ICON_UNION2TRI" );
@@ -4444,13 +4477,14 @@ void SMESHGUI::initialize( CAM_Application* app )
   createMenu( SMESHOp::OpQuadraticHexahedron,    addId, -1 );
   createMenu( SMESHOp::OpTriQuadraticHexahedron, addId, -1 );
 
-  createMenu( SMESHOp::OpRemoveNodes,       removeId, -1 );
-  createMenu( SMESHOp::OpRemoveElements,    removeId, -1 );
-  createMenu( SMESHOp::OpRemoveOrphanNodes, removeId, -1 );
-  createMenu( separator(),                  removeId, -1 );
-  createMenu( SMESHOp::OpDeleteGroup,       removeId, -1 );
-  createMenu( separator(),                  removeId, -1 );
-  createMenu( SMESHOp::OpClearMesh,         removeId, -1 );
+  createMenu( SMESHOp::OpRemoveNodes,          removeId, -1 );
+  createMenu( SMESHOp::OpRemoveElements,       removeId, -1 );
+  createMenu( SMESHOp::OpRemoveOrphanNodes,    removeId, -1 );
+  createMenu( SMESHOp::OpRemoveNodeWithReconn, removeId, -1 );
+  createMenu( separator(),                     removeId, -1 );
+  createMenu( SMESHOp::OpDeleteGroup,          removeId, -1 );
+  createMenu( separator(),                     removeId, -1 );
+  createMenu( SMESHOp::OpClearMesh,            removeId, -1 );
 
   //createMenu( SMESHOp::OpRenumberingNodes,    renumId, -1 );
   //createMenu( SMESHOp::OpRenumberingElements, renumId, -1 );
@@ -4479,6 +4513,8 @@ void SMESHGUI::initialize( CAM_Application* app )
   createMenu( SMESHOp::OpCuttingOfQuadrangles,   modifyId, -1 );
   createMenu( SMESHOp::OpSplitVolumes,           modifyId, -1 );
   createMenu( SMESHOp::OpSplitBiQuadratic,       modifyId, -1 );
+  createMenu( SMESHOp::OpSplitEdgeInteract,  modifyId, -1 );
+  createMenu( SMESHOp::OpSplitFaceInteract,      modifyId, -1 );
   createMenu( SMESHOp::OpSmoothing,              modifyId, -1 );
   createMenu( SMESHOp::OpPatternMapping,         modifyId, -1 );
 
@@ -4630,6 +4666,12 @@ void SMESHGUI::initialize( CAM_Application* app )
   createTool( SMESHOp::OpSplitBiQuadratic,       modifyTb );
   createTool( SMESHOp::OpSmoothing,              modifyTb );
   createTool( SMESHOp::OpPatternMapping,         modifyTb );
+
+  int interactTb = createTool( tr( "TB_INTERACT" ), QString( "SMESHInteractiveToolbar" ) ) ;
+  createTool( SMESHOp::OpMoveNodeInteractive,   interactTb );
+  createTool( SMESHOp::OpRemoveNodeWithReconn,  interactTb );
+  createTool( SMESHOp::OpSplitEdgeInteract, interactTb );
+  createTool( SMESHOp::OpSplitFaceInteract,     interactTb );
 
   // Adaptation - begin
 #ifndef DISABLE_MG_ADAPT
@@ -5989,6 +6031,18 @@ LightApp_Operation* SMESHGUI::createOperation( const int id ) const
     break;
   case SMESHOp::OpMoveNode: // Make mesh pass through point
     op = new SMESHGUI_MakeNodeAtPointOp();
+    break;
+  case SMESHOp::OpMoveNodeInteractive: // Make mesh pass through point / by mouse
+    op = new SMESHGUI_MakeNodeAtPointOp( 2 );
+    break;
+  case SMESHOp::OpRemoveNodeWithReconn:
+    op = new SMESHGUI_RemoveNodeReconnectionOp();
+    break;
+  case SMESHOp::OpSplitEdgeInteract:
+    op = new SMESHGUI_AddNodeOnSegmentOp();
+    break;
+  case SMESHOp::OpSplitFaceInteract:
+    op = new SMESHGUI_AddNodeOnFaceOp();
     break;
   case SMESHOp::OpElem0DOnElemNodes: // Create 0D elements on all nodes
     op = new SMESHGUI_Add0DElemsOnAllNodesOp();

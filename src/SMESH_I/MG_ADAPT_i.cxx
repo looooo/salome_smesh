@@ -18,6 +18,7 @@
 //
 
 #include "MG_ADAPT_i.hxx"
+#include "SMESH_Homard_i.hxx"
 
 #include "MG_ADAPT.hxx"
 #include "SMESH_File.hxx"
@@ -114,7 +115,8 @@ SMESH::MG_ADAPT_ptr SMESH_Gen_i::CreateAdaptationHypothesis()
   return SMESH::MG_ADAPT_ptr();
 #endif
 }
-SMESH::MG_ADAPT_OBJECT_ptr SMESH_Gen_i::Adaptation( const char* adaptationType)
+//SMESH::MG_ADAPT_OBJECT_ptr SMESH_Gen_i::Adaptation( const char* adaptationType)
+SALOME::GenericObj_ptr SMESH_Gen_i::Adaptation( const char* adaptationType)
 {
 #ifndef DISABLE_MG_ADAPT
   if (!strcmp(adaptationType, "MG_Adapt"))
@@ -124,6 +126,12 @@ SMESH::MG_ADAPT_OBJECT_ptr SMESH_Gen_i::Adaptation( const char* adaptationType)
     return anObj._retn();
   }
 #endif
+  if (!strcmp(adaptationType, "Uniform"))
+  {
+    SMESHHOMARD_I::HOMARD_Gen_i* homard_adapt = new SMESHHOMARD_I::HOMARD_Gen_i();
+    SMESHHOMARD::HOMARD_Gen_var anObj = homard_adapt->_this();
+    return anObj._retn();
+  }
   return SMESH::MG_ADAPT_OBJECT_ptr();
 }
 //=============================================================================

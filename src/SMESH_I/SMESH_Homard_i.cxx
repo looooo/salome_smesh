@@ -1905,7 +1905,7 @@ CORBA::Long HOMARD_Gen_i::ComputeAdap(SMESHHOMARD::HOMARD_Cas_var myCase,
     fclose(file);
     // CleanOption = 0 : report an error if output mesh file exists
     // CleanOption = 1 : destruction du répertoire d'execution
-    int CleanOption = 0;
+    int CleanOption = 1;
     if (CleanOption == 0) {
       SALOME::ExceptionStruct es;
       es.type = SALOME::BAD_PARAM;
@@ -2541,13 +2541,22 @@ void HOMARD_Gen_i::PublishResultInSmesh(const char* NomFich, CORBA::Long Option)
   //
   //SMESH::SMESH_Gen_var aSmeshEngine = this->retrieveSMESHInst();
   SMESH_Gen_i* aSmeshEngine = SMESH_Gen_i::GetSMESHGen();
+  MESSAGE(" *** aaajfa *** !!! 1");
   //
   //ASSERT(!CORBA::is_nil(aSmeshEngine));
   aSmeshEngine->UpdateStudy();
   SMESH::DriverMED_ReadStatus theStatus;
 
   // On met a jour les attributs AttributeExternalFileDef et AttributePixMap
+  MESSAGE(" *** aaajfa *** !!! 2");
   SMESH::mesh_array* mesMaillages = aSmeshEngine->CreateMeshesFromMED(NomFich, theStatus);
+  MESSAGE(" *** aaajfa *** !!! 3");
+  if (CORBA::is_nil(aSmeshSO)) {
+    aSmeshSO = SMESH_Gen_i::GetSMESHGen()->getStudyServant()->FindComponent("SMESH");
+    if (CORBA::is_nil(aSmeshSO)) return;
+  }
+  MESSAGE(" *** aaajfa *** !!! 4");
+
   for (int i = 0; i < (int)mesMaillages->length(); i++) {
     MESSAGE(". Mise a jour des attributs du maillage");
     SMESH::SMESH_Mesh_var monMaillage = (*mesMaillages)[i];
@@ -2569,6 +2578,7 @@ void HOMARD_Gen_i::PublishResultInSmesh(const char* NomFich, CORBA::Long Option)
     else               { icone = "mesh_tree_mesh.png"; }
     anAttr2->SetPixMap(icone);
   }
+  MESSAGE(" *** aaajfa *** !!! 5");
 }
 
 //=============================================================================

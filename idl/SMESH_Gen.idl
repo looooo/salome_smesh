@@ -587,7 +587,8 @@ module SMESH
 
     MG_ADAPT CreateMG_ADAPT();
     SMESHHOMARD::HOMARD_Gen CreateHOMARD_ADAPT();
-    MG_ADAPT_OBJECT Adaptation(in string adaptType);
+    //MG_ADAPT_OBJECT Adaptation(in string adaptType);
+    SALOME::GenericObj Adaptation(in string adaptType);
     MG_ADAPT CreateAdaptationHypothesis();
   };
 

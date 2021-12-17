@@ -99,7 +99,6 @@ SMESHGUI_HomardAdaptDlg::SMESHGUI_HomardAdaptDlg(SMESHHOMARD::HOMARD_Gen_ptr myH
   myAdvOpt->removeLogOnSuccessCheck   ->setText (tr( "REMOVE_LOG_ON_SUCCESS" ));
   myAdvOpt->keepWorkingFilesCheck     ->setText (tr( "KEEP_WORKING_FILES" ));
 
-  // disable // TODO???
   myAdvOpt->logInFileCheck->setChecked(true);
   myAdvOpt->removeLogOnSuccessCheck->setChecked(false);
 
@@ -151,7 +150,6 @@ SMESHGUI_HomardAdaptDlg::SMESHGUI_HomardAdaptDlg(SMESHHOMARD::HOMARD_Gen_ptr myH
   l->addLayout( btnLayout );
 
   // dialog name and size
-  /*
   resize(600, 1150);
   QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
   sizePolicy.setHorizontalStretch(0);
@@ -160,9 +158,8 @@ SMESHGUI_HomardAdaptDlg::SMESHGUI_HomardAdaptDlg(SMESHHOMARD::HOMARD_Gen_ptr myH
   setSizePolicy(sizePolicy);
   setMinimumSize(QSize(600, 320));
   setSizeIncrement(QSize(1, 1));
-  setBaseSize(QSize(600, 320));
+  setBaseSize(QSize(600, 600));
   setAutoFillBackground(true);
-  */
 
   SetBoundaryNo();
   InitConnect();
@@ -216,7 +213,6 @@ void SMESHGUI_HomardAdaptDlg::InitConnect()
   connect( buttonHelp,     SIGNAL(pressed()), this, SLOT(PushOnHelp()));
 
   connect(myArgs, SIGNAL(updateSelection()), this, SLOT(updateSelection()));
-  connect(myArgs, SIGNAL(toExportMED(const char*)), this, SLOT(exportMED(const char*)));
 }
 
 //=================================================================================
@@ -383,8 +379,6 @@ bool SMESHGUI_HomardAdaptDlg::PushOnApply()
   if (!CheckCase(true))
     return false;
 
-  MESSAGE("PushOnApply: *** aaajfa *** 12");
-
   // Create boundaries
   if (myArgs->RBBoundaryCAO->isChecked()) {
     QString monBoundaryCAOName = myArgs->CBBoundaryCAO->currentText();
@@ -415,7 +409,6 @@ bool SMESHGUI_HomardAdaptDlg::PushOnApply()
       }
     }
   }
-  MESSAGE("PushOnApply: *** aaajfa *** 13");
 
   // Output MED and MESH parameters
   myHomardGen->SetKeepMedOUT(myArgs->myOutMedFileChk->isChecked());
@@ -475,7 +468,6 @@ bool SMESHGUI_HomardAdaptDlg::PushOnApply()
     MESSAGE("myHomardGen->SetLogFile(" << anOutLog.toStdString().c_str() << ")");
     myHomardGen->SetLogFile(anOutLog.toStdString().c_str());
   }
-  MESSAGE("PushOnApply: *** aaajfa *** 14");
 
   // Compute and publish
   bool isSuccess = true;
@@ -487,7 +479,6 @@ bool SMESHGUI_HomardAdaptDlg::PushOnApply()
                            QObject::tr(CORBA::string_dup(S_ex.details.text)) );
     isSuccess = false;
   }
-  MESSAGE("PushOnApply: *** aaajfa *** 15");
 
   // Update Object Browser
   if (isSuccess) {
@@ -507,7 +498,6 @@ bool SMESHGUI_HomardAdaptDlg::PushOnApply()
   myAdvOpt->workingDirectoryLineEdit->setReadOnly(false);
   myAdvOpt->workingDirectoryPushButton->setEnabled(true);
 
-  MESSAGE("PushOnApply: *** aaajfa *** THE END");
   return isSuccess;
 }
 
@@ -1051,7 +1041,7 @@ void SMESHGUI_HomardAdaptArguments::setupUi(QWidget *CreateCase)
   argumentsLayout->setColumnStretch( 1, 5 );
   argumentsLayout->setRowStretch( 4, 5 );
 
-  mySelectInMedFileButton->setText(QString());
+  //mySelectInMedFileButton->setText(QString());
   CBBoundaryD->setText(QApplication::translate("CreateCase", "Discrete boundary", nullptr));
   CBBoundaryA->setText(QApplication::translate("CreateCase", "Analytical boundary", nullptr));
   PBBoundaryCAOEdit->setText(QApplication::translate("CreateCase", "Edit", nullptr));

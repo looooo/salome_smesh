@@ -342,6 +342,7 @@ private:
   // Input data type
   bool _CaseOnMedFile;
   SMESH::SMESH_Mesh_var _SmeshMesh;
+  std::string _TmpMeshFile;
 };
 
 SMESH_I_EXPORT std::vector<double>   GetBoundingBoxInMedFile(const char * aFile);

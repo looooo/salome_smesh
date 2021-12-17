@@ -1182,20 +1182,19 @@ HomardDriver::HomardDriver(const std::string siter, const std::string siterp1):
   _Texte( "" ), _bLu( false )
 {
   MESSAGE("siter = "<<siter<<", siterp1 = "<<siterp1);
-// Le repertoire ou se trouve l'executable HOMARD
+  // Le repertoire ou se trouve l'executable HOMARD
   std::string dir ;
-  if ( getenv("HOMARD_REP_EXE_PRIVATE") != NULL ) { dir = getenv("HOMARD_REP_EXE_PRIVATE") ; }
-  else                                            { dir = getenv("HOMARD_REP_EXE") ; }
+  // TODO?
+  if ( getenv("HOMARD_ROOT_DIR") != NULL ) { dir = getenv("HOMARD_ROOT_DIR") ; }
+  dir += "/bin/salome";
   MESSAGE("dir ="<<dir);
-// L'executable HOMARD
-  std::string executable ;
-  if ( getenv("HOMARD_EXE_PRIVATE") != NULL ) { executable = getenv("HOMARD_EXE_PRIVATE") ; }
-  else                                        { executable = getenv("HOMARD_EXE") ; }
+  // L'executable HOMARD
+  std::string executable = "homard";
   MESSAGE("executable ="<<executable);
-// Memorisation du nom complet de l'executable HOMARD
+  // Memorisation du nom complet de l'executable HOMARD
   _HOMARD_Exec = dir + "/" + executable ;
   MESSAGE("==> _HOMARD_Exec ="<<_HOMARD_Exec) ;
-//
+  //
   _siter = siter ;
   _siterp1 = siterp1 ;
 }

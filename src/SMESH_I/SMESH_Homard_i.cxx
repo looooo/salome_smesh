@@ -20,9 +20,12 @@
 #include "SMESH_Homard_i.hxx"
 #include "SMESH_Homard.hxx"
 
-#include <SMESH_Gen_i.hxx>
+#include "SMESH_Gen_i.hxx"
 #include "SMESH_PythonDump.hxx"
 
+#include "SMESH_File.hxx"
+
+// TODO?
 //#include "FrontTrack.hxx"
 
 #include "utilities.h"
@@ -933,7 +936,9 @@ HOMARD_Gen_i::HOMARD_Gen_i() : SALOME::GenericObj_i(SMESH_Gen_i::GetPOA()),
                                _MeshNameOUT(""),
                                _MeshFileOUT(""),
                                _LogFile(""),
-                               _CaseOnMedFile(true)
+                               _CaseOnMedFile(true),
+                               _SmeshMesh(SMESH::SMESH_Mesh::_nil()),
+                               _TmpMeshFile("")
 {
   MESSAGE("constructor de HOMARD_Gen_i");
   myHomard = new SMESHHOMARDImpl::HOMARD_Gen;
@@ -946,6 +951,9 @@ HOMARD_Gen_i::HOMARD_Gen_i() : SALOME::GenericObj_i(SMESH_Gen_i::GetPOA()),
 //=============================================================================
 HOMARD_Gen_i::~HOMARD_Gen_i()
 {
+  if (!myCase->_is_nil()) {
+    CleanCase();
+  }
 }
 
 //=============================================================================
@@ -1202,9 +1210,16 @@ SMESHHOMARD::HOMARD_Cas_ptr HOMARD_Gen_i::CreateCaseOnMesh (const char* MeshName
   MESSAGE("CreateCaseOnMesh : smeshMesh is not nil");
 
   // A.3. Write mesh object in a temporary file in the working directory
-  std::string aTmpMeshFile (theWorkingDir);
-  aTmpMeshFile += std::string("/") + std::string(MeshName) + "_saved_from_SMESH.med"; // TODO: unique
-  const char* MeshFile = aTmpMeshFile.c_str();
+  std::string aTmpMeshFile = theWorkingDir;
+  aTmpMeshFile = theWorkingDir;
+  aTmpMeshFile += std::string("/") + std::string(MeshName) + "_saved_from_SMESH";
+  _TmpMeshFile = aTmpMeshFile + ".med";
+  SMESH_File aFile (_TmpMeshFile, false);
+  for (int ii = 1; aFile.exists(); ii++) {
+    _TmpMeshFile = aTmpMeshFile + std::string("_") + std::to_string(ii) + ".med";
+    aFile = SMESH_File(_TmpMeshFile, false);
+  }
+  const char* MeshFile = _TmpMeshFile.c_str();
   bool toOverwrite = true;
   bool toFindOutDim = true;
 
@@ -1816,13 +1831,6 @@ CORBA::Long HOMARD_Gen_i::Compute()
     // Python Dump
     PythonDump();
 
-    // Delete log file, if required
-    MESSAGE("myIteration1->GetLogFile() = " << myIteration1->GetLogFile());
-    if (_LogInFile && _RemoveLogOnSuccess) {
-      // Remove log file on success
-      // TODO: QFile(myIteration->GetLogFile()).remove();
-    }
-
     // Clean all data
     CleanCase();
   }
@@ -1832,6 +1840,13 @@ CORBA::Long HOMARD_Gen_i::Compute()
 
 void HOMARD_Gen_i::CleanCase()
 {
+  // Delete log file, if required
+  MESSAGE("myIteration1->GetLogFile() = " << myIteration1->GetLogFile());
+  if (_LogInFile && _RemoveLogOnSuccess) {
+    // Remove log file on success
+    SMESH_File(myIteration1->GetLogFile(), false).remove();
+  }
+
   // Delete all boundaries
   std::map<std::string, SMESHHOMARD::HOMARD_Boundary_var>::const_iterator it_boundary;
   for (it_boundary  = _mesBoundarys.begin();
@@ -1848,6 +1863,13 @@ void HOMARD_Gen_i::CleanCase()
 
   // Delete case
   DeleteCase();
+
+  // Delete tmp mesh file
+  if (!_CaseOnMedFile && !_TmpMeshFile.empty()) {
+    SMESH_File aFile (_TmpMeshFile, false);
+    if (aFile.exists()) aFile.remove();
+  }
+  _SmeshMesh = SMESH::SMESH_Mesh::_nil();
 }
 
 //=============================================================================
@@ -2041,6 +2063,7 @@ CORBA::Long HOMARD_Gen_i::ComputeCAO(SMESHHOMARD::HOMARD_Cas_var myCase,
 
   // C. Lancement des projections
   MESSAGE (". Lancement des projections");
+  // TODO?
   //FrontTrack* myFrontTrack = new FrontTrack();
   //myFrontTrack->track(theInputMedFile, theOutputMedFile, theInputNodeFiles, theXaoFileName, theIsParallel);
 
@@ -2505,6 +2528,9 @@ void HOMARD_Gen_i::PublishResultInSmesh(const char* NomFich, CORBA::Long Option)
   SALOMEDS::SObject_var aSmeshSO =
     SMESH_Gen_i::GetSMESHGen()->getStudyServant()->FindComponent("SMESH");
   //
+  // TODO?
+  // Temporary suppressed depublication of mesh with the same name of file
+  /*
   if (!CORBA::is_nil(aSmeshSO)) {
     // On verifie que le fichier n est pas deja publie
     SALOMEDS::ChildIterator_var aIter =
@@ -2535,27 +2561,24 @@ void HOMARD_Gen_i::PublishResultInSmesh(const char* NomFich, CORBA::Long Option)
       }
     }
   }
+  */
 
   // On enregistre le fichier
   MESSAGE("Enregistrement du fichier");
   //
   //SMESH::SMESH_Gen_var aSmeshEngine = this->retrieveSMESHInst();
   SMESH_Gen_i* aSmeshEngine = SMESH_Gen_i::GetSMESHGen();
-  MESSAGE(" *** aaajfa *** !!! 1");
   //
   //ASSERT(!CORBA::is_nil(aSmeshEngine));
   aSmeshEngine->UpdateStudy();
   SMESH::DriverMED_ReadStatus theStatus;
 
   // On met a jour les attributs AttributeExternalFileDef et AttributePixMap
-  MESSAGE(" *** aaajfa *** !!! 2");
   SMESH::mesh_array* mesMaillages = aSmeshEngine->CreateMeshesFromMED(NomFich, theStatus);
-  MESSAGE(" *** aaajfa *** !!! 3");
   if (CORBA::is_nil(aSmeshSO)) {
     aSmeshSO = SMESH_Gen_i::GetSMESHGen()->getStudyServant()->FindComponent("SMESH");
     if (CORBA::is_nil(aSmeshSO)) return;
   }
-  MESSAGE(" *** aaajfa *** !!! 4");
 
   for (int i = 0; i < (int)mesMaillages->length(); i++) {
     MESSAGE(". Mise a jour des attributs du maillage");
@@ -2578,7 +2601,6 @@ void HOMARD_Gen_i::PublishResultInSmesh(const char* NomFich, CORBA::Long Option)
     else               { icone = "mesh_tree_mesh.png"; }
     anAttr2->SetPixMap(icone);
   }
-  MESSAGE(" *** aaajfa *** !!! 5");
 }
 
 //=============================================================================
@@ -2629,7 +2651,8 @@ void HOMARD_Gen_i::PythonDump()
 
   // SMESH_Homard
   pd << "import SMESHHOMARD\n";
-  pd << "smeshhomard = " << SMESH_Gen_i::GetSMESHGen() << ".CreateHOMARD_ADAPT()\n";
+  //pd << "smeshhomard = " << SMESH_Gen_i::GetSMESHGen() << ".CreateHOMARD_ADAPT()\n";
+  pd << "smeshhomard = " << SMESH_Gen_i::GetSMESHGen() << ".Adaptation(\"Uniform\")\n";
 
   // Boundaries
   if (_mesBoundarys.size() > 0) MESSAGE(". Creation of the boundaries");
@@ -2652,21 +2675,21 @@ void HOMARD_Gen_i::PythonDump()
   else {
     pd << "Case_1 = smeshhomard.CreateCaseOnMesh(\"" << myIteration0->GetMeshName();
     pd << "\", " << _SmeshMesh;
-    pd << ", \"" << myCase->GetDirName() << "\")\n";
+    pd << ".GetMesh(), \"" << myCase->GetDirName() << "\")\n";
   }
 
   pd << myCase->GetDumpPython();
 
   // Preferences
-  pd << "smeshhomard.SetKeepMedOUT(" << _KeepMedOUT << ")\n";
-  pd << "smeshhomard.SetPublishMeshOUT(" << _PublishMeshOUT << ")\n";
+  pd << "smeshhomard.SetKeepMedOUT(" << (_KeepMedOUT ? "True" : "False") << ")\n";
+  pd << "smeshhomard.SetPublishMeshOUT(" << (_PublishMeshOUT ? "True" : "False") << ")\n";
   pd << "smeshhomard.SetMeshNameOUT(\"" << _MeshNameOUT << "\")\n";
   pd << "smeshhomard.SetMeshFileOUT(\"" << _MeshFileOUT << "\")\n";
 
-  pd << "smeshhomard.SetKeepWorkingFiles(" << _KeepWorkingFiles << ")\n";
-  pd << "smeshhomard.SetLogInFile(" << _LogInFile << ")\n";
+  pd << "smeshhomard.SetKeepWorkingFiles(" << (_KeepWorkingFiles ? "True" : "False") << ")\n";
+  pd << "smeshhomard.SetLogInFile(" << (_LogInFile ? "True" : "False") << ")\n";
   if (_LogInFile) pd << "smeshhomard.SetLogFile(\"" << _LogFile << "\")\n";
-  pd << "smeshhomard.SetRemoveLogOnSuccess(" << _RemoveLogOnSuccess << ")\n";
+  pd << "smeshhomard.SetRemoveLogOnSuccess(" << (_RemoveLogOnSuccess ? "True" : "False") << ")\n";
   pd << "smeshhomard.SetVerboseLevel(" << _VerboseLevel << ")\n";
 
   // Compute

@@ -364,18 +364,19 @@ QString SMESH_HOMARD_QT_COMMUN::PushNomFichier(bool avertir, QString TypeFichier
   if ( TypeFichier == "med" )     { filtre = QString("Med") ; }
   else if ( TypeFichier == "py" ) { filtre = QString("Python") ; }
   else                            { filtre = TypeFichier ; }
-//
+  //
   if ( TypeFichier != "" ) { filtre += QString(" files (*.") + TypeFichier + QString(");;") ; }
-//
+  //
   filtre += QString("all (*) ") ;
-//
+  //
   // B. Selection
-  int nbSel = SMESH_HOMARD_UTILS::IObjectCount() ;
-//   MESSAGE("nbSel ="<<nbSel);
+  //int nbSel = SMESH_HOMARD_UTILS::IObjectCount() ;
+  int nbSel = 0;
+  //   MESSAGE("nbSel ="<<nbSel);
   // B.1. Rien n'est selectionne
   if ( nbSel == 0 )
   {
-//     aFile = QFileDialog::getOpenFileName(0, QObject::tr("HOM_SELECT_FILE_0"), QString(""), QString("Med files (*.med);;all (*) ") );
+    //aFile = QFileDialog::getOpenFileName(0, QObject::tr("HOM_SELECT_FILE_0"), QString(""), QString("Med files (*.med);;all (*) ") );
     aFile = QFileDialog::getOpenFileName(0, QObject::tr("HOM_SELECT_FILE_0"), QString(""), filtre );
   }
   // B.2. Un objet est selectionne

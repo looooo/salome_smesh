@@ -51,7 +51,7 @@ class MESHJOBMANAGERENGINE_EXPORT MeshJobManager_i: public virtual POA_MESHJOB::
 public:
   MeshJobManager_i(CORBA::ORB_ptr orb, PortableServer::POA_ptr poa,
                    PortableServer::ObjectId * contId,
-                   const char *instanceName, const char *interfaceName);
+                   const char *instanceName, const char *interfaceName, bool checkNS = true, bool regist = true);
   ~MeshJobManager_i();
 
   bool           configure  (const char *configId,

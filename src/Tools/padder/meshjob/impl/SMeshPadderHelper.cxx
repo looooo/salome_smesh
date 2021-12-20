@@ -46,7 +46,7 @@ Engines::EngineComponent_var BuildPadderMeshJobManagerInstance()
     //
     pman->activate();
     //
-    MeshJobManager_i *servant = new MeshJobManager_i(orb, poa, conId, "SMESH_inst_2", "SMESH");
+    MeshJobManager_i *servant = new MeshJobManager_i(orb, poa, conId, "MeshJobManager_inst_3", "MeshJobManager", false, false);
     PortableServer::ObjectId *zeId = servant->getId();
     CORBA::Object_var zeRef = poa->id_to_reference(*zeId);
     _unique_compo = Engines::EngineComponent::_narrow(zeRef);

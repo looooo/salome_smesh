@@ -65,6 +65,15 @@ using namespace std;
 
 SMESHHOMARD::HOMARD_Gen_ptr SMESH_Gen_i::CreateHOMARD_ADAPT()
 {
+  if (getenv("HOMARD_ROOT_DIR") == NULL) {
+    THROW_SALOME_CORBA_EXCEPTION("HOMARD_ROOT_DIR is not defined", SALOME::INTERNAL_ERROR);
+  }
+  else {
+    std::string homard_exec = getenv("HOMARD_ROOT_DIR");
+    homard_exec += "/bin/salome/homard";
+    if (!SMESH_File(homard_exec).exists())
+      THROW_SALOME_CORBA_EXCEPTION("HOMARD module is not built", SALOME::INTERNAL_ERROR);
+  }
   SMESHHOMARD_I::HOMARD_Gen_i* aHomardGen = new SMESHHOMARD_I::HOMARD_Gen_i();
   SMESHHOMARD::HOMARD_Gen_var anObj = aHomardGen->_this();
   return anObj._retn();
@@ -1841,10 +1850,12 @@ CORBA::Long HOMARD_Gen_i::Compute()
 void HOMARD_Gen_i::CleanCase()
 {
   // Delete log file, if required
-  MESSAGE("myIteration1->GetLogFile() = " << myIteration1->GetLogFile());
-  if (_LogInFile && _RemoveLogOnSuccess) {
-    // Remove log file on success
-    SMESH_File(myIteration1->GetLogFile(), false).remove();
+  if (!myIteration1->_is_nil()) {
+    MESSAGE("myIteration1->GetLogFile() = " << myIteration1->GetLogFile());
+    if (_LogInFile && _RemoveLogOnSuccess) {
+      // Remove log file on success
+      SMESH_File(myIteration1->GetLogFile(), false).remove();
+    }
   }
 
   // Delete all boundaries

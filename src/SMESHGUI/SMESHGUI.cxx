@@ -3023,10 +3023,19 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
         break;
       EmitSignalDeactivateDialog();
 
-      SALOME::GenericObj_wrap< SMESHHOMARD::HOMARD_Gen > homardGen =
-        GetSMESHGen()->CreateHOMARD_ADAPT();
-      SMESHGUI_HomardAdaptDlg *aDlg = new SMESHGUI_HomardAdaptDlg(homardGen);
-      aDlg->show();
+      SALOME::GenericObj_wrap< SMESHHOMARD::HOMARD_Gen > homardGen;
+      try {
+        homardGen = GetSMESHGen()->CreateHOMARD_ADAPT();
+      }
+      catch ( const SALOME::SALOME_Exception& S_ex ) {
+        SUIT_MessageBox::critical(SMESHGUI::desktop(),
+                                  QObject::tr("SMESH_ERROR"),
+                                  QObject::tr(S_ex.details.text.in()));
+      }
+      if (!homardGen->_is_nil()) {
+        SMESHGUI_HomardAdaptDlg *aDlg = new SMESHGUI_HomardAdaptDlg(homardGen);
+        aDlg->show();
+      }
       break;
     }
   // Adaptation - end

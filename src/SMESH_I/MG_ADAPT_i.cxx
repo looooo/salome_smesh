@@ -18,7 +18,8 @@
 //
 
 #include "MG_ADAPT_i.hxx"
-#include "SMESH_Homard_i.hxx"
+
+#include CORBA_SERVER_HEADER(SMESH_Homard)
 
 #include "MG_ADAPT.hxx"
 #include "SMESH_File.hxx"
@@ -126,11 +127,8 @@ SALOME::GenericObj_ptr SMESH_Gen_i::Adaptation( const char* adaptationType)
     return anObj._retn();
   }
 #endif
-  if (!strcmp(adaptationType, "Uniform"))
-  {
-    SMESHHOMARD_I::HOMARD_Gen_i* homard_adapt = new SMESHHOMARD_I::HOMARD_Gen_i();
-    SMESHHOMARD::HOMARD_Gen_var anObj = homard_adapt->_this();
-    return anObj._retn();
+  if (!strcmp(adaptationType, "Uniform")) {
+    return CreateHOMARD_ADAPT();
   }
   return SMESH::MG_ADAPT_OBJECT_ptr();
 }

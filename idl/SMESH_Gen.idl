@@ -586,9 +586,9 @@ module SMESH
 			  in double theTolerance );    
 
     MG_ADAPT CreateMG_ADAPT();
-    SMESHHOMARD::HOMARD_Gen CreateHOMARD_ADAPT();
+    SMESHHOMARD::HOMARD_Gen CreateHOMARD_ADAPT() raises ( SALOME::SALOME_Exception );
     //MG_ADAPT_OBJECT Adaptation(in string adaptType);
-    SALOME::GenericObj Adaptation(in string adaptType);
+    SALOME::GenericObj Adaptation(in string adaptType) raises ( SALOME::SALOME_Exception );
     MG_ADAPT CreateAdaptationHypothesis();
   };
 

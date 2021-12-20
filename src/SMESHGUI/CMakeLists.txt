@@ -288,9 +288,9 @@ SET(_ts_RESOURCES
   SMESH_msg_en.ts
   SMESH_msg_fr.ts
   SMESH_msg_ja.ts
-  HOMARD_msg_en.ts
-  HOMARD_msg_fr.ts
-  HOMARD_msg_ja.ts
+  SMESHGUI_Homard_msg_en.ts
+  SMESHGUI_Homard_msg_fr.ts
+  SMESHGUI_Homard_msg_ja.ts
 )
 
 # --- rules ---

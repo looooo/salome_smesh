@@ -25,9 +25,6 @@
 
 #include "SMESH_File.hxx"
 
-// TODO?
-//#include "FrontTrack.hxx"
-
 #include "utilities.h"
 #include "Basics_Utils.hxx"
 #include "Basics_DirUtils.hxx"
@@ -1008,6 +1005,7 @@ CORBA::Long HOMARD_Gen_i::DeleteIteration(int numIter)
   MESSAGE ("DeleteIteration : numIter = " << numIter);
 
   if (numIter == 0) {
+    if (!CORBA::is_nil(myIteration1)) DeleteIteration(1);
     myIteration0 = SMESHHOMARD::HOMARD_Iteration::_nil();
   }
   else {
@@ -2070,16 +2068,18 @@ CORBA::Long HOMARD_Gen_i::ComputeCAO(SMESHHOMARD::HOMARD_Cas_var myCase,
   MESSAGE (". theXaoFileName = " << theXaoFileName);
 
   // B.5. Parallélisme
-  //bool theIsParallel = false;
+  bool theIsParallel = false;
 
   // C. Lancement des projections
   MESSAGE (". Lancement des projections");
   // TODO?
-  //FrontTrack* myFrontTrack = new FrontTrack();
-  //myFrontTrack->track(theInputMedFile, theOutputMedFile, theInputNodeFiles, theXaoFileName, theIsParallel);
+  SMESHHOMARDImpl::FrontTrack* myFrontTrack = new SMESHHOMARDImpl::FrontTrack();
+  myFrontTrack->track(theInputMedFile, theOutputMedFile,
+                      theInputNodeFiles, theXaoFileName, theIsParallel);
 
   // D. Transfert des coordonnées modifiées dans le fichier historique de HOMARD
-  //    On lance une exécution spéciale de HOMARD en attendant de savoir le faire avec MEDCoupling
+  //    On lance une exécution spéciale de HOMARD en attendant
+  //    de savoir le faire avec MEDCoupling
   MESSAGE (". Transfert des coordonnées");
   codret = ComputeCAObis(myIteration);
 

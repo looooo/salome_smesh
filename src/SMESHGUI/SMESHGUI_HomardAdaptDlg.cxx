@@ -472,6 +472,7 @@ bool SMESHGUI_HomardAdaptDlg::PushOnApply()
   // Compute and publish
   bool isSuccess = true;
   try {
+    SUIT_OverrideCursor aWaitCursor;
     isSuccess = myHomardGen->Compute() == 0;
   }
   catch( SALOME::SALOME_Exception& S_ex ) {
@@ -540,6 +541,7 @@ void SMESHGUI_HomardAdaptDlg::selectionChanged()
   if (!myArgs->myInBrowserRadio->isChecked())
     return;
 
+  //SUIT_OverrideCursor aWaitCursor;
   LightApp_SelectionMgr *selMgr = SMESHGUI::selectionMgr();
 
   // get selected mesh
@@ -580,6 +582,10 @@ void SMESHGUI_HomardAdaptDlg::selectionChanged()
     myArgs->mySelectOutMedFileLineEdit->setText(aFileInfo.absoluteFilePath());
   }
   //}
+
+  // Check data
+  if (!aMeshName.isEmpty())
+    CheckCase(false);
 }
 
 void SMESHGUI_HomardAdaptDlg::SetFileName()
@@ -587,6 +593,7 @@ void SMESHGUI_HomardAdaptDlg::SetFileName()
   // Input med file
   QString fileName0 = myArgs->mySelectInMedFileLineEdit->text().trimmed();
   QString fileName = SMESH_HOMARD_QT_COMMUN::PushNomFichier(false, QString("med"));
+  //SUIT_OverrideCursor aWaitCursor;
   if (fileName.isEmpty()) {
     fileName = fileName0;
     if (fileName.isEmpty()) return;

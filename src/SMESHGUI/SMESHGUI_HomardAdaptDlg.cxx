@@ -88,10 +88,9 @@ SMESHGUI_HomardAdaptDlg::SMESHGUI_HomardAdaptDlg(SMESHHOMARD::HOMARD_Gen_ptr myH
   myAdvOpt = new SMESHGUI_HomardAdaptAdvanced(myTabWidget);
 
   myTabWidget->addTab( myArgs, tr( "Args" ) );
-  //myTabWidget->addTab( myAdvOpt, tr( "ADVOP" ) );
-  myTabWidget->addTab( myAdvOpt, tr( "LOG_GROUP_TITLE" ) );
+  myTabWidget->addTab( myAdvOpt, tr( "ADVOP" ) );
 
-  //myAdvOpt->logGroupBox               ->setTitle(tr( "LOG_GROUP_TITLE" ));
+  myAdvOpt->logGroupBox               ->setTitle(tr( "LOG_GROUP_TITLE" ));
   myAdvOpt->workingDirectoryLabel     ->setText (tr( "WORKING_DIR" ));
   myAdvOpt->workingDirectoryPushButton->setText (tr( "SELECT_DIR" ));
   myAdvOpt->verboseLevelLabel         ->setText (tr( "VERBOSE_LEVEL" ));
@@ -99,8 +98,8 @@ SMESHGUI_HomardAdaptDlg::SMESHGUI_HomardAdaptDlg(SMESHHOMARD::HOMARD_Gen_ptr myH
   myAdvOpt->removeLogOnSuccessCheck   ->setText (tr( "REMOVE_LOG_ON_SUCCESS" ));
   myAdvOpt->keepWorkingFilesCheck     ->setText (tr( "KEEP_WORKING_FILES" ));
 
-  myAdvOpt->logInFileCheck->setChecked(true);
-  myAdvOpt->removeLogOnSuccessCheck->setChecked(false);
+  //myAdvOpt->logInFileCheck->setChecked(true);
+  //myAdvOpt->removeLogOnSuccessCheck->setChecked(false);
 
   // Working directory
   QString aWorkingDir = QDir::tempPath();
@@ -156,7 +155,8 @@ SMESHGUI_HomardAdaptDlg::SMESHGUI_HomardAdaptDlg(SMESHHOMARD::HOMARD_Gen_ptr myH
   sizePolicy.setVerticalStretch(0);
   sizePolicy.setHeightForWidth(this->sizePolicy().hasHeightForWidth());
   setSizePolicy(sizePolicy);
-  setMinimumSize(QSize(600, 320));
+  //setMinimumSize(QSize(600, 320));
+  setMinimumSize(QSize(500, 320));
   setSizeIncrement(QSize(1, 1));
   setBaseSize(QSize(600, 600));
   setAutoFillBackground(true);
@@ -227,7 +227,7 @@ void SMESHGUI_HomardAdaptDlg::InitBoundarys()
   // Pour les frontieres analytiques : la colonne des groupes
   SMESHHOMARD::ListGroupType_var _listeGroupesCas = myCase->GetGroups();
   QTableWidgetItem *__colItem = new QTableWidgetItem();
-  __colItem->setText(QApplication::translate("CreateCase", "", 0));
+  __colItem->setText(tr(""));
   myArgs->TWBoundary->setHorizontalHeaderItem(0, __colItem);
   for ( int i = 0; i < (int)_listeGroupesCas->length(); i++ ) {
     myArgs->TWBoundary->insertRow(i);
@@ -493,7 +493,6 @@ bool SMESHGUI_HomardAdaptDlg::PushOnApply()
   myArgs->myInMedFileRadio->setEnabled(true);
   myArgs->myInBrowserRadio->setEnabled(true);
   myArgs->mySelectInMedFileLineEdit->setReadOnly(false);
-  //myArgs->mySelectInMedFileButton->hide();
   myArgs->mySelectInMedFileButton->setEnabled(true);
   myArgs->myInBrowserObject->setReadOnly(false);
   myAdvOpt->workingDirectoryLineEdit->setReadOnly(false);
@@ -514,7 +513,6 @@ void SMESHGUI_HomardAdaptDlg::PushOnOK()
 
 void SMESHGUI_HomardAdaptDlg::PushOnHelp()
 {
-  //SMESH::ShowHelpFile(QString("gui_create_case.html"));
   SMESH::ShowHelpFile("adaptation.html#_homard_adapt_anchor");
 }
 
@@ -678,7 +676,7 @@ void SMESHGUI_HomardAdaptDlg::PushBoundaryCAOEdit()
 // ------------------------------------------------------------------------
 void SMESHGUI_HomardAdaptDlg::PushBoundaryCAOHelp()
 {
-  SMESH::ShowHelpFile(QString("gui_create_boundary.html"));
+  SMESH::ShowHelpFile(QString("homard_create_boundary.html#cao-boundary"));
 }
 
 // ------------------------------------------------------------------------
@@ -734,9 +732,7 @@ void SMESHGUI_HomardAdaptDlg::PushBoundaryDiEdit()
 // ------------------------------------------------------------------------
 void SMESHGUI_HomardAdaptDlg::PushBoundaryDiHelp()
 {
-  SMESH::ShowHelpFile(QString("gui_create_boundary.html"));
-  //std::string LanguageShort = myHomardGen->GetLanguageShort();
-  //HOMARD_UTILS::PushOnHelp(QString("gui_create_boundary.html"), QString("frontiere-discrete"), QString(LanguageShort.c_str()));
+  SMESH::ShowHelpFile(QString("homard_create_boundary.html#discrete-boundary"));
 }
 
 // ------------------------------------------------------------------------
@@ -774,7 +770,7 @@ void SMESHGUI_HomardAdaptDlg::AddBoundaryAn(QString newBoundary)
   nbcol += 1 ;
   myArgs->TWBoundary->setColumnCount ( nbcol ) ;
   QTableWidgetItem *__colItem = new QTableWidgetItem();
-  __colItem->setText(QApplication::translate("CreateCase", newBoundary.toStdString().c_str(), 0));
+  __colItem->setText(tr(newBoundary.toStdString().c_str()));
   myArgs->TWBoundary->setHorizontalHeaderItem(nbcol-1, __colItem);
 /*  TWBoundary->horizontalHeaderItem(nbcol-1)->setFlags( Qt::ItemIsSelectable|Qt::ItemIsEnabled );*/
 // Chaque case est a cocher
@@ -821,9 +817,7 @@ void SMESHGUI_HomardAdaptDlg::PushBoundaryAnEdit()
 void SMESHGUI_HomardAdaptDlg::PushBoundaryAnHelp()
 // ------------------------------------------------------------------------
 {
-  SMESH::ShowHelpFile(QString("gui_create_boundary.html"));
-  //std::string LanguageShort = myHomardGen->GetLanguageShort();
-  //HOMARD_UTILS::PushOnHelp(QString("gui_create_boundary.html"), QString("frontiere-analytique"), QString(LanguageShort.c_str()));
+  SMESH::ShowHelpFile(QString("homard_create_boundary.html#analytical-boundary"));
 }
 
 //=================================================================================
@@ -833,14 +827,14 @@ void SMESHGUI_HomardAdaptDlg::PushBoundaryAnHelp()
 SMESHGUI_HomardAdaptArguments::SMESHGUI_HomardAdaptArguments(QWidget* parent)
   : QWidget(parent)
 {
-  setupUi(this);
+  setupUi();
 }
 
 SMESHGUI_HomardAdaptArguments::~SMESHGUI_HomardAdaptArguments()
 {
 }
 
-void SMESHGUI_HomardAdaptArguments::setupUi(QWidget *CreateCase)
+void SMESHGUI_HomardAdaptArguments::setupUi()
 {
   // Mesh in
   QGroupBox* aMeshIn    = new QGroupBox( tr( "MeshIn" ), this );
@@ -887,7 +881,7 @@ void SMESHGUI_HomardAdaptArguments::setupUi(QWidget *CreateCase)
   meshOut->addWidget( myOutPublishChk,  2, 0,1,1 );
 
   // Conformity type
-  QGroupBox *GBTypeConf = new QGroupBox(tr("Conformity type"), CreateCase);
+  QGroupBox *GBTypeConf = new QGroupBox(tr("Conformity type"), this);
   RBConforme = new QRadioButton(tr("Conformal"), GBTypeConf);
   RBNonConforme = new QRadioButton(tr("Non conformal"), GBTypeConf);
   RBConforme->setChecked(true);
@@ -899,7 +893,7 @@ void SMESHGUI_HomardAdaptArguments::setupUi(QWidget *CreateCase)
   hboxLayout2->addWidget(RBNonConforme);
 
   // Boundary type
-  GBTypeBoun = new QGroupBox(tr("Boundary type"), CreateCase);
+  GBTypeBoun = new QGroupBox(tr("Boundary type"), this);
 
   RBBoundaryNo     = new QRadioButton(tr("No boundary"), GBTypeBoun);
   RBBoundaryCAO    = new QRadioButton(tr("CAO"), GBTypeBoun);
@@ -917,9 +911,9 @@ void SMESHGUI_HomardAdaptArguments::setupUi(QWidget *CreateCase)
   CBBoundaryCAO = new QComboBox(GBBoundaryC);
   CBBoundaryCAO->setSizeAdjustPolicy(QComboBox::AdjustToContents);
 
-  PBBoundaryCAONew = new QPushButton(tr("CAO_NEW_BTN"), GBBoundaryC);
-  PBBoundaryCAOEdit = new QPushButton(tr("CAO_EDIT_BTN"), GBBoundaryC);
-  PBBoundaryCAOHelp = new QPushButton(tr("CAO_HELP_BTN"), GBBoundaryC);
+  PBBoundaryCAONew = new QPushButton(tr("New"), GBBoundaryC);
+  PBBoundaryCAOEdit = new QPushButton(tr("Edit"), GBBoundaryC);
+  PBBoundaryCAOHelp = new QPushButton(tr("Help"), GBBoundaryC);
 
   PBBoundaryCAONew->setAutoDefault(false);
   PBBoundaryCAOEdit->setAutoDefault(false);
@@ -937,8 +931,8 @@ void SMESHGUI_HomardAdaptArguments::setupUi(QWidget *CreateCase)
 
   //     Non CAO (discrete / analytical)
   GBBoundaryN = new QGroupBox(GBTypeBoun);
-  CBBoundaryD = new QCheckBox(tr("BOUNDARY_DISCRETE"), GBBoundaryN);
-  CBBoundaryA = new QCheckBox(tr("BOUNDARY_ANALYTICAL"), GBBoundaryN);
+  CBBoundaryD = new QCheckBox(tr("Discrete boundary"), GBBoundaryN);
+  CBBoundaryA = new QCheckBox(tr("Analytical boundary"), GBBoundaryN);
 
   //hboxLayout3 = new QHBoxLayout(GBBoundaryN);
   //hboxLayout3->setSpacing(6);
@@ -953,9 +947,7 @@ void SMESHGUI_HomardAdaptArguments::setupUi(QWidget *CreateCase)
   gridLayout = new QGridLayout(GBBoundaryD);
   gridLayout->setSpacing(6);
   gridLayout->setContentsMargins(9, 9, 9, 9);
-  gridLayout->setObjectName(QString::fromUtf8("gridLayout"));
   CBBoundaryDi = new QComboBox(GBBoundaryD);
-  CBBoundaryDi->setObjectName(QString::fromUtf8("CBBoundaryDi"));
   CBBoundaryDi->setSizeAdjustPolicy(QComboBox::AdjustToContents);
 
   gridLayout->addWidget(CBBoundaryDi, 0, 0, 1, 1);
@@ -963,34 +955,27 @@ void SMESHGUI_HomardAdaptArguments::setupUi(QWidget *CreateCase)
   QSpacerItem* spacerItem5 = new QSpacerItem(40, 13, QSizePolicy::Fixed, QSizePolicy::Minimum);
   gridLayout->addItem(spacerItem5, 0, 1, 1, 1);
 
-  PBBoundaryDiEdit = new QPushButton(GBBoundaryD);
-  PBBoundaryDiEdit->setObjectName(QString::fromUtf8("PBBoundaryDiEdit"));
+  PBBoundaryDiNew  = new QPushButton(tr("New"), GBBoundaryD);
+  PBBoundaryDiEdit = new QPushButton(tr("Edit"), GBBoundaryD);
+  PBBoundaryDiHelp = new QPushButton(tr("Help"), GBBoundaryD);
+
+  PBBoundaryDiNew->setAutoDefault(false);
   PBBoundaryDiEdit->setAutoDefault(false);
-
-  gridLayout->addWidget(PBBoundaryDiEdit, 0, 3, 1, 1);
-
-  PBBoundaryDiHelp = new QPushButton(GBBoundaryD);
-  PBBoundaryDiHelp->setObjectName(QString::fromUtf8("PBBoundaryDiHelp"));
   PBBoundaryDiHelp->setAutoDefault(false);
 
+  gridLayout->addWidget(PBBoundaryDiNew,  0, 2, 1, 1);
+  gridLayout->addWidget(PBBoundaryDiEdit, 0, 3, 1, 1);
   gridLayout->addWidget(PBBoundaryDiHelp, 0, 4, 1, 1);
-
-  PBBoundaryDiNew = new QPushButton(GBBoundaryD);
-  PBBoundaryDiNew->setAutoDefault(false);
-
-  gridLayout->addWidget(PBBoundaryDiNew, 0, 2, 1, 1);
 
   //          analytical
   GBBoundaryA = new QGroupBox(tr("Analytical boundary"), GBBoundaryN);
   GBBoundaryA->setMinimumSize(QSize(548, 200));
   formLayout = new QFormLayout(GBBoundaryA);
-  formLayout->setObjectName(QString::fromUtf8("formLayout"));
   TWBoundary = new QTableWidget(GBBoundaryA);
   if (TWBoundary->columnCount() < 1)
     TWBoundary->setColumnCount(1);
   QTableWidgetItem *__qtablewidgetitem = new QTableWidgetItem();
   TWBoundary->setHorizontalHeaderItem(0, __qtablewidgetitem);
-  TWBoundary->setObjectName(QString::fromUtf8("TWBoundary"));
   TWBoundary->setEditTriggers(QAbstractItemView::AnyKeyPressed|QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed|QAbstractItemView::SelectedClicked);
   TWBoundary->setShowGrid(true);
   TWBoundary->setRowCount(0);
@@ -1001,23 +986,17 @@ void SMESHGUI_HomardAdaptArguments::setupUi(QWidget *CreateCase)
   gridLayout1 = new QGridLayout();
   gridLayout1->setSpacing(6);
   gridLayout1->setContentsMargins(0, 0, 0, 0);
-  gridLayout1->setObjectName(QString::fromUtf8("gridLayout1"));
-  PBBoundaryAnEdit = new QPushButton(GBBoundaryA);
-  PBBoundaryAnEdit->setObjectName(QString::fromUtf8("PBBoundaryAnEdit"));
-  PBBoundaryAnEdit->setAutoDefault(false);
 
-  gridLayout1->addWidget(PBBoundaryAnEdit, 1, 0, 1, 1);
+  PBBoundaryAnNew  = new QPushButton(tr("New"), GBBoundaryA);
+  PBBoundaryAnEdit = new QPushButton(tr("Edit"), GBBoundaryA);
+  PBBoundaryAnHelp = new QPushButton(tr("Help"), GBBoundaryA);
 
-  PBBoundaryAnNew = new QPushButton(GBBoundaryA);
-  PBBoundaryAnNew->setObjectName(QString::fromUtf8("PBBoundaryAnNew"));
   PBBoundaryAnNew->setAutoDefault(false);
-
-  gridLayout1->addWidget(PBBoundaryAnNew, 0, 0, 1, 1);
-
-  PBBoundaryAnHelp = new QPushButton(GBBoundaryA);
-  PBBoundaryAnHelp->setObjectName(QString::fromUtf8("PBBoundaryAnHelp"));
+  PBBoundaryAnEdit->setAutoDefault(false);
   PBBoundaryAnHelp->setAutoDefault(false);
 
+  gridLayout1->addWidget(PBBoundaryAnNew,  0, 0, 1, 1);
+  gridLayout1->addWidget(PBBoundaryAnEdit, 1, 0, 1, 1);
   gridLayout1->addWidget(PBBoundaryAnHelp, 2, 0, 1, 1);
 
   formLayout->setLayout(0, QFormLayout::FieldRole, gridLayout1);
@@ -1040,7 +1019,7 @@ void SMESHGUI_HomardAdaptArguments::setupUi(QWidget *CreateCase)
   aBoundTypeLayout->addWidget(GBBoundaryN, 2, 0, 1, 3);
 
   // Arguments layout
-  QGridLayout *argumentsLayout = new QGridLayout(CreateCase);
+  QGridLayout *argumentsLayout = new QGridLayout(this);
   argumentsLayout->addWidget(aMeshIn,     0, 0, 1, 3);
   argumentsLayout->addWidget(aMeshOut,    1, 0, 1, 3);
   argumentsLayout->addWidget(GBTypeConf,  2, 0, 1, 3);
@@ -1048,20 +1027,8 @@ void SMESHGUI_HomardAdaptArguments::setupUi(QWidget *CreateCase)
   argumentsLayout->setColumnStretch( 1, 5 );
   argumentsLayout->setRowStretch( 4, 5 );
 
-  //mySelectInMedFileButton->setText(QString());
-  CBBoundaryD->setText(QApplication::translate("CreateCase", "Discrete boundary", nullptr));
-  CBBoundaryA->setText(QApplication::translate("CreateCase", "Analytical boundary", nullptr));
-  PBBoundaryCAOEdit->setText(QApplication::translate("CreateCase", "Edit", nullptr));
-  PBBoundaryCAOHelp->setText(QApplication::translate("CreateCase", "Help", nullptr));
-  PBBoundaryCAONew->setText(QApplication::translate("CreateCase", "New", nullptr));
-  PBBoundaryDiEdit->setText(QApplication::translate("CreateCase", "Edit", nullptr));
-  PBBoundaryDiHelp->setText(QApplication::translate("CreateCase", "Help", nullptr));
-  PBBoundaryDiNew->setText(QApplication::translate("CreateCase", "New", nullptr));
   QTableWidgetItem *___qtablewidgetitem = TWBoundary->horizontalHeaderItem(0);
-  ___qtablewidgetitem->setText(QApplication::translate("CreateCase", "a_virer", nullptr));
-  PBBoundaryAnEdit->setText(QApplication::translate("CreateCase", "Edit", nullptr));
-  PBBoundaryAnNew->setText(QApplication::translate("CreateCase", "New", nullptr));
-  PBBoundaryAnHelp->setText(QApplication::translate("CreateCase", "Help", nullptr));
+  ___qtablewidgetitem->setText(tr("a_virer"));
 
   // Initial state
   myInMedFileRadio->setChecked( true );
@@ -1074,11 +1041,10 @@ void SMESHGUI_HomardAdaptArguments::setupUi(QWidget *CreateCase)
   CBBoundaryDi->setCurrentIndex(-1);
 
   // Connections
-  QMetaObject::connectSlotsByName(CreateCase);
   connect(myInMeshGroup,            SIGNAL(buttonClicked(int)), this, SLOT(modeInChanged(int)));
   connect(myOutMedFileChk,          SIGNAL(stateChanged(int)),  this, SLOT(onOutMedFileChk(int)));
   connect(myOutPublishChk,          SIGNAL(stateChanged(int)),  this, SLOT(onOutPublishChk(int)));
-  connect(mySelectOutMedFileButton, SIGNAL(pressed()),          this, SLOT(onSelectOutMedFileButton()));
+  connect(mySelectOutMedFileButton, SIGNAL(pressed()), this, SLOT(onSelectOutMedFileButton()));
   emit updateSelection();
 }
 
@@ -1150,11 +1116,12 @@ void SMESHGUI_HomardAdaptArguments::onOutPublishChk(int state)
 // SMESHGUI_HomardAdaptAdvanced
 //////////////////////////////////////////
 
-SMESHGUI_HomardAdaptAdvanced::SMESHGUI_HomardAdaptAdvanced( QWidget* parent, Qt::WindowFlags f )
-  : QWidget( parent, f )
+SMESHGUI_HomardAdaptAdvanced::SMESHGUI_HomardAdaptAdvanced(QWidget* parent)
+  : QWidget(parent)
 {
   setupWidget();
-  connect(workingDirectoryPushButton, SIGNAL(pressed()), this, SLOT(onWorkingDirectoryPushButton()));
+  connect(workingDirectoryPushButton, SIGNAL(pressed()),
+          this, SLOT(onWorkingDirectoryPushButton()));
 }
 
 SMESHGUI_HomardAdaptAdvanced::~SMESHGUI_HomardAdaptAdvanced()
@@ -1163,77 +1130,63 @@ SMESHGUI_HomardAdaptAdvanced::~SMESHGUI_HomardAdaptAdvanced()
 
 void SMESHGUI_HomardAdaptAdvanced::setupWidget()
 {
-  if (this->objectName().isEmpty())
-    this->setObjectName(QString(tr("MG-ADAPT-ADV")));
-  this->resize(337, 369);
+  //this->resize(337, 369);
 
   // Logs and debug
   logGroupBox = new QGroupBox(this);
-  logGroupBox->setObjectName(QString("logGroupBox"));
+  QGridLayout* logGroupBoxLayout = new QGridLayout(this);
+  logGroupBoxLayout->setMargin( 9 );
+  logGroupBoxLayout->setSpacing( 6 );
+  logGroupBoxLayout->addWidget(logGroupBox, 0, 0, 1, 1);
 
   QGridLayout* logsLayout = new QGridLayout(logGroupBox);
-  logsLayout->setObjectName(QString("logsLayout"));
+  logsLayout->setMargin( 9 );
+  logsLayout->setSpacing( 6 );
 
   // Working directory + Verbose level layout
   QGridLayout* gridLayout = new QGridLayout();
-  gridLayout->setObjectName(QString("gridLayout"));
 
   // Working directory
   workingDirectoryLabel = new QLabel(logGroupBox);
-  workingDirectoryLabel->setObjectName(QString("workingDirectoryLabel"));
-
-  gridLayout->addWidget(workingDirectoryLabel, 0, 0, 1, 1);
-
   workingDirectoryLineEdit = new QLineEdit(logGroupBox);
-  workingDirectoryLineEdit->setObjectName(QString("workingDirectoryLineEdit"));
-
-  gridLayout->addWidget(workingDirectoryLineEdit, 0, 1, 1, 1);
-
   workingDirectoryPushButton = new QPushButton(logGroupBox);
-  workingDirectoryPushButton->setObjectName(QString("workingDirectoryPushButton"));
 
+  gridLayout->addWidget(workingDirectoryLabel,      0, 0, 1, 1);
+  gridLayout->addWidget(workingDirectoryLineEdit,   0, 1, 1, 1);
   gridLayout->addWidget(workingDirectoryPushButton, 0, 2, 1, 1);
 
   // Verbose level
   verboseLevelLabel = new QLabel(logGroupBox);
-  verboseLevelLabel->setObjectName(QString("verboseLevelLabel"));
+  verboseLevelSpin = new QSpinBox(logGroupBox);
 
   gridLayout->addWidget(verboseLevelLabel, 1, 0, 1, 1);
-
-  verboseLevelSpin = new QSpinBox(logGroupBox);
-  verboseLevelSpin->setObjectName(QString("verboseLevelSpin"));
-
-  gridLayout->addWidget(verboseLevelSpin, 1, 1, 1, 1);
+  gridLayout->addWidget(verboseLevelSpin,  1, 1, 1, 1);
 
   logsLayout->addLayout(gridLayout, 0, 0, 1, 1);
 
   // logInFileCheck + removeLogOnSuccessCheck
   QHBoxLayout* horizontalLayout = new QHBoxLayout();
-  horizontalLayout->setObjectName(QString("horizontalLayout"));
 
-  // Log In File Check
   logInFileCheck = new QCheckBox(logGroupBox);
-  logInFileCheck->setObjectName(QString("logInFileCheck"));
-  logInFileCheck->setChecked(true);
-
-  horizontalLayout->addWidget(logInFileCheck);
-
-  // Remove Log On Success Check
   removeLogOnSuccessCheck = new QCheckBox(logGroupBox);
-  removeLogOnSuccessCheck->setObjectName(QString("removeLogOnSuccessCheck"));
+
+  logInFileCheck->setChecked(true);
   removeLogOnSuccessCheck->setChecked(true);
 
+  horizontalLayout->addWidget(logInFileCheck);
   horizontalLayout->addWidget(removeLogOnSuccessCheck);
 
   logsLayout->addLayout(horizontalLayout, 1, 0, 1, 1);
 
   // Keep Working Files Check
   keepWorkingFilesCheck = new QCheckBox(logGroupBox);
-  keepWorkingFilesCheck->setObjectName(QString("keepWorkingFilesCheck"));
   keepWorkingFilesCheck->setAutoExclusive(false);
   keepWorkingFilesCheck->setChecked(false);
 
   logsLayout->addWidget(keepWorkingFilesCheck, 2, 0, 1, 1);
+
+  //logsLayout->setColumnStretch( 1, 5 );
+  //logsLayout->setRowStretch( 3, 5 );
 }
 
 void SMESHGUI_HomardAdaptAdvanced::onWorkingDirectoryPushButton()

@@ -509,9 +509,7 @@ void SMESH_CreateBoundaryAn::PushOnOK()
 void SMESH_CreateBoundaryAn::PushOnHelp()
 // ------------------------------------------------------------------------
 {
-  SMESH::ShowHelpFile(QString("gui_create_boundary.html"));
-  //std::string LanguageShort = myHomardGen->GetLanguageShort();
-  //HOMARD_UTILS::PushOnHelp(QString("gui_create_boundary.html"), QString("un-cylindre"), QString(LanguageShort.c_str()));
+  SMESH::ShowHelpFile(QString("homard_create_boundary.html#analytical-boundary"));
 }
 
 // -----------------------------------
@@ -903,9 +901,7 @@ void SMESH_CreateBoundaryCAO::PushOnOK()
 void SMESH_CreateBoundaryCAO::PushOnHelp()
 // ------------------------------------------------------------------------
 {
-  SMESH::ShowHelpFile(QString("gui_create_boundary.html"));
-  //std::string LanguageShort = myHomardGen->GetLanguageShort();
-  //HOMARD_UTILS::PushOnHelp(QString("gui_create_boundary.html"), QString("CAO"), QString(LanguageShort.c_str()));
+  SMESH::ShowHelpFile(QString("homard_create_boundary.html#cao-boundary"));
 }
 // ------------------------------------------------------------------------
 void SMESH_CreateBoundaryCAO::AssocieLesGroupes()
@@ -1077,9 +1073,7 @@ void SMESH_CreateBoundaryDi::PushOnOK()
 void SMESH_CreateBoundaryDi::PushOnHelp()
 // ------------------------------------------------------------------------
 {
-  SMESH::ShowHelpFile(QString("gui_create_boundary.html"));
-  //std::string LanguageShort = myHomardGen->GetLanguageShort();
-  //HOMARD_UTILS::PushOnHelp(QString("gui_create_boundary.html"), QString("frontiere-discrete"), QString(LanguageShort.c_str()));
+  SMESH::ShowHelpFile(QString("homard_create_boundary.html#discrete-boundary"));
 }
 // ------------------------------------------------------------------------
 void SMESH_CreateBoundaryDi::AssocieLesGroupes()

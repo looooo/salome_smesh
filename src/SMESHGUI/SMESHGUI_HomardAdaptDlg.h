@@ -133,7 +133,7 @@ public:
   SMESHGUI_HomardAdaptArguments (QWidget* parent);
   ~SMESHGUI_HomardAdaptArguments();
 
-  void setupUi(QWidget *CreateCase);
+  void setupUi();
 
 public:
   // Mesh In
@@ -209,7 +209,7 @@ class SMESHGUI_HomardAdaptAdvanced : public QWidget
   Q_OBJECT
 
 public:
-  SMESHGUI_HomardAdaptAdvanced(QWidget* = 0, Qt::WindowFlags = 0);
+  SMESHGUI_HomardAdaptAdvanced(QWidget* = 0);
   ~SMESHGUI_HomardAdaptAdvanced();
 
   void setupWidget();

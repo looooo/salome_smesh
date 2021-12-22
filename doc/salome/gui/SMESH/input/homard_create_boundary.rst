@@ -41,6 +41,15 @@ The window invites in the choice of a file that contains the CAO with XAO format
 .. note::
   The coherence between this CAO and the initial mesh is not checked.
 
+Filtering by the groups
+***********************
+.. index:: single: group
+
+We can restrict the application of the boundary to groups. So elements not belonging to these groups will not be affected. We check the associated button **Filtering with groups**. The list of the present groups of elements in the mesh is shown. It is enough to check those wanted to restrict the boundary.
+
+.. image:: ../images/adaptation_with_homard_boundary_groups.png
+   :align: center
+
 .. _homard_create_boundary_Di:
 
 Discrete boundary

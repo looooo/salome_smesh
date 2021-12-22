@@ -636,9 +636,11 @@ void SMESHGUI_HomardAdaptDlg::SetBoundaryNo()
 // ------------------------------------------------------------------------
 void SMESHGUI_HomardAdaptDlg::SetBoundaryCAO()
 {
-  myArgs->GBBoundaryC->setVisible(1);
-  myArgs->GBBoundaryN->setVisible(0);
-  adjustSize();
+  if (CheckCase(true)) {
+    myArgs->GBBoundaryC->setVisible(1);
+    myArgs->GBBoundaryN->setVisible(0);
+    adjustSize();
+  }
 }
 // ------------------------------------------------------------------------
 void SMESHGUI_HomardAdaptDlg::SetBoundaryNonCAO()

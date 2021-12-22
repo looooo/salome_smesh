@@ -38,23 +38,24 @@
 using namespace std;
 
 // ------------------------------------------------------------------------------------
-SMESH_CreateListGroupCAO::SMESH_CreateListGroupCAO(SMESH_CreateBoundaryCAO* parentBound, bool modal,
-                                             SMESHHOMARD::HOMARD_Gen_var myHomardGen0,
-                                             QString aCaseName,
-                                             QStringList listeGroupesHypo)
+SMESH_CreateListGroupCAO::SMESH_CreateListGroupCAO(SMESH_CreateBoundaryCAO* parentBound,
+                                                   bool modal,
+                                                   SMESHHOMARD::HOMARD_Gen_var myHomardGen0,
+                                                   QString aCaseName,
+                                                   QStringList listeGroupesHypo)
   : QDialog(0), SMESH_Ui_CreateListGroup(),
     _aCaseName (aCaseName),
     _listeGroupesHypo (listeGroupesHypo),
     _parentBound(parentBound)
 {
-  MESSAGE("Debut de  SMESH_CreateListGroupCAO");
+  MESSAGE("Debut de SMESH_CreateListGroupCAO");
   myHomardGen = SMESHHOMARD::HOMARD_Gen::_duplicate(myHomardGen0);
   setupUi(this);
   setModal(modal);
   InitConnect();
   InitGroupes();
 }
-// --------------------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
 SMESH_CreateListGroupCAO::SMESH_CreateListGroupCAO(SMESH_CreateBoundaryCAO* parentBound,
                                              SMESHHOMARD::HOMARD_Gen_var myHomardGen,
                                              QString aCaseName,
@@ -112,7 +113,7 @@ void SMESH_CreateListGroupCAO::PushOnOK()
 void SMESH_CreateListGroupCAO::PushOnHelp()
 // ------------------------------------------------------------------------
 {
-  SMESH::ShowHelpFile(QString("gui_create_hypothese.html"));
+  SMESH::ShowHelpFile(QString("homard_create_boundary.html#filtering-by-the-groups"));
 }
 // ------------------------------------------------------------------------
 void SMESH_CreateListGroupCAO::InitGroupes()
@@ -220,7 +221,7 @@ void SMESH_CreateListGroup::PushOnOK()
 void SMESH_CreateListGroup::PushOnHelp()
 // ------------------------------------------------------------------------
 {
-  SMESH::ShowHelpFile(QString("gui_create_hypothese.html"));
+  SMESH::ShowHelpFile(QString("homard_create_boundary.html#filtering-by-the-groups"));
 }
 // ------------------------------------------------------------------------
 void SMESH_CreateListGroup::InitGroupes()

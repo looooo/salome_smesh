@@ -956,7 +956,7 @@ void SMESH_CreateBoundaryCAO::setGroups (QStringList listGroup)
 }
 // ------------------------------------------------------------------------
 void SMESH_CreateBoundaryCAO::SetFiltrage()
-// // ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
 {
   if (!CBGroupe->isChecked()) return;
 
@@ -1564,11 +1564,11 @@ bool SMESH_EditBoundaryCAO::PushOnApply()
 }
 // ------------------------------------------------------------------------
 void SMESH_EditBoundaryCAO::SetFiltrage()
-// // ------------------------------------------------------------------------
+// ------------------------------------------------------------------------
 {
   if (!CBGroupe->isChecked()) return;
-  SMESHHOMARD::HOMARD_Cas_var monCas = myHomardGen->GetCase();
-  SMESHHOMARD::ListGroupType_var _listeGroupesCas = monCas->GetGroups();
+  //SMESHHOMARD::HOMARD_Cas_var monCas = myHomardGen->GetCase();
+  //SMESHHOMARD::ListGroupType_var _listeGroupesCas = monCas->GetGroups();
 
   SMESH_EditListGroupCAO *aDlg = new SMESH_EditListGroupCAO
     (this, true, SMESHHOMARD::HOMARD_Gen::_duplicate(myHomardGen),
@@ -1576,14 +1576,14 @@ void SMESH_EditBoundaryCAO::SetFiltrage()
   aDlg->show();
 }
 
-// -------------------------------------------------------------------------------------------------------------------------------------
-SMESH_EditBoundaryDi::SMESH_EditBoundaryDi( SMESHGUI_HomardAdaptDlg* parent, bool modal,
-                                      SMESHHOMARD::HOMARD_Gen_var myHomardGen,
-                                      QString caseName, QString Name):
-// -------------------------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------
 /* Constructs a SMESH_EditBoundaryDi
     herite de SMESH_CreateBoundaryDi
 */
+// ------------------------------------------------------------------------------------
+SMESH_EditBoundaryDi::SMESH_EditBoundaryDi( SMESHGUI_HomardAdaptDlg* parent, bool modal,
+                                      SMESHHOMARD::HOMARD_Gen_var myHomardGen,
+                                      QString caseName, QString Name):
   SMESH_CreateBoundaryDi(parent, modal, myHomardGen, caseName, Name)
 {
     MESSAGE("Debut de Boundary pour " << Name.toStdString().c_str());

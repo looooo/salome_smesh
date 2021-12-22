@@ -4093,6 +4093,7 @@ namespace // actual projection algorithms
                                   newSolution[0], newSolution[1]);
       projection = ElSLib::CylinderValue( newSolution[0], newSolution[1],
                                           _cylinder.Position(), _cylinder.Radius() );
+      _dist = point.Distance( projection );
 
       return ( _dist * _dist < maxDist2 )  &&  SurfaceProjector::classify( newSolution );
     }

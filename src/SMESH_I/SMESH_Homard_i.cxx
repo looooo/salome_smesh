@@ -34,6 +34,10 @@
 #include "SALOME_LifeCycleCORBA.hxx"
 #include "SALOMEconfig.h"
 
+// Have to be included before std headers
+#include <Python.h>
+#include <structmember.h>
+
 #include <vector>
 #include <cmath>
 #include <cstdlib>
@@ -453,7 +457,7 @@ SMESHHOMARD::extrema* HOMARD_Cas_i::GetBoundingBox()
   std::vector<double> LesExtremes = myHomardCas->GetBoundingBox();
   ASSERT(LesExtremes.size() == 10);
   aResult->length(10);
-  for (int i = 0; i < (int)LesExtremes.size(); i++) {
+  for (unsigned int i = 0; i < LesExtremes.size(); i++) {
     aResult[i] = LesExtremes[i];
   }
   return aResult._retn();
@@ -470,7 +474,7 @@ void HOMARD_Cas_i::SetGroups(const SMESHHOMARD::ListGroupType& ListGroup)
 {
   ASSERT(myHomardCas);
   std::list<std::string> ListString;
-  for (int i = 0; i < ListGroup.length(); i++)
+  for (unsigned int i = 0; i < ListGroup.length(); i++)
   {
     ListString.push_back(std::string(ListGroup[i]));
   }
@@ -957,6 +961,7 @@ HOMARD_Gen_i::HOMARD_Gen_i() : SALOME::GenericObj_i(SMESH_Gen_i::GetPOA()),
 //=============================================================================
 HOMARD_Gen_i::~HOMARD_Gen_i()
 {
+  MESSAGE ("HOMARD_Gen_i::~HOMARD_Gen_i()");
   if (!myCase->_is_nil()) {
     CleanCase();
   }
@@ -1005,8 +1010,8 @@ CORBA::Long HOMARD_Gen_i::DeleteIteration(int numIter)
   MESSAGE ("DeleteIteration : numIter = " << numIter);
 
   if (numIter == 0) {
-    if (!CORBA::is_nil(myIteration1)) DeleteIteration(1);
-    myIteration0 = SMESHHOMARD::HOMARD_Iteration::_nil();
+    if (CORBA::is_nil(myIteration1))
+      myIteration0 = SMESHHOMARD::HOMARD_Iteration::_nil();
   }
   else {
     if (!CORBA::is_nil(myIteration1)) {
@@ -1088,18 +1093,28 @@ void HOMARD_Gen_i::AssociateCaseIter(int numIter, const char* labelIter)
     throw SALOME::SALOME_Exception(es);
   }
 
-  SMESHHOMARD::HOMARD_Iteration_var myIteration;
-  if (numIter == 0) myIteration = myIteration0;
-  else              myIteration = myIteration1;
-  if (CORBA::is_nil(myIteration)) {
-    SALOME::ExceptionStruct es;
-    es.type = SALOME::BAD_PARAM;
-    es.text = "Invalid iteration";
-    throw SALOME::SALOME_Exception(es);
-  }
+  if (numIter == 0) {
+    if (CORBA::is_nil(myIteration0)) {
+      SALOME::ExceptionStruct es;
+      es.type = SALOME::BAD_PARAM;
+      es.text = "Invalid iteration";
+      throw SALOME::SALOME_Exception(es);
+    }
 
-  myCase->AddIteration(myIteration->GetName());
-  myIteration->SetCaseName("Case_1");
+    myCase->AddIteration(myIteration0->GetName());
+    myIteration0->SetCaseName("Case_1");
+  }
+  else {
+    if (CORBA::is_nil(myIteration1)) {
+      SALOME::ExceptionStruct es;
+      es.type = SALOME::BAD_PARAM;
+      es.text = "Invalid iteration";
+      throw SALOME::SALOME_Exception(es);
+    }
+
+    myCase->AddIteration(myIteration1->GetName());
+    myIteration1->SetCaseName("Case_1");
+  }
 }
 
 //=============================================================================
@@ -1261,7 +1276,7 @@ SMESHHOMARD::HOMARD_Cas_ptr HOMARD_Gen_i::CreateCaseOnMesh (const char* MeshName
     SMESHHOMARD::extrema_var aSeq = new SMESHHOMARD::extrema();
     if (LesExtremes.size() != 10) { return 0; }
     aSeq->length(10);
-    for (int i = 0; i < LesExtremes.size(); i++)
+    for (unsigned int i = 0; i < LesExtremes.size(); i++)
       aSeq[i] = LesExtremes[i];
     myCase->SetBoundingBox(aSeq);
     // Les groupes
@@ -1343,7 +1358,7 @@ SMESHHOMARD::HOMARD_Cas_ptr HOMARD_Gen_i::CreateCase(const char* MeshName,
     SMESHHOMARD::extrema_var aSeq = new SMESHHOMARD::extrema();
     if (LesExtremes.size() != 10) { return 0; }
     aSeq->length(10);
-    for (int i = 0; i < LesExtremes.size(); i++)
+    for (unsigned int i = 0; i < LesExtremes.size(); i++)
       aSeq[i] = LesExtremes[i];
     myCase->SetBoundingBox(aSeq);
     // Les groupes
@@ -1857,11 +1872,12 @@ void HOMARD_Gen_i::CleanCase()
   }
 
   // Delete all boundaries
-  std::map<std::string, SMESHHOMARD::HOMARD_Boundary_var>::const_iterator it_boundary;
-  for (it_boundary  = _mesBoundarys.begin();
-       it_boundary != _mesBoundarys.end(); ++it_boundary) {
-    DeleteBoundary((*it_boundary).first.c_str());
-  }
+  //std::map<std::string, SMESHHOMARD::HOMARD_Boundary_var>::const_iterator it_boundary;
+  //for (it_boundary  = _mesBoundarys.begin();
+  //     it_boundary != _mesBoundarys.end(); ++it_boundary) {
+  //  DeleteBoundary((*it_boundary).first.c_str());
+  //}
+  _mesBoundarys.clear();
 
   // Delete iteration
   DeleteIteration(1);
@@ -1877,6 +1893,7 @@ void HOMARD_Gen_i::CleanCase()
   if (!_CaseOnMedFile && !_TmpMeshFile.empty()) {
     SMESH_File aFile (_TmpMeshFile, false);
     if (aFile.exists()) aFile.remove();
+    _TmpMeshFile = "";
   }
   _SmeshMesh = SMESH::SMESH_Mesh::_nil();
 }
@@ -1904,14 +1921,7 @@ CORBA::Long HOMARD_Gen_i::ComputeAdap(SMESHHOMARD::HOMARD_Cas_var myCase,
   ASSERT(!CORBA::is_nil(myHypothesis));
 
   // B. L'iteration parent
-  //const char* nomIterationParent = myIteration->GetIterParentName();
-  SMESHHOMARD::HOMARD_Iteration_var myIterationParent = myIteration0;
-  ASSERT(!CORBA::is_nil(myIterationParent));
-  // Si l'iteration parent n'est pas calculee, on le fait (recursivite amont)
-  //if (myIterationParent->GetState() == 1) {
-  //  int codret = Compute(nomIterationParent);
-  //  if (codret != 0) VERIFICATION("Pb au calcul de l'iteration precedente" == 0);
-  //}
+  ASSERT(!CORBA::is_nil(myIteration0));
 
   // C. Le sous-répertoire de l'iteration precedente
   char* DirComputePa = ComputeDirPaManagement(myCase, myIteration);
@@ -1923,9 +1933,9 @@ CORBA::Long HOMARD_Gen_i::ComputeAdap(SMESHHOMARD::HOMARD_Cas_var myCase,
   MESSAGE (". ConfType = " << ConfType);
 
   // D.3. Le maillage de depart
-  const char* NomMeshParent = myIterationParent->GetMeshName();
+  const char* NomMeshParent = myIteration0->GetMeshName();
   MESSAGE (". NomMeshParent = " << NomMeshParent);
-  const char* MeshFileParent = myIterationParent->GetMeshFile();
+  const char* MeshFileParent = myIteration0->GetMeshFile();
   MESSAGE (". MeshFileParent = " << MeshFileParent);
 
   // D.4. Le maillage associe a l'iteration
@@ -2072,10 +2082,28 @@ CORBA::Long HOMARD_Gen_i::ComputeCAO(SMESHHOMARD::HOMARD_Cas_var myCase,
 
   // C. Lancement des projections
   MESSAGE (". Lancement des projections");
-  // TODO?
-  SMESHHOMARDImpl::FrontTrack* myFrontTrack = new SMESHHOMARDImpl::FrontTrack();
-  myFrontTrack->track(theInputMedFile, theOutputMedFile,
-                      theInputNodeFiles, theXaoFileName, theIsParallel);
+
+  assert(Py_IsInitialized());
+  PyGILState_STATE gstate;
+  gstate = PyGILState_Ensure();
+  PyRun_SimpleString("from FrontTrack import FrontTrack");
+  // FrontTrack().track( fic_med_brut, fic_med_new, l_fr, xao_file )
+  std::string pyCommand ("FrontTrack().track( \"");
+  pyCommand += theInputMedFile + "\", \"" + theOutputMedFile + "\", [";
+  for (int i = 0; i < icpt; i++) {
+    if (i > 0) pyCommand += ", ";
+    pyCommand += "\"";
+    pyCommand += theInputNodeFiles[i];
+    pyCommand += "\"";
+  }
+  pyCommand += "], \"" + theXaoFileName + "\", False )";
+  MESSAGE (". Lancement des projections: pyCommand = " << pyCommand);
+  PyRun_SimpleString(pyCommand.c_str());
+  PyGILState_Release(gstate);
+
+  //SMESHHOMARDImpl::FrontTrack* myFrontTrack = new SMESHHOMARDImpl::FrontTrack();
+  //myFrontTrack->track(theInputMedFile, theOutputMedFile,
+  //                    theInputNodeFiles, theXaoFileName, theIsParallel);
 
   // D. Transfert des coordonnées modifiées dans le fichier historique de HOMARD
   //    On lance une exécution spéciale de HOMARD en attendant
@@ -2367,7 +2395,8 @@ char* HOMARD_Gen_i::ComputeDirManagement(SMESHHOMARD::HOMARD_Cas_var myCase,
 //=============================================================================
 // Calcul d'une iteration : gestion du répertoire de calcul de l'iteration parent
 //=============================================================================
-char* HOMARD_Gen_i::ComputeDirPaManagement(SMESHHOMARD::HOMARD_Cas_var myCase, SMESHHOMARD::HOMARD_Iteration_var myIteration)
+char* HOMARD_Gen_i::ComputeDirPaManagement(SMESHHOMARD::HOMARD_Cas_var myCase,
+                                           SMESHHOMARD::HOMARD_Iteration_var myIteration)
 {
   MESSAGE ("ComputeDirPaManagement : répertoires pour le calcul");
   // Le répertoire du cas
@@ -2376,8 +2405,7 @@ char* HOMARD_Gen_i::ComputeDirPaManagement(SMESHHOMARD::HOMARD_Cas_var myCase, S
 
   // Le sous-répertoire de l'iteration precedente
 
-  SMESHHOMARD::HOMARD_Iteration_var myIterationParent = myIteration0;
-  const char* nomDirItPa = myIterationParent->GetDirNameLoc();
+  const char* nomDirItPa = myIteration0->GetDirNameLoc();
   std::stringstream DirComputePa;
   DirComputePa << nomDirCase << "/" << nomDirItPa;
   MESSAGE(". nomDirItPa = " << nomDirItPa);
@@ -2671,6 +2699,8 @@ void HOMARD_Gen_i::PythonDump()
   for (it_boundary  = _mesBoundarys.begin();
        it_boundary != _mesBoundarys.end(); ++it_boundary) {
     SMESHHOMARD::HOMARD_Boundary_var maBoundary = (*it_boundary).second;
+    //MESSAGE ("PythonDump  of boundary " << (*it_boundary).first <<
+    //         " : " << maBoundary->GetDumpPython());
     pd << maBoundary->GetDumpPython();
   }
 

@@ -423,7 +423,7 @@ bool SMESHGUI_HomardAdaptDlg::PushOnApply()
     if (anOutMed.isEmpty()) {
       // store in working directory and with default name
       QString aWorkingDir = myAdvOpt->workingDirectoryLineEdit->text().trimmed();
-      QFileInfo aFileInfo (QDir(aWorkingDir), "Uniform_01_R.med");
+      QFileInfo aFileInfo (QDir(aWorkingDir), "Uniform_R.med");
       anOutMed = aFileInfo.absoluteFilePath();
       // show it
       myArgs->mySelectOutMedFileLineEdit->setText(anOutMed);
@@ -437,7 +437,7 @@ bool SMESHGUI_HomardAdaptDlg::PushOnApply()
   else {
     // Set file name without path for it to be created in current directory
     // (it will be iteration's dir, and it will be destroyed after)
-    aMeshFileOUT = "Uniform_01_R.med";
+    aMeshFileOUT = "Uniform_R.med";
   }
   myHomardGen->SetMeshFileOUT(aMeshFileOUT.c_str());
 
@@ -561,8 +561,7 @@ void SMESHGUI_HomardAdaptDlg::selectionChanged()
   myArgs->myInBrowserObject->setText(aMeshName);
 
   // Out mesh name default value
-  // TODO: add some suffix? "_R" or "_UnifRefin", or "_Uniform_01_R"
-  myArgs->myOutMeshNameLineEdit->setText(aMeshName);
+  myArgs->myOutMeshNameLineEdit->setText(aMeshName + "_Uniform_R");
 
   // Output med file default value
   // Construct it from Input mesh name and working directory
@@ -572,9 +571,9 @@ void SMESHGUI_HomardAdaptDlg::selectionChanged()
   }
   else {
     QString aWorkingDir = myAdvOpt->workingDirectoryLineEdit->text().trimmed();
-    QFileInfo aFileInfo (QDir(aWorkingDir), aMeshName + QString("_Uniform_01_R.med"));
+    QFileInfo aFileInfo (QDir(aWorkingDir), aMeshName + QString("_Uniform_R.med"));
     for (int ii = 1; aFileInfo.exists(); ii++) {
-      QString anUniqueName = QString("%1_Uniform_01_R_%2.med").arg(aMeshName).arg(ii);
+      QString anUniqueName = QString("%1_Uniform_R_%2.med").arg(aMeshName).arg(ii);
       aFileInfo.setFile(QDir(aWorkingDir), anUniqueName);
     }
     myArgs->mySelectOutMedFileLineEdit->setText(aFileInfo.absoluteFilePath());
@@ -601,9 +600,8 @@ void SMESHGUI_HomardAdaptDlg::SetFileName()
   myArgs->mySelectInMedFileLineEdit->setText(fileName);
 
   // Out mesh name default value
-  // TODO: add some suffix? "_R" or "_UnifRefin", or "_Uniform_01_R"
   QString aMeshName = SMESH_HOMARD_QT_COMMUN::LireNomMaillage(fileName);
-  myArgs->myOutMeshNameLineEdit->setText(aMeshName);
+  myArgs->myOutMeshNameLineEdit->setText(aMeshName + "_Uniform_R");
 
   // Output med file default value
   // Construct it from Input med file name and path
@@ -613,9 +611,9 @@ void SMESHGUI_HomardAdaptDlg::SetFileName()
   if (lastdot != std::string::npos)
     fname = fname.substr(0, lastdot);
   QString fileNameOut = fname.c_str();
-  QFileInfo aFileInfo (fileNameOut + QString("_Uniform_01_R.med"));
+  QFileInfo aFileInfo (fileNameOut + QString("_Uniform_R.med"));
   for (int ii = 1; aFileInfo.exists(); ii++) {
-    QString anUniqueName = QString("%1_Uniform_01_R_%2.med").arg(fileNameOut).arg(ii);
+    QString anUniqueName = QString("%1_Uniform_R_%2.med").arg(fileNameOut).arg(ii);
     aFileInfo.setFile(anUniqueName);
   }
   myArgs->mySelectOutMedFileLineEdit->setText(aFileInfo.absoluteFilePath());

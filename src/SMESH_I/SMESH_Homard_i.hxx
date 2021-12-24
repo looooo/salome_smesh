@@ -135,8 +135,7 @@ private:
   SMESHHOMARD::HOMARD_Gen_var _gen_i;
 };
 
-class SMESH_I_EXPORT HOMARD_Iteration_i : public virtual SALOME::GenericObj_i,
-                                          public virtual POA_SMESHHOMARD::HOMARD_Iteration
+class SMESH_I_EXPORT HOMARD_Iteration_i
 {
 public:
   HOMARD_Iteration_i(SMESHHOMARD::HOMARD_Gen_var gen_i);
@@ -171,10 +170,6 @@ public:
 
   void                   SetFileInfo(const char* FileInfo);
   char*                  GetFileInfo();
-
-  // Liens avec les autres iterations
-  void                   LinkNextIteration(const char* NomIteration);
-  void                   UnLinkNextIteration(const char* NomIteration);
 
   // Liens avec les autres structures
   void                   SetCaseName(const char* NomCas);
@@ -236,12 +231,12 @@ public:
                                           const char* FileName,
                                           const char* theWorkingDir);
 
-  SMESHHOMARD::HOMARD_Iteration_ptr CreateIteration();
+  HOMARD_Iteration_i* CreateIteration();
 
   // Les informations
   SMESHHOMARD::HOMARD_Boundary_ptr  GetBoundary  (const char* nomBoundary);
   SMESHHOMARD::HOMARD_Cas_ptr       GetCase      ();
-  SMESHHOMARD::HOMARD_Iteration_ptr GetIteration (CORBA::Long numIter);
+  HOMARD_Iteration_i* GetIteration (CORBA::Long numIter);
 
   SMESHHOMARD::listeBoundarys* GetAllBoundarysName();
 
@@ -285,15 +280,15 @@ public:
 private:
   SMESHHOMARD::HOMARD_Boundary_ptr  newBoundary();
   SMESHHOMARD::HOMARD_Cas_ptr       newCase();
-  SMESHHOMARD::HOMARD_Iteration_ptr newIteration();
+  HOMARD_Iteration_i* newIteration();
   void CleanCase();
 
 private:
   SMESHHOMARDImpl::HOMARD_Gen* myHomard;
+  HOMARD_Iteration_i*          myIteration0;
+  HOMARD_Iteration_i*          myIteration1;
+  SMESHHOMARD::HOMARD_Cas_var  myCase;
   std::map<std::string, SMESHHOMARD::HOMARD_Boundary_var> _mesBoundarys;
-  SMESHHOMARD::HOMARD_Iteration_var  myIteration0;
-  SMESHHOMARD::HOMARD_Iteration_var  myIteration1;
-  SMESHHOMARD::HOMARD_Cas_var        myCase;
 
   // Preferences
   int  _ConfType; // Le type de conformite ou non conformite

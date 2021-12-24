@@ -87,42 +87,6 @@ module SMESHHOMARD
     string   GetCaseCreation()                             raises (SALOME::SALOME_Exception);
   };
 
-  interface HOMARD_Iteration : SALOME::GenericObj
-  {
-    // Generalites
-    void     SetName(in string Name) raises (SALOME::SALOME_Exception);
-    string   GetName()               raises (SALOME::SALOME_Exception);
-
-    // Caracteristiques
-    void     SetDirNameLoc(in string NomDir) raises (SALOME::SALOME_Exception);
-    string   GetDirNameLoc()                 raises (SALOME::SALOME_Exception);
-
-    string   GetDirName() raises (SALOME::SALOME_Exception);
-
-    void     SetNumber(in long NumIter) raises (SALOME::SALOME_Exception);
-    long     GetNumber()                raises (SALOME::SALOME_Exception);
-
-    void     SetState(in long State)                       raises (SALOME::SALOME_Exception);
-    long     GetState()                                    raises (SALOME::SALOME_Exception);
-
-    void     SetMeshName(in string NomMesh)                raises (SALOME::SALOME_Exception);
-    string   GetMeshName()                                 raises (SALOME::SALOME_Exception);
-
-    void     SetMeshFile(in string MeshFile)               raises (SALOME::SALOME_Exception);
-    string   GetMeshFile()                                 raises (SALOME::SALOME_Exception);
-
-    // Fichier des messages
-    void     SetLogFile(in string LogFile)                 raises (SALOME::SALOME_Exception);
-    string   GetLogFile()                                  raises (SALOME::SALOME_Exception);
-
-    void     SetFileInfo(in string FileInfo) raises (SALOME::SALOME_Exception);
-    string   GetFileInfo()                   raises (SALOME::SALOME_Exception);
-
-    // Drivers
-    void     SetInfoCompute(in long MessInfo)              raises (SALOME::SALOME_Exception);
-    long     GetInfoCompute()                              raises (SALOME::SALOME_Exception);
-  };
-
   interface HOMARD_Cas : SALOME::GenericObj
   {
     string GetName() raises (SALOME::SALOME_Exception);
@@ -144,8 +108,6 @@ module SMESHHOMARD
                               in string Group) raises (SALOME::SALOME_Exception);
     ListBoundaryGroupType GetBoundaryGroup() raises (SALOME::SALOME_Exception);
     void SupprBoundaryGroup() raises (SALOME::SALOME_Exception);
-
-    void AddIteration (in string IterName) raises (SALOME::SALOME_Exception);
   };
 
   interface HOMARD_Gen : SALOME::GenericObj
@@ -192,11 +154,7 @@ module SMESHHOMARD
     // A.2. Information
     HOMARD_Boundary  GetBoundary(in string BoundaryName) raises (SALOME::SALOME_Exception);
     HOMARD_Cas       GetCase() raises (SALOME::SALOME_Exception);
-    HOMARD_Iteration GetIteration(in long numIter) raises (SALOME::SALOME_Exception);
     listeBoundarys   GetAllBoundarysName()  raises (SALOME::SALOME_Exception);
-
-    // B. CreateIteration
-    HOMARD_Iteration CreateIteration() raises (SALOME::SALOME_Exception);
 
     void InvalideBoundary (in string BoundaryName) raises (SALOME::SALOME_Exception);
 

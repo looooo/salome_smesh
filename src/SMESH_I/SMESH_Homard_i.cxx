@@ -380,7 +380,8 @@ void HOMARD_Cas_i::SetDirName(const char* NomDir)
     throw SALOME::SALOME_Exception(es);
   }
   // D. En cas de reprise, deplacement du point de depart
-  SMESHHOMARD::HOMARD_Iteration_ptr Iter0 = _gen_i->GetIteration(0);
+  HOMARD_Gen_i* aGenImpl = SMESH::DownCast<HOMARD_Gen_i*>(_gen_i);
+  HOMARD_Iteration_i* Iter0 = aGenImpl->GetIteration(0);
   int state = Iter0->GetNumber();
   if (state != 0) { // GetState()
     MESSAGE ("etat : " << state);
@@ -660,7 +661,6 @@ void HOMARD_Cas_i::AddIteration(const char* NomIteration)
  */
 //=============================================================================
 HOMARD_Iteration_i::HOMARD_Iteration_i()
-  : SALOME::GenericObj_i(SMESH_Gen_i::GetPOA())
 {
   MESSAGE("Default constructor, not for use");
   ASSERT(0);
@@ -671,7 +671,6 @@ HOMARD_Iteration_i::HOMARD_Iteration_i()
  */
 //=============================================================================
 HOMARD_Iteration_i::HOMARD_Iteration_i(SMESHHOMARD::HOMARD_Gen_var engine)
-  : SALOME::GenericObj_i(SMESH_Gen_i::GetPOA())
 {
   MESSAGE("constructor");
   _gen_i = engine;
@@ -810,6 +809,8 @@ CORBA::Long HOMARD_Iteration_i::GetInfoCompute()
  */
 //=============================================================================
 HOMARD_Gen_i::HOMARD_Gen_i() : SALOME::GenericObj_i(SMESH_Gen_i::GetPOA()),
+                               myIteration0(NULL),
+                               myIteration1(NULL),
                                _ConfType(0),
                                _KeepMedOUT(true),
                                _PublishMeshOUT(false),
@@ -884,10 +885,13 @@ CORBA::Long HOMARD_Gen_i::DeleteIteration(int numIter)
   MESSAGE ("DeleteIteration : numIter = " << numIter);
 
   if (numIter == 0) {
-    myIteration0 = SMESHHOMARD::HOMARD_Iteration::_nil();
+    if (myIteration0 != NULL) {
+      delete myIteration0;
+      myIteration0 = NULL;
+    }
   }
   else {
-    if (!CORBA::is_nil(myIteration1)) {
+    if (myIteration1 != NULL) {
       // Invalide Iteration
       if (myIteration1->GetState() > 0) {
         myIteration1->SetState(1);
@@ -909,7 +913,8 @@ CORBA::Long HOMARD_Gen_i::DeleteIteration(int numIter)
         }
       }
 
-      myIteration1 = SMESHHOMARD::HOMARD_Iteration::_nil();
+      delete myIteration1;
+      myIteration1 = NULL;
     }
   }
 
@@ -956,24 +961,26 @@ void HOMARD_Gen_i::AssociateCaseIter(int numIter, const char* labelIter)
   }
 
   if (numIter == 0) {
-    if (CORBA::is_nil(myIteration0)) {
+    if (myIteration0 == NULL) {
       SALOME::ExceptionStruct es;
       es.type = SALOME::BAD_PARAM;
       es.text = "Invalid iteration";
       throw SALOME::SALOME_Exception(es);
     }
 
-    myCase->AddIteration(myIteration0->GetName());
+    HOMARD_Cas_i* aCaseImpl = SMESH::DownCast<HOMARD_Cas_i*>(myCase);
+    aCaseImpl->AddIteration(myIteration0->GetName());
   }
   else {
-    if (CORBA::is_nil(myIteration1)) {
+    if (myIteration1 == NULL) {
       SALOME::ExceptionStruct es;
       es.type = SALOME::BAD_PARAM;
       es.text = "Invalid iteration";
       throw SALOME::SALOME_Exception(es);
     }
 
-    myCase->AddIteration(myIteration1->GetName());
+    HOMARD_Cas_i* aCaseImpl = SMESH::DownCast<HOMARD_Cas_i*>(myCase);
+    aCaseImpl->AddIteration(myIteration1->GetName());
   }
 }
 
@@ -1016,15 +1023,15 @@ SMESHHOMARD::HOMARD_Cas_ptr HOMARD_Gen_i::GetCase()
   return SMESHHOMARD::HOMARD_Cas::_duplicate(myCase);
 }
 //=============================================================================
-SMESHHOMARD::HOMARD_Iteration_ptr HOMARD_Gen_i::GetIteration(int numIter)
+HOMARD_Iteration_i* HOMARD_Gen_i::GetIteration(int numIter)
 {
   if (numIter == 0) {
-    ASSERT(!CORBA::is_nil(myIteration0));
-    return SMESHHOMARD::HOMARD_Iteration::_duplicate(myIteration0);
+    ASSERT(myIteration0);
+    return myIteration0;
   }
 
-  ASSERT(!CORBA::is_nil(myIteration1));
-  return SMESHHOMARD::HOMARD_Iteration::_duplicate(myIteration1);
+  ASSERT(myIteration1);
+  return myIteration1;
 }
 
 //=============================================================================
@@ -1040,13 +1047,11 @@ SMESHHOMARD::HOMARD_Cas_ptr HOMARD_Gen_i::newCase()
   return aCase._retn();
 }
 //=============================================================================
-SMESHHOMARD::HOMARD_Iteration_ptr HOMARD_Gen_i::newIteration()
+HOMARD_Iteration_i* HOMARD_Gen_i::newIteration()
 {
   SMESHHOMARD::HOMARD_Gen_var engine = POA_SMESHHOMARD::HOMARD_Gen::_this();
   HOMARD_Iteration_i* aServant = new HOMARD_Iteration_i(engine);
-  SMESHHOMARD::HOMARD_Iteration_var aIter =
-    SMESHHOMARD::HOMARD_Iteration::_narrow(aServant->_this());
-  return aIter._retn();
+  return aServant;
 }
 //=============================================================================
 SMESHHOMARD::HOMARD_Boundary_ptr HOMARD_Gen_i::newBoundary()
@@ -1261,9 +1266,9 @@ SMESHHOMARD::HOMARD_Cas_ptr HOMARD_Gen_i::CreateCase(const char* MeshName,
 //=============================================================================
 // Create Iteration1
 //=============================================================================
-SMESHHOMARD::HOMARD_Iteration_ptr HOMARD_Gen_i::CreateIteration()
+HOMARD_Iteration_i* HOMARD_Gen_i::CreateIteration()
 {
-  if (CORBA::is_nil(myIteration0)) {
+  if (myIteration0 == NULL) {
     SALOME::ExceptionStruct es;
     es.type = SALOME::BAD_PARAM;
     es.text = "The parent iteration is not defined.";
@@ -1278,12 +1283,12 @@ SMESHHOMARD::HOMARD_Iteration_ptr HOMARD_Gen_i::CreateIteration()
   }
   const char* nomDirCase = myCase->GetDirName();
 
-  if (!myIteration1->_is_nil()) {
+  if (myIteration1 != NULL) {
     DeleteIteration(1);
   }
 
   myIteration1 = newIteration();
-  if (CORBA::is_nil(myIteration1)) {
+  if (myIteration1 == NULL) {
     SALOME::ExceptionStruct es;
     es.type = SALOME::BAD_PARAM;
     es.text = "Unable to create the iteration 1";
@@ -1323,7 +1328,7 @@ SMESHHOMARD::HOMARD_Iteration_ptr HOMARD_Gen_i::CreateIteration()
   std::string label = "IterationHomard_" + nomIterParent;
   AssociateCaseIter(1, label.c_str());
 
-  return SMESHHOMARD::HOMARD_Iteration::_duplicate(myIteration1);
+  return myIteration1;
 }
 //=============================================================================
 SMESHHOMARD::HOMARD_Boundary_ptr HOMARD_Gen_i::CreateBoundary(const char* BoundaryName,
@@ -1527,7 +1532,7 @@ CORBA::Long HOMARD_Gen_i::Compute()
   if (_LogInFile) myIteration1->SetLogFile(_LogFile.c_str());
 
   // A.1. L'objet iteration
-  ASSERT(!CORBA::is_nil(myIteration1));
+  ASSERT(myIteration1);
 
   // A.2. Controle de la possibilite d'agir
   // A.2.1. Etat de l'iteration
@@ -1691,7 +1696,7 @@ CORBA::Long HOMARD_Gen_i::Compute()
     PythonDump();
 
     // Delete log file, if required
-    if (!myIteration1->_is_nil()) {
+    if (myIteration1 != NULL) {
       MESSAGE("myIteration1->GetLogFile() = " << myIteration1->GetLogFile());
       if (_LogInFile && _RemoveLogOnSuccess) {
         // Remove log file on success
@@ -1747,7 +1752,7 @@ CORBA::Long HOMARD_Gen_i::ComputeAdap(SMESHHOMARDImpl::HomardDriver* myDriver)
   if (NumeIter < 11) { siter = "0" + siter; }
 
   // B. L'iteration parent
-  ASSERT(!CORBA::is_nil(myIteration0));
+  ASSERT(myIteration0);
 
   // C. Le sous-répertoire de l'iteration precedente
   char* DirComputePa = ComputeDirPaManagement();

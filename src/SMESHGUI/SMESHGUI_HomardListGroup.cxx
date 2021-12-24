@@ -57,15 +57,15 @@ SMESH_CreateListGroupCAO::SMESH_CreateListGroupCAO(SMESH_CreateBoundaryCAO* pare
 }
 // ------------------------------------------------------------------------------------
 SMESH_CreateListGroupCAO::SMESH_CreateListGroupCAO(SMESH_CreateBoundaryCAO* parentBound,
-                                             SMESHHOMARD::HOMARD_Gen_var myHomardGen,
-                                             QString aCaseName,
-                                             QStringList listeGroupesHypo)
+                                                   SMESHHOMARD::HOMARD_Gen_var myHomardGen0,
+                                                   QString aCaseName,
+                                                   QStringList listeGroupesHypo)
   : QDialog(0), SMESH_Ui_CreateListGroup(),
     _aCaseName (aCaseName),
     _listeGroupesHypo (listeGroupesHypo),
     _parentBound(parentBound)
 {
-    myHomardGen = SMESHHOMARD::HOMARD_Gen::_duplicate(myHomardGen);
+    myHomardGen = SMESHHOMARD::HOMARD_Gen::_duplicate(myHomardGen0);
     setupUi(this);
     InitConnect();
 }
@@ -147,8 +147,8 @@ void SMESH_CreateListGroupCAO::InitGroupes()
 
 // ------------------------------------------------------------------------
 SMESH_CreateListGroup::SMESH_CreateListGroup(SMESH_CreateBoundaryDi* parentBound, bool modal,
-                                       SMESHHOMARD::HOMARD_Gen_var myHomardGen0,
-                                       QString aCaseName,  QStringList listeGroupesHypo)
+                                             SMESHHOMARD::HOMARD_Gen_var myHomardGen0,
+                                             QString aCaseName,  QStringList listeGroupesHypo)
   : QDialog(0), SMESH_Ui_CreateListGroup(),
     _aCaseName (aCaseName),
     _listeGroupesHypo (listeGroupesHypo),
@@ -164,14 +164,14 @@ SMESH_CreateListGroup::SMESH_CreateListGroup(SMESH_CreateBoundaryDi* parentBound
 
 // ------------------------------------------------------------------------
 SMESH_CreateListGroup::SMESH_CreateListGroup(SMESH_CreateBoundaryDi* parentBound,
-                                       SMESHHOMARD::HOMARD_Gen_var myHomardGen,
-                                       QString aCaseName,  QStringList listeGroupesHypo)
+                                             SMESHHOMARD::HOMARD_Gen_var myHomardGen0,
+                                             QString aCaseName,  QStringList listeGroupesHypo)
   : QDialog(0), SMESH_Ui_CreateListGroup(),
     _aCaseName (aCaseName),
     _listeGroupesHypo (listeGroupesHypo),
     _parentBound(parentBound)
 {
-  myHomardGen = SMESHHOMARD::HOMARD_Gen::_duplicate(myHomardGen);
+  myHomardGen = SMESHHOMARD::HOMARD_Gen::_duplicate(myHomardGen0);
   setupUi(this);
   InitConnect();
 }
@@ -255,12 +255,12 @@ void SMESH_CreateListGroup::InitGroupes()
 
 //---------------------------------------------------------------------
 SMESH_EditListGroupCAO::SMESH_EditListGroupCAO( SMESH_CreateBoundaryCAO* parentBound,
-                                          bool modal,
-                                          SMESHHOMARD::HOMARD_Gen_var myHomardGen,
-                                          QString aCaseName,
-                                          QStringList listeGroupesHypo):
+                                                bool modal,
+                                                SMESHHOMARD::HOMARD_Gen_var myHomardGen0,
+                                                QString aCaseName,
+                                                QStringList listeGroupesHypo):
 //---------------------------------------------------------------------
-SMESH_CreateListGroupCAO(parentBound,myHomardGen,aCaseName,listeGroupesHypo)
+SMESH_CreateListGroupCAO(parentBound,myHomardGen0,aCaseName,listeGroupesHypo)
 {
   MESSAGE("Debut de SMESH_EditListGroupCAO");
     setWindowTitle(QObject::tr("HOM_GROU_EDIT_WINDOW_TITLE"));
@@ -291,12 +291,12 @@ void SMESH_EditListGroupCAO:: InitGroupes()
 
 //---------------------------------------------------------------------
 SMESH_EditListGroup::SMESH_EditListGroup( SMESH_CreateBoundaryDi* parentBound,
-                                    bool modal,
-                                    SMESHHOMARD::HOMARD_Gen_var myHomardGen,
-                                    QString aCaseName,
-                                    QStringList listeGroupesHypo):
+                                          bool modal,
+                                          SMESHHOMARD::HOMARD_Gen_var myHomardGen0,
+                                          QString aCaseName,
+                                          QStringList listeGroupesHypo):
 //---------------------------------------------------------------------
-SMESH_CreateListGroup(parentBound,myHomardGen,aCaseName,listeGroupesHypo)
+SMESH_CreateListGroup(parentBound,myHomardGen0,aCaseName,listeGroupesHypo)
 {
   MESSAGE("Debut de SMESH_EditListGroup");
     setWindowTitle(QObject::tr("HOM_GROU_EDIT_WINDOW_TITLE"));

@@ -62,6 +62,21 @@
 #include <vector>
 #include <stdio.h>
 
+// C'est le ASSERT de SALOMELocalTrace/utilities.h dans KERNEL
+#ifndef VERIFICATION
+#define VERIFICATION(condition) \
+        if (!(condition)){INTERRUPTION("CONDITION "<<#condition<<" NOT VERIFIED")}
+#endif /* VERIFICATION */
+
+// La gestion des repertoires
+#ifndef CHDIR
+  #ifdef WIN32
+    #define CHDIR _chdir
+  #else
+    #define CHDIR chdir
+  #endif
+#endif
+
 using namespace std;
 
 SMESHHOMARD::HOMARD_Gen_ptr SMESH_Gen_i::CreateHOMARD_ADAPT()
@@ -657,80 +672,6 @@ void HOMARD_Cas_i::AddIteration(const char* NomIteration)
  *  standard constructor
  */
 //=============================================================================
-HOMARD_Hypothesis_i::HOMARD_Hypothesis_i()
-  : SALOME::GenericObj_i(SMESH_Gen_i::GetPOA())
-{
-  MESSAGE("Default constructor, not for use");
-  ASSERT(0);
-}
-
-//=============================================================================
-/*!
- *  standard constructor
- */
-//=============================================================================
-HOMARD_Hypothesis_i::HOMARD_Hypothesis_i(SMESHHOMARD::HOMARD_Gen_var engine)
-  : SALOME::GenericObj_i(SMESH_Gen_i::GetPOA())
-{
-  MESSAGE("standard constructor");
-  _gen_i = engine;
-  myHomardHypothesis = new SMESHHOMARDImpl::HOMARD_Hypothesis();
-  ASSERT(myHomardHypothesis);
-
-  // SetUnifRefinUnRef(1)
-  int RefinType = 1;
-  int UnRefType = 0;
-  myHomardHypothesis->SetAdapType(-1);
-  myHomardHypothesis->SetRefinTypeDera(RefinType, UnRefType);
-
-  // Set name
-  myHomardHypothesis->SetName("Hypo_1");
-}
-
-//=============================================================================
-/*!
- *  standard destructor
- */
-//=============================================================================
-HOMARD_Hypothesis_i::~HOMARD_Hypothesis_i()
-{
-}
-
-//=============================================================================
-void HOMARD_Hypothesis_i::SetExtraOutput(CORBA::Long ExtraOutput)
-{
-  ASSERT(myHomardHypothesis);
-  myHomardHypothesis->SetExtraOutput(ExtraOutput);
-}
-//=============================================================================
-CORBA::Long HOMARD_Hypothesis_i::GetExtraOutput()
-{
-  ASSERT(myHomardHypothesis);
-  return myHomardHypothesis->GetExtraOutput();
-}
-
-//=============================================================================
-//=============================================================================
-// Liens avec les autres structures
-//=============================================================================
-//=============================================================================
-void HOMARD_Hypothesis_i::LinkIteration(const char* NomIteration)
-{
-  ASSERT(myHomardHypothesis);
-  myHomardHypothesis->LinkIteration(NomIteration);
-}
-//=============================================================================
-void HOMARD_Hypothesis_i::UnLinkIteration(const char* NomIteration)
-{
-  ASSERT(myHomardHypothesis);
-  myHomardHypothesis->UnLinkIteration(NomIteration);
-}
-
-//=============================================================================
-/*!
- *  standard constructor
- */
-//=============================================================================
 HOMARD_Iteration_i::HOMARD_Iteration_i()
   : SALOME::GenericObj_i(SMESH_Gen_i::GetPOA())
 {
@@ -864,61 +805,6 @@ char* HOMARD_Iteration_i::GetFileInfo()
   return CORBA::string_dup(myHomardIteration->GetFileInfo().c_str());
 }
 //=============================================================================
-//=============================================================================
-// Liens avec les autres iterations
-//=============================================================================
-//=============================================================================
-void HOMARD_Iteration_i::LinkNextIteration(const char* NomIteration)
-{
-  ASSERT(myHomardIteration);
-  myHomardIteration->LinkNextIteration(NomIteration);
-}
-//=============================================================================
-void HOMARD_Iteration_i::UnLinkNextIteration(const char* NomIteration)
-{
-  ASSERT(myHomardIteration);
-  myHomardIteration->UnLinkNextIteration(NomIteration);
-}
-//=============================================================================
-void HOMARD_Iteration_i::SetIterParentName(const char* NomIterParent)
-{
-  ASSERT(myHomardIteration);
-  myHomardIteration->SetIterParentName(NomIterParent);
-}
-//=============================================================================
-char* HOMARD_Iteration_i::GetIterParentName()
-{
-  ASSERT(myHomardIteration);
-  return CORBA::string_dup(myHomardIteration->GetIterParentName().c_str());
-}
-
-//=============================================================================
-//=============================================================================
-// Liens avec les autres structures
-//=============================================================================
-//=============================================================================
-void HOMARD_Iteration_i::SetCaseName(const char* NomCas)
-{
-  ASSERT(myHomardIteration);
-  myHomardIteration->SetCaseName(NomCas);
-}
-//=============================================================================
-char* HOMARD_Iteration_i::GetCaseName()
-{
-  ASSERT(myHomardIteration);
-  return CORBA::string_dup(myHomardIteration->GetCaseName().c_str());
-}
-//=============================================================================
-void HOMARD_Iteration_i::SetHypoName(const char* NomHypo)
-{
-  ASSERT(myHomardIteration);
-  myHomardIteration->SetHypoName(NomHypo);
-}
-//=============================================================================
-//=============================================================================
-// Divers
-//=============================================================================
-//=============================================================================
 void HOMARD_Iteration_i::SetInfoCompute(CORBA::Long MessInfo)
 {
   ASSERT(myHomardIteration);
@@ -962,9 +848,9 @@ HOMARD_Gen_i::HOMARD_Gen_i() : SALOME::GenericObj_i(SMESH_Gen_i::GetPOA()),
 HOMARD_Gen_i::~HOMARD_Gen_i()
 {
   MESSAGE ("HOMARD_Gen_i::~HOMARD_Gen_i()");
-  if (!myCase->_is_nil()) {
-    CleanCase();
-  }
+  //if (!myCase->_is_nil()) {
+  //  CleanCase();
+  //}
 }
 
 //=============================================================================
@@ -1010,17 +896,18 @@ CORBA::Long HOMARD_Gen_i::DeleteIteration(int numIter)
   MESSAGE ("DeleteIteration : numIter = " << numIter);
 
   if (numIter == 0) {
-    if (CORBA::is_nil(myIteration1))
-      myIteration0 = SMESHHOMARD::HOMARD_Iteration::_nil();
+    myIteration0 = SMESHHOMARD::HOMARD_Iteration::_nil();
   }
   else {
     if (!CORBA::is_nil(myIteration1)) {
+      /*
       if (CORBA::is_nil(myIteration0)) {
         SALOME::ExceptionStruct es;
         es.type = SALOME::BAD_PARAM;
         es.text = "Invalid iteration 0";
         throw SALOME::SALOME_Exception(es);
       }
+      */
 
       // Invalide Iteration
       if (myIteration1->GetState() > 0) {
@@ -1043,10 +930,6 @@ CORBA::Long HOMARD_Gen_i::DeleteIteration(int numIter)
         }
       }
 
-      // Unlink from the parent iteration and from the hypothesis
-      myIteration0->UnLinkNextIteration("Iter_1");
-      ASSERT(!CORBA::is_nil(myHypothesis));
-      myHypothesis->UnLinkIteration("Iter_1");
       myIteration1 = SMESHHOMARD::HOMARD_Iteration::_nil();
     }
   }
@@ -1102,7 +985,6 @@ void HOMARD_Gen_i::AssociateCaseIter(int numIter, const char* labelIter)
     }
 
     myCase->AddIteration(myIteration0->GetName());
-    myIteration0->SetCaseName("Case_1");
   }
   else {
     if (CORBA::is_nil(myIteration1)) {
@@ -1113,7 +995,6 @@ void HOMARD_Gen_i::AssociateCaseIter(int numIter, const char* labelIter)
     }
 
     myCase->AddIteration(myIteration1->GetName());
-    myIteration1->SetCaseName("Case_1");
   }
 }
 
@@ -1436,7 +1317,7 @@ SMESHHOMARD::HOMARD_Iteration_ptr HOMARD_Gen_i::CreateIteration()
   myIteration1->SetState(1);
   myIteration1->SetNumber(1);
 
-  int nbitercase = 1; //myCase->GetNumberofIter()
+  int nbitercase = 1;
   char* nomDirIter = CreateDirNameIter(nomDirCase, nbitercase);
   myIteration1->SetDirNameLoc(nomDirIter);
 
@@ -1462,29 +1343,6 @@ SMESHHOMARD::HOMARD_Iteration_ptr HOMARD_Gen_i::CreateIteration()
   std::string nomIterParent = myIteration0->GetName();
   std::string label = "IterationHomard_" + nomIterParent;
   AssociateCaseIter(1, label.c_str());
-
-  // Lien avec l'iteration precedente
-  myIteration0->LinkNextIteration("Iter_1");
-  myIteration1->SetIterParentName(nomIterParent.c_str());
-
-  // Associate hypothesis
-  if (CORBA::is_nil(myHypothesis)) {
-    SMESHHOMARD::HOMARD_Gen_var engine = POA_SMESHHOMARD::HOMARD_Gen::_this();
-    HOMARD_Hypothesis_i* aServant = new HOMARD_Hypothesis_i(engine);
-    myHypothesis = SMESHHOMARD::HOMARD_Hypothesis::_narrow(aServant->_this());
-    if (CORBA::is_nil(myHypothesis)) {
-      SALOME::ExceptionStruct es;
-      es.type = SALOME::BAD_PARAM;
-      es.text = "Unable to create the hypothesis";
-      throw SALOME::SALOME_Exception(es);
-    }
-    //myHypothesis->SetNivMax(-1);
-    //myHypothesis->SetDiamMin(-1.0);
-    //myHypothesis->SetAdapInit(0);
-    //myHypothesis->SetExtraOutput(1);
-  }
-  myIteration1->SetHypoName("Hypo_1");
-  myHypothesis->LinkIteration("Iter_1");
 
   return SMESHHOMARD::HOMARD_Iteration::_duplicate(myIteration1);
 }
@@ -1731,7 +1589,7 @@ CORBA::Long HOMARD_Gen_i::Compute()
   // B.1. Le répertoire courant
   std::string nomDirWork = getenv("PWD");
   // B.2. Le sous-répertoire de l'iteration a traiter
-  char* DirCompute = ComputeDirManagement(myCase, myIteration1);
+  char* DirCompute = ComputeDirManagement();
   MESSAGE(". DirCompute = " << DirCompute);
 
   // C. Le fichier des messages
@@ -1767,10 +1625,10 @@ CORBA::Long HOMARD_Gen_i::Compute()
   iaux = 1;
   myDriver->TexteMaillageHOMARD(DirCompute, siterp1, iaux);
   myDriver->TexteMaillage(NomMesh, MeshFile, 1);
-  codret = ComputeAdap(myCase, myIteration1, myDriver);
+  codret = ComputeAdap(myDriver);
 
   // E.4. Ajout des informations liees a l'eventuel suivi de frontiere
-  int BoundaryOption = DriverTexteBoundary(myCase, myDriver);
+  int BoundaryOption = DriverTexteBoundary(myDriver);
 
   // E.5. Ecriture du texte dans le fichier
   MESSAGE (". Ecriture du texte dans le fichier de configuration; codret = "<<codret);
@@ -1845,13 +1703,22 @@ CORBA::Long HOMARD_Gen_i::Compute()
   if (codret == 0) {
     if ((BoundaryOption % 5 == 0) && (codretexec == 0)) {
       MESSAGE ("Suivi de frontière CAO");
-      codret = ComputeCAO(myCase, myIteration1);
+      codret = ComputeCAO();
     }
   }
 
   if (codretexec == 0) {
     // Python Dump
     PythonDump();
+
+    // Delete log file, if required
+    if (!myIteration1->_is_nil()) {
+      MESSAGE("myIteration1->GetLogFile() = " << myIteration1->GetLogFile());
+      if (_LogInFile && _RemoveLogOnSuccess) {
+        // Remove log file on success
+        SMESH_File(myIteration1->GetLogFile(), false).remove();
+      }
+    }
 
     // Clean all data
     CleanCase();
@@ -1862,29 +1729,14 @@ CORBA::Long HOMARD_Gen_i::Compute()
 
 void HOMARD_Gen_i::CleanCase()
 {
-  // Delete log file, if required
-  if (!myIteration1->_is_nil()) {
-    MESSAGE("myIteration1->GetLogFile() = " << myIteration1->GetLogFile());
-    if (_LogInFile && _RemoveLogOnSuccess) {
-      // Remove log file on success
-      SMESH_File(myIteration1->GetLogFile(), false).remove();
-    }
-  }
+  MESSAGE ("CleanCase");
+  if (myCase->_is_nil()) return;
 
   // Delete all boundaries
-  //std::map<std::string, SMESHHOMARD::HOMARD_Boundary_var>::const_iterator it_boundary;
-  //for (it_boundary  = _mesBoundarys.begin();
-  //     it_boundary != _mesBoundarys.end(); ++it_boundary) {
-  //  DeleteBoundary((*it_boundary).first.c_str());
-  //}
   _mesBoundarys.clear();
 
   // Delete iteration
   DeleteIteration(1);
-
-  // Delete hypothesis
-  // Hypothesis should be deleted only after iteration deletion
-  myHypothesis = SMESHHOMARD::HOMARD_Hypothesis::_nil();
 
   // Delete case
   DeleteCase();
@@ -1901,9 +1753,7 @@ void HOMARD_Gen_i::CleanCase()
 //=============================================================================
 // Calcul d'une iteration : partie spécifique à l'adaptation
 //=============================================================================
-CORBA::Long HOMARD_Gen_i::ComputeAdap(SMESHHOMARD::HOMARD_Cas_var myCase,
-                                      SMESHHOMARD::HOMARD_Iteration_var myIteration,
-                                      SMESHHOMARDImpl::HomardDriver* myDriver)
+CORBA::Long HOMARD_Gen_i::ComputeAdap(SMESHHOMARDImpl::HomardDriver* myDriver)
 {
   MESSAGE ("ComputeAdap");
 
@@ -1911,20 +1761,17 @@ CORBA::Long HOMARD_Gen_i::ComputeAdap(SMESHHOMARD::HOMARD_Cas_var myCase,
   // A.1. Bases
   int codret = 0;
   // Numero de l'iteration
-  int NumeIter = myIteration->GetNumber();
+  int NumeIter = 1;
   std::stringstream saux0;
   saux0 << NumeIter-1;
   std::string siter = saux0.str();
   if (NumeIter < 11) { siter = "0" + siter; }
 
-  // A.2. On verifie qu il y a une hypothese (erreur improbable);
-  ASSERT(!CORBA::is_nil(myHypothesis));
-
   // B. L'iteration parent
   ASSERT(!CORBA::is_nil(myIteration0));
 
   // C. Le sous-répertoire de l'iteration precedente
-  char* DirComputePa = ComputeDirPaManagement(myCase, myIteration);
+  char* DirComputePa = ComputeDirPaManagement();
   MESSAGE(". DirComputePa = " << DirComputePa);
 
   // D. Les données de l'adaptation HOMARD
@@ -1939,7 +1786,7 @@ CORBA::Long HOMARD_Gen_i::ComputeAdap(SMESHHOMARD::HOMARD_Cas_var myCase,
   MESSAGE (". MeshFileParent = " << MeshFileParent);
 
   // D.4. Le maillage associe a l'iteration
-  const char* MeshFile = myIteration->GetMeshFile();
+  const char* MeshFile = myIteration1->GetMeshFile();
   MESSAGE (". MeshFile = " << MeshFile);
   FILE *file = fopen(MeshFile,"r");
   if (file != NULL) {
@@ -1966,36 +1813,20 @@ CORBA::Long HOMARD_Gen_i::ComputeAdap(SMESHHOMARD::HOMARD_Cas_var myCase,
     }
   }
 
-  // D.5. Les types de raffinement et de deraffinement
-  // Les appels corba sont lourds, il vaut mieux les grouper
-  //SMESHHOMARD::listeTypes* ListTypes = myHypothesis->GetAdapRefinUnRef();
-  //ASSERT(ListTypes->length() == 3);
-  int TypeAdap = -1; // HomardHypothesis->GetAdapType()
-  int TypeRaff = 1; // HomardHypothesis->GetRefinType()
-  int TypeDera = 0; // HomardHypothesis->GetUnRefType()
-
   // E. Texte du fichier de configuration
   // E.1. Incontournables du texte
   myDriver->TexteAdap();
   int iaux = 0;
   myDriver->TexteMaillageHOMARD(DirComputePa, siter, iaux);
   myDriver->TexteMaillage(NomMeshParent, MeshFileParent, 0);
-  myDriver->TexteConfRaffDera(ConfType, TypeAdap, TypeRaff, TypeDera);
+  myDriver->TexteConfRaffDera(ConfType);
 
   // E.6. Ajout des options avancees
-  //int NivMax = myHypo->GetNivMax();
-  //MESSAGE (". NivMax = " << NivMax);
-  //double DiamMin = myHypo->GetDiamMin();
-  //MESSAGE (". DiamMin = " << DiamMin);
-  //int AdapInit = myHypo->GetAdapInit();
-  //MESSAGE (". AdapInit = " << AdapInit);
-  //int ExtraOutput = myHypo->GetExtraOutput();
-  //MESSAGE (". ExtraOutput = " << ExtraOutput);
   //myDriver->TexteAdvanced(NivMax, DiamMin, AdapInit, ExtraOutput);
   myDriver->TexteAdvanced(-1, -1.0, 0, 1);
 
   // E.7. Ajout des informations sur le deroulement de l'execution
-  int MessInfo = myIteration->GetInfoCompute();
+  int MessInfo = myIteration1->GetInfoCompute();
   MESSAGE (". MessInfo = " << MessInfo);
   myDriver->TexteInfoCompute(MessInfo);
 
@@ -2004,8 +1835,7 @@ CORBA::Long HOMARD_Gen_i::ComputeAdap(SMESHHOMARD::HOMARD_Cas_var myCase,
 //=============================================================================
 // Calcul d'une iteration : partie spécifique au suivi de frontière CAO
 //=============================================================================
-CORBA::Long HOMARD_Gen_i::ComputeCAO(SMESHHOMARD::HOMARD_Cas_var myCase,
-                                     SMESHHOMARD::HOMARD_Iteration_var myIteration)
+CORBA::Long HOMARD_Gen_i::ComputeCAO()
 {
   MESSAGE ("ComputeCAO");
 
@@ -2013,9 +1843,9 @@ CORBA::Long HOMARD_Gen_i::ComputeCAO(SMESHHOMARD::HOMARD_Cas_var myCase,
   // A.1. Bases
   int codret = 0;
   // A.2. Le sous-répertoire de l'iteration en cours de traitement
-  char* DirCompute = myIteration->GetDirName();
+  char* DirCompute = myIteration1->GetDirName();
   // A.3. Le maillage résultat de l'iteration en cours de traitement
-  char* MeshFile = myIteration->GetMeshFile();
+  char* MeshFile = myIteration1->GetMeshFile();
 
   // B. Les données pour FrontTrack
   // B.1. Le maillage à modifier
@@ -2077,9 +1907,6 @@ CORBA::Long HOMARD_Gen_i::ComputeCAO(SMESHHOMARD::HOMARD_Cas_var myCase,
   const std::string theXaoFileName = myBoundary->GetDataFile();
   MESSAGE (". theXaoFileName = " << theXaoFileName);
 
-  // B.5. Parallélisme
-  bool theIsParallel = false;
-
   // C. Lancement des projections
   MESSAGE (". Lancement des projections");
 
@@ -2101,15 +1928,11 @@ CORBA::Long HOMARD_Gen_i::ComputeCAO(SMESHHOMARD::HOMARD_Cas_var myCase,
   PyRun_SimpleString(pyCommand.c_str());
   PyGILState_Release(gstate);
 
-  //SMESHHOMARDImpl::FrontTrack* myFrontTrack = new SMESHHOMARDImpl::FrontTrack();
-  //myFrontTrack->track(theInputMedFile, theOutputMedFile,
-  //                    theInputNodeFiles, theXaoFileName, theIsParallel);
-
   // D. Transfert des coordonnées modifiées dans le fichier historique de HOMARD
   //    On lance une exécution spéciale de HOMARD en attendant
   //    de savoir le faire avec MEDCoupling
   MESSAGE (". Transfert des coordonnées");
-  codret = ComputeCAObis(myIteration);
+  codret = ComputeCAObis();
 
   return codret;
 }
@@ -2117,7 +1940,7 @@ CORBA::Long HOMARD_Gen_i::ComputeCAO(SMESHHOMARD::HOMARD_Cas_var myCase,
 //=============================================================================
 // Transfert des coordonnées en suivi de frontière CAO
 //=============================================================================
-CORBA::Long HOMARD_Gen_i::ComputeCAObis(SMESHHOMARD::HOMARD_Iteration_var myIteration)
+CORBA::Long HOMARD_Gen_i::ComputeCAObis()
 {
   MESSAGE ("ComputeCAObis");
 
@@ -2126,7 +1949,7 @@ CORBA::Long HOMARD_Gen_i::ComputeCAObis(SMESHHOMARD::HOMARD_Iteration_var myIter
 
   // A.1. Controle de la possibilite d'agir
   // A.1.1. Etat de l'iteration
-  int etat = myIteration->GetState();
+  int etat = myIteration1->GetState();
   MESSAGE ("etat = " << etat);
   // A.1.2. L'iteration doit être calculee
   if (etat == 1) {
@@ -2138,7 +1961,7 @@ CORBA::Long HOMARD_Gen_i::ComputeCAObis(SMESHHOMARD::HOMARD_Iteration_var myIter
   }
   // A.2. Numero de l'iteration
   //     siterp1 : numero de l'iteration a traiter
-  int NumeIter = myIteration->GetNumber();
+  int NumeIter = myIteration1->GetNumber();
   std::string siterp1;
   std::stringstream saux1;
   saux1 << NumeIter;
@@ -2150,14 +1973,14 @@ CORBA::Long HOMARD_Gen_i::ComputeCAObis(SMESHHOMARD::HOMARD_Iteration_var myIter
   ASSERT(!CORBA::is_nil(myCase));
 
   // A.4. Le sous-répertoire de l'iteration a traiter
-  char* DirCompute = myIteration->GetDirName();
+  char* DirCompute = myIteration1->GetDirName();
   MESSAGE(". DirCompute = " << DirCompute);
 
   // C. Le fichier des messages
   std::string LogFile = DirCompute;
   LogFile += "/Liste." + siterp1 + ".maj_coords.log";
   MESSAGE (". LogFile = " << LogFile);
-  myIteration->SetFileInfo(LogFile.c_str());
+  myIteration1->SetFileInfo(LogFile.c_str());
 
   // D. On passe dans le répertoire de l'iteration a calculer
   MESSAGE (". On passe dans DirCompute = " << DirCompute);
@@ -2169,9 +1992,9 @@ CORBA::Long HOMARD_Gen_i::ComputeCAObis(SMESHHOMARD::HOMARD_Iteration_var myIter
   myDriver->TexteInit(DirCompute, LogFile, "English");
 
   // E.2. Le maillage associe a l'iteration
-  const char* NomMesh = myIteration->GetMeshName();
+  const char* NomMesh = myIteration1->GetMeshName();
   MESSAGE (". NomMesh = " << NomMesh);
-  const char* MeshFile = myIteration->GetMeshFile();
+  const char* MeshFile = myIteration1->GetMeshFile();
   MESSAGE (". MeshFile = " << MeshFile);
 
   // E.3. Les données du traitement HOMARD
@@ -2296,8 +2119,7 @@ char* HOMARD_Gen_i::CreateDirNameIter(const char* nomrep, CORBA::Long num)
 //=============================================================================
 // Calcul d'une iteration : gestion du répertoire de calcul
 //=============================================================================
-char* HOMARD_Gen_i::ComputeDirManagement(SMESHHOMARD::HOMARD_Cas_var myCase,
-                                         SMESHHOMARD::HOMARD_Iteration_var myIteration)
+char* HOMARD_Gen_i::ComputeDirManagement()
 {
   MESSAGE ("ComputeDirManagement : répertoires pour le calcul");
 
@@ -2313,7 +2135,7 @@ char* HOMARD_Gen_i::ComputeDirManagement(SMESHHOMARD::HOMARD_Cas_var myCase,
 
   // B.3. Le sous-répertoire de l'iteration a calculer, puis le répertoire complet a creer
   // B.3.1. Le nom du sous-répertoire
-  const char* nomDirIt = myIteration->GetDirNameLoc();
+  const char* nomDirIt = myIteration1->GetDirNameLoc();
 
   // B.3.2. Le nom complet du sous-répertoire
   std::stringstream DirCompute;
@@ -2395,8 +2217,7 @@ char* HOMARD_Gen_i::ComputeDirManagement(SMESHHOMARD::HOMARD_Cas_var myCase,
 //=============================================================================
 // Calcul d'une iteration : gestion du répertoire de calcul de l'iteration parent
 //=============================================================================
-char* HOMARD_Gen_i::ComputeDirPaManagement(SMESHHOMARD::HOMARD_Cas_var myCase,
-                                           SMESHHOMARD::HOMARD_Iteration_var myIteration)
+char* HOMARD_Gen_i::ComputeDirPaManagement()
 {
   MESSAGE ("ComputeDirPaManagement : répertoires pour le calcul");
   // Le répertoire du cas
@@ -2421,7 +2242,7 @@ char* HOMARD_Gen_i::ComputeDirPaManagement(SMESHHOMARD::HOMARD_Cas_var myCase,
 //    2. les liens avec les groupes
 //    3. un entier resumant le type de comportement pour les frontieres
 //=============================================================================
-int HOMARD_Gen_i::DriverTexteBoundary(SMESHHOMARD::HOMARD_Cas_var myCase, SMESHHOMARDImpl::HomardDriver* myDriver)
+int HOMARD_Gen_i::DriverTexteBoundary(SMESHHOMARDImpl::HomardDriver* myDriver)
 {
   MESSAGE ("... DriverTexteBoundary");
   // 1. Recuperation des frontieres

@@ -72,6 +72,7 @@ SMESHGUI_HomardAdaptDlg::SMESHGUI_HomardAdaptDlg(SMESHHOMARD::HOMARD_Gen_ptr myH
 {
   MESSAGE("Debut du constructeur de SMESHGUI_HomardAdaptDlg");
   myHomardGen = SMESHHOMARD::HOMARD_Gen::_duplicate(myHomardGen0);
+  //myHomardGen = SMESHGUI::GetSMESHGen()->CreateHOMARD_ADAPT();
   myHomardGen->Register();
 
   setModal(false);
@@ -181,6 +182,7 @@ SMESHGUI_HomardAdaptDlg::SMESHGUI_HomardAdaptDlg(SMESHHOMARD::HOMARD_Gen_ptr myH
 SMESHGUI_HomardAdaptDlg::~SMESHGUI_HomardAdaptDlg()
 {
   // no need to delete child widgets, Qt does it all for us
+  myHomardGen->CleanCase();
 }
 
 //=================================================================================

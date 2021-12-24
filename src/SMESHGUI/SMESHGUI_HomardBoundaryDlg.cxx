@@ -44,8 +44,8 @@ using namespace std;
 
 // ----------------------------------------------------------------------------------
 SMESH_CreateBoundaryAn::SMESH_CreateBoundaryAn(SMESHGUI_HomardAdaptDlg* parent, bool modal,
-                                         SMESHHOMARD::HOMARD_Gen_var myHomardGen0,
-                                         QString caseName) :
+                                               SMESHHOMARD::HOMARD_Gen_var myHomardGen0,
+                                               QString caseName) :
 /* Constructs a SMESH_CreateBoundaryAn
    appele pour une vraie creation
    initialise un cylindre et non une sphere
@@ -106,8 +106,8 @@ SMESH_CreateBoundaryAn::SMESH_CreateBoundaryAn(SMESHGUI_HomardAdaptDlg* parent, 
 
 // -------------------------------------------------------------------------------
 SMESH_CreateBoundaryAn::SMESH_CreateBoundaryAn(SMESHGUI_HomardAdaptDlg* parent,
-                                         SMESHHOMARD::HOMARD_Gen_var myHomardGen0,
-                                         QString caseName):
+                                               SMESHHOMARD::HOMARD_Gen_var myHomardGen0,
+                                               QString caseName):
     QDialog(0), SMESH_Ui_CreateBoundaryAn(),
     _parent(parent),
     _Name (""),
@@ -117,10 +117,10 @@ SMESH_CreateBoundaryAn::SMESH_CreateBoundaryAn(SMESHGUI_HomardAdaptDlg* parent,
     // Pour affichage lors de l edition d une BoundaryAn sans nom de Cas
     _Xcentre(0), _Ycentre(0), _Zcentre(0), _Rayon(0),
     _Xmin(1), _Xmax(1), _Xincr(1), _Ymin(1), _Ymax(1), _Yincr(1), _Zmin(1), _Zmax(1), _Zincr(1), _DMax(1),
-     Chgt (false),
-     myHomardGen(myHomardGen0)
+     Chgt (false)
     {
   //  MESSAGE("Debut de  SMESH_CreateBoundaryAn")
+      myHomardGen = SMESHHOMARD::HOMARD_Gen::_duplicate(myHomardGen0);
       setupUi(this);
       SUIT_ResourceMgr* resMgr = SUIT_Session::session()->resourceMgr();
       QPixmap pix = resMgr->loadPixmap( "HOMARD", "spherepoint.png" );
@@ -805,8 +805,8 @@ void SMESH_CreateBoundaryAn::convertRayonAngle(int option)
 
 // -------------------------------------------------------------------------------
 SMESH_CreateBoundaryCAO::SMESH_CreateBoundaryCAO(SMESHGUI_HomardAdaptDlg* parent, bool modal,
-                                           SMESHHOMARD::HOMARD_Gen_var myHomardGen0,
-                                           QString caseName, QString aName)
+                                                 SMESHHOMARD::HOMARD_Gen_var myHomardGen0,
+                                                 QString caseName, QString aName)
 // ---------------------------------------------------------------------------------
 /* Constructs a SMESH_CreateBoundaryCAO */
     :
@@ -968,8 +968,8 @@ void SMESH_CreateBoundaryCAO::SetFiltrage()
 
 // -------------------------------------------------------------------------------
 SMESH_CreateBoundaryDi::SMESH_CreateBoundaryDi(SMESHGUI_HomardAdaptDlg* parent, bool modal,
-                                         SMESHHOMARD::HOMARD_Gen_var myHomardGen0,
-                                         QString caseName, QString aName)
+                                               SMESHHOMARD::HOMARD_Gen_var myHomardGen0,
+                                               QString caseName, QString aName)
 // ---------------------------------------------------------------------------------
 /* Constructs a SMESH_CreateBoundaryDi */
     :
@@ -1140,13 +1140,13 @@ void SMESH_CreateBoundaryDi::SetFiltrage()
 
 // ------------------------------------------------------------------------
 SMESH_EditBoundaryAn::SMESH_EditBoundaryAn( SMESHGUI_HomardAdaptDlg* parent, bool modal,
-                                      SMESHHOMARD::HOMARD_Gen_var myHomardGen,
-                                      QString caseName, QString Name ):
+                                            SMESHHOMARD::HOMARD_Gen_var myHomardGen0,
+                                            QString caseName, QString Name ):
 // ------------------------------------------------------------------------
 /* Constructs a SMESH_EditBoundaryAn
     herite de SMESH_CreateBoundaryAn
 */
-    SMESH_CreateBoundaryAn(parent, myHomardGen, caseName)
+    SMESH_CreateBoundaryAn(parent, myHomardGen0, caseName)
 {
     MESSAGE("Debut de SMESH_EditBoundaryAn pour " << Name.toStdString().c_str());
     setWindowTitle(QObject::tr("HOM_BOUN_A_EDIT_WINDOW_TITLE"));
@@ -1516,9 +1516,9 @@ bool SMESH_EditBoundaryAn::CreateOrUpdateBoundaryAn()
 */
 // --------------------------------------------------------------------------------------
 SMESH_EditBoundaryCAO::SMESH_EditBoundaryCAO( SMESHGUI_HomardAdaptDlg* parent, bool modal,
-                                              SMESHHOMARD::HOMARD_Gen_var myHomardGen,
+                                              SMESHHOMARD::HOMARD_Gen_var myHomardGen0,
                                               QString caseName, QString Name):
-    SMESH_CreateBoundaryCAO(parent, modal, myHomardGen, caseName, Name)
+    SMESH_CreateBoundaryCAO(parent, modal, myHomardGen0, caseName, Name)
 {
     MESSAGE("Debut de Boundary pour " << Name.toStdString().c_str());
     setWindowTitle(QObject::tr("HOM_BOUN_C_EDIT_WINDOW_TITLE"));
@@ -1582,9 +1582,9 @@ void SMESH_EditBoundaryCAO::SetFiltrage()
 */
 // ------------------------------------------------------------------------------------
 SMESH_EditBoundaryDi::SMESH_EditBoundaryDi( SMESHGUI_HomardAdaptDlg* parent, bool modal,
-                                      SMESHHOMARD::HOMARD_Gen_var myHomardGen,
-                                      QString caseName, QString Name):
-  SMESH_CreateBoundaryDi(parent, modal, myHomardGen, caseName, Name)
+                                            SMESHHOMARD::HOMARD_Gen_var myHomardGen0,
+                                            QString caseName, QString Name):
+  SMESH_CreateBoundaryDi(parent, modal, myHomardGen0, caseName, Name)
 {
     MESSAGE("Debut de Boundary pour " << Name.toStdString().c_str());
     setWindowTitle(QObject::tr("HOM_BOUN_D_EDIT_WINDOW_TITLE"));

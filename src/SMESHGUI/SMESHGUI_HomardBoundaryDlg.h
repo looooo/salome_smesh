@@ -1065,13 +1065,13 @@ class SMESHGUI_EXPORT SMESH_CreateBoundaryAn : public QDialog, public SMESH_Ui_C
 
 public:
   SMESH_CreateBoundaryAn (SMESHGUI_HomardAdaptDlg* parent, bool modal,
-                          SMESHHOMARD::HOMARD_Gen_var myHomardGen,
+                          SMESHHOMARD::HOMARD_Gen_var myHomardGen0,
                           QString caseName);
   virtual ~SMESH_CreateBoundaryAn();
 
 protected :
   SMESH_CreateBoundaryAn (SMESHGUI_HomardAdaptDlg* parent,
-                          SMESHHOMARD::HOMARD_Gen_var myHomardGen,
+                          SMESHHOMARD::HOMARD_Gen_var myHomardGen0,
                           QString caseName);
 
   SMESHGUI_HomardAdaptDlg * _parent;
@@ -1121,8 +1121,8 @@ class SMESHGUI_EXPORT SMESH_EditBoundaryAn : public SMESH_CreateBoundaryAn
     Q_OBJECT
 public:
     SMESH_EditBoundaryAn( SMESHGUI_HomardAdaptDlg* parent, bool modal,
-                       SMESHHOMARD::HOMARD_Gen_var myHomardGen,
-                       QString caseName, QString Name);
+                          SMESHHOMARD::HOMARD_Gen_var myHomardGen0,
+                          QString caseName, QString Name);
     virtual ~SMESH_EditBoundaryAn();
 
 protected :
@@ -1147,8 +1147,8 @@ class SMESHGUI_EXPORT SMESH_CreateBoundaryCAO : public QDialog, public SMESH_Ui_
 
 public:
     SMESH_CreateBoundaryCAO( SMESHGUI_HomardAdaptDlg* parent, bool modal,
-                         SMESHHOMARD::HOMARD_Gen_var myHomardGen,
-                         QString caseName, QString BoundaryName );
+                             SMESHHOMARD::HOMARD_Gen_var myHomardGen0,
+                             QString caseName, QString BoundaryName );
     ~SMESH_CreateBoundaryCAO();
     virtual void setGroups (QStringList listGroup);
 
@@ -1181,8 +1181,8 @@ class SMESHGUI_EXPORT SMESH_EditBoundaryCAO : public SMESH_CreateBoundaryCAO
     Q_OBJECT
 public:
     SMESH_EditBoundaryCAO( SMESHGUI_HomardAdaptDlg* parent, bool modal,
-                        SMESHHOMARD::HOMARD_Gen_var myHomardGen,
-                        QString caseName, QString Name );
+                           SMESHHOMARD::HOMARD_Gen_var myHomardGen0,
+                           QString caseName, QString Name );
     virtual ~SMESH_EditBoundaryCAO();
 
 protected :
@@ -1197,8 +1197,8 @@ class SMESHGUI_EXPORT SMESH_CreateBoundaryDi : public QDialog, public SMESH_Ui_C
 
 public:
     SMESH_CreateBoundaryDi( SMESHGUI_HomardAdaptDlg* parent, bool modal,
-                         SMESHHOMARD::HOMARD_Gen_var myHomardGen,
-                         QString caseName, QString BoundaryName );
+                            SMESHHOMARD::HOMARD_Gen_var myHomardGen0,
+                            QString caseName, QString BoundaryName );
     ~SMESH_CreateBoundaryDi();
     virtual void setGroups (QStringList listGroup);
 
@@ -1231,8 +1231,8 @@ class SMESHGUI_EXPORT SMESH_EditBoundaryDi : public SMESH_CreateBoundaryDi
     Q_OBJECT
 public:
     SMESH_EditBoundaryDi( SMESHGUI_HomardAdaptDlg* parent, bool modal,
-                       SMESHHOMARD::HOMARD_Gen_var myHomardGen,
-                       QString caseName, QString Name );
+                          SMESHHOMARD::HOMARD_Gen_var myHomardGen0,
+                          QString caseName, QString Name );
     virtual ~SMESH_EditBoundaryDi();
 
 protected :

@@ -138,27 +138,6 @@ private:
   SMESHHOMARD::HOMARD_Gen_var _gen_i;
 };
 
-class SMESH_I_EXPORT HOMARD_Hypothesis_i : public virtual SALOME::GenericObj_i,
-                                           public virtual POA_SMESHHOMARD::HOMARD_Hypothesis
-{
-public:
-  HOMARD_Hypothesis_i(SMESHHOMARD::HOMARD_Gen_var gen_i);
-  HOMARD_Hypothesis_i();
-
-  virtual ~HOMARD_Hypothesis_i();
-
-  // Generalites
-  void SetExtraOutput(CORBA::Long ExtraOutput);
-  CORBA::Long GetExtraOutput();
-
-  void LinkIteration(const char* NomIteration);
-  void UnLinkIteration(const char* NomIteration);
-
-private:
-  SMESHHOMARDImpl::HOMARD_Hypothesis* myHomardHypothesis;
-  SMESHHOMARD::HOMARD_Gen_var  _gen_i;
-};
-
 class SMESH_I_EXPORT HOMARD_Iteration_i : public virtual SALOME::GenericObj_i,
                                           public virtual POA_SMESHHOMARD::HOMARD_Iteration
 {
@@ -200,14 +179,9 @@ public:
   void                   LinkNextIteration(const char* NomIteration);
   void                   UnLinkNextIteration(const char* NomIteration);
 
-  void                   SetIterParentName(const char* NomIterParent);
-  char*                  GetIterParentName();
-
   // Liens avec les autres structures
   void                   SetCaseName(const char* NomCas);
   char*                  GetCaseName();
-
-  void                   SetHypoName(const char* NomHypo);
 
   // Drivers
   void                   SetInfoCompute(CORBA::Long MessInfo);
@@ -284,18 +258,12 @@ public:
   char* CreateDirNameIter(const char* nomrep, CORBA::Long num);
 
   CORBA::Long Compute();
-  CORBA::Long ComputeAdap(SMESHHOMARD::HOMARD_Cas_var myCase,
-                          SMESHHOMARD::HOMARD_Iteration_var myIteration,
-                          SMESHHOMARDImpl::HomardDriver* myDriver);
-  CORBA::Long ComputeCAO(SMESHHOMARD::HOMARD_Cas_var myCase,
-                         SMESHHOMARD::HOMARD_Iteration_var myIteration);
-  CORBA::Long ComputeCAObis(SMESHHOMARD::HOMARD_Iteration_var myIteration);
-  char* ComputeDirManagement(SMESHHOMARD::HOMARD_Cas_var myCase,
-                             SMESHHOMARD::HOMARD_Iteration_var myIteration);
-  char* ComputeDirPaManagement(SMESHHOMARD::HOMARD_Cas_var myCase,
-                               SMESHHOMARD::HOMARD_Iteration_var myIteration);
-  int   DriverTexteBoundary(SMESHHOMARD::HOMARD_Cas_var myCase,
-                            SMESHHOMARDImpl::HomardDriver* myDriver);
+  CORBA::Long ComputeAdap(SMESHHOMARDImpl::HomardDriver* myDriver);
+  CORBA::Long ComputeCAO();
+  CORBA::Long ComputeCAObis();
+  char* ComputeDirManagement();
+  char* ComputeDirPaManagement();
+  int   DriverTexteBoundary(SMESHHOMARDImpl::HomardDriver* myDriver);
 
   void PublishResultInSmesh(const char* NomFich, CORBA::Long Option);
   void DeleteResultInSmesh(std::string NomFich, std::string MeshName);
@@ -323,7 +291,6 @@ private:
 private:
   SMESHHOMARDImpl::HOMARD_Gen* myHomard;
   std::map<std::string, SMESHHOMARD::HOMARD_Boundary_var> _mesBoundarys;
-  SMESHHOMARD::HOMARD_Hypothesis_var myHypothesis;
   SMESHHOMARD::HOMARD_Iteration_var  myIteration0;
   SMESHHOMARD::HOMARD_Iteration_var  myIteration1;
   SMESHHOMARD::HOMARD_Cas_var        myCase;

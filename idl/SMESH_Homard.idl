@@ -118,19 +118,6 @@ module SMESHHOMARD
     void     SetFileInfo(in string FileInfo) raises (SALOME::SALOME_Exception);
     string   GetFileInfo()                   raises (SALOME::SALOME_Exception);
 
-    // Liens avec les autres iterations
-    void     LinkNextIteration(in string NomIter)          raises (SALOME::SALOME_Exception);
-    void     UnLinkNextIteration(in string NomIter)        raises (SALOME::SALOME_Exception);
-
-    void     SetIterParentName(in string NomIterParent)    raises (SALOME::SALOME_Exception);
-    string   GetIterParentName()                           raises (SALOME::SALOME_Exception);
-
-    // Liens avec les autres structures
-    void     SetCaseName(in string NomCas)                 raises (SALOME::SALOME_Exception);
-    string   GetCaseName()                                 raises (SALOME::SALOME_Exception);
-
-    void     SetHypoName(in string NomHypo)                raises (SALOME::SALOME_Exception);
-
     // Drivers
     void     SetInfoCompute(in long MessInfo)              raises (SALOME::SALOME_Exception);
     long     GetInfoCompute()                              raises (SALOME::SALOME_Exception);
@@ -162,16 +149,6 @@ module SMESHHOMARD
     void SupprBoundaryGroup() raises (SALOME::SALOME_Exception);
 
     void AddIteration (in string IterName) raises (SALOME::SALOME_Exception);
-  };
-
-  interface HOMARD_Hypothesis : SALOME::GenericObj
-  {
-    // Generalites
-    void     SetExtraOutput(in long ExtraOutput)           raises (SALOME::SALOME_Exception);
-    long     GetExtraOutput()                              raises (SALOME::SALOME_Exception);
-
-    void     LinkIteration(in string NomIteration)         raises (SALOME::SALOME_Exception);
-    void     UnLinkIteration(in string NomIteration)       raises (SALOME::SALOME_Exception);
   };
 
   interface HOMARD_Gen : SALOME::GenericObj
@@ -228,6 +205,7 @@ module SMESHHOMARD
 
     long DeleteBoundary (in string BoundaryName) raises (SALOME::SALOME_Exception);
     long DeleteCase() raises (SALOME::SALOME_Exception);
+    void CleanCase() raises (SALOME::SALOME_Exception);
 
     long Compute() raises (SALOME::SALOME_Exception);
 

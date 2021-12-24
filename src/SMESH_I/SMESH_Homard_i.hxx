@@ -116,9 +116,6 @@ public:
   void  SetDirName(const char* NomDir);
   char* GetDirName();
 
-  void        SetConfType(CORBA::Long ConfType);
-  CORBA::Long GetConfType();
-
   void                  SetBoundingBox(const SMESHHOMARD::extrema& LesExtremes);
   SMESHHOMARD::extrema* GetBoundingBox();
 
@@ -254,6 +251,8 @@ public:
   CORBA::Long DeleteCase();
   CORBA::Long DeleteIteration(int numIter);
 
+  void AddBoundaryGroup(const char* Boundary, const char* Group);
+
   void AssociateCaseIter(int numIter, const char* labelIter);
   char* CreateDirNameIter(const char* nomrep, CORBA::Long num);
 
@@ -271,8 +270,9 @@ public:
   void PythonDump();
 
   // Preferences
-  void SetKeepMedOUT(bool theKeepMedOUT);
-  void SetPublishMeshOUT(bool thePublishMeshOUT);
+  void SetConfType (CORBA::Long theConfType);
+  void SetKeepMedOUT (bool theKeepMedOUT);
+  void SetPublishMeshOUT (bool thePublishMeshOUT);
   void SetMeshNameOUT (const char* theMeshNameOUT);
   void SetMeshFileOUT (const char* theMeshFileOUT);
 
@@ -296,6 +296,7 @@ private:
   SMESHHOMARD::HOMARD_Cas_var        myCase;
 
   // Preferences
+  int  _ConfType; // Le type de conformite ou non conformite
   bool _KeepMedOUT;
   bool _PublishMeshOUT;
   bool _KeepWorkingFiles;

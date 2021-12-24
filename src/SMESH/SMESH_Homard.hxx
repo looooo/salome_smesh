@@ -119,9 +119,6 @@ public:
   int                           SetDirName( const char* NomDir );
   std::string                   GetDirName() const;
 
-  void                          SetConfType( int ConfType );
-  const int                     GetConfType() const;
-
   void                          SetBoundingBox( const std::vector<double>& extremas );
   const std::vector<double>&    GetBoundingBox() const;
 
@@ -140,7 +137,6 @@ public:
 private:
   std::string                   _Name;
   std::string                   _NomDir;
-  int                           _ConfType;
   int                           _Etat;
 
   std::vector<double>           _Boite;         // cf HomardQTCommun pour structure du vecteur

@@ -332,7 +332,7 @@ std::string HOMARD_Boundary::GetCaseCreation() const
  */
 //=============================================================================
 HOMARD_Cas::HOMARD_Cas():
-  _Name(""), _NomDir("/tmp"), _ConfType(0)
+  _Name(""), _NomDir("/tmp")
 {
   MESSAGE("HOMARD_Cas");
 }
@@ -360,12 +360,10 @@ std::string HOMARD_Cas::GetName() const
 std::string HOMARD_Cas::GetDumpPython() const
 {
   std::ostringstream aScript;
-  //aScript << _Name << ".SetDirName(\"" << _NomDir << "\")\n";
-  aScript << _Name << ".SetConfType(" << _ConfType << ")\n";
   // Suivi de frontieres
   std::list<std::string>::const_iterator it = _ListBoundaryGroup.begin();
   while (it != _ListBoundaryGroup.end()) {
-    aScript << _Name << ".AddBoundaryGroup(\"" << *it << "\", \"";
+    aScript << "smeshhomard.AddBoundaryGroup(\"" << *it << "\", \"";
     it++;
     aScript << *it << "\")\n";
     it++;
@@ -405,19 +403,6 @@ int HOMARD_Cas::SetDirName( const char* NomDir )
 std::string HOMARD_Cas::GetDirName() const
 {
   return _NomDir;
-}
-//
-// Le type de conformite ou non conformite
-//
-//=============================================================================
-void HOMARD_Cas::SetConfType( int Conftype )
-{
-  _ConfType = Conftype;
-}
-//=============================================================================
-const int HOMARD_Cas::GetConfType() const
-{
-  return _ConfType;
 }
 //
 // La boite englobante

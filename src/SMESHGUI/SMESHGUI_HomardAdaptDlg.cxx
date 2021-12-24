@@ -360,9 +360,6 @@ bool SMESHGUI_HomardAdaptDlg::CheckCase(bool fixCase)
     InitBoundarys();
   }
 
-  // Repertoire et type
-  myCase->SetConfType(myArgs->RBConforme->isChecked() ? 0 : 1);
-
   // Menage des eventuelles frontieres deja enregistrees
   myCase->SupprBoundaryGroup();
 
@@ -442,6 +439,9 @@ bool SMESHGUI_HomardAdaptDlg::PushOnApply()
     aMeshFileOUT = "Uniform_R.med";
   }
   myHomardGen->SetMeshFileOUT(aMeshFileOUT.c_str());
+
+  // Conformity type
+  myHomardGen->SetConfType(myArgs->RBConforme->isChecked() ? 0 : 1);
 
   // Advanced options
   myHomardGen->SetVerboseLevel(myAdvOpt->verboseLevelSpin->value());

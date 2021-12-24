@@ -440,19 +440,6 @@ char* HOMARD_Cas_i::GetDirName()
   return CORBA::string_dup(myHomardCas->GetDirName().c_str());
 }
 //=============================================================================
-void HOMARD_Cas_i::SetConfType(CORBA::Long ConfType)
-{
-  ASSERT(myHomardCas);
-  //VERIFICATION((ConfType>=-2) && (ConfType<=3));
-  myHomardCas->SetConfType(ConfType);
-}
-//=============================================================================
-CORBA::Long HOMARD_Cas_i::GetConfType()
-{
-  ASSERT(myHomardCas);
-  return myHomardCas->GetConfType();
-}
-//=============================================================================
 void HOMARD_Cas_i::SetBoundingBox(const SMESHHOMARD::extrema& LesExtrema)
 {
   ASSERT(myHomardCas);
@@ -823,6 +810,7 @@ CORBA::Long HOMARD_Iteration_i::GetInfoCompute()
  */
 //=============================================================================
 HOMARD_Gen_i::HOMARD_Gen_i() : SALOME::GenericObj_i(SMESH_Gen_i::GetPOA()),
+                               _ConfType(0),
                                _KeepMedOUT(true),
                                _PublishMeshOUT(false),
                                _KeepWorkingFiles(false),
@@ -900,15 +888,6 @@ CORBA::Long HOMARD_Gen_i::DeleteIteration(int numIter)
   }
   else {
     if (!CORBA::is_nil(myIteration1)) {
-      /*
-      if (CORBA::is_nil(myIteration0)) {
-        SALOME::ExceptionStruct es;
-        es.type = SALOME::BAD_PARAM;
-        es.text = "Invalid iteration 0";
-        throw SALOME::SALOME_Exception(es);
-      }
-      */
-
       // Invalide Iteration
       if (myIteration1->GetState() > 0) {
         myIteration1->SetState(1);
@@ -1776,8 +1755,7 @@ CORBA::Long HOMARD_Gen_i::ComputeAdap(SMESHHOMARDImpl::HomardDriver* myDriver)
 
   // D. Les données de l'adaptation HOMARD
   // D.1. Le type de conformite
-  int ConfType = myCase->GetConfType();
-  MESSAGE (". ConfType = " << ConfType);
+  MESSAGE (". ConfType = " << _ConfType);
 
   // D.3. Le maillage de depart
   const char* NomMeshParent = myIteration0->GetMeshName();
@@ -1819,7 +1797,7 @@ CORBA::Long HOMARD_Gen_i::ComputeAdap(SMESHHOMARDImpl::HomardDriver* myDriver)
   int iaux = 0;
   myDriver->TexteMaillageHOMARD(DirComputePa, siter, iaux);
   myDriver->TexteMaillage(NomMeshParent, MeshFileParent, 0);
-  myDriver->TexteConfRaffDera(ConfType);
+  myDriver->TexteConfRaffDera(_ConfType);
 
   // E.6. Ajout des options avancees
   //myDriver->TexteAdvanced(NivMax, DiamMin, AdapInit, ExtraOutput);
@@ -2530,12 +2508,12 @@ void HOMARD_Gen_i::PythonDump()
   MESSAGE (". Creation of the case");
 
   if (_CaseOnMedFile) {
-    pd << "Case_1 = smeshhomard.CreateCase(\"" << myIteration0->GetMeshName();
+    pd << "smeshhomard.CreateCase(\"" << myIteration0->GetMeshName();
     pd << "\", \"" << myIteration0->GetMeshFile();
     pd << "\", \"" << myCase->GetDirName() << "\")\n";
   }
   else {
-    pd << "Case_1 = smeshhomard.CreateCaseOnMesh(\"" << myIteration0->GetMeshName();
+    pd << "smeshhomard.CreateCaseOnMesh(\"" << myIteration0->GetMeshName();
     pd << "\", " << _SmeshMesh;
     pd << ".GetMesh(), \"" << myCase->GetDirName() << "\")\n";
   }
@@ -2543,6 +2521,7 @@ void HOMARD_Gen_i::PythonDump()
   pd << myCase->GetDumpPython();
 
   // Preferences
+  pd << "smeshhomard.SetConfType(" << _ConfType << ")\n";
   pd << "smeshhomard.SetKeepMedOUT(" << (_KeepMedOUT ? "True" : "False") << ")\n";
   pd << "smeshhomard.SetPublishMeshOUT(" << (_PublishMeshOUT ? "True" : "False") << ")\n";
   pd << "smeshhomard.SetMeshNameOUT(\"" << _MeshNameOUT << "\")\n";
@@ -2559,9 +2538,27 @@ void HOMARD_Gen_i::PythonDump()
   MESSAGE ("End PythonDump");
 }
 
+void HOMARD_Gen_i::AddBoundaryGroup(const char* BoundaryName, const char* Group)
+{
+  MESSAGE("HOMARD_Gen_i::AddBoundaryGroup : BoundaryName = " <<
+          BoundaryName << ", Group = " << Group);
+  if (myCase->_is_nil()) {
+    SALOME::ExceptionStruct es;
+    es.type = SALOME::BAD_PARAM;
+    std::string text = "The input mesh must be defined before boundary group addition";
+    es.text = CORBA::string_dup(text.c_str());
+    throw SALOME::SALOME_Exception(es);
+  }
+  myCase->AddBoundaryGroup(BoundaryName, Group);
+}
+
 //===============================================================================
 // Preferences
 //===============================================================================
+void HOMARD_Gen_i::SetConfType(CORBA::Long theConfType)
+{
+  _ConfType = theConfType;
+}
 void HOMARD_Gen_i::SetKeepMedOUT(bool theKeepMedOUT)
 {
   _KeepMedOUT = theKeepMedOUT;

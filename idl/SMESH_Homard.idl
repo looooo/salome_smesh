@@ -132,9 +132,6 @@ module SMESHHOMARD
     void     SetDirName(in string NomDir) raises (SALOME::SALOME_Exception);
     string   GetDirName()                 raises (SALOME::SALOME_Exception);
 
-    void     SetConfType(in long ConfType) raises (SALOME::SALOME_Exception);
-    long     GetConfType()                 raises (SALOME::SALOME_Exception);
-
     void     SetBoundingBox(in extrema LesExtremes)        raises (SALOME::SALOME_Exception);
     extrema  GetBoundingBox()                              raises (SALOME::SALOME_Exception);
 
@@ -207,6 +204,9 @@ module SMESHHOMARD
     long DeleteCase() raises (SALOME::SALOME_Exception);
     void CleanCase() raises (SALOME::SALOME_Exception);
 
+    void AddBoundaryGroup(in string BoundaryName,
+                          in string Group) raises (SALOME::SALOME_Exception);
+
     long Compute() raises (SALOME::SALOME_Exception);
 
     string CreateDirNameIter (in string NomDir, in long num)
@@ -216,6 +216,7 @@ module SMESHHOMARD
       raises (SALOME::SALOME_Exception);
 
     //  Preferences
+    void SetConfType(in long ConfType) raises (SALOME::SALOME_Exception);
     void SetKeepMedOUT (in boolean theKeepMedOUT);
     void SetPublishMeshOUT (in boolean thePublishMeshOUT);
     void SetMeshNameOUT (in string theMeshName) raises (SALOME::SALOME_Exception);

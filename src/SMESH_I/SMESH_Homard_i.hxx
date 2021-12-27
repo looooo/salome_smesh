@@ -90,11 +90,6 @@ public:
   void                   SetGroups(const SMESHHOMARD::ListGroupType& ListGroup);
   SMESHHOMARD::ListGroupType* GetGroups();
 
-  // Liens avec les autres structures
-  void  SetCaseCreation(const char* NomCaseCreation);
-  char* GetCaseCreation();
-
-
 private:
   SMESHHOMARDImpl::HOMARD_Boundary* myHomardBoundary;
   SMESHHOMARD::HOMARD_Gen_var _gen_i;
@@ -109,7 +104,6 @@ public:
 
   virtual ~HOMARD_Cas_i();
 
-  char* GetName();
   char* GetDumpPython();
 
   // Caracteristiques
@@ -243,7 +237,7 @@ public:
   void InvalideBoundary(const char* nomBoundary);
 
   CORBA::Long DeleteBoundary(const char* nomBoundary);
-  CORBA::Long DeleteCase();
+  void        DeleteCase();
   CORBA::Long DeleteIteration(int numIter);
 
   void AddBoundaryGroup(const char* Boundary, const char* Group);
@@ -259,7 +253,7 @@ public:
   char* ComputeDirPaManagement();
   int   DriverTexteBoundary(SMESHHOMARDImpl::HomardDriver* myDriver);
 
-  void PublishResultInSmesh(const char* NomFich, CORBA::Long Option);
+  void PublishResultInSmesh(const char* NomFich);
   void DeleteResultInSmesh(std::string NomFich, std::string MeshName);
 
   void PythonDump();
@@ -278,10 +272,9 @@ public:
   void SetRemoveLogOnSuccess(bool theRemoveLogOnSuccess);
 
 private:
-  SMESHHOMARD::HOMARD_Boundary_ptr  newBoundary();
-  SMESHHOMARD::HOMARD_Cas_ptr       newCase();
-  HOMARD_Iteration_i* newIteration();
-  void CleanCase();
+  SMESHHOMARD::HOMARD_Boundary_ptr newBoundary();
+  SMESHHOMARD::HOMARD_Cas_ptr      newCase();
+  HOMARD_Iteration_i*              newIteration();
 
 private:
   SMESHHOMARDImpl::HOMARD_Gen* myHomard;

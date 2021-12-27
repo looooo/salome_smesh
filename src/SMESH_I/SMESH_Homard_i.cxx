@@ -285,22 +285,6 @@ SMESHHOMARD::ListGroupType*  HOMARD_Boundary_i::GetGroups()
   }
   return aResult._retn();
 }
-//=============================================================================
-//=============================================================================
-// Liens avec les autres structures
-//=============================================================================
-//=============================================================================
-void HOMARD_Boundary_i::SetCaseCreation(const char* NomCaseCreation)
-{
-  ASSERT(myHomardBoundary);
-  myHomardBoundary->SetCaseCreation(NomCaseCreation);
-}
-//=============================================================================
-char* HOMARD_Boundary_i::GetCaseCreation()
-{
-  ASSERT(myHomardBoundary);
-  return CORBA::string_dup(myHomardBoundary->GetCaseCreation().c_str());
-}
 
 //=============================================================================
 /*!
@@ -326,7 +310,6 @@ HOMARD_Cas_i::HOMARD_Cas_i(SMESHHOMARD::HOMARD_Gen_var engine)
   _gen_i = engine;
   myHomardCas = new SMESHHOMARDImpl::HOMARD_Cas();
   ASSERT(myHomardCas);
-  myHomardCas->SetName("Case_1");
 }
 
 //=============================================================================
@@ -336,16 +319,6 @@ HOMARD_Cas_i::HOMARD_Cas_i(SMESHHOMARD::HOMARD_Gen_var engine)
 //=============================================================================
 HOMARD_Cas_i::~HOMARD_Cas_i()
 {
-}
-//=============================================================================
-//=============================================================================
-// Generalites
-//=============================================================================
-//=============================================================================
-char* HOMARD_Cas_i::GetName()
-{
-  ASSERT(myHomardCas);
-  return CORBA::string_dup(myHomardCas->GetName().c_str());
 }
 //=============================================================================
 char* HOMARD_Cas_i::GetDumpPython()
@@ -379,6 +352,7 @@ void HOMARD_Cas_i::SetDirName(const char* NomDir)
     es.text = CORBA::string_dup(text.c_str());
     throw SALOME::SALOME_Exception(es);
   }
+
   // D. En cas de reprise, deplacement du point de depart
   HOMARD_Gen_i* aGenImpl = SMESH::DownCast<HOMARD_Gen_i*>(_gen_i);
   HOMARD_Iteration_i* Iter0 = aGenImpl->GetIteration(0);
@@ -389,7 +363,7 @@ void HOMARD_Cas_i::SetDirName(const char* NomDir)
     char* DirNameIter = Iter0->GetDirNameLoc();
     MESSAGE ("SetDirName : nom actuel pour le repertoire de l iteration, DirNameIter = "<< DirNameIter);
     // D.2. Recherche d'un nom local pour l'iteration de depart dans le futur repertoire du cas
-    char* nomDirIter = _gen_i->CreateDirNameIter(NomDir, 0);
+    char* nomDirIter = aGenImpl->CreateDirNameIter(NomDir, 0);
     MESSAGE ("SetDirName : nom futur pour le repertoire de l iteration, nomDirIter = "<< nomDirIter);
     // D.3. Creation du futur repertoire local pour l'iteration de depart
     std::string nomDirIterTotal;
@@ -837,9 +811,6 @@ HOMARD_Gen_i::HOMARD_Gen_i() : SALOME::GenericObj_i(SMESH_Gen_i::GetPOA()),
 HOMARD_Gen_i::~HOMARD_Gen_i()
 {
   MESSAGE ("HOMARD_Gen_i::~HOMARD_Gen_i()");
-  //if (!myCase->_is_nil()) {
-  //  CleanCase();
-  //}
 }
 
 //=============================================================================
@@ -863,19 +834,6 @@ CORBA::Long HOMARD_Gen_i::DeleteBoundary(const char* BoundaryName)
   // comme on a un _var comme pointeur CORBA, on ne se preoccupe pas du delete
   _mesBoundarys.erase(BoundaryName);
 
-  return 0;
-}
-
-//=============================================================================
-CORBA::Long HOMARD_Gen_i::DeleteCase()
-{
-  MESSAGE ("DeleteCase");
-  if (!CORBA::is_nil(myCase)) {
-    // Delete Iteration0
-    if (DeleteIteration(0) != 0) return 2;
-
-    myCase = SMESHHOMARD::HOMARD_Cas::_nil();
-  }
   return 0;
 }
 
@@ -1064,12 +1022,6 @@ SMESHHOMARD::HOMARD_Boundary_ptr HOMARD_Gen_i::newBoundary()
 }
 
 //=============================================================================
-//=============================================================================
-// Creation des structures identifiees par leurs noms
-//=============================================================================
-//=============================================================================
-
-//=============================================================================
 // Creation of a case
 // MeshName : name of the mesh
 // smeshMesh : correspondent mesh
@@ -1084,7 +1036,7 @@ SMESHHOMARD::HOMARD_Cas_ptr HOMARD_Gen_i::CreateCaseOnMesh (const char* MeshName
   // A. Controles
   // A.1. Controle du nom :
   if (!myCase->_is_nil()) {
-    CleanCase();
+    DeleteCase();
   }
 
   // A.2. Controle du objet maillage
@@ -1196,7 +1148,7 @@ SMESHHOMARD::HOMARD_Cas_ptr HOMARD_Gen_i::CreateCase(const char* MeshName,
   // A. Controles
   // A.1. Controle du nom :
   if (!myCase->_is_nil()) {
-    CleanCase();
+    DeleteCase();
   }
 
   // A.3. Controle du fichier du maillage
@@ -1525,7 +1477,7 @@ CORBA::Long HOMARD_Gen_i::Compute()
   int codret = 0;
 
   // A.0. Create Iteration 1
-  myIteration1 = CreateIteration();
+  CreateIteration();
   myIteration1->SetInfoCompute(_VerboseLevel);
   myIteration1->SetMeshName(_MeshNameOUT.c_str());
   myIteration1->SetMeshFile(_MeshFileOUT.c_str());
@@ -1647,7 +1599,7 @@ CORBA::Long HOMARD_Gen_i::Compute()
       std::stringstream saux0;
       Commentaire = "Mesh";
       Commentaire += " " + siterp1;
-      if (_PublishMeshOUT) PublishResultInSmesh(MeshFile, 1);
+      if (_PublishMeshOUT) PublishResultInSmesh(MeshFile);
     }
     // H.3 Message d'erreur
     if (codretexec != 0) {
@@ -1705,25 +1657,26 @@ CORBA::Long HOMARD_Gen_i::Compute()
     }
 
     // Clean all data
-    CleanCase();
+    DeleteCase();
   }
 
   return codretexec;
 }
 
-void HOMARD_Gen_i::CleanCase()
+void HOMARD_Gen_i::DeleteCase()
 {
-  MESSAGE ("CleanCase");
+  MESSAGE ("DeleteCase");
   if (myCase->_is_nil()) return;
 
   // Delete all boundaries
   _mesBoundarys.clear();
 
-  // Delete iteration
+  // Delete iterations
   DeleteIteration(1);
+  DeleteIteration(0);
 
   // Delete case
-  DeleteCase();
+  myCase = SMESHHOMARD::HOMARD_Cas::_nil();
 
   // Delete tmp mesh file
   if (!_CaseOnMedFile && !_TmpMeshFile.empty()) {
@@ -2350,16 +2303,14 @@ int HOMARD_Gen_i::DriverTexteBoundary(SMESHHOMARDImpl::HomardDriver* myDriver)
 //===========================================================================
 
 //===========================================================================
-// Publications
-// Option = 0 : fichier issu d'une importation
-// Option = 1 : fichier issu d'une execution HOMARD
+// Publication
 //===========================================================================
-void HOMARD_Gen_i::PublishResultInSmesh(const char* NomFich, CORBA::Long Option)
+void HOMARD_Gen_i::PublishResultInSmesh(const char* NomFich)
 {
   // Prevent dump of CreateMeshesFromMED
   SMESH::TPythonDump pDump; // do not delete this line of code
 
-  MESSAGE("PublishResultInSmesh " << NomFich << ", avec Option = " << Option);
+  MESSAGE("PublishResultInSmesh " << NomFich);
   if (CORBA::is_nil(SMESH_Gen_i::GetSMESHGen()->getStudyServant())) {
     SALOME::ExceptionStruct es;
     es.type = SALOME::BAD_PARAM;
@@ -2388,6 +2339,8 @@ void HOMARD_Gen_i::PublishResultInSmesh(const char* NomFich, CORBA::Long Option)
         if (strcmp((const char*)value, NomFich) == 0) {
           MESSAGE ("PublishResultInSmesh : le fichier " << NomFich << " est deja publie.");
           // Pour un fichier importe, on ne republie pas
+          // Option = 0 : fichier issu d'une importation
+          // Option = 1 : fichier issu d'une execution HOMARD
           if (Option == 0) { return; }
           // Pour un fichier calcule, on commence par faire la depublication
           else {
@@ -2439,10 +2392,7 @@ void HOMARD_Gen_i::PublishResultInSmesh(const char* NomFich, CORBA::Long Option)
     SALOMEDS::GenericAttribute_var aPixMap =
       aStudyBuilder->FindOrCreateAttribute(aSO, "AttributePixMap");
     SALOMEDS::AttributePixMap_var anAttr2 = SALOMEDS::AttributePixMap::_narrow(aPixMap);
-    const char* icone;
-    if (Option == 0) { icone = "mesh_tree_importedmesh.png"; }
-    else               { icone = "mesh_tree_mesh.png"; }
-    anAttr2->SetPixMap(icone);
+    anAttr2->SetPixMap("mesh_tree_mesh.png");
   }
 }
 

@@ -182,7 +182,7 @@ SMESHGUI_HomardAdaptDlg::SMESHGUI_HomardAdaptDlg(SMESHHOMARD::HOMARD_Gen_ptr myH
 SMESHGUI_HomardAdaptDlg::~SMESHGUI_HomardAdaptDlg()
 {
   // no need to delete child widgets, Qt does it all for us
-  myHomardGen->CleanCase();
+  myHomardGen->DeleteCase();
 }
 
 //=================================================================================

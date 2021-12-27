@@ -872,7 +872,6 @@ bool SMESH_CreateBoundaryCAO::PushOnApply()
      _aName=aName;
      aBoundary=myHomardGen->CreateBoundaryCAO(CORBA::string_dup(_aName.toStdString().c_str()), aCAOFile.toStdString().c_str());
      _parent->AddBoundaryCAO(_aName);
-     aBoundary->SetCaseCreation("Case_1");
    }
    catch( SALOME::SALOME_Exception& S_ex )
    {
@@ -1044,7 +1043,6 @@ bool SMESH_CreateBoundaryDi::PushOnApply()
      _aName=aName;
      aBoundary=myHomardGen->CreateBoundaryDi(CORBA::string_dup(_aName.toStdString().c_str()), aMeshName.toStdString().c_str(), aMeshFile.toStdString().c_str());
      _parent->AddBoundaryDi(_aName);
-     aBoundary->SetCaseCreation("Case_1");
    }
    catch( SALOME::SALOME_Exception& S_ex )
    {

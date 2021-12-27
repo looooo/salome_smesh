@@ -82,13 +82,8 @@ public:
   void                          SetGroups(const std::list<std::string>& ListGroup );
   const std::list<std::string>& GetGroups() const;
 
-  // Liens avec les autres structures
-  std::string                   GetCaseCreation() const;
-  void                          SetCaseCreation( const char* NomCasCreation );
-
 private:
   std::string                   _Name;
-  std::string                   _NomCasCreation;
   std::string                   _DataFile;
   std::string                   _MeshName;
   int                           _Type;
@@ -110,9 +105,6 @@ public:
   ~HOMARD_Cas();
 
   // Generalites
-  void                          SetName( const char* Name );
-  std::string                   GetName() const;
-
   std::string                   GetDumpPython() const;
 
   // Caracteristiques
@@ -135,7 +127,6 @@ public:
   void                          AddIteration( const char* NomIteration );
 
 private:
-  std::string                   _Name;
   std::string                   _NomDir;
   int                           _Etat;
 

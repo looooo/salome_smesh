@@ -342,7 +342,7 @@
     </message>
     <message>
         <source>MEN_HOMARD_ADAPT</source>
-        <translation>Remesh with HOMARD</translation>
+        <translation>Uniform refinement</translation>
     </message>
     <message>
         <source>Args</source>
@@ -3225,6 +3225,10 @@ Use Display Entity menu command to show them.
         <translation>Z</translation>
     </message>
     <message>
+        <source>SMESH_Z_SCALARBAR</source>
+        <translation>Z:</translation>
+    </message>
+    <message>
         <source>STATE_ALGO_MISSING</source>
         <translation>%3 %2D algorithm is missing</translation>
     </message>
@@ -3322,7 +3326,7 @@ Use Display Entity menu command to show them.
     </message>
     <message>
         <source>STB_HOMARD_ADAPT</source>
-        <translation>Remesh with HOMARD</translation>
+        <translation>Uniform refinement</translation>
     </message>
     <message>
         <source>STB_CONV_TO_QUAD</source>
@@ -4022,7 +4026,7 @@ Use Display Entity menu command to show them.
     </message>
     <message>
         <source>TOP_HOMARD_ADAPT</source>
-        <translation>Remesh with HOMARD</translation>
+        <translation>Uniform refinement</translation>
     </message>
     <message>
         <source>TOP_CONV_TO_QUAD</source>

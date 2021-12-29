@@ -9,6 +9,11 @@ Adaptation
 HOMARD
 ======
 
+.. literalinclude:: ../../../examples/test_uniform_refinement.py
+    :language: python
+
+:download:`Download this script <../../../examples/test_uniform_refinement.py>`
+
 .. literalinclude:: ../../../examples/test_homard_adapt.py
     :language: python
 

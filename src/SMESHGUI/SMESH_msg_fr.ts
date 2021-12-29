@@ -12,10 +12,6 @@
         <translation>Fichiers MED</translation>
     </message>
     <message>
-        <source>SAUV_FILES_FILTER</source>
-        <translation>Fichiers SAUV</translation>
-    </message>
-    <message>
         <source>IDEAS_FILES_FILTER</source>
         <translation>Fichiers IDEAS</translation>
     </message>
@@ -649,10 +645,6 @@
         <translation>Exporter au format GMF</translation>
     </message>
     <message>
-        <source>MEN_EXPORT_SAUV</source>
-        <translation>Exporter au format SAUV (ASCII)</translation>
-    </message>
-    <message>
         <source>MEN_EXPORT_STL</source>
         <translation>Exporter au format STL</translation>
     </message>
@@ -682,15 +674,15 @@
     </message>
     <message>
         <source>TOP_REORIENT_2D</source>
-        <translation>Réorienter des faces selon un vecteur</translation>
+        <translation>Réorienter des faces</translation>
     </message>
     <message>
         <source>MEN_REORIENT_2D</source>
-        <translation>Réorienter des faces selon un vecteur</translation>
+        <translation>Réorienter des faces</translation>
     </message>
     <message>
         <source>STB_REORIENT_2D</source>
-        <translation>Réorienter des faces selon un vecteur</translation>
+        <translation>Réorienter des faces</translation>
     </message>
     <message>
         <source>TOP_FIND_ELEM</source>
@@ -875,14 +867,6 @@
     <message>
         <source>MEN_GMF</source>
         <translation>Fichier GMF</translation>
-    </message>
-    <message>
-        <source>MEN_IMPORT_SAUV</source>
-        <translation>Fichier SAUV (ASCII)</translation>
-    </message>
-    <message>
-        <source>MEN_SAUV</source>
-        <translation>Fichier SAUV (ASCII)</translation>
     </message>
     <message>
         <source>MEN_MERGE</source>
@@ -3452,10 +3436,6 @@ Utilisez le menu &quot;Visualiser une entité&quot; pour les afficher.
         <translation>Exporter au format GMF</translation>
     </message>
     <message>
-        <source>STB_EXPORT_SAUV</source>
-        <translation>Exporter au format SAUV (ASCII)</translation>
-    </message>
-    <message>
         <source>STB_EXPORT_STL</source>
         <translation>Exporter au format STL</translation>
     </message>
@@ -3586,14 +3566,6 @@ Utilisez le menu &quot;Visualiser une entité&quot; pour les afficher.
     <message>
         <source>STB_GMF</source>
         <translation>Exporter un fichier GMF</translation>
-    </message>
-    <message>
-        <source>STB_IMPORT_SAUV</source>
-        <translation>Importer un fichier SAUV (ASCII)</translation>
-    </message>
-    <message>
-        <source>STB_SAUV</source>
-        <translation>Exporter un fichier SAUV (ASCII)</translation>
     </message>
     <message>
         <source>STB_MERGE</source>
@@ -4152,10 +4124,6 @@ Utilisez le menu &quot;Visualiser une entité&quot; pour les afficher.
         <translation>Exporter au format MED</translation>
     </message>
     <message>
-        <source>TOP_EXPORT_SAUV</source>
-        <translation>Exporter au format SAUV (ASCII)</translation>
-    </message>
-    <message>
         <source>TOP_EXPORT_STL</source>
         <translation>Exporter au format STL</translation>
     </message>
@@ -4286,14 +4254,6 @@ Utilisez le menu &quot;Visualiser une entité&quot; pour les afficher.
     <message>
         <source>TOP_GMF</source>
         <translation>Exporter un fichier GMF</translation>
-    </message>
-    <message>
-        <source>TOP_IMPORT_SAUV</source>
-        <translation>Importer un fichier SAUV (ASCII)</translation>
-    </message>
-    <message>
-        <source>TOP_SAUV</source>
-        <translation>Exporter un fichier SAUV (ASCII)</translation>
     </message>
     <message>
         <source>TOP_MERGE</source>
@@ -4883,7 +4843,11 @@ Ouvrez une fenêtre VTK et essayez de nouveau</translation>
     </message>
     <message>
         <source>PREF_SHOW_WARN</source>
-        <translation>Affiche un avertissement quand un groupe est exporté</translation>
+        <translation>Afficher un avertissement quand un groupe est exporté</translation>
+    </message>
+    <message>
+        <source>PREF_MED_SAVE_NUMS</source>
+        <translation>Enregistrer les numéros des nœuds/mailles dans le fichier MED</translation>
     </message>
     <message>
         <source>PREF_ZTOLERANCE</source>
@@ -8649,7 +8613,7 @@ en rouge dans le browser.</translation>
     <name>SMESHGUI_ReorientFacesDlg</name>
     <message>
         <source>CAPTION</source>
-        <translation>Réorienter des faces selon un vector</translation>
+        <translation>Réorienter des faces</translation>
     </message>
     <message>
         <source>REORIENT_FACES</source>
@@ -8663,6 +8627,10 @@ en rouge dans le browser.</translation>
         <source>OBJECT</source>
         <translation>Objet</translation>
     </message>
+     <message>
+         <source>OBJECTS</source>
+         <translation>Objets</translation>
+     </message>
     <message>
         <source>POINT</source>
         <translation>Point</translation>
@@ -8682,6 +8650,10 @@ en rouge dans le browser.</translation>
     <message>
         <source>VOLUMES</source>
         <translation>Volumes</translation>
+    </message>
+    <message>
+        <source>REF_GROUPS</source>
+        <translation>Objets de référence (optionnel)</translation>
     </message>
     <message>
         <source>OUTSIDE_VOLUME_NORMAL</source>

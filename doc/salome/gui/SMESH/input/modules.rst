@@ -25,13 +25,11 @@ Importing and exporting meshes
    smeshBuilder.CreateMeshesFromSTL
    smeshBuilder.CreateMeshesFromCGNS
    smeshBuilder.CreateMeshesFromGMF
-   smeshBuilder.CreateMeshesFromSAUV
    Mesh.ExportMED
    Mesh.ExportUNV
    Mesh.ExportSTL
    Mesh.ExportCGNS
    Mesh.ExportDAT
-   Mesh.ExportSAUV
    Mesh.ExportGMF
 
 
@@ -451,6 +449,7 @@ Changing orientation of elements
    Mesh.Reorient
    Mesh.ReorientObject
    Mesh.Reorient2D
+   Mesh.Reorient2DByNeighbours
    Mesh.Reorient2DBy3D
 
 Uniting triangles

@@ -19,6 +19,7 @@
 
 SET(_bin_SCRIPTS
   SMESH_SalomeSessionless.py
+  MeshJobManager_SalomeSessionless.py
 )
 
 SALOME_INSTALL_SCRIPTS("${_bin_SCRIPTS}" ${SALOME_INSTALL_PYTHON} DEF_PERMS)

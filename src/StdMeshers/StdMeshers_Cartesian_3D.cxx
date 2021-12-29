@@ -4458,7 +4458,7 @@ namespace
 
     // connect pn2 (probably new, at _eIntNodes) with a split
 
-    int i, iConn;
+    int i, iConn = 0;
     size_t nbCommon;
     TGeomID commonFaces[20];
     _Node* nPrev = nullptr;
@@ -5644,8 +5644,8 @@ namespace
           continue;
 
         gp_Dir direction(1,0,0);
-        const SMDS_MeshElement* anyFace = *facesToOrient.begin();
-        editor.Reorient2D( facesToOrient, direction, anyFace );
+        TIDSortedElemSet refFaces;
+        editor.Reorient2D( facesToOrient, direction, refFaces, /*allowNonManifold=*/true );
       }
     }
     return;

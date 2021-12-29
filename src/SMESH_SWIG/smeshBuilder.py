@@ -685,18 +685,6 @@ class smeshBuilder( SMESH._objref_SMESH_Gen, object ):
         aMeshes = [ Mesh(self, self.geompyD, m) for m in aSmeshMeshes ]
         return aMeshes, aStatus
 
-    def CreateMeshesFromSAUV( self,theFileName ):
-        """
-        Create a Mesh object(s) importing data from the given SAUV file
-
-        Returns:
-                a tuple ( list of class :class:`Mesh` instances, :class:`SMESH.DriverMED_ReadStatus` )
-        """
-
-        aSmeshMeshes, aStatus = SMESH._objref_SMESH_Gen.CreateMeshesFromSAUV(self,theFileName)
-        aMeshes = [ Mesh(self, self.geompyD, m) for m in aSmeshMeshes ]
-        return aMeshes, aStatus
-
     def CreateMeshesFromSTL( self, theFileName ):
         """
         Create a Mesh object importing data from the given STL file
@@ -2455,20 +2443,6 @@ class Mesh(metaclass = MeshMeta):
                                        fields, geomAssocFields, z_tolerance, saveNumbers )
         else:
             self.mesh.ExportMED(fileName, auto_groups, version, overwrite, autoDimension)
-
-    def ExportSAUV(self, f, auto_groups=0):
-        """
-        Export the mesh in a file in SAUV format
-
-
-        Parameters:
-                f: is the file name
-                auto_groups: boolean parameter for creating/not creating
-                        the groups Group_On_All_Nodes, Group_On_All_Faces, ... ;
-                        the typical use is auto_groups=False.
-        """
-
-        self.mesh.ExportSAUV(f, auto_groups)
 
     def ExportDAT(self, f, meshPart=None, renumber=True):
         """
@@ -4689,6 +4663,29 @@ class Mesh(metaclass = MeshMeta):
             thePoint = theFaceOrPoint
             theFace = -1
         return self.editor.Reorient2D( the2DObject, theDirection, theFace, thePoint )
+
+    def Reorient2DByNeighbours(self, objectFaces, referenceFaces=[]):
+        """
+        Reorient faces contained in a list of *objectFaces*
+        equally to faces contained in a list of *referenceFaces*.
+
+        Parameters:
+                 objectFaces: list of :class:`mesh, sub-mesh, group, filter <SMESH.SMESH_IDSource>` holding faces to reorient.
+                 referenceFaces: list of :class:`sub-mesh, group, filter <SMESH.SMESH_IDSource>` holding reference faces. It can be empty, then any face in *objectFaces* is used as the reference.
+
+        Returns:
+                 number of reoriented faces.
+        """
+        if not isinstance( objectFaces, list ):
+            objectFaces = [ objectFaces ]
+        for i,obj2D in enumerate( objectFaces ):
+            if isinstance( obj2D, Mesh ):
+                objectFaces[i] = obj2D.GetMesh()
+        if not isinstance( referenceFaces, list ):
+            referenceFaces = [ referenceFaces ]
+
+        return self.editor.Reorient2DByNeighbours( objectFaces, referenceFaces )
+
 
     def Reorient2DBy3D(self, the2DObject, the3DObject, theOutsideNormal=True ):
         """

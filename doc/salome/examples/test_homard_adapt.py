@@ -3,7 +3,7 @@
 
 
 import salome
-salome.salome_init()
+salome.salome_init_without_session()
 
 import SMESH, SALOMEDS
 from salome.smesh import smeshBuilder
@@ -13,7 +13,7 @@ smesh = smeshBuilder.New()
 
 import os, inspect, tempfile, shutil
 
-data_dir = os.path.dirname(inspect.getfile(lambda: None))
+data_dir = os.path.abspath(os.path.dirname(inspect.getfile(lambda: None)))
 working_dir = tempfile.mkdtemp()
 
 input_med = os.path.join (data_dir, "test_homard_adapt.med")

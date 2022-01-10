@@ -2493,6 +2493,19 @@ void HOMARD_Gen_i::PythonDump()
   MESSAGE ("End PythonDump");
 }
 
+void HOMARD_Gen_i::AddBoundary(const char* BoundaryName)
+{
+  MESSAGE("HOMARD_Gen_i::AddBoundary : BoundaryName = " << BoundaryName);
+  if (myCase->_is_nil()) {
+    SALOME::ExceptionStruct es;
+    es.type = SALOME::BAD_PARAM;
+    std::string text = "The input mesh must be defined before boundary addition";
+    es.text = CORBA::string_dup(text.c_str());
+    throw SALOME::SALOME_Exception(es);
+  }
+  myCase->AddBoundary(BoundaryName);
+}
+
 void HOMARD_Gen_i::AddBoundaryGroup(const char* BoundaryName, const char* Group)
 {
   MESSAGE("HOMARD_Gen_i::AddBoundaryGroup : BoundaryName = " <<

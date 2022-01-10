@@ -147,6 +147,7 @@ module SMESHHOMARD
                           in string theWorkingDir) raises(SALOME::SALOME_Exception);
 
     // Associate boundaries to groups
+    void AddBoundary(in string BoundaryName) raises (SALOME::SALOME_Exception);
     void AddBoundaryGroup(in string BoundaryName,
                           in string Group) raises (SALOME::SALOME_Exception);
 

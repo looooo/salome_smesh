@@ -240,6 +240,7 @@ public:
   void        DeleteCase();
   CORBA::Long DeleteIteration(int numIter);
 
+  void AddBoundary(const char* Boundary);
   void AddBoundaryGroup(const char* Boundary, const char* Group);
 
   void AssociateCaseIter(int numIter, const char* labelIter);

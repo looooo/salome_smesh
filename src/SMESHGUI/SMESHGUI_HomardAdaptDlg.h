@@ -169,14 +169,12 @@ public:
   QCheckBox *CBBoundaryA;
 
   QGroupBox *GBBoundaryC; // CAO boundary
-  QGridLayout *_2;
   QPushButton *PBBoundaryCAOEdit;
   QPushButton *PBBoundaryCAOHelp;
   QComboBox *CBBoundaryCAO;
   QPushButton *PBBoundaryCAONew;
   QGroupBox *GBBoundaryN; // Non CAO boundary
   QGroupBox *GBBoundaryD;
-  QGridLayout *gridLayout;
   QComboBox *CBBoundaryDi;
   QPushButton *PBBoundaryDiEdit;
   QPushButton *PBBoundaryDiHelp;
@@ -184,7 +182,6 @@ public:
   QGroupBox *GBBoundaryA;
   QFormLayout *formLayout;
   QTableWidget *TWBoundary;
-  QGridLayout *gridLayout1;
   QPushButton *PBBoundaryAnEdit;
   QPushButton *PBBoundaryAnNew;
   QPushButton *PBBoundaryAnHelp;

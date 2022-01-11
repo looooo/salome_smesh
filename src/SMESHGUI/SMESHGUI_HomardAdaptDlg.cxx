@@ -150,13 +150,12 @@ SMESHGUI_HomardAdaptDlg::SMESHGUI_HomardAdaptDlg(SMESHHOMARD::HOMARD_Gen_ptr myH
   l->addLayout( btnLayout );
 
   // dialog name and size
-  resize(600, 1150);
+  resize(600, 1000);
   QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
   sizePolicy.setHorizontalStretch(0);
   sizePolicy.setVerticalStretch(0);
   sizePolicy.setHeightForWidth(this->sizePolicy().hasHeightForWidth());
   setSizePolicy(sizePolicy);
-  //setMinimumSize(QSize(600, 320));
   setMinimumSize(QSize(500, 320));
   setSizeIncrement(QSize(1, 1));
   setBaseSize(QSize(600, 600));
@@ -639,7 +638,11 @@ void SMESHGUI_HomardAdaptDlg::SetBoundaryCAO()
   if (CheckCase(true)) {
     myArgs->GBBoundaryC->setVisible(1);
     myArgs->GBBoundaryN->setVisible(0);
-    adjustSize();
+    resize(600, 550);
+    //adjustSize();
+  }
+  else {
+    myArgs->RBBoundaryNo->click();
   }
 }
 // ------------------------------------------------------------------------
@@ -647,7 +650,11 @@ void SMESHGUI_HomardAdaptDlg::SetBoundaryNonCAO()
 {
   myArgs->GBBoundaryC->setVisible(0);
   myArgs->GBBoundaryN->setVisible(1);
-  adjustSize();
+  int aH = 550;
+  if (myArgs->GBBoundaryD->isVisible()) aH += 50;
+  if (myArgs->GBBoundaryA->isVisible()) aH += 150;
+  resize(600, aH);
+  //adjustSize();
 }
 // ------------------------------------------------------------------------
 void SMESHGUI_HomardAdaptDlg::AddBoundaryCAO(QString newBoundary)
@@ -703,7 +710,11 @@ void SMESHGUI_HomardAdaptDlg::SetBoundaryD()
   //myArgs->mySelectInMedFileLineEdit->setReadOnly(true);
   //myArgs->mySelectInMedFileButton->hide();
 
-  adjustSize();
+  int aH = 550;
+  if (myArgs->GBBoundaryD->isVisible()) aH += 50;
+  if (myArgs->GBBoundaryA->isVisible()) aH += 150;
+  resize(600, aH);
+  //adjustSize();
 }
 // ------------------------------------------------------------------------
 void SMESHGUI_HomardAdaptDlg::AddBoundaryDi(QString newBoundary)
@@ -759,7 +770,11 @@ void SMESHGUI_HomardAdaptDlg::SetBoundaryA()
   //myArgs->mySelectInMedFileLineEdit->setReadOnly(true);
   //myArgs->mySelectInMedFileButton->hide();
 
-  adjustSize();
+  int aH = 550;
+  if (myArgs->GBBoundaryD->isVisible()) aH += 50;
+  if (myArgs->GBBoundaryA->isVisible()) aH += 150;
+  resize(600, aH);
+  //adjustSize();
 }
 // ------------------------------------------------------------------------
 void SMESHGUI_HomardAdaptDlg::AddBoundaryAn(QString newBoundary)
@@ -904,11 +919,14 @@ void SMESHGUI_HomardAdaptArguments::setupUi()
 
   //     CAO
   GBBoundaryC = new QGroupBox(tr("CAO"), GBTypeBoun);
+  /*
   QSizePolicy sizePolicy1(QSizePolicy::Fixed, QSizePolicy::Fixed);
   sizePolicy1.setHorizontalStretch(0);
   sizePolicy1.setVerticalStretch(0);
   sizePolicy1.setHeightForWidth(GBBoundaryC->sizePolicy().hasHeightForWidth());
   GBBoundaryC->setSizePolicy(sizePolicy1);
+  */
+  GBBoundaryC->setMinimumSize(QSize(450, 50));
 
   CBBoundaryCAO = new QComboBox(GBBoundaryC);
   CBBoundaryCAO->setSizeAdjustPolicy(QComboBox::AdjustToContents);
@@ -921,41 +939,38 @@ void SMESHGUI_HomardAdaptArguments::setupUi()
   PBBoundaryCAOEdit->setAutoDefault(false);
   PBBoundaryCAOHelp->setAutoDefault(false);
 
-  _2 = new QGridLayout(GBBoundaryC);
-  _2->setSpacing(6);
-  _2->setContentsMargins(9, 9, 9, 9);
-  _2->addWidget(CBBoundaryCAO, 0, 0, 1, 1);
+  QGridLayout* gridLayout2 = new QGridLayout(GBBoundaryC);
+  gridLayout2->setSpacing(6);
+  gridLayout2->setContentsMargins(9, 9, 9, 9);
+  gridLayout2->addWidget(CBBoundaryCAO, 0, 0, 1, 1);
   QSpacerItem* spacerItem3 = new QSpacerItem(40, 13, QSizePolicy::Fixed, QSizePolicy::Minimum);
-  _2->addItem(spacerItem3, 0, 1, 1, 1);
-  _2->addWidget(PBBoundaryCAONew, 0, 2, 1, 1);
-  _2->addWidget(PBBoundaryCAOEdit, 0, 3, 1, 1);
-  _2->addWidget(PBBoundaryCAOHelp, 0, 4, 1, 1);
+  gridLayout2->addItem(spacerItem3, 0, 1, 1, 1);
+  gridLayout2->addWidget(PBBoundaryCAONew, 0, 2, 1, 1);
+  gridLayout2->addWidget(PBBoundaryCAOEdit, 0, 3, 1, 1);
+  gridLayout2->addWidget(PBBoundaryCAOHelp, 0, 4, 1, 1);
+  gridLayout2->setRowMinimumHeight(0, 80);
 
   //     Non CAO (discrete / analytical)
-  GBBoundaryN = new QGroupBox(GBTypeBoun);
+  GBBoundaryN = new QGroupBox(tr("Non CAO"), GBTypeBoun);
+  GBBoundaryN->setMinimumSize(QSize(450, 80));
+
   CBBoundaryD = new QCheckBox(tr("Discrete boundary"), GBBoundaryN);
   CBBoundaryA = new QCheckBox(tr("Analytical boundary"), GBBoundaryN);
 
-  //hboxLayout3 = new QHBoxLayout(GBBoundaryN);
-  //hboxLayout3->setSpacing(6);
-  //hboxLayout3->setContentsMargins(0, 0, 0, 0);
-  //hboxLayout3->addWidget(CBBoundaryD);
-  //hboxLayout3->addWidget(CBBoundaryA);
-
   //          discrete
   GBBoundaryD = new QGroupBox(tr("Discrete boundary"), GBBoundaryN);
-  sizePolicy1.setHeightForWidth(GBBoundaryD->sizePolicy().hasHeightForWidth());
-  GBBoundaryD->setSizePolicy(sizePolicy1);
-  gridLayout = new QGridLayout(GBBoundaryD);
-  gridLayout->setSpacing(6);
-  gridLayout->setContentsMargins(9, 9, 9, 9);
+  //sizePolicy1.setHeightForWidth(GBBoundaryD->sizePolicy().hasHeightForWidth());
+  //GBBoundaryD->setSizePolicy(sizePolicy1);
+  QGridLayout* gridLayoutD = new QGridLayout(GBBoundaryD);
+  gridLayoutD->setSpacing(6);
+  gridLayoutD->setContentsMargins(9, 9, 9, 9);
   CBBoundaryDi = new QComboBox(GBBoundaryD);
   CBBoundaryDi->setSizeAdjustPolicy(QComboBox::AdjustToContents);
 
-  gridLayout->addWidget(CBBoundaryDi, 0, 0, 1, 1);
+  gridLayoutD->addWidget(CBBoundaryDi, 0, 0, 1, 1);
 
   QSpacerItem* spacerItem5 = new QSpacerItem(40, 13, QSizePolicy::Fixed, QSizePolicy::Minimum);
-  gridLayout->addItem(spacerItem5, 0, 1, 1, 1);
+  gridLayoutD->addItem(spacerItem5, 0, 1, 1, 1);
 
   PBBoundaryDiNew  = new QPushButton(tr("New"), GBBoundaryD);
   PBBoundaryDiEdit = new QPushButton(tr("Edit"), GBBoundaryD);
@@ -965,9 +980,9 @@ void SMESHGUI_HomardAdaptArguments::setupUi()
   PBBoundaryDiEdit->setAutoDefault(false);
   PBBoundaryDiHelp->setAutoDefault(false);
 
-  gridLayout->addWidget(PBBoundaryDiNew,  0, 2, 1, 1);
-  gridLayout->addWidget(PBBoundaryDiEdit, 0, 3, 1, 1);
-  gridLayout->addWidget(PBBoundaryDiHelp, 0, 4, 1, 1);
+  gridLayoutD->addWidget(PBBoundaryDiNew,  0, 2, 1, 1);
+  gridLayoutD->addWidget(PBBoundaryDiEdit, 0, 3, 1, 1);
+  gridLayoutD->addWidget(PBBoundaryDiHelp, 0, 4, 1, 1);
 
   //          analytical
   GBBoundaryA = new QGroupBox(tr("Analytical boundary"), GBBoundaryN);
@@ -985,7 +1000,7 @@ void SMESHGUI_HomardAdaptArguments::setupUi()
 
   formLayout->setWidget(0, QFormLayout::LabelRole, TWBoundary);
 
-  gridLayout1 = new QGridLayout();
+  QGridLayout* gridLayout1 = new QGridLayout();
   gridLayout1->setSpacing(6);
   gridLayout1->setContentsMargins(0, 0, 0, 0);
 
@@ -1188,7 +1203,7 @@ void SMESHGUI_HomardAdaptAdvanced::setupWidget()
   logsLayout->addWidget(keepWorkingFilesCheck, 2, 0, 1, 1);
 
   //logsLayout->setColumnStretch( 1, 5 );
-  //logsLayout->setRowStretch( 3, 5 );
+  logsLayout->setRowStretch( 3, 5 );
 }
 
 void SMESHGUI_HomardAdaptAdvanced::onWorkingDirectoryPushButton()

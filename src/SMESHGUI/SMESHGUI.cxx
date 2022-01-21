@@ -4337,7 +4337,7 @@ void SMESHGUI::initialize( CAM_Application* app )
       meshId    = createMenu( tr( "MEN_MESH" ),    -1, 70, 10 ),
       ctrlId    = createMenu( tr( "MEN_CTRL" ),    -1, 60, 10 ),
       modifyId  = createMenu( tr( "MEN_MODIFY" ),  -1, 40, 10 ),
-#if not defined(DISABLE_MG_ADAPT) or not defined(DISABLE_HOMARD_ADAPT)
+#if !defined(DISABLE_MG_ADAPT) || !defined(DISABLE_HOMARD_ADAPT)
       adaptId   = createMenu( tr( "MEN_ADAPT" ),   -1, 80, 10 ),
 #endif
       measureId = createMenu( tr( "MEN_MEASURE" ), -1, 50, 10 ),
@@ -4663,7 +4663,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   createTool( SMESHOp::OpPatternMapping,         modifyTb );
 
   // Adaptation - begin
-#if not defined(DISABLE_MG_ADAPT) or not defined(DISABLE_HOMARD_ADAPT)
+#if !defined(DISABLE_MG_ADAPT) || !defined(DISABLE_HOMARD_ADAPT)
   int adaptTb = createTool( tr( "TB_ADAPTATION" ), QString( "SMESHAdaptationToolbar" ) ) ;
 #endif
 #ifndef DISABLE_MG_ADAPT

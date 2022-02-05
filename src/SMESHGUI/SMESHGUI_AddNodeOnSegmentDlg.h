@@ -27,7 +27,7 @@
 #define SMESHGUI_AddNodeOnSegmentDLG_H
 
 #include "SMESHGUI_Dialog.h"
-#include "SMESHGUI_SelectionOp.h"
+#include "SMESHGUI_InteractiveOp.h"
 
 class QButtonGroup;
 class QCheckBox;
@@ -42,7 +42,7 @@ class SMESHGUI_AddNodeOnSegmentDlg;
 /*!
  * \brief Operation to make a mesh pass through a point
  */
-class SMESHGUI_EXPORT SMESHGUI_AddNodeOnSegmentOp: public SMESHGUI_SelectionOp
+class SMESHGUI_EXPORT SMESHGUI_AddNodeOnSegmentOp: public SMESHGUI_InteractiveOp
 {
   Q_OBJECT
 
@@ -54,22 +54,28 @@ public:
 
 protected:
 
-  virtual void                   startOperation();
-  virtual void                   stopOperation();
+  virtual void                   startOperation() override;
+  virtual void                   stopOperation() override;
 
   virtual void                   activateSelection();
 
   bool                           isValid( QString&, SMESH::smIdType& n1, SMESH::smIdType& n2 );
 
+  virtual void                   processStyleEvents(unsigned long event,
+    void* calldata)  override;
+
+  virtual void                   processInteractorEvents(unsigned long event,
+    void* calldata) override;
+
+
 protected slots:
-  virtual bool                   onApply();
+  virtual bool                   onApply() override;
+
 
 private slots:
   void                           onSelectionDone();
   void                           redisplayPreview();
   void                           onTextChange( const QString& );
-  void                           onPositionClick();
-  void                           onPositionChanged();
   void                           onSelTypeChange();
   void                           onOpenView();
   void                           onCloseView();

@@ -37,6 +37,7 @@
 #include <SMESH_Actor.h>
 #include <SMESH_ActorUtils.h>
 #include <SMESH_TypeDefs.hxx>
+#include <SMESH_MeshAlgos.hxx>
 
 // SALOME GUI includes
 #include <LightApp_SelectionMgr.h>
@@ -49,6 +50,9 @@
 #include <SUIT_ResourceMgr.h>
 #include <SUIT_OverrideCursor.h>
 #include <SUIT_MessageBox.h>
+#include <SVTK_RenderWindowInteractor.h>
+#include <SVTK_Renderer.h>
+#include <SVTK_Event.h>
 
 // Qt includes
 #include <QApplication>
@@ -65,6 +69,11 @@
 
 // VTK includes
 #include <vtkProperty.h>
+#include <vtkCellPicker.h>
+#include <vtkInteractorStyle.h>
+#include <vtkGenericRenderWindowInteractor.h>
+#include <vtkInteractorObserver.h>
+
 
 // IDL includes
 #include <SALOMEconfig.h>
@@ -73,6 +82,8 @@
 
 #define SPACING 6
 #define MARGIN  11
+
+#define TOLERANCE 1e-3
 
 //=======================================================================
 /*!
@@ -147,6 +158,8 @@ QWidget* SMESHGUI_AddNodeOnFaceDlg::createMainFrame (QWidget* theParent)
   myDestinationY->RangeStepAndValidator(COORD_MIN, COORD_MAX, 10.0, "length_precision");
   myDestinationZ->RangeStepAndValidator(COORD_MIN, COORD_MAX, 10.0, "length_precision");
 
+  myPointOnFace = new QCheckBox(tr("XYZ_NODE_ON_FACE"), xyzGrp);
+
   QGridLayout* aDestLayout = new QGridLayout(xyzGrp);
   aDestLayout->setMargin(MARGIN);
   aDestLayout->setSpacing(SPACING);
@@ -160,9 +173,9 @@ QWidget* SMESHGUI_AddNodeOnFaceDlg::createMainFrame (QWidget* theParent)
   aDestLayout->setColumnStretch(2, 1);
   aDestLayout->setColumnStretch(4, 1);
   aDestLayout->setColumnStretch(6, 1);
+  aDestLayout->addWidget(myPointOnFace, 1, 0, 1, 6);
 
   // Preview
-
   myPreviewChkBox = new QCheckBox( tr("PREVIEW"), aFrame);
   myPreviewChkBox->setChecked( true );
 
@@ -209,7 +222,8 @@ void SMESHGUI_AddNodeOnFaceDlg::ButtonToggled (bool on)
 */
 //================================================================================
 
-SMESHGUI_AddNodeOnFaceOp::SMESHGUI_AddNodeOnFaceOp()
+SMESHGUI_AddNodeOnFaceOp::SMESHGUI_AddNodeOnFaceOp() : 
+  SMESHGUI_InteractiveOp()
 {
   mySimulation = 0;
   mySMESHGUI = 0;
@@ -217,15 +231,22 @@ SMESHGUI_AddNodeOnFaceOp::SMESHGUI_AddNodeOnFaceOp()
   myHelpFileName = "add_node_on_face.html";
 
   myNoPreview = false;
+  myUpdateDestination = false;
 
   // connect signals and slots
-  connect(myDlg->myDestinationX,  SIGNAL (valueChanged(double)), this, SLOT(redisplayPreview()));
-  connect(myDlg->myDestinationY,  SIGNAL (valueChanged(double)), this, SLOT(redisplayPreview()));
-  connect(myDlg->myDestinationZ,  SIGNAL (valueChanged(double)), this, SLOT(redisplayPreview()));
+  connect(myDlg->myDestinationX,  SIGNAL (valueChanged(double)), this, SLOT(onDestCoordChanged()));
+  connect(myDlg->myDestinationY,  SIGNAL (valueChanged(double)), this, SLOT(onDestCoordChanged()));
+  connect(myDlg->myDestinationZ,  SIGNAL (valueChanged(double)), this, SLOT(onDestCoordChanged()));
   connect(myDlg->myId,            SIGNAL (textChanged(const QString&)),SLOT(redisplayPreview()));
   connect(myDlg->myPreviewChkBox, SIGNAL (toggled(bool)),              SLOT(redisplayPreview()));
   connect(myDlg,                  SIGNAL (selTypeChanged() ),          SLOT(onSelTypeChange()));
   connect(myDlg->myId,            SIGNAL (textChanged(const QString&)),SLOT(onTextChange(const QString&)));
+  connect(myDlg->myPointOnFace,   SIGNAL(toggled(bool)),               SLOT(pointLocationChanged(bool)));
+
+  myFacePicker = vtkCellPicker::New();
+  myFacePicker->SetTolerance(0.005);
+  myFacePicker->PickFromListOn();
+
 }
 
 //================================================================================
@@ -242,7 +263,14 @@ void SMESHGUI_AddNodeOnFaceOp::onSelTypeChange()
   }
   else if ( myDlg->myDestBtn->isChecked() )
   {
-    // TODO: activate picking a point on a selected face
+    QString msg;
+    if (isValid(msg)) {
+      //Disconnect selectionChanged to keep selected element
+      disconnect(selectionMgr(), SIGNAL(selectionChanged()), this, SLOT(onSelectionDone()));
+      // Set selection mode to ActorSelection to avoid element's prehighlight during interactive selection
+      setSelectionMode(ActorSelection);
+      connect(selectionMgr(), SIGNAL(selectionChanged()), SLOT(onSelectionDone()));
+    }
   }
   else
   {
@@ -275,10 +303,15 @@ void SMESHGUI_AddNodeOnFaceOp::startOperation()
   aProp->Delete();
 
   SMESHGUI_SelectionOp::startOperation();
+  SMESHGUI_InteractiveOp::startOperation();
   myDlg->myId->setText("");
+  myUpdateDestination = true;
   myDlg->myDestinationX->SetValue(0);
   myDlg->myDestinationY->SetValue(0);
   myDlg->myDestinationZ->SetValue(0);
+  myUpdateDestination = false;
+
+  addObserver();
 
   myDlg->show();
 
@@ -309,6 +342,7 @@ void SMESHGUI_AddNodeOnFaceOp::stopOperation()
   disconnect(mySMESHGUI, SIGNAL (SignalActivatedViewManager()), this, SLOT(onOpenView()));
   disconnect(mySMESHGUI, SIGNAL (SignalCloseView()),            this, SLOT(onCloseView()));
   SMESHGUI_SelectionOp::stopOperation();
+  removeObserver();
 }
 
 //================================================================================
@@ -429,6 +463,8 @@ void SMESHGUI_AddNodeOnFaceOp::onSelectionDone()
       return;
     Handle(SALOME_InteractiveObject) anIO = aList.First();
     myMeshActor = SMESH::FindActorByEntry(anIO->getEntry());
+    myFacePicker->InitializePickList();
+    myFacePicker->AddPickList(myMeshActor);
 
     QString aString;
     int nbElems = SMESH::GetNameOfSelectedElements(selector(),anIO, aString);
@@ -442,9 +478,11 @@ void SMESHGUI_AddNodeOnFaceOp::onSelectionDone()
           for ( int i = 0; i < face->NbCornerNodes(); ++i )
             faceGC += SMESH_NodeXYZ( face->GetNode( i ));
           faceGC /= face->NbCornerNodes();
+          myUpdateDestination = true;
           myDlg->myDestinationX->SetValue(faceGC.X());
           myDlg->myDestinationY->SetValue(faceGC.Y());
           myDlg->myDestinationZ->SetValue(faceGC.Z());
+          myUpdateDestination = false;
         }
   } catch (...) {
   }
@@ -590,6 +628,54 @@ SMESHGUI_AddNodeOnFaceOp::~SMESHGUI_AddNodeOnFaceOp()
 {
   if ( myDlg )        delete myDlg;
   if ( mySimulation ) delete mySimulation;
+  myFacePicker->Delete();
+}
+
+//================================================================================
+/*!
+ * \brief SLOT called when destination coordinates are changed
+*/
+//================================================================================
+void SMESHGUI_AddNodeOnFaceOp::onDestCoordChanged() 
+{
+  if (myUpdateDestination)
+    return;
+  pointLocationChanged(myDlg->myPointOnFace->isChecked());
+  redisplayPreview();
+}
+
+//================================================================================
+/*!
+ * \brief SLOT called when 'Node on face' checkbox is changed
+*/
+//================================================================================
+void SMESHGUI_AddNodeOnFaceOp::pointLocationChanged(bool onFace) {
+  if (onFace) {
+    QString msg;
+    if (myMeshActor && isValid(msg)) {
+      SMESH::smIdType id = myDlg->myId->text().toLong();
+      if (id > 0) {
+        if (SMDS_Mesh* aMesh = myMeshActor->GetObject()->GetMesh()) {
+          if (const SMDS_MeshElement* face = aMesh->FindElement(id))
+          {
+            if (face->GetType() == SMDSAbs_Face) {
+              gp_Pnt point(myDlg->myDestinationX->GetValue(), myDlg->myDestinationY->GetValue(),myDlg->myDestinationZ->GetValue());
+              gp_XYZ closestPnt;
+              double dist = SMESH_MeshAlgos::GetDistance( face, point, &closestPnt);
+              if (dist > TOLERANCE) {
+                myUpdateDestination = true;
+                myDlg->myDestinationX->SetValue(closestPnt.X());
+                myDlg->myDestinationY->SetValue(closestPnt.Y());
+                myDlg->myDestinationZ->SetValue(closestPnt.Z());
+                myUpdateDestination = false;
+                redisplayPreview();
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 //================================================================================
@@ -604,3 +690,97 @@ LightApp_Dialog* SMESHGUI_AddNodeOnFaceOp::dlg() const
   return myDlg;
 }
 
+//================================================================================
+/*
+* \brief Process InteractiveSelectionChanged event
+*/
+//================================================================================
+void SMESHGUI_AddNodeOnFaceOp::processStyleEvents(unsigned long theEvent, void* theCallData)
+{
+  (void*)theCallData;
+  QString msg;
+  if (isValid(msg)) {
+    if (theEvent == SVTK::InteractiveSelectionChanged) {
+      if (myDlg->myPointOnFace->isChecked()) {
+        // Pick point on a mesh surface
+        QString msg;
+        if (myMeshActor && isValid(msg)) {
+          SMESH::smIdType id = myDlg->myId->text().toLong();
+          if (id > 0) {
+            if (SMDS_Mesh* aMesh = myMeshActor->GetObject()->GetMesh()) {
+              if (const SMDS_MeshElement* face = aMesh->FindElement(id))
+              {
+                if (face->GetType() == SMDSAbs_Face) {
+                  int xClick, yClick; // Last event (move or left button bown) position
+                  myRWInteractor->GetDevice()->GetEventPosition(xClick, yClick);
+                  gp_XYZ faceNode(0, 0, 0);
+                  SMDS_Mesh tmp;
+                  double Ni[3];
+                  std::vector<const SMDS_MeshNode*> tmpNodes;
+                  for (int i = 0; i < face->NbCornerNodes(); ++i) {
+                    faceNode = SMESH_NodeXYZ(face->GetNode(i));
+                    vtkInteractorObserver::ComputeWorldToDisplay(myRWInteractor->GetRenderer()->GetDevice(),
+                      faceNode.X(), faceNode.Y(), faceNode.Z(), Ni);
+                    tmpNodes.push_back(tmp.AddNode(Ni[0], Ni[1], 0));
+                  }
+                  SMDS_MeshFace* face2D = tmp.AddPolygonalFace(tmpNodes);
+                  gp_Pnt point(double(xClick), double(yClick), 0);
+                  gp_XYZ closestPnt;
+                  double dist = SMESH_MeshAlgos::GetDistance(face2D, point, &closestPnt);
+                  double xPick = 0, yPick = 0;
+                  if (dist < TOLERANCE) {
+                    xPick = xClick;
+                    yPick = yClick;
+                  }
+                  else {
+                    xPick = closestPnt.X();
+                    yPick = closestPnt.Y();
+                  }
+                  myFacePicker->Pick(xPick, yPick, 0.0, myRWInteractor->GetRenderer()->GetDevice());
+                  double closest[3];
+                  myFacePicker->GetPickPosition(closest);
+                  myUpdateDestination = true;
+                  myDlg->myDestinationX->SetValue(closest[0]);
+                  myDlg->myDestinationY->SetValue(closest[1]);
+                  myDlg->myDestinationZ->SetValue(closest[2]);
+                  myUpdateDestination = false;
+                  redisplayPreview();
+                }
+              }
+            }
+          }
+        }
+      }
+      else {
+        double* aCoord = (double*)theCallData;
+        myUpdateDestination = true;
+        myDlg->myDestinationX->SetValue(aCoord[0]);
+        myDlg->myDestinationY->SetValue(aCoord[1]);
+        myDlg->myDestinationZ->SetValue(aCoord[2]);
+        myUpdateDestination = false;
+        redisplayPreview();
+      }
+    }
+  }
+}
+
+//================================================================================
+/*
+* \brief Process LeftButtonPressEvent event: activate interactive selection
+*/
+//================================================================================
+void SMESHGUI_AddNodeOnFaceOp::processInteractorEvents(unsigned long theEvent, void* theCallData)
+{
+  (void*)theCallData;
+  if (theEvent == vtkCommand::LeftButtonPressEvent && myDlg->myDestBtn->isChecked()) {
+    bool control = myRWInteractor->GetDevice()->GetControlKey();
+    bool shift = myRWInteractor->GetDevice()->GetControlKey();
+    SVTK_ViewWindow* svtkViewWindow = SMESH::GetViewWindow(mySMESHGUI);
+    if (svtkViewWindow && !shift && !control) {
+      QString msg;
+      if (isValid(msg)) {
+        svtkViewWindow->activateInteractiveSelection();
+      }
+    }
+  }
+}

@@ -30,7 +30,7 @@
 #include "SMESH_SMESHGUI.hxx"
 
 #include "SMESHGUI_Dialog.h"
-#include "SMESHGUI_SelectionOp.h"
+#include "SMESHGUI_InteractiveOp.h"
 
 class QButtonGroup;
 class QCheckBox;
@@ -41,12 +41,13 @@ class QRadioButton;
 class SMESHGUI_SpinBox;
 class SMESHGUI_MeshEditPreview;
 class SMESHGUI_AddNodeOnFaceDlg;
+class vtkCellPicker;
 
 /*!
  * \brief Operation to split a face into triangles by creating a new node
  *        on the face and connecting it to the face nodes
  */
-class SMESHGUI_EXPORT SMESHGUI_AddNodeOnFaceOp: public SMESHGUI_SelectionOp
+class SMESHGUI_EXPORT SMESHGUI_AddNodeOnFaceOp: public SMESHGUI_InteractiveOp
 {
   Q_OBJECT
 
@@ -58,12 +59,19 @@ public:
 
 protected:
 
-  virtual void                  startOperation();
-  virtual void                  stopOperation();
+  virtual void                  startOperation() override;
+  virtual void                  stopOperation() override;
 
-  virtual void                  activateSelection();
+  virtual void                  activateSelection() override;
 
   bool                          isValid( QString& );
+
+  virtual void                   processStyleEvents(unsigned long event,
+                                                    void* calldata)  override;
+
+  virtual void                   processInteractorEvents(unsigned long event,
+                                                         void* calldata) override;
+
 
 protected slots:
   virtual bool                  onApply();
@@ -73,9 +81,11 @@ private slots:
   void                          redisplayPreview();
   void                          onSelTypeChange();
   void                          onTextChange( const QString& );
-  void                          onDestCoordChanged();
+//  void                          onDestCoordChanged();
   void                          onOpenView();
   void                          onCloseView();
+  void                          pointLocationChanged(bool);
+  void                          onDestCoordChanged();
 
 private:
   SMESHGUI_AddNodeOnFaceDlg*    myDlg;
@@ -87,6 +97,7 @@ private:
   bool                          myNoPreview;
   bool                          myUpdateDestination;
   bool                          myDestCoordChanged;
+  vtkCellPicker*                myFacePicker;      
 };
 
 /*!
@@ -112,6 +123,7 @@ private:
   SMESHGUI_SpinBox*             myDestinationX;
   SMESHGUI_SpinBox*             myDestinationY;
   SMESHGUI_SpinBox*             myDestinationZ;
+  QCheckBox*                    myPointOnFace;
   QCheckBox*                    myPreviewChkBox;
 
   QString                       myHelpFileName;

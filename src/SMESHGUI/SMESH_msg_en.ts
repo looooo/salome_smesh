@@ -6865,6 +6865,10 @@ Please specify them and try again</translation>
         <source>XYZ_GROUP</source>
         <translation>Node location by mouse click</translation>
     </message>
+    <message>
+        <source>XYZ_NODE_ON_FACE</source>
+        <translation>Node on face</translation>
+    </message>
 </context>
 <context>
     <name>SMESHGUI_AddNodeOnFaceOp</name>

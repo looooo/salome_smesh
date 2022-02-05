@@ -48,6 +48,9 @@
 #include <SUIT_Desktop.h>
 #include <SVTK_ViewModel.h>
 #include <SVTK_ViewWindow.h>
+#include <SVTK_Renderer.h>
+#include <SVTK_RenderWindowInteractor.h>
+#include <SVTK_Event.h>
 #include <SalomeApp_Tools.h>
 #include <SalomeApp_TypeFilter.h>
 #include <SUIT_ResourceMgr.h>
@@ -74,7 +77,10 @@
 #include <QButtonGroup>
 
 // VTK includes
+#include <vtkObject.h>
 #include <vtkProperty.h>
+#include <vtkGenericRenderWindowInteractor.h>
+#include <vtkInteractorObserver.h>
 
 // IDL includes
 #include <SALOMEconfig.h>
@@ -88,6 +94,8 @@ namespace
 {
   enum { MANUAL_MODE = 0, SEARCH_MODE, INTERACTIVE_MODE };
 }
+
+//#define SELECTION_PRECISION 4
 
 //=======================================================================
 /*!
@@ -125,7 +133,7 @@ QWidget* SMESHGUI_MakeNodeAtPointDlg::createMainFrame (QWidget* theParent)
   QPixmap iconMoveWithoutNode (rm->loadPixmap("SMESH", tr("ICON_DLG_MOVE_WITHOUT_NODE")));
   QPixmap iconMoveInteractive (rm->loadPixmap("SMESH", tr("ICON_DLG_MOVE_NODE_INTERACTIVE")));
   QPixmap iconSelect          (rm->loadPixmap("SMESH", tr("ICON_SELECT")));
-
+  
   // constructor
   QGroupBox* aPixGrp = new QGroupBox(tr("MOVE_NODE"), this);
   aPixGrp->setSizePolicy( QSizePolicy( QSizePolicy::Expanding, QSizePolicy::Fixed ) );
@@ -349,7 +357,6 @@ void SMESHGUI_MakeNodeAtPointDlg::ConstructorsClicked (int constructorId)
       break;
     }
   }
-
   QApplication::instance()->processEvents();
   myMainFrame->hide();
   myMainFrame->show();
@@ -363,7 +370,8 @@ void SMESHGUI_MakeNodeAtPointDlg::ConstructorsClicked (int constructorId)
 */
 //================================================================================
 
-SMESHGUI_MakeNodeAtPointOp::SMESHGUI_MakeNodeAtPointOp(int defaultConstructor)
+SMESHGUI_MakeNodeAtPointOp::SMESHGUI_MakeNodeAtPointOp(int defaultConstructor) : 
+  SMESHGUI_InteractiveOp()
 {
   myDefaultConstructor = defaultConstructor;
   mySimulation = 0;
@@ -385,7 +393,7 @@ SMESHGUI_MakeNodeAtPointOp::SMESHGUI_MakeNodeAtPointOp(int defaultConstructor)
   connect(myDlg->myDestDZ,        SIGNAL (valueChanged(double)), this, SLOT(onDestCoordChanged()));
   connect(myDlg->myId,            SIGNAL (textChanged(const QString&)),SLOT(redisplayPreview()));
   connect(myDlg->myPreviewChkBox, SIGNAL (toggled(bool)),              SLOT(redisplayPreview()));
-  connect(myDlg->myButtonGroup,   SIGNAL (buttonClicked(int)),         SLOT(redisplayPreview()));
+  connect(myDlg->myButtonGroup,   SIGNAL (buttonClicked(int)),         SLOT(constructorChanged()));
 
   // IPAL22913: TC6.5.0: selected in "Move node" dialog box node is not highlighted
   // note: this slot seems to be lost together with removed obsolete SMESHGUI_MoveNodesDlg class
@@ -419,6 +427,7 @@ void SMESHGUI_MakeNodeAtPointOp::onDestCoordChanged()
   myDestCoordChanged = true;
 }
 
+
 //=======================================================================
 // function : startOperation()
 // purpose  : Init dialog fields, connect signals and slots, show dialog
@@ -432,7 +441,8 @@ void SMESHGUI_MakeNodeAtPointOp::startOperation()
   // init simulation with a current View
   if ( mySimulation ) delete mySimulation;
   mySMESHGUI = getSMESHGUI();
-  mySimulation = new SMESHGUI_MeshEditPreview(SMESH::GetViewWindow( mySMESHGUI ) );
+  mySimulation = new SMESHGUI_MeshEditPreview(SMESH::GetViewWindow(mySMESHGUI));
+
   connect(mySMESHGUI, SIGNAL (SignalActivatedViewManager()), this, SLOT(onOpenView()));
   connect(mySMESHGUI, SIGNAL (SignalCloseView()), this, SLOT(onCloseView()));
   vtkProperty* aProp = vtkProperty::New();
@@ -455,6 +465,7 @@ void SMESHGUI_MakeNodeAtPointOp::startOperation()
   // IPAL19360
   SMESHGUI_SelectionOp::startOperation(); // this method should be called only after filter creation
   //activateSelection(); // set filters   // called inside of previous statement
+  SMESHGUI_InteractiveOp::startOperation();
   myDlg->myId->setText("");
   myDlg->myDestinationX->SetValue(0);
   myDlg->myDestinationY->SetValue(0);
@@ -470,8 +481,10 @@ void SMESHGUI_MakeNodeAtPointOp::startOperation()
   myDlg->myDestDZ->setReadOnly(true);
   myDlg->myRButNodeToMove->setChecked(true);
 
-  if ( myDefaultConstructor == INTERACTIVE_MODE )
+  if ( myDefaultConstructor == INTERACTIVE_MODE ) {
+    addObserver();
     myDlg->myButtonGroup->button( INTERACTIVE_MODE )->setChecked(true);
+  }
   myDlg->ConstructorsClicked( GetConstructorId() );
 
   myDlg->show();
@@ -514,6 +527,7 @@ void SMESHGUI_MakeNodeAtPointOp::stopOperation()
   disconnect(mySMESHGUI, SIGNAL (SignalCloseView()),            this, SLOT(onCloseView()));
   selectionMgr()->removeFilter( myFilter );
   SMESHGUI_SelectionOp::stopOperation();
+  removeObserver();
 }
 
 //================================================================================
@@ -873,6 +887,23 @@ void SMESHGUI_MakeNodeAtPointOp::onOpenView()
 
 //=================================================================================
 /*!
+ * \brief SLOT called when the creation mode is changed 
+ */
+ //=================================================================================
+
+void SMESHGUI_MakeNodeAtPointOp::constructorChanged() {
+  redisplayPreview();
+  if (GetConstructorId() == INTERACTIVE_MODE) {
+    addObserver();
+  }
+  else {
+    removeObserver();
+  }
+}
+
+
+//=================================================================================
+/*!
  * \brief SLOT called when the viewer closed
  */
 //=================================================================================
@@ -951,3 +982,54 @@ LightApp_Dialog* SMESHGUI_MakeNodeAtPointOp::dlg() const
   return myDlg;
 }
 
+
+//================================================================================
+/*
+* \brief Process InteractiveSelectionChanged event
+*/
+//================================================================================
+
+void SMESHGUI_MakeNodeAtPointOp::processStyleEvents(unsigned long theEvent, void* theCallData) {
+  if (theEvent == SVTK::InteractiveSelectionChanged) {
+    double* aCoord = (double*)theCallData;
+    myDlg->myDestinationX->SetValue(aCoord[0]);
+    myDlg->myDestinationY->SetValue(aCoord[1]);
+    myDlg->myDestinationZ->SetValue(aCoord[2]);
+    redisplayPreview();
+  }
+}
+
+//================================================================================
+/*
+* \brief Process LeftButtonPressEvent event
+*/
+//================================================================================
+void SMESHGUI_MakeNodeAtPointOp::processInteractorEvents(unsigned long theEvent, void* theCallData) {
+  (void*)theCallData;
+  if (theEvent == vtkCommand::LeftButtonPressEvent) {
+    bool control = myRWInteractor->GetDevice()->GetControlKey();
+    bool shift = myRWInteractor->GetDevice()->GetControlKey();
+    if (GetConstructorId() == INTERACTIVE_MODE && myDlg->myDestBtn->isChecked() && !shift && !control) {
+      if (SVTK_ViewWindow* svtkViewWindow = SMESH::GetViewWindow(SMESHGUI::GetSMESHGUI())) {
+        svtkViewWindow->activateInteractiveSelection();
+      }
+    }
+  }
+   /*
+   if ( myRWInteractor && myRWInteractor->GetDevice() && myInteractorStyle ) {
+      int xClick, yClick; // Last click position
+      myRWInteractor->GetDevice()->GetEventPosition(xClick, yClick);
+      double nodeCoords[3];
+      vtkInteractorObserver::ComputeWorldToDisplay(myRWInteractor->GetRenderer()->GetDevice(),
+                                                   myDlg->myDestinationX->GetValue(),
+                                                   myDlg->myDestinationY->GetValue(),
+                                                   myDlg->myDestinationZ->GetValue(),
+                                                   nodeCoords);
+      double rad = std::sqrt(std::pow(xClick - nodeCoords[0], 2) + std::pow(yClick - nodeCoords[1], 2));
+      if (rad < SELECTION_PRECISION) {
+        if (SVTK_ViewWindow* svtkViewWindow = SMESH::GetViewWindow(mySMESHGUI)) {
+          svtkViewWindow->activateInteractiveSelection();
+        }
+      }
+  }*/
+}

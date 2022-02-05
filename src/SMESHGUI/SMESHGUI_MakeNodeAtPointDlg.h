@@ -30,7 +30,9 @@
 #include "SMESH_SMESHGUI.hxx"
 
 #include "SMESHGUI_Dialog.h"
-#include "SMESHGUI_SelectionOp.h"
+#include "SMESHGUI_InteractiveOp.h"
+
+#include <vtkSmartPointer.h>
 
 class QButtonGroup;
 class QCheckBox;
@@ -42,10 +44,11 @@ class SMESHGUI_SpinBox;
 class SMESHGUI_MeshEditPreview;
 class SMESHGUI_MakeNodeAtPointDlg;
 
+
 /*!
  * \brief Operation to make a mesh pass through a point
  */
-class SMESHGUI_EXPORT SMESHGUI_MakeNodeAtPointOp: public SMESHGUI_SelectionOp
+class SMESHGUI_EXPORT SMESHGUI_MakeNodeAtPointOp: public SMESHGUI_InteractiveOp
 {
   Q_OBJECT
 
@@ -57,12 +60,18 @@ public:
 
 protected:
 
-  virtual void                   startOperation();
-  virtual void                   stopOperation();
+  virtual void                   startOperation() override;
+  virtual void                   stopOperation() override;
 
-  virtual void                   activateSelection();
+  virtual void                   activateSelection() override;
 
   bool                           isValid( QString& );
+
+  virtual void                   processStyleEvents(unsigned long event,
+                                                    void* calldata)  override;
+
+  virtual void                   processInteractorEvents(unsigned long event,
+                                                         void* calldata) override;
 
 protected slots:
   virtual bool                   onApply();
@@ -75,6 +84,7 @@ private slots:
   void                           onDestCoordChanged();
   void                           onOpenView();
   void                           onCloseView();
+  void                           constructorChanged();
 
 private:
   int                           GetConstructorId();

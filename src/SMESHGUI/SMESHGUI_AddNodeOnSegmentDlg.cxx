@@ -44,6 +44,9 @@
 #include <SUIT_ResourceMgr.h>
 #include <SVTK_ViewModel.h>
 #include <SVTK_ViewWindow.h>
+#include <SVTK_RenderWindowInteractor.h>
+#include <SVTK_Renderer.h>
+#include <SVTK_Event.h>
 #include <SalomeApp_Tools.h>
 
 // Qt includes
@@ -61,6 +64,10 @@
 
 // VTK includes
 #include <vtkProperty.h>
+#include <vtkInteractorStyle.h>
+#include <vtkGenericRenderWindowInteractor.h>
+#include <vtkInteractorObserver.h>
+#include <vtkLine.h>
 
 // IDL includes
 #include <SALOMEconfig.h>
@@ -69,6 +76,8 @@
 
 #define SPACING 6
 #define MARGIN  11
+
+#define SPIN_TOLERANCE 1e-3
 
 //=======================================================================
 /*!
@@ -135,8 +144,7 @@ QWidget* SMESHGUI_AddNodeOnSegmentDlg::createMainFrame (QWidget* theParent)
 
   myPositionSpin = new SMESHGUI_SpinBox(positionGrp);
   myPositionSpin->setReadOnly(false);
-  const double tol = 1e-3;
-  myPositionSpin->RangeStepAndValidator( tol, 1-tol, 0.1, "length_precision");
+  myPositionSpin->RangeStepAndValidator(SPIN_TOLERANCE, 1- SPIN_TOLERANCE, 0.1, "length_precision");
 
   QGridLayout* positionLayout = new QGridLayout(positionGrp);
   positionLayout->setMargin(MARGIN);
@@ -193,7 +201,8 @@ void SMESHGUI_AddNodeOnSegmentDlg::ButtonToggled (bool on)
  */
 //================================================================================
 
-SMESHGUI_AddNodeOnSegmentOp::SMESHGUI_AddNodeOnSegmentOp()
+SMESHGUI_AddNodeOnSegmentOp::SMESHGUI_AddNodeOnSegmentOp() :
+  SMESHGUI_InteractiveOp()
 {
   mySimulation = 0;
   mySMESHGUI = 0;
@@ -224,7 +233,17 @@ void SMESHGUI_AddNodeOnSegmentOp::onSelTypeChange()
   }
   else if ( myDlg->myPositionBtn->isChecked() )
   {
-    // TODO: activate picking a point on a selected segment
+    if (SVTK_ViewWindow* svtkViewWindow = SMESH::GetViewWindow(mySMESHGUI)) {
+      QString msg;
+      SMESH::smIdType node1 = 0, node2 = 0;
+      if (isValid(msg, node1, node2)) {
+        //Disconnect selectionChanged to keep selected element
+        disconnect(selectionMgr(), SIGNAL(selectionChanged()), this, SLOT(onSelectionDone()));
+        // Set selection mode to ActorSelection to avoid element's prehighlight during interactive selection
+        setSelectionMode(ActorSelection);
+        connect(selectionMgr(), SIGNAL(selectionChanged()), SLOT(onSelectionDone()));
+      }      
+    }
   }
   else
   {
@@ -257,9 +276,12 @@ void SMESHGUI_AddNodeOnSegmentOp::startOperation()
   aProp->Delete();
 
   SMESHGUI_SelectionOp::startOperation(); // this method should be called only after filter creation
+  SMESHGUI_InteractiveOp::startOperation();
   myDlg->mySegment->setText("");
   myDlg->myPositionSpin->SetValue(0.5);
   myDlg->myPositionSpin->setReadOnly(false);
+
+  addObserver();
 
   myDlg->show();
 
@@ -291,11 +313,12 @@ void SMESHGUI_AddNodeOnSegmentOp::stopOperation()
   disconnect(mySMESHGUI, SIGNAL (SignalCloseView()),            this, SLOT(onCloseView()));
   //selectionMgr()->removeFilter( myFilter );
   SMESHGUI_SelectionOp::stopOperation();
+  removeObserver();
 }
 
 //================================================================================
 /*!
- * \brief perform it's intention action: move or create a node
+ * \brief perform it's intention action: create a node on a segment
  */
 //================================================================================
 
@@ -603,3 +626,76 @@ LightApp_Dialog* SMESHGUI_AddNodeOnSegmentOp::dlg() const
   return myDlg;
 }
 
+//================================================================================
+/*
+* \brief Process InteractiveSelectionChanged event
+*/
+//================================================================================
+void SMESHGUI_AddNodeOnSegmentOp::processStyleEvents(unsigned long theEvent, void* theCallData) 
+{
+  (void*)theCallData;
+  QString msg;
+  SMESH::smIdType node1 = 0, node2 = 0;
+  if (isValid(msg, node1, node2)) {
+    if (theEvent == SVTK::InteractiveSelectionChanged) {
+      if (SMDS_Mesh* mesh = myMeshActor->GetObject()->GetMesh())
+        if(myRWInteractor && myRWInteractor->GetDevice() && myInteractorStyle) {
+        {
+          double N1[3];
+          double N2[3];
+          double pos;
+          double N1_SC[3];
+          double N2_SC[3];
+          double xyz[3];
+          double closest[3];
+
+          const SMDS_MeshNode* n1 = mesh->FindNode(node1);
+          const SMDS_MeshNode* n2 = mesh->FindNode(node2);
+          int xClick, yClick; // Last event (move or left button down) position
+          myRWInteractor->GetDevice()->GetEventPosition(xClick, yClick);
+
+          n1->GetXYZ(N1);
+          n2->GetXYZ(N2);
+          // Get 2D screen coordinates of each node
+          vtkInteractorObserver::ComputeWorldToDisplay(myRWInteractor->GetRenderer()->GetDevice(),
+            N1[0], N1[1], N1[2], N1_SC);
+          vtkInteractorObserver::ComputeWorldToDisplay(myRWInteractor->GetRenderer()->GetDevice(),
+            N2[0], N2[1], N2[2], N2_SC);
+          N1_SC[2] = N2_SC[2] = xyz[2] = 0;
+          xyz[0] = static_cast<double>(xClick);
+          xyz[1] = static_cast<double>(yClick);
+          // Parametric position of selected point on a line
+          vtkLine::DistanceToLine(xyz, N1_SC, N2_SC, pos, closest);
+          if (pos < 0)
+            pos = SPIN_TOLERANCE;
+          else if (pos > 1.0)
+            pos = 1.0 - SPIN_TOLERANCE;
+          myDlg->myPositionSpin->SetValue(pos);
+          redisplayPreview();
+        }
+      }
+    }
+  }
+}
+
+//================================================================================
+/*
+* \brief Process LeftButtonPressEvent event: activate interactive selection
+*/
+//================================================================================
+void SMESHGUI_AddNodeOnSegmentOp::processInteractorEvents(unsigned long theEvent, void* theCallData) 
+{
+  (void*)theCallData;
+  if (theEvent == vtkCommand::LeftButtonPressEvent && myDlg->myPositionBtn->isChecked()) {
+    bool control = myRWInteractor->GetDevice()->GetControlKey();
+    bool shift = myRWInteractor->GetDevice()->GetControlKey();
+    SVTK_ViewWindow* svtkViewWindow = SMESH::GetViewWindow(mySMESHGUI);
+    if (svtkViewWindow  && !shift && ! control) {
+      QString msg;
+      SMESH::smIdType node1 = 0, node2 = 0;
+      if (isValid(msg, node1, node2)) {
+        svtkViewWindow->activateInteractiveSelection();
+      }
+    }
+  }
+}

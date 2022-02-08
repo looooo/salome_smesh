@@ -338,6 +338,7 @@ void SMESHGUI_MakeNodeAtPointDlg::ConstructorsClicked (int constructorId)
       myCurrentY->SetValue(0);
       myCurrentZ->SetValue(0);
       if (!myNodeToMoveGrp->isVisible()) myNodeToMoveGrp->show();
+      myIdBtn->setChecked( true );
       break;
     }
   case SEARCH_MODE:

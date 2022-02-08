@@ -4497,6 +4497,9 @@ void SMESHGUI::initialize( CAM_Application* app )
   createMenu( SMESHOp::OpBiQuadraticPentahedron, addId, -1 );
   createMenu( SMESHOp::OpQuadraticHexahedron,    addId, -1 );
   createMenu( SMESHOp::OpTriQuadraticHexahedron, addId, -1 );
+  createMenu( separator(),                       addId, -1 );
+  createMenu( SMESHOp::OpSplitEdgeInteract,      addId, -1 );
+  createMenu( SMESHOp::OpSplitFaceInteract,      addId, -1 );
 
   createMenu( SMESHOp::OpRemoveNodes,          removeId, -1 );
   createMenu( SMESHOp::OpRemoveElements,       removeId, -1 );
@@ -4534,8 +4537,6 @@ void SMESHGUI::initialize( CAM_Application* app )
   createMenu( SMESHOp::OpCuttingOfQuadrangles,   modifyId, -1 );
   createMenu( SMESHOp::OpSplitVolumes,           modifyId, -1 );
   createMenu( SMESHOp::OpSplitBiQuadratic,       modifyId, -1 );
-  createMenu( SMESHOp::OpSplitEdgeInteract,  modifyId, -1 );
-  createMenu( SMESHOp::OpSplitFaceInteract,      modifyId, -1 );
   createMenu( SMESHOp::OpSmoothing,              modifyId, -1 );
   createMenu( SMESHOp::OpPatternMapping,         modifyId, -1 );
 

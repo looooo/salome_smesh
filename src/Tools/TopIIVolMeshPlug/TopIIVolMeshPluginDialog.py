@@ -112,8 +112,8 @@ class TopIIVolMeshPluginDialog(Ui_TopIIVolMeshMainFrame,QWidget):
       shellCmd+= " --zpoints " + str(zPoints)
       shellCmd+= " --depth   " + str(depth)
       shellCmd+= " --partition_x " + str(xParts)
-      shellCmd+= " --partition_y " + str(xParts)
-      shellCmd+= " --partition_z " + str(xParts)
+      shellCmd+= " --partition_y " + str(yParts)
+      shellCmd+= " --partition_z " + str(zParts)
       shellCmd+= " --in " + inputMesh
     if platform.system()=="Windows" :
       self.SALOME_TMP_DIR = os.getenv("SALOME_TMP_DIR")

@@ -7,8 +7,6 @@ import sys
 import salome
 
 import os
-salome.standalone() # <- key point of test is here
-salome.salome_init()
 import salome_notebook
 notebook = salome_notebook.NoteBook()
 

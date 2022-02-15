@@ -5,7 +5,6 @@ Most basic test of SHAPE/SMESH usecase, but it can be tested without any session
 
 import sys
 import salome
-salome.standalone() # <- key point of test is here
 salome.salome_init()
 
 #from salome.shaper import initConfig

@@ -11,7 +11,6 @@ class SMESHExportOfFieldsInMemory(unittest.TestCase):
     """
     Test focuses on ExportMEDCoupling method in the context of MED_CELL field output.
     """
-    salome.standalone()
     salome.salome_init()
     ###
     ### SHAPER component

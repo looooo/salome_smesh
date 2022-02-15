@@ -7,6 +7,7 @@ import sys
 import salome
 
 import os
+salome.salome_init()
 import salome_notebook
 notebook = salome_notebook.NoteBook()
 

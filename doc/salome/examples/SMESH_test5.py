@@ -38,6 +38,10 @@ import CORBA
 import os
 import os.path
 
+import tempfile
+
+aOutPath = tempfile.mkdtemp()
+
 def SetSObjName(theSObj,theName) :
     ok, anAttr = theSObj.FindAttribute("AttributeName")
     if ok:
@@ -58,8 +62,7 @@ def ConvertMED2UNV(thePath,theFile) :
         aMesh.SetName(aFileName)
         print(aMesh.GetName())
 
-        aOutPath = '/tmp/'
-        aFileName = aOutPath + theFile + "." + str(iMesh) + ".unv"
+        aFileName = os.path.join(aOutPath, theFile + "." + str(iMesh) + ".unv")
         aMesh.ExportUNV(aFileName)
         aMesh = smesh.CreateMeshesFromUNV(aFileName)
         print(aMesh.GetName(), end=' ')
@@ -72,13 +75,11 @@ aPath = os.getenv('DATA_DIR') + '/MedFiles/'
 aListDir = os.listdir(aPath)
 print(aListDir)
 
-for iFile in range(len(aListDir)) :
-    aFileName = aListDir[iFile]
+for aFileName in aListDir:
     aName,anExt = os.path.splitext(aFileName)
     if anExt == ".med" :
         aFileName = os.path.basename(aFileName)
         print(aFileName)
         ConvertMED2UNV(aPath,aFileName)
-        #break
 
 salome.sg.updateObjBrowser()

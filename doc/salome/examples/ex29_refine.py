@@ -36,7 +36,8 @@ import os
 # Values
 # ------
 
-tmpDir = os.getenv('SALOME_TMP_DIR', '/tmp')
+import tempfile
+tmpDir = tempfile.mkdtemp()
 print("Output directory:", tmpDir)
 
 # Path for ".med" files

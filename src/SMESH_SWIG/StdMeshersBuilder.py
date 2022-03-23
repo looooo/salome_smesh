@@ -45,10 +45,6 @@ COMPOSITE   = "CompositeSegment_1D"
 
 Algorithm type: Composite segment 1D algorithm, see :class:`~StdMeshersBuilder.StdMeshersBuilder_CompositeSegment`
 """
-MEFISTO     = "MEFISTO_2D"
-"""
-Algorithm type: Triangle MEFISTO 2D algorithm, see :class:`~StdMeshersBuilder.StdMeshersBuilder_Triangle_MEFISTO`
-"""
 
 Hexa        = "Hexa_3D"
 """
@@ -91,11 +87,11 @@ for e in StdMeshers.VLExtrusionMethod._items: exec('%s = StdMeshers.%s'%(e,e))
 class StdMeshersBuilder_Segment(Mesh_Algorithm):
     """
     Defines segment 1D algorithm for edges discretization.
-    
+
     It can be created by calling smeshBuilder.Mesh.Segment(geom=0)
     """
-    
-    
+
+
     meshMethod = "Segment"
     """
     name of the dynamic method in smeshBuilder.Mesh class
@@ -109,7 +105,7 @@ class StdMeshersBuilder_Segment(Mesh_Algorithm):
     isDefault  = True
     """
     flag pointing whether this algorithm should be used by default in dynamic method
-    of smeshBuilder.Mesh class    
+    of smeshBuilder.Mesh class
     """
 
     docHelper  = "Create segment 1D algorithm for edges"
@@ -132,7 +128,7 @@ class StdMeshersBuilder_Segment(Mesh_Algorithm):
     def LocalLength(self, l, UseExisting=0, p=1e-07):
         """
         Defines "LocalLength" hypothesis to cut an edge in several segments with the same length
-        
+
         Parameters:
             l : for the length of segments that cut an edge
             UseExisting : if == true - searches for an  existing hypothesis created with
@@ -146,8 +142,8 @@ class StdMeshersBuilder_Segment(Mesh_Algorithm):
                 p=0.5 means rounding of (edge_length / l) to the nearest integer,
                 p=1 means rounding of (edge_length / l) to the lower integer.
                 Default value is 1e-07.
-                
-        Returns: 
+
+        Returns:
             an instance of StdMeshers_LocalLength hypothesis
         """
 
@@ -167,11 +163,11 @@ class StdMeshersBuilder_Segment(Mesh_Algorithm):
                 the preestimated length is used that depends on geometry size
             UseExisting : if ==true - searches for an existing hypothesis created with
                 the same parameters, else (default) - Create a new one
-        
+
         Returns:
             an instance of StdMeshers_MaxLength hypothesis
         """
-    
+
 
         hyp = self.Hypothesis("MaxLength", [length], UseExisting=UseExisting)
         if isinstance(length,str) or length > 0:
@@ -203,12 +199,12 @@ class StdMeshersBuilder_Segment(Mesh_Algorithm):
                     A list item can also be a tuple (edge, 1st_vertex_of_edge)
             UseExisting: if ==true - searches for an existing hypothesis created with
                     the same parameters, else (default) - create a new one
-    
-        Returns: 
+
+        Returns:
             an instance of StdMeshers_NumberOfSegments hypothesis
         """
-    
-        
+
+
         if not isinstance(reversedEdges,list): #old version script, before adding reversedEdges
             reversedEdges, UseExisting = [], reversedEdges
         entry = self.MainShapeEntry()
@@ -263,7 +259,7 @@ class StdMeshersBuilder_Segment(Mesh_Algorithm):
         Returns:
             an instance of StdMeshers_Adaptive1D hypothesis
         """
-        
+
         from salome.smesh.smeshBuilder import IsEqual
         compFun = lambda hyp, args: ( IsEqual(hyp.GetMinSize(), args[0]) and \
                                       IsEqual(hyp.GetMaxSize(), args[1]) and \
@@ -291,7 +287,7 @@ class StdMeshersBuilder_Segment(Mesh_Algorithm):
         Returns:
                 an instance of StdMeshers_Arithmetic1D hypothesis
         """
-        
+
         if not isinstance(reversedEdges,list): #old version script, before adding reversedEdges
             reversedEdges, UseExisting = [], reversedEdges
         reversedEdgeInd = self.ReversedEdgeIndices(reversedEdges)
@@ -325,7 +321,7 @@ class StdMeshersBuilder_Segment(Mesh_Algorithm):
             Returns:
                 an instance of StdMeshers_Geometric1D hypothesis
         """
-        
+
         reversedEdgeInd = self.ReversedEdgeIndices(reversedEdges)
         entry = self.MainShapeEntry()
         from salome.smesh.smeshBuilder import IsEqual
@@ -360,7 +356,7 @@ class StdMeshersBuilder_Segment(Mesh_Algorithm):
         Returns:
                 an instance of StdMeshers_FixedPoints1D hypothesis
         """
-        
+
         if not isinstance(reversedEdges,list): #old version script, before adding reversedEdges
             reversedEdges, UseExisting = [], reversedEdges
         reversedEdgeInd = self.ReversedEdgeIndices(reversedEdges)
@@ -392,7 +388,7 @@ class StdMeshersBuilder_Segment(Mesh_Algorithm):
         Returns:
             an instance of StdMeshers_StartEndLength hypothesis
         """
-        
+
         if not isinstance(reversedEdges,list): #old version script, before adding reversedEdges
             reversedEdges, UseExisting = [], reversedEdges
         reversedEdgeInd = self.ReversedEdgeIndices(reversedEdges)
@@ -419,7 +415,7 @@ class StdMeshersBuilder_Segment(Mesh_Algorithm):
             UseExisting: if ==true - searches for an existing hypothesis created with
                 the same parameters, else (default) - create a new one
         """
-        
+
         from salome.smesh.smeshBuilder import IsEqual
         compFun = lambda hyp, args: IsEqual(hyp.GetDeflection(), args[0])
         hyp = self.Hypothesis("Deflection1D", [d], UseExisting=UseExisting, CompareMethod=compFun)
@@ -433,7 +429,7 @@ class StdMeshersBuilder_Segment(Mesh_Algorithm):
                 on all other edges that are at the opposite side in case of quadrangular faces
                 This hypothesis should be assigned to an edge to propagate a hypothesis from.
         """
-        
+
         return self.Hypothesis("Propagation", UseExisting=1, CompareMethod=self.CompareEqualHyp)
 
     def PropagationOfDistribution(self):
@@ -441,9 +437,9 @@ class StdMeshersBuilder_Segment(Mesh_Algorithm):
         Defines "Propagation of Node Distribution" hypothesis that propagates
                 distribution of nodes from an edge where this hypothesis is assigned to,
                 to opposite edges of quadrangular faces, so that number of segments on all these
-                edges will be the same, as well as relations between segment lengths. 
+                edges will be the same, as well as relations between segment lengths.
         """
-        
+
         return self.Hypothesis("PropagOfDistribution", UseExisting=1,
                                CompareMethod=self.CompareEqualHyp)
 
@@ -456,7 +452,7 @@ class StdMeshersBuilder_Segment(Mesh_Algorithm):
             UseExisting: if ==true - searches for an existing hypothesis created with the
                 same parameters, else (default) - create a new one
         """
-        
+
         from salome.smesh.smeshBuilder import IsEqual
         compFun = lambda hyp, args: IsEqual(hyp.GetFineness(), args[0])
         hyp = self.Hypothesis("AutomaticLength",[fineness],UseExisting=UseExisting,
@@ -476,7 +472,7 @@ class StdMeshersBuilder_Segment(Mesh_Algorithm):
             UseExisting: if ==true - searches for an  existing hypothesis created with
                 the same parameters, else (default) - Create a new one
         """
-        
+
         import types
         store_geom = self.geom
         if isinstance(vertex, int):
@@ -521,7 +517,7 @@ class StdMeshersBuilder_Segment(Mesh_Algorithm):
         The 3D mesher generates quadratic volumes only if all boundary faces
         are quadratic, else it fails.
         """
-        
+
         hyp = self.Hypothesis("QuadraticMesh", UseExisting=1, CompareMethod=self.CompareEqualHyp)
         return hyp
 
@@ -533,7 +529,7 @@ class StdMeshersBuilder_CompositeSegment(StdMeshersBuilder_Segment):
 
     It is created by calling smeshBuilder.Mesh.Segment(smeshBuilder.COMPOSITE,geom=0)
     """
-    
+
 
     meshMethod = "Segment"
     """
@@ -575,7 +571,7 @@ class StdMeshersBuilder_Segment_Python(Mesh_Algorithm):
     Defines a segment 1D algorithm for discretization of edges with Python function.
     It is created by calling smeshBuilder.Mesh.Segment(smeshBuilder.PYTHON,geom=0)
     """
-    
+
 
     meshMethod = "Segment"
     """
@@ -613,7 +609,7 @@ class StdMeshersBuilder_Segment_Python(Mesh_Algorithm):
             UseExisting: if ==true - searches for the existing hypothesis created with
                 the same parameters, else (default) - Create a new one
         """
-        
+
         compFun = lambda hyp, args: False
         hyp = self.Hypothesis("PythonSplit1D", [n], "libPython1dEngine.so",
                               UseExisting=UseExisting, CompareMethod=compFun)
@@ -623,78 +619,12 @@ class StdMeshersBuilder_Segment_Python(Mesh_Algorithm):
 
     pass # end of StdMeshersBuilder_Segment_Python class
 
-class StdMeshersBuilder_Triangle_MEFISTO(Mesh_Algorithm):
-    """
-    Triangle MEFISTO 2D algorithm.
-    It is created by calling smeshBuilder.Mesh.Triangle(smeshBuilder.MEFISTO,geom=0)
-    """
-    
-
-    meshMethod = "Triangle"
-    """
-    name of the dynamic method in smeshBuilder.Mesh class
-    """
-    algoType   = MEFISTO
-    """
-    type of algorithm used with helper function in smeshBuilder.Mesh class
-    """
-    isDefault  = True
-    """
-    flag pointing whether this algorithm should be used by default in dynamic method
-        of smeshBuilder.Mesh class
-    """
-    docHelper  = "Create triangle 2D algorithm for faces"
-    """
-    doc string of the method
-    """
-
-    def __init__(self, mesh, geom=0):
-        """
-        Private constructor.
-
-        Parameters:
-            mesh: parent mesh object algorithm is assigned to
-            geom: geometry (shape/sub-shape) algorithm is assigned to;
-                if it is :code:`0` (default), the algorithm is assigned to the main shape
-        """
-        Mesh_Algorithm.__init__(self)
-        self.Create(mesh, geom, self.algoType)
-        pass
-
-    def MaxElementArea(self, area, UseExisting=0):
-        """
-        Defines "MaxElementArea" hypothesis basing on the definition of the maximum area of each triangle
-
-        Parameters:
-            area: for the maximum area of each triangle
-            UseExisting: if ==true - searches for an  existing hypothesis created with the
-                same parameters, else (default) - Create a new one
-        """
-        
-        from salome.smesh.smeshBuilder import IsEqual
-        comparator = lambda hyp, args: IsEqual(hyp.GetMaxElementArea(), args[0])
-        hyp = self.Hypothesis("MaxElementArea", [area], UseExisting=UseExisting,
-                              CompareMethod=comparator)
-        hyp.SetMaxElementArea(area)
-        return hyp
-
-    def LengthFromEdges(self):
-        """
-        Defines "LengthFromEdges" hypothesis to build triangles
-            based on the length of the edges taken from the wire
-        """
-        
-        hyp = self.Hypothesis("LengthFromEdges", UseExisting=1, CompareMethod=self.CompareEqualHyp)
-        return hyp
-
-    pass # end of StdMeshersBuilder_Triangle_MEFISTO class
-
 class StdMeshersBuilder_Quadrangle(Mesh_Algorithm):
     """
     Defines a quadrangle 2D algorithm.
     It is created by calling smeshBuilder.Mesh.Quadrangle(geom=0)
     """
-    
+
 
     meshMethod = "Quadrangle"
     """
@@ -778,7 +708,7 @@ class StdMeshersBuilder_Quadrangle(Mesh_Algorithm):
             UseExisting: if *True* - searches for the existing hypothesis created with
                 the same parameters, else (default) - Create a new one
         """
-        
+
 
         import GEOM, SMESH
         vertexID = triangleVertex
@@ -831,7 +761,7 @@ class StdMeshersBuilder_Quadrangle(Mesh_Algorithm):
         UseExisting: if ==true - searches for the existing hypothesis created with
             the same parameters, else (default) - Create a new one
         """
-        
+
         if reversed:
             return self.QuadrangleParameters(QUAD_QUADRANGLE_PREF_REVERSED,UseExisting=UseExisting)
         return self.QuadrangleParameters(QUAD_QUADRANGLE_PREF,UseExisting=UseExisting)
@@ -845,7 +775,7 @@ class StdMeshersBuilder_Quadrangle(Mesh_Algorithm):
             UseExisting: if ==true - searches for the existing hypothesis created with
                 the same parameters, else (default) - Create a new one
         """
-    
+
         return self.QuadrangleParameters(QUAD_TRIANGLE_PREF,UseExisting=UseExisting)
 
     def Reduced(self, UseExisting=0):
@@ -860,7 +790,7 @@ class StdMeshersBuilder_Quadrangle(Mesh_Algorithm):
             UseExisting: if ==true - searches for the existing hypothesis created with
                 the same parameters, else (default) - Create a new one
         """
-        
+
         return self.QuadrangleParameters(QUAD_REDUCED,UseExisting=UseExisting)
 
     def TriangleVertex(self, vertex, UseExisting=0):
@@ -875,7 +805,7 @@ class StdMeshersBuilder_Quadrangle(Mesh_Algorithm):
              UseExisting: if ==true - searches for the existing hypothesis created with
                 the same parameters, else (default) - Create a new one
         """
-        
+
         return self.QuadrangleParameters(QUAD_STANDARD,vertex,UseExisting)
 
     pass # end of StdMeshersBuilder_Quadrangle class
@@ -885,7 +815,7 @@ class StdMeshersBuilder_Hexahedron(Mesh_Algorithm):
     Defines a hexahedron 3D algorithm.
     It is created by calling smeshBuilder.Mesh.Hexahedron(geom=0)
     """
-    
+
 
     meshMethod = "Hexahedron"
     """
@@ -934,7 +864,7 @@ class StdMeshersBuilder_Projection1D(Mesh_Algorithm):
     Defines a projection 1D algorithm.
     It is created by calling smeshBuilder.Mesh.Projection1D(geom=0)
     """
-    
+
 
     meshMethod = "Projection1D"
     """
@@ -1002,7 +932,7 @@ class StdMeshersBuilder_Projection2D(Mesh_Algorithm):
     Defines a projection 2D algorithm.
     It is created by calling smeshBuilder.Mesh.Projection2D(geom=0)
     """
-    
+
 
     meshMethod = "Projection2D"
     """
@@ -1053,7 +983,7 @@ class StdMeshersBuilder_Projection2D(Mesh_Algorithm):
             UseExisting: if ==true - forces the search for the existing hypothesis created with
                 he same parameters, else (default) - forces the creation a new one
 
-        Note: 
+        Note:
             all association vertices must belong to one edge of a face
         """
         from salome.smesh.smeshBuilder import Mesh
@@ -1079,7 +1009,7 @@ class StdMeshersBuilder_Projection1D2D(StdMeshersBuilder_Projection2D):
     Defines a projection 1D-2D algorithm.
     It is created by calling smeshBuilder.Mesh.Projection1D2D(geom=0)
     """
-    
+
 
     meshMethod = "Projection1D2D"
     """
@@ -1113,7 +1043,7 @@ class StdMeshersBuilder_Projection3D(Mesh_Algorithm):
     Defines a projection 3D algorithm.
     It is created by calling smeshBuilder.Mesh.Projection3D(geom=0)
     """
-    
+
 
     meshMethod = "Projection3D"
     """
@@ -1158,7 +1088,7 @@ class StdMeshersBuilder_Projection3D(Mesh_Algorithm):
             UseExisting: if ==true - searches for the existing hypothesis created with
                     the same parameters, else (default) - Create a new one
 
-        Note: 
+        Note:
             association vertices must belong to one edge of a solid
         """
         for geom in [ solid, srcV1, tgtV1, srcV2, tgtV2 ]:
@@ -1187,7 +1117,7 @@ class StdMeshersBuilder_Prism3D(Mesh_Algorithm):
     Defines a Prism 3D algorithm, which is either "Extrusion 3D" or "Radial Prism" depending on geometry.
     It is created by calling smeshBuilder.Mesh.Prism(geom=0)
     """
-    
+
 
     meshMethod = "Prism"
     """
@@ -1217,7 +1147,7 @@ class StdMeshersBuilder_Prism3D(Mesh_Algorithm):
                 if it is :code:`0` (default), the algorithm is assigned to the main shape
         """
         Mesh_Algorithm.__init__(self)
-        
+
         shape = geom
         if not shape:
             shape = mesh.geom
@@ -1235,7 +1165,7 @@ class StdMeshersBuilder_Prism3D(Mesh_Algorithm):
 
     def Get3DHypothesis(self):
         """
-        Returns: 
+        Returns:
             3D hypothesis holding the 1D one
         """
         if self.algoType != "RadialPrism_3D":
@@ -1246,7 +1176,7 @@ class StdMeshersBuilder_Prism3D(Mesh_Algorithm):
     def OwnHypothesis(self, hypType, args=[], so="libStdMeshersEngine.so"):
         """
         Private method creating a 1D hypothesis and storing it in the LayerDistribution
-            hypothesis. 
+            hypothesis.
 
         Returns:
             the created hypothesis
@@ -1424,7 +1354,7 @@ class StdMeshersBuilder_RadialPrism3D(StdMeshersBuilder_Prism3D):
             if it is :code:`0` (default), the algorithm is assigned to the main shape
         """
         Mesh_Algorithm.__init__(self)
-        
+
         shape = geom
         if not shape:
             shape = mesh.geom
@@ -1436,7 +1366,7 @@ class StdMeshersBuilder_RadialPrism3D(StdMeshersBuilder_Prism3D):
 class StdMeshersBuilder_RadialAlgorithm(Mesh_Algorithm):
     """
     Base class for algorithms supporting radial distribution hypotheses
-    """ 
+    """
 
     def __init__(self):
         Mesh_Algorithm.__init__(self)
@@ -1457,9 +1387,9 @@ class StdMeshersBuilder_RadialAlgorithm(Mesh_Algorithm):
     def OwnHypothesis(self, hypType, args=[], so="libStdMeshersEngine.so"):
         """
         Private method creating a 1D hypothesis and storing it in the LayerDistribution
-            hypothesis. 
+            hypothesis.
 
-        Returns: 
+        Returns:
             the created hypothesis
         """
         if self.nbLayers:
@@ -1728,7 +1658,7 @@ class StdMeshersBuilder_UseExistingElements_1D(Mesh_Algorithm):
 
     It is created by calling smeshBuilder.Mesh.UseExisting1DElements(geom=0)
     """
-    
+
 
     meshMethod = "UseExisting1DElements"
     """
@@ -1790,7 +1720,7 @@ class StdMeshersBuilder_UseExistingElements_1D2D(Mesh_Algorithm):
 
     It is created by calling smeshBuilder.Mesh.UseExisting2DElements(geom=0)
     """
-    
+
 
     meshMethod = "UseExisting2DElements"
     """
@@ -1853,7 +1783,7 @@ class StdMeshersBuilder_Cartesian_3D(Mesh_Algorithm):
 
     It is created by calling smeshBuilder.Mesh.BodyFitted(geom=0)
     """
-    
+
 
     meshMethod = "BodyFitted"
     """
@@ -1899,8 +1829,8 @@ class StdMeshersBuilder_Cartesian_3D(Mesh_Algorithm):
                         several functions, they must be accompanied by relative coordinates of
                         points dividing the whole shape into ranges where the functions apply; points
                         coordinates should vary within (0.0, 1.0) range. Parameter *t* of the spacing
-                        function f(t) varies from 0.0 to 1.0 within a shape range. 
-        Note: 
+                        function f(t) varies from 0.0 to 1.0 within a shape range.
+        Note:
             The actual grid spacing can slightly differ from the defined one. This is done for the
             best fitting of polyhedrons and for a better mesh quality on the interval boundaries.
             For example, if a constant **Spacing** is defined along an axis, the actual grid will
@@ -2011,7 +1941,7 @@ class StdMeshersBuilder_Cartesian_3D(Mesh_Algorithm):
             self.mesh.AddHypothesis( self.hyp, self.geom )
         self.hyp.SetFixedPoint( p, toUnset )
         return self.hyp
-        
+
 
     pass # end of StdMeshersBuilder_Cartesian_3D class
 
@@ -2056,7 +1986,7 @@ class StdMeshersBuilder_UseExisting_2D(Mesh_Algorithm):
 
     It is created by calling smeshBuilder.Mesh.UseExistingFaces(geom=0)
     """
-    
+
 
     meshMethod = "UseExistingFaces"
     """

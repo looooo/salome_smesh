@@ -45,21 +45,21 @@ class Mesh_Algorithm:
 
       then an instance of :code:`MyPlugin_Algorithm` can be created by the direct invocation of the function
       of :class:`~smeshBuilder.Mesh` class::
-    
+
           my_algo = mesh.MyAlgorithm()
-    
+
     - :code:`algoType` defines type of algorithm and is used mostly to discriminate
       algorithms that are created by the same method of class :class:`~smeshBuilder.Mesh`. For example, if this attribute
       is specified in :code:`MyPlugin_Algorithm` class as::
-    
+
           algoType = "MyPLUGIN"
 
       then it's creation code can be::
 
           my_algo = mesh.MyAlgorithm(algo="MyPLUGIN")
     """
-    
-    
+
+
     def __init__(self):
         """
         Private constructor
@@ -75,7 +75,7 @@ class Mesh_Algorithm:
         Finds a hypothesis in the study by its type name and parameters.
         Finds only the hypotheses created in smeshBuilder engine.
 
-        Returns: 
+        Returns:
                 :class:`~SMESH.SMESH_Hypothesis`
         """
         study = salome.myStudy
@@ -165,7 +165,7 @@ class Mesh_Algorithm:
 
     def GetSubMesh(self):
         """
-        If the algorithm is global, returns 0; 
+        If the algorithm is global, returns 0;
         else returns the :class:`~SMESH.SMESH_subMesh` associated to this algorithm.
         """
         return self.subm
@@ -372,7 +372,7 @@ class Mesh_Algorithm:
         """
         Defines "ViscousLayers2D" hypothesis to give parameters of layers of quadrilateral
         elements to build near mesh boundary. This hypothesis can be used by several 2D algorithms:
-        NETGEN 2D, NETGEN 1D-2D, Quadrangle (mapping), MEFISTO, MG-CADSurf
+        NETGEN 2D, NETGEN 1D-2D, Quadrangle (mapping), MG-CADSurf
 
         Parameters:
                 thickness: total thickness of layers of quadrilaterals
@@ -393,7 +393,7 @@ class Mesh_Algorithm:
         Returns:
                 StdMeshers.StdMeshers_ViscousLayers2D hypothesis
         """
-        
+
         if not isinstance(self.algo, SMESH._objref_SMESH_2D_Algo):
             raise TypeError("ViscousLayers2D are supported by 2D algorithms only")
         if not "ViscousLayers2D" in self.GetCompatibleHypothesis():
@@ -434,7 +434,7 @@ class Mesh_Algorithm:
         Transform a list of either edges or tuples (edge, 1st_vertex_of_edge)
         into a list acceptable to SetReversedEdges() of some 1D hypotheses
         """
-        
+
         resList = []
         geompy = self.mesh.geompyD
         for i in reverseList:

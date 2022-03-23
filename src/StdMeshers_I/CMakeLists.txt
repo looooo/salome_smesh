@@ -39,12 +39,6 @@ INCLUDE_DIRECTORIES(
   ${PROJECT_BINARY_DIR}/idl
 )
 
-IF(SALOME_SMESH_ENABLE_MEFISTO)
-  INCLUDE_DIRECTORIES(
-      ${PROJECT_SOURCE_DIR}/src/MEFISTO2
-  )
-ENDIF(SALOME_SMESH_ENABLE_MEFISTO)
-
 # additional preprocessor / compiler flags
 ADD_DEFINITIONS(
   ${OpenCASCADE_DEFINITIONS}
@@ -122,15 +116,12 @@ SET(StdMeshersEngine_HEADERS
   StdMeshers_PolyhedronPerSolid_3D_i.hxx
   StdMeshers_BlockRenumber_i.hxx
 )
-IF(SALOME_SMESH_ENABLE_MEFISTO)
-  SET(StdMeshersEngine_HEADERS ${StdMeshersEngine_HEADERS} StdMeshers_MEFISTO_2D_i.hxx)
-ENDIF(SALOME_SMESH_ENABLE_MEFISTO)
 # --- sources ---
 
 # sources / static
 SET(StdMeshersEngine_SOURCES
   StdMeshers_i.cxx
-  StdMeshers_LocalLength_i.cxx 
+  StdMeshers_LocalLength_i.cxx
   StdMeshers_Reversible1D_i.cxx
   StdMeshers_StartEndLength_i.cxx
   StdMeshers_Arithmetic1D_i.cxx
@@ -144,7 +135,7 @@ SET(StdMeshersEngine_SOURCES
   StdMeshers_MaxElementVolume_i.cxx
   StdMeshers_NotConformAllowed_i.cxx
   StdMeshers_Regular_1D_i.cxx
-  StdMeshers_Quadrangle_2D_i.cxx  
+  StdMeshers_Quadrangle_2D_i.cxx
   StdMeshers_Hexa_3D_i.cxx
   StdMeshers_AutomaticLength_i.cxx
   StdMeshers_QuadranglePreference_i.cxx
@@ -174,15 +165,11 @@ SET(StdMeshersEngine_SOURCES
   StdMeshers_ViscousLayers2D_i.cxx
   StdMeshers_CartesianParameters3D_i.cxx
   StdMeshers_Cartesian_3D_i.cxx
-  StdMeshers_Adaptive1D_i.cxx 
+  StdMeshers_Adaptive1D_i.cxx
   StdMeshers_PolygonPerFace_2D_i.cxx
   StdMeshers_PolyhedronPerSolid_3D_i.cxx
   StdMeshers_BlockRenumber_i.cxx
 )
-
-IF(SALOME_SMESH_ENABLE_MEFISTO)
-  SET(StdMeshersEngine_SOURCES ${StdMeshersEngine_SOURCES} StdMeshers_MEFISTO_2D_i.cxx)
-ENDIF(SALOME_SMESH_ENABLE_MEFISTO)
 
 # --- rules ---
 

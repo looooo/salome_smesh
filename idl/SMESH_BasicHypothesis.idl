@@ -136,17 +136,17 @@ module StdMeshers
      * Set list of edges to reverse
      */
     void SetReversedEdges( in SMESH::long_array list );
-    
+
     /*!
      * Returns list of edges to reverse
      */
     SMESH::long_array GetReversedEdges();
-    
+
     /*!
      * Set entry of the main object
      */
     void SetObjectEntry( in string entry );
-    
+
     /*!
      * Get the entry of the main object
      */
@@ -165,7 +165,7 @@ module StdMeshers
       raises (SALOME::SALOME_Exception);
     SMESH::double_array BuildDistributionTab( in SMESH::double_array func, in long  nbSeg, in long  conv )
       raises (SALOME::SALOME_Exception);
-  
+
     /*!
      * Sets <number of segments> parameter value
      */
@@ -247,13 +247,13 @@ module StdMeshers
      * * OBSOLETE *. Avoid such a way of interface design
      * * It is recommended to dedicate a method to each parameter.
      */
-    void SetLength(in double length, in boolean isStartLength) 
+    void SetLength(in double length, in boolean isStartLength)
       raises (SALOME::SALOME_Exception);
 
     /*!
      * Sets <start segment length> parameter value
      */
-    void SetStartLength(in double length) 
+    void SetStartLength(in double length)
       raises (SALOME::SALOME_Exception);
 
     /*!
@@ -277,7 +277,7 @@ module StdMeshers
     /*!
      * Sets length of the first segment
      */
-    void SetStartLength(in double length) 
+    void SetStartLength(in double length)
       raises (SALOME::SALOME_Exception);
 
     /*!
@@ -306,7 +306,7 @@ module StdMeshers
     /*!
      * Sets <maximum element area> parameter value
      */
-    void SetMaxElementArea(in double area) 
+    void SetMaxElementArea(in double area)
       raises (SALOME::SALOME_Exception);
 
     /*!
@@ -323,7 +323,7 @@ module StdMeshers
     /*!
      * Sets <mode> parameter value
      */
-    void SetMode(in long  mode) 
+    void SetMode(in long  mode)
       raises (SALOME::SALOME_Exception);
 
     /*!
@@ -342,13 +342,13 @@ module StdMeshers
      * * OBSOLETE *. Avoid such a way of interface design.
      * * It is recommended to dedicate a method to each parameter.
      */
-    void SetLength(in double length, in boolean isStartLength) 
+    void SetLength(in double length, in boolean isStartLength)
       raises (SALOME::SALOME_Exception);
 
     /*!
      * Sets <start segment length> parameter value
      */
-    void SetStartLength(in double length) 
+    void SetStartLength(in double length)
       raises (SALOME::SALOME_Exception);
 
     /*!
@@ -393,7 +393,7 @@ module StdMeshers
      * create list of reversed edges if it is needed) and sets numbers
      * of segments between given points (default values are equals 1)
      */
-    void SetPoints(in SMESH::double_array listParams) 
+    void SetPoints(in SMESH::double_array listParams)
       raises (SALOME::SALOME_Exception);
     void SetNbSegments(in SMESH::smIdType_array listNbSeg)
       raises (SALOME::SALOME_Exception);
@@ -402,7 +402,7 @@ module StdMeshers
      * Returns list of point's parameters
      */
     SMESH::double_array GetPoints();
-    
+
     /*!
      * Returns list of numbers of segments
      */
@@ -428,7 +428,7 @@ module StdMeshers
     double GetMaxSize();
 
     /*!
-     * Sets <deflection> parameter value, 
+     * Sets <deflection> parameter value,
      * i.e. a maximal allowed distance between a segment and an edge.
      */
     void SetDeflection(in double deflection) raises (SALOME::SALOME_Exception);
@@ -443,7 +443,7 @@ module StdMeshers
     /*!
      * Sets <maximum element volume> parameter value
      */
-    void SetMaxElementVolume(in double volume) 
+    void SetMaxElementVolume(in double volume)
       raises (SALOME::SALOME_Exception);
 
     /*!
@@ -495,7 +495,7 @@ module StdMeshers
 
   /*!
    * StdMeshers_QuadraticMesh: interface of "QuadraticMesh" hypothesis.
-   * This is an auxiliary 1D hypothesis whose presence forces construction 
+   * This is an auxiliary 1D hypothesis whose presence forces construction
    * of quadratic edges.
    * If the 2D mesher sees that all boundary edges are quadratic ones,
    * it generates quadratic faces, else it generates linear faces using
@@ -511,7 +511,7 @@ module StdMeshers
   /*!
    * StdMeshers_NumberOfLayers: interface of "Nb. Layers" hypothesis.
    * This hypothesis is used by "Radial prism" algorithm.
-   * It specifies number of segments between the internal 
+   * It specifies number of segments between the internal
    * and the external surfaces.
    */
   interface StdMeshers_NumberOfLayers : SMESH::SMESH_Hypothesis
@@ -519,7 +519,7 @@ module StdMeshers
     /*!
      * Sets <number of segments> parameter value
      */
-    void SetNumberOfLayers(in long  numberOfLayers) 
+    void SetNumberOfLayers(in long  numberOfLayers)
       raises (SALOME::SALOME_Exception);
 
     /*!
@@ -532,7 +532,7 @@ module StdMeshers
   /*!
    * StdMeshers_LayerDistribution: interface of "Distribution of Layers" hypothesis.
    * This hypothesis is used by "Radial prism" algorithm.
-   * It specifies 1D hypothesis defining distribution of segments between the internal 
+   * It specifies 1D hypothesis defining distribution of segments between the internal
    * and the external surfaces.
    */
   interface StdMeshers_LayerDistribution : SMESH::SMESH_Hypothesis
@@ -540,7 +540,7 @@ module StdMeshers
     /*!
      * Sets  1D hypothesis specifying distribution of layers
      */
-    void SetLayerDistribution(in SMESH::SMESH_Hypothesis distributionHyp) 
+    void SetLayerDistribution(in SMESH::SMESH_Hypothesis distributionHyp)
       raises (SALOME::SALOME_Exception);
 
     /*!
@@ -553,7 +553,7 @@ module StdMeshers
   /*!
    * StdMeshers_NumberOfLayers2D: interface of "Nb. Layers" hypothesis.
    * This hypothesis is used by "Radial quadrangle" algorithm.
-   * It specifies number of segments between the internal 
+   * It specifies number of segments between the internal
    * and the external surfaces.
    */
   interface StdMeshers_NumberOfLayers2D : StdMeshers_NumberOfLayers
@@ -563,7 +563,7 @@ module StdMeshers
   /*!
    * StdMeshers_LayerDistribution2D: interface of "Distribution of Layers" hypothesis.
    * This hypothesis is used by "Radial quadrangle" algorithm.
-   * It specifies 1D hypothesis defining distribution of segments between the internal 
+   * It specifies 1D hypothesis defining distribution of segments between the internal
    * and the external surfaces.
    */
   interface StdMeshers_LayerDistribution2D : StdMeshers_LayerDistribution
@@ -772,22 +772,22 @@ module StdMeshers
      * Set base vertex for triangles
      */
     void SetTriaVertex( in long  vertID );
-    
+
     /*!
      * Returns base vertex for triangles
      */
     long  GetTriaVertex();
-    
+
     /*!
      * Set entry of the main object
      */
     void SetObjectEntry( in string entry );
-    
+
     /*!
      * Get the entry of the main object
      */
     string GetObjectEntry();
-    
+
     /*!
      * Set the type of quadrangulation
      */
@@ -870,11 +870,11 @@ module StdMeshers
   /*!
    * Method of computing translation of a node at Viscous Layers construction
    */
-  enum VLExtrusionMethod { 
+  enum VLExtrusionMethod {
     // node is translated along normal to a surface with possible further smoothing
     SURF_OFFSET_SMOOTH,
     // node is translated along the average normal of surrounding faces till
-    // intersection with a neighbor face translated along its own normal 
+    // intersection with a neighbor face translated along its own normal
     // by the layers thickness
     FACE_OFFSET,
     // node is translated along the average normal of surrounding faces
@@ -933,7 +933,7 @@ module StdMeshers
    * interface of "Viscous Layers 2D" hypothesis.
    * This hypothesis specifies parameters of layers of quadrilaterals to build
    * near mesh boundary. This hypothesis can be used by several 2D algorithms:
-   * Mefisto, Quadrangle (mapping), NETGEN, BLSURF
+   * Quadrangle (mapping), NETGEN, BLSURF
    */
   interface StdMeshers_ViscousLayers2D : SMESH::SMESH_Hypothesis
   {
@@ -946,7 +946,7 @@ module StdMeshers
     /*!
      * Set edges either to exclude from treatment or to make the Viscous Layers on.
      */
-    void SetEdges(in SMESH::long_array edgeIDs, 
+    void SetEdges(in SMESH::long_array edgeIDs,
                   in boolean           toIgnore) raises (SALOME::SALOME_Exception);
     SMESH::long_array GetEdges();
     boolean           GetIsToIgnoreEdges();
@@ -975,7 +975,7 @@ module StdMeshers
 
   /*!
    * interface of "Body fitting Parameters" hypothesis.
-   * This hypothesis specifies 
+   * This hypothesis specifies
    * - Size threshold
    * - Definition of the Cartesian grid
    * - Direction of grid axes
@@ -985,14 +985,14 @@ module StdMeshers
     /*!
      * Set size threshold. A polyhedral cell got by cutting an initial
      * hexahedron by geometry boundary is considered small and is removed if
-     * it's size is \a threshold times less than the size of the initial hexahedron. 
+     * it's size is \a threshold times less than the size of the initial hexahedron.
      * threshold must be > 1.0
      */
     void SetSizeThreshold(in double threshold) raises (SALOME::SALOME_Exception);
     double GetSizeThreshold();
 
     /*!
-     * \brief Return true if the grid is defined by spacing functions and 
+     * \brief Return true if the grid is defined by spacing functions and
      *        not by node coordinates in given direction (X==0,...)
      */
     boolean IsGridBySpacing(in short axis);
@@ -1085,7 +1085,7 @@ module StdMeshers
                                            in double              x1,
                                            in SMESH::string_array spaceFuns,
                                            in SMESH::double_array points,
-                                           in string              axisName ) 
+                                           in string              axisName )
       raises (SALOME::SALOME_Exception);
   };
 
@@ -1126,13 +1126,6 @@ module StdMeshers
    * StdMeshers_CompositeSegment_1D: interface of "Composite side discretisation" algorithm
    */
   interface StdMeshers_CompositeSegment_1D : SMESH::SMESH_1D_Algo
-  {
-  };
-
-  /*!
-   * StdMeshers_MEFISTO_2D: interface of "Triangle (Mefisto)" algorithm
-   */
-  interface StdMeshers_MEFISTO_2D : SMESH::SMESH_2D_Algo
   {
   };
 

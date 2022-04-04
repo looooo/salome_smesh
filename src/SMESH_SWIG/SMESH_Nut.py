@@ -23,7 +23,7 @@
 
 #####################################################################
 #Created                :17/02/2005
-#Author                 :MASLOV Eugeny, KOVALTCHUK Alexey 
+#Author                 :MASLOV Eugeny, KOVALTCHUK Alexey
 #####################################################################
 #
 import salome
@@ -41,7 +41,7 @@ import math
 
 #Sketcher_1 creation
 print("Sketcher creation...")
-Sketcher_1 = geompy.MakeSketcher("Sketcher:F 100 -57.7:TT 100 57.7:TT 0 115.47:TT -100 57.7:TT -100 -57.7:TT 0 -115.47:WW") 
+Sketcher_1 = geompy.MakeSketcher("Sketcher:F 100 -57.7:TT 100 57.7:TT 0 115.47:TT -100 57.7:TT -100 -57.7:TT 0 -115.47:WW")
 geompy.addToStudy(Sketcher_1, "Sketcher_1")
 Face_1 = geompy.MakeFace(Sketcher_1, 1)
 geompy.addToStudy(Face_1, "Face_1")
@@ -58,7 +58,7 @@ geompy.addToStudy(Prism_1, "Prism_1")
 
 #Sketcher_2 creation
 print("Sketcher creation...")
-Sketcher_2 = geompy.MakeSketcher("Sketcher:F 50 0:TT 80 0:TT 112 13:TT 112 48:TT 80 63:TT 80 90:TT 50 90:WW", [0,0,0, 1,0,0, 0,1,0]) 
+Sketcher_2 = geompy.MakeSketcher("Sketcher:F 50 0:TT 80 0:TT 112 13:TT 112 48:TT 80 63:TT 80 90:TT 50 90:WW", [0,0,0, 1,0,0, 0,1,0])
 geompy.addToStudy(Sketcher_2, "Sketcher_2")
 Face_2 = geompy.MakeFace(Sketcher_2, 1)
 geompy.addToStudy(Face_2, "Face_2")
@@ -129,7 +129,7 @@ smesh.SetName(hAvLength, "AverageLength_"+str(theAverageLength))
 
 print("-------------------------- MaxElementArea")
 theMaxElementArea = 20
-algoMef = mesh.Triangle(smeshBuilder.MEFISTO)
+algoMef = mesh.Triangle(smeshBuilder.NETGEN_2D)
 hArea = algoMef.MaxElementArea( theMaxElementArea )
 print(hArea.GetName())
 print(hArea.GetId())

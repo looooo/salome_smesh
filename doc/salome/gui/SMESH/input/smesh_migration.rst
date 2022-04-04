@@ -42,11 +42,11 @@ User Guide.
 
   For instance::
 
-	MEFISTO_2D_1 = Mesh_1.Triangle(algo=smesh.MEFISTO,geom=Face_1)
+	NETGEN_2D_1 = Mesh_1.Triangle(algo=smesh.NETGEN_2D,geom=Face_1)
 
   is replaced by::
 
-	MEFISTO_2D_1 = Mesh_1.Triangle(algo=smeshBuilder.MEFISTO,geom=Face_1)
+	NETGEN_2D_1 = Mesh_1.Triangle(algo=smeshBuilder.NETGEN_2D,geom=Face_1)
 
   StdMeshers algorithms concerned are *REGULAR, PYTHON, COMPOSITE, MEFISTO, Hexa, QUADRANGLE, RADIAL_QUAD*.
 
@@ -97,7 +97,7 @@ User Guide.
 	import GHS3DPlugin
 	import HexoticPLUGIN
 
-  is replaced by:: 
+  is replaced by::
 
 	from salome.StdMeshers import StdMeshersBuilder
 	from salome.NETGENPlugin import NETGENPluginBuilder

@@ -50,7 +50,9 @@ SET(BAD_TESTS
   blocFissure_04_without_session.py
   blocFissure_05_without_session.py
   blocFissure_06_without_session.py
-  blocFissure_07_without_session.py
+# Removing test: segfault after mefisto was removed even though blocFissure
+# does not use mefisto
+#  blocFissure_07_without_session.py
   )
 
 IF(NOT WIN32)

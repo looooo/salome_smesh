@@ -63,7 +63,7 @@ Mesh_1 = smesh.Mesh(Box_1_1)
 Regular_1D = Mesh_1.Segment()
 Local_Length_1 = Regular_1D.LocalLength(5)
 
-MEFISTO_2D = Mesh_1.Triangle(algo=smeshBuilder.MEFISTO)
+NETGEN_2D = Mesh_1.Triangle(algo=smeshBuilder.NETGEN_2D)
 
 ok = Mesh_1.Compute()
 

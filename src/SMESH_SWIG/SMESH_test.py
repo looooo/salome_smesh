@@ -75,7 +75,7 @@ print(hyp.GetName())
 print(hyp.GetId())
 print(hyp.GetLength())
 
-algo_2 = mesh.Triangle(smeshBuilder.MEFISTO, box)
+algo_2 = mesh.Triangle(smeshBuilder.NETGEN_2D, box)
 hyp = algo_2.MaxElementArea(5000)
 print(hyp.GetName())
 print(hyp.GetId())

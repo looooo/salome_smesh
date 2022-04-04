@@ -33,10 +33,8 @@ model.end()
 ###
 ### SHAPERSTUDY component
 ###
-#import pdb; pdb.set_trace()
 model.publishToShaperStudy()
 import SHAPERSTUDY
-#import pdb; pdb.set_trace()
 Box_1_1, = SHAPERSTUDY.shape(model.featureStringId(Box_1))
 ###
 ### SMESH component

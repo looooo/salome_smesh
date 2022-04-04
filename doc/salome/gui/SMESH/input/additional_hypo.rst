@@ -1,4 +1,4 @@
-.. _additional_hypo_page: 
+.. _additional_hypo_page:
 
 *********************
 Additional Hypotheses
@@ -9,10 +9,10 @@ Additional Hypotheses
 An **Additional Hypothesis** can be defined in the same way as any main hypothesis in :ref:`Create Mesh <create_mesh_anchor>` or :ref:`Create Sub-Mesh <constructing_submeshes_page>` dialog.
 
 The following additional hypothesis are available:
- 
+
 * :ref:`propagation_anchor` and :ref:`propagofdistribution_anchor` hypotheses are useful for creation of quadrangle and hexahedral meshes.
 * :ref:`Viscous Layers <viscous_layers_anchor>` and :ref:`Viscous Layers 2D <viscous_layers_anchor>` hypotheses allow creation of layers of highly stretched elements near mesh boundary, which is beneficial for high quality viscous computations.
-* :ref:`quadratic_mesh_anchor` hypothesis allows generation of second order meshes. 
+* :ref:`quadratic_mesh_anchor` hypothesis allows generation of second order meshes.
 * :ref:`quadrangle_preference_anchor` hypothesis enables generation of quadrangles.
 
 
@@ -31,8 +31,8 @@ parameters will be propagated via opposite sides of quadrangles to the
 whole geometry, and this propagation stops at an edge with other local
 meshing parameters.
 
-This hypothesis can be taken into account by 
-:ref:`Wire Discretization <a1d_algos_anchor>` and 
+This hypothesis can be taken into account by
+:ref:`Wire Discretization <a1d_algos_anchor>` and
 :ref:`Composite Side Discretization <a1d_algos_anchor>` algorithms.
 
 **See Also** a sample TUI Script of a :ref:`Propagation hypothesis <tui_propagation>` operation
@@ -48,9 +48,9 @@ propagation are defined on an edge of a quadrangular face, the
 opposite edge will have the same number of nodes and the same
 relations between segment lengths, unless another hypothesis
 has been locally defined on the opposite edge.
- 
-This hypothesis can be taken into account by 
-:ref:`Wire Discretization <a1d_algos_anchor>` and 
+
+This hypothesis can be taken into account by
+:ref:`Wire Discretization <a1d_algos_anchor>` and
 :ref:`Composite Side Discretization <a1d_algos_anchor>` algorithms.
 
 **See Also** a sample TUI Script of a :ref:`Propagation hypothesis <tui_propagation>` operation
@@ -63,7 +63,7 @@ Viscous Layers and Viscous Layers 2D
 **Viscous Layers** and **Viscous Layers 2D** additional
 hypotheses can be used by several 3D algorithms, for example
 Hexahedron(i,j,k), or 2D algorithms, for example Triangle
-(MEFISTO), correspondingly. These hypotheses allow creation of layers
+(NETGEN2D), correspondingly. These hypotheses allow creation of layers
 of highly stretched elements, prisms in 3D and quadrilaterals in 2D,
 near mesh boundary, which is beneficial for high quality viscous
 computations.
@@ -73,7 +73,7 @@ computations.
 
 .. image:: ../images/viscous_layers_2d_hyp.png
 	:align: center
-   
+
 
 * **Name** - allows to define the name of the hypothesis.
 * **Total thickness** - gives the total thickness of element layers.
@@ -83,18 +83,18 @@ computations.
 
   * **Surface offset + smooth** method extrudes nodes along the normal to the underlying geometrical surface. Smoothing of the internal surface of element layers is possible to avoid creation of invalid prisms.
   * **Face offset** method extrudes nodes along the average normal of surrounding mesh faces to the intersection with a neighbor mesh face translated along its own normal by the thickness of layers. The thickness of layers can be limited to avoid creation of invalid prisms.
-  * **Node offset** method extrudes nodes along the average normal of surrounding mesh faces by the thickness of layers. The thickness of layers can be limited to avoid creation of invalid prisms. 
+  * **Node offset** method extrudes nodes along the average normal of surrounding mesh faces by the thickness of layers. The thickness of layers can be limited to avoid creation of invalid prisms.
 
-	.. image:: ../images/viscous_layers_extrusion_method.png 
+	.. image:: ../images/viscous_layers_extrusion_method.png
 		:align: center
 
 	.. centered::
 		Prisms created by the tree extrusion methods at the same other parameters
 
-* **Specified Faces/Edges are** - defines how the shapes specified by the next parameter are used.	
+* **Specified Faces/Edges are** - defines how the shapes specified by the next parameter are used.
 * **Faces/Edges with/without layers** - defines geometrical faces or edges on which element layers either should be or should not be constructed, depending on the value of the previous parameter (**Specified Faces/Edges are**). Faces (or edges) can be selected either in the Object Browser or in the VTK Viewer. **Add** button becomes active as soon as a suitable sub-shape is selected.
 
-  .. note:: 
+  .. note::
 	A mesh shown in the 3D Viewer can prevent selection of faces and edges, just hide the mesh to avoid this. If a face, which should be selected, is hidden by other faces, consider creating a group of faces to be selected in the Geometry module. To avoid a long wait when a geometry with many faces (or edges) is displayed, the number of faces (edges) shown at a time is limited by the value of :ref:`Sub-shapes preview chunk size <chunk_size_pref>` preference (in Preferences/Mesh/General tab).
 
 
@@ -110,7 +110,7 @@ computations.
 
 * **Create groups from layers** - activates creation of a group containing elements of the layers.
 
-  .. image:: ../images/viscous_layers_on_submesh.png 
+  .. image:: ../images/viscous_layers_on_submesh.png
      :align: center
 
   .. centered::
@@ -146,9 +146,9 @@ Quadratic Mesh hypothesis allows to build a quadratic mesh (in which
 links between element nodes are not straight but curved lines due to
 presence of an additional mid-side node).
 
-This 1D hypothesis can be taken into account by 
-:ref:`Wire Discretization <a1d_algos_anchor>` and 
-:ref:`Composite Side Discretization <a1d_algos_anchor>` algorithms. To create a quadratic mes assign this hypothesis at 
+This 1D hypothesis can be taken into account by
+:ref:`Wire Discretization <a1d_algos_anchor>` and
+:ref:`Composite Side Discretization <a1d_algos_anchor>` algorithms. To create a quadratic mes assign this hypothesis at
 :ref:`mesh construction <constructing_meshes_page>`.
 
 See :ref:`adding_quadratic_elements_page` for more information about quadratic meshes.

@@ -1539,13 +1539,6 @@ msgstr ""
 msgid "for the python function that calculates the length of all segments"
 msgstr ""
 
-# d547c98271ce4546853aef52f20e3c2e
-#: StdMeshersBuilder.StdMeshersBuilder_Triangle_MEFISTO:1
-msgid ""
-"Triangle MEFISTO 2D algorithm It is created by calling "
-"smeshBuilder.Mesh.Triangle(smeshBuilder.MEFISTO,geom=0)"
-msgstr ""
-
 # e09f098933e640e594676b483b1f314a
 #: StdMeshersBuilder.StdMeshersBuilder_Triangle_MEFISTO.LengthFromEdges:1
 msgid "Defines \"LengthFromEdges\" hypothesis to build triangles"

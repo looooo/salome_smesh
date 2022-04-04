@@ -15,7 +15,7 @@ from salome.smesh import smeshBuilder
 smesh =  smeshBuilder.New()
 
 
-# geometry 
+# geometry
 
 O = geompy.MakeVertex(0, 0, 0)
 OX = geompy.MakeVectorDXDYDZ(1, 0, 0)
@@ -44,8 +44,8 @@ vec2 = geompy.MakeVector(Vertex_5, Vertex_6)
 Mesh_1 = smesh.Mesh(Partition_1)
 Regular_1D = Mesh_1.Segment()
 Nb_Segments_1 = Regular_1D.NumberOfSegments(15)
-MEFISTO_2D = Mesh_1.Triangle(algo=smeshBuilder.MEFISTO)
-Length_From_Edges_2D = MEFISTO_2D.LengthFromEdges()
+NETGEN_2D = Mesh_1.Triangle(algo=smeshBuilder.NETGEN_2D)
+Length_From_Edges_2D = NETGEN_2D.LengthFromEdges()
 ALGO3D = Mesh_1.Tetrahedron()
 isDone = Mesh_1.Compute()
 

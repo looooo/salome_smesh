@@ -8,30 +8,30 @@ This page provides example codes of :ref:`defining algorithms <tui_defining_mesh
 and hypotheses.
 
 * Wire discretisation 1D algorithm
-  
+
     * :ref:`tui_1d_adaptive` hypothesis
     * :ref:`Arithmetic Progression <tui_1d_arithmetic>` hypothesis
     * :ref:`Geometric Progression <tui_1d_arithmetic>` hypothesis
     * :ref:`Deflection and Number of Segments <tui_deflection_1d>` hypotheses
     * :ref:`Start and End Length <tui_start_and_end_length>` hypothesis
     * :ref:`tui_average_length` hypothesis
-    * :ref:`tui_propagation` additional hypotheses 
+    * :ref:`tui_propagation` additional hypotheses
     * :ref:`Fixed Points 1D <tui_fixed_points>` hypothesis
-  
 
-* Triangle: Mefisto 2D algorithm
-  
-    * :ref:`tui_max_element_area` hypothesis 
-    * :ref:`tui_length_from_edges` hypothesis 
-  
+
+* Triangle: netgen 2D algorithm
+
+    * :ref:`tui_max_element_area` hypothesis
+    * :ref:`tui_length_from_edges` hypothesis
+
 * Quadrangle: Mapping 2D algorithm
-  
-    * :ref:`Quadrangle Parameters <tui_quadrangle_parameters>` hypothesis 
+
+    * :ref:`Quadrangle Parameters <tui_quadrangle_parameters>` hypothesis
 
 * :ref:`Radial Quadrangle 1D-2D <tui_radial_quadrangle>` algorithm
 * NETGEN 3D algorithm
-  
-    *  :ref:`tui_max_element_volume` hypothesis 
+
+    *  :ref:`tui_max_element_volume` hypothesis
     *  :ref:`Viscous layers <tui_viscous_layers>` hypotheses
 
 * Hexahedron (i,j,k) 3D algorithm
@@ -271,7 +271,7 @@ Usage of Body Fitting algorithm
 
 :download:`Download this script <../../../examples/cartesian_algo.py>`
 
-.. _tui_use_existing_faces: 
+.. _tui_use_existing_faces:
 
 Usage of "Use Faces to be Created Manually" algorithm
 #####################################################

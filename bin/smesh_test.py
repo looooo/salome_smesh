@@ -58,10 +58,10 @@ class TestMesh(unittest.TestCase):
         lib = 'StdMeshersEngine'
         self.processGuiEvents()
 
-        # ---- create hypotheses 
+        # ---- create hypotheses
         print('... Create hypotheses')
 
-        # **** create local length 
+        # **** create local length
         print('...... Local Length')
         local_length = smesh.CreateHypothesis('LocalLength', lib)
         self.assertIsNotNone(local_length)
@@ -97,18 +97,18 @@ class TestMesh(unittest.TestCase):
         self.assertEqual(regular.GetName(), 'Regular_1D')
         self.processGuiEvents()
 
-        # **** create mefisto 2d
-        print('...... Mefisto 2D')
-        mefisto = smesh.CreateHypothesis( 'MEFISTO_2D', lib )
-        listHyp = mefisto.GetCompatibleHypothesis()
-        self.assertEqual(mefisto.GetName(), 'MEFISTO_2D')
+        # **** create NETGEN 2d
+        print('...... NETGEN 2D')
+        netgen = smesh.CreateHypothesis( 'NETGEN_2D', lib )
+        listHyp = netgen.GetCompatibleHypothesis()
+        self.assertEqual(netgen.GetName(), 'NETGEN_2D')
         self.processGuiEvents()
 
         # ---- create mesh on box
         print('... Create mesh on box')
         mesh = smesh.CreateMesh(box)
         self.assertEqual(mesh.AddHypothesis(box, regular)[0], SMESH.HYP_OK)
-        self.assertEqual(mesh.AddHypothesis(box, mefisto)[0], SMESH.HYP_OK)
+        self.assertEqual(mesh.AddHypothesis(box, netgen)[0], SMESH.HYP_OK)
         self.assertEqual(mesh.AddHypothesis(box, nb_segments)[0], SMESH.HYP_OK)
         self.assertEqual(mesh.AddHypothesis(box, max_area)[0], SMESH.HYP_OK)
         self.processGuiEvents()

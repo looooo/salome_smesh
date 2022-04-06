@@ -559,7 +559,7 @@ msgstr ""
 
 # 223a2036b61245b9a74d39e766c41171
 #: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/constructing_meshes.rst:242
-msgid "*2D* **Triangle: Mefisto** with Hypothesis **Max Element Area**"
+msgid "*2D* **Triangle: NETGEN_2D** with Hypothesis **Max Element Area**"
 msgstr ""
 
 # af68c57a6c6541e4a5ee565e61ce82a8
@@ -578,7 +578,7 @@ msgstr ""
 #: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/constructing_meshes.rst:248
 #: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/constructing_meshes.rst:253
 #: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/constructing_meshes.rst:259
-msgid "*2D* **Triangle: Mefisto** with Hypothesis **MaxElementArea** =1200"
+msgid "*2D* **Triangle: NETGEN_2D** with Hypothesis **MaxElementArea** =1200"
 msgstr ""
 
 # dae60f1eb8924fd19c98131c2b68967a

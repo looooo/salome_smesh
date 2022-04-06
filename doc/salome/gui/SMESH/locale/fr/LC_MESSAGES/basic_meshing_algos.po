@@ -71,7 +71,7 @@ msgstr ""
 # 96ff3177522e4abbac57c5166724c7db
 #: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/basic_meshing_algos.rst:22
 msgid ""
-"**Triangle: Mefisto** meshing algorithm - splits faces into triangular "
+"**Triangle: NETGEN_2D** meshing algorithm - splits faces into triangular "
 "elements."
 msgstr ""
 

@@ -43,7 +43,7 @@ A usual workflow to generate a mesh on geometry is following:
 	.. code-block:: python
 
 		regular1D = mesh.Segment()
-		mefisto   = mesh.Triangle( smeshBuilder.MEFISTO )
+		netgen   = mesh.Triangle( smeshBuilder.NETGEN_2D )
 		# use other triangle algorithm on a face -- a sub-mesh appears in the mesh
 		netgen    = mesh.Triangle( smeshBuilder.NETGEN_1D2D, face )
 
@@ -51,7 +51,7 @@ A usual workflow to generate a mesh on geometry is following:
 	.. code-block:: python
 
 		segLen10 = regular1D.LocalLength( 10. )
-		maxArea  = mefisto.LocalLength( 100. )
+		maxArea  = netgen.LocalLength( 100. )
 		netgen.SetMaxSize( 20. )
 		netgen.SetFineness( smeshBuilder.VeryCoarse )
 

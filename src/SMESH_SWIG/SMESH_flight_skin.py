@@ -85,8 +85,8 @@ smesh.SetName(hypLength, "LocalLength_" + str(lengthOfSegments))
 
 print("-------------------------- LengthFromEdges")
 
-mefisto2D = mesh.Triangle()
-hypLengthFromEdge = mefisto2D.LengthFromEdges()
+netgen2D = mesh.Triangle()
+hypLengthFromEdge = netgen2D.LengthFromEdges()
 print(hypLengthFromEdge.GetName())
 print(hypLengthFromEdge.GetId())
 smesh.SetName(hypLengthFromEdge,"LengthFromEdge")

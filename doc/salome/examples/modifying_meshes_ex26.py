@@ -21,7 +21,7 @@ geompy.addToStudy( Sphere, "Sphere" )
 Mesh = smesh.Mesh(Sphere)
 Regular_1D = Mesh.Segment()
 Nb_Segments = Regular_1D.NumberOfSegments(5)
-MEFISTO_2D = Mesh.Triangle()
+NETGEN_2D = Mesh.Triangle()
 Tetrahedron = Mesh.Tetrahedron()
 
 # compute mesh
@@ -45,7 +45,7 @@ Mesh.ConvertFromQuadratic()
 
 Mesh.ConvertToQuadratic( theForce3d=0 )
 
-# to convert not the whole mesh but a sub-mesh, provide it as 
+# to convert not the whole mesh but a sub-mesh, provide it as
 # an additional argument to the functions:
 # Mesh.ConvertToQuadratic( 0, subMesh )
 # Mesh.ConvertFromQuadratic( subMesh )

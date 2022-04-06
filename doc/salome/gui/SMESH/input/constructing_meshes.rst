@@ -7,7 +7,7 @@ Constructing meshes
 To create a mesh on geometry, it is necessary to create a mesh object by choosing
 
 * a geometrical shape produced in the Geometry module (*main shape*);
-* *meshing parameters*, including 
+* *meshing parameters*, including
 
   * :ref:`meshing algorithms <basic_meshing_algos_page>` and
   * :ref:`hypotheses <about_hypo_page>` specifying constraints to be taken into account by the chosen meshing algorithms.
@@ -77,11 +77,11 @@ To construct a mesh:
 #. Select a geometrical object for meshing.
 #. In the **Mesh** menu select **Create Mesh** or click *"Create Mesh"* button |img| in the toolbar.
 
-   The following dialog box will appear: 
+   The following dialog box will appear:
 
 	.. image:: ../images/createmesh-inv.png
 		:align: center
-  
+
 #. To filter off irrelevant meshing algorithms, you can select **Mesh Type** in the corresponding list from **Any, Hexahedral, Tetrahedral, Triangular** and **Quadrilateral** (there can be less items for the geometry of lower dimensions). Selection of a mesh type hides all meshing algorithms that cannot generate elements of this type.
 
 #. Apply :ref:`meshing algorithms <basic_meshing_algos_page>` and :ref:`hypotheses <about_hypo_page>` which will be used to compute this mesh.
@@ -106,16 +106,16 @@ To construct a mesh:
    Click the *"Edit Hypothesis"* button |edt| to change the values for the current hypothesis.
 
    Most 2D and 3D algorithms can work without hypotheses using default meshing parameters. Some algorithms do not require any hypotheses. After selection of an algorithm "Hypothesis" field of the dialog can contain:
-    
+
    * *\<Default\>* if the algorithm can work using default parameters.
    * *\<None\>* if the algorithm requires a hypothesis defining its parameters.
    * If the algorithm does not use hypotheses, this field is grayed.
-    
+
    After selection of an algorithm **Add. Hypothesis** field can contain:
-    
+
    * *\<None\>* if the algorithm can be tuned using an additional hypothesis.
    * If the algorithm does not use additional hypotheses, this field is grayed.
-    
+
 
    Proceed in the same way with 2D and 1D Algorithms and Hypotheses that will be used to mesh faces and edges of your geometry. (Note that any object has edges, even if their existence is not apparent, for example, a sphere has 4 edges). Note that the choice of hypotheses and lower dimension algorithms depends on the higher dimension algorithm.
 
@@ -128,12 +128,12 @@ To construct a mesh:
 	.. image:: ../images/image88.jpg
 		:align: center
 
-   It contains: 
-    
+   It contains:
+
    * a mesh name (*Mesh_mechanic*);
-   * a reference to the geometrical object on the basis of which the mesh has been constructed (*mechanic*); 
+   * a reference to the geometrical object on the basis of which the mesh has been constructed (*mechanic*);
    * **Applied hypotheses** folder containing the references to the hypotheses chosen at the construction of the mesh;
-   * **Applied algorithms** folder containing the references to the algorithms chosen at the construction of the mesh. 
+   * **Applied algorithms** folder containing the references to the algorithms chosen at the construction of the mesh.
    * **SubMeshes on Face** folder containing the sub-meshes defined on geometrical faces. There also can be folders for sub-meshes on vertices, edges, wires, shells, solids and compounds.
    * **Groups of Faces** folder containing the groups of mesh faces. There also can be folders for groups of nodes, edges, volumes 0D elements and balls.
 
@@ -161,7 +161,7 @@ To construct a mesh:
 
    .. note::
       * The list of sets of hypotheses can be shorter than in the above image depending on the geometry dimension.
-  
+
 
 Consider trying a sample script for construction of a mesh from our :ref:`TUI Scripts <tui_creating_meshes_page>` section.
 
@@ -171,7 +171,7 @@ Evaluating mesh size
 ####################
 
 After the mesh object is created and all hypotheses are assigned and before :ref:`Compute <compute_anchor>` operation, it is possible to calculate the eventual mesh size. For this, select the mesh in the **Object Browser** and from the **Mesh** menu select **Evaluate**.
-The result of evaluation will be displayed in the following information box: 
+The result of evaluation will be displayed in the following information box:
 
 	.. image:: ../images/mesh_evaluation_succeed.png
 		:align: center
@@ -185,16 +185,16 @@ Before :ref:`the mesh computation <compute_anchor>`, it is also possible to see 
 
 For this, select the mesh in the Object Browser. From the **Mesh** menu select **Preview** or click "Preview" button |prv| in the toolbar or activate "Preview" item from the pop-up menu.
 
-Select **1D mesh** or **2D mesh** preview mode in the Preview dialog. 
+Select **1D mesh** or **2D mesh** preview mode in the Preview dialog.
 
-.. image:: ../images/preview_mesh_1D.png 
+.. image:: ../images/preview_mesh_1D.png
 	:align: center
 
 .. centered::
 	1D mesh preview shows nodes computed on geometry edges
 
 
-.. image:: ../images/preview_mesh_2D.png 
+.. image:: ../images/preview_mesh_2D.png
 	:align: center
 
 .. centered::
@@ -224,29 +224,29 @@ If the mesh contains concurrent :ref:`sub-meshes <constructing_submeshes_page>`,
 
 *To change sub-mesh priority:*
 
-Choose **Change sub-mesh priority** from the **Mesh** menu or a pop-up menu. The opened dialog shows a list of sub-meshes in the order of their priority. 
+Choose **Change sub-mesh priority** from the **Mesh** menu or a pop-up menu. The opened dialog shows a list of sub-meshes in the order of their priority.
 
 There is an example of sub-mesh order modifications taking a Mesh created on a Box shape. The main Mesh object:
 
 * *1D* **Wire discretisation** with **Number of Segments** = 20
-* *2D* **Triangle: Mefisto** with Hypothesis **Max Element Area**
-  
+* *2D* **Triangle: NETGEN_2D** with Hypothesis **Max Element Area**
+
 
 The first sub-mesh **Submesh_1** created on **Face_1** is:
 
 * *1D* **Wire discretisation** with **Number of Segments** = 4
-* *2D* **Triangle: Mefisto** with Hypothesis **MaxElementArea** = 1200
+* *2D* **Triangle: NETGEN_2D** with Hypothesis **MaxElementArea** = 1200
 
 The second sub-mesh **Submesh_2** created on **Face_2** is:
 
 * *1D* **Wire discretisation** with **Number of Segments** = 8
-* *2D* **Triangle: Mefisto** with Hypothesis **MaxElementArea** = 1200
+* *2D* **Triangle: NETGEN_2D** with Hypothesis **MaxElementArea** = 1200
 
 
 And the last sub-mesh **Submesh_3** created on **Face_3** is:
 
 * *1D* **Wire discretisation** with **Number of Segments** = 12
-* *2D* **Triangle: Mefisto** with Hypothesis **MaxElementArea** = 1200
+* *2D* **Triangle: NETGEN_2D** with Hypothesis **MaxElementArea** = 1200
 
 
 The sub-meshes become concurrent if they share sub-shapes that can be meshed with different algorithms (or different hypotheses). In the example, we have three sub-meshes with concurrent algorithms, because they have different hypotheses.
@@ -287,7 +287,7 @@ And the last mesh computation is made with:
 
 .. centered::
 	Mesh order SubMesh_3, SubMesh_2, SubMesh_1
-	
+
 
 .. image:: ../images/mesh_order_321_res.png
 	:align: center
@@ -296,13 +296,13 @@ And the last mesh computation is made with:
 	Result mesh with order SubMesh_3, SubMesh_2, SubMesh_1
 
 As we can see, each mesh computation has a different number of result
-elements and a different mesh discretization on the shared edges (the edges 
+elements and a different mesh discretization on the shared edges (the edges
 that are shared between **Face_1**, **Face_2** and **Face_3**)
 
 Additionally, sub-mesh priority (the order of applied algorithms) can
 be modified not only in a separate dialog box, but also in
 the **Preview**. This helps to preview different mesh results,
-modifying the order of sub-meshes. 
+modifying the order of sub-meshes.
 
 .. image:: ../images/mesh_order_preview.png
 	:align: center
@@ -335,8 +335,8 @@ After the mesh computation finishes, the Mesh Computation information
 box appears. If you close this box and click "Compute" button again,
 without previously changing meshing parameters, the mesh will NOT be
 re-computed and the Mesh Computation information box will be shown
-with the same contents. (To fully re-compute the mesh, invoke 
-:ref:`clear_mesh_anchor` command before). 
+with the same contents. (To fully re-compute the mesh, invoke
+:ref:`clear_mesh_anchor` command before).
 
 .. _meshing_result_anchor:
 
@@ -356,7 +356,7 @@ After you select an error in **Errors** table, **Show Sub-shape** button allows
 visualizing in magenta the geometrical entity meshing of which failed
 (Name of this entity or its ID and type is shown in *Sub-shape* column).
 
-.. image:: ../images/failed_computation.png 
+.. image:: ../images/failed_computation.png
 	:align: center
 
 .. centered::
@@ -368,7 +368,7 @@ allows analyzing the problematic geometry and creating a sub-mesh on it in
 order to locally tune the hypotheses.
 
 If the failure is caused by an invalid input mesh and the algorithm has
-found which mesh entities are bad, **Show bad Mesh** 
+found which mesh entities are bad, **Show bad Mesh**
 button appears in the dialog. Clicked, it shows the bad mesh entities in
 the Viewer in magenta. Sometimes the shown mesh entities are too small
 or/and hidden by other mesh elements. They can be seen after
@@ -390,7 +390,7 @@ Edges bounding a hole in the surface are shown in magenta using **Show bad Mesh*
 Editing the mesh
 ################
 
-It is possible to :ref:`edit the mesh <modifying_meshes_page>` of a 
+It is possible to :ref:`edit the mesh <modifying_meshes_page>` of a
 lower dimension before generation of the mesh of a higher dimension.
 
 For example you can generate a 2D mesh, modify it using e.g. :ref:`Pattern mapping <pattern_mapping_page>`, and then generate a 3D mesh basing on the modified 2D mesh. The workflow is as follows:

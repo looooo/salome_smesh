@@ -109,7 +109,7 @@ msgstr ""
 #: ../../../../../../../SRC/SMESH_SRC/doc/salome/gui/SMESH/input/smesh_migration.rst:55
 msgid ""
 "StdMeshers algorithms concerned are **REGULAR, PYTHON, COMPOSITE, "
-"MEFISTO, Hexa, QUADRANGLE, RADIAL_QUAD**."
+"Hexa, QUADRANGLE, RADIAL_QUAD**."
 msgstr ""
 
 # ca97ecd8ffc74d798b1c512b44fb6b95

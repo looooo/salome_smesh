@@ -42,7 +42,7 @@ geompy.addToStudy( Plane_2, "Plane_2" )
 Mesh_1 = smesh.Mesh(Partition_1)
 Regular_1D = Mesh_1.Segment()
 Max_Size_1 = Regular_1D.MaxSize(34.641)
-MEFISTO_2D = Mesh_1.Triangle()
+NETGEN_2D = Mesh_1.Triangle()
 Tetrahedronn = Mesh_1.Tetrahedron()
 isDone = Mesh_1.Compute()
 

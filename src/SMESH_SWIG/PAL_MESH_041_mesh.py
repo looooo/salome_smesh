@@ -90,7 +90,7 @@ maxElementArea = 200
 algoMef = mesh.Triangle()
 listHyp = algoMef.GetCompatibleHypothesis()
 print(algoMef.GetName())
-algoMef.SetName("Triangle (Mefisto)")
+algoMef.SetName("Triangle (netgen)")
 
 hypArea200 = algoMef.MaxElementArea(maxElementArea)
 print(hypArea200.GetName())

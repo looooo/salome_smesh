@@ -102,8 +102,8 @@ Defining hypotheses
 
 .. autosummary::
 
-   StdMeshersBuilder_Triangle_MEFISTO.MaxElementArea
-   StdMeshersBuilder_Triangle_MEFISTO.LengthFromEdges
+   StdMeshersBuilder_Triangle_NETGEN_2D.MaxElementArea
+   StdMeshersBuilder_Triangle_NETGEN_2D.LengthFromEdges
    StdMeshersBuilder_Quadrangle.QuadrangleParameters
    StdMeshersBuilder_Quadrangle.QuadranglePreference
    StdMeshersBuilder_Quadrangle.TrianglePreference
@@ -131,7 +131,7 @@ Constructing sub-meshes
    Mesh.GetSubMesh
    Mesh.ClearSubMesh
 
-Editing Meshes   
+Editing Meshes
 ==============
 
 .. autosummary::
@@ -151,7 +151,7 @@ Grouping elements
    Mesh.SetAutoColor
    Mesh.GetAutoColor
    Mesh.HasDuplicatedGroupNamesMED
-   
+
 Creating groups
 ===============
 
@@ -512,7 +512,7 @@ Duplication of nodes and elements (to emulate cracks)
    Mesh.AffectedElemGroupsInRegion
    Mesh.DoubleNodesOnGroupBoundaries
    Mesh.CreateFlatElementsOnFacesGroups
-   
+
 Renumbering nodes and elements
 ==============================
 

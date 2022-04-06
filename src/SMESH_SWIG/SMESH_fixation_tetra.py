@@ -75,9 +75,9 @@ smesh.SetName(hypNbSeg, "NumberOfSegments_" + str(numberOfSegments))
 
 ## maxElementArea = 80
 
-## mefisto2D = mesh.Triangle()
-## mefisto2D.SetName("MEFISTO_2D")
-## hypArea = mefisto2D.MaxElementArea(maxElementArea)
+## netgen2D = mesh.Triangle()
+## netgen2D.SetName("NETGEN_2D")
+## hypArea = netgen2D.MaxElementArea(maxElementArea)
 ## print hypArea.GetName()
 ## print hypArea.GetId()
 ## print hypArea.GetMaxElementArea()
@@ -85,9 +85,9 @@ smesh.SetName(hypNbSeg, "NumberOfSegments_" + str(numberOfSegments))
 
 print("-------------------------- LengthFromEdges")
 
-mefisto2D = mesh.Triangle()
-mefisto2D.SetName("MEFISTO_2D")
-hypLengthFromEdges = mefisto2D.LengthFromEdges()
+netgen2D = mesh.Triangle()
+netgen2D.SetName("NETGEN_2D")
+hypLengthFromEdges = netgen2D.LengthFromEdges()
 print(hypLengthFromEdges.GetName())
 print(hypLengthFromEdges.GetId())
 smesh.SetName(hypLengthFromEdges, "LengthFromEdges")
@@ -119,7 +119,7 @@ if ret != 0:
     print("Number of triangles    : ", mesh.NbTriangles())
     print("Number of volumes      : ", mesh.NbVolumes())
     print("Number of tetrahedrons : ", mesh.NbTetras())
-    
+
 else:
     print("problem when computing the mesh")
 

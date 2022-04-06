@@ -38,7 +38,7 @@ tetra = smesh.Mesh(box, "Box : tetrahedrical mesh")
 # create a Regular 1D algorithm for edges
 algo1D = tetra.Segment()
 
-# create a Mefisto 2D algorithm for faces
+# create a NETGEN 2D algorithm for faces
 algo2D = tetra.Triangle()
 
 # create a 3D algorithm for solids

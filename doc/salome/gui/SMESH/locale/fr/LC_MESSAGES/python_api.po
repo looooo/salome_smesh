@@ -126,7 +126,7 @@ msgstr ""
 # 5d5613278457472fbf4dd155ba325791
 #: StdMeshersBuilder.MEFISTO:1
 msgid ""
-"*Algorithm type* -- Triangle MEFISTO 2D algorithm, see "
+"*Algorithm type* -- Triangle NETGEN_2D algorithm, see "
 ":class:`~StdMeshersBuilder.StdMeshersBuilder_Triangle_MEFISTO`"
 msgstr ""
 

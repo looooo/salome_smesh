@@ -1,7 +1,4 @@
-# Copyright (C) 2007-2021  CEA/DEN, EDF R&D, OPEN CASCADE
-#
-# Copyright (C) 2003-2007  OPEN CASCADE, EADS/CCR, LIP6, CEA/DEN,
-# CEDRAT, EDF R&D, LEG, PRINCIPIA R&D, BUREAU VERITAS
+# Copyright (C) 2015-2021  CEA/DEN, EDF R&D, OPEN CASCADE
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -20,8 +17,18 @@
 # See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
 #
 
-ADD_SUBDIRECTORY(examples)
-IF(SALOME_BUILD_DOC)
-  ADD_SUBDIRECTORY(tui)
-  ADD_SUBDIRECTORY(gui)
-ENDIF()
+INCLUDE(tests.set)
+
+FOREACH(tfile ${GOOD_TESTS} ${BAD_TESTS})
+  GET_FILENAME_COMPONENT(BASE_NAME ${tfile} NAME_WE)
+  SET(TEST_NAME SMESH_${BASE_NAME})
+  ADD_TEST(${TEST_NAME} python ${PYTHON_TEST_DRIVER} ${TIMEOUT} ${tfile})
+  SET_TESTS_PROPERTIES(${TEST_NAME} PROPERTIES LABELS "${COMPONENT_NAME};${COMPONENT_NAME}_tests")
+ENDFOREACH()
+
+FOREACH(tfile ${SESSION_FREE_TESTS})
+  GET_FILENAME_COMPONENT(BASE_NAME ${tfile} NAME_WE)
+  SET(TEST_NAME SMESH_${BASE_NAME})
+  ADD_TEST(${TEST_NAME} python ${tfile})
+  SET_TESTS_PROPERTIES(${TEST_NAME} PROPERTIES LABELS "${COMPONENT_NAME};${COMPONENT_NAME}_tests")
+endforeach()

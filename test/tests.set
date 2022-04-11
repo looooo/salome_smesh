@@ -1,0 +1,61 @@
+# Copyright (C) 2015-2021  CEA/DEN, EDF R&D, OPEN CASCADE
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+#
+# See http://www.salome-platform.org/ or email : webmaster.salome@opencascade.com
+#
+
+# The following tests cannot be executed with 'make test' because they use
+# external meshing plug-ins.
+# On the other hand these tests can be executed with 'salome test'.
+# ---------------------------------------------------------------------------
+
+SET(BAD_TESTS
+  blocFissure_01_without_session.py
+  blocFissure_02_without_session.py
+  blocFissure_03_without_session.py
+  blocFissure_04_without_session.py
+  blocFissure_05_without_session.py
+  blocFissure_06_without_session.py
+  blocFissure_07_without_session.py
+  test_smeshplugins.py
+  )
+IF(NOT WIN32)
+  LIST(APPEND BAD_TESTS
+    test_smeshplugin_mg_tetra_parallele.py
+  )
+ENDIF(NOT WIN32)
+
+# The following tests can be executed with both 'make test' and 'salome test'.
+# ----------------------------------------------------------------------------
+
+SET(GOOD_TESTS
+  create_penta_biquad.py
+  ex_MakePolyLine.py
+  extrusion_penta_biquad.py
+  test_polyhedron_per_solid.py
+  )
+
+# The following tests can be executed without driver, just by python.
+# ----------------------------------------------------------------------------
+
+set(SESSION_FREE_TESTS
+  basic_geom_smesh_without_session.py
+  basic_shaper_smesh_without_session.py
+  basic_smesh_output_with_mc_field.py
+  doublenodes_polyhedra.py
+  shaper_smesh_groups_without_session.py
+  ssl_hdf5_symbols_conflicts.py
+  )

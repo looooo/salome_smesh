@@ -24,6 +24,7 @@
 #  File   : SMESH_test5.py
 #  Module : SMESH
 #
+
 import salome
 salome.salome_init()
 import GEOM
@@ -36,7 +37,10 @@ smesh =  smeshBuilder.New()
 
 import CORBA
 import os
-import os.path
+import shutil
+import tempfile
+
+aOutPath = tempfile.mkdtemp()
 
 def SetSObjName(theSObj,theName) :
     ok, anAttr = theSObj.FindAttribute("AttributeName")
@@ -45,40 +49,31 @@ def SetSObjName(theSObj,theName) :
         #print aName.__dict__
         aName.SetValue(theName)
 
-def ConvertMED2UNV(thePath,theFile) :
-    anInitFileName = thePath + theFile
-    aMeshes,aResult = smesh.CreateMeshesFromMED(anInitFileName)
-    print(aResult, aMeshes)
+def ConvertMED2UNV(theFile):
+    print(theFile)
+    aMeshes, aResult = smesh.CreateMeshesFromMED(theFile)
+    print(aMeshes, aResult)
 
-    for iMesh in range(len(aMeshes)) :
-        aMesh = aMeshes[iMesh]
+    for aMesh in aMeshes:
         print(aMesh.GetName(), end=' ')
-        aFileName = anInitFileName
-        aFileName = os.path.basename(aFileName)
-        aMesh.SetName(aFileName)
+        aMesh.SetName(os.path.basename(theFile))
         print(aMesh.GetName())
 
-        aOutPath = '/tmp/'
-        aFileName = aOutPath + theFile + "." + str(iMesh) + ".unv"
+        aFileName = os.path.join(aOutPath, theFile + ".unv")
         aMesh.ExportUNV(aFileName)
+
         aMesh = smesh.CreateMeshesFromUNV(aFileName)
         print(aMesh.GetName(), end=' ')
-        os.remove(aFileName)
-        aFileName = os.path.basename(aFileName)
-        aMesh.SetName(aFileName)
+        aMesh.SetName(os.path.basename(aFileName))
         print(aMesh.GetName())
 
-aPath = os.getenv('DATA_DIR') + '/MedFiles/'
-aListDir = os.listdir(aPath)
-print(aListDir)
+aPath = os.path.join(os.getenv('DATA_DIR'), 'MedFiles')
+      
+for aFileName in sorted(os.listdir(aPath)):
+    if os.path.splitext(aFileName)[-1] == ".med":
+        ConvertMED2UNV(os.path.join(aPath, aFileName))
 
-for iFile in range(len(aListDir)) :
-    aFileName = aListDir[iFile]
-    aName,anExt = os.path.splitext(aFileName)
-    if anExt == ".med" :
-        aFileName = os.path.basename(aFileName)
-        print(aFileName)
-        ConvertMED2UNV(aPath,aFileName)
-        #break
+if os.getenv('SMESH_KEEP_TMP_DIR') != '1':
+    shutil.rmtree(aOutPath)
 
 salome.sg.updateObjBrowser()

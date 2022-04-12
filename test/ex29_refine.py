@@ -21,6 +21,11 @@
 # =======================================
 # Procedure that take a triangulation and split all triangles in 4 others triangles
 #
+
+import os
+import shutil
+import tempfile
+
 import salome
 salome.salome_init()
 import GEOM
@@ -31,16 +36,14 @@ import SMESH, SALOMEDS
 from salome.smesh import smeshBuilder
 smesh =  smeshBuilder.New()
 
-import os
-
 # Values
 # ------
 
-tmpDir = os.getenv('SALOME_TMP_DIR', '/tmp')
+tmpDir = tempfile.mkdtemp()
 print("Output directory:", tmpDir)
 
 # Path for ".med" files
-path = os.path.join( tmpDir, "ex29_%s_" % os.getenv('USER','unknown'))
+path = os.path.join(tmpDir, "ex29_")
 
 # Name of the shape and the mesh
 name = "Carre"
@@ -228,6 +231,12 @@ NbCells4 = NbCells3*4
 print(("Mesh with "+str(NbCells4)+" cells computed."))
 
 MyMesh.ExportMED(path+str(NbCells4)+"_triangles.med", 0)
+
+# Remove temporary directory
+# --------------------------
+
+if os.getenv('SMESH_KEEP_TMP_DIR') != '1':
+    shutil.rmtree(tmpDir)
 
 # Update the object browser
 # -------------------------

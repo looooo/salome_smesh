@@ -48,7 +48,7 @@ filePath = filePath + "/Shapes/Brep/"
 filename = "flight_solid.brep"
 filename = filePath + filename
 
-shape = geompy.Import(filename, "BREP")
+shape = geompy.ImportBREP(filename)
 idShape = geompy.addToStudy(shape, "flight")
 
 print("Analysis of the geometry flight :")

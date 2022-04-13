@@ -4,15 +4,14 @@ import salome
 salome.salome_init_without_session()
 
 from salome.geom import geomBuilder
-geompy = geomBuilder.New()
-
-import SMESH
 from salome.smesh import smeshBuilder
-smesh =  smeshBuilder.New()
 
-OX = geompy.MakeVectorDXDYDZ(1,0,0)
-OY = geompy.MakeVectorDXDYDZ(0,1,0)
-OZ = geompy.MakeVectorDXDYDZ(0,0,1)
+geom_builder = geomBuilder.New()
+smesh_builder = smeshBuilder.New()
+
+OX = geom_builder.MakeVectorDXDYDZ(1,0,0)
+OY = geom_builder.MakeVectorDXDYDZ(0,1,0)
+OZ = geom_builder.MakeVectorDXDYDZ(0,0,1)
 
 #  Y ^       Make geometry of a "pipe" with the following base (cross section).
 #    |       Big central quadrangles will be meshed with triangles, walls
@@ -31,30 +30,28 @@ OZ = geompy.MakeVectorDXDYDZ(0,0,1)
 #   |  |  |  |  |  |  |  -->
 #   +--+--+--+--+--+--+   X
 
-quadBig   = geompy.MakeFaceHW( 20,20, 1 )
-quadBig   = geompy.MakeTranslation( quadBig, 15,15,0 )
-quadSmall = geompy.MakeFaceHW( 10,10, 1 )
-smallQuads1 = geompy.MakeMultiTranslation1D( quadSmall, OX, 10, 3 )
-smallQuads2 = geompy.MakeMultiTranslation1D( quadSmall, OY, 10, 3 )
-smallQuads2 = geompy.SubShapeAllSortedCentres( smallQuads2, geompy.ShapeType["FACE"])[1:]
+quadBig   = geom_builder.MakeFaceHW( 20,20, 1 )
+quadBig   = geom_builder.MakeTranslation( quadBig, 15,15,0 )
+quadSmall = geom_builder.MakeFaceHW( 10,10, 1 )
+smallQuads1 = geom_builder.MakeMultiTranslation1D( quadSmall, OX, 10, 3 )
+smallQuads2 = geom_builder.MakeMultiTranslation1D( quadSmall, OY, 10, 3 )
+smallQuads2 = geom_builder.SubShapeAllSortedCentres( smallQuads2, geom_builder.ShapeType["FACE"])[1:]
 
-base = geompy.MakeCompound( smallQuads2 + [smallQuads1, quadBig])
-axis = geompy.MakeLine( geompy.MakeVertex( 25,25,0), OZ )
-base = geompy.MultiRotate1DNbTimes( base, axis, 4)
-base = geompy.MakePartition( [base], theName="base")
-path = geompy.MakeSketcher("Sketcher:F 0 0:TT 0 100:R 0:C -90 180:T 0 -150",[0,0,0, 0,-1,0, 1,0,0])
+base = geom_builder.MakeCompound( smallQuads2 + [smallQuads1, quadBig])
+axis = geom_builder.MakeLine( geom_builder.MakeVertex( 25,25,0), OZ )
+base = geom_builder.MultiRotate1DNbTimes( base, axis, 4)
+base = geom_builder.MakePartition( [base], theName="base")
+path = geom_builder.MakeSketcher("Sketcher:F 0 0:TT 0 100:R 0:C -90 180:T 0 -150",[0,0,0, 0,-1,0, 1,0,0])
 
 # Make the pipe, each quadrangle of the base turns into a prism with composite wall faces
-pipe   = geompy.MakePipe( base, path )
-prisms = geompy.MakePartition( [pipe], theName="prisms")
-
+pipe   = geom_builder.MakePipe( base, path )
+prisms = geom_builder.MakePartition( [pipe], theName="prisms")
 
 # get base faces of the prism to define sub-mesh on them
-smallQuad = geompy.GetFaceNearPoint( prisms, geompy.MakeVertex( 0,0,0 ), "smallQuad")
-bigQuad   = geompy.GetFaceNearPoint( prisms, geompy.MakeVertex( 15,15,0 ), "bigQuad")
+smallQuad = geom_builder.GetFaceNearPoint( prisms, geom_builder.MakeVertex( 0,0,0 ), "smallQuad")
+bigQuad   = geom_builder.GetFaceNearPoint( prisms, geom_builder.MakeVertex( 15,15,0 ), "bigQuad")
 
-
-mesh = smesh.Mesh( prisms )
+mesh = smesh_builder.Mesh( prisms )
 
 # assign Global hypotheses
 

@@ -4,13 +4,13 @@ import math
 
 import salome
 salome.salome_init_without_session()
-import GEOM
-from salome.geom import geomBuilder
-geompy = geomBuilder.New()
 
-import SMESH, SALOMEDS
+import SMESH
+from salome.geom import geomBuilder
 from salome.smesh import smeshBuilder
-smesh =  smeshBuilder.New()
+
+geom_builder = geomBuilder.New()
+smesh_builder = smeshBuilder.New()
 
 # 1. Create points
 points = [[0, 0], [50, 30], [50, 110], [0, 150], [-80, 150], [-130, 70], [-130, -20]]
@@ -18,33 +18,30 @@ points = [[0, 0], [50, 30], [50, 110], [0, 150], [-80, 150], [-130, 70], [-130, 
 iv = 1
 vertices = []
 for point in points:
-    vert = geompy.MakeVertex(point[0], point[1], 0)
-    #geompy.addToStudy(vert, "Vertex_" + repr(iv))
+    vert = geom_builder.MakeVertex(point[0], point[1], 0)
     vertices.append(vert)
     iv += 1
-    pass
 
 # 2. Create edges and wires
-Edge_straight = geompy.MakeEdge(vertices[0], vertices[4])
-Edge_bezierrr = geompy.MakeBezier(vertices)
-Wire_polyline = geompy.MakePolyline(vertices)
-Edge_Circle   = geompy.MakeCircleThreePnt(vertices[0], vertices[1], vertices[2])
+Edge_straight = geom_builder.MakeEdge(vertices[0], vertices[4])
+Edge_bezierrr = geom_builder.MakeBezier(vertices)
+Wire_polyline = geom_builder.MakePolyline(vertices)
+Edge_Circle   = geom_builder.MakeCircleThreePnt(vertices[0], vertices[1], vertices[2])
 
-geompy.addToStudy(Edge_straight, "Edge_straight")
-geompy.addToStudy(Edge_bezierrr, "Edge_bezierrr")
-geompy.addToStudy(Wire_polyline, "Wire_polyline")
-geompy.addToStudy(Edge_Circle  , "Edge_Circle")
+geom_builder.addToStudy(Edge_straight, "Edge_straight")
+geom_builder.addToStudy(Edge_bezierrr, "Edge_bezierrr")
+geom_builder.addToStudy(Wire_polyline, "Wire_polyline")
+geom_builder.addToStudy(Edge_Circle  , "Edge_Circle")
 
 # 3. Explode wire on edges, as they will be used for mesh extrusion
-Wire_polyline_edges = geompy.SubShapeAll(Wire_polyline, geompy.ShapeType["EDGE"])
+Wire_polyline_edges = geom_builder.SubShapeAll(Wire_polyline, geom_builder.ShapeType["EDGE"])
 for ii in range(len(Wire_polyline_edges)):
-    geompy.addToStudyInFather(Wire_polyline, Wire_polyline_edges[ii], "Edge_" + repr(ii + 1))
-    pass
+    geom_builder.addToStudyInFather(Wire_polyline, Wire_polyline_edges[ii], "Edge_" + repr(ii + 1))
 
 # Mesh
 
 # Mesh the given shape with the given 1d hypothesis
-def Mesh1D(shape1d, nbSeg, name, smesh_builder):
+def Mesh1D(shape1d, nbSeg, name):
   mesh1d_tool = smesh_builder.Mesh(shape1d, name)
   algo = mesh1d_tool.Segment()
   hyp  = algo.NumberOfSegments(nbSeg)
@@ -53,7 +50,7 @@ def Mesh1D(shape1d, nbSeg, name, smesh_builder):
   return mesh1d_tool
 
 # Create a mesh with six nodes, seven edges and two quadrangle faces
-def MakeQuadMesh2(mesh_name, smesh_builder):
+def MakeQuadMesh2(mesh_name):
   quad_1 = smesh_builder.Mesh(name = mesh_name)
   
   # six nodes
@@ -79,19 +76,19 @@ def MakeQuadMesh2(mesh_name, smesh_builder):
   return [quad_1, [1,2,3,4,5,6,7], [8,9]]
 
 # Path meshes
-Edge_straight_mesh = Mesh1D(Edge_straight, 7, "Edge_straight", smesh_builder=smesh)
-Edge_bezierrr_mesh = Mesh1D(Edge_bezierrr, 7, "Edge_bezierrr", smesh_builder=smesh)
-Wire_polyline_mesh = Mesh1D(Wire_polyline, 3, "Wire_polyline", smesh_builder=smesh)
-Edge_Circle_mesh   = Mesh1D(Edge_Circle  , 8, "Edge_Circle"  , smesh_builder=smesh)
+Edge_straight_mesh = Mesh1D(Edge_straight, 7, "Edge_straight")
+Edge_bezierrr_mesh = Mesh1D(Edge_bezierrr, 7, "Edge_bezierrr")
+Wire_polyline_mesh = Mesh1D(Wire_polyline, 3, "Wire_polyline")
+Edge_Circle_mesh   = Mesh1D(Edge_Circle  , 8, "Edge_Circle")
 
 # Initial meshes (to be extruded)
-[quad_1, ee_1, ff_1] = MakeQuadMesh2("quad_1", smesh_builder=smesh)
-[quad_2, ee_2, ff_2] = MakeQuadMesh2("quad_2", smesh_builder=smesh)
-[quad_3, ee_3, ff_3] = MakeQuadMesh2("quad_3", smesh_builder=smesh)
-[quad_4, ee_4, ff_4] = MakeQuadMesh2("quad_4", smesh_builder=smesh)
-[quad_5, ee_5, ff_5] = MakeQuadMesh2("quad_5", smesh_builder=smesh)
-[quad_6, ee_6, ff_6] = MakeQuadMesh2("quad_6", smesh_builder=smesh)
-[quad_7, ee_7, ff_7] = MakeQuadMesh2("quad_7", smesh_builder=smesh)
+[quad_1, ee_1, ff_1] = MakeQuadMesh2("quad_1")
+[quad_2, ee_2, ff_2] = MakeQuadMesh2("quad_2")
+[quad_3, ee_3, ff_3] = MakeQuadMesh2("quad_3")
+[quad_4, ee_4, ff_4] = MakeQuadMesh2("quad_4")
+[quad_5, ee_5, ff_5] = MakeQuadMesh2("quad_5")
+[quad_6, ee_6, ff_6] = MakeQuadMesh2("quad_6")
+[quad_7, ee_7, ff_7] = MakeQuadMesh2("quad_7")
 
 # ExtrusionAlongPath
 # IDsOfElements, PathMesh, PathShape, NodeStart,
@@ -137,13 +134,13 @@ error = quad_7.ExtrusionAlongPath(ff_7, Edge_Circle_mesh, Edge_Circle, 1,
 #   HasRefPoint=False, RefPoint=[0,0,0], MakeGroups=False,
 #   ScaleFactors=[], ScalesVariation=False
 
-quad_1 = MakeQuadMesh2("quad_1", smesh_builder=smesh)[0]
-quad_2 = MakeQuadMesh2("quad_2", smesh_builder=smesh)[0]
-quad_3 = MakeQuadMesh2("quad_3", smesh_builder=smesh)[0]
-quad_4 = MakeQuadMesh2("quad_4", smesh_builder=smesh)[0]
-quad_5 = MakeQuadMesh2("quad_5", smesh_builder=smesh)[0]
-quad_6 = MakeQuadMesh2("quad_6", smesh_builder=smesh)[0]
-quad_7 = MakeQuadMesh2("quad_7", smesh_builder=smesh)[0]
+quad_1 = MakeQuadMesh2("quad_1")[0]
+quad_2 = MakeQuadMesh2("quad_2")[0]
+quad_3 = MakeQuadMesh2("quad_3")[0]
+quad_4 = MakeQuadMesh2("quad_4")[0]
+quad_5 = MakeQuadMesh2("quad_5")[0]
+quad_6 = MakeQuadMesh2("quad_6")[0]
+quad_7 = MakeQuadMesh2("quad_7")[0]
 
 # 1. Extrusion of two mesh edges along a straight path
 nn, ee, ff = [], [1,2], []
@@ -175,6 +172,3 @@ error = quad_6.ExtrusionAlongPathObjects( nn, ee, ff, Edge_Circle_mesh )
 nn, ee, ff = [], [], quad_7
 error = quad_7.ExtrusionAlongPathObjects( nn, ee, ff, Edge_Circle_mesh, Edge_Circle,
                                           Angles=[a45, -a45, a45, -a45, a45, -a45, a45, -a45])
-
-
-salome.sg.updateObjBrowser()

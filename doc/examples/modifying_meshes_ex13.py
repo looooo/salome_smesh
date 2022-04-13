@@ -1,8 +1,6 @@
 # Removing Orphan Nodes
 
-import SMESH_mechanic
-
-mesh = SMESH_mechanic.mesh
+from mechanic import *
 
 # add orphan nodes
 mesh.AddNode(0,0,0)

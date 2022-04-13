@@ -1,21 +1,24 @@
 # Export of a Mesh
 
+import os
+import tempfile
+import MEDLoader
+
 import salome
 salome.salome_init_without_session()
-import GEOM
-from salome.geom import geomBuilder
-geompy = geomBuilder.New()
 
-import SMESH, SALOMEDS
+from salome.geom import geomBuilder
 from salome.smesh import smeshBuilder
-smesh =  smeshBuilder.New()
+
+geom_builder = geomBuilder.New()
+smesh_builder = smeshBuilder.New()
 
 # create a box
-box = geompy.MakeBox(0., 0., 0., 100., 200., 300.)
-idbox = geompy.addToStudy(box, "box")
+box = geom_builder.MakeBox(0., 0., 0., 100., 200., 300.)
+idbox = geom_builder.addToStudy(box, "box")
 
 # create a mesh
-tetra = smesh.Mesh(box, "MeshBox")
+tetra = smesh_builder.Mesh(box, "MeshBox")
 tetra.Segment().NumberOfSegments(7)
 tetra.Triangle()
 tetra.Tetrahedron()
@@ -24,12 +27,11 @@ tetra.Tetrahedron()
 tetra.Compute()
 
 # export the mesh in a MED file
-import tempfile
 medFile = tempfile.NamedTemporaryFile(suffix=".med").name
 tetra.ExportMED( medFile, 0 )
 
 # export a group in a MED file
-face = geompy.SubShapeAll( box, geompy.ShapeType["FACE"])[0] # a box side
+face = geom_builder.SubShapeAll( box, geom_builder.ShapeType["FACE"])[0] # a box side
 group = tetra.GroupOnGeom( face, "face group" ) # group of 2D elements on the <face>
 tetra.ExportMED( medFile, meshPart=group )
 
@@ -37,11 +39,9 @@ tetra.ExportMED( medFile, meshPart=group )
 # autoDimension parameter
 # ========================
 
-face = geompy.MakeFaceHW( 10, 10, 1, "rectangle" )
-mesh2D = smesh.Mesh( face, "mesh2D" )
+face = geom_builder.MakeFaceHW( 10, 10, 1, "rectangle" )
+mesh2D = smesh_builder.Mesh( face, "mesh2D" )
 mesh2D.AutomaticHexahedralization(0)
-
-import MEDLoader, os
 
 # exported mesh is in 2D space because it is a planar mesh lying
 # on XOY plane, and autoDimension=True by default

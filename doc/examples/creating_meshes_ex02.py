@@ -2,25 +2,24 @@
 
 import salome
 salome.salome_init_without_session()
-import GEOM
-from salome.geom import geomBuilder
-geompy = geomBuilder.New()
 
-import SMESH, SALOMEDS
+from salome.geom import geomBuilder
 from salome.smesh import smeshBuilder
-smesh =  smeshBuilder.New()
+
+geom_builder = geomBuilder.New()
+smesh_builder = smeshBuilder.New()
 
 # create a box
-box = geompy.MakeBoxDXDYDZ(10., 10., 10.)
-geompy.addToStudy(box, "Box")
+box = geom_builder.MakeBoxDXDYDZ(10., 10., 10.)
+geom_builder.addToStudy(box, "Box")
 
 # select one edge of the box for definition of a local hypothesis
-p5 = geompy.MakeVertex(5., 0., 0.)
-EdgeX = geompy.GetEdgeNearPoint(box, p5)
-geompy.addToStudyInFather(box, EdgeX, "Edge [0,0,0 - 10,0,0]")
+p5 = geom_builder.MakeVertex(5., 0., 0.)
+EdgeX = geom_builder.GetEdgeNearPoint(box, p5)
+geom_builder.addToStudyInFather(box, EdgeX, "Edge [0,0,0 - 10,0,0]")
 
 # create a hexahedral mesh on the box
-mesh = smesh.Mesh(box, "Box : hexahedral 3D mesh")
+mesh = smesh_builder.Mesh(box, "Box : hexahedral 3D mesh")
 
 # create a Regular_1D algorithm for discretization of edges
 algo1D = mesh.Segment()
@@ -46,12 +45,11 @@ algo_local.Propagation()
 # assign a hexahedral algorithm
 mesh.Hexahedron()
 
-
 # any sub-shape can be meshed individually --
 # compute mesh on two surfaces using different methods
 
 # get surfaces
-surfaces = geompy.SubShapeAll(box, geompy.ShapeType["FACE"])
+surfaces = geom_builder.SubShapeAll(box, geom_builder.ShapeType["FACE"])
 
 # method 1: no sub-mesh is created
 mesh.Compute( surfaces[0] )
@@ -59,8 +57,6 @@ mesh.Compute( surfaces[0] )
 # method 2: a sub-mesh is created
 submesh = mesh.GetSubMesh( surfaces[2], "submesh 2" )
 submesh.Compute()
-
-
 
 # compute the whole mesh
 mesh.Compute()

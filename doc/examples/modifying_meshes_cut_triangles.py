@@ -2,11 +2,13 @@
 
 import salome
 salome.salome_init_without_session()
+
 from salome.smesh import smeshBuilder
-smesh = smeshBuilder.New()
+
+smesh_builder = smeshBuilder.New()
 
 # create 3 triangles and 1 segment all sharing edge 1-2
-mesh = smesh.Mesh()
+mesh = smesh_builder.Mesh()
 n1 = mesh.AddNode( 0, 0, 0)
 n2 = mesh.AddNode( 0, 0, -10)
 n3 = mesh.AddNode( 10, 0, 0)

@@ -1,23 +1,22 @@
 # Viewing Mesh Infos
 
-
 import salome
 salome.salome_init_without_session()
-import GEOM
-from salome.geom import geomBuilder
-geompy = geomBuilder.New()
 
-import SMESH, SALOMEDS
+import SMESH
+from salome.geom import geomBuilder
 from salome.smesh import smeshBuilder
-smesh =  smeshBuilder.New()
+
+geom_builder = geomBuilder.New()
+smesh_builder = smeshBuilder.New()
 
 # create a box
-box = geompy.MakeBox(0., 0., 0., 20., 20., 20.)
-geompy.addToStudy(box, "box")
-[Face_1,Face_2,Face_3,Face_4,Face_5,Face_5] = geompy.SubShapeAll(box, geompy.ShapeType["FACE"])
+box = geom_builder.MakeBox(0., 0., 0., 20., 20., 20.)
+geom_builder.addToStudy(box, "box")
+[Face_1,Face_2,Face_3,Face_4,Face_5,Face_5] = geom_builder.SubShapeAll(box, geom_builder.ShapeType["FACE"])
 
 # create a mesh
-tetra = smesh.Mesh(box, "MeshBox")
+tetra = smesh_builder.Mesh(box, "MeshBox")
 
 algo1D = tetra.Segment()
 algo1D.NumberOfSegments(3)
@@ -60,7 +59,7 @@ print("          polyhedrons : ", tetra.NbPolyhedrons())
 
 # Get Information About Mesh by GetMeshInfo
 print("\nInformation about mesh by GetMeshInfo:")
-info = smesh.GetMeshInfo(tetra)
+info = smesh_builder.GetMeshInfo(tetra)
 keys = list(info.keys()); keys.sort()
 for i in keys:
   print("  %s   :  %d" % ( i, info[i] ))
@@ -68,7 +67,7 @@ for i in keys:
 
 # Get Information About Group by GetMeshInfo
 print("\nInformation about group by GetMeshInfo:")
-info = smesh.GetMeshInfo(group)
+info = smesh_builder.GetMeshInfo(group)
 keys = list(info.keys()); keys.sort()
 for i in keys:
   print("  %s  :  %d" % ( i, info[i] ))
@@ -76,7 +75,7 @@ for i in keys:
 
 # Get Information About SubMesh by GetMeshInfo
 print("\nInformation about Submesh by GetMeshInfo:")
-info = smesh.GetMeshInfo(submesh)
+info = smesh_builder.GetMeshInfo(submesh)
 keys = list(info.keys()); keys.sort()
 for i in keys:
   print("  %s  :  %d" % ( i, info[i] ))

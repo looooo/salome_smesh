@@ -1,16 +1,11 @@
 # Warping
 
-import SMESH_mechanic
-import SMESH
-
-smesh  = SMESH_mechanic.smesh
-mesh   = SMESH_mechanic.mesh
-salome = SMESH_mechanic.salome
+from mechanic import *
 
 # Criterion : WARP ANGLE > 1e-15
 wa_margin = 1e-15
 
-aFilter = smesh.GetFilter(SMESH.FACE, SMESH.FT_Warping, SMESH.FT_MoreThan, wa_margin)
+aFilter = smesh_builder.GetFilter(SMESH.FACE, SMESH.FT_Warping, SMESH.FT_MoreThan, wa_margin)
 
 anIds = mesh.GetIdsFromFilter(aFilter) 
 
@@ -28,5 +23,3 @@ print("")
 aGroup = mesh.CreateEmptyGroup(SMESH.FACE, "Warp > " + repr(wa_margin))
 
 aGroup.Add(anIds)
-
-salome.sg.updateObjBrowser()

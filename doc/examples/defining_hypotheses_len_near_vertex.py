@@ -4,16 +4,18 @@
 
 import salome
 salome.salome_init_without_session()
+
 from salome.geom import geomBuilder
-geompy = geomBuilder.New()
 from salome.smesh import smeshBuilder
-smesh =  smeshBuilder.New()
+
+geom_builder = geomBuilder.New()
+smesh_builder = smeshBuilder.New()
 
 # create a box
-box = geompy.MakeBoxDXDYDZ( 10, 10, 10 )
+box = geom_builder.MakeBoxDXDYDZ( 10, 10, 10 )
 
 # make a mesh
-mesh = smesh.Mesh( box )
+mesh = smesh_builder.Mesh( box )
 
 # define quadrangle meshing
 algo1d = mesh.Segment()

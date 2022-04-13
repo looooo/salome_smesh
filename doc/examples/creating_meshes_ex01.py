@@ -2,20 +2,19 @@
 
 import salome
 salome.salome_init_without_session()
-import GEOM
-from salome.geom import geomBuilder
-geompy = geomBuilder.New()
 
-import SMESH, SALOMEDS
+from salome.geom import geomBuilder
 from salome.smesh import smeshBuilder
-smesh =  smeshBuilder.New()
+
+geom_builder = geomBuilder.New()
+smesh_builder = smeshBuilder.New()
 
 # create a box
-box = geompy.MakeBox(0., 0., 0., 100., 200., 300.)
-idbox = geompy.addToStudy(box, "box")
+box = geom_builder.MakeBox(0., 0., 0., 100., 200., 300.)
+idbox = geom_builder.addToStudy(box, "box")
 
 # create a mesh
-tetra = smesh.Mesh(box, "MeshBox")
+tetra = smesh_builder.Mesh(box, "MeshBox")
 
 algo1D = tetra.Segment()
 algo1D.NumberOfSegments(7)

@@ -1,22 +1,20 @@
 # Basic Properties
 
-
 import salome
 salome.salome_init_without_session()
-import GEOM
-from salome.geom import geomBuilder
-geompy = geomBuilder.New()
 
-import SMESH, SALOMEDS
+from salome.geom import geomBuilder
 from salome.smesh import smeshBuilder
-smesh =  smeshBuilder.New()
+
+geom_builder = geomBuilder.New()
+smesh_builder = smeshBuilder.New()
 
 # create a box
-box = geompy.MakeBoxDXDYDZ(100,100,100)
-face = geompy.SubShapeAllSorted(box, geompy.ShapeType['FACE'])[0]
+box = geom_builder.MakeBoxDXDYDZ(100,100,100)
+face = geom_builder.SubShapeAllSorted(box, geom_builder.ShapeType['FACE'])[0]
 
 # mesh a box
-mesh = smesh.Mesh(box)
+mesh = smesh_builder.Mesh(box)
 submesh_1d = mesh.Segment().NumberOfSegments(5)
 submesh_2d = mesh.Quadrangle()
 submesh_3d = mesh.Hexahedron()
@@ -31,7 +29,7 @@ group_2d = mesh.Group(face)
 
 print("Get basic properties: approach 1 (via measurements tool) ----")
 
-measure = smesh.CreateMeasurements()
+measure = smesh_builder.CreateMeasurements()
 
 print("* for mesh:")
 print("  length:", measure.Length(mesh.mesh))
@@ -53,19 +51,19 @@ measure.UnRegister()
 print("Get basic properties: approach 2 (via smeshBuilder) ----")
 
 print("* for mesh:")
-print("  length:", smesh.GetLength(mesh))
-print("  area:",   smesh.GetArea(mesh))
-print("  volume:", smesh.GetVolume(mesh))
+print("  length:", smesh_builder.GetLength(mesh))
+print("  area:",   smesh_builder.GetArea(mesh))
+print("  volume:", smesh_builder.GetVolume(mesh))
 
 print("* for group (2d):")
-print("  length:", smesh.GetLength(group_2d))
-print("  area:",   smesh.GetArea(group_2d))
-print("  volume:", smesh.GetVolume(group_2d))
+print("  length:", smesh_builder.GetLength(group_2d))
+print("  area:",   smesh_builder.GetArea(group_2d))
+print("  volume:", smesh_builder.GetVolume(group_2d))
 
 print("* for submesh (2d):")
-print("  length:", smesh.GetLength(submesh_2d_face))
-print("  area:",   smesh.GetArea(submesh_2d_face))
-print("  volume:", smesh.GetVolume(submesh_2d_face))
+print("  length:", smesh_builder.GetLength(submesh_2d_face))
+print("  area:",   smesh_builder.GetArea(submesh_2d_face))
+print("  volume:", smesh_builder.GetVolume(submesh_2d_face))
 
 print("Get basic properties: approach 3 (via smeshBuilder.Mesh) ----")
 

@@ -1,23 +1,21 @@
 # Add 0D Element on Element Nodes
 
-
 import salome
 salome.salome_init_without_session()
 
+import SMESH
 from salome.geom import geomBuilder
-geompy = geomBuilder.New()
-
-import SMESH, SALOMEDS
 from salome.smesh import smeshBuilder
-smesh =  smeshBuilder.New()
 
+geom_builder = geomBuilder.New()
+smesh_builder = smeshBuilder.New()
 
 # create a geometry
-box = geompy.MakeBoxDXDYDZ( 10, 10, 10 )
-face = geompy.SubShapeAll( box, geompy.ShapeType["FACE"])[0]
+box = geom_builder.MakeBoxDXDYDZ( 10, 10, 10 )
+face = geom_builder.SubShapeAll( box, geom_builder.ShapeType["FACE"])[0]
 
 # make 3D mesh
-mesh = smesh.Mesh( box )
+mesh = smesh_builder.Mesh( box )
 mesh.AutomaticHexahedralization(0)
 
 # create 0D elements on all nodes of the mesh
@@ -38,9 +36,9 @@ group = mesh.Group( face, "faceGroup" )
 res = mesh.Add0DElementsToAllNodes( group )
 
 # remove all 0D elements
-mesh.RemoveElements( mesh.GetIdsFromFilter( smesh.GetFilter( SMESH.ELEM0D,
-                                                             SMESH.FT_ElemGeomType,
-                                                             "=",SMESH.Geom_POINT )))
+mesh.RemoveElements( mesh.GetIdsFromFilter( smesh_builder.GetFilter( SMESH.ELEM0D,
+                                                                     SMESH.FT_ElemGeomType,
+                                                                     "=",SMESH.Geom_POINT )))
 
 # create 0D elements on all nodes of some elements
 res = mesh.Add0DElementsToAllNodes( mesh.GetElementsId() )

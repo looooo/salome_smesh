@@ -2,19 +2,18 @@
 
 import salome
 salome.salome_init_without_session()
-import GEOM
+
 from salome.geom import geomBuilder
-geompy = geomBuilder.New()
-
-import SMESH, SALOMEDS
 from salome.smesh import smeshBuilder
-smesh =  smeshBuilder.New()
 
-Box_1 = geompy.MakeBoxDXDYDZ(200, 200, 200)
-[Face_1,Face_2,Face_3,Face_4,Face_5,Face_6] = geompy.SubShapeAllSorted(Box_1, geompy.ShapeType["FACE"])
+geom_builder = geomBuilder.New()
+smesh_builder = smeshBuilder.New()
+
+Box_1 = geom_builder.MakeBoxDXDYDZ(200, 200, 200)
+[Face_1,Face_2,Face_3,Face_4,Face_5,Face_6] = geom_builder.SubShapeAllSorted(Box_1, geom_builder.ShapeType["FACE"])
 
 # create Mesh object on Box shape
-Mesh_1 = smesh.Mesh(Box_1)
+Mesh_1 = smesh_builder.Mesh(Box_1)
 
 # assign mesh algorithms and hypotheses
 Regular_1D = Mesh_1.Segment()

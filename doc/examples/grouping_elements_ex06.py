@@ -1,14 +1,9 @@
 # Intersection of groups
 
-import SMESH_mechanic
-import SMESH
-
-smesh  = SMESH_mechanic.smesh
-mesh   = SMESH_mechanic.mesh
-salome = SMESH_mechanic.salome
+from mechanic import *
 
 # Criterion : AREA > 20
-aFilter = smesh.GetFilter(SMESH.FACE, SMESH.FT_Area, SMESH.FT_MoreThan, 20.)
+aFilter = smesh_builder.GetFilter(SMESH.FACE, SMESH.FT_Area, SMESH.FT_MoreThan, 20.)
 
 anIds = mesh.GetIdsFromFilter(aFilter)
 
@@ -19,7 +14,7 @@ aGroup1 = mesh.CreateEmptyGroup(SMESH.FACE, "Area > 20")
 aGroup1.Add(anIds)
 
 # Criterion : AREA < 60
-aFilter = smesh.GetFilter(SMESH.FACE, SMESH.FT_Area, SMESH.FT_LessThan, 60.)
+aFilter = smesh_builder.GetFilter(SMESH.FACE, SMESH.FT_Area, SMESH.FT_LessThan, 60.)
 
 anIds = mesh.GetIdsFromFilter(aFilter)
 
@@ -34,4 +29,3 @@ aGroup3 = mesh.IntersectListOfGroups([aGroup1, aGroup2], "20 < Area < 60")
 print("Criterion: 20 < Area < 60, Nb = ", len(aGroup3.GetListOfID()))
 # Please note that also there is IntersectGroups() method which works with two groups only
 
-salome.sg.updateObjBrowser()

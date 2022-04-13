@@ -1,35 +1,33 @@
 # Create a Group on Geometry
 
-
 import salome
 salome.salome_init_without_session()
-import GEOM
-from salome.geom import geomBuilder
-geompy = geomBuilder.New()
 
-import SMESH, SALOMEDS
+from salome.geom import geomBuilder
 from salome.smesh import smeshBuilder
-smesh =  smeshBuilder.New()
+
+geom_builder = geomBuilder.New()
+smesh_builder = smeshBuilder.New()
 
 # create a box
-box = geompy.MakeBox(0., 0., 0., 100., 100., 100.)
-geompy.addToStudy(box, "box")
+box = geom_builder.MakeBox(0., 0., 0., 100., 100., 100.)
+geom_builder.addToStudy(box, "box")
 
 # add the first face of the box to the study
-subShapeList = geompy.SubShapeAll(box, geompy.ShapeType["FACE"])
+subShapeList = geom_builder.SubShapeAll(box, geom_builder.ShapeType["FACE"])
 face = subShapeList[0]
-geompy.addToStudyInFather(box, face, "face 1") 
+geom_builder.addToStudyInFather(box, face, "face 1") 
 
 # create group of edges on the face
-aGeomGroupE = geompy.CreateGroup(face, geompy.ShapeType["EDGE"])
-geompy.AddObject(aGeomGroupE, 3)
-geompy.AddObject(aGeomGroupE, 6)
-geompy.AddObject(aGeomGroupE, 8)
-geompy.AddObject(aGeomGroupE, 10)
-geompy.addToStudyInFather(face, aGeomGroupE, "Group of Edges")
+aGeomGroupE = geom_builder.CreateGroup(face, geom_builder.ShapeType["EDGE"])
+geom_builder.AddObject(aGeomGroupE, 3)
+geom_builder.AddObject(aGeomGroupE, 6)
+geom_builder.AddObject(aGeomGroupE, 8)
+geom_builder.AddObject(aGeomGroupE, 10)
+geom_builder.addToStudyInFather(face, aGeomGroupE, "Group of Edges")
 
 # create quadrangle 2D mesh on the box
-quadra = smesh.Mesh(box, "Box : quadrangle 2D mesh")
+quadra = smesh_builder.Mesh(box, "Box : quadrangle 2D mesh")
 algo1D = quadra.Segment()
 quadra.Quadrangle()
 algo1D.NumberOfSegments(7) 
@@ -42,5 +40,3 @@ aSmeshGroup1 = quadra.GroupOnGeom(face, "SMESHGroup1")
 
 # create SMESH group on <aGeomGroupE> with default name
 aSmeshGroup2 = quadra.GroupOnGeom(aGeomGroupE) 
-
-salome.sg.updateObjBrowser()

@@ -23,7 +23,6 @@
 # ---------------------------------------------------------------------------
 
 SET(BAD_TESTS
-  3dmesh.py
   a3DmeshOnModified2Dmesh.py
   creating_meshes_ex01.py
   creating_meshes_ex03.py
@@ -40,6 +39,7 @@ SET(BAD_TESTS
   filters_ex35.py
   generate_flat_elements.py
   modifying_meshes_ex26.py
+  mesh_3d.py
   notebook_smesh.py
   quality_controls_ex06.py
   quality_controls_ex20.py

@@ -1,26 +1,23 @@
 # Bare border volumes
 
-
 import salome
 salome.salome_init_without_session()
-import GEOM
+
+import SMESH
 from salome.geom import geomBuilder
-geompy = geomBuilder.New()
-
-import SMESH, SALOMEDS
 from salome.smesh import smeshBuilder
-smesh =  smeshBuilder.New()
-import salome_notebook
 
+geom_builder = geomBuilder.New()
+smesh_builder = smeshBuilder.New()
 
-box = geompy.MakeBoxDXDYDZ(100, 30, 10)
+box = geom_builder.MakeBoxDXDYDZ(100, 30, 10)
 # the smallest face of the box
-face = geompy.SubShapeAllSorted( box, geompy.ShapeType["FACE"])[0]
+face = geom_builder.SubShapeAllSorted( box, geom_builder.ShapeType["FACE"])[0]
 
-geompy.addToStudy( box, "box" )
-geompy.addToStudyInFather( box, face, "face" )
+geom_builder.addToStudy( box, "box" )
+geom_builder.addToStudyInFather( box, face, "face" )
 
-mesh = smesh.Mesh(box)
+mesh = smesh_builder.Mesh(box)
 mesh.AutomaticHexahedralization();
 
 # remove half of mesh faces from the smallest face

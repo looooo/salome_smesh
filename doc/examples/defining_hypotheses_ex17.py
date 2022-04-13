@@ -2,32 +2,32 @@
 
 import salome
 salome.salome_init_without_session()
-import GEOM
+
+import SMESH
 from salome.geom import geomBuilder
-geompy = geomBuilder.New()
-
-import SMESH, SALOMEDS
 from salome.smesh import smeshBuilder
-smesh =  smeshBuilder.New()
 
-X = geompy.MakeVectorDXDYDZ( 1,0,0 )
-O = geompy.MakeVertex( 100,50,50 )
-plane = geompy.MakePlane( O, X, 200 ) # plane YZ
+geom_builder = geomBuilder.New()
+smesh_builder = smeshBuilder.New()
 
-box = geompy.MakeBoxDXDYDZ(200,100,100)
+X = geom_builder.MakeVectorDXDYDZ( 1,0,0 )
+O = geom_builder.MakeVertex( 100,50,50 )
+plane = geom_builder.MakePlane( O, X, 200 ) # plane YZ
 
-shape = geompy.MakeHalfPartition( box, plane )
+box = geom_builder.MakeBoxDXDYDZ(200,100,100)
 
-faces = geompy.SubShapeAllSorted(shape, geompy.ShapeType["FACE"])
+shape = geom_builder.MakeHalfPartition( box, plane )
+
+faces = geom_builder.SubShapeAllSorted(shape, geom_builder.ShapeType["FACE"])
 face1 = faces[1]
 ignoreFaces = [ faces[0], faces[-1]]
 
-geompy.addToStudy( shape, "shape" )
-geompy.addToStudyInFather( shape, face1, "face1")
+geom_builder.addToStudy( shape, "shape" )
+geom_builder.addToStudyInFather( shape, face1, "face1")
 
 # 3D Viscous layers
 
-mesh = smesh.Mesh(shape, "CFD")
+mesh = smesh_builder.Mesh(shape, "CFD")
 
 mesh.Segment().NumberOfSegments( 4 )
 
@@ -56,9 +56,9 @@ mesh.MakeGroup("Prims",SMESH.VOLUME,SMESH.FT_ElemGeomType,"=",SMESH.Geom_PENTA)
 # 2D Viscous layers
 
 # 3 edges of the 4 edges of face1
-edgeIds = geompy.SubShapeAllIDs( face1, geompy.ShapeType["EDGE"])[:-1]
+edgeIds = geom_builder.SubShapeAllIDs( face1, geom_builder.ShapeType["EDGE"])[:-1]
 
-mesh = smesh.Mesh(face1,"VicsousLayers2D")
+mesh = smesh_builder.Mesh(face1,"VicsousLayers2D")
 mesh.Segment().NumberOfSegments( 5 )
 
 # viscous layers will be created on 1 edge, as we set 3 edges to ignore

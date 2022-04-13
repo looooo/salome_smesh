@@ -1,9 +1,6 @@
 # Add Tetrahedron
 
-import SMESH_mechanic
-
-mesh = SMESH_mechanic.mesh
-print("")
+from mechanic import *
 
 # add node
 n1 = mesh.AddNode(50, 10, 0)

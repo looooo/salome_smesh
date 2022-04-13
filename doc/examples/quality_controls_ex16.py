@@ -1,16 +1,11 @@
 # Minimum Angle
 
-import SMESH_mechanic
-import SMESH
-
-smesh  = SMESH_mechanic.smesh
-mesh   = SMESH_mechanic.mesh
-salome = SMESH_mechanic.salome
+from mechanic import *
 
 # Criterion : MINIMUM ANGLE < 35.
 min_angle = 35.
 
-aFilter = smesh.GetFilter(SMESH.FACE, SMESH.FT_MinimumAngle, SMESH.FT_LessThan, min_angle)
+aFilter = smesh_builder.GetFilter(SMESH.FACE, SMESH.FT_MinimumAngle, SMESH.FT_LessThan, min_angle)
 
 anIds = mesh.GetIdsFromFilter(aFilter) 
 
@@ -28,5 +23,3 @@ print("")
 aGroup = mesh.CreateEmptyGroup(SMESH.FACE, "Minimum Angle < " + repr(min_angle))
 
 aGroup.Add(anIds)
-
-salome.sg.updateObjBrowser()

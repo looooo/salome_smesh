@@ -2,25 +2,23 @@
 
 import salome
 salome.salome_init_without_session()
-import GEOM
-from salome.geom import geomBuilder
-geompy = geomBuilder.New()
 
-import SMESH, SALOMEDS
+from salome.geom import geomBuilder
 from salome.smesh import smeshBuilder
-smesh =  smeshBuilder.New()
-from salome.StdMeshers import StdMeshersBuilder
+
+geom_builder = geomBuilder.New()
+smesh_builder = smeshBuilder.New()
 
 # Create face and explode it on edges
-face = geompy.MakeFaceHW(100, 100, 1)
-edges = geompy.SubShapeAllSorted(face, geompy.ShapeType["EDGE"])
-geompy.addToStudy( face, "Face" )
+face = geom_builder.MakeFaceHW(100, 100, 1)
+edges = geom_builder.SubShapeAllSorted(face, geom_builder.ShapeType["EDGE"])
+geom_builder.addToStudy( face, "Face" )
 
 # get the first edge from exploded result
-edge1 = geompy.GetSubShapeID(face, edges[0])
+edge1 = geom_builder.GetSubShapeID(face, edges[0])
 
 # Define Mesh on previously created face
-Mesh_1 = smesh.Mesh(face)
+Mesh_1 = smesh_builder.Mesh(face)
 
 # Create Fixed Point 1D hypothesis and define parameters.
 # Note: values greater than 1.0 and less than 0.0 are not taken into account;
@@ -29,7 +27,7 @@ Mesh_1 = smesh.Mesh(face)
 # The number of segments should correspond to the number of points (NbSeg = NbPnt-1);
 # extra values of segments splitting parameter are not taken into account,
 # while missing values are considered to be equal to 1.
-Fixed_points_1D_1 = smesh.CreateHypothesis('FixedPoints1D')
+Fixed_points_1D_1 = smesh_builder.CreateHypothesis('FixedPoints1D')
 Fixed_points_1D_1.SetPoints( [ 1.1, 0.9, 0.5, 0.0, 0.5, -0.3 ] )
 Fixed_points_1D_1.SetNbSegments( [ 3, 1, 2 ] )
 Fixed_points_1D_1.SetReversedEdges( [edge1] )

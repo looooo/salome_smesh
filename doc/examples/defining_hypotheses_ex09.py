@@ -2,20 +2,19 @@
 
 import salome
 salome.salome_init_without_session()
-import GEOM
-from salome.geom import geomBuilder
-geompy = geomBuilder.New()
 
-import SMESH, SALOMEDS
+from salome.geom import geomBuilder
 from salome.smesh import smeshBuilder
-smesh =  smeshBuilder.New()
+
+geom_builder = geomBuilder.New()
+smesh_builder = smeshBuilder.New()
 
 # create a box
-box = geompy.MakeBoxDXDYDZ(10., 10., 10.)
-geompy.addToStudy(box, "Box")
+box = geom_builder.MakeBoxDXDYDZ(10., 10., 10.)
+geom_builder.addToStudy(box, "Box")
 
 # Create a hexahedral mesh on the box
-hexa = smesh.Mesh(box, "Box : hexahedrical mesh")
+hexa = smesh_builder.Mesh(box, "Box : hexahedrical mesh")
 
 # create a Regular 1D algorithm for edges
 algo1D = hexa.Segment()
@@ -33,7 +32,7 @@ algo1D.Arithmetic1D(1, 4)
 hexa.Compute()
 
 # 2. Create a tetrahedral mesh on the box
-tetra = smesh.Mesh(box, "Box : tetrahedrical mesh")
+tetra = smesh_builder.Mesh(box, "Box : tetrahedrical mesh")
 
 # create a Regular 1D algorithm for edges
 algo1D = tetra.Segment()

@@ -1,20 +1,15 @@
 # Uniting a Set of Triangles
 
-
 import salome
 salome.salome_init_without_session()
-import GEOM
-from salome.geom import geomBuilder
-geompy = geomBuilder.New()
 
-import SMESH, SALOMEDS
+import SMESH
 from salome.smesh import smeshBuilder
-smesh =  smeshBuilder.New()
-import salome_notebook
 
+smesh_builder = smeshBuilder.New()
 
 # create an empty mesh structure
-mesh = smesh.Mesh() 
+mesh = smesh_builder.Mesh() 
 
 # create the following mesh:
 # .----.----.----.
@@ -50,5 +45,3 @@ print("\nUnite a set of triangles ... ", end=' ')
 res = mesh.TriToQuad([ff[2], ff[3], ff[4], ff[5]], SMESH.FT_MinimumAngle, 60.)
 if not res: print("failed!")
 else:       print("done.")
-
-salome.sg.updateObjBrowser()

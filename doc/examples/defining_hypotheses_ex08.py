@@ -2,26 +2,25 @@
 
 import salome
 salome.salome_init_without_session()
-import GEOM
-from salome.geom import geomBuilder
-geompy = geomBuilder.New()
 
-import SMESH, SALOMEDS
+from salome.geom import geomBuilder
 from salome.smesh import smeshBuilder
-smesh =  smeshBuilder.New()
+
+geom_builder = geomBuilder.New()
+smesh_builder = smeshBuilder.New()
 
 # create a box
-base = geompy.MakeSketcher("Sketcher:F 0 0:TT 10 0:TT 20 10:TT 0 10:WF", theName="F")
-box  = geompy.MakePrismDXDYDZ( base, 0,0,10 )
-geompy.addToStudy(box, "Box")
+base = geom_builder.MakeSketcher("Sketcher:F 0 0:TT 10 0:TT 20 10:TT 0 10:WF", theName="F")
+box  = geom_builder.MakePrismDXDYDZ( base, 0,0,10 )
+geom_builder.addToStudy(box, "Box")
 
 # get one edge of the box to put local hypothesis on
-p5 = geompy.MakeVertex(5., 0., 0.)
-EdgeX = geompy.GetEdgeNearPoint(box, p5)
-geompy.addToStudyInFather(box, EdgeX, "Edge [0,0,0 - 10,0,0]")
+p5 = geom_builder.MakeVertex(5., 0., 0.)
+EdgeX = geom_builder.GetEdgeNearPoint(box, p5)
+geom_builder.addToStudyInFather(box, EdgeX, "Edge [0,0,0 - 10,0,0]")
 
 # create a hexahedral mesh on the box
-hexa = smesh.Mesh(box, "Propagation of hypothesis")
+hexa = smesh_builder.Mesh(box, "Propagation of hypothesis")
 
 # set global algorithms and hypotheses
 algo1D = hexa.Segment()
@@ -42,9 +41,8 @@ algo_local.Propagation()
 # compute the mesh which contains prisms
 hexa.Compute()
 
-
 # create another mesh on the box
-mesh = smesh.Mesh(box, "Propagation of distribution of nodes")
+mesh = smesh_builder.Mesh(box, "Propagation of distribution of nodes")
 
 # set global algorithms and hypotheses
 algo1D = mesh.Segment()

@@ -1,25 +1,24 @@
 # Borders at Multiconnection 2D
 
-
 import salome
 salome.salome_init_without_session()
-import GEOM
-from salome.geom import geomBuilder
-geompy = geomBuilder.New()
 
-import SMESH, SALOMEDS
+import SMESH
+from salome.geom import geomBuilder
 from salome.smesh import smeshBuilder
-smesh =  smeshBuilder.New()
+
+geom_builder = geomBuilder.New()
+smesh_builder = smeshBuilder.New()
 
 # create a compound of two glued boxes
-box1 = geompy.MakeBox(0., 0., 0., 20., 20., 15.)
-box2 = geompy.MakeTranslation(box1, 0., 20., 0)
-comp = geompy.MakeCompound([box1, box2])
-box = geompy.MakeGlueFaces(comp, 0.000001)
-idbox = geompy.addToStudy(box, "box")
+box1 = geom_builder.MakeBox(0., 0., 0., 20., 20., 15.)
+box2 = geom_builder.MakeTranslation(box1, 0., 20., 0)
+comp = geom_builder.MakeCompound([box1, box2])
+box = geom_builder.MakeGlueFaces(comp, 0.000001)
+idbox = geom_builder.addToStudy(box, "box")
 
 # create a mesh
-mesh = smesh.Mesh(box, "Box compound : 2D triangle mesh")
+mesh = smesh_builder.Mesh(box, "Box compound : 2D triangle mesh")
 algo = mesh.Segment()
 algo.NumberOfSegments(5)
 algo = mesh.Triangle()
@@ -29,7 +28,7 @@ mesh.Compute()
 # Criterion : MULTI-CONNECTION 2D = 3
 nb_conn = 3
 
-aFilter = smesh.GetFilter(SMESH.FACE, SMESH.FT_MultiConnection2D, SMESH.FT_EqualTo, nb_conn)
+aFilter = smesh_builder.GetFilter(SMESH.FACE, SMESH.FT_MultiConnection2D, SMESH.FT_EqualTo, nb_conn)
 
 anIds = mesh.GetIdsFromFilter(aFilter) 
 
@@ -46,5 +45,3 @@ print("")
 # create a group
 aGroup = mesh.CreateEmptyGroup(SMESH.FACE, "Borders at multi-connection 2D = " + repr(nb_conn))
 aGroup.Add(anIds)
-
-salome.sg.updateObjBrowser()

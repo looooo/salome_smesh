@@ -1,19 +1,17 @@
 # Using SALOME NoteBook
 
-
 import salome
 salome.salome_init_without_session()
-import GEOM
-from salome.geom import geomBuilder
-geompy = geomBuilder.New()
+from salome_notebook import notebook
 
-import SMESH, SALOMEDS
+import SMESH
+from salome.geom import geomBuilder
 from salome.smesh import smeshBuilder
-smesh =  smeshBuilder.New()
-import salome_notebook
+
+geom_builder = geomBuilder.New()
+smesh_builder = smeshBuilder.New()
 
 # set variables
-notebook = salome_notebook.notebook
 notebook.set("Length", 100)
 notebook.set("Width", 200)
 notebook.set("Offset", 50)
@@ -23,11 +21,11 @@ notebook.set("MaxElementArea", 800)
 notebook.set("MaxElementVolume", 900)
 
 # create a box
-box = geompy.MakeBoxDXDYDZ("Length", "Width", 300)
-idbox = geompy.addToStudy(box, "Box")
+box = geom_builder.MakeBoxDXDYDZ("Length", "Width", 300)
+idbox = geom_builder.addToStudy(box, "Box")
 
 # create a mesh
-tetra = smesh.Mesh(box, "MeshBox")
+tetra = smesh_builder.Mesh(box, "MeshBox")
 
 algo1D = tetra.Segment()
 algo1D.NumberOfSegments("NbSegments")

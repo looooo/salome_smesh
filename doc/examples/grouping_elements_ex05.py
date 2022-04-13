@@ -1,14 +1,10 @@
 # Union of groups
 
-import SMESH_mechanic
-import SMESH, SALOMEDS
-
-smesh  = SMESH_mechanic.smesh
-mesh   = SMESH_mechanic.mesh
-salome = SMESH_mechanic.salome
+from mechanic import *
+import SALOMEDS
 
 # Criterion : AREA > 20
-aFilter = smesh.GetFilter(SMESH.FACE, SMESH.FT_Area, SMESH.FT_MoreThan, 20.)
+aFilter = smesh_builder.GetFilter(SMESH.FACE, SMESH.FT_Area, SMESH.FT_MoreThan, 20.)
 
 anIds = mesh.GetIdsFromFilter(aFilter)
 
@@ -19,7 +15,7 @@ aGroup1 = mesh.CreateEmptyGroup(SMESH.FACE, "Area > 20")
 aGroup1.Add(anIds)
 
 # Criterion : AREA = 20
-aFilter = smesh.GetFilter(SMESH.FACE, SMESH.FT_Area, SMESH.FT_EqualTo, 20.)
+aFilter = smesh_builder.GetFilter(SMESH.FACE, SMESH.FT_Area, SMESH.FT_EqualTo, 20.)
 
 anIds = mesh.GetIdsFromFilter(aFilter)
 
@@ -37,7 +33,7 @@ print("Criterion: Area >= 20, Nb = ", len(aGroup3.GetListOfID()))
 # Please note that also there is UnionGroups() method which works with two groups only
 
 # Criterion : AREA < 20
-aFilter = smesh.GetFilter(SMESH.FACE, SMESH.FT_Area, SMESH.FT_LessThan, 20.)
+aFilter = smesh_builder.GetFilter(SMESH.FACE, SMESH.FT_Area, SMESH.FT_LessThan, 20.)
 
 anIds = mesh.GetIdsFromFilter(aFilter)
 
@@ -51,5 +47,3 @@ aGroup4.SetColor( SALOMEDS.Color(1.,0.,0.));
 # create union group : area >= 20 and area < 20
 aGroup5 = mesh.UnionListOfGroups([aGroup3, aGroup4], "Any Area")
 print("Criterion: Any Area, Nb = ", len(aGroup5.GetListOfID()))
-
-salome.sg.updateObjBrowser()

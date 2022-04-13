@@ -2,25 +2,23 @@
 
 import salome
 salome.salome_init_without_session()
-import GEOM
-from salome.geom import geomBuilder
-geompy = geomBuilder.New()
 
-import SMESH, SALOMEDS
+from salome.geom import geomBuilder
 from salome.smesh import smeshBuilder
-smesh =  smeshBuilder.New()
+
+geom_builder = geomBuilder.New()
+smesh_builder = smeshBuilder.New()
 
 # Create face from the wire and add to study
-Face = geompy.MakeSketcher("Sketcher:F 0 0:TT 20 0:R 90:C 20 90:WF", [0, 0, 0, 1, 0, 0, 0, 0, 1])
-geompy.addToStudy(Face,"Face")
-circle, radius1, radius2 = geompy.SubShapeAllSorted(Face, geompy.ShapeType["EDGE"])
-geompy.addToStudyInFather(Face, radius1,"radius1")
-geompy.addToStudyInFather(Face, radius2,"radius2")
-geompy.addToStudyInFather(Face, circle,"circle")
-
+Face = geom_builder.MakeSketcher("Sketcher:F 0 0:TT 20 0:R 90:C 20 90:WF", [0, 0, 0, 1, 0, 0, 0, 0, 1])
+geom_builder.addToStudy(Face,"Face")
+circle, radius1, radius2 = geom_builder.SubShapeAllSorted(Face, geom_builder.ShapeType["EDGE"])
+geom_builder.addToStudyInFather(Face, radius1,"radius1")
+geom_builder.addToStudyInFather(Face, radius2,"radius2")
+geom_builder.addToStudyInFather(Face, circle,"circle")
 
 # Define geometry for mesh, and Radial Quadrange algorithm
-mesh = smesh.Mesh(Face)
+mesh = smesh_builder.Mesh(Face)
 radial_Quad_algo = mesh.Quadrangle(algo=smeshBuilder.RADIAL_QUAD)
 
 # The Radial Quadrange algorithm can work without any hypothesis

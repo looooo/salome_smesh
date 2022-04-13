@@ -1,14 +1,14 @@
 # Combine several criteria into a filter
 
 # create mesh
-from SMESH_mechanic import *
+from mechanic import *
 
 # get all the quadrangle faces ...
-criterion1 = smesh.GetCriterion(SMESH.FACE, SMESH.FT_ElemGeomType, SMESH.Geom_QUADRANGLE, SMESH.FT_LogicalAND)
+criterion1 = smesh_builder.GetCriterion(SMESH.FACE, SMESH.FT_ElemGeomType, SMESH.Geom_QUADRANGLE, SMESH.FT_LogicalAND)
 # ... but those from sub_face3
-criterion2 = smesh.GetCriterion(SMESH.FACE, SMESH.FT_BelongToGeom, sub_face3, SMESH.FT_LogicalNOT)
+criterion2 = smesh_builder.GetCriterion(SMESH.FACE, SMESH.FT_BelongToGeom, sub_face3, SMESH.FT_LogicalNOT)
 
-quadFilter = smesh.GetFilterFromCriteria([criterion1,criterion2])
+quadFilter = smesh_builder.GetFilterFromCriteria([criterion1,criterion2])
 
 # get faces satisfying the criteria
 ids = mesh.GetIdsFromFilter(quadFilter)

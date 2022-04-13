@@ -1,19 +1,14 @@
 # Free Edges
 
-import SMESH_mechanic
-import SMESH
+from mechanic import *
 
-smesh  = SMESH_mechanic.smesh
-mesh   = SMESH_mechanic.mesh
-salome = SMESH_mechanic.salome
-
-aFilterMgr = smesh.CreateFilterManager()
+aFilterMgr = smesh_builder.CreateFilterManager()
 
 # Remove some elements to obtain free edges
 # Criterion : AREA > 95.
 area_margin = 95.
 
-aFilter = smesh.GetFilter(SMESH.FACE, SMESH.FT_Area, SMESH.FT_MoreThan, area_margin)
+aFilter = smesh_builder.GetFilter(SMESH.FACE, SMESH.FT_Area, SMESH.FT_MoreThan, area_margin)
 
 anIds = mesh.GetIdsFromFilter(aFilter)
 
@@ -36,5 +31,3 @@ for i in range(len(aBorders)):
 
   aGroupF.Add([aBorder.myElemId])
   aGroupN.Add([aBorder.myPnt1, aBorder.myPnt2])
-
-salome.sg.updateObjBrowser()

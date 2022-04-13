@@ -2,25 +2,24 @@
 
 import salome
 salome.salome_init_without_session()
-import GEOM
-from salome.geom import geomBuilder
-geompy = geomBuilder.New()
 
-import SMESH, SALOMEDS
+from salome.geom import geomBuilder
 from salome.smesh import smeshBuilder
-smesh =  smeshBuilder.New()
+
+geom_builder = geomBuilder.New()
+smesh_builder = smeshBuilder.New()
 
 # create a box
-box = geompy.MakeBoxDXDYDZ(10., 10., 10.)
-geompy.addToStudy(box, "Box")
+box = geom_builder.MakeBoxDXDYDZ(10., 10., 10.)
+geom_builder.addToStudy(box, "Box")
 
 # get one edge of the box to put local hypothesis on
-p5 = geompy.MakeVertex(5., 0., 0.)
-EdgeX = geompy.GetEdgeNearPoint(box, p5)
-geompy.addToStudyInFather(box, EdgeX, "Edge [0,0,0 - 10,0,0]")
+p5 = geom_builder.MakeVertex(5., 0., 0.)
+EdgeX = geom_builder.GetEdgeNearPoint(box, p5)
+geom_builder.addToStudyInFather(box, EdgeX, "Edge [0,0,0 - 10,0,0]")
 
 # create a hexahedral mesh on the box
-hexa = smesh.Mesh(box, "Box : hexahedrical mesh")
+hexa = smesh_builder.Mesh(box, "Box : hexahedrical mesh")
 
 # set algorithms
 algo1D = hexa.Segment()

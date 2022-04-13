@@ -2,31 +2,30 @@
 
 import salome
 salome.salome_init_without_session()
-import GEOM
-from salome.geom import geomBuilder
-geompy = geomBuilder.New()
 
-import SMESH, SALOMEDS
+from salome.geom import geomBuilder
 from salome.smesh import smeshBuilder
-smesh =  smeshBuilder.New()
+
+geom_builder = geomBuilder.New()
+smesh_builder = smeshBuilder.New()
 
 # create a face
-px   = geompy.MakeVertex(100., 0.  , 0.  )
-py   = geompy.MakeVertex(0.  , 100., 0.  )
-pz   = geompy.MakeVertex(0.  , 0.  , 100.)
+px   = geom_builder.MakeVertex(100., 0.  , 0.  )
+py   = geom_builder.MakeVertex(0.  , 100., 0.  )
+pz   = geom_builder.MakeVertex(0.  , 0.  , 100.)
 
-vxy = geompy.MakeVector(px, py)
-arc = geompy.MakeArc(py, pz, px)
-wire = geompy.MakeWire([vxy, arc])
+vxy = geom_builder.MakeVector(px, py)
+arc = geom_builder.MakeArc(py, pz, px)
+wire = geom_builder.MakeWire([vxy, arc])
 
 isPlanarFace = 1
-face = geompy.MakeFace(wire, isPlanarFace)
+face = geom_builder.MakeFace(wire, isPlanarFace)
 
 # add the face in the study
-id_face = geompy.addToStudy(face, "Face to be meshed")
+id_face = geom_builder.addToStudy(face, "Face to be meshed")
 
 # create a mesh
-tria_mesh = smesh.Mesh(face, "Face : triangulation")
+tria_mesh = smesh_builder.Mesh(face, "Face : triangulation")
 
 # define 1D meshing:
 algo = tria_mesh.Segment()

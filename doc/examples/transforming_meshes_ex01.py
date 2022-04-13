@@ -1,8 +1,6 @@
 # Translation
 
-import SMESH_mechanic
-
-mesh = SMESH_mechanic.mesh 
+from mechanic import *
 
 # define translation vector
 vector = [-150., -150., 0.]

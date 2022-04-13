@@ -1,14 +1,9 @@
 # Cut of groups
 
-import SMESH_mechanic
-import SMESH
-
-smesh  = SMESH_mechanic.smesh
-mesh   = SMESH_mechanic.mesh
-salome = SMESH_mechanic.salome
+from mechanic import *
 
 # Criterion : AREA > 20
-aFilter = smesh.GetFilter(SMESH.FACE, SMESH.FT_Area, SMESH.FT_MoreThan, 20.)
+aFilter = smesh_builder.GetFilter(SMESH.FACE, SMESH.FT_Area, SMESH.FT_MoreThan, 20.)
 
 anIds = mesh.GetIdsFromFilter(aFilter)
 
@@ -18,7 +13,7 @@ print("Criterion: Area > 20, Nb = ", len(anIds))
 aGroupMain = mesh.MakeGroupByIds("Area > 20", SMESH.FACE, anIds)
 
 # Criterion : AREA < 60
-aFilter = smesh.GetFilter(SMESH.FACE, SMESH.FT_Area, SMESH.FT_LessThan, 60.)
+aFilter = smesh_builder.GetFilter(SMESH.FACE, SMESH.FT_Area, SMESH.FT_LessThan, 60.)
 
 anIds = mesh.GetIdsFromFilter(aFilter)
 
@@ -31,5 +26,3 @@ aGroupTool = mesh.MakeGroupByIds("Area < 60", SMESH.FACE, anIds)
 aGroupRes = mesh.CutGroups(aGroupMain, aGroupTool, "Area >= 60")
 print("Criterion: Area >= 60, Nb = ", len(aGroupRes.GetListOfID()))
 # Please note that also there is CutListOfGroups() method which works with lists of groups of any lengths
-
-salome.sg.updateObjBrowser()

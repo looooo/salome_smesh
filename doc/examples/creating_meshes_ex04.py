@@ -2,13 +2,12 @@
 
 import salome
 salome.salome_init_without_session()
-import GEOM
-from salome.geom import geomBuilder
-geompy = geomBuilder.New()
 
-import SMESH, SALOMEDS
+from salome.geom import geomBuilder
 from salome.smesh import smeshBuilder
-smesh =  smeshBuilder.New()
+
+geom_builder = geomBuilder.New()
+smesh_builder = smeshBuilder.New()
 
 def PrintMeshInfo(theMesh):
     aMesh = theMesh.GetMesh()
@@ -20,17 +19,17 @@ def PrintMeshInfo(theMesh):
     pass
 
 # create a box
-box = geompy.MakeBox(0., 0., 0., 20., 20., 20.)
-geompy.addToStudy(box, "box")
+box = geom_builder.MakeBox(0., 0., 0., 20., 20., 20.)
+geom_builder.addToStudy(box, "box")
 
 # select one edge of the box for definition of a local hypothesis
-subShapeList = geompy.SubShapeAll(box, geompy.ShapeType["EDGE"])
+subShapeList = geom_builder.SubShapeAll(box, geom_builder.ShapeType["EDGE"])
 edge = subShapeList[0]
-name = geompy.SubShapeName(edge, box)
-geompy.addToStudyInFather(box, edge, name)
+name = geom_builder.SubShapeName(edge, box)
+geom_builder.addToStudyInFather(box, edge, name)
 
 # create a mesh
-tria = smesh.Mesh(box, "Mesh 2D")
+tria = smesh_builder.Mesh(box, "Mesh 2D")
 algo1D = tria.Segment()
 hyp1 = algo1D.NumberOfSegments(3)
 algo2D = tria.Triangle()

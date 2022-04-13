@@ -3,17 +3,18 @@
 # There is a series of Extrusion Along Line methods added at different times;
 # a fully functional method is ExtrusionSweepObjects()
 
-import salome, math
+import math
+
+import salome
 salome.salome_init_without_session()
-from salome.geom import geomBuilder
-geompy = geomBuilder.New()
 
 import SMESH
 from salome.smesh import smeshBuilder
-smesh =  smeshBuilder.New()
+
+smesh_builder = smeshBuilder.New()
 
 # create an empty mesh
-mesh = smesh.Mesh() 
+mesh = smesh_builder.Mesh() 
 
 # add a node
 mesh.AddNode( 0.,0.,0. )
@@ -57,9 +58,9 @@ mesh.ExtrusionSweepObject( obj, stepVector, nbSteps )
 
 # extrude all nodes and triangle faces of the disk quarter, applying a scale factor
 diskGroup = mesh.GetGroupByName( "line_rotated", SMESH.FACE )[0]
-crit = [ smesh.GetCriterion( SMESH.FACE, SMESH.FT_ElemGeomType,'=',SMESH.Geom_TRIANGLE ),
-         smesh.GetCriterion( SMESH.FACE, SMESH.FT_BelongToMeshGroup,'=', diskGroup )]
-trianglesFilter = smesh.GetFilterFromCriteria( crit )
+crit = [ smesh_builder.GetCriterion( SMESH.FACE, SMESH.FT_ElemGeomType,'=',SMESH.Geom_TRIANGLE ),
+         smesh_builder.GetCriterion( SMESH.FACE, SMESH.FT_BelongToMeshGroup,'=', diskGroup )]
+trianglesFilter = smesh_builder.GetFilterFromCriteria( crit )
 
 nodes      = [ diskGroup ]
 edges      = []
@@ -79,5 +80,3 @@ elements = cylGroup
 stepSize = 5.
 nbSteps  = 2
 mesh.ExtrusionByNormal( elements, stepSize, nbSteps )
-
-salome.sg.updateObjBrowser()

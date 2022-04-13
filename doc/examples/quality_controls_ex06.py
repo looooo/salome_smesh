@@ -1,45 +1,44 @@
 # Free Faces
 
-
 import salome
 salome.salome_init_without_session()
-import GEOM
-from salome.geom import geomBuilder
-geompy = geomBuilder.New()
 
-import SMESH, SALOMEDS
+import SMESH
+from salome.geom import geomBuilder
 from salome.smesh import smeshBuilder
-smesh =  smeshBuilder.New()
+
+geom_builder = geomBuilder.New()
+smesh_builder = smeshBuilder.New()
 
 ####### GEOM part ########
 
-Box_1 = geompy.MakeBoxDXDYDZ(200, 200, 200)
-Box_1_vertex_6 = geompy.GetSubShape(Box_1, [6])
-Box_1 = geompy.GetMainShape(Box_1_vertex_6)
-Box_1_vertex_16 = geompy.GetSubShape(Box_1, [16])
-Box_1 = geompy.GetMainShape(Box_1_vertex_16)
-Box_1_vertex_11 = geompy.GetSubShape(Box_1, [11])
-Box_1 = geompy.GetMainShape(Box_1_vertex_11)
-Plane_1 = geompy.MakePlaneThreePnt(Box_1_vertex_6, Box_1_vertex_16, Box_1_vertex_11, 2000)
-Partition_1 = geompy.MakePartition([Box_1], [Plane_1], [], [], geompy.ShapeType["SOLID"], 0, [], 0)
+Box_1 = geom_builder.MakeBoxDXDYDZ(200, 200, 200)
+Box_1_vertex_6 = geom_builder.GetSubShape(Box_1, [6])
+Box_1 = geom_builder.GetMainShape(Box_1_vertex_6)
+Box_1_vertex_16 = geom_builder.GetSubShape(Box_1, [16])
+Box_1 = geom_builder.GetMainShape(Box_1_vertex_16)
+Box_1_vertex_11 = geom_builder.GetSubShape(Box_1, [11])
+Box_1 = geom_builder.GetMainShape(Box_1_vertex_11)
+Plane_1 = geom_builder.MakePlaneThreePnt(Box_1_vertex_6, Box_1_vertex_16, Box_1_vertex_11, 2000)
+Partition_1 = geom_builder.MakePartition([Box_1], [Plane_1], [], [], geom_builder.ShapeType["SOLID"], 0, [], 0)
 
-Box_1_vertex_19 = geompy.GetSubShape(Box_1, [19])
-Box_1_vertex_21 = geompy.GetSubShape(Box_1, [21])
-Plane_2 = geompy.MakePlaneThreePnt(Box_1_vertex_16, Box_1_vertex_19, Box_1_vertex_21, 2000)
+Box_1_vertex_19 = geom_builder.GetSubShape(Box_1, [19])
+Box_1_vertex_21 = geom_builder.GetSubShape(Box_1, [21])
+Plane_2 = geom_builder.MakePlaneThreePnt(Box_1_vertex_16, Box_1_vertex_19, Box_1_vertex_21, 2000)
 
-geompy.addToStudy( Box_1, "Box_1" )
-geompy.addToStudyInFather( Box_1, Box_1_vertex_6, "Box_1:vertex_6" )
-geompy.addToStudyInFather( Box_1, Box_1_vertex_16, "Box_1:vertex_16" )
-geompy.addToStudyInFather( Box_1, Box_1_vertex_11, "Box_1:vertex_11" )
-geompy.addToStudy( Plane_1, "Plane_1" )
-geompy.addToStudy( Partition_1, "Partition_1" )
-geompy.addToStudyInFather( Box_1, Box_1_vertex_19, "Box_1:vertex_19" )
-geompy.addToStudyInFather( Box_1, Box_1_vertex_21, "Box_1:vertex_21" )
-geompy.addToStudy( Plane_2, "Plane_2" )
+geom_builder.addToStudy( Box_1, "Box_1" )
+geom_builder.addToStudyInFather( Box_1, Box_1_vertex_6, "Box_1:vertex_6" )
+geom_builder.addToStudyInFather( Box_1, Box_1_vertex_16, "Box_1:vertex_16" )
+geom_builder.addToStudyInFather( Box_1, Box_1_vertex_11, "Box_1:vertex_11" )
+geom_builder.addToStudy( Plane_1, "Plane_1" )
+geom_builder.addToStudy( Partition_1, "Partition_1" )
+geom_builder.addToStudyInFather( Box_1, Box_1_vertex_19, "Box_1:vertex_19" )
+geom_builder.addToStudyInFather( Box_1, Box_1_vertex_21, "Box_1:vertex_21" )
+geom_builder.addToStudy( Plane_2, "Plane_2" )
 
 ###### SMESH part ######
 
-Mesh_1 = smesh.Mesh(Partition_1)
+Mesh_1 = smesh_builder.Mesh(Partition_1)
 Regular_1D = Mesh_1.Segment()
 Max_Size_1 = Regular_1D.MaxSize(34.641)
 MEFISTO_2D = Mesh_1.Triangle()
@@ -47,7 +46,7 @@ Tetrahedronn = Mesh_1.Tetrahedron()
 isDone = Mesh_1.Compute()
 
 # create a group of free faces
-aFilter = smesh.GetFilter(SMESH.FACE, SMESH.FT_FreeFaces )
+aFilter = smesh_builder.GetFilter(SMESH.FACE, SMESH.FT_FreeFaces )
 aFaceIds = Mesh_1.GetIdsFromFilter(aFilter)
 
 aGroup = Mesh_1.CreateEmptyGroup(SMESH.FACE, "Free_faces")
@@ -64,15 +63,13 @@ for i in range(len(aFaceIds)):
 print("")
 
 #filter faces from plane 2
-aFilter = smesh.GetFilter(SMESH.FACE, SMESH.FT_BelongToPlane, Plane_2)
+aFilter = smesh_builder.GetFilter(SMESH.FACE, SMESH.FT_BelongToPlane, Plane_2)
 aFaceIds = Mesh_1.GetIdsFromFilter(aFilter)
 aGroup.Remove(aFaceIds)
 
 # create a group of shared faces (located on partition boundary inside box)
-aFilter = smesh.GetFilter(SMESH.FACE, SMESH.FT_BelongToPlane, Plane_1)
+aFilter = smesh_builder.GetFilter(SMESH.FACE, SMESH.FT_BelongToPlane, Plane_1)
 aFaceIds = Mesh_1.GetIdsFromFilter(aFilter)
 
 aGroup = Mesh_1.CreateEmptyGroup(SMESH.FACE, "Shared_faces")
 aGroup.Add(aFaceIds)
-
-salome.sg.updateObjBrowser()

@@ -1,24 +1,22 @@
 # Convert mesh to/from quadratic
 
-
 import salome
 salome.salome_init_without_session()
-import GEOM
-from salome.geom import geomBuilder
-geompy = geomBuilder.New()
 
-import SMESH, SALOMEDS
+from salome.geom import geomBuilder
 from salome.smesh import smeshBuilder
-smesh =  smeshBuilder.New()
+
+geom_builder = geomBuilder.New()
+smesh_builder = smeshBuilder.New()
 
 # create sphere of radius 100
 
-Sphere = geompy.MakeSphereR( 100 )
-geompy.addToStudy( Sphere, "Sphere" )
+Sphere = geom_builder.MakeSphereR( 100 )
+geom_builder.addToStudy( Sphere, "Sphere" )
 
 # create simple trihedral mesh
 
-Mesh = smesh.Mesh(Sphere)
+Mesh = smesh_builder.Mesh(Sphere)
 Regular_1D = Mesh.Segment()
 Nb_Segments = Regular_1D.NumberOfSegments(5)
 MEFISTO_2D = Mesh.Triangle()

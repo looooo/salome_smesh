@@ -4,23 +4,23 @@ import salome
 salome.salome_init_without_session()
 
 from salome.geom import geomBuilder
-geompy = geomBuilder.New()
-
 from salome.smesh import smeshBuilder
-smesh = smeshBuilder.New()
+
+geom_builder = geomBuilder.New()
+smesh_builder = smeshBuilder.New()
 
 # make a shape consisting of two quadranges
-OY  = geompy.MakeVectorDXDYDZ(0, 1, 0)
-OY1 = geompy.MakeTranslation( OY, 1, 0, 0 )
-OY2 = geompy.MakeTranslation( OY, 2, 0, 0 )
-q1  = geompy.MakeQuad2Edges( OY, OY1 )
-q2  = geompy.MakeQuad2Edges( OY1, OY2 )
+OY  = geom_builder.MakeVectorDXDYDZ(0, 1, 0)
+OY1 = geom_builder.MakeTranslation( OY, 1, 0, 0 )
+OY2 = geom_builder.MakeTranslation( OY, 2, 0, 0 )
+q1  = geom_builder.MakeQuad2Edges( OY, OY1 )
+q2  = geom_builder.MakeQuad2Edges( OY1, OY2 )
 
-shape = geompy.Partition( [q1,q2], theName='shape' )
-ff    = geompy.SubShapeAll( shape, geompy.ShapeType["FACE"], theName="quad" )
+shape = geom_builder.Partition( [q1,q2], theName='shape' )
+ff    = geom_builder.SubShapeAll( shape, geom_builder.ShapeType["FACE"], theName="quad" )
 
 # mesh one quadrange with quadrangless and the other with triangles
-mesh = smesh.Mesh( shape )
+mesh = smesh_builder.Mesh( shape )
 mesh.Segment().NumberOfSegments(1)
 mesh.Quadrangle()
 mesh.Triangle( ff[1] )

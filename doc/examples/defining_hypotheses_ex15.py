@@ -2,23 +2,25 @@
 
 import salome
 salome.salome_init_without_session()
+
 from salome.geom import geomBuilder
-geompy = geomBuilder.New()
 from salome.smesh import smeshBuilder
-smesh =  smeshBuilder.New()
+
+geom_builder = geomBuilder.New()
+smesh_builder = smeshBuilder.New()
 
 # Make quadrangle face and explode it on edges.
-Vertex_1 = geompy.MakeVertex(0, 0, 0)
-Vertex_2 = geompy.MakeVertex(40, 0, 0)
-Vertex_3 = geompy.MakeVertex(40, 30, 0)
-Vertex_4 = geompy.MakeVertex(0, 30, 0)
-Quadrangle_Face_1 = geompy.MakeQuad4Vertices(Vertex_1, Vertex_4, Vertex_3, Vertex_2)
-[Edge_1,Edge_2,Edge_3,Edge_4] = geompy.SubShapeAllSorted(Quadrangle_Face_1, geompy.ShapeType["EDGE"])
-geompy.addToStudy( Quadrangle_Face_1, "Quadrangle Face_1" )
-geompy.addToStudyInFather( Quadrangle_Face_1, Edge_2, "Edge_2" )
+Vertex_1 = geom_builder.MakeVertex(0, 0, 0)
+Vertex_2 = geom_builder.MakeVertex(40, 0, 0)
+Vertex_3 = geom_builder.MakeVertex(40, 30, 0)
+Vertex_4 = geom_builder.MakeVertex(0, 30, 0)
+Quadrangle_Face_1 = geom_builder.MakeQuad4Vertices(Vertex_1, Vertex_4, Vertex_3, Vertex_2)
+[Edge_1,Edge_2,Edge_3,Edge_4] = geom_builder.SubShapeAllSorted(Quadrangle_Face_1, geom_builder.ShapeType["EDGE"])
+geom_builder.addToStudy( Quadrangle_Face_1, "Quadrangle Face_1" )
+geom_builder.addToStudyInFather( Quadrangle_Face_1, Edge_2, "Edge_2" )
 
 # Set the Geometry for meshing
-Mesh_1 = smesh.Mesh(Quadrangle_Face_1)
+Mesh_1 = smesh_builder.Mesh(Quadrangle_Face_1)
 
 # Create Quadrangle parameters and
 # define the Type as Quadrangle Preference

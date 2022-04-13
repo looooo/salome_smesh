@@ -76,10 +76,10 @@ generation and for retrieving basic information on mesh nodes, elements and grou
 Example of 3d mesh generation:
 ##############################
 
-.. literalinclude:: ../../examples/3dmesh.py
+.. literalinclude:: ../../examples/mesh_3d.py
     :language: python
 
-:download:`Download this script <../../examples/3dmesh.py>`
+:download:`Download this script <../../examples/mesh_3d.py>`
 
 Examples of Python scripts for Mesh operations are available by
 the following links:

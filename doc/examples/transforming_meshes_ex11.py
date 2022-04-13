@@ -1,23 +1,21 @@
 # Duplicate nodes or/and elements
 
-
 import salome
 salome.salome_init_without_session()
 
-import GEOM
-from salome.geom import geomBuilder
-geompy = geomBuilder.New()
-
 import SMESH
+from salome.geom import geomBuilder
 from salome.smesh import smeshBuilder
-smesh =  smeshBuilder.New()
+
+geom_builder = geomBuilder.New()
+smesh_builder = smeshBuilder.New()
 
 # Create a box
 
-box = geompy.MakeBox(0., 0., 0., 100., 200., 300.)
+box = geom_builder.MakeBox(0., 0., 0., 100., 200., 300.)
 
 # Define hexa mesh on a box
-mesh = smesh.Mesh(box, "Mesh")
+mesh = smesh_builder.Mesh(box, "Mesh")
 mesh.Segment().NumberOfSegments(7)
 mesh.Quadrangle()
 mesh.Hexahedron()
@@ -89,7 +87,3 @@ mesh.DoubleElements( edges, edges.GetName() )
 
 # Duplicate two first edges of the mesh
 mesh.DoubleElements([ 1, 2 ])
-
-# Update object browser
-if salome.sg.hasDesktop():
-    salome.sg.updateObjBrowser()

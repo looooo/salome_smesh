@@ -1,12 +1,8 @@
 # Revolution
 
 import math
-import SMESH
 
-import SMESH_mechanic
-
-mesh  = SMESH_mechanic.mesh
-smesh = SMESH_mechanic.smesh
+from mechanic import *
 
 # create a group of faces to be revolved
 FacesRotate = [492, 493, 502, 503]

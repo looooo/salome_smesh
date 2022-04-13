@@ -1,39 +1,39 @@
 # Merging Elements
 
-
 import salome
 salome.salome_init_without_session()
-from salome.geom import geomBuilder
-geompy = geomBuilder.New()
 
 import SMESH
+from salome.geom import geomBuilder
 from salome.smesh import smeshBuilder
-smesh =  smeshBuilder.New()
+
+geom_builder = geomBuilder.New()
+smesh_builder = smeshBuilder.New()
 
 # create a face to be meshed
-px = geompy.MakeVertex(100., 0.  , 0.  )
-py = geompy.MakeVertex(0.  , 100., 0.  )
-pz = geompy.MakeVertex(0.  , 0.  , 100.)
+px = geom_builder.MakeVertex(100., 0.  , 0.  )
+py = geom_builder.MakeVertex(0.  , 100., 0.  )
+pz = geom_builder.MakeVertex(0.  , 0.  , 100.)
 
-vxy = geompy.MakeVector(px, py)
-arc = geompy.MakeArc(py, pz, px)
+vxy = geom_builder.MakeVector(px, py)
+arc = geom_builder.MakeArc(py, pz, px)
 
-wire = geompy.MakeWire([vxy, arc])
+wire = geom_builder.MakeWire([vxy, arc])
 isPlanarFace = 1
 
-face1 = geompy.MakeFace(wire, isPlanarFace)
-id_face1 = geompy.addToStudy(face1, "Face1")
+face1 = geom_builder.MakeFace(wire, isPlanarFace)
+id_face1 = geom_builder.addToStudy(face1, "Face1")
 
 # create a circle to be an extrusion path
-px1 = geompy.MakeVertex( 100.,  100.,  0.)
-py1 = geompy.MakeVertex(-100., -100.,  0.)
-pz1 = geompy.MakeVertex(   0.,    0., 50.)
+px1 = geom_builder.MakeVertex( 100.,  100.,  0.)
+py1 = geom_builder.MakeVertex(-100., -100.,  0.)
+pz1 = geom_builder.MakeVertex(   0.,    0., 50.)
 
-circle = geompy.MakeCircleThreePnt(py1, pz1, px1)
-id_circle = geompy.addToStudy(circle, "Path")
+circle = geom_builder.MakeCircleThreePnt(py1, pz1, px1)
+id_circle = geom_builder.addToStudy(circle, "Path")
  
 # create a 2D mesh on the face
-trias = smesh.Mesh(face1, "Face : 2D mesh")
+trias = smesh_builder.Mesh(face1, "Face : 2D mesh")
 
 algo1D = trias.Segment()
 algo1D.NumberOfSegments(6)
@@ -46,7 +46,7 @@ trias.Compute()
 faceTriGroup = trias.Group( face1, "face triangles" )
 
 # create a path mesh
-circlemesh = smesh.Mesh(circle, "Path mesh")
+circlemesh = smesh_builder.Mesh(circle, "Path mesh")
 algo = circlemesh.Segment()
 algo.NumberOfSegments(10)
 circlemesh.Compute()
@@ -82,5 +82,3 @@ print("Number of elements after MergeEqualElements:")
 print("Edges      : ", trias.NbEdges())
 print("Faces      : ", trias.NbFaces())
 print("Volumes    : ", trias.NbVolumes())
-
-salome.sg.updateObjBrowser()

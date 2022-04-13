@@ -2,12 +2,13 @@
 
 import salome
 salome.salome_init_without_session()
-from salome.geom import geomBuilder
-geompy = geomBuilder.New()
 
 import SMESH
+from salome.geom import geomBuilder
 from salome.smesh import smeshBuilder
-smesh =  smeshBuilder.New()
+
+geom_builder = geomBuilder.New()
+smesh_builder = smeshBuilder.New()
 
 ###
 # Geometry: an assembly of a box, a cylinder and a truncated cone
@@ -24,40 +25,40 @@ radius_2 = 40
 height = 100 
 
 # Build a box
-box = geompy.MakeBox(-cote, -cote, -cote, +cote, +cote, +cote) 
+box = geom_builder.MakeBox(-cote, -cote, -cote, +cote, +cote, +cote) 
 
 # Build a cylinder
-pt1 = geompy.MakeVertex(0, 0, cote/3) 
-di1 = geompy.MakeVectorDXDYDZ(0, 0, 1) 
-cyl = geompy.MakeCylinder(pt1, di1, section, size) 
+pt1 = geom_builder.MakeVertex(0, 0, cote/3) 
+di1 = geom_builder.MakeVectorDXDYDZ(0, 0, 1) 
+cyl = geom_builder.MakeCylinder(pt1, di1, section, size) 
 
 # Build a truncated cone
-pt2 = geompy.MakeVertex(0, 0, size) 
-cone = geompy.MakeCone(pt2, di1, radius_1, radius_2, height) 
+pt2 = geom_builder.MakeVertex(0, 0, size) 
+cone = geom_builder.MakeCone(pt2, di1, radius_1, radius_2, height) 
 
 # Fuse
-box_cyl = geompy.MakeFuse(box, cyl) 
-piece = geompy.MakeFuse(box_cyl, cone) 
+box_cyl = geom_builder.MakeFuse(box, cyl) 
+piece = geom_builder.MakeFuse(box_cyl, cone) 
 
 # Add to the study
-geompy.addToStudy(piece, name) 
+geom_builder.addToStudy(piece, name) 
 
 # Create a group of faces
-faces_group = geompy.CreateGroup(piece, geompy.ShapeType["FACE"]) 
+faces_group = geom_builder.CreateGroup(piece, geom_builder.ShapeType["FACE"]) 
 group_name = name + "_grp" 
-geompy.addToStudy(faces_group, group_name) 
+geom_builder.addToStudy(faces_group, group_name) 
 faces_group.SetName(group_name) 
 
 # Add faces to the group
-faces = geompy.SubShapeAllIDs(piece, geompy.ShapeType["FACE"]) 
-geompy.UnionIDs(faces_group, faces) 
+faces = geom_builder.SubShapeAllIDs(piece, geom_builder.ShapeType["FACE"]) 
+geom_builder.UnionIDs(faces_group, faces) 
 
 ###
 # Create a mesh
 ###
 
 # Define a mesh on a geometry
-tetra = smesh.Mesh(piece, name) 
+tetra = smesh_builder.Mesh(piece, name) 
 
 # Define 1D algorithm and hypothesis
 algo1d = tetra.Segment() 
@@ -101,4 +102,3 @@ for group in tetra.GetGroups():
     name  = group.GetName()
     eType = group.GetType()
     groupStr += "'%s' %s: %s \n" % ( name, eType, ids )
-

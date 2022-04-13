@@ -4,22 +4,21 @@ import salome
 salome.salome_init_without_session()
 
 from salome.geom import geomBuilder
-geompy = geomBuilder.New()
-
 from salome.smesh import smeshBuilder
-smesh =  smeshBuilder.New()
+
+geom_builder = geomBuilder.New()
+smesh_builder = smeshBuilder.New()
 
 # Get 1/4 part from the disk face.
-Box_1 = geompy.MakeBoxDXDYDZ(100, 100, 100)
-Disk_1 = geompy.MakeDiskR(100, 1)
-Common_1 = geompy.MakeCommon(Disk_1, Box_1)
-triaVertex = geompy.GetVertexNearPoint( Common_1, geompy.MakeVertex(0,0,0) )
-geompy.addToStudy( Common_1, "Common_1" )
-geompy.addToStudyInFather( Common_1, triaVertex, "triaVertex" )
-
+Box_1 = geom_builder.MakeBoxDXDYDZ(100, 100, 100)
+Disk_1 = geom_builder.MakeDiskR(100, 1)
+Common_1 = geom_builder.MakeCommon(Disk_1, Box_1)
+triaVertex = geom_builder.GetVertexNearPoint( Common_1, geom_builder.MakeVertex(0,0,0) )
+geom_builder.addToStudy( Common_1, "Common_1" )
+geom_builder.addToStudyInFather( Common_1, triaVertex, "triaVertex" )
 
 # Set the Geometry for meshing
-Mesh_1 = smesh.Mesh(Common_1)
+Mesh_1 = smesh_builder.Mesh(Common_1)
 
 # Define 1D hypothesis
 Regular_1D = Mesh_1.Segment()

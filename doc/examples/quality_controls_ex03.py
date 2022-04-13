@@ -1,25 +1,24 @@
 # Length 1D
 
-
 import salome
 salome.salome_init_without_session()
-import GEOM
-from salome.geom import geomBuilder
-geompy = geomBuilder.New()
 
-import SMESH, SALOMEDS
+import SMESH
+from salome.geom import geomBuilder
 from salome.smesh import smeshBuilder
-smesh =  smeshBuilder.New()
+
+geom_builder = geomBuilder.New()
+smesh_builder = smeshBuilder.New()
 
 # create open shell: a box without one plane
-box = geompy.MakeBox(0., 0., 0., 20., 20., 15.)
-FaceList = geompy.SubShapeAll(box, geompy.ShapeType["FACE"])
+box = geom_builder.MakeBox(0., 0., 0., 20., 20., 15.)
+FaceList = geom_builder.SubShapeAll(box, geom_builder.ShapeType["FACE"])
 FaceList.remove(FaceList[5])
-box = geompy.MakeShell(FaceList)
-idbox = geompy.addToStudy(box, "box")
+box = geom_builder.MakeShell(FaceList)
+idbox = geom_builder.addToStudy(box, "box")
 
 # create a mesh
-mesh = smesh.Mesh(box, "Mesh_Length_1D")
+mesh = smesh_builder.Mesh(box, "Mesh_Length_1D")
 algo = mesh.Segment()
 algo.NumberOfSegments(5)
 algo = mesh.Triangle()
@@ -29,7 +28,7 @@ mesh.Compute()
 # Criterion : Length > 3.
 length_margin = 3.
 
-aFilter = smesh.GetFilter(SMESH.EDGE, SMESH.FT_Length, SMESH.FT_MoreThan, length_margin)
+aFilter = smesh_builder.GetFilter(SMESH.EDGE, SMESH.FT_Length, SMESH.FT_MoreThan, length_margin)
 anIds = mesh.GetIdsFromFilter(aFilter) 
 
 # print the result
@@ -45,5 +44,3 @@ print("")
 # create a group
 aGroup = mesh.GetMesh().CreateGroup(SMESH.EDGE, "Edges with length > " + repr(length_margin))
 aGroup.Add(anIds)
-
-salome.sg.updateObjBrowser()

@@ -1,27 +1,24 @@
 # Moving Nodes
 
-
 import salome
 salome.salome_init_without_session()
 
 from salome.geom import geomBuilder
-geompy = geomBuilder.New()
-
-import SMESH, SALOMEDS
 from salome.smesh import smeshBuilder
-smesh =  smeshBuilder.New()
 
+geom_builder = geomBuilder.New()
+smesh_builder = smeshBuilder.New()
 
-box = geompy.MakeBoxDXDYDZ(200, 200, 200)
+box = geom_builder.MakeBoxDXDYDZ(200, 200, 200)
 
-mesh = smesh.Mesh( box )
+mesh = smesh_builder.Mesh( box )
 mesh.Segment().AutomaticLength(0.1)
 mesh.Quadrangle()
 mesh.Compute()
 
 # find node at (0,0,0) which is located on a geom vertex
 node000 = None
-for vId in geompy.SubShapeAllIDs( box, geompy.ShapeType["VERTEX"]):
+for vId in geom_builder.SubShapeAllIDs( box, geom_builder.ShapeType["VERTEX"]):
     if node000: break
     nodeIds = mesh.GetSubMeshNodesId( vId, True )
     for node in nodeIds:

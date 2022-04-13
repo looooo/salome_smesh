@@ -1,32 +1,29 @@
 # Create a Group on Filter
 
-
 import salome
 salome.salome_init_without_session()
-import GEOM
+
+import SMESH
 from salome.geom import geomBuilder
-geompy = geomBuilder.New()
-
-import SMESH, SALOMEDS
 from salome.smesh import smeshBuilder
-smesh =  smeshBuilder.New()
-import salome_notebook
 
+geom_builder = geomBuilder.New()
+smesh_builder = smeshBuilder.New()
 
-box = geompy.MakeBoxDXDYDZ(10,10,10)
+box = geom_builder.MakeBoxDXDYDZ(10,10,10)
 
 # make a mesh with quadrangles of different area in range [1,16]
-mesh = smesh.Mesh(box,"Quad mesh")
+mesh = smesh_builder.Mesh(box,"Quad mesh")
 hyp1D = mesh.Segment().StartEndLength( 1, 4 )
 mesh.Quadrangle()
 mesh.Compute()
 
 # create a group on filter selecting faces of medium size
 critaria = [ \
-    smesh.GetCriterion(SMESH.FACE, SMESH.FT_Area, ">", 1.1, BinaryOp=SMESH.FT_LogicalAND ),
-    smesh.GetCriterion(SMESH.FACE, SMESH.FT_Area, "<", 15.0 )
+    smesh_builder.GetCriterion(SMESH.FACE, SMESH.FT_Area, ">", 1.1, BinaryOp=SMESH.FT_LogicalAND ),
+    smesh_builder.GetCriterion(SMESH.FACE, SMESH.FT_Area, "<", 15.0 )
     ]
-filt = smesh.GetFilterFromCriteria( critaria )
+filt = smesh_builder.GetFilterFromCriteria( critaria )
 filtGroup = mesh.GroupOnFilter( SMESH.FACE, "group on filter", filt )
 print("Group on filter contains %s elements" % filtGroup.Size())
 
@@ -37,13 +34,11 @@ mesh.Compute()
 print("After mesh change, group on filter contains %s elements" % filtGroup.Size())
 
 # set a new filter defining the group
-filt2 = smesh.GetFilter( SMESH.FACE, SMESH.FT_RangeOfIds, "1-50" )
+filt2 = smesh_builder.GetFilter( SMESH.FACE, SMESH.FT_RangeOfIds, "1-50" )
 filtGroup.SetFilter( filt2 )
 print("With a new filter, group on filter contains %s elements" % filtGroup.Size())
 
 # group is updated at modification of the filter
-filt2.SetCriteria( [ smesh.GetCriterion( SMESH.FACE, SMESH.FT_RangeOfIds, "1-70" )])
+filt2.SetCriteria( [ smesh_builder.GetCriterion( SMESH.FACE, SMESH.FT_RangeOfIds, "1-70" )])
 filtIDs3 = filtGroup.GetIDs()
 print("After filter modification, group on filter contains %s elements" % filtGroup.Size())
-
-salome.sg.updateObjBrowser()

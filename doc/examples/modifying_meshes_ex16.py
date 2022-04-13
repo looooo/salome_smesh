@@ -1,20 +1,15 @@
 # Diagonal Inversion
 
-
 import salome
 salome.salome_init_without_session()
-import GEOM
+
 from salome.geom import geomBuilder
-geompy = geomBuilder.New()
-
-import SMESH, SALOMEDS
 from salome.smesh import smeshBuilder
-smesh =  smeshBuilder.New()
-import salome_notebook
 
+smesh_builder = smeshBuilder.New()
 
 # create an empty mesh structure
-mesh = smesh.Mesh() 
+mesh = smesh_builder.Mesh() 
 
 # create the following mesh:
 # .----.----.----.
@@ -50,5 +45,3 @@ print("\nDiagonal inversion ... ", end=' ')
 res = mesh.InverseDiag(bb[1], tt[2])
 if not res: print("failed!")
 else:       print("done.")
-
-salome.sg.updateObjBrowser()

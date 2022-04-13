@@ -2,34 +2,33 @@
 
 import salome
 salome.salome_init_without_session()
-import GEOM
-from salome.geom import geomBuilder
-geompy = geomBuilder.New()
 
-import SMESH, SALOMEDS
+from salome.geom import geomBuilder
 from salome.smesh import smeshBuilder
-smesh =  smeshBuilder.New()
+
+geom_builder = geomBuilder.New()
+smesh_builder = smeshBuilder.New()
 
 # create a face from arc and straight segment
-px = geompy.MakeVertex(100., 0.  , 0.  )
-py = geompy.MakeVertex(0.  , 100., 0.  )
-pz = geompy.MakeVertex(0.  , 0.  , 100.)
+px = geom_builder.MakeVertex(100., 0.  , 0.  )
+py = geom_builder.MakeVertex(0.  , 100., 0.  )
+pz = geom_builder.MakeVertex(0.  , 0.  , 100.)
 
-exy = geompy.MakeEdge(px, py)
-arc = geompy.MakeArc(py, pz, px)
+exy = geom_builder.MakeEdge(px, py)
+arc = geom_builder.MakeArc(py, pz, px)
 
-wire = geompy.MakeWire([exy, arc])
+wire = geom_builder.MakeWire([exy, arc])
 
 isPlanarFace = 1
-face1 = geompy.MakeFace(wire, isPlanarFace)
-geompy.addToStudy(face1,"Face1")
+face1 = geom_builder.MakeFace(wire, isPlanarFace)
+geom_builder.addToStudy(face1,"Face1")
 
 # get edges from the face
-e_straight,e_arc = geompy.SubShapeAll(face1, geompy.ShapeType["EDGE"])
-geompy.addToStudyInFather(face1, e_arc, "Arc Edge")
+e_straight,e_arc = geom_builder.SubShapeAll(face1, geom_builder.ShapeType["EDGE"])
+geom_builder.addToStudyInFather(face1, e_arc, "Arc Edge")
 
 # create hexahedral mesh
-hexa = smesh.Mesh(face1, "Face : triangle mesh")
+hexa = smesh_builder.Mesh(face1, "Face : triangle mesh")
 
 # define "NumberOfSegments" hypothesis to cut a straight edge in a fixed number of segments
 algo1D = hexa.Segment()

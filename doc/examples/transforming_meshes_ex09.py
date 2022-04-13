@@ -1,28 +1,26 @@
 # Sew Free Borders
 
-
 import salome
 salome.salome_init_without_session()
-import GEOM
-from salome.geom import geomBuilder
-geompy = geomBuilder.New()
 
-import SMESH, SALOMEDS
+from salome.geom import geomBuilder
 from salome.smesh import smeshBuilder
-smesh =  smeshBuilder.New()
+
+geom_builder = geomBuilder.New()
+smesh_builder = smeshBuilder.New()
 
 # make two not sewed quadranges
-OY0 = geompy.MakeVectorDXDYDZ(0, 1, 0)
-OY1 = geompy.MakeTranslation( OY0, 1, 0, 0, theName="OY1" )
-OY2 = geompy.MakeTranslation( OY0, 1.01, 0, 0, theName="OY2" )
-OY3 = geompy.MakeTranslation( OY0, 2, 0, 0 )
-q1  = geompy.MakeQuad2Edges( OY0, OY1 )
-q2  = geompy.MakeQuad2Edges( OY2, OY3 )
+OY0 = geom_builder.MakeVectorDXDYDZ(0, 1, 0)
+OY1 = geom_builder.MakeTranslation( OY0, 1, 0, 0, theName="OY1" )
+OY2 = geom_builder.MakeTranslation( OY0, 1.01, 0, 0, theName="OY2" )
+OY3 = geom_builder.MakeTranslation( OY0, 2, 0, 0 )
+q1  = geom_builder.MakeQuad2Edges( OY0, OY1 )
+q2  = geom_builder.MakeQuad2Edges( OY2, OY3 )
 
-shape = geompy.MakeCompound( [q1,q2], theName='shape' )
+shape = geom_builder.MakeCompound( [q1,q2], theName='shape' )
 
 # make a non-uniform quadrangle mesh on two faces
-mesh = smesh.Mesh(shape, "Two faces : quadrangle mesh")
+mesh = smesh_builder.Mesh(shape, "Two faces : quadrangle mesh")
 mesh.Segment().Arithmetic1D( 0.1, 0.4 )
 mesh.Segment(q1).NumberOfSegments( 5 )
 mesh.Quadrangle()
@@ -47,4 +45,3 @@ res = mesh.SewFreeBorders(FirstNodeID1, SecondNodeID1, LastNodeID1,
                           CreatePolygons, CreatePolyedrs )
 print(res)
 print("nb polygons:", mesh.NbPolygons())
-

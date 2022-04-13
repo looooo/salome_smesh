@@ -3,12 +3,12 @@
 import salome
 salome.salome_init_without_session()
 
-import SMESH, SALOMEDS
 from salome.smesh import smeshBuilder
-smesh = smeshBuilder.New()
+
+smesh_builder = smeshBuilder.New()
 
 # create an empty mesh structure
-mesh = smesh.Mesh() 
+mesh = smesh_builder.Mesh() 
 
 # a method to build a polygonal mesh element with <nb_vert> angles:
 def MakePolygon (a_mesh, x0, y0, z0, radius, nb_vert, smesh_builder):
@@ -32,5 +32,3 @@ def MakePolygon (a_mesh, x0, y0, z0, radius, nb_vert, smesh_builder):
 f1 = MakePolygon(mesh, 0, 0,  0, 30, 13, smesh_builder=mesh)
 f2 = MakePolygon(mesh, 0, 0, 10, 21,  9, smesh_builder=mesh)
 f3 = MakePolygon(mesh, 0, 0, 20, 13,  6, smesh_builder=mesh)
-
-salome.sg.updateObjBrowser()

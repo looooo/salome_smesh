@@ -1,22 +1,19 @@
 # Bare border faces
 
-
 import salome
 salome.salome_init_without_session()
-import GEOM
+
+import SMESH
 from salome.geom import geomBuilder
-geompy = geomBuilder.New()
-
-import SMESH, SALOMEDS
 from salome.smesh import smeshBuilder
-smesh =  smeshBuilder.New()
-import salome_notebook
 
+geom_builder = geomBuilder.New()
+smesh_builder = smeshBuilder.New()
 
-box = geompy.MakeBoxDXDYDZ(100, 100, 100)
-geompy.addToStudy( box, "box" )
+box = geom_builder.MakeBoxDXDYDZ(100, 100, 100)
+geom_builder.addToStudy( box, "box" )
 
-mesh = smesh.Mesh(box)
+mesh = smesh_builder.Mesh(box)
 mesh.Segment().NumberOfSegments(3)
 mesh.Quadrangle()
 mesh.Compute()

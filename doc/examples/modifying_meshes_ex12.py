@@ -1,8 +1,6 @@
 # Removing Elements
 
-import SMESH_mechanic
-
-mesh = SMESH_mechanic.mesh
+from mechanic import *
 
 # remove three elements: #850, #859 and #814
 res = mesh.RemoveElements([850, 859, 814])

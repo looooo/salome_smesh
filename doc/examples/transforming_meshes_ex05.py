@@ -1,14 +1,12 @@
 # Merging Nodes
 
-import SMESH_mechanic, SMESH
-mesh  = SMESH_mechanic.mesh
-smesh = SMESH_mechanic.smesh
+from mechanic import *
 
 # criterion of coincidence
 Tolerance = 4.0
 
 # find close nodes of triangle elements only
-triangleFilter = smesh.GetFilter( SMESH.FACE, SMESH.FT_ElemGeomType,'=', SMESH.Geom_TRIANGLE )
+triangleFilter = smesh_builder.GetFilter( SMESH.FACE, SMESH.FT_ElemGeomType,'=', SMESH.Geom_TRIANGLE )
 GroupsOfNodesOfTriangles = mesh.FindCoincidentNodesOnPart([triangleFilter],Tolerance)
 
 # prevent nodes located on geom edges from removal during merge:
@@ -16,7 +14,6 @@ GroupsOfNodesOfTriangles = mesh.FindCoincidentNodesOnPart([triangleFilter],Toler
 allSegs = mesh.MakeGroup( "all segments", SMESH.EDGE, SMESH.FT_ElemGeomType,'=', SMESH.Geom_EDGE )
 
 mesh.MergeNodes(GroupsOfNodesOfTriangles, NodesToKeep=allSegs)
-
 
 # find close nodes in the whole mesh
 GroupsOfNodes = mesh.FindCoincidentNodes(Tolerance)

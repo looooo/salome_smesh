@@ -1,21 +1,20 @@
 # Find Element by Point
 
-
 import salome
 salome.salome_init_without_session()
-import GEOM
-from salome.geom import geomBuilder
-geompy = geomBuilder.New()
 
-import SMESH, SALOMEDS
+import SMESH
+from salome.geom import geomBuilder
 from salome.smesh import smeshBuilder
-smesh =  smeshBuilder.New()
+
+geom_builder = geomBuilder.New()
+smesh_builder = smeshBuilder.New()
 
 # Create a geometry to mesh
-box = geompy.MakeBoxDXDYDZ(100,100,100)
+box = geom_builder.MakeBoxDXDYDZ(100,100,100)
 
 # Create a mesh
-mesh = smesh.Mesh(box,"Mesh")
+mesh = smesh_builder.Mesh(box,"Mesh")
 mesh.AutomaticHexahedralization()
 mesh.Compute()
 

@@ -1,20 +1,14 @@
 # Orientation
 
-
 import salome
 salome.salome_init_without_session()
-import GEOM
-from salome.geom import geomBuilder
-geompy = geomBuilder.New()
 
-import SMESH, SALOMEDS
 from salome.smesh import smeshBuilder
-smesh =  smeshBuilder.New()
-import salome_notebook
 
+smesh_builder = smeshBuilder.New()
 
 # create an empty mesh structure
-mesh = smesh.Mesh() 
+mesh = smesh_builder.Mesh() 
 
 # build five quadrangles:
 dx = 10
@@ -41,5 +35,3 @@ f5 = mesh.AddFace([n5, n6, n12, n11])
 
 # Change the orientation of the second and the fourth faces.
 mesh.Reorient([2, 4])
-
-salome.sg.updateObjBrowser()

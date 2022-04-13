@@ -2,20 +2,19 @@
 
 import salome
 salome.salome_init_without_session()
-import GEOM
-from salome.geom import geomBuilder
-geompy = geomBuilder.New()
 
-import SMESH, SALOMEDS
 from salome.smesh import smeshBuilder
-smesh =  smeshBuilder.New()
+from salome.geom import geomBuilder
+
+geom_builder = geomBuilder.New()
+smesh_builder = smeshBuilder.New()
 
 # create a cylinder
-cyl = geompy.MakeCylinderRH(30., 50.)
-geompy.addToStudy(cyl, "cyl")
+cyl = geom_builder.MakeCylinderRH(30., 50.)
+geom_builder.addToStudy(cyl, "cyl")
 
 # create a mesh on the cylinder
-tetra = smesh.Mesh(cyl, "Cylinder : tetrahedrical mesh")
+tetra = smesh_builder.Mesh(cyl, "Cylinder : tetrahedrical mesh")
 
 # assign algorithms
 algo1D = tetra.Segment()

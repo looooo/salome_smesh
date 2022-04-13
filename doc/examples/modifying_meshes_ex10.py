@@ -1,16 +1,16 @@
 # Add Polyhedron
 
+import math
 
 import salome
 salome.salome_init_without_session()
 
 from salome.smesh import smeshBuilder
-smesh =  smeshBuilder.New()
 
-import math
+smesh_builder = smeshBuilder.New()
 
 # create an empty mesh structure
-mesh = smesh.Mesh()  
+mesh = smesh_builder.Mesh()  
 
 # Create nodes for 12-hedron with pentagonal faces
 al = 2 * math.pi / 5.0
@@ -58,6 +58,3 @@ mesh.AddPolyhedralVolume([dd[0], dd[1], dd[2], dd[3], dd[4],  # top
                           aa[0], bb[0], cc[0], bb[1], aa[1],  # .
                           aa[0], aa[1], aa[2], aa[3], aa[4]], # bottom
                          [5,5,5,5,5,5,5,5,5,5,5,5])
-
-if salome.sg.hasDesktop():
-    salome.sg.updateObjBrowser()

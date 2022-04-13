@@ -1,10 +1,9 @@
 # Badly oriented volume
 
 # create mesh with volumes
-from SMESH_mechanic import *
-mesh.Tetrahedron()
-mesh.Compute()
+from mechanic import *
+
 # get all badly oriented volumes
-filter = smesh.GetFilter(SMESH.VOLUME, SMESH.FT_BadOrientedVolume)
+filter = smesh_builder.GetFilter(SMESH.VOLUME, SMESH.FT_BadOrientedVolume)
 ids = mesh.GetIdsFromFilter(filter)
 print("Number of badly oriented volumes:", len(ids))

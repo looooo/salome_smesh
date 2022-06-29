@@ -6403,10 +6403,10 @@ bool StdMeshers_Cartesian_3D::Compute(SMESH_Mesh &         theMesh,
     const StdMeshers_ViscousLayers* hypViscousLayers = _hypViscousLayers;
     _hypViscousLayers = nullptr;
 
-    StdMeshers_Cartesian_VL::ViscousBuilder builder( hypViscousLayers );
+    StdMeshers_Cartesian_VL::ViscousBuilder builder( hypViscousLayers, theMesh, theShape );
 
     std::string error;
-    TopoDS_Shape offsetShape = builder.MakeOffsetShape( theShape, error );
+    TopoDS_Shape offsetShape = builder.MakeOffsetShape( theShape, theMesh, error );
     if ( offsetShape.IsNull() )
       throw SALOME_Exception( error );
 

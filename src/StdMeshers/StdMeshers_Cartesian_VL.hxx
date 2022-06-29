@@ -27,6 +27,9 @@
 #define __StdMeshers_Cartesian_VL_HXX__
 
 #include <BRepOffset_MakeOffset.hxx>
+#include <set>
+#include <map>
+#include <vector>
 
 class StdMeshers_ViscousLayers;
 class SMESH_Mesh;
@@ -37,16 +40,19 @@ namespace StdMeshers_Cartesian_VL
   {
   public:
 
-    ViscousBuilder( const StdMeshers_ViscousLayers* hypViscousLayers );
+    ViscousBuilder( const StdMeshers_ViscousLayers* hypViscousLayers,
+                    const SMESH_Mesh &              theMesh,
+                    const TopoDS_Shape &            theShape);
     ~ViscousBuilder();
 
     TopoDS_Shape MakeOffsetShape(const TopoDS_Shape & theShape,
+                                 SMESH_Mesh &         theMesh,
                                  std::string &        theError );
 
-    SMESH_Mesh* MakeOffsetMesh();
+    SMESH_Mesh*  MakeOffsetMesh();
 
-    bool MakeViscousLayers( SMESH_Mesh &         theMesh,
-                            const TopoDS_Shape & theShape );
+    bool         MakeViscousLayers( SMESH_Mesh &         theMesh,
+                                    const TopoDS_Shape & theShape );
 
   private:
 
@@ -56,6 +62,8 @@ namespace StdMeshers_Cartesian_VL
     BRepOffset_MakeOffset           _makeOffset;
     SMESH_Mesh*                     _offsetMesh;
     TopoDS_Shape                    _offsetShape;
+    std::set< int >                 _shapesWVL; // shapes with viscous layers
+    std::map< int, std::vector< int > > _edge2facesWOVL; // EDGE 2 FACEs w/o VL
   };
 }
 

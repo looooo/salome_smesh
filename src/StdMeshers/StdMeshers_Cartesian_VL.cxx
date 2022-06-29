@@ -85,6 +85,7 @@ namespace
     TopoDS_Shape          _initShape;
     TopoDS_Shape          _offsetShape;
     int                   _initShapeID;
+    bool                  _hasVL;
     bool                  _toCheckCoinc; // to check if nodes on shape boundary coincide
   };
 
@@ -241,11 +242,8 @@ namespace
    */
   //================================================================================
 
-  bool computeVLHeight( const StdMeshers_ViscousLayers* hyp,
-                        SMESHDS_Mesh *                  mesh,
-                        const TopoDS_Shape &            shape,
-                        std::vector< double > &         vlH,
-                        std::set< TGeomID > &           shapesWVL )
+  void computeVLHeight( const StdMeshers_ViscousLayers* hyp,
+                        std::vector< double > &         vlH )
   {
     const double  T = hyp->GetTotalThickness();
     const double  f = hyp->GetStretchFactor();
@@ -257,35 +255,6 @@ namespace
     for ( double h = h0 * f; (int)vlH.size() < N-1; h *= f )
       vlH.push_back( h + vlH.back() );
     vlH.push_back( T );
-
-
-    TopTools_IndexedMapOfShape faces;
-    TopExp::MapShapes( shape, TopAbs_FACE, faces );
-
-    if ( hyp->IsToIgnoreShapes() )
-    {
-      for ( int i = 1; i <= faces.Size(); ++i )
-        shapesWVL.insert( mesh->ShapeToIndex( faces( i )));
-
-      for ( TGeomID& sID : hyp->GetBndShapes() )
-        shapesWVL.erase( sID );
-    }
-    else
-    {
-      for ( TGeomID& sID : hyp->GetBndShapes() )
-        shapesWVL.insert( sID );
-    }
-
-    for ( TGeomID fID : shapesWVL )
-    {
-      const TopoDS_Shape & face = mesh->IndexToShape( fID );
-      for ( TopExp_Explorer exp( face, TopAbs_EDGE ); exp.More(); exp.Next() )
-        shapesWVL.insert( mesh->ShapeToIndex( exp.Current() ));
-      for ( TopExp_Explorer exp( face, TopAbs_VERTEX ); exp.More(); exp.Next() )
-        shapesWVL.insert( mesh->ShapeToIndex( exp.Current() ));
-    }
-
-    return !shapesWVL.empty();
   }
 
   //================================================================================
@@ -493,6 +462,75 @@ namespace
 
   //================================================================================
   /*!
+   * \brief Create faces from edges
+   *  \param [inout] theEOS - shape to treat
+   *  \param [inout] theMesh - offset mesh to fill in
+   *  \param [inout] theN2E - map of node to VLEdge
+   *  \param [inout] theFaceID - ID of WOVL FACE for new faces to set on
+   *  \return bool - ok
+   */
+  //================================================================================
+
+  bool makeFaces( VLEdgesOnShape & theEOS,
+                  SMESH_Mesh*      theMesh,
+                  TNode2VLEdge   & theN2E,
+                  const TGeomID    theFaceID)
+  {
+    SMESHDS_SubMesh* sm = theMesh->GetMeshDS()->MeshElements( theEOS._offsetShape );
+    if ( !sm || sm->NbElements() == 0 )
+      return true;
+
+    SMESH_MeshEditor editor( theMesh );
+    SMESH_MeshEditor::ElemFeatures elem2D( SMDSAbs_Face );
+
+    std::vector< const SMDS_MeshNode* > fNodes( 4 );
+    std::vector<const SMDS_MeshElement *> foundVolum;
+    std::vector< VLEdge*> edgesVec;
+    for ( SMDS_ElemIteratorPtr eIt = sm->GetElements(); eIt->more(); )
+    {
+      const SMDS_MeshElement* edge = eIt->next();
+      if ( edge->GetType() != SMDSAbs_Edge )
+        continue;
+
+      const int nbNodes = 2; //edge->NbCornerNodes();
+      edgesVec.resize( nbNodes );
+      fNodes.resize( nbNodes * 2 );
+      for ( int i = 0; i < nbNodes; ++i )
+      {
+        const SMDS_MeshNode* n = edge->GetNode( i );
+        if ( !theN2E.IsBound( n ))
+          return false;
+        edgesVec[ i ] = theN2E( n );
+      }
+      size_t nbFaces = edgesVec[0]->_nodes.size() - 1;
+      for ( size_t iF = 0; iF < nbFaces; ++iF )
+      {
+        fNodes[ 0 ] = edgesVec[ 0 ]->_nodes[ iF ].Node();
+        fNodes[ 1 ] = edgesVec[ 1 ]->_nodes[ iF ].Node();
+        fNodes[ 2 ] = edgesVec[ 1 ]->_nodes[ iF + 1 ].Node();
+        fNodes[ 3 ] = edgesVec[ 0 ]->_nodes[ iF + 1 ].Node();
+
+        if ( const SMDS_MeshElement* face = editor.AddElement( fNodes, elem2D ))
+        {
+          theMesh->GetMeshDS()->SetMeshElementOnShape( face, theFaceID );
+
+          if ( SMDS_Mesh::GetElementsByNodes( fNodes, foundVolum, SMDSAbs_Volume ))
+          {
+            TIDSortedElemSet faces = { face }, volumes = { foundVolum[0] };
+            editor.Reorient2DBy3D( faces, volumes, /*outside=*/true );
+          }
+        }
+      }
+      editor.ClearLastCreated();
+
+      // move the face to the top of prisms, on mesh boundary
+      //theMesh->GetMeshDS()->ChangeElementNodes( face, fNodes.data(), nbNodes );
+    }
+    return true;
+  }
+
+  //================================================================================
+  /*!
    * \brief Append the offset mesh to the initial one
    */
   //================================================================================
@@ -594,12 +632,13 @@ namespace
       const int nbNodes = offElem->NbCornerNodes();
       iniNodes.resize( nbNodes );
       iniNodesBnd.resize( nbNodes );
-      //edgesVec.resize( nbNodes );
       for ( int i = 0; i < nbNodes; ++i )
       {
         const SMDS_MeshNode* nOff = offElem->GetNode( i );
         const SMDS_MeshNode* nIni = initMDS->FindNode( nOff->GetID() + theNShift );
         iniNodes[ i ] = nIni;
+        if ( !theN2E.IsBound( nOff ))
+          break;
         VLEdge* vlEd = theN2E( nOff );
         const SMDS_MeshNode* nOffBnd = vlEd->_nodes.back().Node();
         const SMDS_MeshNode* nIniBnd = initMDS->FindNode( nOffBnd->GetID() + theNShift );
@@ -615,6 +654,80 @@ namespace
 
         if ( theEOS._toCheckCoinc )
           theNodesToCheckCoinc.insert( iniNodesBnd.begin(), iniNodesBnd.end() );
+      }
+    }
+    return;
+  }
+
+  //================================================================================
+  /*!
+   * \brief set elements of WOVL face to sub-meshes
+   *  \param [in] theEOS - vlEdges of a sub-shape
+   *  \param [inout] theMesh - the mesh
+   *  \param [in] theN2E - map of node to vlEdge
+   *  \param [in] theNShift - nb of nodes in the mesh before adding the offset mesh
+   */
+  //================================================================================
+
+  void setBnd2FVWL( VLEdgesOnShape &     theEOS,
+                    SMESH_Mesh*          theInitMesh,
+                    SMESH_Mesh*          theOffsMesh,
+                    //const TNode2VLEdge & theN2E,
+                    const smIdType       theNShift )
+  {
+    SMESHDS_Mesh* offsetMDS = theOffsMesh->GetMeshDS();
+    SMESHDS_Mesh*   initMDS = theInitMesh->GetMeshDS();
+
+    SMESHDS_SubMesh* sm = offsetMDS->MeshElements( theEOS._offsetShape );
+    if ( !sm || ( sm->NbElements() + sm->NbNodes() == 0 ))
+      return;
+
+    for ( SMDS_NodeIteratorPtr nIt = sm->GetNodes(); nIt->more(); )
+    {
+      const SMDS_MeshNode* offNode = nIt->next();
+      const SMDS_MeshNode* iniNode = initMDS->FindNode( offNode->GetID() + theNShift );
+      initMDS->UnSetNodeOnShape( iniNode );
+
+      switch( theEOS._initShape.ShapeType() ) {
+      case TopAbs_FACE:   initMDS->SetNodeOnFace( iniNode, TopoDS::Face( theEOS._initShape ));
+        break;
+      case TopAbs_EDGE:   initMDS->SetNodeOnEdge( iniNode, TopoDS::Edge( theEOS._initShape ));
+        break;
+      case TopAbs_VERTEX: initMDS->SetNodeOnVertex( iniNode, TopoDS::Vertex( theEOS._initShape ));
+        break;
+      default:;
+      }
+    }
+
+    std::vector< const SMDS_MeshNode* > iniNodes;
+    for ( SMDS_ElemIteratorPtr eIt = sm->GetElements(); eIt->more(); )
+    {
+      const SMDS_MeshElement* offElem = eIt->next();
+      // if ( offElem->GetType() != SMDSAbs_Face )
+      //   continue;
+
+      int nbNodes = offElem->NbCornerNodes();
+      iniNodes.resize( nbNodes );
+      for ( int i = 0; i < nbNodes; ++i )
+      {
+        const SMDS_MeshNode* nOff = offElem->GetNode( i );
+        const SMDS_MeshNode* nIni = initMDS->FindNode( nOff->GetID() + theNShift );
+        iniNodes[ i ] = nIni;
+      }
+      if ( const SMDS_MeshElement* iniElem = initMDS->FindElement( iniNodes ))
+      {
+        initMDS->UnSetElementOnShape( iniElem );
+        initMDS->SetMeshElementOnShape( iniElem, theEOS._initShapeID );
+
+        for ( const SMDS_MeshNode* n : iniNodes )
+          if ( n->GetPosition()->GetDim() == 3 )
+          {
+            initMDS->UnSetNodeOnShape( n );
+            if ( theEOS._initShape.ShapeType() == TopAbs_FACE )
+              initMDS->SetNodeOnFace( n, theEOS._initShapeID );
+            else
+              initMDS->SetNodeOnEdge( n, theEOS._initShapeID );
+          }
       }
     }
     return;
@@ -639,9 +752,50 @@ SMESH_Mesh* StdMeshers_Cartesian_VL::ViscousBuilder::MakeOffsetMesh()
  */
 //================================================================================
 
-StdMeshers_Cartesian_VL::ViscousBuilder::ViscousBuilder( const StdMeshers_ViscousLayers* hyp )
+StdMeshers_Cartesian_VL::ViscousBuilder::ViscousBuilder( const StdMeshers_ViscousLayers* hyp,
+                                                         const SMESH_Mesh &              mainMesh,
+                                                         const TopoDS_Shape &            mainShape)
   : _hyp( hyp ), _offsetMesh( new TmpMesh )
 {
+  // find shapes with viscous layers
+  TopTools_IndexedMapOfShape faces;
+  TopExp::MapShapes( mainShape, TopAbs_FACE, faces );
+  const SMESHDS_Mesh* iniMDS = mainMesh.GetMeshDS();
+
+  if ( hyp->IsToIgnoreShapes() )
+  {
+    for ( int i = 1; i <= faces.Size(); ++i )
+      _shapesWVL.insert( iniMDS->ShapeToIndex( faces( i )));
+
+    for ( TGeomID& sID : hyp->GetBndShapes() )
+      _shapesWVL.erase( sID );
+  }
+  else
+  {
+    for ( TGeomID& sID : hyp->GetBndShapes() )
+      _shapesWVL.insert( sID );
+  }
+
+  for ( TGeomID fID : _shapesWVL )
+  {
+    const TopoDS_Shape & face = iniMDS->IndexToShape( fID );
+    for ( TopExp_Explorer exp( face, TopAbs_EDGE ); exp.More(); exp.Next() )
+      _shapesWVL.insert( iniMDS->ShapeToIndex( exp.Current() ));
+    for ( TopExp_Explorer exp( face, TopAbs_VERTEX ); exp.More(); exp.Next() )
+      _shapesWVL.insert( iniMDS->ShapeToIndex( exp.Current() ));
+  }
+
+  // find EDGE and adjacent FACEs w/o VL
+  for ( int i = 1; i <= faces.Size(); ++i )
+  {
+    const TopoDS_Shape& face = faces( i );
+    TGeomID fID = iniMDS->ShapeToIndex( face );
+    if ( _shapesWVL.count( fID ))
+      continue;
+    for ( TopExp_Explorer exp( face, TopAbs_EDGE ); exp.More(); exp.Next() )
+      _edge2facesWOVL[ iniMDS->ShapeToIndex( exp.Current() )].push_back( fID );
+  }
+  return;
 }
 
 //================================================================================
@@ -659,6 +813,7 @@ StdMeshers_Cartesian_VL::ViscousBuilder::~ViscousBuilder()
 /*!
  * \brief Create an offset shape from a given one
  *  \param [in] theShape - input shape
+ *  \param [in] theMesh - main mesh
  *  \param [out] theError - error description
  *  \return TopoDS_Shape - result offset shape
  */
@@ -666,32 +821,30 @@ StdMeshers_Cartesian_VL::ViscousBuilder::~ViscousBuilder()
 
 TopoDS_Shape
 StdMeshers_Cartesian_VL::ViscousBuilder::MakeOffsetShape(const TopoDS_Shape & theShape,
+                                                         SMESH_Mesh &         theMesh,
                                                          std::string &        theError )
 {
-  // TopoDS_Shape S = theShape;
-  //     BRep_Builder aBuilder;
-  //     TopoDS_Compound comp;
-  //     aBuilder.MakeCompound( comp );
-  // for ( TopExp_Explorer e( theShape, TopAbs_FACE); e.More(); e.Next() )
-  // {
-  //   aBuilder.Add( comp, e.Current());
-  //   e.Next();
-  //   if ( !e.More() )
-  //     break;
-  // }
-  // S = comp;
-
   double offset = -_hyp->GetTotalThickness();
   double    tol = Precision::Confusion();
   _makeOffset.Initialize( theShape, offset, tol, BRepOffset_Skin, /*Intersection=*/false,
                           /*selfInter=*/false, GeomAbs_Intersection );
+  // exclude inlet FACEs
+  SMESHDS_Mesh* meshDS = theMesh.GetMeshDS();
+  for ( TopExp_Explorer fEx( theShape, TopAbs_FACE ); fEx.More(); fEx.Next() )
+  {
+    TGeomID fID = meshDS->ShapeToIndex( fEx.Current() );
+    if ( !_shapesWVL.count( fID ))
+      _makeOffset.SetOffsetOnFace( TopoDS::Face( fEx.Current()), 0 );
+  }
+
   _makeOffset.MakeOffsetShape();
   if ( _makeOffset.IsDone() )
   {
     _offsetShape = _makeOffset.Shape();
+    SMESH_MesherHelper::WriteShape( _offsetShape );////
+
     _offsetMesh->ShapeToMesh( _offsetShape );
     _offsetMesh->GetSubMesh( _offsetShape )->DependsOn();
-    //SMESH_MesherHelper::WriteShape( _offsetShape );
     return _offsetShape;
   }
 
@@ -752,11 +905,9 @@ bool StdMeshers_Cartesian_VL::ViscousBuilder::MakeViscousLayers( SMESH_Mesh &   
   SMESHDS_Mesh*   initMDS = theMesh.GetMeshDS();
   offsetMDS->SetAllCellsNotMarked();
 
-  // Compute heights of viscous layers and finds FACEs with VL
+  // Compute heights of viscous layers
   std::vector< double > vlH;
-  std::set< int > shapesWVL;
-  if ( !computeVLHeight( _hyp, initMDS, theShape, vlH, shapesWVL ))
-    return false;
+  computeVLHeight( _hyp, vlH );
 
   std::vector< VLEdgesOnShape > edgesOnShape;
   edgesOnShape.reserve( offsetMDS->MaxShapeIndex() + 1 );
@@ -776,7 +927,10 @@ bool StdMeshers_Cartesian_VL::ViscousBuilder::MakeViscousLayers( SMESH_Mesh &   
       EOS._initShape    = shapes( i );
       EOS._offsetShape  = getOffsetSubShape( EOS._initShape );
       EOS._initShapeID  = initMDS->ShapeToIndex( EOS._initShape );
+      EOS._hasVL        = _shapesWVL.count( EOS._initShapeID );
       EOS._toCheckCoinc = false;
+      if ( !EOS._hasVL )
+        continue;
 
       // project boundary nodes of offset mesh to boundary of init mesh
       // (new nodes are created in the offset mesh)
@@ -809,11 +963,11 @@ bool StdMeshers_Cartesian_VL::ViscousBuilder::MakeViscousLayers( SMESH_Mesh &   
       // create nodes of layers
       if ( _hyp->GetNumberLayers() > 1 )
       {
-        if ( shapesWVL.count( EOS._initShapeID ))
-          for ( size_t i = 0; i < EOS._edges.size(); ++i )
-          {
-            divideVLEdge( &EOS._edges[ i ], vlH, offsetMDS );
-          }
+        //if ( _shapesWVL.count( EOS._initShapeID ))
+        for ( size_t i = 0; i < EOS._edges.size(); ++i )
+        {
+          divideVLEdge( &EOS._edges[ i ], vlH, offsetMDS );
+        }
       }
     } // loop on shapes
   } // loop on shape types
@@ -823,10 +977,29 @@ bool StdMeshers_Cartesian_VL::ViscousBuilder::MakeViscousLayers( SMESH_Mesh &   
   for ( size_t i = 0; i < edgesOnShape.size(); ++i )
   {
     VLEdgesOnShape& EOS = edgesOnShape[ i ];
-    if ( EOS._initShape.ShapeType() == TopAbs_FACE )
+    if ( EOS._initShape.ShapeType() == TopAbs_FACE && EOS._hasVL )
     {
       if ( !makePrisms( EOS, _offsetMesh, n2e ))
         prismsOk = false;
+    }
+  }
+  if ( prismsOk )
+  {
+    // create faces on FACEs WOVL
+    for ( size_t i = 0; i < edgesOnShape.size(); ++i )
+    {
+      VLEdgesOnShape& EOS = edgesOnShape[ i ];
+      if ( EOS._initShape.ShapeType() == TopAbs_EDGE && EOS._hasVL )
+      {
+        auto e2f = _edge2facesWOVL.find( EOS._initShapeID );
+        if ( e2f != _edge2facesWOVL.end() && !e2f->second.empty() )
+        {
+          TopoDS_Shape f = initMDS->IndexToShape( e2f->second[0] );
+          TopoDS_Shape f2 = getOffsetSubShape( f );
+          //cout << e2f->second[0] << " OFF " << offsetMDS->ShapeToIndex( f2 ) << endl;
+          makeFaces( EOS, _offsetMesh, n2e, offsetMDS->ShapeToIndex( f2 ) );
+        }
+      }
     }
   }
 
@@ -854,7 +1027,10 @@ bool StdMeshers_Cartesian_VL::ViscousBuilder::MakeViscousLayers( SMESH_Mesh &   
   for ( size_t i = 0; i < edgesOnShape.size(); ++i )
   {
     VLEdgesOnShape& EOS = edgesOnShape[ i ];
-    setBnd2Sub( EOS, &theMesh, _offsetMesh, n2e, nShift, nodesToCheckCoinc );
+    if ( EOS._hasVL )
+      setBnd2Sub( EOS, &theMesh, _offsetMesh, n2e, nShift, nodesToCheckCoinc );
+    else
+      setBnd2FVWL( EOS, &theMesh, _offsetMesh, nShift );
   }
 
   // merge coincident nodes

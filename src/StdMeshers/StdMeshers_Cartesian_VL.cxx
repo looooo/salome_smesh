@@ -1036,7 +1036,7 @@ bool StdMeshers_Cartesian_VL::ViscousBuilder::MakeViscousLayers( SMESH_Mesh &   
   // merge coincident nodes
   SMESH_MeshEditor editor( &theMesh );
   SMESH_MeshEditor::TListOfListOfNodes nodesToMerge;
-  editor.FindCoincidentNodes( nodesToCheckCoinc, vlH[0]/20., nodesToMerge, false );
+  editor.FindCoincidentNodes( nodesToCheckCoinc, vlH[0]/50., nodesToMerge, false );
   editor.MergeNodes( nodesToMerge );
 
   // create a group

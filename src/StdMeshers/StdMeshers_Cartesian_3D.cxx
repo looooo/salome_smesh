@@ -2753,6 +2753,7 @@ namespace
       // 1) add this->_eIntPoints to _Face::_eIntNodes
       // 2) fill _intNodes and _vIntNodes
       //
+      const double tol2 = _grid->_tol * _grid->_tol * 4;
       const double tol2 = _grid->_tol * _grid->_tol;
       int facets[3], nbFacets, subEntity;
 

@@ -458,7 +458,7 @@ namespace {
       initialized = true;
       filteredArgs.push_back( "SMESH.MED_V2_1" );
       filteredArgs.push_back( "SMESH.MED_V2_2" );
-    }  
+    }
     return std::find( filteredArgs.begin(), filteredArgs.end(), theArg ) != filteredArgs.end();
   }
 }
@@ -1827,7 +1827,7 @@ _pyMesh::_pyMesh(const Handle(_pyCommand) theCreationCmd, const _pyID& meshId):
     const _pyID& meshID = theCreationCmd->GetObject();
     addFatherMesh( meshID );
   }
-    
+
   // convert my creation command
   Handle(_pyCommand) creationCmd = GetCreationCmd();
   creationCmd->SetObject( SMESH_2smeshpy::SmeshpyName() );
@@ -2211,7 +2211,7 @@ bool _pyMesh::NeedMeshAccess( const Handle(_pyCommand)& theCommand )
         "GetElemNode","IsMediumNode","IsMediumNodeOfAnyElem","ElemNbEdges","ElemNbFaces",
         "GetElemFaceNodes", "GetFaceNormal", "FindElementByNodes",
         "IsPoly","IsQuadratic","BaryCenter","GetHypothesisList", "SetAutoColor", "GetAutoColor",
-        "Clear", "ConvertToStandalone", "GetMeshOrder", "SetMeshOrder"
+        "Clear", "ConvertToStandalone", "GetMeshOrder", "SetMeshOrder", "SetNbThreads"
         ,"" }; // <- mark of end
     sameMethods.Insert( names );
   }
@@ -2419,7 +2419,7 @@ void _pyMesh::ClearCommands()
   list< Handle(_pySubMesh) >::iterator sm = mySubmeshes.begin();
   for ( ; sm != mySubmeshes.end(); ++sm )
     (*sm)->ClearCommands();
-  
+
   list< Handle(_pyGroup) >::iterator gr = myGroups.begin();
   for ( ; gr != myGroups.end(); ++gr )
     (*gr)->ClearCommands();
@@ -2579,7 +2579,7 @@ void _pyMeshEditor::Process( const Handle(_pyCommand)& theCommand)
       // 1. Remove "MakeGroups" from the Command
       TCollection_AsciiString aMethod = theCommand->GetMethod();
       int nbArgsToAdd = diffLastTwoArgsMethods.Contains(aMethod) ? 2 : 1;
-      
+
       if(is0DmethObj)
         pos = pos-2;  //Remove "0D" from the Command too
       aMethod.Trunc(pos-1);
@@ -3410,7 +3410,7 @@ void _pyLayerDistributionHypo::Flush()
   list< Handle(_pyCommand) >::iterator cmd = myArgCommands.begin();
   _pyID prevNewName;
   for ( cmd = myArgCommands.begin(); cmd != myArgCommands.end(); ++cmd )
-  {    
+  {
     const _pyID& hyp1dID = (*cmd)->GetArg( 1 );
     if ( hyp1dID.IsEmpty() ) continue;
 
@@ -3434,7 +3434,7 @@ void _pyLayerDistributionHypo::Flush()
       }
       newName += "_Distribution";
       prevNewName = newName;
-    
+
       hyp1d->GetCreationCmd()->SetResultValue( newName );
     }
     list< Handle(_pyCommand) >& cmds = theGen->GetCommands();
@@ -4631,7 +4631,7 @@ _pyGroup::_pyGroup(const Handle(_pyCommand)& theCreationCmd, const _pyID & id)
 
 //================================================================================
 /*!
- * \brief Check if "[ group1, group2 ] = mesh.GetGroups()" creation command 
+ * \brief Check if "[ group1, group2 ] = mesh.GetGroups()" creation command
  *        can be cleared
  */
 //================================================================================
@@ -4802,7 +4802,7 @@ void _pyFilter::Process( const Handle(_pyCommand)& theCommand)
 
   if ( !myNewID.IsEmpty() )
     theCommand->SetObject( myNewID );
-    
+
   // Convert the following set of commands into smesh.GetFilterFromCriteria(criteria)
   // aFilter0x2aaab0487080 = aFilterManager.CreateFilter()
   // aFilter0x2aaab0487080.SetCriteria(aCriteria)
@@ -4845,7 +4845,7 @@ void _pyFilter::Process( const Handle(_pyCommand)& theCommand)
 void _pyFilter::Flush()
 {
   if ( myNewID.IsEmpty() ) return;
-  
+
   list< Handle(_pyCommand) >::iterator cmd = myArgCmds.begin();
   for ( ; cmd != myArgCmds.end(); ++cmd )
     if ( !(*cmd)->IsEmpty() )
@@ -4982,7 +4982,7 @@ _pyHypothesisReader::_pyHypothesisReader()
     //          ...
     //          dim="2">
     //   <python-wrap>
-    //     <accumulative-methods> 
+    //     <accumulative-methods>
     //       SetEnforcedVertex,
     //       SetEnforcedVertexNamed
     //     </accumulative-methods>

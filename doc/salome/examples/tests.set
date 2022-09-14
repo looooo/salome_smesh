@@ -51,6 +51,7 @@ SET(BAD_TESTS
   blocFissure_05_without_session.py
   blocFissure_06_without_session.py
   blocFissure_07_without_session.py
+  netgen_runner.py
   )
 
 IF(NOT WIN32)

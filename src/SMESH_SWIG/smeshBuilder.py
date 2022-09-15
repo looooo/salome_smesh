@@ -1621,7 +1621,7 @@ class Mesh(metaclass = MeshMeta):
         Destructor. Clean-up resources
         """
         if self.mesh:
-            #self.mesh.UnRegister()
+            self.mesh.UnRegister()
             pass
         pass
 

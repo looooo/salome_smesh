@@ -6179,7 +6179,7 @@ CORBA::Long  SMESH_Gen_i::GetObjectId(CORBA::Object_ptr theObject)
 {
   if ( myStudyContext && !CORBA::is_nil( theObject )) {
     CORBA::String_var iorString = GetORB()->object_to_string( theObject );
-    string iorStringCpp(iorString.in()); 
+    string iorStringCpp(iorString.in());
     return myStudyContext->findId( iorStringCpp );
   }
   return 0;
@@ -6508,8 +6508,6 @@ CORBA::Boolean SMESH_Gen_i::IsApplicable ( const char*           theAlgoType,
 
   SMESH_CATCH( SMESH::doNothing );
 
-#ifdef _DEBUG_
-  cout << "SMESH_Gen_i::IsApplicable(): exception in " << ( theAlgoType ? theAlgoType : "") << endl;
-#endif
+  MESSAGE("SMESH_Gen_i::IsApplicable(): exception in " << ( theAlgoType ? theAlgoType : ""));
   return true;
 }

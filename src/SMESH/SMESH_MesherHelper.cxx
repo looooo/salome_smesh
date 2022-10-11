@@ -4996,10 +4996,9 @@ void SMESH_MesherHelper::FixQuadraticElements(SMESH_ComputeErrorPtr& compError,
       }
     }
     // fix nodes on geom faces
-#ifdef _DEBUG_
-    int nbfaces = nbSolids;
-    nbfaces = faces.Extent(); /*avoid "unused varianbles": */ nbfaces++, nbfaces--;
-#endif
+
+    int nbfaces = faces.Extent();
+    
     for ( TopTools_MapIteratorOfMapOfShape fIt( faces ); fIt.More(); fIt.Next() ) {
       MESSAGE("FIX FACE " << nbfaces-- << " #" << GetMeshDS()->ShapeToIndex(fIt.Key()));
       MSG("FIX FACE " << nbfaces-- << " #" << GetMeshDS()->ShapeToIndex(fIt.Key()));

@@ -935,7 +935,7 @@ SMESH_Gen_i::PublishHypothesis (SMESH::SMESH_Hypothesis_ptr theHyp,
 
   SetName( aHypSO, theName, hypType.in() );
 
-  if(MYDEBUG) MESSAGE("PublishHypothesis--END")
+  if(MYDEBUG) MESSAGE("PublishHypothesis--END");
   return aHypSO._retn();
 }
 
@@ -1097,7 +1097,7 @@ SALOMEDS::SObject_ptr
 SMESH_Gen_i::GetMeshOrSubmeshByShape (SMESH::SMESH_Mesh_ptr theMesh,
                                       GEOM::GEOM_Object_ptr theShape)
 {
-  if(MYDEBUG) MESSAGE("GetMeshOrSubmeshByShape")
+  if(MYDEBUG) MESSAGE("GetMeshOrSubmeshByShape");
   SALOMEDS::SObject_wrap aMeshOrSubMesh;
   if (theMesh->_is_nil() || ( theShape->_is_nil() && theMesh->HasShapeToMesh()))
     return aMeshOrSubMesh._retn();
@@ -1121,7 +1121,7 @@ SMESH_Gen_i::GetMeshOrSubmeshByShape (SMESH::SMESH_Mesh_ptr theMesh,
         aMeshOrSubMesh = ObjectToSObject( aSubMesh );
     }
   }
-  if(MYDEBUG) MESSAGE("GetMeshOrSubmeshByShape--END")
+  if(MYDEBUG) MESSAGE("GetMeshOrSubmeshByShape--END");
   return aMeshOrSubMesh._retn();
 }
 
@@ -1134,7 +1134,7 @@ bool SMESH_Gen_i::AddHypothesisToShape(SMESH::SMESH_Mesh_ptr       theMesh,
                                        GEOM::GEOM_Object_ptr       theShape,
                                        SMESH::SMESH_Hypothesis_ptr theHyp)
 {
-  if(MYDEBUG) MESSAGE("AddHypothesisToShape")
+  if(MYDEBUG) MESSAGE("AddHypothesisToShape");
   if (theMesh->_is_nil() ||
       theHyp->_is_nil() || (theShape->_is_nil()
                             && theMesh->HasShapeToMesh()) )
@@ -1175,7 +1175,7 @@ bool SMESH_Gen_i::AddHypothesisToShape(SMESH::SMESH_Mesh_ptr       theMesh,
 
   addReference( AHR, theHyp );
 
-  if(MYDEBUG) MESSAGE("AddHypothesisToShape--END")
+  if(MYDEBUG) MESSAGE("AddHypothesisToShape--END");
   return true;
 }
 

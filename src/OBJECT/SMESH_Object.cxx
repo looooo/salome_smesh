@@ -855,7 +855,7 @@ void SMESH_SubMeshObj::UpdateFunctor( const SMESH::Controls::FunctorPtr& theFunc
 //=================================================================================
 bool SMESH_SubMeshObj::Update( int theIsClear )
 {
-  if ( MYDEBUG ) MESSAGE("SMESH_SubMeshObj::Update " << this)
+  if ( MYDEBUG ) MESSAGE("SMESH_SubMeshObj::Update " << this);
   bool changed = myMeshObj->Update( theIsClear );
   buildPrs(true);
   return changed;

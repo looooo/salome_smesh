@@ -6125,7 +6125,7 @@ char* SMESH_Gen_i::IORToLocalPersistentID( SALOMEDS::SObject_ptr /*theSObject*/,
   if ( myStudyContext && strcmp( IORString, "" ) != 0 ) {
     int anId = myStudyContext->findId( IORString );
     if ( anId ) {
-      if(MYDEBUG) MESSAGE( "VSR " << anId )
+      if(MYDEBUG) MESSAGE( "VSR " << anId );
       char strId[ 20 ];
       sprintf( strId, "%d", anId );
       return  CORBA::string_dup( strId );

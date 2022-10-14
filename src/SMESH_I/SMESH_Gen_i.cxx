@@ -154,12 +154,6 @@ using SMESH::TVar;
 
 #define NUM_TMP_FILES 2
 
-#ifdef _DEBUG_
-static int MYDEBUG = 0;
-#else
-static int MYDEBUG = 0;
-#endif
-
 // Static variables definition
 GEOM::GEOM_Gen_var      SMESH_Gen_i::myGeomGen;
 CORBA::ORB_var          SMESH_Gen_i::myOrb;
@@ -448,7 +442,7 @@ GenericHypothesisCreator_i* SMESH_Gen_i::getHypothesisCreator(const char* theHyp
   thePlatformLibName = aPlatformLibName;
 
   Unexpect aCatch(SALOME_SalomeException);
-  if(MYDEBUG) MESSAGE( "Create Hypothesis <" << theHypName << "> from " << aPlatformLibName);
+  MESSAGE( "Create Hypothesis <" << theHypName << "> from " << aPlatformLibName);
 
   typedef GenericHypothesisCreator_i* (*GetHypothesisCreator)(const char* );
   GenericHypothesisCreator_i* aCreator;
@@ -458,7 +452,7 @@ GenericHypothesisCreator_i* SMESH_Gen_i::getHypothesisCreator(const char* theHyp
     if (myHypCreatorMap.find(string(theHypName)) == myHypCreatorMap.end())
     {
       // load plugin library
-      if(MYDEBUG) MESSAGE("Loading server meshers plugin library ...");
+      MESSAGE("Loading server meshers plugin library ...");
 #ifdef WIN32
 #  ifdef UNICODE
       const wchar_t* path = Kernel_Utils::decode_s(aPlatformLibName);
@@ -484,7 +478,7 @@ GenericHypothesisCreator_i* SMESH_Gen_i::getHypothesisCreator(const char* theHyp
       }
 
       // get method, returning hypothesis creator
-      if(MYDEBUG) MESSAGE("Find GetHypothesisCreator() method ...");
+      MESSAGE("Find GetHypothesisCreator() method ...");
       GetHypothesisCreator procHandle =
         (GetHypothesisCreator)GetProc( libHandle, "GetHypothesisCreator" );
       if (!procHandle)
@@ -495,7 +489,7 @@ GenericHypothesisCreator_i* SMESH_Gen_i::getHypothesisCreator(const char* theHyp
       }
 
       // get hypothesis creator
-      if(MYDEBUG) MESSAGE("Get Hypothesis Creator for " << theHypName);
+      MESSAGE("Get Hypothesis Creator for " << theHypName);
       aCreator = procHandle(theHypName);
       if (!aCreator)
       {
@@ -546,8 +540,7 @@ SMESH::SMESH_Hypothesis_ptr SMESH_Gen_i::createHypothesis(const char* theHypName
     // activate the CORBA servant of hypothesis
     hypothesis_i = myHypothesis_i->_this();
     int nextId = RegisterObject( hypothesis_i );
-    if(MYDEBUG) { MESSAGE( "Add hypo to map with id = "<< nextId ); }
-    else        { (void)nextId; } // avoid "unused variable" warning in release mode
+    MESSAGE( "Add hypo to map with id = "<< nextId );
   }
   return hypothesis_i._retn();
 }
@@ -563,21 +556,21 @@ SMESH::SMESH_Hypothesis_ptr SMESH_Gen_i::createHypothesis(const char* theHypName
 SMESH::SMESH_Mesh_ptr SMESH_Gen_i::createMesh()
 {
   Unexpect aCatch(SALOME_SalomeException);
-  if(MYDEBUG) MESSAGE( "SMESH_Gen_i::createMesh" );
+  MESSAGE( "SMESH_Gen_i::createMesh" );
 
   // Get or create the GEOM_Client instance
   try {
     // create a new mesh object servant, store it in a map in study context
     SMESH_Mesh_i* meshServant = new SMESH_Mesh_i( GetPOA(), this );
     // create a new mesh object
-    if(MYDEBUG) MESSAGE("myIsEmbeddedMode " << myIsEmbeddedMode);
+    MESSAGE("myIsEmbeddedMode " << myIsEmbeddedMode);
     meshServant->SetImpl( myGen.CreateMesh( myIsEmbeddedMode ));
 
     // activate the CORBA servant of Mesh
     SMESH::SMESH_Mesh_var mesh = SMESH::SMESH_Mesh::_narrow( meshServant->_this() );
     int nextId = RegisterObject( mesh );
-    if(MYDEBUG) { MESSAGE( "Add mesh to map with id = "<< nextId); }
-    else        { (void)nextId; } // avoid "unused variable" warning in release mode
+    MESSAGE( "Add mesh to map with id = "<< nextId);
+
     return mesh._retn();
   }
   catch (SALOME_Exception& S_ex) {
@@ -1193,7 +1186,7 @@ char* SMESH_Gen_i::GetOption(const char* name)
 SMESH::SMESH_Mesh_ptr SMESH_Gen_i::CreateMesh( GEOM::GEOM_Object_ptr theShapeObject )
 {
   Unexpect aCatch(SALOME_SalomeException);
-  if(MYDEBUG) MESSAGE( "SMESH_Gen_i::CreateMesh" );
+  MESSAGE( "SMESH_Gen_i::CreateMesh" );
   // create mesh
   SMESH::SMESH_Mesh_var mesh = this->createMesh();
   // set shape
@@ -1227,7 +1220,7 @@ SMESH::SMESH_Mesh_ptr SMESH_Gen_i::CreateMesh( GEOM::GEOM_Object_ptr theShapeObj
 SMESH::SMESH_Mesh_ptr SMESH_Gen_i::CreateEmptyMesh()
 {
   Unexpect aCatch(SALOME_SalomeException);
-  if(MYDEBUG) MESSAGE( "SMESH_Gen_i::CreateMesh" );
+  MESSAGE( "SMESH_Gen_i::CreateMesh" );
   // create mesh
   SMESH::SMESH_Mesh_var mesh = this->createMesh();
 
@@ -1579,7 +1572,7 @@ CORBA::Boolean SMESH_Gen_i::IsReadyToCompute( SMESH::SMESH_Mesh_ptr theMesh,
                                               GEOM::GEOM_Object_ptr theShapeObject )
 {
   Unexpect aCatch(SALOME_SalomeException);
-  if(MYDEBUG) MESSAGE( "SMESH_Gen_i::IsReadyToCompute" );
+  MESSAGE( "SMESH_Gen_i::IsReadyToCompute" );
 
   if ( CORBA::is_nil( theShapeObject ) )
     THROW_SALOME_CORBA_EXCEPTION( "bad shape object reference",
@@ -1653,7 +1646,7 @@ SMESH::compute_error_array* SMESH_Gen_i::GetComputeErrors( SMESH::SMESH_Mesh_ptr
                                                            GEOM::GEOM_Object_ptr theSubObject )
 {
   Unexpect aCatch(SALOME_SalomeException);
-  if(MYDEBUG) MESSAGE( "SMESH_Gen_i::GetComputeErrors()" );
+  MESSAGE( "SMESH_Gen_i::GetComputeErrors()" );
 
   if ( CORBA::is_nil( theSubObject ) && theMesh->HasShapeToMesh())
     THROW_SALOME_CORBA_EXCEPTION( "bad shape object reference", SALOME::BAD_PARAM );
@@ -1727,7 +1720,7 @@ SMESH_Gen_i::GetBadInputElements( SMESH::SMESH_Mesh_ptr theMesh,
                                   CORBA::Short          theSubShapeID )
 {
   Unexpect aCatch(SALOME_SalomeException);
-  if(MYDEBUG) MESSAGE( "SMESH_Gen_i::GetBadInputElements()" );
+  MESSAGE( "SMESH_Gen_i::GetBadInputElements()" );
 
   if ( CORBA::is_nil( theMesh ) )
     THROW_SALOME_CORBA_EXCEPTION( "bad Mesh reference",SALOME::BAD_PARAM );
@@ -1848,7 +1841,7 @@ SMESH::algo_error_array* SMESH_Gen_i::GetAlgoState( SMESH::SMESH_Mesh_ptr theMes
                                                     GEOM::GEOM_Object_ptr theSubObject )
 {
   Unexpect aCatch(SALOME_SalomeException);
-  if(MYDEBUG) MESSAGE( "SMESH_Gen_i::GetAlgoState()" );
+  MESSAGE( "SMESH_Gen_i::GetAlgoState()" );
 
   if ( CORBA::is_nil( theSubObject ) && theMesh->HasShapeToMesh())
     THROW_SALOME_CORBA_EXCEPTION( "bad shape object reference", SALOME::BAD_PARAM );
@@ -1909,7 +1902,7 @@ SMESH_Gen_i::GetSubShapesId( GEOM::GEOM_Object_ptr      theMainShapeObject,
                              const SMESH::object_array& theListOfSubShapeObject )
 {
   Unexpect aCatch(SALOME_SalomeException);
-  if(MYDEBUG) MESSAGE( "SMESH_Gen_i::GetSubShapesId" );
+  MESSAGE( "SMESH_Gen_i::GetSubShapesId" );
 
   SMESH::long_array_var shapesId = new SMESH::long_array;
   set<int> setId;
@@ -1936,19 +1929,19 @@ SMESH_Gen_i::GetSubShapesId( GEOM::GEOM_Object_ptr      theMainShapeObject,
       {
         const TopoDS_Face& F = TopoDS::Face(exp.Current());
         setId.insert(myIndexToShape.FindIndex(F));
-        if(MYDEBUG) SCRUTE(myIndexToShape.FindIndex(F));
+        SCRUTE(myIndexToShape.FindIndex(F));
       }
       for (TopExp_Explorer exp(locShape,TopAbs_EDGE); exp.More(); exp.Next())
       {
         const TopoDS_Edge& E = TopoDS::Edge(exp.Current());
         setId.insert(myIndexToShape.FindIndex(E));
-        if(MYDEBUG) SCRUTE(myIndexToShape.FindIndex(E));
+        SCRUTE(myIndexToShape.FindIndex(E));
       }
       for (TopExp_Explorer exp(locShape,TopAbs_VERTEX); exp.More(); exp.Next())
       {
         const TopoDS_Vertex& V = TopoDS::Vertex(exp.Current());
         setId.insert(myIndexToShape.FindIndex(V));
-        if(MYDEBUG) SCRUTE(myIndexToShape.FindIndex(V));
+        SCRUTE(myIndexToShape.FindIndex(V));
       }
     }
     shapesId->length(setId.size());
@@ -1956,9 +1949,9 @@ SMESH_Gen_i::GetSubShapesId( GEOM::GEOM_Object_ptr      theMainShapeObject,
     int i=0;
     for (iind = setId.begin(); iind != setId.end(); iind++)
     {
-      if(MYDEBUG) SCRUTE((*iind));
+      SCRUTE((*iind));
       shapesId[i] = (*iind);
-      if(MYDEBUG) SCRUTE(shapesId[i]);
+      SCRUTE(shapesId[i]);
       i++;
     }
   }
@@ -1983,7 +1976,7 @@ CORBA::Boolean SMESH_Gen_i::Compute( SMESH::SMESH_Mesh_ptr theMesh,
 {
   //MEMOSTAT;
   Unexpect aCatch(SALOME_SalomeException);
-  if(MYDEBUG) MESSAGE( "SMESH_Gen_i::Compute" );
+  MESSAGE( "SMESH_Gen_i::Compute" );
 
   if ( CORBA::is_nil( theShapeObject ) && theMesh->HasShapeToMesh())
     THROW_SALOME_CORBA_EXCEPTION( "bad shape object reference",
@@ -2078,7 +2071,7 @@ SMESH::MeshPreviewStruct* SMESH_Gen_i::Precompute( SMESH::SMESH_Mesh_ptr theMesh
                                                    SMESH::long_array&    theShapesId)
 {
   Unexpect aCatch(SALOME_SalomeException);
-  if(MYDEBUG) MESSAGE( "SMESH_Gen_i::Precompute" );
+  MESSAGE( "SMESH_Gen_i::Precompute" );
 
   if ( CORBA::is_nil( theShapeObject ) && theMesh->HasShapeToMesh())
     THROW_SALOME_CORBA_EXCEPTION( "bad shape object reference",
@@ -2264,7 +2257,7 @@ SMESH::smIdType_array* SMESH_Gen_i::Evaluate(SMESH::SMESH_Mesh_ptr theMesh,
                                              GEOM::GEOM_Object_ptr theShapeObject)
 {
   Unexpect aCatch(SALOME_SalomeException);
-  if(MYDEBUG) MESSAGE( "SMESH_Gen_i::Evaluate" );
+  MESSAGE( "SMESH_Gen_i::Evaluate" );
 
   if ( CORBA::is_nil( theShapeObject ) && theMesh->HasShapeToMesh())
     THROW_SALOME_CORBA_EXCEPTION( "bad shape object reference", SALOME::BAD_PARAM );
@@ -5087,7 +5080,7 @@ SALOMEDS::TMPFile* SMESH_Gen_i::Save( SALOMEDS::SComponent_ptr theComponent,
 SALOMEDS::TMPFile* SMESH_Gen_i::SaveASCII( SALOMEDS::SComponent_ptr theComponent,
                                            const char*              theURL,
                                            bool                     isMultiFile ) {
-  if(MYDEBUG) MESSAGE( "SMESH_Gen_i::SaveASCII" );
+  MESSAGE( "SMESH_Gen_i::SaveASCII" );
   SALOMEDS::TMPFile_var aStreamFile = Save( theComponent, theURL, isMultiFile );
   return aStreamFile._retn();
 
@@ -5227,7 +5220,7 @@ bool SMESH_Gen_i::Load( SALOMEDS::SComponent_ptr theComponent,
               size = aDataset->GetSize();
               char* libname_str = new char[ size ];
               aDataset->ReadFromDisk( libname_str );
-              if(MYDEBUG) SCRUTE( libname_str );
+              SCRUTE( libname_str );
               libname = string( libname_str );
               delete [] libname_str;
               aDataset->CloseOnDisk();
@@ -5249,7 +5242,7 @@ bool SMESH_Gen_i::Load( SALOMEDS::SComponent_ptr theComponent,
 
           // --> restore hypothesis from data
           if ( id > 0 && !hypname.empty()/* && !hypdata.empty()*/ ) { // VSR : persistent data can be empty
-            if(MYDEBUG) MESSAGE("VSR - load hypothesis : id = " << id <<
+            MESSAGE("VSR - load hypothesis : id = " << id <<
                                 ", name = " << hypname.c_str() << ", persistent string = " << hypdata.c_str());
             SMESH::SMESH_Hypothesis_var myHyp;
 
@@ -5269,7 +5262,7 @@ bool SMESH_Gen_i::Load( SALOMEDS::SComponent_ptr theComponent,
               myStudyContext->mapOldToNew( id, newId );
             }
             else
-              if(MYDEBUG) MESSAGE( "VSR - SMESH_Gen::Load - can't get servant" );
+              MESSAGE( "VSR - SMESH_Gen::Load - can't get servant" );
           }
         }
       }
@@ -5326,7 +5319,7 @@ bool SMESH_Gen_i::Load( SALOMEDS::SComponent_ptr theComponent,
               size = aDataset->GetSize();
               char* libname_str = new char[ size ];
               aDataset->ReadFromDisk( libname_str );
-              if(MYDEBUG) SCRUTE( libname_str );
+              SCRUTE( libname_str );
               libname = string( libname_str );
               delete [] libname_str;
               aDataset->CloseOnDisk();
@@ -5338,7 +5331,7 @@ bool SMESH_Gen_i::Load( SALOMEDS::SComponent_ptr theComponent,
               size = aDataset->GetSize();
               char* hypdata_str = new char[ size ];
               aDataset->ReadFromDisk( hypdata_str );
-              if(MYDEBUG) SCRUTE( hypdata_str );
+              SCRUTE( hypdata_str );
               hypdata = string( hypdata_str );
               delete [] hypdata_str;
               aDataset->CloseOnDisk();
@@ -5349,7 +5342,7 @@ bool SMESH_Gen_i::Load( SALOMEDS::SComponent_ptr theComponent,
 
           // --> restore algorithm from data
           if ( id > 0 && !hypname.empty()/* && !hypdata.empty()*/ ) { // VSR : persistent data can be empty
-            if(MYDEBUG) MESSAGE("VSR - load algo : id = " << id <<
+            MESSAGE("VSR - load algo : id = " << id <<
                                 ", name = " << hypname.c_str() << ", persistent string = " << hypdata.c_str());
             SMESH::SMESH_Hypothesis_var myHyp;
 
@@ -5373,7 +5366,7 @@ bool SMESH_Gen_i::Load( SALOMEDS::SComponent_ptr theComponent,
               myStudyContext->mapOldToNew( id, newId );
             }
             else
-              if(MYDEBUG) MESSAGE( "VSR - SMESH_Gen::Load - can't get servant" );
+              MESSAGE( "VSR - SMESH_Gen::Load - can't get servant" );
           }
         }
       }
@@ -5402,7 +5395,7 @@ bool SMESH_Gen_i::Load( SALOMEDS::SComponent_ptr theComponent,
         int aNbObjects = aTopGroup->nInternalObjects();
         if ( aNbObjects > 0 ) {
           // create mesh
-          if(MYDEBUG) MESSAGE( "VSR - load mesh : id = " << id );
+          MESSAGE( "VSR - load mesh : id = " << id );
           SMESH::SMESH_Mesh_var myNewMesh = this->createMesh();
           SMESH_Mesh_i* myNewMeshImpl = dynamic_cast<SMESH_Mesh_i*>( GetServant( myNewMesh ).in() );
           if ( !myNewMeshImpl )
@@ -5538,7 +5531,7 @@ bool SMESH_Gen_i::Load( SALOMEDS::SComponent_ptr theComponent,
         aGroup->OpenOnDisk();
         // get number of applied algorithms
         int aNbSubObjects = aGroup->nInternalObjects();
-        if(MYDEBUG) MESSAGE( "VSR - number of applied algos " << aNbSubObjects );
+        MESSAGE( "VSR - number of applied algos " << aNbSubObjects );
         for ( int j = 0; j < aNbSubObjects; j++ ) {
           char name_dataset[ HDF_NAME_MAX_LEN+1 ];
           aGroup->InternalObjectIndentify( j, name_dataset );
@@ -6041,7 +6034,7 @@ bool SMESH_Gen_i::LoadASCII( SALOMEDS::SComponent_ptr theComponent,
                              const SALOMEDS::TMPFile& theStream,
                              const char*              theURL,
                              bool                     isMultiFile ) {
-  if(MYDEBUG) MESSAGE( "SMESH_Gen_i::LoadASCII" );
+  MESSAGE( "SMESH_Gen_i::LoadASCII" );
   return Load( theComponent, theStream, theURL, isMultiFile );
 
   //before call main ::Load method it's need for decipher text format to
@@ -6078,7 +6071,7 @@ bool SMESH_Gen_i::LoadASCII( SALOMEDS::SComponent_ptr theComponent,
 
 void SMESH_Gen_i::Close( SALOMEDS::SComponent_ptr theComponent )
 {
-  if(MYDEBUG) MESSAGE( "SMESH_Gen_i::Close" );
+  MESSAGE( "SMESH_Gen_i::Close" );
 
   // Clear study contexts data
   myStudyContext->Clear();
@@ -6102,7 +6095,7 @@ void SMESH_Gen_i::Close( SALOMEDS::SComponent_ptr theComponent )
 
 char* SMESH_Gen_i::ComponentDataType()
 {
-  if(MYDEBUG) MESSAGE( "SMESH_Gen_i::ComponentDataType" );
+  MESSAGE( "SMESH_Gen_i::ComponentDataType" );
   return CORBA::string_dup( "SMESH" );
 }
 
@@ -6120,12 +6113,12 @@ char* SMESH_Gen_i::IORToLocalPersistentID( SALOMEDS::SObject_ptr /*theSObject*/,
                                            CORBA::Boolean        /*isMultiFile*/,
                                            CORBA::Boolean        /*isASCII*/ )
 {
-  if(MYDEBUG) MESSAGE( "SMESH_Gen_i::IORToLocalPersistentID" );
+  MESSAGE( "SMESH_Gen_i::IORToLocalPersistentID" );
 
   if ( myStudyContext && strcmp( IORString, "" ) != 0 ) {
     int anId = myStudyContext->findId( IORString );
     if ( anId ) {
-      if(MYDEBUG) MESSAGE( "VSR " << anId );
+      MESSAGE( "VSR " << anId );
       char strId[ 20 ];
       sprintf( strId, "%d", anId );
       return  CORBA::string_dup( strId );
@@ -6147,7 +6140,7 @@ char* SMESH_Gen_i::LocalPersistentIDToIOR( SALOMEDS::SObject_ptr /*theSObject*/,
                                            CORBA::Boolean        /*isMultiFile*/,
                                            CORBA::Boolean        /*isASCII*/ )
 {
-  if(MYDEBUG) MESSAGE( "SMESH_Gen_i::LocalPersistentIDToIOR(): id = " << aLocalPersistentID );
+  MESSAGE( "SMESH_Gen_i::LocalPersistentIDToIOR(): id = " << aLocalPersistentID );
 
   if ( myStudyContext && strcmp( aLocalPersistentID, "" ) != 0 ) {
     int anId = atoi( aLocalPersistentID );

@@ -627,14 +627,19 @@ void SMESH_Gen_i::SetEmbeddedMode( CORBA::Boolean theMode )
     if (!envNoCatchSignals || !atoi(envNoCatchSignals))
     {
       bool raiseFPE;
-#ifdef _DEBUG_
-      raiseFPE = true;
-      char* envDisableFPE = getenv("DISABLE_FPE");
-      if (envDisableFPE && atoi(envDisableFPE))
+
+      if (SALOME::VerbosityActivated())
+      {
+        raiseFPE = true;
+        char* envDisableFPE = getenv("DISABLE_FPE");
+        if (envDisableFPE && atoi(envDisableFPE))
+          raiseFPE = false;
+      }
+      else
+      {
         raiseFPE = false;
-#else
-      raiseFPE = false;
-#endif
+      }
+
       OSD::SetSignal( raiseFPE );
     }
     // else OSD::SetSignal() is called in GUI
@@ -6504,8 +6509,8 @@ CORBA::Boolean SMESH_Gen_i::IsApplicable ( const char*           theAlgoType,
 
   SMESH_CATCH( SMESH::doNothing );
 
-#ifdef _DEBUG_
-  cout << "SMESH_Gen_i::IsApplicable(): exception in " << ( theAlgoType ? theAlgoType : "") << endl;
-#endif
+  if (SALOME::VerbosityActivated())
+    cout << "SMESH_Gen_i::IsApplicable(): exception in " << ( theAlgoType ? theAlgoType : "") << endl;
+
   return true;
 }

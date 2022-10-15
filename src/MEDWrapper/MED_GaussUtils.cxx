@@ -297,7 +297,7 @@ namespace MED
         }
       }
 
-#ifdef _DEBUG_
+      if (SALOME::VerbosityActivated())
       {
         INITMSG("theGauss: ");
         for(TInt aGaussId = 0; aGaussId < aNbGauss; aGaussId++){
@@ -309,21 +309,22 @@ namespace MED
           ADDMSG("} ");
         }
         ADDMSG(std::endl);
-      }
-      for(TInt anElemId = 0; anElemId < aNbElem; anElemId++){
-        TCCoordSliceArr aCoordSliceArr = theGaussCoord.GetCoordSliceArr(anElemId);
-        INITMSG("");
-        for(TInt aGaussId = 0; aGaussId < aNbGauss; aGaussId++){
-          TCCoordSlice aCoordSlice = aCoordSliceArr[aGaussId];
-          ADDMSG("{");
-          for(TInt aDimId = 0; aDimId < aDim; aDimId++){
-            ADDMSG(aCoordSlice[aDimId]<<" ");
+
+        for(TInt anElemId = 0; anElemId < aNbElem; anElemId++){
+          TCCoordSliceArr aCoordSliceArr = theGaussCoord.GetCoordSliceArr(anElemId);
+          INITMSG("");
+          for(TInt aGaussId = 0; aGaussId < aNbGauss; aGaussId++){
+            TCCoordSlice aCoordSlice = aCoordSliceArr[aGaussId];
+            ADDMSG("{");
+            for(TInt aDimId = 0; aDimId < aDim; aDimId++){
+              ADDMSG(aCoordSlice[aDimId]<<" ");
+            }
+            ADDMSG("} ");
           }
-          ADDMSG("} ");
+          ADDMSG(std::endl);
         }
-        ADDMSG(std::endl);
       }
-#endif
+
       return true;
     }
 
@@ -1956,21 +1957,22 @@ namespace MED
       }
     }
 
-#ifdef _DEBUG_
-    for(TInt anElemId = 0; anElemId < aNbElem; anElemId++){
-      TCoordSliceArr aCoordSliceArr = theGaussCoord.GetCoordSliceArr(anElemId);
-      INITMSG("");
-      for(TInt aGaussId = 0; aGaussId < aNbGauss; aGaussId++){
-        TCoordSlice& aCoordSlice = aCoordSliceArr[aGaussId];
-        ADDMSG("{");
-        for(TInt aDimId = 0; aDimId < aDim; aDimId++){
-          ADDMSG(aCoordSlice[aDimId]<<" ");
+    if (SALOME::VerbosityActivated())
+    {
+      for(TInt anElemId = 0; anElemId < aNbElem; anElemId++){
+        TCoordSliceArr aCoordSliceArr = theGaussCoord.GetCoordSliceArr(anElemId);
+        INITMSG("");
+        for(TInt aGaussId = 0; aGaussId < aNbGauss; aGaussId++){
+          TCoordSlice& aCoordSlice = aCoordSliceArr[aGaussId];
+          ADDMSG("{");
+          for(TInt aDimId = 0; aDimId < aDim; aDimId++){
+            ADDMSG(aCoordSlice[aDimId]<<" ");
+          }
+          ADDMSG("} ");
         }
-        ADDMSG("} ");
+        ADDMSG(std::endl);
       }
-      ADDMSG(std::endl);
     }
-#endif
 
     return true;
   }

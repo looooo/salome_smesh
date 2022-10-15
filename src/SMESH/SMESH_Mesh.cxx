@@ -524,10 +524,12 @@ int SMESH_Mesh::MEDToMesh(const char* theFileName, const char* theMeshName)
   myReader.SetFile(theFileName);
   myReader.SetMeshName(theMeshName);
   Driver_Mesh::Status status = myReader.Perform();
-#ifdef _DEBUG_
-  SMESH_ComputeErrorPtr er = myReader.GetError();
-  if ( er && !er->IsOK() ) std::cout << er->myComment << std::endl;
-#endif
+
+  if (SALOME::VerbosityActivated())
+  {
+    SMESH_ComputeErrorPtr er = myReader.GetError();
+    if ( er && !er->IsOK() ) std::cout << er->myComment << std::endl;
+  }
 
   // Reading groups (sub-meshes are out of scope of MED import functionality)
   std::list<TNameAndType> aGroupNames = myReader.GetGroupNamesAndTypes();
@@ -1742,9 +1744,8 @@ double SMESH_Mesh::GetComputeProgress() const
         rate = algo->GetProgress();
       }
       catch (...) {
-#ifdef _DEBUG_
-        std::cerr << "Exception in " << algo->GetName() << "::GetProgress()" << std::endl;
-#endif
+        if (SALOME::VerbosityActivated())
+          std::cerr << "Exception in " << algo->GetName() << "::GetProgress()" << std::endl;
       }
       if ( 0. < rate && rate < 1.001 )
       {

@@ -687,11 +687,8 @@ namespace SMESH
 
   void printException( const char* text )
   {
-#ifdef _DEBUG_
-    std::cout << "Exception in SMESH_Gen_i::DumpPython(): " << text << std::endl;
-#else
-    (void)text; // unused in release mode
-#endif
+    if (SALOME::VerbosityActivated())
+      std::cout << "Exception in SMESH_Gen_i::DumpPython(): " << text << std::endl;
   }
 
 //=======================================================================

@@ -245,13 +245,14 @@ namespace MED
       TGaussInfo::TKey aKey = boost::get<0>(aPreInfo);
       aKey2Gauss[aKey] = anInfo;
 
-#ifdef _DEBUG_
-      const EGeometrieElement& aGeom = boost::get<0>(aKey);
-      const std::string& aName = boost::get<1>(aKey);
-      INITMSG("- aGeom = "<<aGeom<<"; aName = '"<<aName<<"'"<<std::endl);
-#endif
-
+      if (SALOME::VerbosityActivated())
+      {
+        const EGeometrieElement& aGeom = boost::get<0>(aKey);
+        const std::string& aName = boost::get<1>(aKey);
+        INITMSG("- aGeom = "<<aGeom<<"; aName = '"<<aName<<"'"<<std::endl);
+      }
     }
+    
     return aKey2Gauss;
   }
 

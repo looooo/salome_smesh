@@ -594,17 +594,18 @@ namespace MED
     PFamilyInfo anInfo = CrFamilyInfo(theMeshInfo, aNbGroup, aNbAttr);
     GetFamilyInfo(theId, *anInfo, theErr);
 
-#ifdef _DEBUG_
-    std::string aName = anInfo->GetName();
-    INITMSG("GetPFamilyInfo - aFamilyName = '"<<aName<<
-            "'; andId = "<<anInfo->GetId()<<
-            "; aNbAttr = "<<aNbAttr<<
-            "; aNbGroup = "<<aNbGroup<<"\n");
-    for (TInt iGroup = 0; iGroup < aNbGroup; iGroup++) {
-      aName = anInfo->GetGroupName(iGroup);
-      INITMSG("aGroupName = '"<<aName<<"'\n");
+    if (SALOME::VerbosityActivated())
+    {
+      std::string aName = anInfo->GetName();
+      INITMSG("GetPFamilyInfo - aFamilyName = '"<<aName<<
+              "'; andId = "<<anInfo->GetId()<<
+              "; aNbAttr = "<<aNbAttr<<
+              "; aNbGroup = "<<aNbGroup<<"\n");
+      for (TInt iGroup = 0; iGroup < aNbGroup; iGroup++) {
+        aName = anInfo->GetGroupName(iGroup);
+        INITMSG("aGroupName = '"<<aName<<"'\n");
+      }
     }
-#endif
 
     return anInfo;
   }
@@ -1155,37 +1156,38 @@ namespace MED
     PNodeInfo anInfo = CrNodeInfo(theMeshInfo, aNbElems);
     GetNodeInfo(*anInfo, theErr);
 
-#ifdef _DEBUG_
-    TInt aDim = theMeshInfo->myDim;
-    TInt aNbElem = anInfo->GetNbElem();
-    INITMSG("GetPNodeInfo: ");
+    if (SALOME::VerbosityActivated())
     {
-      INITMSG("aCoords: "<<aNbElem<<": ");
-      TNodeCoord& aCoord = anInfo->myCoord;
-      for (TInt iElem = 0; iElem < aNbElem; iElem++) {
-        for (TInt iDim = 0, anId = iElem*aDim; iDim < aDim; iDim++, anId++) {
-          ADDMSG(aCoord[anId]<<",");
-        }
-        ADDMSG(" ");
-      }
-      ADDMSG(std::endl);
-
-      BEGMSG("GetFamNum: ");
-      for (TInt iElem = 0; iElem < aNbElem; iElem++) {
-        ADDMSG(anInfo->GetFamNum(iElem)<<", ");
-      }
-      ADDMSG(std::endl);
-
-      if (anInfo->IsElemNum()) {
-        BEGMSG("GetElemNum: ");
+      TInt aDim = theMeshInfo->myDim;
+      TInt aNbElem = anInfo->GetNbElem();
+      INITMSG("GetPNodeInfo: ");
+      {
+        INITMSG("aCoords: "<<aNbElem<<": ");
+        TNodeCoord& aCoord = anInfo->myCoord;
         for (TInt iElem = 0; iElem < aNbElem; iElem++) {
-          ADDMSG(anInfo->GetElemNum(iElem)<<", ");
+          for (TInt iDim = 0, anId = iElem*aDim; iDim < aDim; iDim++, anId++) {
+            ADDMSG(aCoord[anId]<<",");
+          }
+          ADDMSG(" ");
         }
         ADDMSG(std::endl);
+
+        BEGMSG("GetFamNum: ");
+        for (TInt iElem = 0; iElem < aNbElem; iElem++) {
+          ADDMSG(anInfo->GetFamNum(iElem)<<", ");
+        }
+        ADDMSG(std::endl);
+
+        if (anInfo->IsElemNum()) {
+          BEGMSG("GetElemNum: ");
+          for (TInt iElem = 0; iElem < aNbElem; iElem++) {
+            ADDMSG(anInfo->GetElemNum(iElem)<<", ");
+          }
+          ADDMSG(std::endl);
+        }
       }
+      ADDMSG(std::endl);
     }
-    ADDMSG(std::endl);
-#endif
 
     return anInfo;
   }
@@ -1540,20 +1542,21 @@ namespace MED
     PPolygoneInfo anInfo = CrPolygoneInfo(theMeshInfo, theEntity, theGeom, aNbElem, aConnSize, theConnMode);
     GetPolygoneInfo(anInfo);
 
-#ifdef _DEBUG_
-    INITMSG("GetPPolygoneInfo"<<
-            " - theGeom = "<<theGeom<<
-            "; aNbElem = "<<aNbElem<<": ");
-    for (TInt iElem = 1; iElem < aNbElem; iElem++) {
-      TCConnSlice aConnSlice = anInfo->GetConnSlice(iElem);
-      TInt aConnDim = aConnSlice.size();
-      for (TInt iConn = 0; iConn < aConnDim; iConn++) {
-        ADDMSG(aConnSlice[iConn]<<",");
+    if (SALOME::VerbosityActivated())
+    {
+      INITMSG("GetPPolygoneInfo"<<
+              " - theGeom = "<<theGeom<<
+              "; aNbElem = "<<aNbElem<<": ");
+      for (TInt iElem = 1; iElem < aNbElem; iElem++) {
+        TCConnSlice aConnSlice = anInfo->GetConnSlice(iElem);
+        TInt aConnDim = aConnSlice.size();
+        for (TInt iConn = 0; iConn < aConnDim; iConn++) {
+          ADDMSG(aConnSlice[iConn]<<",");
+        }
+        ADDMSG(" ");
       }
-      ADDMSG(" ");
+      ADDMSG(std::endl);
     }
-    ADDMSG(std::endl);
-#endif
 
     return anInfo;
   }
@@ -1850,27 +1853,28 @@ namespace MED
     PPolyedreInfo anInfo = CrPolyedreInfo(theMeshInfo, theEntity, theGeom, aNbElem, aNbFaces, aConnSize, theConnMode);
     GetPolyedreInfo(anInfo);
 
-#ifdef _DEBUG_
-    INITMSG("GetPPolyedreInfo"<<
-            " - theGeom = "<<theGeom<<
-            "; aNbElem = "<<aNbElem<<": ");
-    for (TInt iElem = 0; iElem < aNbElem; iElem++) {
-      TCConnSliceArr aConnSliceArr = anInfo->GetConnSliceArr(iElem);
-      TInt aNbFaces = aConnSliceArr.size();
-      ADDMSG("{");
-      for (TInt iFace = 0; iFace < aNbFaces; iFace++) {
-        TCConnSlice aConnSlice = aConnSliceArr[iFace];
-        TInt aNbConn = aConnSlice.size();
-        ADDMSG("[");
-        for (TInt iConn = 0; iConn < aNbConn; iConn++) {
-          ADDMSG(aConnSlice[iConn]<<",");
+    if (SALOME::VerbosityActivated())
+    {
+      INITMSG("GetPPolyedreInfo"<<
+              " - theGeom = "<<theGeom<<
+              "; aNbElem = "<<aNbElem<<": ");
+      for (TInt iElem = 0; iElem < aNbElem; iElem++) {
+        TCConnSliceArr aConnSliceArr = anInfo->GetConnSliceArr(iElem);
+        TInt aNbFaces = aConnSliceArr.size();
+        ADDMSG("{");
+        for (TInt iFace = 0; iFace < aNbFaces; iFace++) {
+          TCConnSlice aConnSlice = aConnSliceArr[iFace];
+          TInt aNbConn = aConnSlice.size();
+          ADDMSG("[");
+          for (TInt iConn = 0; iConn < aNbConn; iConn++) {
+            ADDMSG(aConnSlice[iConn]<<",");
+          }
+          ADDMSG("] ");
         }
-        ADDMSG("] ");
+        ADDMSG("} ");
       }
-      ADDMSG("} ");
+      ADDMSG(std::endl);
     }
-    ADDMSG(std::endl);
-#endif
 
     return anInfo;
   }
@@ -2271,34 +2275,35 @@ namespace MED
     PCellInfo anInfo = CrCellInfo(theMeshInfo, theEntity, theGeom, aNbElem, theConnMode);
     GetCellInfo(anInfo, theErr);
 
-#ifdef _DEBUG_
-    TInt aConnDim = anInfo->GetConnDim();
-    INITMSG("GetPCellInfo - theEntity = "<<theEntity<<"; theGeom = "<<theGeom<<"; aConnDim: "<<aConnDim<<"\n");
-    BEGMSG("GetPCellInfo - aNbElem: "<<aNbElem<<": ");
-    for (TInt iElem = 0; iElem < aNbElem; iElem++) {
-      TCConnSlice aConnSlice = anInfo->GetConnSlice(iElem);
-      for (TInt iConn = 0; iConn < aConnDim; iConn++) {
-        ADDMSG(aConnSlice[iConn]<<",");
-      }
-      ADDMSG(" ");
-    }
-    ADDMSG(std::endl);
-
-    BEGMSG("GetPCellInfo - GetFamNum: ");
-    for (TInt iElem = 0; iElem < aNbElem; iElem++) {
-      ADDMSG(anInfo->GetFamNum(iElem)<<", ");
-    }
-    ADDMSG(std::endl);
-
-    if (anInfo->IsElemNum()) {
-      BEGMSG("GetPCellInfo - GetElemNum: ");
+    if (SALOME::VerbosityActivated())
+    {
+      TInt aConnDim = anInfo->GetConnDim();
+      INITMSG("GetPCellInfo - theEntity = "<<theEntity<<"; theGeom = "<<theGeom<<"; aConnDim: "<<aConnDim<<"\n");
+      BEGMSG("GetPCellInfo - aNbElem: "<<aNbElem<<": ");
       for (TInt iElem = 0; iElem < aNbElem; iElem++) {
-        ADDMSG(anInfo->GetElemNum(iElem)<<", ");
+        TCConnSlice aConnSlice = anInfo->GetConnSlice(iElem);
+        for (TInt iConn = 0; iConn < aConnDim; iConn++) {
+          ADDMSG(aConnSlice[iConn]<<",");
+        }
+        ADDMSG(" ");
+      }
+      ADDMSG(std::endl);
+
+      BEGMSG("GetPCellInfo - GetFamNum: ");
+      for (TInt iElem = 0; iElem < aNbElem; iElem++) {
+        ADDMSG(anInfo->GetFamNum(iElem)<<", ");
+      }
+      ADDMSG(std::endl);
+
+      if (anInfo->IsElemNum()) {
+        BEGMSG("GetPCellInfo - GetElemNum: ");
+        for (TInt iElem = 0; iElem < aNbElem; iElem++) {
+          ADDMSG(anInfo->GetElemNum(iElem)<<", ");
+        }
+        ADDMSG(std::endl);
       }
       ADDMSG(std::endl);
     }
-    ADDMSG(std::endl);
-#endif
 
     return anInfo;
   }
@@ -2679,13 +2684,14 @@ namespace MED
     PFieldInfo anInfo = CrFieldInfo(theMeshInfo, aNbComp);
     GetFieldInfo(theId, *anInfo, theErr);
 
-#ifdef _DEBUG_
-    INITMSG("GetPFieldInfo "<<
-            "- aName = '"<<anInfo->GetName()<<"'"<<
-            "; aType = "<<anInfo->GetType()<<
-            "; aNbComp = "<<aNbComp<<
-            std::endl);
-#endif
+    if (SALOME::VerbosityActivated())
+    {
+      INITMSG("GetPFieldInfo "<<
+              "- aName = '"<<anInfo->GetName()<<"'"<<
+              "; aType = "<<anInfo->GetType()<<
+              "; aNbComp = "<<aNbComp<<
+              std::endl);
+    }
 
     return anInfo;
   }
@@ -3051,15 +3057,16 @@ namespace MED
     PTimeStampInfo anInfo = CrTimeStampInfo(theFieldInfo, theEntity, theGeom2Size);
     GetTimeStampInfo(theId, *anInfo, theErr);
 
-#ifdef _DEBUG_
-    INITMSG("GetPTimeStampInfo - anEntity = "<<anInfo->GetEntity()<<"\n");
-    TGeom2NbGauss& aGeom2NbGauss = anInfo->myGeom2NbGauss;
-    TGeom2NbGauss::const_iterator anIter = aGeom2NbGauss.begin();
-    for (; anIter != aGeom2NbGauss.end(); anIter++) {
-      const EGeometrieElement& aGeom = anIter->first;
-      INITMSG("aGeom = "<<aGeom<<" - "<<aGeom2NbGauss[aGeom]<<";\n");
+    if (SALOME::VerbosityActivated())
+    {
+      INITMSG("GetPTimeStampInfo - anEntity = "<<anInfo->GetEntity()<<"\n");
+      TGeom2NbGauss& aGeom2NbGauss = anInfo->myGeom2NbGauss;
+      TGeom2NbGauss::const_iterator anIter = aGeom2NbGauss.begin();
+      for (; anIter != aGeom2NbGauss.end(); anIter++) {
+        const EGeometrieElement& aGeom = anIter->first;
+        INITMSG("aGeom = "<<aGeom<<" - "<<aGeom2NbGauss[aGeom]<<";\n");
+      }
     }
-#endif
 
     return anInfo;
   }
@@ -3547,12 +3554,13 @@ namespace MED
                       theMKey2Profile,
                       theKey2Gauss,
                       theErr);
-#ifdef _DEBUG_
-    if (aFieldInfo->GetType() == eFLOAT64)
-      Print<TFloatTimeStampValue>(anInfo);
-    else
-      Print<TIntTimeStampValue>(anInfo);
-#endif
+    if (SALOME::VerbosityActivated())
+    {
+      if (aFieldInfo->GetType() == eFLOAT64)
+        Print<TFloatTimeStampValue>(anInfo);
+      else
+        Print<TIntTimeStampValue>(anInfo);
+    }
     return anInfo;
   }
 
@@ -3682,9 +3690,10 @@ namespace MED
     GetGrilleInfo(anInfo);
     anInfo->SetGrilleType(type);
 
-#ifdef _DEBUG_
-    INITMSG("GetPGrilleInfo: ");
+    if (SALOME::VerbosityActivated())
     {
+      INITMSG("GetPGrilleInfo: ");
+
       TInt aNbElem = anInfo->GetNbNodes();
       BEGMSG("GetFamNumNode: ");
       for (TInt iElem = 0; iElem < aNbElem; iElem++) {
@@ -3706,9 +3715,7 @@ namespace MED
         ADDMSG(anInfo->GetCoordUnit(iElem)<<", ");
       }
       ADDMSG(std::endl);
-
     }
-#endif
 
     return anInfo;
   }

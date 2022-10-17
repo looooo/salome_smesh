@@ -3859,10 +3859,8 @@ namespace { // Structures used by FixQuadraticElements()
     else
       _normal.SetCoord(1e-33,0,0);
 
-    _face = face;
-
-    (void)face; // unused in release mode
-#endif
+    if (SALOME::VerbosityActivated())
+      _face = face;
   }
   //================================================================================
   /*!

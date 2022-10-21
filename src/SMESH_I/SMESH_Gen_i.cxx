@@ -2870,16 +2870,16 @@ SMESH::SMESH_Mesh_ptr SMESH_Gen_i::CreateDualMesh(SMESH::SMESH_IDSource_ptr mesh
 
   if (PyErr_Occurred()) {
     // Restrieving python error
-    MESSAGE("Catching error")
+    MESSAGE("Catching error");
     PyObject *errtype, *errvalue, *traceback;
     PyErr_Fetch(&errtype, &errvalue, &traceback);
     if(errvalue != NULL) {
-      MESSAGE("Error has a value")
+      MESSAGE("Error has a value");
       PyObject *s = PyObject_Str(errvalue);
       Py_ssize_t size;
       std::string msg = PyUnicode_AsUTF8AndSize(s, &size);
       msg = "Issue with the execution of create_dual_mesh:\n"+msg;
-      MESSAGE("throwing exception")
+      MESSAGE("throwing exception");
       // We need to deactivate the GIL before throwing the exception
       PyGILState_Release(gstate);
       THROW_SALOME_CORBA_EXCEPTION(msg.c_str(), SALOME::INTERNAL_ERROR );

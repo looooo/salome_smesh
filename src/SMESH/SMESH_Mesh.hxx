@@ -50,7 +50,7 @@
 #include <ostream>
 
 #include <boost/filesystem.hpp>
-#ifndef DISABLE_PARASMESH
+#ifndef WIN32
 #include <boost/asio/thread_pool.hpp>
 #include <boost/thread.hpp>
 #endif
@@ -391,7 +391,7 @@ class SMESH_EXPORT SMESH_Mesh
 
   // Parallel computation functions
 
-#ifdef DISABLE_PARASMESH
+#ifdef WIN32
   void Lock() {};
   void Unlock() {};
 
@@ -420,7 +420,7 @@ class SMESH_EXPORT SMESH_Mesh
 
   // Temporary folder used during parallel Computation
   boost::filesystem::path tmp_folder;
-  #ifndef DISABLE_PARASMESH
+  #ifndef WIN32
   boost::asio::thread_pool *     _pool = nullptr; //thread pool for computation
   #endif
 
@@ -472,7 +472,7 @@ protected:
   TCallUp*                    _callUp;
 
   // Mutex for multhitreading write in SMESH_Mesh
-#ifndef DISABLE_PARASMESH
+#ifndef WIN32
   boost::mutex _my_lock;
 #endif
   int _NbThreads=0;

@@ -28,7 +28,7 @@
 
 //#define CHRONODEF
 //
-#ifndef DISABLE_PARAMESH
+#ifndef WIN32
 #include <boost/asio.hpp>
 #endif
 #include "SMESH_Gen.hxx"
@@ -350,7 +350,7 @@ bool SMESH_Gen::parallelComputeSubMeshes(
       smToCompute->ComputeStateEngine( SMESH_subMesh::CHECK_COMPUTE_STATE );
       continue;
     }
-#ifdef DISABLE_PARASMESH
+#ifdef WIN32
     compute_function(smToCompute, computeEvent,
                       shapeSM, aShapeOnly, allowedSubShapes,
                       aShapesId);

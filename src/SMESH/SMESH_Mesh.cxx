@@ -239,7 +239,7 @@ SMESH_Mesh::~SMESH_Mesh()
     int result=pthread_create(&thread, NULL, deleteMeshDS, (void*)_meshDS);
 #endif
   }
-#ifndef DISABLE_PARASMESH
+#ifndef WIN32
   if(_pool)
     DeletePoolThreads();
 #endif

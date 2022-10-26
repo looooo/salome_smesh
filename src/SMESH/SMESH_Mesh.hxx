@@ -29,6 +29,7 @@
 
 #include "SMESH_SMESH.hxx"
 
+
 #include "SMDSAbs_ElementType.hxx"
 #include "SMESH_ComputeError.hxx"
 #include "SMESH_Controls.hxx"
@@ -49,8 +50,10 @@
 #include <ostream>
 
 #include <boost/filesystem.hpp>
+#ifndef DISABLE_PARASMESH
 #include <boost/asio/thread_pool.hpp>
 #include <boost/thread.hpp>
+#endif
 
 #ifdef WIN32
 #pragma warning(disable:4251) // Warning DLL Interface ...
@@ -388,6 +391,19 @@ class SMESH_EXPORT SMESH_Mesh
 
   // Parallel computation functions
 
+#ifdef DISABLE_PARASMESH
+  void Lock() {};
+  void Unlock() {};
+
+  int GetNbThreads(){return _NbThreads;};
+  void SetNbThreads(int nbThreads){std::cout << "Warning Parallel Meshing is disabled on Windows it will behave as a slower normal compute" << std::endl;_NbThreads=nbThreads;};
+
+  void InitPoolThreads(){};
+  void DeletePoolThreads(){};
+  void wait(){}
+
+  bool IsParallel(){return _NbThreads > 0;}
+#else
   void Lock() {_my_lock.lock();};
   void Unlock() {_my_lock.unlock();};
 
@@ -400,10 +416,13 @@ class SMESH_EXPORT SMESH_Mesh
   void wait(){_pool->join(); DeletePoolThreads(); InitPoolThreads(); }
 
   bool IsParallel(){return _NbThreads > 0;}
+#endif
 
   // Temporary folder used during parallel Computation
   boost::filesystem::path tmp_folder;
+  #ifndef DISABLE_PARASMESH
   boost::asio::thread_pool *     _pool = nullptr; //thread pool for computation
+  #endif
 
 
 private:
@@ -453,7 +472,9 @@ protected:
   TCallUp*                    _callUp;
 
   // Mutex for multhitreading write in SMESH_Mesh
+#ifndef DISABLE_PARASMESH
   boost::mutex _my_lock;
+#endif
   int _NbThreads=0;
 
 protected:

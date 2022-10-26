@@ -239,9 +239,10 @@ SMESH_Mesh::~SMESH_Mesh()
     int result=pthread_create(&thread, NULL, deleteMeshDS, (void*)_meshDS);
 #endif
   }
-
+#ifndef WIN32
   if(_pool)
     DeletePoolThreads();
+#endif
 #ifndef _DEBUG_
     fs::remove_all(tmp_folder);
 #endif

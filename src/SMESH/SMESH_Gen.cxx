@@ -27,8 +27,10 @@
 //
 
 //#define CHRONODEF
-
+//
+#ifndef WIN32
 #include <boost/asio.hpp>
+#endif
 #include "SMESH_Gen.hxx"
 
 #include "SMESH_DriverMesh.hxx"
@@ -348,9 +350,15 @@ bool SMESH_Gen::parallelComputeSubMeshes(
       smToCompute->ComputeStateEngine( SMESH_subMesh::CHECK_COMPUTE_STATE );
       continue;
     }
+#ifdef WIN32
+    compute_function(smToCompute, computeEvent,
+                      shapeSM, aShapeOnly, allowedSubShapes,
+                      aShapesId);
+#else
     boost::asio::post(*(aMesh._pool), std::bind(compute_function, smToCompute, computeEvent,
                       shapeSM, aShapeOnly, allowedSubShapes,
                       aShapesId));
+#endif
   }
 
   // Waiting for the thread for Solids to finish
@@ -360,7 +368,6 @@ bool SMESH_Gen::parallelComputeSubMeshes(
 
   return ret;
 };
-
 
 //=============================================================================
 /*

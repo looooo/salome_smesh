@@ -80,8 +80,10 @@
 #include <pthread.h>
 #endif
 
+#ifndef WIN32
 #include <boost/filesystem.hpp>
 namespace fs=boost::filesystem;
+#endif
 
 // maximum stored group name length in MED file
 #define MAX_MED_GROUP_NAME_LENGTH 80
@@ -236,10 +238,8 @@ SMESH_Mesh::~SMESH_Mesh()
     int result=pthread_create(&thread, NULL, deleteMeshDS, (void*)_meshDS);
 #endif
   }
-#ifndef WIN32
   if(_pool)
     DeletePoolThreads();
-#endif
 }
 
 //================================================================================
@@ -2578,9 +2578,11 @@ void SMESH_Mesh::getAncestorsSubMeshes (const TopoDS_Shape&            theSubSha
 //=============================================================================
 void SMESH_Mesh::CreateTmpFolder()
 {
+#ifndef WIN32
   // Temporary folder that will be used by parallel computation
   tmp_folder = fs::temp_directory_path()/fs::unique_path(fs::path("SMESH_%%%%-%%%%"));
   fs::create_directories(tmp_folder);
+#endif
 }
 //
 //=============================================================================
@@ -2590,7 +2592,7 @@ void SMESH_Mesh::CreateTmpFolder()
 //=============================================================================
 void SMESH_Mesh::DeleteTmpFolder()
 {
-#ifndef _DEBUG_
+#ifndef WIN32
     fs::remove_all(tmp_folder);
 #endif
 }

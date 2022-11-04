@@ -29,7 +29,6 @@
 
 #include "SMESH_SMESH.hxx"
 
-
 #include "SMDSAbs_ElementType.hxx"
 #include "SMESH_ComputeError.hxx"
 #include "SMESH_Controls.hxx"
@@ -49,11 +48,11 @@
 #include <vector>
 #include <ostream>
 
-#include <boost/filesystem.hpp>
 #ifndef WIN32
+#include <boost/filesystem.hpp>
 #include <boost/asio/thread_pool.hpp>
-#include <boost/thread.hpp>
 #endif
+#include <boost/thread.hpp>
 
 #ifdef WIN32
 #pragma warning(disable:4251) // Warning DLL Interface ...
@@ -422,10 +421,13 @@ class SMESH_EXPORT SMESH_Mesh
   void DeleteTmpFolder();
 
   // Temporary folder used during parallel Computation
+#ifndef WIN32
   boost::filesystem::path tmp_folder;
-  #ifndef WIN32
   boost::asio::thread_pool *     _pool = nullptr; //thread pool for computation
-  #endif
+#else
+  std::string tmp_folder;
+  bool _pool = false;
+#endif
 
 
 private:

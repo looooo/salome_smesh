@@ -25,7 +25,6 @@
 //  Author : Paul RASCLE, EDF
 //  Module : SMESH
 //
-
 //#define CHRONODEF
 //
 #ifndef WIN32
@@ -60,8 +59,10 @@
 #include <Basics_Utils.hxx>
 
 using namespace std;
+#ifndef WIN32
 #include <boost/filesystem.hpp>
 namespace fs = boost::filesystem;
+#endif
 
 // Environment variable separator
 #ifdef WIN32
@@ -280,6 +281,9 @@ bool SMESH_Gen::parallelComputeSubMeshes(
           const bool complexShapeFirst,
           const bool   aShapeOnly)
 {
+#ifdef WIN32
+  throw SALOME_Exception("ParallelMesh is not working on Windows");
+#else
 
   bool ret = true;
 
@@ -351,15 +355,9 @@ bool SMESH_Gen::parallelComputeSubMeshes(
       smToCompute->ComputeStateEngine( SMESH_subMesh::CHECK_COMPUTE_STATE );
       continue;
     }
-#ifdef WIN32
-    compute_function(smToCompute, computeEvent,
-                      shapeSM, aShapeOnly, allowedSubShapes,
-                      aShapesId);
-#else
     boost::asio::post(*(aMesh._pool), std::bind(compute_function, smToCompute, computeEvent,
                       shapeSM, aShapeOnly, allowedSubShapes,
                       aShapesId));
-#endif
   }
 
   // Waiting for the thread for Solids to finish
@@ -369,6 +367,7 @@ bool SMESH_Gen::parallelComputeSubMeshes(
   aMesh.DeleteTmpFolder();
 
   return ret;
+#endif
 };
 
 //=============================================================================

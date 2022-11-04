@@ -126,4 +126,7 @@ def test_netgen3d():
         assert nb_tetras > 0
 
 if __name__ == "__main__":
+    if sys.platform == "win32":
+        print("Disabled on windows")
+        sys.exit(0)
     test_netgen3d()

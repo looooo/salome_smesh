@@ -123,9 +123,11 @@ def run_test(nbox=2, boxsize=100):
     print("Time elapsed (seq, par): ", time_seq, time_par)
 
 def main():
+    if sys.platform == "win32":
+        print("Test disabled on Windows")
+        return
     nbox = 2
     boxsize = 100
     run_test(nbox, boxsize)
 
 main()
-

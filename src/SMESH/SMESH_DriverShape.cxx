@@ -24,7 +24,6 @@
 //  Author : Yoann AUDOUIN, EDF
 //  Module : SMESH
 //
-
 #include <utilities.h>
 #include <Utils_SALOME_Exception.hxx>
 #include "SMESH_DriverShape.hxx"
@@ -41,9 +40,11 @@
 //Occ include
 #include <TopoDS.hxx>
 
+#ifndef WIN32
 #include <boost/filesystem.hpp>
 #include <boost/algorithm/string.hpp>
 namespace fs = boost::filesystem;
+#endif
 
 /**
  * @brief Import the content of a shape file (STEP) into a TopDS_Shape object
@@ -147,6 +148,7 @@ int exportBREPShape(const std::string shape_file, const TopoDS_Shape& aShape){
  * @return error code
  */
 int importShape(const std::string shape_file, TopoDS_Shape& aShape){
+#ifndef WIN32
   std::string type = fs::path(shape_file).extension().string();
   boost::algorithm::to_lower(type);
   if (type == ".brep"){
@@ -156,6 +158,7 @@ int importShape(const std::string shape_file, TopoDS_Shape& aShape){
   } else {
     throw SALOME_Exception("Unknow format for importShape: " + type);
   }
+#endif
 }
 
 /**
@@ -167,6 +170,7 @@ int importShape(const std::string shape_file, TopoDS_Shape& aShape){
  * @return error code
  */
 int exportShape(const std::string shape_file, const TopoDS_Shape& aShape){
+#ifndef WIN32
   std::string type = fs::path(shape_file).extension().string();
   boost::algorithm::to_lower(type);
   if (type == ".brep"){
@@ -176,4 +180,5 @@ int exportShape(const std::string shape_file, const TopoDS_Shape& aShape){
   } else {
     throw SALOME_Exception("Unknow format for exportShape: " + type);
   }
+#endif
 }

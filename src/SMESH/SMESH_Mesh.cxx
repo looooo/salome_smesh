@@ -124,9 +124,6 @@ SMESH_Mesh::SMESH_Mesh(int               theLocalId,
   _callUp        = NULL;
   _meshDS->ShapeToMesh( PseudoShape() );
   _subMeshHolder = new SubMeshHolder;
-  // Temporary folder that will be used by parallel computation
-  tmp_folder = fs::temp_directory_path()/fs::unique_path(fs::path("SMESH_%%%%-%%%%"));
-  fs::create_directories(tmp_folder);
 
   // assure unique persistent ID
   if ( _document->NbMeshes() > 1 )
@@ -242,9 +239,6 @@ SMESH_Mesh::~SMESH_Mesh()
 #ifndef WIN32
   if(_pool)
     DeletePoolThreads();
-#endif
-#ifndef _DEBUG_
-    fs::remove_all(tmp_folder);
 #endif
 }
 
@@ -2574,4 +2568,29 @@ void SMESH_Mesh::getAncestorsSubMeshes (const TopoDS_Shape&            theSubSha
 
   // sort submeshes according to stored mesh order
   SortByMeshOrder( theSubMeshes );
+}
+
+
+//=============================================================================
+/*!
+ * \brief Build folder for parallel computation
+ */
+//=============================================================================
+void SMESH_Mesh::CreateTmpFolder()
+{
+  // Temporary folder that will be used by parallel computation
+  tmp_folder = fs::temp_directory_path()/fs::unique_path(fs::path("SMESH_%%%%-%%%%"));
+  fs::create_directories(tmp_folder);
+}
+//
+//=============================================================================
+/*!
+ * \brief Delete temporary folder used for parallel computation
+ */
+//=============================================================================
+void SMESH_Mesh::DeleteTmpFolder()
+{
+#ifndef _DEBUG_
+    fs::remove_all(tmp_folder);
+#endif
 }

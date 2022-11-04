@@ -289,6 +289,7 @@ bool SMESH_Gen::parallelComputeSubMeshes(
   // Pool of thread for computation
   // TODO: move when parallelMesh created
   aMesh.InitPoolThreads();
+  aMesh.CreateTmpFolder();
 
   TopAbs_ShapeEnum previousShapeType = TopAbs_VERTEX;
   int nbThreads = aMesh.GetNbThreads();
@@ -365,6 +366,7 @@ bool SMESH_Gen::parallelComputeSubMeshes(
   aMesh.wait();
 
   aMesh.GetMeshDS()->Modified();
+  aMesh.DeleteTmpFolder();
 
   return ret;
 };

@@ -418,6 +418,9 @@ class SMESH_EXPORT SMESH_Mesh
   bool IsParallel(){return _NbThreads > 0;}
 #endif
 
+  void CreateTmpFolder();
+  void DeleteTmpFolder();
+
   // Temporary folder used during parallel Computation
   boost::filesystem::path tmp_folder;
   #ifndef WIN32

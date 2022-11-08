@@ -158,6 +158,8 @@ int importShape(const std::string shape_file, TopoDS_Shape& aShape){
   } else {
     throw SALOME_Exception("Unknow format for importShape: " + type);
   }
+#else
+  return 0;
 #endif
 }
 
@@ -180,5 +182,7 @@ int exportShape(const std::string shape_file, const TopoDS_Shape& aShape){
   } else {
     throw SALOME_Exception("Unknow format for exportShape: " + type);
   }
+#else
+  return 0;
 #endif
 }

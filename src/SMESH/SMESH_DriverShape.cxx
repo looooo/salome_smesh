@@ -147,7 +147,7 @@ int exportBREPShape(const std::string shape_file, const TopoDS_Shape& aShape){
  *
  * @return error code
  */
-int importShape(const std::string shape_file, TopoDS_Shape& aShape){
+int SMESH_DriverShape::importShape(const std::string shape_file, TopoDS_Shape& aShape){
 #ifndef WIN32
   std::string type = fs::path(shape_file).extension().string();
   boost::algorithm::to_lower(type);
@@ -171,7 +171,7 @@ int importShape(const std::string shape_file, TopoDS_Shape& aShape){
  *
  * @return error code
  */
-int exportShape(const std::string shape_file, const TopoDS_Shape& aShape){
+int SMESH_DriverShape::exportShape(const std::string shape_file, const TopoDS_Shape& aShape){
 #ifndef WIN32
   std::string type = fs::path(shape_file).extension().string();
   boost::algorithm::to_lower(type);

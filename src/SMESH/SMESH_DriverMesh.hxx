@@ -30,16 +30,18 @@
 
 #include <string>
 #include <cassert>
+#include "SMESH_SMESH.hxx"
 
 class SMESH_Mesh;
-
-bool diffMEDFile(const std::string mesh_file1,
-                   const std::string mesh_file2,
-                   const std::string mesh_name);
-int importMesh(const std::string mesh_file,
-                SMESH_Mesh& aMesh);
-int exportMesh(const std::string mesh_file,
-                SMESH_Mesh& aMesh,
-                const std::string meshName);
-
+class SMESH_EXPORT SMESH_DriverMesh{
+  public:
+    static bool diffMEDFile(const std::string mesh_file1,
+                            const std::string mesh_file2,
+                            const std::string mesh_name);
+    static int importMesh(const std::string mesh_file,
+                          SMESH_Mesh& aMesh);
+    static int exportMesh(const std::string mesh_file,
+                          SMESH_Mesh& aMesh,
+                          const std::string meshName);
+};
 #endif

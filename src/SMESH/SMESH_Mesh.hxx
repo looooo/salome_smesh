@@ -395,7 +395,7 @@ class SMESH_EXPORT SMESH_Mesh
   void Unlock() {};
 
   int GetNbThreads(){return _NbThreads;};
-  void SetNbThreads(int nbThreads){std::cout << "Warning Parallel Meshing is disabled on Windows it will behave as a slower normal compute" << std::endl;_NbThreads=nbThreads;};
+  void SetNbThreads(long nbThreads){std::cout << "Warning Parallel Meshing is disabled on Windows it will behave as a slower normal compute" << std::endl;_NbThreads=nbThreads;};
 
   void InitPoolThreads(){};
   void DeletePoolThreads(){};
@@ -407,7 +407,7 @@ class SMESH_EXPORT SMESH_Mesh
   void Unlock() {_my_lock.unlock();};
 
   int GetNbThreads(){return _NbThreads;};
-  void SetNbThreads(int nbThreads){_NbThreads=nbThreads;};
+  void SetNbThreads(long nbThreads){_NbThreads=nbThreads;};
 
   void InitPoolThreads(){_pool = new boost::asio::thread_pool(_NbThreads);};
   void DeletePoolThreads(){delete _pool;};

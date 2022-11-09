@@ -7042,7 +7042,7 @@ TListOfListOfInt SMESH_Mesh_i::findConcurrentSubMeshes()
  * \brief Set the number of threads for a parallel computation
  */
 //=============================================================================
- void SMESH_Mesh_i::SetNbThreads(long nbThreads){
+void SMESH_Mesh_i::SetNbThreads(CORBA::Long nbThreads){
   _impl->SetNbThreads(nbThreads);
 }
 

@@ -26,10 +26,11 @@
 //
 #ifndef _SMESH_MESHLOCKER_HXX_
 #define _SMESH_MESHLOCKER_HXX_
+#include "SMESH_SMESH.hxx"
 
 class SMESH_Mesh;
 
-class SMESH_MeshLocker{
+class SMESH_EXPORT SMESH_MeshLocker{
 public:
   SMESH_MeshLocker(SMESH_Mesh * aMesh);
   ~SMESH_MeshLocker();

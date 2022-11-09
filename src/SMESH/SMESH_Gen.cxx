@@ -340,7 +340,7 @@ bool SMESH_Gen::parallelComputeSubMeshes(
       if(file_name != "")
       {
         fs::path mesh_file = fs::path(aMesh.tmp_folder) / fs::path(file_name);
-        exportMesh(mesh_file.string(), aMesh, "MESH");
+	SMESH_DriverMesh::exportMesh(mesh_file.string(), aMesh, "MESH");
 
       }
       //Resetting threaded pool info

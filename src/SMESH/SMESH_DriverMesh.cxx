@@ -46,7 +46,7 @@ using namespace MEDCoupling;
  *
  * @return true if the mesh within the files are identical
  */
-bool diffMEDFile(const std::string mesh_file1, const std::string mesh_file2, const std::string mesh_name){
+bool SMESH_DriverMesh::diffMEDFile(const std::string mesh_file1, const std::string mesh_file2, const std::string mesh_name){
   MEDFileUMesh* medmesh1 = MEDFileUMesh::New(mesh_file1, mesh_name);
   MEDFileUMesh* medmesh2 = MEDFileUMesh::New(mesh_file2, mesh_name);
   MEDCouplingUMesh *m0_1=medmesh1->getMeshAtLevel(0,false);
@@ -70,7 +70,7 @@ std::string getMeshName(std::string mesh_file){
  *
  * @return error code
  */
-int importMesh(const std::string mesh_file, SMESH_Mesh& aMesh){
+int SMESH_DriverMesh::importMesh(const std::string mesh_file, SMESH_Mesh& aMesh){
   // TODO: change that as it depends on the language
   std::string mesh_name = getMeshName(mesh_file);
   MESSAGE("Importing mesh from " << mesh_file << " mesh " << mesh_name);
@@ -87,7 +87,8 @@ int importMesh(const std::string mesh_file, SMESH_Mesh& aMesh){
  *
  * @return error code
  */
-int exportMesh(const std::string mesh_file, SMESH_Mesh& aMesh, const std::string mesh_name){
+ 
+int SMESH_DriverMesh::exportMesh(const std::string mesh_file, SMESH_Mesh& aMesh, const std::string mesh_name){
 
   MESSAGE("Exporting mesh to " << mesh_file);
   aMesh.ExportMED(mesh_file.c_str(), // theFile

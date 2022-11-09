@@ -30,10 +30,11 @@
 
 #include <string>
 #include <cassert>
-
+#include "SMESH_SMESH.hxx"
 class TopoDS_Shape;
-
-int importShape(const std::string shape_file, TopoDS_Shape& aShape);
-int exportShape(const std::string shape_file, const TopoDS_Shape& aShape);
-
+class SMESH_EXPORT SMESH_DriverShape{
+  public:
+    static int importShape(const std::string shape_file, TopoDS_Shape& aShape);
+    static int exportShape(const std::string shape_file, const TopoDS_Shape& aShape);
+};
 #endif

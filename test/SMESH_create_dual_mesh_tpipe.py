@@ -83,11 +83,13 @@ Mesh_1.Tetrahedron(algo=smeshBuilder.NETGEN_3D)
 isDone = Mesh_1.Compute()
 
 # Create groups
+d_geom_groups = {}
 d_mesh_groups = {}
 for geom_group in geom_groups:
   gr = Mesh_1.Group(geom_group)
   gr_name = gr.GetName()
   d_mesh_groups[gr_name] = gr
+  d_geom_groups[gr_name] = geom_group
 
 # Check tetra mesh volume
 mesh_volume = smesh.GetVolume(Mesh_1)
@@ -110,25 +112,42 @@ dual_Mesh_raw_group_names = dual_Mesh_raw_1.GetGroupNames()
 
 assert len(dual_Mesh_raw_groups) == 4
 
-for gr_dual, gr_name in zip(dual_Mesh_raw_groups, dual_Mesh_raw_group_names):
+## Create dual mesh with projection on faces
+dual_Mesh_1 = smesh.CreateDualMesh(Mesh_1, 'dual_Mesh_1', True)
+
+# Check dual mesh volume
+dual_volume = dual_Mesh_1.GetVolume()
+print("dual_volume: ", dual_volume)
+print("dual_raw_volume: ", dual_raw_volume)
+assert (dual_volume >= dual_raw_volume)
+
+assert abs(dual_volume-shape_volume)/shape_volume < 0.11
+
+# Check groups
+dual_Mesh_groups = dual_Mesh_1.GetGroups()
+dual_Mesh_group_names = dual_Mesh_1.GetGroupNames()
+d_mesh_dual_groups = {}
+for gr_name, gr in zip(dual_Mesh_group_names, dual_Mesh_groups):
+    gr_name = gr_name.strip()
+    d_mesh_dual_groups[gr_name] = gr
+
+for gr_dual_raw, gr_name in zip(dual_Mesh_raw_groups, dual_Mesh_raw_group_names):
   gr_name = gr_name.strip()
   gr_tri = d_mesh_groups[gr_name]
+  gr_dual = d_mesh_dual_groups[gr_name]
+  gr_geom = d_geom_groups[gr_name]
+  area_gr_geom = geompy.BasicProperties(gr_geom)[1]
   area_gr_tri = smesh.GetArea(gr_tri)
+  area_gr_dual_raw = smesh.GetArea(gr_dual_raw)
   area_gr_dual = smesh.GetArea(gr_dual)
   print(gr_name)
+  print("Area geom: ", area_gr_geom)
   print("Area tri: ", area_gr_tri)
+  print("Area dual raw:", area_gr_dual_raw)
   print("Area dual:", area_gr_dual)
-  assert abs(area_gr_tri-area_gr_dual)/area_gr_tri < 1e-3
+  assert abs(area_gr_geom-area_gr_dual)/area_gr_geom < 0.015
+  assert abs(area_gr_tri-area_gr_dual_raw)/area_gr_tri < 1e-3
 
-#dual_Mesh_1 = smesh.CreateDualMesh(Mesh_1, 'dual_Mesh_1', True)
-
-
-#dual_volume = dual_Mesh_1.GetVolume()
-#dual_raw_volume = dual_Mesh_raw_1.GetVolume()
-#print("dual_volume: ", dual_volume)
-#print("dual_raw_volume: ", dual_raw_volume)
-
-#assert (dual_volume >= dual_raw_volume)
 
 if salome.sg.hasDesktop():
   salome.sg.updateObjBrowser()

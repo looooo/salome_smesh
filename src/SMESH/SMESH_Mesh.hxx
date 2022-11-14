@@ -391,32 +391,33 @@ class SMESH_EXPORT SMESH_Mesh
   // Parallel computation functions
 
 #ifdef WIN32
-  void Lock() {};
-  void Unlock() {};
+  virtual void Lock() {};
+  virtual void Unlock() {};
 
-  int GetNbThreads(){return _NbThreads;};
-  void SetNbThreads(long nbThreads){std::cout << "Warning Parallel Meshing is disabled on Windows it will behave as a slower normal compute" << std::endl;_NbThreads=nbThreads;};
+  virtual int GetNbThreads(){return _NbThreads;};
+  virtual void SetNbThreads(long nbThreads){std::cout << "Warning Parallel Meshing is disabled on Windows it will behave as a slower normal compute" << std::endl;_NbThreads=nbThreads;};
 
-  void InitPoolThreads(){};
-  void DeletePoolThreads(){};
-  void wait(){}
+  virtual void InitPoolThreads(){};
+  virtual void DeletePoolThreads(){};
+  virtual void wait(){}
 
-  bool IsParallel(){return _NbThreads > 0;}
+  virtual bool IsParallel(){return _NbThreads > 0;}
 #else
-  void Lock() {_my_lock.lock();};
-  void Unlock() {_my_lock.unlock();};
+  virtual void Lock() {_my_lock.lock();};
+  virtual void Unlock() {_my_lock.unlock();};
 
-  int GetNbThreads(){return _NbThreads;};
-  void SetNbThreads(long nbThreads){_NbThreads=nbThreads;};
+  virtual int GetNbThreads(){return _NbThreads;};
+  virtual void SetNbThreads(long nbThreads){_NbThreads=nbThreads;};
 
-  void InitPoolThreads(){_pool = new boost::asio::thread_pool(_NbThreads);};
-  void DeletePoolThreads(){delete _pool;};
+  virtual void InitPoolThreads(){_pool = new boost::asio::thread_pool(_NbThreads);};
+  virtual void DeletePoolThreads(){delete _pool;};
 
-  void wait(){_pool->join(); DeletePoolThreads(); InitPoolThreads(); }
+  virtual void wait(){_pool->join(); DeletePoolThreads(); InitPoolThreads(); }
 
-  bool IsParallel(){return _NbThreads > 0;}
+  virtual bool IsParallel(){return _NbThreads > 0;}
 #endif
 
+  //TODO: to remove only used by ParallelMesh
   void CreateTmpFolder();
   void DeleteTmpFolder();
 

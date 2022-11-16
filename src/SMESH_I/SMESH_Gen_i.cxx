@@ -2933,6 +2933,10 @@ SMESH::SMESH_Mesh_ptr SMESH_Gen_i::CreateDualMesh(SMESH::SMESH_IDSource_ptr mesh
     MESSAGE("Dump of groups");
     SMESH::ListOfGroups_var groups = newMesh->GetGroups();
 
+#ifndef _DEBUG_
+  fs::remove_all(tmp_folder);
+#endif
+
   return newMesh._retn();
 }
 

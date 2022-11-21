@@ -106,7 +106,7 @@ assert dual_Mesh_raw_1.NbPolyhedrons() == dual_Mesh_raw_1.NbVolumes()
 
 # Check dual mesh volume
 dual_raw_volume = dual_Mesh_raw_1.GetVolume()
-assert abs(dual_raw_volume-shape_volume)/shape_volume < 0.12
+assert abs(dual_raw_volume-shape_volume)/shape_volume < 0.14
 
 # Check groups
 dual_Mesh_raw_groups = dual_Mesh_raw_1.GetGroups()
@@ -125,7 +125,7 @@ print("dual_volume: ", dual_volume)
 print("dual_raw_volume: ", dual_raw_volume)
 assert (dual_volume >= dual_raw_volume)
 
-assert abs(dual_volume-shape_volume)/shape_volume < 0.12
+assert abs(dual_volume-shape_volume)/shape_volume < 0.14
 
 # Check groups
 dual_Mesh_groups = dual_Mesh_1.GetGroups()

@@ -33,6 +33,7 @@
 #include "SMESH_ComputeError.hxx"
 #include "SMESH_Controls.hxx"
 #include "SMESH_Hypothesis.hxx"
+#include "SMESH_subMesh.hxx"
 #include "SMDS_Iterator.hxx"
 
 #include "Utils_SALOME_Exception.hxx"
@@ -72,6 +73,7 @@ class TopoDS_Solid;
 
 class DriverMED_W_SMESHDS_Mesh;
 
+typedef std::set<int> TSetOfInt;
 typedef std::list<int> TListOfInt;
 typedef std::list<TListOfInt> TListOfListOfInt;
 
@@ -390,47 +392,33 @@ class SMESH_EXPORT SMESH_Mesh
 
   // Parallel computation functions
 
-#ifdef WIN32
-  virtual void Lock() {};
-  virtual void Unlock() {};
+  virtual void Lock(){};
+  virtual void Unlock(){};
 
-  virtual int GetNbThreads(){return _NbThreads;};
-  virtual void SetNbThreads(long nbThreads){std::cout << "Warning Parallel Meshing is disabled on Windows it will behave as a slower normal compute" << std::endl;_NbThreads=nbThreads;};
+  virtual int GetNbThreads(){return 0;};
+  virtual void SetNbThreads(long nbThreads){(void) nbThreads;};
 
-  virtual void InitPoolThreads(){};
-  virtual void DeletePoolThreads(){};
-  virtual void wait(){}
+  virtual void InitPoolThreads(){std::cout << "Should not pass here" << std::endl;};
+  virtual void DeletePoolThreads(){std::cout << "Should not pass here" << std::endl;};
+  virtual void wait(){std::cout << "Should not pass here" << std::endl;};
 
-  virtual bool IsParallel(){return _NbThreads > 0;}
-#else
-  virtual void Lock() {_my_lock.lock();};
-  virtual void Unlock() {_my_lock.unlock();};
+  virtual bool IsParallel(){std::cout << "Should not pass here" << std::endl;return false;};
 
-  virtual int GetNbThreads(){return _NbThreads;};
-  virtual void SetNbThreads(long nbThreads){_NbThreads=nbThreads;};
+  virtual bool ComputeSubMeshes(
+            SMESH_Gen* gen,
+            SMESH_Mesh & aMesh,
+            const TopoDS_Shape & aShape,
+            const ::MeshDimension       aDim,
+            TSetOfInt*                  aShapesId /*=0*/,
+            TopTools_IndexedMapOfShape* allowedSubShapes,
+            SMESH_subMesh::compute_event &computeEvent,
+            const bool includeSelf,
+            const bool complexShapeFirst,
+            const bool   aShapeOnly){(void) gen;(void) aMesh;(void) aShape;(void) aDim;(void) aShapesId;(void) allowedSubShapes;(void) computeEvent;(void) includeSelf;(void) complexShapeFirst;(void) aShapeOnly;std::cout << "Should not pass here" << std::endl;return false;};
 
-  virtual void InitPoolThreads(){_pool = new boost::asio::thread_pool(_NbThreads);};
-  virtual void DeletePoolThreads(){delete _pool;};
-
-  virtual void wait(){_pool->join(); DeletePoolThreads(); InitPoolThreads(); }
-
-  virtual bool IsParallel(){return _NbThreads > 0;}
-#endif
-
-  //TODO: to remove only used by ParallelMesh
-  void CreateTmpFolder();
-  void DeleteTmpFolder();
-
-  // Temporary folder used during parallel Computation
-#ifndef WIN32
+  // TODO: Remove from SMESH_Mesh
   boost::filesystem::path tmp_folder;
   boost::asio::thread_pool *     _pool = nullptr; //thread pool for computation
-#else
-  std::string tmp_folder;
-  bool _pool = false;
-#endif
-
-
 private:
 
   void exportMEDCommmon(DriverMED_W_SMESHDS_Mesh& myWriter,

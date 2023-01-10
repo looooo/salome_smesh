@@ -29,6 +29,9 @@
 
 #include "SMESH_Mesh.hxx"
 
+#include "SMESH_Gen.hxx"
+#include "SMESH_subMesh.hxx"
+
 class SMESH_EXPORT SMESH_SequentialMesh: public SMESH_Mesh
 {
  public:
@@ -43,12 +46,25 @@ class SMESH_EXPORT SMESH_SequentialMesh: public SMESH_Mesh
   void Unlock() override {};
 
   int GetNbThreads() override {return 0;};
-  void SetNbThreads(long nbThreads) {};
+  void SetNbThreads(long nbThreads) {(void) nbThreads;};
 
   void InitPoolThreads() override {};
   void DeletePoolThreads() override {};
   void wait() override {};
 
   bool IsParallel() override {return false;};
+
+  bool ComputeSubMeshes (
+            SMESH_Gen* gen,
+            SMESH_Mesh & aMesh,
+            const TopoDS_Shape & aShape,
+            const ::MeshDimension       aDim,
+            TSetOfInt*                  aShapesId /*=0*/,
+            TopTools_IndexedMapOfShape* allowedSubShapes,
+            SMESH_subMesh::compute_event &computeEvent,
+            const bool includeSelf,
+            const bool complexShapeFirst,
+            const bool   aShapeOnly) override;
+
 };
 #endif

@@ -29,6 +29,9 @@
 
 #include "SMESH_Mesh.hxx"
 
+#include "SMESH_Gen.hxx"
+#include "SMESH_subMesh.hxx"
+
 class SMESH_EXPORT SMESH_ParallelMesh: public SMESH_Mesh
 {
  public:
@@ -45,18 +48,26 @@ class SMESH_EXPORT SMESH_ParallelMesh: public SMESH_Mesh
   int GetNbThreads() override{return _NbThreads;};
   void SetNbThreads(long nbThreads) override{_NbThreads=nbThreads;};
 
-  void InitPoolThreads() override{_pool = new boost::asio::thread_pool(_NbThreads);};
-  void DeletePoolThreads() override{delete _pool;};
+  void InitPoolThreads() override {_pool = new boost::asio::thread_pool(_NbThreads);};
+  void DeletePoolThreads() override {delete _pool;};
 
-  void wait() override{_pool->join(); DeletePoolThreads(); InitPoolThreads(); };
+  void wait() override {_pool->join(); DeletePoolThreads(); InitPoolThreads(); };
 
-  bool IsParallel() override{return _NbThreads > 0;};
+  bool IsParallel() override {return _NbThreads > 0;};
 
   void CreateTmpFolder();
   void DeleteTmpFolder();
 
- private:
-  boost::filesystem::path tmp_folder;
-  boost::asio::thread_pool *     _pool = nullptr; //thread pool for computation
+  bool ComputeSubMeshes(
+            SMESH_Gen* gen,
+            SMESH_Mesh & aMesh,
+            const TopoDS_Shape & aShape,
+            const ::MeshDimension       aDim,
+            TSetOfInt*                  aShapesId /*=0*/,
+            TopTools_IndexedMapOfShape* allowedSubShapes,
+            SMESH_subMesh::compute_event &computeEvent,
+            const bool includeSelf,
+            const bool complexShapeFirst,
+            const bool   aShapeOnly) override;
 };
 #endif

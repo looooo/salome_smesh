@@ -26,3 +26,93 @@
 //
 #include "SMESH_ParallelMesh.hxx"
 
+#include "SMESH_Gen.hxx"
+
+#ifdef WIN32
+  #include <windows.h>
+#endif
+
+#ifndef WIN32
+#include <boost/filesystem.hpp>
+namespace fs=boost::filesystem;
+#endif
+
+#ifndef WIN32
+#include <boost/asio.hpp>
+#endif
+
+#include <utilities.h>
+
+#ifdef _DEBUG_
+static int MYDEBUG = 1;
+#else
+static int MYDEBUG = 0;
+#endif
+
+SMESH_ParallelMesh::SMESH_ParallelMesh(int               theLocalId,
+                       SMESH_Gen*        theGen,
+                       bool              theIsEmbeddedMode,
+                       SMESHDS_Document* theDocument) :SMESH_Mesh(theLocalId,
+                                                                  theGen,
+                                                                  theIsEmbeddedMode,
+                                                                  theDocument)
+{
+  InitPoolThreads();
+  CreateTmpFolder();
+};
+
+SMESH_ParallelMesh::~SMESH_ParallelMesh()
+{
+  DeletePoolThreads();
+  if(!MYDEBUG)
+    DeleteTmpFolder();
+};
+
+
+
+//=============================================================================
+/*!
+ * \brief Build folder for parallel computation
+ */
+//=============================================================================
+void SMESH_ParallelMesh::CreateTmpFolder()
+{
+#ifndef WIN32
+  // Temporary folder that will be used by parallel computation
+  tmp_folder = fs::temp_directory_path()/fs::unique_path(fs::path("SMESH_%%%%-%%%%"));
+  fs::create_directories(tmp_folder);
+#endif
+}
+//
+//=============================================================================
+/*!
+ * \brief Delete temporary folder used for parallel computation
+ */
+//=============================================================================
+void SMESH_ParallelMesh::DeleteTmpFolder()
+{
+#ifndef WIN32
+    fs::remove_all(tmp_folder);
+#endif
+}
+
+bool SMESH_ParallelMesh::ComputeSubMeshes(
+          SMESH_Gen* gen,
+          SMESH_Mesh & aMesh,
+          const TopoDS_Shape & aShape,
+          const ::MeshDimension       aDim,
+          TSetOfInt*                  aShapesId /*=0*/,
+          TopTools_IndexedMapOfShape* allowedSubShapes,
+          SMESH_subMesh::compute_event &computeEvent,
+          const bool includeSelf,
+          const bool complexShapeFirst,
+          const bool   aShapeOnly)
+{
+  return gen->parallelComputeSubMeshes(
+            aMesh, aShape, aDim,
+            aShapesId, allowedSubShapes,
+            computeEvent,
+            includeSelf,
+            complexShapeFirst,
+            aShapeOnly);
+}

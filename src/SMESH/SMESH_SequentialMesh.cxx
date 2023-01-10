@@ -25,3 +25,44 @@
 //  Module : SMESH
 //
 #include "SMESH_SequentialMesh.hxx"
+
+#include <TopExp_Explorer.hxx>
+#include <TopoDS.hxx>
+#include <TopoDS_Iterator.hxx>
+
+#include <utilities.h>
+
+SMESH_SequentialMesh::SMESH_SequentialMesh(int               theLocalId,
+                       SMESH_Gen*        theGen,
+                       bool              theIsEmbeddedMode,
+                       SMESHDS_Document* theDocument) :SMESH_Mesh(theLocalId,
+                                                                  theGen,
+                                                                  theIsEmbeddedMode,
+                                                                  theDocument)
+{
+};
+
+SMESH_SequentialMesh::~SMESH_SequentialMesh()
+{
+};
+
+bool SMESH_SequentialMesh::ComputeSubMeshes(
+          SMESH_Gen* gen,
+          SMESH_Mesh & aMesh,
+          const TopoDS_Shape & aShape,
+          const ::MeshDimension       aDim,
+          TSetOfInt*                  aShapesId /*=0*/,
+          TopTools_IndexedMapOfShape* allowedSubShapes,
+          SMESH_subMesh::compute_event &computeEvent,
+          const bool includeSelf,
+          const bool complexShapeFirst,
+          const bool   aShapeOnly)
+{
+    return gen->sequentialComputeSubMeshes(
+            aMesh, aShape, aDim,
+            aShapesId, allowedSubShapes,
+            computeEvent,
+            includeSelf,
+            complexShapeFirst,
+            aShapeOnly);
+};

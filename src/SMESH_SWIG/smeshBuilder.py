@@ -1592,7 +1592,7 @@ class Mesh(metaclass = MeshMeta):
     mesh = 0
     editor = 0
 
-    def __init__(self, smeshpyD, geompyD, obj=0, name=0):
+    def __init__(self, smeshpyD, geompyD, obj=0, name=0, parallel=False):
 
         """
         Constructor
@@ -1625,7 +1625,10 @@ class Mesh(metaclass = MeshMeta):
                     else:
                         geo_name = "%s_%s to mesh"%(self.geom.GetShapeType(), id(self.geom)%100)
                     geompyD.addToStudy( self.geom, geo_name )
-                self.SetMesh( self.smeshpyD.CreateMesh(self.geom) )
+                if parallel and isinstance(self, ParallelMesh):
+                    self.SetMesh( self.smeshpyD.CreateParallelMesh(self.geom) )
+                else:
+                    self.SetMesh( self.smeshpyD.CreateMesh(self.geom) )
 
             elif isinstance(obj, SMESH._objref_SMESH_Mesh):
                 self.SetMesh(obj)
@@ -7537,6 +7540,49 @@ class ParallelMesh(Mesh):
     Surcharge on Mesh for parallel computation of a mesh
     """
 
+    def __split_geom(self, geompyD, geom):
+        """
+        Splitting geometry into n solids and a 2D/1D compound
+
+        Parameters:
+            geom: geometrical object for meshing
+
+        """
+        # Splitting geometry into 3D elements and all the 2D/1D into one compound
+        object_solids = geompyD.ExtractShapes(geom, geompyD.ShapeType["SOLID"],
+                                              True)
+
+        solids = []
+        isolid = 0
+        for solid in object_solids:
+            isolid += 1
+            geompyD.addToStudyInFather( geom, solid, 'Solid_{}'.format(isolid) )
+            solids.append(solid)
+        # If geom is a solid ExtractShapes will return nothin in that case geom is the solids
+        if isolid == 0:
+           solids = [geom]
+
+        faces = []
+        iface = 0
+        for isolid, solid in enumerate(solids):
+            solid_faces = geompyD.ExtractShapes(solid, geompyD.ShapeType["FACE"],
+                                                True)
+            for face in solid_faces:
+                faces.append(face)
+                iface += 1
+                geompyD.addToStudyInFather(solid, face,
+                                           'Face_{}'.format(iface))
+
+        # Creating submesh for edges 1D/2D part
+
+        all_faces = geompyD.MakeCompound(faces)
+        geompyD.addToStudy(all_faces, 'Compound_1')
+        all_faces = geompyD.MakeGlueEdges(all_faces, 1e-07)
+        all_faces = geompyD.MakeGlueFaces(all_faces, 1e-07)
+        geompyD.addToStudy(all_faces, 'global2D')
+
+        return all_faces, solids
+
     def __init__(self, smeshpyD, geompyD, geom, param, nbThreads, name=0):
         """
         Create a parallel mesh.
@@ -7560,37 +7606,9 @@ class ParallelMesh(Mesh):
         if nbThreads < 1:
             raise ValueError("Number of threads must be stricly greater than 1")
 
-        # Splitting geometry into 3D elements and all the 2D/1D into one compound
-        object_solids = geompyD.ExtractShapes(geom, geompyD.ShapeType["SOLID"],
-                                              True)
+        all_faces, solids = self.__split_geom(geompyD, geom)
 
-        solids = []
-        isolid = 0
-        for solid in object_solids:
-            isolid += 1
-            geompyD.addToStudyInFather( geom, solid, 'Solid_{}'.format(isolid) )
-            solids.append(solid)
-
-        faces = []
-        iface = 0
-        for isolid, solid in enumerate(solids):
-            solid_faces = geompyD.ExtractShapes(solid, geompyD.ShapeType["FACE"],
-                                                True)
-            for face in solid_faces:
-                faces.append(face)
-                iface += 1
-                geompyD.addToStudyInFather(solid, face,
-                                           'Face_{}'.format(iface))
-
-        # Creating submesh for edges 1D/2D part
-
-        all_faces = geompyD.MakeCompound(faces)
-        geompyD.addToStudy(all_faces, 'Compound_1')
-        all_faces = geompyD.MakeGlueEdges(all_faces, 1e-07)
-        all_faces = geompyD.MakeGlueFaces(all_faces, 1e-07)
-        geompyD.addToStudy(all_faces, 'global2D')
-
-        super(ParallelMesh, self).__init__(smeshpyD, geompyD, geom, name)
+        super(ParallelMesh, self).__init__(smeshpyD, geompyD, geom, name, parallel=True)
 
         self.mesh.SetNbThreads(nbThreads)
 

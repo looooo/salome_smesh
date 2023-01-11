@@ -98,7 +98,9 @@ def run_test(nbox=2, boxsize=100):
     """
     geom, seq_mesh, netgen_parameters = build_seq_mesh(nbox, boxsize, 0)
 
-    par_mesh = smesh.ParallelMesh(geom, netgen_parameters, 6, name="par_mesh")
+    par_mesh = smesh.ParallelMesh(geom, name="par_mesh")
+    par_mesh.AddGlobalHypothesis(netgen_parameters)
+    par_mesh.SetNbThreads(6)
 
     start = time.monotonic()
     is_done = seq_mesh.Compute()

@@ -1238,7 +1238,7 @@ SMESH::SMESH_Mesh_ptr SMESH_Gen_i::CreateMesh( GEOM::GEOM_Object_ptr theShapeObj
 SMESH::SMESH_Mesh_ptr SMESH_Gen_i::CreateParallelMesh( GEOM::GEOM_Object_ptr theShapeObject )
 {
   Unexpect aCatch(SALOME_SalomeException);
-  if(MYDEBUG) MESSAGE( "SMESH_Gen_i::CreateParallelMesh" );
+  MESSAGE( "SMESH_Gen_i::CreateParallelMesh" );
   // create mesh
   SMESH::SMESH_Mesh_var mesh = this->createMesh(true);
   // set shape

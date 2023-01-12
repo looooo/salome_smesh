@@ -404,6 +404,9 @@ class SMESH_EXPORT SMESH_Mesh
 
   virtual bool IsParallel(){std::cout << "Should not pass here" << std::endl;return false;};
 
+  virtual boost::filesystem::path GetTmpFolder() {return "";};
+  virtual boost::asio::thread_pool* GetPool() {return NULL;};
+
   virtual bool ComputeSubMeshes(
             SMESH_Gen* gen,
             SMESH_Mesh & aMesh,
@@ -416,9 +419,6 @@ class SMESH_EXPORT SMESH_Mesh
             const bool complexShapeFirst,
             const bool   aShapeOnly){(void) gen;(void) aMesh;(void) aShape;(void) aDim;(void) aShapesId;(void) allowedSubShapes;(void) computeEvent;(void) includeSelf;(void) complexShapeFirst;(void) aShapeOnly;std::cout << "Should not pass here" << std::endl;return false;};
 
-  // TODO: Remove from SMESH_Mesh
-  boost::filesystem::path tmp_folder;
-  boost::asio::thread_pool *     _pool = nullptr; //thread pool for computation
 private:
 
   void exportMEDCommmon(DriverMED_W_SMESHDS_Mesh& myWriter,

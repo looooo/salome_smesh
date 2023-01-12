@@ -58,6 +58,9 @@ class SMESH_EXPORT SMESH_ParallelMesh: public SMESH_Mesh
   void CreateTmpFolder();
   void DeleteTmpFolder();
 
+  boost::filesystem::path GetTmpFolder() override {return tmp_folder;};
+  boost::asio::thread_pool* GetPool() override {return _pool;};
+
   bool ComputeSubMeshes(
             SMESH_Gen* gen,
             SMESH_Mesh & aMesh,
@@ -69,5 +72,9 @@ class SMESH_EXPORT SMESH_ParallelMesh: public SMESH_Mesh
             const bool includeSelf,
             const bool complexShapeFirst,
             const bool   aShapeOnly) override;
+
+ private:
+  boost::filesystem::path tmp_folder;
+  boost::asio::thread_pool *     _pool = nullptr; //thread pool for computation
 };
 #endif

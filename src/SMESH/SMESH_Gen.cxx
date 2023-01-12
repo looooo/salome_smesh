@@ -360,7 +360,7 @@ bool SMESH_Gen::parallelComputeSubMeshes(
       }
       if(file_name != "")
       {
-        fs::path mesh_file = fs::path(aMesh.tmp_folder) / fs::path(file_name);
+        fs::path mesh_file = fs::path(aMesh.GetTmpFolder()) / fs::path(file_name);
 	      SMESH_DriverMesh::exportMesh(mesh_file.string(), aMesh, "MESH");
       }
       //Resetting threaded pool info
@@ -375,7 +375,7 @@ bool SMESH_Gen::parallelComputeSubMeshes(
       smToCompute->ComputeStateEngine( SMESH_subMesh::CHECK_COMPUTE_STATE );
       continue;
     }
-    boost::asio::post(*(aMesh._pool), std::bind(compute_function, smToCompute, computeEvent,
+    boost::asio::post(*(aMesh.GetPool()), std::bind(compute_function, smToCompute, computeEvent,
                       shapeSM, aShapeOnly, allowedSubShapes,
                       aShapesId));
   }

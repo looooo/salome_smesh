@@ -59,7 +59,8 @@ You follow the same principle as the creation of a sequential Mesh.
 #. Set the parameters for the parallelisation:
 	.. code-block:: python
 
-		par_mesh.SetNbThreads()Compute()
+		param = par_mesh.GetParallelismSettings()
+		param.SetNbThreads(6)
 
 #. Compute the mesh:
 	.. code-block:: python

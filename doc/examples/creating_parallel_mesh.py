@@ -100,7 +100,10 @@ def run_test(nbox=2, boxsize=100):
 
     par_mesh = smesh.ParallelMesh(geom, name="par_mesh")
     par_mesh.AddGlobalHypothesis(netgen_parameters)
-    par_mesh.SetNbThreads(6)
+    param = par_mesh.GetParallelismSettings()
+    param.SetNbThreads(6)
+
+    assert param.GetNbThreads() == 6, param.GetNbThreads()
 
     start = time.monotonic()
     is_done = seq_mesh.Compute()

@@ -904,6 +904,11 @@ module SMESH
      */
     void SetNbThreads(in long nbThreads);
     /*!
+    /*!
+     * \brief Get Number of Threads
+     */
+    long GetNbThreads();
+    /*!
 
     /*!
      * Get mesh description

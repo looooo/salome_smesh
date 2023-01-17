@@ -7583,12 +7583,41 @@ def _split_geom(geompyD, geom):
 
     return all_faces, solids
 
+class ParallelismSettings:
+    """
+    Defines the parameters for the parallelism of ParallelMesh
+    """
+    def __init__(self, mesh):
+        """
+        Construsctor
+
+        Parameters:
+        mesh: Instance of ParallelMesh
+        """
+        if not(isinstance(mesh, ParallelMesh)):
+            raise ValueError("mesh should be a ParallelMesh")
+
+        self._mesh = mesh
+
+    def SetNbThreads(self, nbThreads):
+        """
+        Set the number of threads for multithreading
+        """
+        if nbThreads < 1:
+            raise ValueError("Number of threads must be stricly greater than 1")
+
+        self._mesh.mesh.SetNbThreads(nbThreads)
+
+    def GetNbThreads(self):
+        """
+        Get Number of threads
+        """
+        return self._mesh.mesh.GetNbThreads()
+
 class ParallelMesh(Mesh):
     """
     Surcharge on Mesh for parallel computation of a mesh
     """
-
-
     def __init__(self, smeshpyD, geompyD, geom, split_geom=True, name=0):
         """
         Create a parallel mesh.
@@ -7598,7 +7627,7 @@ class ParallelMesh(Mesh):
             geompyD: instance of geomBuilder
             geom: geometrical object for meshing
             split_geom: If true will divide geometry on solids and 1D/2D
-            coumpund and create the associated submeshes
+            coumpound and create the associated submeshes
             name: the name for the new mesh.
 
         Returns:
@@ -7628,10 +7657,20 @@ class ParallelMesh(Mesh):
                 algo3d = self.Tetrahedron(geom=solid, algo="NETGEN_3D_Remote")
                 self._algo3d.append(algo3d)
 
+        self._param = ParallelismSettings(self)
+
+
+    def GetParallelismSettings(self):
+        """
+        Return class to set parameters for the parallelism
+        """
+        return self._param
 
     def AddGlobalHypothesis(self, hyp):
         """
-        Assign a hypothesis
+        Split hypothesis to apply it to all the submeshes:
+        - the 1D+2D
+        - each of the 3D solids
 
         Parameters:
                 hyp: a hypothesis to assign
@@ -7648,18 +7687,6 @@ class ParallelMesh(Mesh):
             param3d = algo3d.Parameters()
             _copy_netgen_param(3, param3d, hyp)
 
-    def SetNbThreads(self, nbThreads):
-        """
-        Define the number of threads for meshing
-
-        Parameters:
-            nbThreads: Number of threads
-        """
-
-        if nbThreads < 1:
-            raise ValueError("Number of threads must be stricly greater than 1")
-
-        self.mesh.SetNbThreads(nbThreads)
 
     pass # End of ParallelMesh
 

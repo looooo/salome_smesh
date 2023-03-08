@@ -666,7 +666,11 @@ namespace SMESHUtils_MGLicenseKeyGen // API implementation
   {
     int ok;
     std::string key = GetKey(error);
+#ifndef WIN32
     ok = setenv(SPATIAL_LICENSE, key.c_str(), 0); // 0 means do not overwrite
+#else
+    ok = Kernel_Utils::setenv(SPATIAL_LICENSE, key.c_str(), 0 );
+#endif
     MESSAGE("Set SPATIAL_LICENSE");
     return (ok==0);
   }

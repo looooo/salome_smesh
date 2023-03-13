@@ -1,9 +1,11 @@
 # contains function to compute a mesh in parallel
+import platform
 from platform import java_ver
 import sys
-from tkinter import W
 import salome
-
+# tkinter not built on Windows - Python 3.6.5
+if platform.system() != 'Windows':
+    from tkinter import W
 import time
 
 

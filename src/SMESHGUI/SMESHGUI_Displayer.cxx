@@ -37,6 +37,9 @@
 #include <SVTK_ViewModel.h>
 #include <SVTK_ViewWindow.h>
 
+#include <SPV3D_ViewModel.h>
+#include <SPV3D_ViewWindow.h>
+
 
 // IDL includes
 #include <SALOMEconfig.h>
@@ -80,6 +83,14 @@ SALOME_Prs* SMESHGUI_Displayer::buildPresentation( const QString& entry, SALOME_
         UpdatePrs( prs );
       else if( anActor )
         SMESH::RemoveActor( vtk_viewer->getViewManager()->getActiveView(), anActor );
+    }
+    else 
+    {
+      SPV3D_ViewModel* pv3_viewer = dynamic_cast<SPV3D_ViewModel*>(aViewFrame);
+      if (pv3_viewer)
+      {
+        // NYI
+      }
     }
   }
 

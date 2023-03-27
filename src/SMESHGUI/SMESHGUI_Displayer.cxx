@@ -94,7 +94,7 @@ SalomeApp_Study* SMESHGUI_Displayer::study() const
 bool SMESHGUI_Displayer::canBeDisplayed( const QString& entry, const QString& viewer_type ) const
 {
   bool res = false;
-  if(viewer_type != SVTK_Viewer::Type())
+  if(viewer_type != SVTK_Viewer::Type() && viewer_type != SPV3D_ViewModel::Type())
     return res;
   
   _PTR(SObject) obj = SMESH::getStudy()->FindObjectID( (const char*)entry.toUtf8() );

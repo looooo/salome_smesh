@@ -49,10 +49,8 @@
 #include <vector>
 #include <ostream>
 
-#ifndef DISABLE_PSMESH
 #include <boost/filesystem.hpp>
 #include <boost/asio/thread_pool.hpp>
-#endif
 #include <boost/thread.hpp>
 
 #ifdef WIN32
@@ -404,10 +402,8 @@ class SMESH_EXPORT SMESH_Mesh
 
   virtual bool IsParallel(){std::cout << "Should not pass here: IsParallel" << std::endl;return false;};
 
-#ifndef DISABLE_PSMESH
   virtual boost::filesystem::path GetTmpFolder() {return "";};
   virtual boost::asio::thread_pool* GetPool() {return NULL;};
-#endif
 
   virtual bool ComputeSubMeshes(
             SMESH_Gen* gen,
@@ -468,9 +464,7 @@ protected:
   TCallUp*                    _callUp;
 
   // Mutex for multhitreading write in SMESH_Mesh
-#ifndef DISABLE_PSMESH
   boost::mutex _my_lock;
-#endif
   int _NbThreads=-1;
 
 protected:

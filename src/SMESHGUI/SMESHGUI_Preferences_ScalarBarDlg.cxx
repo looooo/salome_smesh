@@ -569,6 +569,7 @@ bool SMESHGUI_Preferences_ScalarBarDlg::onApply()
 
   myLookupTable->SetRange( aMin, aMax );
   myLookupTable->SetNumberOfTableValues(myColorsSpin->value());
+  applyThreshold(myLookupTable);
 
   bool scaleChanged = (myLogarithmicCheck->isChecked() != (myLookupTable->GetScale() == VTK_SCALE_LOG10));
   if (scaleChanged)
@@ -661,6 +662,8 @@ void SMESHGUI_Preferences_ScalarBarDlg::onSelectionChanged()
           myLogarithmicCheck->setChecked(aLookupTable->GetScale() == VTK_SCALE_LOG10);
           //myLogarithmicCheck->setEnabled(range[0] > 1e-07 && range[1] > 1e-07);
           myLogarithmicCheck->setEnabled(range[0] != range[1]);
+
+          applyThreshold(aLookupTable);
         }
 
         vtkTextProperty* aTitleTextPrp = myScalarBarActor->GetTitleTextProperty();
@@ -876,5 +879,29 @@ void SMESHGUI_Preferences_ScalarBarDlg::initScalarBarFromResources()
       DEF_VER_W = mgr->doubleValue("SMESH", name.arg( "width" ));
     if (mgr->hasValue("SMESH", name.arg( "height" )))
       DEF_VER_H = mgr->doubleValue("SMESH", name.arg( "height" ));
+  }
+}
+
+//=================================================================================================
+/*!
+ *  SMESHGUI_Preferences_ScalarBarDlg::applyThreshold()
+ *
+ *  Switch on and off using of special color for values beyond the min-max range.
+ *  Now this color is completely transparent - RGBA(0,0,0,0).
+ */
+//=================================================================================================
+void SMESHGUI_Preferences_ScalarBarDlg::applyThreshold(vtkLookupTable* aLookupTable)
+{
+  const bool isChecked = myThresholdCheck->isChecked();
+
+  aLookupTable->SetUseAboveRangeColor(isChecked);
+  aLookupTable->SetUseBelowRangeColor(isChecked);
+
+  if (isChecked)
+  {
+    const double beyondRangeColor[4] = {};
+
+    aLookupTable->SetAboveRangeColor(beyondRangeColor);
+    aLookupTable->SetBelowRangeColor(beyondRangeColor);
   }
 }

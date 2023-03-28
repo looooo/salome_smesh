@@ -50,6 +50,8 @@ class SalomeApp_IntSpinBox;
 class QtxColorButton;
 class LightApp_SelectionMgr;
 
+class vtkLookupTable;
+
 class SMESHGUI_EXPORT SMESHGUI_Preferences_ScalarBarDlg : public QDialog
 { 
   Q_OBJECT
@@ -69,6 +71,9 @@ public:
                                              const double,
                                              const double );
   void                     initScalarBarFromResources();
+
+protected:
+  void                     applyThreshold(vtkLookupTable* aLookupTable);
 
 protected slots:
   virtual void             reject();

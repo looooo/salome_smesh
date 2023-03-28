@@ -663,6 +663,7 @@ void SMESHGUI_Preferences_ScalarBarDlg::onSelectionChanged()
           //myLogarithmicCheck->setEnabled(range[0] > 1e-07 && range[1] > 1e-07);
           myLogarithmicCheck->setEnabled(range[0] != range[1]);
 
+          setThresholdFromTable(aLookupTable);
           applyThreshold(aLookupTable);
         }
 
@@ -880,6 +881,29 @@ void SMESHGUI_Preferences_ScalarBarDlg::initScalarBarFromResources()
     if (mgr->hasValue("SMESH", name.arg( "height" )))
       DEF_VER_H = mgr->doubleValue("SMESH", name.arg( "height" ));
   }
+}
+
+//=================================================================================================
+/*!
+ *  SMESHGUI_Preferences_ScalarBarDlg::setThresholdFromTable()
+ *
+ *  Checks if the table uses special color for values beyond the min-max range,
+ *  and this color is completely transparent - RGBA(0,0,0,0).
+ */
+//=================================================================================================
+void SMESHGUI_Preferences_ScalarBarDlg::setThresholdFromTable(vtkLookupTable* aLookupTable)
+{
+  bool isUseBeyondRangeColor = aLookupTable->GetUseAboveRangeColor() && aLookupTable->GetUseBelowRangeColor();
+
+  if (isUseBeyondRangeColor)
+  {
+    const double* aboveRangeColor = aLookupTable->GetAboveRangeColor();
+    const double* belowRangeColor = aLookupTable->GetBelowRangeColor();
+
+    isUseBeyondRangeColor = aboveRangeColor[3] == 0.0 && belowRangeColor[3] == 0.0;
+  }
+
+  myThresholdCheck->setChecked(isUseBeyondRangeColor);
 }
 
 //=================================================================================================

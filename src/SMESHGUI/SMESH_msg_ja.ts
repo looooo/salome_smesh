@@ -1980,6 +1980,10 @@
       <translation>対数</translation>
     </message>
     <message>
+        <source>SMESH_TRESHOLD_SCALARBAR</source>
+        <translation>しきい値</translation>
+    </message>
+    <message>
       <source>SMESH_MAKE_GROUPS</source>
       <translation>グループを生成します。</translation>
     </message>

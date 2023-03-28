@@ -2225,6 +2225,10 @@ Check algorithm documentation for supported geometry</translation>
         <translation>Logarithmic</translation>
     </message>
     <message>
+        <source>SMESH_TRESHOLD_SCALARBAR</source>
+        <translation>Threshold</translation>
+    </message>
+    <message>
         <source>SMESH_MAKE_GROUPS</source>
         <translation>Generate groups</translation>
     </message>

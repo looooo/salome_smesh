@@ -146,11 +146,16 @@ SMESHGUI_Preferences_ScalarBarDlg::SMESHGUI_Preferences_ScalarBarDlg( SMESHGUI* 
   myLogarithmicCheck->setText(tr("SMESH_LOGARITHMIC_SCALARBAR"));
   myLogarithmicCheck->setChecked(false);
 
+  myThresholdCheck = new QCheckBox (myRangeGrp);
+  myThresholdCheck->setText(tr("SMESH_TRESHOLD_SCALARBAR"));
+  myThresholdCheck->setChecked(false);
+
   myRangeGrpLayout->addWidget( new QLabel( tr( "SMESH_RANGE_MIN" ), myRangeGrp ), 0, 0, 1, 1 );
   myRangeGrpLayout->addWidget( myMinEdit, 0, 1, 1, 1 );
   myRangeGrpLayout->addWidget( new QLabel( tr( "SMESH_RANGE_MAX" ), myRangeGrp ), 0, 2, 1, 1 );
   myRangeGrpLayout->addWidget( myMaxEdit, 0, 3, 1, 1 );
-  myRangeGrpLayout->addWidget( myLogarithmicCheck, 1, 0, 1, 4 );
+  myRangeGrpLayout->addWidget( myLogarithmicCheck, 1, 0, 1, 1 );
+  myRangeGrpLayout->addWidget( myThresholdCheck, 1, 1, 1, 1 );
 
   aTopLayout->addWidget( myRangeGrp );
 

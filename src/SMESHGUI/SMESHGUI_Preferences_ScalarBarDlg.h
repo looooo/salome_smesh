@@ -97,6 +97,7 @@ private:
   QLineEdit*               myMinEdit;
   QLineEdit*               myMaxEdit;
   QCheckBox*               myLogarithmicCheck;
+  QCheckBox*               myThresholdCheck;
 
   QGroupBox*               myFontGrp;
   QtxColorButton*          myTitleColorBtn;

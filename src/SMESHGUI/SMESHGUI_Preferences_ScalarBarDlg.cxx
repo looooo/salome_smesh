@@ -745,11 +745,19 @@ void SMESHGUI_Preferences_ScalarBarDlg::onSelectionChanged()
 //=================================================================================================
 void SMESHGUI_Preferences_ScalarBarDlg::onMinMaxChanged()
 {
-  double aMin = myMinEdit->text().toDouble();
-  double aMax = myMaxEdit->text().toDouble();
-  bool isLogarithmicEnabled = (aMin > 1e-07 && aMax > 1e-07);
-  myLogarithmicCheck->setChecked(isLogarithmicEnabled);
+  // Check if the min-max range is valid.
+  const double aMin = myMinEdit->text().toDouble();
+  const double aMax = myMaxEdit->text().toDouble();
+  const bool isLogarithmicEnabled = aMin > 1e-07 && aMax > 1e-07; // TODO: is it right validation?
+
+  // The checkbox should be enabled only when the range is valid for it
   myLogarithmicCheck->setEnabled(isLogarithmicEnabled);
+
+  // Change checkbox only if the range is not valid. Otherwise it's on the user decision.
+  if (!isLogarithmicEnabled)
+  {
+    myLogarithmicCheck->setChecked(isLogarithmicEnabled);
+  }
 }
 
 //=================================================================================================

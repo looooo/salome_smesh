@@ -36,7 +36,21 @@
 #include <SUIT_ViewManager.h>
 #include <SVTK_ViewModel.h>
 #include <SVTK_ViewWindow.h>
+#include <SPV3D_Prs.h>
+#include <SPV3D_ViewModel.h>
+#include <PV3DViewer_ViewWindow.h>
 
+//For PV3D
+#include "SMESH_Actor.h"
+#include "vtkDataSet.h"
+#include "vtkMapper.h"
+#include "pqServer.h"
+#include "pqApplicationCore.h"
+#include "pqServerManagerModel.h"
+#include "pqObjectBuilder.h"
+#include "pqPipelineSource.h"
+#include "vtkSMSourceProxy.h"
+#include "vtkPVTrivialProducer.h"
 
 // IDL includes
 #include <SALOMEconfig.h>
@@ -57,7 +71,7 @@ SMESHGUI_Displayer::~SMESHGUI_Displayer()
 
 SALOME_Prs* SMESHGUI_Displayer::buildPresentation( const QString& entry, SALOME_View* theViewFrame )
 {
-  SALOME_Prs* prs = 0;
+  SALOME_Prs *prs = nullptr;
 
   SALOME_View* aViewFrame = theViewFrame ? theViewFrame : GetActiveView();
 
@@ -80,6 +94,39 @@ SALOME_Prs* SMESHGUI_Displayer::buildPresentation( const QString& entry, SALOME_
         UpdatePrs( prs );
       else if( anActor )
         SMESH::RemoveActor( vtk_viewer->getViewManager()->getActiveView(), anActor );
+    }
+    
+    SPV3D_ViewModel *pv3d_viewer = dynamic_cast<SPV3D_ViewModel *>( aViewFrame );
+    if(pv3d_viewer)
+    {
+      SUIT_ViewWindow* wnd = pv3d_viewer->getViewManager()->getActiveView();
+      SMESH_Actor* anActor = SMESH::FindActorByEntry( wnd, entry.toUtf8().data() );
+      if( !anActor )
+        anActor = SMESH::CreateActor( entry.toUtf8().data(), true );
+      if( anActor )
+      {
+        prs = LightApp_Displayer::buildPresentation( entry.toUtf8().data(), aViewFrame );
+        if( prs )
+        {
+          SPV3D_Prs *pv3dPrs = dynamic_cast<SPV3D_Prs*>( prs );
+          if( pv3dPrs )
+          {
+            anActor->GetMapper()->Update();
+            vtkDataObject *ds = anActor->GetMapper()->GetInput();
+            vtkDataSet *ds2 = vtkDataSet::SafeDownCast(ds);
+            pqServer *serv(pqApplicationCore::instance()->getServerManagerModel()->findServer(pqServerResource("builtin:")));
+            pqObjectBuilder *builder(pqApplicationCore::instance()->getObjectBuilder());
+            pqPipelineSource *mySourceProducer(builder->createSource("sources","PVTrivialProducer",serv));
+            vtkSMProxy *producerBase = mySourceProducer->getProxy();
+            vtkSMSourceProxy *producer(vtkSMSourceProxy::SafeDownCast(producerBase));
+            vtkObjectBase *clientSideObject(producer->GetClientSideObject());
+            vtkPVTrivialProducer *clientSideObjectCast = vtkPVTrivialProducer::SafeDownCast(clientSideObject);
+            clientSideObjectCast->SetOutput(ds2);
+            mySourceProducer->updatePipeline();
+            pv3dPrs->SetSourceProducer( mySourceProducer );
+          }
+        }
+      }
     }
   }
 

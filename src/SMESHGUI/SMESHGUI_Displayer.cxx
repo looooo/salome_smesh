@@ -42,15 +42,6 @@
 
 //For PV3D
 #include "SMESH_Actor.h"
-#include "vtkDataSet.h"
-#include "vtkMapper.h"
-#include "pqServer.h"
-#include "pqApplicationCore.h"
-#include "pqServerManagerModel.h"
-#include "pqObjectBuilder.h"
-#include "pqPipelineSource.h"
-#include "vtkSMSourceProxy.h"
-#include "vtkPVTrivialProducer.h"
 
 // IDL includes
 #include <SALOMEconfig.h>
@@ -111,19 +102,7 @@ SALOME_Prs* SMESHGUI_Displayer::buildPresentation( const QString& entry, SALOME_
           SPV3D_Prs *pv3dPrs = dynamic_cast<SPV3D_Prs*>( prs );
           if( pv3dPrs )
           {
-            anActor->GetMapper()->Update();
-            vtkDataObject *ds = anActor->GetMapper()->GetInput();
-            vtkDataSet *ds2 = vtkDataSet::SafeDownCast(ds);
-            pqServer *serv(pqApplicationCore::instance()->getServerManagerModel()->findServer(pqServerResource("builtin:")));
-            pqObjectBuilder *builder(pqApplicationCore::instance()->getObjectBuilder());
-            pqPipelineSource *mySourceProducer(builder->createSource("sources","PVTrivialProducer",serv));
-            vtkSMProxy *producerBase = mySourceProducer->getProxy();
-            vtkSMSourceProxy *producer(vtkSMSourceProxy::SafeDownCast(producerBase));
-            vtkObjectBase *clientSideObject(producer->GetClientSideObject());
-            vtkPVTrivialProducer *clientSideObjectCast = vtkPVTrivialProducer::SafeDownCast(clientSideObject);
-            clientSideObjectCast->SetOutput(ds2);
-            mySourceProducer->updatePipeline();
-            pv3dPrs->SetSourceProducer( mySourceProducer );
+            pv3dPrs->FillUsingActor( anActor );
           }
         }
       }

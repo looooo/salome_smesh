@@ -48,6 +48,27 @@
 #include CORBA_SERVER_HEADER(SMESH_Group)
 #include CORBA_SERVER_HEADER(SMESH_Mesh)
 
+std::string SMESHGUI_Displayer::getName( const QString& entry )
+{
+  Handle( SALOME_InteractiveObject ) theIO = new SALOME_InteractiveObject();
+  theIO->setEntry( entry.toUtf8().constData() );
+  if ( !theIO.IsNull() )
+  {
+    //  Find SOBject (because shape should be published previously)
+    if ( study() )
+    {
+      _PTR(SObject) aSObj ( study()->studyDS()->FindObjectID( theIO->getEntry() ) );
+      _PTR(GenericAttribute) anAttr;
+
+      if ( aSObj && aSObj->FindAttribute( anAttr, "AttributeName") )
+      {
+        _PTR(AttributeName) aNameAttr( anAttr );
+        return aNameAttr->Value();
+      }
+    }
+  }
+  return "";
+}
 
 SMESHGUI_Displayer::SMESHGUI_Displayer( SalomeApp_Application* app )
 : LightApp_Displayer(),
@@ -102,6 +123,7 @@ SALOME_Prs* SMESHGUI_Displayer::buildPresentation( const QString& entry, SALOME_
           SPV3D_Prs *pv3dPrs = dynamic_cast<SPV3D_Prs*>( prs );
           if( pv3dPrs )
           {
+            pv3dPrs->SetName( getName( entry ) );
             pv3dPrs->FillUsingActor( anActor );
           }
         }

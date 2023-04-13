@@ -73,8 +73,7 @@ public:
   void                     initScalarBarFromResources();
 
 protected:
-  void                     setThresholdFromTable(vtkLookupTable* aLookupTable);
-  void                     applyThreshold(vtkLookupTable* aLookupTable);
+  void                     applyThreshold(double min, double max);
 
 protected slots:
   virtual void             reject();

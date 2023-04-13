@@ -50,6 +50,8 @@
 
 #include <QtxColorButton.h>
 
+#include "utilities.h"
+
 // Qt includes
 #include <QButtonGroup>
 #include <QCheckBox>
@@ -569,7 +571,7 @@ bool SMESHGUI_Preferences_ScalarBarDlg::onApply()
 
   myLookupTable->SetRange( aMin, aMax );
   myLookupTable->SetNumberOfTableValues(myColorsSpin->value());
-  applyThreshold(myLookupTable);
+  applyThreshold(aMin, aMax);
 
   bool scaleChanged = (myLogarithmicCheck->isChecked() != (myLookupTable->GetScale() == VTK_SCALE_LOG10));
   if (scaleChanged)
@@ -663,8 +665,8 @@ void SMESHGUI_Preferences_ScalarBarDlg::onSelectionChanged()
           //myLogarithmicCheck->setEnabled(range[0] > 1e-07 && range[1] > 1e-07);
           myLogarithmicCheck->setEnabled(range[0] != range[1]);
 
-          setThresholdFromTable(aLookupTable);
-          applyThreshold(aLookupTable);
+          myThresholdCheck->setChecked(myActor->IsClipThresholdOn());
+          applyThreshold(range[0], range[1]);
         }
 
         vtkTextProperty* aTitleTextPrp = myScalarBarActor->GetTitleTextProperty();
@@ -893,47 +895,14 @@ void SMESHGUI_Preferences_ScalarBarDlg::initScalarBarFromResources()
 
 //=================================================================================================
 /*!
- *  SMESHGUI_Preferences_ScalarBarDlg::setThresholdFromTable()
- *
- *  Checks if the table uses special color for values beyond the min-max range,
- *  and this color is completely transparent - RGBA(0,0,0,0).
- */
-//=================================================================================================
-void SMESHGUI_Preferences_ScalarBarDlg::setThresholdFromTable(vtkLookupTable* aLookupTable)
-{
-  bool isUseBeyondRangeColor = aLookupTable->GetUseAboveRangeColor() && aLookupTable->GetUseBelowRangeColor();
-
-  if (isUseBeyondRangeColor)
-  {
-    const double* aboveRangeColor = aLookupTable->GetAboveRangeColor();
-    const double* belowRangeColor = aLookupTable->GetBelowRangeColor();
-
-    isUseBeyondRangeColor = aboveRangeColor[3] == 0.0 && belowRangeColor[3] == 0.0;
-  }
-
-  myThresholdCheck->setChecked(isUseBeyondRangeColor);
-}
-
-//=================================================================================================
-/*!
  *  SMESHGUI_Preferences_ScalarBarDlg::applyThreshold()
  *
  *  Switch on and off using of special color for values beyond the min-max range.
  *  Now this color is completely transparent - RGBA(0,0,0,0).
  */
 //=================================================================================================
-void SMESHGUI_Preferences_ScalarBarDlg::applyThreshold(vtkLookupTable* aLookupTable)
+//void SMESHGUI_Preferences_ScalarBarDlg::applyThreshold(vtkLookupTable* aLookupTable)
+void SMESHGUI_Preferences_ScalarBarDlg::applyThreshold(double min, double max)
 {
-  const bool isChecked = myThresholdCheck->isChecked();
-
-  aLookupTable->SetUseAboveRangeColor(isChecked);
-  aLookupTable->SetUseBelowRangeColor(isChecked);
-
-  if (isChecked)
-  {
-    const double beyondRangeColor[4] = {};
-
-    aLookupTable->SetAboveRangeColor(beyondRangeColor);
-    aLookupTable->SetBelowRangeColor(beyondRangeColor);
-  }
+  myActor->ClipThreshold(myThresholdCheck->isChecked(), min, max);
 }

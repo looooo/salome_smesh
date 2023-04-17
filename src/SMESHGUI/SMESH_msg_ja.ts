@@ -1984,6 +1984,10 @@
         <translation>しきい値</translation>
     </message>
     <message>
+        <source>SMESH_WIREFRAME_OFF_SCALARBAR</source>
+        <translation>ワイヤーフレーム オフ</translation>
+    </message>
+    <message>
       <source>SMESH_MAKE_GROUPS</source>
       <translation>グループを生成します。</translation>
     </message>

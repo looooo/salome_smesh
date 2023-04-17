@@ -74,6 +74,7 @@ public:
 
 protected:
   void                     applyThreshold(double min, double max);
+  void                     applyWireframeOff();
 
 protected slots:
   virtual void             reject();
@@ -103,6 +104,7 @@ private:
   QLineEdit*               myMaxEdit;
   QCheckBox*               myLogarithmicCheck;
   QCheckBox*               myThresholdCheck;
+  QCheckBox*               myWireframeOffCheck;
 
   QGroupBox*               myFontGrp;
   QtxColorButton*          myTitleColorBtn;

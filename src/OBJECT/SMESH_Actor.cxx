@@ -842,6 +842,7 @@ void SMESH_ActorDef::SetControlMode( eControl theMode, bool theCheckEntityMode )
   myBallActor->GetMapper()->SetScalarVisibility(false);
   myScalarBarActor->SetVisibility(false);
   ClipThreshold(false);
+  SetWireframeOff(false);
 
   bool anIsScalarVisible = theMode > eNone;
 
@@ -1825,6 +1826,8 @@ void SMESH_ActorDef::UpdateHighlight()
   case SMESH_DeviceActor::eSurface:
   case SMESH_DeviceActor::eWireframe:
     {
+      anIsVisible = !IsWireframeOff();
+
       if(myIsHighlighted) {
         myHighlitableActor->SetProperty(myHighlightProp);
       }else if(myIsPreselected){
@@ -2524,6 +2527,14 @@ void SMESH_ActorDef::ClipThreshold(bool isThresholdOn, double min /*= 0.0*/, dou
     // Restore the filters' chain
     myControlActor->SetImplicitFunctionUsed(myControlActor->myIsImplicitFunctionUsed);
   }
+}
+
+// Hides the wireframe if isWireframeOff == true.
+void SMESH_ActorDef::SetWireframeOff(bool isWireframeOff)
+{
+  myIsWireframeOff = isWireframeOff;
+
+  UpdateHighlight();
 }
 
 void SMESH_ActorDef::UpdateDistribution()

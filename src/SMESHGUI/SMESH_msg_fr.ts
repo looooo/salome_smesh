@@ -2227,6 +2227,10 @@ Référez-vous à la documentation sur l'algorithme et la géométrie supportée
         <translation>Seuil</translation>
     </message>
     <message>
+        <source>SMESH_WIREFRAME_OFF_SCALARBAR</source>
+        <translation>Filaire désactivé</translation>
+    </message>
+    <message>
         <source>SMESH_MAKE_GROUPS</source>
         <translation>Générer les groupes</translation>
     </message>

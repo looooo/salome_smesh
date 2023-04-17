@@ -152,12 +152,17 @@ SMESHGUI_Preferences_ScalarBarDlg::SMESHGUI_Preferences_ScalarBarDlg( SMESHGUI* 
   myThresholdCheck->setText(tr("SMESH_TRESHOLD_SCALARBAR"));
   myThresholdCheck->setChecked(false);
 
+  myWireframeOffCheck = new QCheckBox (myRangeGrp);
+  myWireframeOffCheck->setText(tr("SMESH_WIREFRAME_OFF_SCALARBAR"));
+  myWireframeOffCheck->setChecked(false);
+
   myRangeGrpLayout->addWidget( new QLabel( tr( "SMESH_RANGE_MIN" ), myRangeGrp ), 0, 0, 1, 1 );
   myRangeGrpLayout->addWidget( myMinEdit, 0, 1, 1, 1 );
   myRangeGrpLayout->addWidget( new QLabel( tr( "SMESH_RANGE_MAX" ), myRangeGrp ), 0, 2, 1, 1 );
   myRangeGrpLayout->addWidget( myMaxEdit, 0, 3, 1, 1 );
   myRangeGrpLayout->addWidget( myLogarithmicCheck, 1, 0, 1, 1 );
   myRangeGrpLayout->addWidget( myThresholdCheck, 1, 1, 1, 1 );
+  myRangeGrpLayout->addWidget( myWireframeOffCheck, 1, 2, 1, 1 );
 
   aTopLayout->addWidget( myRangeGrp );
 
@@ -573,6 +578,8 @@ bool SMESHGUI_Preferences_ScalarBarDlg::onApply()
   myLookupTable->SetNumberOfTableValues(myColorsSpin->value());
   applyThreshold(aMin, aMax);
 
+  applyWireframeOff();
+
   bool scaleChanged = (myLogarithmicCheck->isChecked() != (myLookupTable->GetScale() == VTK_SCALE_LOG10));
   if (scaleChanged)
     myLookupTable->SetScale(myLogarithmicCheck->isChecked() ? VTK_SCALE_LOG10 : VTK_SCALE_LINEAR);
@@ -667,7 +674,11 @@ void SMESHGUI_Preferences_ScalarBarDlg::onSelectionChanged()
 
           myThresholdCheck->setChecked(myActor->IsClipThresholdOn());
           applyThreshold(range[0], range[1]);
+
+          myWireframeOffCheck->setChecked(myActor->IsWireframeOff());
         }
+
+        applyWireframeOff();
 
         vtkTextProperty* aTitleTextPrp = myScalarBarActor->GetTitleTextProperty();
         double aTColor[3];
@@ -897,12 +908,22 @@ void SMESHGUI_Preferences_ScalarBarDlg::initScalarBarFromResources()
 /*!
  *  SMESHGUI_Preferences_ScalarBarDlg::applyThreshold()
  *
- *  Switch on and off using of special color for values beyond the min-max range.
- *  Now this color is completely transparent - RGBA(0,0,0,0).
+ *  Hides and shows elements beyond the given min - max range by threshold filter inside the actor.
  */
 //=================================================================================================
-//void SMESHGUI_Preferences_ScalarBarDlg::applyThreshold(vtkLookupTable* aLookupTable)
 void SMESHGUI_Preferences_ScalarBarDlg::applyThreshold(double min, double max)
 {
   myActor->ClipThreshold(myThresholdCheck->isChecked(), min, max);
+}
+
+//=================================================================================================
+/*!
+ *  SMESHGUI_Preferences_ScalarBarDlg::applyWireframeOff()
+ *
+ *  Hides and shows edges' lines.
+ */
+//=================================================================================================
+void SMESHGUI_Preferences_ScalarBarDlg::applyWireframeOff()
+{
+  myActor->SetWireframeOff(myWireframeOffCheck->isChecked());
 }

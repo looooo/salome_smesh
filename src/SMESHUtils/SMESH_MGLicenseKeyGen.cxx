@@ -447,12 +447,10 @@ namespace SMESHUtils_MGLicenseKeyGen // API implementation
       return false;
 
     bool ok = false;
-    // get the key from KeyGen
-    std::string key = SMESHUtils_MGLicenseKeyGen::GetKey(error);
-    typedef int (*SignFun)(const char* );
+    typedef bool (*SignFun)(const std::string& );
 
     // specific function to unlock each product
-    std::string function = "meshgems_" + product + "_unlock_product";
+    std::string function = "UnlockProduct";
 
     SignFun signFun = (SignFun) GetProc( theLibraryHandle, function.c_str() );
     if ( !signFun )
@@ -464,14 +462,13 @@ namespace SMESHUtils_MGLicenseKeyGen // API implementation
     {
       SMESH_TRY;
 
-      int status = signFun( key.c_str() );
-      // MeshGems status: 0: OK, 1: warning, -1: error
-      ok = status >= 0;
+      ok = signFun( product.c_str() );
 
       SMESH_CATCH( SMESH::returnError );
 
       if ( !error.empty() )
 	{
+	  std::cerr << "error: " << error << std::endl;
 	  ok = false;
 	}
       else if ( !ok )

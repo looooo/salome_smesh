@@ -653,58 +653,58 @@ namespace SMESHUtils_MGLicenseKeyGen // API implementation
       return v_min;
 
     typedef int (*GetKeyFun)();
-    GetKeyFun keyFun = (GetKeyFun) GetProc( theLibraryHandle, "meshgems_core_get_version_minor" );
+    GetKeyFun keyFun = (GetKeyFun) GetProc( theLibraryHandle, "GetVersionMinor" );
     if ( !keyFun )
     {
       if ( ! getLastError( error ))
-	error = SMESH_Comment( "Can't find symbol 'meshgems_core_get_version_minor' in '") << getenv( theEnvVar ) << "'";
+	error = SMESH_Comment( "Can't find symbol 'GetVersionMinor' in '") << getenv( theEnvVar ) << "'";
     }
     else
     {
 	v_min = keyFun( );
     }
     if ( v_min==-1 )
-      error = "meshgems_core_get_version_minor() failed (located in '" + libraryFile._name + "')";
+      error = "GetVersionMinor() failed (located in '" + libraryFile._name + "')";
 
-    MESSAGE("meshgems_core_get_version_minor: " << v_min);
+    MESSAGE("GetVersionMinor: " << v_min);
 
     // get major version
     int v_maj = -1;
 
     typedef int (*GetKeyFun)();
-    keyFun = (GetKeyFun) GetProc( theLibraryHandle, "meshgems_core_get_version_major" );
+    keyFun = (GetKeyFun) GetProc( theLibraryHandle, "GetVersionMajor" );
     if ( !keyFun )
     {
       if ( ! getLastError( error ))
-	error = SMESH_Comment( "Can't find symbol 'meshgems_core_get_version_major' in '") << getenv( theEnvVar ) << "'";
+	error = SMESH_Comment( "Can't find symbol 'GetVersionMajor' in '") << getenv( theEnvVar ) << "'";
     }
     else
     {
 	v_maj = keyFun( );
     }
     if ( v_maj==-1 )
-      error = "meshgems_core_get_version_major() failed (located in '" + libraryFile._name + "')";
+      error = "GetVersionMajor() failed (located in '" + libraryFile._name + "')";
 
-    MESSAGE("meshgems_core_get_version_major: " << v_maj);
+    MESSAGE("GetVersionMajor: " << v_maj);
 
     // get patch version
     int v_patch = -1;
 
     typedef int (*GetKeyFun)();
-    keyFun = (GetKeyFun) GetProc( theLibraryHandle, "meshgems_core_get_version_patch" );
+    keyFun = (GetKeyFun) GetProc( theLibraryHandle, "GetVersionPatch" );
     if ( !keyFun )
     {
       if ( ! getLastError( error ))
-	error = SMESH_Comment( "Can't find symbol 'meshgems_core_get_version_patch' in '") << getenv( theEnvVar ) << "'";
+	error = SMESH_Comment( "Can't find symbol 'GetVersionPatch' in '") << getenv( theEnvVar ) << "'";
     }
     else
     {
 	v_patch = keyFun( );
     }
     if ( v_patch==-1 )
-      error = "meshgems_core_get_version_patch() failed (located in '" + libraryFile._name + "')";
+      error = "GetVersionPatch() failed (located in '" + libraryFile._name + "')";
 
-    MESSAGE("meshgems_core_get_version_patch: " << v_patch );
+    MESSAGE("GetVersionPatch: " << v_patch );
 
     int v_hex = (v_maj << 16 | v_min << 8 | v_patch);
 

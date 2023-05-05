@@ -707,7 +707,7 @@ namespace SMESHUtils_MGLicenseKeyGen // API implementation
     MESSAGE("MeshGems major version = " << v_maj);
 
     // get patch version
-    int v_patch = GetMGVersionFromFct("meshgems_core_get_version_patch ");
+    int v_patch = GetMGVersionFromFct("meshgems_core_get_version_patch");
     if (v_patch == -1) v_patch = GetMGVersionFromFct("GetVersionPatch");
     if (v_patch == -1) v_patch = GetMGVersionFromEnv("MESHGEMS_VERSION_PATCH");
     if (v_patch == -1)

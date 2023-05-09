@@ -643,13 +643,16 @@ namespace SMESHUtils_MGLicenseKeyGen // API implementation
    *  \return int - the version
    */
   //================================================================================
-  int GetMGVersionFromEnv(const char* env_variable){
+  int GetMGVersionFromEnv(const char* env_variable)
+  {
     MESSAGE("Entering GetMGVersionFromEnv and calling " << env_variable);
     int version = -1;
-    if (getenv(env_variable) == nullptr ){
+    if (getenv(env_variable) == nullptr )
+    {
       MESSAGE("Could not find " << env_variable << " from environment");
     }
-    else{
+    else
+    {
       version = std::stoi(std::string(getenv(env_variable)));
     }
     return version;
@@ -661,55 +664,65 @@ namespace SMESHUtils_MGLicenseKeyGen // API implementation
    *  \return int - the function implemented in the library
    */
   //================================================================================
-  int GetMGVersionFromFct(const char* function_name){
-    MESSAGE("Entering GetMGVersionFromFct and calling " << function_name);
+  int GetMGVersionFromFunction(const char* function_name)
+  {
+    MESSAGE("Entering GetMGVersionFromFunction and calling " << function_name);
     int version = -1;
     typedef int (*GetKeyFun)();
     GetKeyFun keyFun = (GetKeyFun) GetProc( theLibraryHandle, function_name);
-    if ( !keyFun ){
+    if ( !keyFun )
+    {
       MESSAGE("Could not find " << function_name << " from library");
     }
-    else{
-      version = keyFun( );
+    else
+    {
+      version = keyFun();
     }
     return version;
   }
 
   //================================================================================
   /*!
-   * \brief Get MeshGems version from the keygen library and meshgems built-in functions
+   * \brief Get MeshGems version from the keygen library or meshgems built-in functions
    *  \param [out] error - return error description
    *  \return int - the version
    */
   //================================================================================
   int GetMGVersionHex(std::string&       error)
   {
-    // get minor version
+    // load mgkeygen library
     int v_min = -1;
     LibraryFile libraryFile;
     if ( !loadLibrary( error, libraryFile ))
       return v_min;
     MESSAGE("Extracting MeshGems version");
 
-    v_min = GetMGVersionFromFct("meshgems_core_get_version_minor");
-    if (v_min == -1) v_min = GetMGVersionFromFct("GetVersionMinor");
-    if (v_min == -1) v_min = GetMGVersionFromEnv("MESHGEMS_VERSION_MINOR");
+    // get minor version
+    v_min = GetMGVersionFromFunction("meshgems_core_get_version_minor");
+    if (v_min == -1)
+      v_min = GetMGVersionFromFunction("GetVersionMinor");
+    if (v_min == -1)
+      v_min = GetMGVersionFromEnv("MESHGEMS_VERSION_MINOR");
     if (v_min == -1)
       error = "could not retrieve minor version (located in '" + libraryFile._name + "')";
     MESSAGE("MeshGems minor version =  " << v_min);
 
     // get major version
-    int v_maj = GetMGVersionFromFct("meshgems_core_get_version_major");
-    if (v_maj == -1) v_maj = GetMGVersionFromFct("GetVersionMajor");
-    if (v_maj == -1) v_maj = GetMGVersionFromEnv("MESHGEMS_VERSION_MAJOR");
+    int v_maj = GetMGVersionFromFunction("meshgems_core_get_version_major");
+    if (v_maj == -1)
+      v_maj = GetMGVersionFromFunction("GetVersionMajor");
+    if (v_maj == -1)
+      v_maj = GetMGVersionFromEnv("MESHGEMS_VERSION_MAJOR");
     if (v_maj == -1)
       error = "could not retrieve major version (located in '" + libraryFile._name + "')";
     MESSAGE("MeshGems major version = " << v_maj);
 
     // get patch version
-    int v_patch = GetMGVersionFromFct("meshgems_core_get_version_patch");
-    if (v_patch == -1) v_patch = GetMGVersionFromFct("GetVersionPatch");
-    if (v_patch == -1) v_patch = GetMGVersionFromEnv("MESHGEMS_VERSION_PATCH");
+    int v_patch = GetMGVersionFromFunction("meshgems_core_get_version_patch");
+    if (v_patch == -1)
+      v_patch = GetMGVersionFromFunction("GetVersionPatch");
+    if (v_patch == -1)
+      v_patch = GetMGVersionFromEnv("MESHGEMS_VERSION_PATCH");
     if (v_patch == -1)
       error = "could not retrieve patch version (located in '" + libraryFile._name + "')";
     MESSAGE("MeshGems patch version = " << v_patch);

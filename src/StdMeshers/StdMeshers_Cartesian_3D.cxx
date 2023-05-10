@@ -2754,7 +2754,6 @@ namespace
       // 2) fill _intNodes and _vIntNodes
       //
       const double tol2 = _grid->_tol * _grid->_tol * 4;
-      const double tol2 = _grid->_tol * _grid->_tol;
       int facets[3], nbFacets, subEntity;
 
       for ( int iF = 0; iF < 6; ++iF )

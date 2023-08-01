@@ -451,9 +451,9 @@ CORBA::Long MeshJobManager_i::initialize(const MESHJOB::MeshJobFileList & meshJo
   //const char * resourceName = "nepal@nepal";
   const char * resourceName = _configMap[configId].resname;
   
-  Engines::ResourceDefinition * resourceDefinition;
+  Engines::ResourceDefinitionContainer* resourceDefinition;
   try {
-    resourceDefinition = _resourcesManager->GetResourceDefinition(resourceName);
+    resourceDefinition = _resourcesManager->GetResourceDefinitionContainer(resourceName);
   }
   catch (const CORBA::SystemException& ex) {
     _lastErrorMessage = std::string("We can not access the resource ") + std::string(resourceName);
@@ -664,11 +664,8 @@ std::vector<std::string> * MeshJobManager_i::_getResourceNames() {
   //
   // These part is just to control the available resources
   //
-  Engines::ResourceParameters params;
-  KERNEL::getLifeCycleCORBA()->preSet(params);
-
-  Engines::ResourceList * resourceList = _resourcesManager->GetFittingResources(params);
-  Engines::ResourceDefinition * resourceDefinition = NULL;
+  Engines::ResourceList* resourceList = _resourcesManager->ListAllResourcesInCatalogContainer();
+  Engines::ResourceDefinitionContainer* resourceDefinition = nullptr;
   LOG("### resource list:");
   std::vector<std::string>* resourceNames = new std::vector<std::string>();
   if (resourceList) {
@@ -676,7 +673,7 @@ std::vector<std::string> * MeshJobManager_i::_getResourceNames() {
       const char* aResourceName = (*resourceList)[i];
       resourceNames->push_back(std::string(aResourceName));
       LOG("resource["<<i<<"] = "<<aResourceName);
-      resourceDefinition = _resourcesManager->GetResourceDefinition(aResourceName);
+      resourceDefinition = _resourcesManager->GetResourceDefinitionContainer(aResourceName);
       LOG("protocol["<<i<<"] = "<<resourceDefinition->protocol);
       (void)resourceDefinition; // unused in release mode
     }

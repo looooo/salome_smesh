@@ -115,7 +115,7 @@ namespace
       ids[2] = NodeID( i+1, j+1 );
       ids[3] = NodeID( i+1, j   );
     }
-    void IFaceNodes( int i, int j, int k, cgsize_t* ids ) const // face perpendiculaire to X (3D)
+    void IFaceNodes( int i, int j, int k, cgsize_t* ids ) const // face perpendicular to X (3D)
     {
       ids[0] = NodeID( i, j, k );
       ids[1] = ids[0] + _sizeX*( i==_sizeX ? 1 : _sizeY );
@@ -136,14 +136,14 @@ namespace
       ids[2] = ids[0] + _sizeX + 1;
       ids[3] = ids[0] + ( k==_sizeZ ? _sizeX : 1);
     }
-    void IEdgeNodes( int i, int j, int /*k*/, cgsize_t* ids ) const // edge perpendiculaire to X (2D)
+    void IEdgeNodes( int i, int j, int /*k*/, cgsize_t* ids ) const // edge perpendicular to X (2D)
     {
-      ids[0] = NodeID( i, j, 0 );
+      ids[0] = NodeID( i, j);
       ids[1] = ids[0] + _sizeX;
     }
     void JEdgeNodes( int i, int j, int /*k*/, cgsize_t* ids ) const
     {
-      ids[0] = NodeID( i, j, 0 );
+      ids[0] = NodeID( i, j);
       ids[1] = ids[0] + 1;
     }
 #define gpXYZ2IJK(METHOD)                                     \
@@ -599,7 +599,7 @@ namespace
 
   //================================================================================
   /*!
-   * \brief Finds an existing boundary element
+   * \brief Finds an existing boundary element given its nodes ids
    */
   //================================================================================
 
@@ -628,7 +628,80 @@ namespace
         }
       } 
     }
+    else
+    {
+      MESSAGE("First node not found");
+    }
     return 0;
+  }
+
+  //================================================================================
+  /*!
+   * \brief Helper function for findElements
+   */
+  //================================================================================
+  bool isAllNodesCommon(int nbChecked, int nbCommon, int nbNodes, int /*nbCorners*/,
+                        bool & toStopChecking )
+  {
+    // Code from SMESH_Mesh_i
+    // TODO: factorize it in SMESHDS_Mesh
+    toStopChecking = ( nbCommon < nbChecked );
+    return nbCommon == nbNodes;
+  }
+
+  //================================================================================
+  /*!
+   * \brief Finds existing boundary elements given all their nodes ids
+   */
+  //================================================================================
+
+  void findElements(const vector<cgsize_t> &nodeIDs,
+                    const SMESHDS_Mesh* aMeshDS,
+                    const SMDSAbs_ElementType anElemType,
+                    SMDS_MeshGroup& resGroupCore)
+  {
+    // Get elements of theElemType based on all nodes of elements of group
+    // Code adapted from SMESH_Mesh_i::CreateDimGroup
+    // TODO: factorize it in SMESHDS_Mesh
+    const SMDS_MeshNode* n;
+    int nbChecked, nbCommon, nbNodes, nbCorners;
+    int nbNodesInGroup = nodeIDs.size();
+    cgsize_t maxNodeIdInGroup = *max_element(std::begin(nodeIDs), std::end(nodeIDs));
+    vector<bool> isNodeInGroups(maxNodeIdInGroup);
+    // initialize isNodeInGroups
+    for ( cgsize_t nodeID : nodeIDs )
+      isNodeInGroups[nodeID] = true;
+    vector<bool> isElemChecked( aMeshDS->MaxElementID() + 1 );
+    for ( int iN = 0; iN < nbNodesInGroup; ++iN )
+    {
+      n = aMeshDS->FindNode( nodeIDs[iN] );
+      // check nodes of elements of theElemType around n
+      SMDS_ElemIteratorPtr elOfTypeIt = n->GetInverseElementIterator( anElemType );
+      while ( elOfTypeIt->more() )
+      {
+        const SMDS_MeshElement*  elOfType = elOfTypeIt->next();
+        vector<bool>::reference isChecked = isElemChecked[ elOfType->GetID() ];
+        if ( isChecked )
+          continue;
+        isChecked = true;
+
+        nbNodes   = elOfType->NbNodes();
+        nbCorners = elOfType->NbCornerNodes();
+        nbCommon  = 0;
+        bool toStopChecking = false;
+        SMDS_ElemIteratorPtr nIt = elOfType->nodesIterator();
+        for ( nbChecked = 1; nIt->more() && !toStopChecking; ++nbChecked )
+        {
+          const smIdType nID = nIt->next()->GetID();
+          if ( nID<=maxNodeIdInGroup && isNodeInGroups[ nID ] &&
+              isAllNodesCommon( nbChecked, ++nbCommon, nbNodes, nbCorners, toStopChecking ))
+          {
+            resGroupCore.Add( elOfType );
+            break;
+          }
+        }
+      }
+    }
   }
 
 } // namespace
@@ -666,6 +739,8 @@ Driver_Mesh::Status DriverCGNS_Read::Perform()
 
   myMeshName = meshName;
   MESSAGE("myMeshName: " << myMeshName);
+  MESSAGE("spaceDim: " << spaceDim);
+  MESSAGE("meshDim: " << meshDim);
 
 
   // read nb of domains (Zone_t) in the mesh
@@ -798,6 +873,9 @@ Driver_Mesh::Status DriverCGNS_Read::Perform()
     {
       int nbI = zone._sizeX - 1, nbJ = zone._sizeY - 1, nbK = zone._sizeZ - 1;
       cgsize_t nID[8];
+      MESSAGE("nbI: "<< nbI);
+      MESSAGE("nbJ: "<< nbJ);
+      MESSAGE("nbK: "<< nbK);
       if ( meshDim > 2 && nbK > 0 )
       {
         for ( int k = 1; k <= nbK; ++k )
@@ -1035,9 +1113,28 @@ Driver_Mesh::Status DriverCGNS_Read::Perform()
           addMessage( cg_get_error() );
           continue;
         }
+
         SMDSAbs_ElementType elemType = SMDSAbs_All;
         switch ( location ) {
-        case CGNS_ENUMV( Vertex      ): elemType = SMDSAbs_Node; break;
+        case CGNS_ENUMV( Vertex ):
+          // if the BC info is stored on Vertex, create BC group on meshDim-1
+          MESSAGE("    case CGNS_ENUMV( Vertex )");
+          if ( meshDim == 3)
+          {
+            elemType = SMDSAbs_Face;
+            MESSAGE("    meshDim == 3 => elemType = SMDSAbs_Face");
+          }
+          else if ( meshDim == 2 )
+          {
+            elemType = SMDSAbs_Edge;
+            MESSAGE("    meshDim == 2 => elemType = SMDSAbs_Edge");
+          }
+          else
+          {
+            elemType = SMDSAbs_Node;
+            MESSAGE("    meshDim == 1 => elemType = SMDSAbs_Node");
+          }
+          break;
         case CGNS_ENUMV( FaceCenter  ): elemType = SMDSAbs_Face; break;
         case CGNS_ENUMV( IFaceCenter ): elemType = SMDSAbs_Face; break;
         case CGNS_ENUMV( JFaceCenter ): elemType = SMDSAbs_Face; break;
@@ -1045,148 +1142,159 @@ Driver_Mesh::Status DriverCGNS_Read::Perform()
         case CGNS_ENUMV( EdgeCenter  ): elemType = SMDSAbs_Edge; break;
         default:;
         }
+        // add group of elemType on Mesh
         SMESHDS_Group* group = new SMESHDS_Group ( groupID++, myMesh, elemType );
         myMesh->AddGroup( group );
-        SMESH_Comment groupName( name ); groupName << " " << cg_BCTypeName( bcType );
+        SMESH_Comment groupName( name );
+        // add the BC type to the name of the group
+        // because sometimes BCs with the same name group has different types
+        if (bcType)
+          groupName << " " << cg_BCTypeName( bcType );
+        MESSAGE("    groupName: " << groupName);
+        MESSAGE("    elemType: " << elemType);
         group->SetStoreName( groupName.c_str() );
         SMDS_MeshGroup& groupDS = group->SMDSGroup();
 
-        if ( elemType == SMDSAbs_Node )
+        if ( zone.IsStructured() )
         {
-          if ( zone.IsStructured() )
+          MESSAGE("    zone.IsStructured()");
+          MESSAGE("ids.size(): " << ids.size() );
+          MESSAGE("I Index Range : " << ids[0] << " " << ids[0+meshDim] );
+          MESSAGE("J Index Range : " << ids[1] << " " << ids[1+meshDim] );
+          if (meshDim == 3)
+            MESSAGE("K Index Range : " << ids[2] << " " << ids[2+meshDim] );
+          int axis = 0; // axis perpendicular to which boundary elements are oriented
+          if ( (int) ids.size() >= meshDim * 2 )
           {
-            vector< cgsize_t > nodeIds;
-            if ( psType == CGNS_ENUMV( PointRange ))
-            {
-              // nodes are given as (ijkMin, ijkMax)
-              TPointRangeIterator idIt( & ids[0], meshDim );
-              nodeIds.reserve( idIt.Size() );
-              while ( idIt.More() )
-                nodeIds.push_back( zone.NodeID( idIt.Next() ));
-            }
-            else
-            {
-              // nodes are given as (ijk1, ijk2, ..., ijkN)
-              nodeIds.reserve( ids.size() / meshDim );
-              for ( size_t i = 0; i < ids.size(); i += meshDim )
-                nodeIds.push_back( zone.NodeID( ids[i], ids[i+1], ids[i+2] ));
-            }
-            ids.swap( nodeIds );
+            for ( ; axis < meshDim; ++axis )
+              if ( ids[axis] - ids[axis+meshDim] == 0 )
+                break;
           }
-          else if ( zone._nodeIdShift )
+          else
           {
-            for ( size_t i = 0; i < ids.size(); ++i )
-              ids[i] += zone._nodeIdShift;
+            for ( ; axis < meshDim; ++axis )
+              if ( normIndex[axis] != 0 )
+                break;
+          }
+          if ( axis == meshDim )
+          {
+            addMessage( SMESH_Comment("axis could not be guessed from BC's range or normIndex for ") << name );
+            continue;
+          }
+          MESSAGE(" axis : " << axis);
+          const int nbElemNodesByDim[] = { 1, 2, 4, 8 };
+          const int nbElemNodes = nbElemNodesByDim[ meshDim ];
+
+          if ( psType == CGNS_ENUMV( PointRange ) ||
+              psType == CGNS_ENUMV( ElementRange ))
+          {
+            // elements are given as (ijkMin, ijkMax)
+            MESSAGE("    elements are given as (ijkMin, ijkMax)");
+            typedef void (TZoneData::*PGetNodesFun)( const gp_XYZ& ijk, cgsize_t* ids ) const;
+            PGetNodesFun getNodesFun = 0;
+            if ( meshDim == 3 )
+              switch ( axis ) {
+                case 0: getNodesFun = & TZoneData::IFaceNodes; break;
+                case 1: getNodesFun = & TZoneData::JFaceNodes; break;
+                case 2: getNodesFun = & TZoneData::KFaceNodes; break;
+              }
+            else if ( meshDim == 2 )
+              switch ( axis ) {
+                case 0: getNodesFun = & TZoneData::IEdgeNodes; break;
+                case 1: getNodesFun = & TZoneData::JEdgeNodes; break;
+              }
+            if ( !getNodesFun )
+            {
+              addMessage( SMESH_Comment("Unsupported BC location in BC ") << name
+                          << " " << cg_GridLocationName( location )
+                          << " in " << meshDim << " mesh");
+              continue;
+            }
+            // Set last id -1 for other axes
+            // (otherwise, we are outside the mesh, since getNodesFun is meant for i, j, k on cells centers
+            // and we use it for i, j, k points)
+            if (location == CGNS_ENUMV( Vertex ))
+            {
+              if (axis!=0)
+                ids[meshDim] = ids[meshDim]-1;
+              if (axis!=1)
+                ids[1+meshDim] = ids[1+meshDim]-1;
+              if (meshDim == 3 && axis!=2)
+                ids[2+meshDim] = ids[2+meshDim]-1;
+            }
+            TPointRangeIterator rangeIt( & ids[0], meshDim );
+            vector< cgsize_t > elemNodeIds( rangeIt.Size() * nbElemNodes );
+            for ( int i = 0; rangeIt.More(); i+= nbElemNodes )
+              (zone.*getNodesFun)( rangeIt.Next(), &elemNodeIds[i] );
+
+            ids.swap( elemNodeIds );
+          }
+          else
+          {
+            // elements are given as (ijk1, ijk2, ..., ijkN)
+            MESSAGE("elements are given as (ijk1, ijk2, ..., ijkN)");
+            typedef void (TZoneData::*PGetNodesFun)( int i, int j, int k, cgsize_t* ids ) const;
+            PGetNodesFun getNodesFun = 0;
+            if ( elemType == SMDSAbs_Face )
+              switch ( axis ) {
+                case 0: getNodesFun = & TZoneData::IFaceNodes; break;
+                case 1: getNodesFun = & TZoneData::JFaceNodes; break;
+                case 2: getNodesFun = & TZoneData::KFaceNodes; break;
+              }
+            else if ( elemType == SMDSAbs_Edge && meshDim == 2 )
+              switch ( axis ) {
+                case 0: getNodesFun = & TZoneData::IEdgeNodes; break;
+                case 1: getNodesFun = & TZoneData::JEdgeNodes; break;
+              }
+            if ( !getNodesFun )
+            {
+              addMessage( SMESH_Comment("Unsupported BC location in BC ") << name
+                          << " " << cg_GridLocationName( location )
+                          << " in " << meshDim << " mesh");
+              continue;
+            }
+            vector< cgsize_t > elemNodeIds( ids.size()/meshDim * nbElemNodes );
+            for ( size_t i = 0, j = 0; i < ids.size(); i += meshDim, j += nbElemNodes )
+              (zone.*getNodesFun)( ids[i], ids[i+1], ids[i+2], &elemNodeIds[j] );
+
+            ids.swap( elemNodeIds );
           }
           zone.ReplaceNodes( &ids[0], ids.size() );
 
-          for ( size_t i = 0; i < ids.size(); ++i )
-            if ( const SMDS_MeshNode* n = myMesh->FindNode( ids[i] ))
-              groupDS.Add( n );
-        }
-        else // BC applied to elements
-        {
-          if ( zone.IsStructured() )
+          PAddElemFun addElemFun = 0;
+          switch ( meshDim )
           {
-            int axis = 0; // axis perpendiculaire to which boundary elements are oriented
-            if ( (int) ids.size() >= meshDim * 2 )
-            {
-              for ( ; axis < meshDim; ++axis )
-                if ( ids[axis] - ids[axis+meshDim] == 0 )
-                  break;
-            }
-            else
-            {
-              for ( ; axis < meshDim; ++axis )
-                if ( normIndex[axis] != 0 )
-                  break;
-            }
-            if ( axis == meshDim )
-            {
-              addMessage( SMESH_Comment("Invalid NormalIndex in BC ") << name );
-              continue;
-            }
-            const int nbElemNodesByDim[] = { 1, 2, 4, 8 };
-            const int nbElemNodes = nbElemNodesByDim[ meshDim ];
-
-            if ( psType == CGNS_ENUMV( PointRange ) ||
-                 psType == CGNS_ENUMV( ElementRange ))
-            {
-              // elements are given as (ijkMin, ijkMax)
-              typedef void (TZoneData::*PGetNodesFun)( const gp_XYZ& ijk, cgsize_t* ids ) const;
-              PGetNodesFun getNodesFun = 0;
-              if ( elemType == SMDSAbs_Face  && meshDim == 3 )
-                switch ( axis ) {
-                case 0: getNodesFun = & TZoneData::IFaceNodes; break;
-                case 1: getNodesFun = & TZoneData::JFaceNodes; break;
-                case 2: getNodesFun = & TZoneData::KFaceNodes; break;
-                }
-              else if ( elemType == SMDSAbs_Edge && meshDim == 2 )
-                switch ( axis ) {
-                case 0: getNodesFun = & TZoneData::IEdgeNodes; break;
-                case 1: getNodesFun = & TZoneData::JEdgeNodes; break;
-                }
-              if ( !getNodesFun )
-              {
-                addMessage( SMESH_Comment("Unsupported BC location in BC ") << name
-                            << " " << cg_GridLocationName( location )
-                            << " in " << meshDim << " mesh");
-                continue;
-              }
-              TPointRangeIterator rangeIt( & ids[0], meshDim );
-              vector< cgsize_t > elemNodeIds( rangeIt.Size() * nbElemNodes );
-              for ( int i = 0; rangeIt.More(); i+= nbElemNodes )
-                (zone.*getNodesFun)( rangeIt.Next(), &elemNodeIds[i] );
-
-              ids.swap( elemNodeIds );
-            }
-            else
-            {
-              // elements are given as (ijk1, ijk2, ..., ijkN)
-              typedef void (TZoneData::*PGetNodesFun)( int i, int j, int k, cgsize_t* ids ) const;
-              PGetNodesFun getNodesFun = 0;
-              if ( elemType == SMDSAbs_Face )
-                switch ( axis ) {
-                case 0: getNodesFun = & TZoneData::IFaceNodes; break;
-                case 1: getNodesFun = & TZoneData::JFaceNodes; break;
-                case 2: getNodesFun = & TZoneData::KFaceNodes; break;
-                }
-              else if ( elemType == SMDSAbs_Edge && meshDim == 2 )
-                switch ( axis ) {
-                case 0: getNodesFun = & TZoneData::IEdgeNodes; break;
-                case 1: getNodesFun = & TZoneData::JEdgeNodes; break;
-                }
-              if ( !getNodesFun )
-              {
-                addMessage( SMESH_Comment("Unsupported BC location in BC ") << name
-                            << " " << cg_GridLocationName( location )
-                            << " in " << meshDim << " mesh");
-                continue;
-              }
-              vector< cgsize_t > elemNodeIds( ids.size()/meshDim * nbElemNodes );
-              for ( size_t i = 0, j = 0; i < ids.size(); i += meshDim, j += nbElemNodes )
-                (zone.*getNodesFun)( ids[i], ids[i+1], ids[i+2], &elemNodeIds[j] );
-
-              ids.swap( elemNodeIds );
-            }
-            zone.ReplaceNodes( &ids[0], ids.size() );
-
-            PAddElemFun addElemFun = 0;
-            switch ( meshDim ) {
-            case 1: addElemFun = & add_BAR_2;  break;
-            case 2: addElemFun = & add_QUAD_4; break;
-            case 3: addElemFun = & add_HEXA_8; break;
-            }
-            smIdType elemID = meshInfo.NbElements();
-            const SMDS_MeshElement* elem = 0;
-            for ( size_t i = 0; i < ids.size(); i += nbElemNodes )
-            {
-              if ( iZone == 1 || !( elem = findElement( &ids[i], nbElemNodes, myMesh )))
-                elem = addElemFun( &ids[i], myMesh, ++elemID );
-              groupDS.Add( elem );
-            }
+            case 1: addElemFun = & add_0D;  break;
+            case 2: addElemFun = & add_BAR_2;  break;
+            case 3: addElemFun = & add_QUAD_4; break;
           }
-          else // unstructured zone
+          smIdType elemID = meshInfo.NbElements();
+          const SMDS_MeshElement* elem = 0;
+
+
+          MESSAGE("    adding elements to group given their nodes");
+          for ( size_t i = 0; i < ids.size(); i += nbElemNodes )
+          {
+            if ( iZone == 1 || !( elem = findElement( &ids[i], nbElemNodes, myMesh )))
+              elem = addElemFun( &ids[i], myMesh, ++elemID );
+            if (elem)
+              groupDS.Add( elem );
+          }
+
+          MESSAGE(" group on structured zone. " << groupDS.Extent() << " elements have been added to " << groupName);
+          MESSAGE("    end of adding elements to group");
+        }
+        else // unstructured zone
+        {
+          if (location == CGNS_ENUMV( Vertex ))
+          {
+            // ids are ids of all nodes, not stored element by element
+            // so we can't use findElement
+            // => Use findElements adapted from CreateDimGroup instead
+            findElements(ids, myMesh, elemType, groupDS);
+            MESSAGE(" group on unstructured zone. " << groupDS.Extent() << " elements have been added to " << groupName);
+          }
+          else
           {
             if ( zone._elemIdShift )
               for ( size_t i = 0; i < ids.size(); ++i )

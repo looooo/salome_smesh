@@ -451,9 +451,9 @@ CORBA::Long MeshJobManager_i::initialize(const MESHJOB::MeshJobFileList & meshJo
   //const char * resourceName = "nepal@nepal";
   const char * resourceName = _configMap[configId].resname;
   
-  Engines::ResourceDefinitionContainer* resourceDefinition;
+  Engines::ResourceDefinitionJob* resourceDefinition = nullptr;
   try {
-    resourceDefinition = _resourcesManager->GetResourceDefinitionContainer(resourceName);
+    resourceDefinition = _resourcesManager->GetResourceDefinitionJob(resourceName);
   }
   catch (const CORBA::SystemException& ex) {
     _lastErrorMessage = std::string("We can not access the resource ") + std::string(resourceName);
@@ -470,8 +470,8 @@ CORBA::Long MeshJobManager_i::initialize(const MESHJOB::MeshJobFileList & meshJo
   // CAUTION: the additional two following parameters MUST be
   // specified explicitly, because they are not provided by the
   // resource definition:
-  jobParameters->resource_required.mem_mb   = resourceDefinition->mem_mb;
-  jobParameters->resource_required.nb_proc  = resourceDefinition->nb_proc_per_node;
+  // jobParameters->resource_required.mem_mb   = resourceDefinition->mem_mb;
+  // jobParameters->resource_required.nb_proc  = resourceDefinition->nb_proc_per_node;
   // CAUTION: the parameter mem_mb specifies the maximum memory value
   // that could be allocated for executing the job. This takes into
   // account not only the data that could be loaded by the batch

@@ -55,9 +55,14 @@ class SMESH_EXPORT SMESH_ParallelMesh: public SMESH_Mesh
   void wait() override {_pool->join(); DeletePoolThreads(); InitPoolThreads(); };
 
   // Thread Pool
+#ifndef WIN32
   void InitPoolThreads() {_pool = new boost::asio::thread_pool(GetPoolNbThreads());};
-  void DeletePoolThreads() {delete _pool;};
   boost::asio::thread_pool* GetPool() {return _pool;};
+#else
+  void InitPoolThreads() {};
+  void* GetPool() {return NULL;};
+#endif
+  void DeletePoolThreads() {delete _pool;};
   int GetPoolNbThreads();
 
   // Temporary folder
@@ -112,10 +117,10 @@ class SMESH_EXPORT SMESH_ParallelMesh: public SMESH_Mesh
   // Mutex for multhitreading write in SMESH_Mesh
 #ifndef WIN32
   boost::mutex _my_lock;
-#endif
-  boost::filesystem::path tmp_folder;
   // thread pool for computation
   boost::asio::thread_pool *     _pool = nullptr;
+#endif
+  boost::filesystem::path tmp_folder;
 
   int _method = ParallelismMethod::MultiThread;
 

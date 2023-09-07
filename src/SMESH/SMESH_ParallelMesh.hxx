@@ -46,7 +46,7 @@ class SMESH_EXPORT SMESH_ParallelMesh: public SMESH_Mesh
                        bool              theIsEmbeddedMode,
                        SMESHDS_Document* theDocument);
 
-  virtual ~SMESH_ParallelMesh();
+  ~SMESH_ParallelMesh();
 
   // Locking mechanism
   void Lock() override {_my_lock.lock();};
@@ -66,9 +66,11 @@ class SMESH_EXPORT SMESH_ParallelMesh: public SMESH_Mesh
   int GetPoolNbThreads();
 
   // Temporary folder
+  bool keepingTmpFolfer();
   void CreateTmpFolder();
   void DeleteTmpFolder();
   boost::filesystem::path GetTmpFolder() {return tmp_folder;};
+  void cleanup();
 
   //
   bool IsParallel() override {return true;};
@@ -96,6 +98,9 @@ class SMESH_EXPORT SMESH_ParallelMesh: public SMESH_Mesh
 
   std::string GetWcKey() {return _wcKey;};
   void SetWcKey(std::string wcKey) {_wcKey = wcKey;};
+
+  std::string GetWalltime() {return _walltime;};
+  void SetWalltime(std::string walltime) {_walltime = walltime;};
 
   // Parallel computation
   bool ComputeSubMeshes(
@@ -131,5 +136,6 @@ class SMESH_EXPORT SMESH_ParallelMesh: public SMESH_Mesh
   int _nbNode = 1;
   std::string _resource = "";
   std::string _wcKey = "P11N0:SALOME";
+  std::string _walltime = "01:00:00";
 };
 #endif

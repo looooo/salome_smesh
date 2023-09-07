@@ -188,3 +188,21 @@ char* SMESH_ParallelMesh_i::GetWcKey(){
 void SMESH_ParallelMesh_i::SetWcKey(const char* wcKey){
   DownCast()->SetWcKey(std::string(wcKey));
 }
+
+//=============================================================================
+/*!
+ * \brief Get the walltime to use on ressource
+ */
+//=============================================================================
+char* SMESH_ParallelMesh_i::GetWalltime(){
+  return CORBA::string_dup(DownCast()->GetWalltime().c_str());
+}
+
+//=============================================================================
+/*!
+ * \brief Set the walltime to use on ressource
+ */
+//=============================================================================
+void SMESH_ParallelMesh_i::SetWalltime(const char* walltime){
+  DownCast()->SetWalltime(std::string(walltime));
+}

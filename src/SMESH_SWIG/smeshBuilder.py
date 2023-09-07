@@ -7755,6 +7755,14 @@ class MNParallelismSettings(ParallelismSettings):
         """ Get Number of Node """
         return self._mesh.mesh.GetWcKey()
 
+    def SetWalltime(self, walltime):
+        """ Set the number of Node for multinode """
+        self._mesh.mesh.SetWalltime(walltime)
+
+    def GetWalltime(self):
+        """ Get Number of Node """
+        return self._mesh.mesh.GetWalltime()
+
     def __str__(self):
         """ str conversion """
         string = "\nParameter for MultiNode parallelism:\n"
@@ -7763,6 +7771,7 @@ class MNParallelismSettings(ParallelismSettings):
         string += "NbProcPerNode: {}\n".format(self.GetNbProcPerNode())
         string += "NbNode: {}\n".format(self.GetNbNode())
         string += "WcKey: {}\n".format(self.GetWcKey())
+        string += "Walltime: {}\n".format(self.GetWalltime())
 
         return string
 

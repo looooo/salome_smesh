@@ -71,6 +71,9 @@ class SMESH_I_EXPORT SMESH_ParallelMesh_i:
   char* GetWcKey();
   void SetWcKey(const char* wcKey);
 
+  char* GetWalltime();
+  void SetWalltime(const char* walltime);
+
   private:
   ::SMESH_ParallelMesh* DownCast();
 };

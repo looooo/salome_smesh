@@ -43,12 +43,6 @@ namespace fs=boost::filesystem;
 
 #include <utilities.h>
 
-#ifdef _DEBUG_
-static int MYDEBUG = 1;
-#else
-static int MYDEBUG = 0;
-#endif
-
 SMESH_ParallelMesh::SMESH_ParallelMesh(int               theLocalId,
                        SMESH_Gen*        theGen,
                        bool              theIsEmbeddedMode,
@@ -63,11 +57,46 @@ SMESH_ParallelMesh::SMESH_ParallelMesh(int               theLocalId,
 
 SMESH_ParallelMesh::~SMESH_ParallelMesh()
 {
-  DeletePoolThreads();
-  if(!MYDEBUG)
-    DeleteTmpFolder();
+  cleanup();
 };
 
+void SMESH_ParallelMesh::cleanup()
+{
+  DeletePoolThreads();
+  std::cout << "Keeping tmp folder" << keepingTmpFolfer() << std::endl;
+  if(!keepingTmpFolfer())
+  {
+    MESSAGE("Set SMESH_KEEP_TMP to > 0 to keep temporary folders")
+    DeleteTmpFolder();
+  }
+};
+
+//=============================================================================
+/*!
+ * \brief Checking if we should keep the temporary folder
+ *        They are kept if the variable SMESH_KEEP_TMP is set to higher than 0
+ */
+//=============================================================================
+bool SMESH_ParallelMesh::keepingTmpFolfer()
+{
+  const char* envVar = std::getenv("SMESH_KEEP_TMP");
+  std::cout << "smesh_keep_tmp: " << envVar << std::endl;
+
+  if (envVar && (envVar[0] != '\0'))
+  {
+    try
+    {
+      const long long numValue = std::stoll(envVar);
+      return numValue > 0;
+    }
+    catch(const std::exception& e)
+    {
+      std::cerr << e.what() << '\n';
+    }
+  }
+
+  return false;
+};
 
 
 //=============================================================================
@@ -92,6 +121,7 @@ void SMESH_ParallelMesh::CreateTmpFolder()
 void SMESH_ParallelMesh::DeleteTmpFolder()
 {
 #ifndef WIN32
+    MESSAGE("Deleting temporary folder" << tmp_folder.string());
     fs::remove_all(tmp_folder);
 #endif
 }

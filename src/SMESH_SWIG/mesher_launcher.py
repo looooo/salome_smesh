@@ -22,7 +22,6 @@
 """
 File to run mesher from command line
 """
-#TODO: Make the execution path independant (output files are written in current directory)
 from os import environ, path
 import sys
 import subprocess as sp
@@ -157,6 +156,7 @@ def run_pylauncher(args):
     job_params.resource_required.nb_proc = args.nb_proc
     job_params.resource_required.nb_proc_per_node = args.nb_proc_per_node
     job_params.resource_required.nb_node = args.nb_node
+    job_params.maximum_duration = args.walltime
 
     # job_params.pre_command = pre_command # command to run on frontal
     # script to run in batch mode
@@ -241,6 +241,13 @@ def run_pylauncher(args):
     launcher.getJobResults(job_id, "")
 
     # Delete remote working dir
+    del_tmp_folder = True
+    try:
+       val = int(environ.get("SMESH_KEEP_TMP", "0"))
+       del_tmp_folder = val > 0
+    except Exception as e:
+        del_tmp_folder = True
+
     launcher.clearJobWorkingDir(job_id)
 
 def def_arg():
@@ -291,6 +298,9 @@ def def_arg():
                            default=1,
                            type=int,
                            help="Number of node")
+    run_param.add_argument("--walltime",
+                           default="01:00:00",
+                           help="walltime for job submission HH:MM:SS (default 01:00:00)")
     run_param.add_argument("--wc-key",
                            default="P11N0:SALOME",
                            help="wc-key for job submission (default P11N0:SALOME)")

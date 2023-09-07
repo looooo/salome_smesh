@@ -453,6 +453,9 @@ bool SMESH_Gen::parallelComputeSubMeshes(
 
   aMesh.GetMeshDS()->Modified();
 
+  // Cleanup done here as in Python the destructor is not called
+  aParMesh.cleanup();
+
   return ret;
 #endif
 };

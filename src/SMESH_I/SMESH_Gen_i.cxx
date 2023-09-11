@@ -2078,7 +2078,8 @@ CORBA::Boolean SMESH_Gen_i::Compute( SMESH::SMESH_Mesh_ptr theMesh,
 
   // Update Python script
   TPythonDump(this) << "isDone = " << this << ".Compute( "
-                << theMesh << ", " << theShapeObject << ")";
+                    << theMesh << ", " << theShapeObject << ")";
+  TPythonDump(this) << "if not isDone: \n    raise Exception(\"Issue while computing Mesh\")";
 
   try {
     // get mesh servant

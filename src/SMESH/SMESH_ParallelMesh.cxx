@@ -32,10 +32,8 @@
   #include <windows.h>
 #endif
 
-#ifndef WIN32
 #include <boost/filesystem.hpp>
 namespace fs=boost::filesystem;
-#endif
 
 #ifndef WIN32
 #include <boost/asio.hpp>
@@ -106,11 +104,9 @@ bool SMESH_ParallelMesh::keepingTmpFolfer()
 //=============================================================================
 void SMESH_ParallelMesh::CreateTmpFolder()
 {
-#ifndef WIN32
   // Temporary folder that will be used by parallel computation
   tmp_folder = fs::temp_directory_path()/fs::unique_path(fs::path("SMESH_%%%%-%%%%"));
   fs::create_directories(tmp_folder);
-#endif
 }
 //
 //=============================================================================
@@ -120,10 +116,8 @@ void SMESH_ParallelMesh::CreateTmpFolder()
 //=============================================================================
 void SMESH_ParallelMesh::DeleteTmpFolder()
 {
-#ifndef WIN32
     MESSAGE("Deleting temporary folder" << tmp_folder.string());
     fs::remove_all(tmp_folder);
-#endif
 }
 
 //=============================================================================

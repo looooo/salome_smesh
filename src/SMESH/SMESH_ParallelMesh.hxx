@@ -35,7 +35,10 @@
 
 #include "SMESH_Gen.hxx"
 #include "SMESH_subMesh.hxx"
-
+#ifdef WIN32
+#include <thread>
+#include <boost/filesystem.hpp>
+#endif
 enum ParallelismMethod {MultiThread, MultiNode};
 
 class SMESH_EXPORT SMESH_ParallelMesh: public SMESH_Mesh
@@ -49,20 +52,24 @@ class SMESH_EXPORT SMESH_ParallelMesh: public SMESH_Mesh
   ~SMESH_ParallelMesh();
 
   // Locking mechanism
+  #ifndef WIN32
   void Lock() override {_my_lock.lock();};
   void Unlock() override {_my_lock.unlock();};
   // We need to recreate the pool afterthe join
   void wait() override {_pool->join(); DeletePoolThreads(); InitPoolThreads(); };
+  #endif
 
   // Thread Pool
 #ifndef WIN32
   void InitPoolThreads() {_pool = new boost::asio::thread_pool(GetPoolNbThreads());};
   boost::asio::thread_pool* GetPool() {return _pool;};
+  void DeletePoolThreads() {delete _pool;};
 #else
   void InitPoolThreads() {};
   void* GetPool() {return NULL;};
+  void DeletePoolThreads(){};
 #endif
-  void DeletePoolThreads() {delete _pool;};
+
   int GetPoolNbThreads();
 
   // Temporary folder
@@ -126,7 +133,6 @@ class SMESH_EXPORT SMESH_ParallelMesh: public SMESH_Mesh
   boost::asio::thread_pool *     _pool = nullptr;
 #endif
   boost::filesystem::path tmp_folder;
-
   int _method = ParallelismMethod::MultiThread;
 
   int _NbThreads = std::thread::hardware_concurrency();

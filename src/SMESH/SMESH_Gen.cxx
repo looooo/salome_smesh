@@ -301,6 +301,7 @@ const std::function<void(SMESH_subMesh*,
 
 void SMESH_Gen::send_mesh(SMESH_Mesh& aMesh, std::string file_name)
 {
+#ifndef WIN32
   SMESH_ParallelMesh& aParMesh = dynamic_cast<SMESH_ParallelMesh&>(aMesh);
   // Calling run_mesher
   // Path to mesher script
@@ -351,6 +352,7 @@ void SMESH_Gen::send_mesh(SMESH_Mesh& aMesh, std::string file_name)
     msg += cmd + "\n";
     throw SALOME_Exception(msg);
   }
+#endif
 }
 
 //=============================================================================

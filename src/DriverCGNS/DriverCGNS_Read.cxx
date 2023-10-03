@@ -675,6 +675,8 @@ namespace
     for ( int iN = 0; iN < nbNodesInGroup; ++iN )
     {
       n = aMeshDS->FindNode( nodeIDs[iN] );
+      if (!n)
+        continue;
       // check nodes of elements of theElemType around n
       SMDS_ElemIteratorPtr elOfTypeIt = n->GetInverseElementIterator( anElemType );
       while ( elOfTypeIt->more() )
@@ -1286,21 +1288,24 @@ Driver_Mesh::Status DriverCGNS_Read::Perform()
         }
         else // unstructured zone
         {
-          if (location == CGNS_ENUMV( Vertex ))
+          MESSAGE(" group on unstructured zone. ");
+          if (location == CGNS_ENUMV( Vertex ) && psType != CGNS_ENUMV( ElementRange ))
           {
+            MESSAGE("                             BC on vertices");
             // ids are ids of all nodes, not stored element by element
             // so we can't use findElement
             // => Use findElements adapted from CreateDimGroup instead
             findElements(ids, myMesh, elemType, groupDS);
-            MESSAGE(" group on unstructured zone. " << groupDS.Extent() << " elements have been added to " << groupName);
+            MESSAGE("                             " << groupDS.Extent() << " elements have been added to " << groupName);
           }
           else
           {
+            MESSAGE("                             BC not on vertices");
             if ( zone._elemIdShift )
               for ( size_t i = 0; i < ids.size(); ++i )
                 ids[i] += zone._elemIdShift;
 
-            if ( psType == CGNS_ENUMV( PointRange ) && ids.size() == 2 )
+            if ( (psType == CGNS_ENUMV( PointRange ) || psType == CGNS_ENUMV( ElementRange )) && ids.size() == 2 )
             {
               for ( cgsize_t i = ids[0]; i <= ids[1]; ++i )
                 if ( const SMDS_MeshElement* e = myMesh->FindElement( i ))

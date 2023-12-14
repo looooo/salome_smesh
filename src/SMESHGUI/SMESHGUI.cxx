@@ -2557,6 +2557,7 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
   SVTK_ViewWindow* vtkwnd = dynamic_cast<SVTK_ViewWindow*>( view );
 
   //QAction* act = action( theCommandID );
+  bool logAction(false);
 
   switch (theCommandID) {
   case SMESHOp::OpDelete:
@@ -2874,6 +2875,7 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
     break;
   case SMESHOp::OpCopyMesh:
     {
+      logAction = true;
       if (isStudyLocked()) break;
       EmitSignalDeactivateDialog();
       ( new SMESHGUI_CopyMeshDlg( this ) )->show();
@@ -3699,6 +3701,7 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
     }
   case SMESHOp::OpTranslation:
     {
+      logAction = true;
       if(isStudyLocked()) break;
       if ( warnOnGeomModif() )
         break; // action forbidden as geometry modified
@@ -3714,6 +3717,7 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
     }
   case SMESHOp::OpRotation:
     {
+      logAction = true;
       if(isStudyLocked()) break;
       if ( warnOnGeomModif() )
         break; // action forbidden as geometry modified
@@ -3729,6 +3733,7 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
     }
   case SMESHOp::OpSymmetry:
     {
+      logAction = true;
       if(isStudyLocked()) break;
       if ( warnOnGeomModif() )
         break; // action forbidden as geometry modified
@@ -3744,6 +3749,7 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
     }
   case SMESHOp::OpScale:
     {
+      logAction = true;
       if(isStudyLocked()) break;
       if ( warnOnGeomModif() )
         break; // action forbidden as geometry modified
@@ -3760,6 +3766,7 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
 
   case SMESHOp::OpOffset:
     {
+      logAction = true;
       if(isStudyLocked()) break;
       if ( warnOnGeomModif() )
         break; // action forbidden as geometry modified
@@ -3776,6 +3783,7 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
 
   case SMESHOp::OpSewing:
     {
+      logAction = true;
       if(isStudyLocked()) break;
       if ( warnOnGeomModif() )
         break; // action forbidden as geometry modified
@@ -4004,6 +4012,14 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
 
   anApp->updateActions(); //SRN: To update a Save button in the toolbar
   //updateObjBrowser();
+  if(logAction)
+  {
+    QAction* anAction = action( theCommandID );
+    CAM_Application::logStructuredUserEvent( "Mesh",
+                                             "Operation",
+                                             anAction->text(),
+                                             "activated" );
+  }
   return true;
 }
 

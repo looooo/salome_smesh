@@ -103,6 +103,7 @@ void SMESHGUI_CreateDualMeshOp::startOperation()
     myDlg = new SMESHGUI_CreateDualMeshDlg( );
   }
   connect( myDlg, SIGNAL( onClicked( int ) ), SLOT( ConnectRadioButtons( int ) ) );
+  connect( myDlg->mySimplify, SIGNAL( toggled( bool ) ), SLOT( DisplayEps( bool ) ) );
 
   myHelpFileName = "create_dual_mesh.html";
 
@@ -229,9 +230,12 @@ bool SMESHGUI_CreateDualMeshOp::onApply()
   SMESH::SMESH_Mesh_var newMesh;
   QByteArray newMeshName=myDlg->myMeshName->text().toUtf8();
   bool adapt_to_shape=myDlg->myProjShape->isChecked();
+  bool simplify=myDlg->mySimplify->isChecked();
+  double eps=myDlg->mySimpEps->text().toDouble();
+  std::cout << "eps" << eps << std::endl;
   try
   {
-    newMesh = gen->CreateDualMesh(mesh, newMeshName.constData(), adapt_to_shape);
+    newMesh = gen->CreateDualMesh(mesh, newMeshName.constData(), adapt_to_shape, simplify, eps);
 
     if ( !newMesh->_is_nil() )
       if ( _PTR(SObject) aSObject = SMESH::ObjectToSObject( newMesh ) )

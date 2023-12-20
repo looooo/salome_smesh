@@ -259,7 +259,9 @@ public:
   // Create dual mesh of a tetrahedron mesh
   SMESH::SMESH_Mesh_ptr CreateDualMesh(SMESH::SMESH_IDSource_ptr meshPart,
                                        const char*               meshName,
-                                       CORBA::Boolean            adapt_to_shape);
+                                       CORBA::Boolean            adapt_to_shape,
+                                       CORBA::Boolean            simplify,
+                                       CORBA::Double             eps);
 
   // Copy a part of mesh
   SMESH::SMESH_Mesh_ptr CopyMesh(SMESH::SMESH_IDSource_ptr meshPart,

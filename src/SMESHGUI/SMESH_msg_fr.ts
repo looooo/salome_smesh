@@ -5751,6 +5751,10 @@ Sélectionner des éléments et essayer encore</translation>
         <source>PROJ_SHAPE</source>
         <translation>Projection des élements de bord sur la géométrie</translation>
     </message>
+    <message>
+        <source>SIMPLIFY</source>
+        <translation>Simplification des polyèdres</translation>
+    </message>
 </context>
 <context>
     <name>SMESHGUI_ConvToQuadOp</name>
@@ -7952,7 +7956,7 @@ Il y a trop peu de points dans le fichier </translation>
         <source>2D_FROM_3D_ELEMENTS</source>
         <translation>Faces des éléments volumiques</translation>
     </message>
-</context> 
+</context>
 <context>
     <name>SMESHGUI_Make2DFrom3DDlg</name>
     <message>

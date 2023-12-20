@@ -299,10 +299,14 @@ module SMESH
      *  \param mesh - TetraHedron mesh to create dual from
      *  \param meshName - a name of the new mesh
      *  \param adaptToShape - if True project boundary point on shape
+     *  \param simplify - if True merge coplanar faces of a polyhedra
+     *  \param eps - epislon tp define coplanar faces
      */
     SMESH_Mesh CreateDualMesh(in SMESH_IDSource mesh,
                               in string         meshName,
-                              in boolean        adaptToShape)
+                              in boolean        adaptToShape,
+                              in boolean        simplify,
+                              in double         eps)
       raises ( SALOME::SALOME_Exception );
 
     /*!

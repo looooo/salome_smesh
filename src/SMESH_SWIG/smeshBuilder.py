@@ -789,7 +789,7 @@ class smeshBuilder( SMESH._objref_SMESH_Gen, object ):
         aMesh = Mesh( self, self.geompyD, aSmeshMesh, name=name )
         return aMesh
 
-    def CreateDualMesh( self, mesh, meshName, adaptToShape):
+    def CreateDualMesh( self, mesh, meshName="", adaptToShape=True, simplify=False, eps=1e-4):
         """
         Create a dual of a mesh.
 
@@ -798,14 +798,17 @@ class smeshBuilder( SMESH._objref_SMESH_Gen, object ):
                         :class:`mesh, <SMESH.SMESH_IDSource>`.
 
                 meshName: a name of the new mesh
-                adpatToShape: if true project boundary points on shape
+                adaptToShape: if true project boundary points on shape
+                simplify: if true will merge coplanar face of polyhedrons
+                eps: threshold to define if two face are coplanar
 
         Returns:
                 an instance of class :class:`Mesh`
         """
         if isinstance( mesh, Mesh ):
             mesh = mesh.GetMesh()
-        dualMesh = SMESH._objref_SMESH_Gen.CreateDualMesh(self, mesh, meshName, adaptToShape)
+        dualMesh = SMESH._objref_SMESH_Gen.CreateDualMesh(self, mesh, meshName,
+            adaptToShape, simplify, eps)
         return Mesh(self, self.geompyD, dualMesh)
 
 

@@ -5745,6 +5745,10 @@ Please specify it and try again</translation>
         <source>PROJ_SHAPE</source>
         <translation>Project boundary elements on shape</translation>
     </message>
+    <message>
+        <source>SIMPLIFY</source>
+        <translation>Simplify polyhedrons</translation>
+    </message>
 </context>
 <context>
     <name>SMESHGUI_ConvToQuadOp</name>
@@ -7926,7 +7930,7 @@ It is impossible to read point coordinates from file</translation>
         <source>2D_FROM_3D_ELEMENTS</source>
         <translation>2D from 3D</translation>
     </message>
-</context>    
+</context>
 <context>
     <name>SMESHGUI_Make2DFrom3DDlg</name>
     <message>

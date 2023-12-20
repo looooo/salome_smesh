@@ -2897,7 +2897,10 @@ SMESH_Gen_i::ConcatenateCommon(const SMESH::ListOfIDSources& theMeshesArray,
 
 SMESH::SMESH_Mesh_ptr SMESH_Gen_i::CreateDualMesh(SMESH::SMESH_IDSource_ptr mesh,
                                                   const char*               meshName,
-                                                  CORBA::Boolean            adapt_to_shape)
+                                                  CORBA::Boolean            adapt_to_shape,
+                                                  CORBA::Boolean            simplify,
+                                                  CORBA::Double             eps_poly
+                                                 )
 {
   Unexpect aCatch(SALOME_SalomeException);
 
@@ -2930,17 +2933,28 @@ SMESH::SMESH_Mesh_ptr SMESH_Gen_i::CreateDualMesh(SMESH::SMESH_IDSource_ptr mesh
   gstate = PyGILState_Ensure();
 
 
-  std::string ats;
+  // Converting arugments in string
+  std::string ats = "False";
   if(adapt_to_shape)
     ats = "True";
-  else
-    ats = "False";
+
+  std::string sp="False";
+  if(simplify)
+    sp = "True";
+
+  std::ostringstream ss;
+  ss << eps_poly;
 
   std::string cmd="import salome.smesh.smesh_tools as smt\n";
-  cmd +="smt.smesh_create_dual_mesh(\"" + mesh_ior + "\", r\"" +
-        dual_mesh_file.string() + "\", mesh_name=\"" + mesh_name + "\", adapt_to_shape=" + ats + ")";
-  MESSAGE(cmd);
+  cmd +="smt.smesh_create_dual_mesh(\"" + mesh_ior + "\"" +
+      ", r\"" + dual_mesh_file.string() + "\"" +
+      ", mesh_name=\"" + mesh_name + "\"" +
+      ", adapt_to_shape=" + ats +
+      ", simplify_poly=" + sp +
+      ", eps_poly=" + ss.str() + ")";
+  MESSAGE("Dual mesh python command" + cmd);
 
+  // Calling code in Python Interperter
   PyObject *py_main = PyImport_AddModule("__main__");
   PyObject *py_dict = PyModule_GetDict(py_main);
   PyObject *local_dict = PyDict_New();

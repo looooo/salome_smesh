@@ -48,10 +48,13 @@ public:
   virtual ~SMESHGUI_CreateDualMeshDlg();
 
   void          ShowWarning(bool);
+  void          DisplayEps(bool);
   bool          isWarningShown();
 
   QLineEdit* myMeshName;
   QCheckBox* myProjShape;
+  QCheckBox* mySimplify;
+  QLineEdit* mySimpEps;
 
 signals:
   void          onClicked( int );

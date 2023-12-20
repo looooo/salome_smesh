@@ -35,6 +35,7 @@
 #include <QRadioButton>
 #include <QButtonGroup>
 #include <QGroupBox>
+#include <QDoubleValidator>
 #include <QFrame>
 #include <QHBoxLayout>
 #include <QGridLayout>
@@ -61,6 +62,16 @@ SMESHGUI_CreateDualMeshDlg::SMESHGUI_CreateDualMeshDlg()
   myProjShape = new QCheckBox(QString(tr("PROJ_SHAPE")), mainFrame());
   myProjShape->toggle();
 
+  mySimplify = new QCheckBox(QString(tr("SIMPLIFY")), mainFrame());
+  mySimplify->toggle();
+
+  mySimpEps = new QLineEdit(mainFrame());
+
+  QDoubleValidator *validator = new QDoubleValidator(1e-16, 100, 1000, mySimpEps);
+
+  mySimpEps->setValidator(validator);
+  mySimpEps->setText("1e-4");
+
   myWarning = new QLabel(QString("<b>%1</b>").arg(tr("NON_TETRA_MESH_WARNING")), mainFrame());
 
   // Fill layout
@@ -71,10 +82,12 @@ SMESHGUI_CreateDualMeshDlg::SMESHGUI_CreateDualMeshDlg()
   aLay->addWidget( objectWg( 0,  Label ),   0, 0 );
   aLay->addWidget( objectWg( 0,  Btn ),     0, 1 );
   aLay->addWidget( objectWg( 0,  Control ), 0, 2 );
-  aLay->addWidget( myWarning,               3, 0, 1, 3 );
   aLay->addWidget( myMeshNameLabel,         1, 0 );
   aLay->addWidget( myMeshName,              1, 2 );
-  aLay->addWidget( myProjShape,              2, 0 );
+  aLay->addWidget( myProjShape,             2, 0 );
+  aLay->addWidget( mySimplify,              3, 0 );
+  aLay->addWidget( mySimpEps,               3, 1 );
+  aLay->addWidget( myWarning,               4, 0, 1, 3 );
 
 }
 
@@ -93,4 +106,13 @@ void SMESHGUI_CreateDualMeshDlg::ShowWarning(bool toShow)
 bool SMESHGUI_CreateDualMeshDlg::isWarningShown()
 {
   return myWarning->isVisible();
+}
+
+void SMESHGUI_CreateDualMeshDlg::DisplayEps(bool on)
+{
+  std::cout << "DisplayEps" << on << std::endl;
+  if ( on )
+    mySimpEps->setEnabled(true);
+  else
+    mySimpEps->setDisabled(true);
 }

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from os import environ
 import salome
 import medcoupling as mc
 
@@ -15,7 +16,10 @@ smesh = smeshBuilder.New()
 
 from salome.kernel.logger import Logger
 logger = Logger("salome.smesh.smesh_tools")
-logger.setLevel("WARNING")
+if environ.get("SALOME_VERBOSE", "0") > "1":
+    logger.setLevel("DEBUG")
+else:
+    logger.setLevel("WARNING")
 
 # prefix for groups with internal usage
 # i.e. used to transfer the faces and edges sub-shapes ids to the mesh
@@ -114,7 +118,7 @@ def __deleteObj(theObj):
     pass
 
 def smesh_create_dual_mesh(mesh_ior, output_file, adapt_to_shape=True,
-                           mesh_name="MESH"):
+                           mesh_name="MESH", simplify_poly=False, eps_poly=1e-4):
     """ Create a dual of the mesh in input_file into output_file
 
     Args:
@@ -131,6 +135,7 @@ def smesh_create_dual_mesh(mesh_ior, output_file, adapt_to_shape=True,
     shape = mesh.GetShapeToMesh()
 
     if adapt_to_shape:
+        logger.debug("Projecting on shape")
         faces = geompy.SubShapeAll(shape, geompy.ShapeType["FACE"])
         faces_ids = geompy.GetSubShapesIDs(shape, faces)
 
@@ -173,17 +178,36 @@ def smesh_create_dual_mesh(mesh_ior, output_file, adapt_to_shape=True,
     tetras = mc.MEDCoupling1SGTUMesh(tetras)
 
     # Create the polyhedra from the tetrahedra (main goal of this function)
+    logger.debug("Computing dual mesh")
     polyh = tetras.computeDualMesh()
+    umesh = polyh.buildUnstructured()
+
+    if (simplify_poly):
+        logger.debug("Simplifying polyhedrons")
+        umesh.simplifyPolyhedra(eps_poly)
+        logger.debug("Colinearize edges")
+        #umesh.colinearizeEdges(eps_poly)
+
+        bad_cells = umesh.arePolyhedronsNotCorrectlyOriented()
+        if not bad_cells.empty():
+            logger.debug("Reorienting polyhedrons")
+            try:
+                umesh.orientCorrectlyPolyhedrons()
+            except Exception as exp:
+                print("Could not reorient Polyhedron")
+                print(exp)
 
     ## Adding skin + transfering groups on faces from tetras mesh
-    mesh2d = polyh.buildUnstructured().computeSkin()
+    logger.debug("Computing Skin")
+    mesh2d = umesh.computeSkin()
     mesh2d.setName(mesh_name)
 
-    polyh_coords = polyh.getCoords()
+    polyh_coords = umesh.getCoords()
 
     treated_edges = []
 
     mc_groups = []
+    logger.debug("Transferring groups")
     for grp_name in mc_mesh_file.getGroupsOnSpecifiedLev(-1):
         # This group is created by the export
         if grp_name == "Group_Of_All_Faces":
@@ -238,8 +262,8 @@ def smesh_create_dual_mesh(mesh_ior, output_file, adapt_to_shape=True,
     logger.debug("Creating file with mesh: "+mesh_name)
     myfile = mc.MEDFileUMesh()
     myfile.setName(mesh_name)
-    polyh.setName(mesh_name)
-    myfile.setMeshAtLevel(0, polyh)
+    umesh.setName(mesh_name)
+    myfile.setMeshAtLevel(0, umesh)
     myfile.setMeshAtLevel(-1, mesh2d)
 
     for group in mc_groups:

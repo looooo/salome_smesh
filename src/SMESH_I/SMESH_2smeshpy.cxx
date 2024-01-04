@@ -1092,6 +1092,14 @@ void _pyGen::Process( const Handle(_pyCommand)& theCommand )
       theCommand->RemoveArgs();
       id_mesh->second->Process( theCommand );
       id_mesh->second->AddProcessedCmd( theCommand );
+
+      // Changing command for compute adding a check on isDone and raising
+      // exception if not completed
+      _AString meshStr = theCommand->GetObject().ToCString();
+      _AString excStr = "\"Could not compute mesh: \"+";
+      excStr += meshStr + ".GetName()";
+      _AString compStr = theCommand->GetString()+"\nif not isDone:\n\traise Exception("+excStr+")";
+      theCommand->GetString() = compStr;
       return;
     }
   }

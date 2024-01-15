@@ -32,6 +32,8 @@
 #include "SMDS_Mesh.hxx"
 #include "SMESHDS_SubMesh.hxx"
 
+#include <Basics_OCCTVersion.hxx>
+
 #include <TopTools_IndexedMapOfShape.hxx>
 #include <TopoDS_Shape.hxx>
 
@@ -57,9 +59,30 @@ class SMDS_BallElement;
  * So this functionality implement on new NCollection_DataMap technology
  */
 #include <NCollection_DataMap.hxx>
-#include "SMESHDS_DataMapOfShape.hxx"
 typedef std::list<const SMESHDS_Hypothesis*>                          THypList;
+
+#if OCC_VERSION_LARGE < 0x07080000
+
+struct SMESHDS_Hasher
+{
+  static inline Standard_Boolean IsEqual(const TopoDS_Shape& S1,
+                                         const TopoDS_Shape& S2)
+  {
+    return S1.IsSame(S2);
+  }
+  static inline Standard_Integer HashCode(const TopoDS_Shape& S,
+                                          const Standard_Integer Upper)
+  {
+    return ::HashCode( S, Upper);
+  }
+};
 typedef NCollection_DataMap< TopoDS_Shape, THypList, SMESHDS_Hasher > ShapeToHypothesis;
+
+#else
+
+typedef NCollection_DataMap< TopoDS_Shape, THypList > ShapeToHypothesis;
+
+#endif
 
 class SMESHDS_GroupBase;
 class DownIdType;

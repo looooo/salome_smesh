@@ -101,6 +101,7 @@
 #include "SMESH_TryCatch.hxx" // include after OCCT headers!
 
 #include <smIdType.hxx>
+#include <Basics_OCCTVersion.hxx>
 
 #define cast2Node(elem) static_cast<const SMDS_MeshNode*>( elem )
 
@@ -1505,7 +1506,7 @@ int SMESH_MeshEditor::Reorient2D( TIDSortedElemSet &  theFaces,
   vector< const SMDS_MeshElement* > facesNearLink;
   vector< std::pair< int, int > >   nodeIndsOfFace;
   TIDSortedElemSet                  avoidSet, emptySet;
-  NCollection_Map< SMESH_TLink, SMESH_TLink > checkedLinks;
+  NCollection_Map< SMESH_TLink, SMESH_TLinkHasher > checkedLinks;
 
   while ( !theRefFaces.empty() )
   {
@@ -7789,6 +7790,8 @@ bool SMESH_MeshEditor::applyMerge( const SMDS_MeshElement* elem,
 // purpose : allow comparing elements basing on their nodes
 // ========================================================
 
+struct ComparableElementHasher;
+
 class ComparableElement : public boost::container::flat_set< smIdType >
 {
   typedef boost::container::flat_set< smIdType >  int_set;
@@ -7796,6 +7799,8 @@ class ComparableElement : public boost::container::flat_set< smIdType >
   const SMDS_MeshElement* myElem;
   smIdType                mySumID;
   mutable int             myGroupID;
+
+  friend ComparableElementHasher;
 
 public:
 
@@ -7825,7 +7830,11 @@ public:
     mySumID   = src.mySumID;
     myGroupID = src.myGroupID;
   }
+};
 
+struct ComparableElementHasher
+{
+#if OCC_VERSION_LARGE < 0x07080000
   static int HashCode(const ComparableElement& se, int limit )
   {
     return ::HashCode( FromSmIdType<int>(se.mySumID), limit );
@@ -7834,7 +7843,17 @@ public:
   {
     return ( se1 == se2 );
   }
+#else
+  size_t operator()(const ComparableElement& se) const
+  {
+    return static_cast<size_t>(FromSmIdType<int>(se.mySumID));
+  }
 
+  bool operator()(const ComparableElement& se1, const ComparableElement& se2) const
+  {
+    return ( se1 == se2 );
+  }
+#endif
 };
 
 //=======================================================================
@@ -7852,8 +7871,8 @@ void SMESH_MeshEditor::FindEqualElements( TIDSortedElemSet &        theElements,
   if ( theElements.empty() ) elemIt = GetMeshDS()->elementsIterator();
   else                       elemIt = SMESHUtils::elemSetIterator( theElements );
 
-  typedef NCollection_Map< ComparableElement, ComparableElement > TMapOfElements;
-  typedef std::list<smIdType>                                     TGroupOfElems;
+  typedef NCollection_Map< ComparableElement, ComparableElementHasher > TMapOfElements;
+  typedef std::list<smIdType>                                           TGroupOfElems;
   TMapOfElements               mapOfElements;
   std::vector< TGroupOfElems > arrayOfGroups;
   TGroupOfElems                groupOfElems;

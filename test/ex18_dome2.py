@@ -84,9 +84,11 @@ c_outils.append(geompy.MakePlane(geompy.MakeVertex(g_ox, g_oy, g_oz+g_cyl_demiHa
 
 c_cpd = geompy.MakePartition([s_sphere], c_outils, [], [], geompy.ShapeType["SOLID"])
 c_calotte_haut, c_reste = geompy.SubShapeAllSorted(c_cpd, geompy.ShapeType["SOLID"])
+c_calotte_haut = geompy.RemoveExtraEdges(c_calotte_haut) 
 
 c_plan = geompy.MakePlane(geompy.MakeVertex(g_ox, g_oy, g_oz), geompy.MakeVectorDXDYDZ(0, 0, 1), g_trim)
 c_calotte_bas = geompy.MakeMirrorByPlane(c_calotte_haut, c_plan)
+c_calotte_bas = geompy.RemoveExtraEdges(c_calotte_bas)
 
 # Fusionner
 # ---------
@@ -110,12 +112,13 @@ h_outils = []
 h_outils.append(geompy.MakePlane(t_point, geompy.MakeVectorDXDYDZ(1, 0, 0), g_trim))
 h_outils.append(geompy.MakePlane(t_point, geompy.MakeVectorDXDYDZ(0, 1, 0), g_trim))
 
-h_piece = geompy.MakePartition([t_piece], h_outils, [], [], geompy.ShapeType["SOLID"])
+piece = geompy.MakePartition([t_piece], h_outils, [], [], geompy.ShapeType["SOLID"])
 
 # Reparer
 # -------
 
-piece = geompy.RemoveExtraEdges(h_piece)
+#Remove extraedges remove the seam edge from calottes. for salome+occt78 we move this call to the calotte sections.
+#piece = geompy.RemoveExtraEdges(h_piece)
 
 # Ajouter la piece dans l'etude
 # -----------------------------

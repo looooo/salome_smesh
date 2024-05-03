@@ -122,6 +122,9 @@
 
 #include "SMESH_version.h"
 
+#include "SMESHDS_Mesh.hxx"
+#include "SMESH_Mesh.hxx"
+
 #include "SMESH_Actor.h"
 #include "SMESH_ActorUtils.h"
 #include "SMESH_Client.hxx"
@@ -220,6 +223,8 @@ namespace
                             int                  theCommandID);
 
   void ExportMeshToFile(int theCommandID);
+
+  void ReloadMeshFromFile(int theCommandID);
 
   void SetDisplayMode(int theCommandID, VTK::MarkerMap& theMarkerMap);
 
@@ -1077,6 +1082,69 @@ namespace
         wc.resume();
       }
     }
+  }
+
+  //================================================================================
+  /*!
+   * \brief Reload selected mesh from file a file
+   */
+   //================================================================================
+  void ReloadMeshFromFile(int theCommandID)
+  {
+    LightApp_SelectionMgr* aSel = SMESHGUI::selectionMgr();
+    SALOME_ListIO selected;
+    if (aSel)
+      aSel->selectedObjects(selected);
+
+    QList< QPair< SMESH::SMESH_IDSource_var, QString > >           aMeshList;
+    QList< QPair< SMESH::SMESH_IDSource_var, QString > >::iterator aMeshIter;
+    SALOME_ListIteratorOfListIO It(selected);
+
+    // Iterate by all selected
+    for (; It.More(); It.Next())
+    {
+      Handle(SALOME_InteractiveObject) anIObject = It.Value();
+      SMESH::SMESH_IDSource_var aMeshItem =
+        SMESH::IObjectToInterface<SMESH::SMESH_IDSource>(anIObject);
+      
+      if (aMeshItem->_is_nil()) {
+        SUIT_MessageBox::warning(SMESHGUI::desktop(),
+          QObject::tr("SMESH_WRN_WARNING"),
+          QObject::tr("SMESH_BAD_MESH_SELECTION"));
+        continue;
+      }
+
+      SMESH::SMESH_Mesh_var aMeshByIO = SMESH::GetMeshByIO(anIObject);
+
+      SMESH::SelectionProxy aMesh = SMESH::SelectionProxy(aMeshItem);
+      SMESH::MedInfo anInfo = aMesh.medFileInfo();
+      if (!anInfo.isValid())
+        continue;
+
+      SMESH::mesh_array_var aMeshes = new SMESH::mesh_array;
+      {
+        // Get file path and re-import mesh
+        QString aPath = anInfo.fileName();
+        SMESH::SMESH_Mesh_var aReloadedMesh = SMESHGUI::GetSMESHGen()->ReloadMeshFromFile(aPath.toUtf8().constData(), aMeshByIO);
+
+        QStringList anEntryList;
+
+        _PTR(SObject) aMeshSO = SMESH::FindSObject(aReloadedMesh);
+        if (aMeshSO) {
+          anEntryList.append(aMeshSO->GetID().c_str());
+        }
+        SMESHGUI::GetSMESHGUI()->updateObjBrowser();
+        if (LightApp_Application* anApp =
+          dynamic_cast<LightApp_Application*>(SUIT_Session::session()->activeApplication()))
+          anApp->browseObjects(anEntryList);
+      }
+
+      SMESH::SMESH_GroupBase_var aGroup = SMESH::SMESH_GroupBase::_narrow(aMeshItem);\
+      QString aMeshName = anIObject->getName();
+      aMeshList.append(QPair< SMESH::SMESH_IDSource_var, QString >(aMeshItem, aMeshName));
+
+    }
+    SMESH::UpdateView();
   }
 
   inline void InverseEntityMode(unsigned int& theOutputMode,
@@ -2691,7 +2759,12 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
       ::ImportMeshesFromFile(GetSMESHGen(),theCommandID);
       break;
     }
-
+  case SMESHOp::OpReloadFromFile:
+  {
+    if (isStudyLocked()) break;
+    ::ReloadMeshFromFile(theCommandID);
+    break;
+  }
   case SMESHOp::OpFileInformation:
     {
       SALOME_ListIO selected;
@@ -3484,7 +3557,6 @@ bool SMESHGUI::OnGUIEvent( int theCommandID )
       }
       break;
     }
-
   case SMESHOp::OpFindElementByPoint:
     {
       startOperation( theCommandID );
@@ -4320,6 +4392,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   //createSMESHAction( SMESHOp::OpStdInfo, "STD_INFO",        "ICON_STD_INFO" );
   //createSMESHAction( SMESHOp::OpWhatIs, "WHAT_IS",         "ICON_WHAT_IS" ); // VSR: issue #0021242 (eliminate "Mesh Element Information" command)
   createSMESHAction( SMESHOp::OpFindElementByPoint,   "FIND_ELEM",               "ICON_FIND_ELEM" );
+  createSMESHAction( SMESHOp::OpReloadFromFile,       "RELOAD_FROM_FILE");
   //update
   createSMESHAction( SMESHOp::OpFreeNode,              "FREE_NODE",               "ICON_FREE_NODE",     0, true );
   createSMESHAction( SMESHOp::OpEqualNode,             "EQUAL_NODE",              "ICON_EQUAL_NODE",    0, true );
@@ -4548,6 +4621,7 @@ void SMESHGUI::initialize( CAM_Application* app )
 #endif
   createMenu( SMESHOp::OpExportGMF,  exportId, -1 );
   createMenu( SMESHOp::OpExportMESHIO,  exportId, -1 ); // formats supported by meshio lib
+  createMenu( SMESHOp::OpReloadFromFile, fileId, -1 );
   createMenu( separator(), fileId, 10 );
 
   createMenu( SMESHOp::OpDelete, editId, -1 );
@@ -4932,6 +5006,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   createPopupItem( SMESHOp::OpFileInformation,   OB, mesh, "&& selcount=1 && isImported" );
   createPopupItem( SMESHOp::OpMeshInformation,   OB, mesh_part );
   createPopupItem( SMESHOp::OpFindElementByPoint,OB, mesh_group, "&& selcount=1 && " + hasElems );
+  createPopupItem( SMESHOp::OpReloadFromFile,    OB, mesh, "&& isImported");
   createPopupItem( SMESHOp::OpOverallMeshQuality,OB, mesh_part );
   popupMgr()->insert( separator(), -1, 0 );
   createPopupItem( SMESHOp::OpCreateGroup,       OB, mesh, "&& selcount=1" );
@@ -4995,6 +5070,7 @@ void SMESHGUI::initialize( CAM_Application* app )
   createPopupItem( SMESHOp::OpMeshInformation,    View, mesh_part );
   createPopupItem( SMESHOp::OpOverallMeshQuality, View, mesh_part );
   createPopupItem( SMESHOp::OpFindElementByPoint, View, mesh, "&& " + hasElems);
+  createPopupItem( SMESHOp::OpReloadFromFile, View, mesh_part, "&& isImported");
   popupMgr()->insert( separator(), -1, 0 );
 
   createPopupItem( SMESHOp::OpUpdate,           OB + " " + View, mesh_part );

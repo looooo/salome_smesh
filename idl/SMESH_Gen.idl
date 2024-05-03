@@ -258,12 +258,24 @@ module SMESH
     SMESH_Mesh CreateEmptyMesh()
       raises ( SALOME::SALOME_Exception );
 
+    SMESH_Mesh ReloadMeshFromFile( in string     theFileName,
+                                   in SMESH_Mesh sourceMesh)
+      raises(SALOME::SALOME_Exception);
+
     /*!
      * Create Mesh object importing data from given UNV file
      * (UNV supported version is I-DEAS 10)
      */
     SMESH_Mesh CreateMeshesFromUNV( in string theFileName )
       raises ( SALOME::SALOME_Exception );
+
+    /*!
+     * Reload Mesh object importing data from given UNV file
+     * (UNV supported version is I-DEAS 10)
+     *
+    SMESH_Mesh ReloadMeshesFromUNV( in string     theFileName,
+                                    in SMESH_Mesh sourceMesh )
+      raises(SALOME::SALOME_Exception);*/
 
     /*!
      * Create Mesh object(s) importing data from given MED file
@@ -273,10 +285,25 @@ module SMESH
       raises ( SALOME::SALOME_Exception );
 
     /*!
+     * Reload Mesh object(s) importing data from given MED file
+     *
+    mesh_array ReloadMeshesFromMED( in string                       theFileName,
+                                    in SMESH_Mesh                   sourceMesh,
+                                    out SMESH::DriverMED_ReadStatus theStatus )
+      raises(SALOME::SALOME_Exception);*/
+
+    /*!
      * Create Mesh object importing data from given STL file
      */
     SMESH_Mesh CreateMeshesFromSTL( in string theFileName )
       raises ( SALOME::SALOME_Exception );
+
+    /*!
+     * Reload Mesh object importing data from given STL file
+     *
+    SMESH_Mesh ReloadMeshesFromSTL( in string     theFileName,
+                                    in SMESH_Mesh sourceMesh )
+      raises(SALOME::SALOME_Exception);*/
 
     /*!
      * Create Mesh object(s) importing data from given CGNS file
@@ -284,6 +311,14 @@ module SMESH
     mesh_array CreateMeshesFromCGNS( in string theFileName,
                                      out SMESH::DriverMED_ReadStatus theStatus )
       raises ( SALOME::SALOME_Exception );
+
+    /*!
+     * Reload Mesh object(s) importing data from given CGNS file
+     *
+    mesh_array ReloadMeshesFromCGNS( in string                       theFileName,
+                                     in SMESH_Mesh                   sourceMesh, 
+                                     out SMESH::DriverMED_ReadStatus theStatus )
+      raises(SALOME::SALOME_Exception);*/
 
     /*!
      * Create Mesh object importing data from given GMF file
@@ -296,11 +331,30 @@ module SMESH
       raises ( SALOME::SALOME_Exception );
 
     /*!
+     * Reload Mesh object importing data from given GMF file
+     *  \param theFileName - a name of file to import
+     *  \param theMakeRequiredGroups - if true, groups of required entities will be created
+     *
+    SMESH_Mesh ReloadMeshesFromGMF( in string               theFileName,
+                                    in SMESH_Mesh           sourceMesh,
+                                    in boolean              theMakeRequiredGroups,
+                                    out SMESH::ComputeError theError )
+      raises(SALOME::SALOME_Exception);*/
+
+    /*!
      * Create a mesh and import data from any file supported by meshio library
      */
     mesh_array CreateMeshesFromMESHIO(in string theFileName,
                                       out SMESH::DriverMED_ReadStatus theStatus)
       raises (SALOME::SALOME_Exception);
+
+    /*!
+     * Reload a mesh and import data from any file supported by meshio library
+     *
+    mesh_array ReloadMeshesFromMESHIO( in string                       theFileName,
+                                       in SMESH_Mesh                   sourceMesh,
+                                       out SMESH::DriverMED_ReadStatus theStatus )
+      raises(SALOME::SALOME_Exception);*/
 
     /*!
      * Create a dual mesh of a Tetrahedron mesh

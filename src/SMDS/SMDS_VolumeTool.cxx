@@ -265,26 +265,26 @@ static int QuadPyram_RE [5][9] = { // REVERSED -> FORWARD (EXTERNAL)
   { 3, 8, 0, 9, 4, 12,3, 4, 4 }}; 
 static int QuadPyram_nbN [] = { 8, 6, 6, 6, 6 };
 
-/*   
-//            + N4
-//           /|\
-//         9/ | \10
-//         /  |  \
-//        /   |   \
-//    N3 +----+----+ N5
-//       |    |11  |
-//       |    |    |
-//       |    +13  |                QUADRATIC
-//       |    |    |                PENTAHEDRON
-//     12+    |    +14
-//       |    |    |
-//       |    |    |
-//       |    + N1 |
-//       |   / \   |               
-//       | 6/   \7 |
-//       | /     \ |
-//       |/       \|
-//    N0 +---------+ N2
+/*   2 1 5 4 3 6 7 8 9 10 11 12 13 14 15 16 18 17
+//            + N4                                 +
+//           /|\                                  /|\
+//         9/ | \10                              + | +
+//         /  |  \                              /  |  \
+//        /   |   \                            /   |   \
+//    N3 +----+----+ N5                       +----+----+
+//       |    |11  |                          |    |    |
+//       |    |    |                          |    |    |   Central nodes
+//       |    +13  |      QUADRATIC           | 17 +    |   of bi-quadratic
+//       |    |    |      PENTAHEDRON         |  + |  + |   PENTAHEDRON
+//     12+    |    +14                        +    | 16 +
+//       |    |    |                          |  18|    |
+//       |    |    |                          |    |    |
+//       |    + N1 |                          |    +    |
+//       |   / \   |                          |   / \   |
+//       | 6/   \7 |                          |  +   +  |
+//       | /     \ |                          | /     \ |
+//       |/       \|                          |/       \|
+//    N0 +---------+ N2                       +---------+
 //            8
 */
 static int QuadPenta_F [5][9] = {  // FORWARD
@@ -300,6 +300,20 @@ static int QuadPenta_RE [5][9] = { // REVERSED -> EXTERNAL
   { 1, 7, 2, 14,5, 10,4, 13,1 },
   { 0, 12,3, 11,5, 14,2, 8, 0 }}; 
 static int QuadPenta_nbN [] = { 6, 6, 8, 8, 8 };
+
+static int BiQuadPenta_F[5][9] = {  // FORWARD
+  { 0, 6, 1, 7, 2, 8, 0, 0, 0 },
+  { 3, 11,5, 10,4, 9, 3, 3, 3 },
+  { 0, 12,3, 9, 4, 13,1, 6, 17},   //!
+  { 1, 13,4, 10,5, 14,2, 7, 16},   //!
+  { 0, 8, 2, 14,5, 11,3, 12,18} }; //!
+static int BiQuadPenta_RE[5][9] = { // REVERSED -> EXTERNAL
+  { 0, 8, 2, 7, 1, 6, 0, 0, 0 },
+  { 3, 9, 4, 10,5, 11,3, 3, 3 },
+  { 0, 6, 1, 13,4, 9, 3, 12,17},   //!
+  { 1, 7, 2, 14,5, 10,4, 13,16},   //!
+  { 0, 12,3, 11,5, 14,2, 8, 18} }; //!
+static int BiQuadPenta_nbN[] = { 6, 6, 9, 9, 9 };
 
 /*
 //                 13                                                         
@@ -634,6 +648,14 @@ void SMDS_VolumeTool::Inverse ()
     SWAP_NODES( myVolumeNodes, 9, 11 );
     SWAP_NODES( myVolumeNodes, 13, 14 );
     break;
+  case 18:
+    SWAP_NODES(myVolumeNodes, 1, 2);
+    SWAP_NODES(myVolumeNodes, 4, 5);
+    SWAP_NODES(myVolumeNodes, 6, 8);
+    SWAP_NODES(myVolumeNodes, 9, 11);
+    SWAP_NODES(myVolumeNodes, 13, 14);
+    SWAP_NODES(myVolumeNodes, 16, 17);
+    break;
   case 20:
     SWAP_NODES( myVolumeNodes, 1, 3 );
     SWAP_NODES( myVolumeNodes, 5, 7 );
@@ -677,6 +699,7 @@ SMDS_VolumeTool::VolumeType SMDS_VolumeTool::GetVolumeType() const
   case 10: return QUAD_TETRA;
   case 13: return QUAD_PYRAM;
   case 15: return QUAD_PENTA;
+  case 18: return QUAD_PENTA;
   case 20: return QUAD_HEXA;
   case 27: return QUAD_HEXA;
   default: break;
@@ -1727,6 +1750,7 @@ int SMDS_VolumeTool::GetOppFaceIndex( int faceIndex ) const
     switch ( myVolumeNodes.size() ) {
     case 6:
     case 15:
+    case 18:
       if ( faceIndex == 0 || faceIndex == 1 )
         ind = 1 - faceIndex;
       break;
@@ -2424,6 +2448,7 @@ bool SMDS_VolumeTool::setFace( int faceIndex ) const
   {
     if ( !myAllFacesNodeIndices_F )
     {
+      //std::cout << myVolumeNodes.size() << std::endl;
       // choose data for an element type
       switch ( myVolumeNodes.size() ) {
       case 4:
@@ -2469,6 +2494,7 @@ bool SMDS_VolumeTool::setFace( int faceIndex ) const
         myMaxFaceNbNodes         = sizeof(QuadPyram_F[0])/sizeof(QuadPyram_F[0][0]);
         break;
       case 15:
+      case 18:
         myAllFacesNodeIndices_F  = &QuadPenta_F [0][0];
         //myAllFacesNodeIndices_FE = &QuadPenta_FE[0][0];
         myAllFacesNodeIndices_RE = &QuadPenta_RE[0][0];
@@ -2535,7 +2561,8 @@ SMDS_VolumeTool::VolumeType SMDS_VolumeTool::GetType(int nbNodes)
   case 8: return HEXA;
   case 10: return QUAD_TETRA;
   case 13: return QUAD_PYRAM;
-  case 15: return QUAD_PENTA;
+  case 15:
+  case 18: return QUAD_PENTA;
   case 20:
   case 27: return QUAD_HEXA;
   case 12: return HEX_PRISM;

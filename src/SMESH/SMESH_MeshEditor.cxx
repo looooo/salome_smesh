@@ -9325,6 +9325,12 @@ smIdType SMESH_MeshEditor::convertElemToQuadratic(SMESHDS_SubMesh *   theSm,
 
 void SMESH_MeshEditor::ConvertToQuadratic(const bool theForce3d, const bool theToBiQuad)
 {
+  /*
+    // remove medium nodes
+    for ( size_t i = nbCornerNodes; i < nodes.size(); ++i )
+      if ( nodes[i]->NbInverseElements() == 0 )
+        meshDS->RemoveFreeNode( nodes[i], theSm );
+  */
   //MESSAGE("ConvertToQuadratic "<< theForce3d << " " << theToBiQuad);
   SMESHDS_Mesh* meshDS = GetMeshDS();
 
@@ -9483,7 +9489,8 @@ void SMESH_MeshEditor::ConvertToQuadratic(const bool theForce3d, const bool theT
       case SMDSEntity_TriQuad_Hexa:
         NewVolume = aHelper.AddVolume(nodes[0], nodes[1], nodes[2], nodes[3],
                                       nodes[4], nodes[5], nodes[6], nodes[7], id, theForce3d);
-        for ( size_t i = 20; i < nodes.size(); ++i ) // rm central nodes
+        for (size_t i = 8; i < nodes.size(); ++i) // rm central nodes from each edge
+        //for (size_t i = 20; i < nodes.size(); ++i) // rm central nodes from each edge
           if ( nodes[i]->NbInverseElements() == 0 )
             GetMeshDS()->RemoveFreeNode( nodes[i], /*sm=*/0, /*fromGroups=*/true );
         break;
@@ -9496,7 +9503,9 @@ void SMESH_MeshEditor::ConvertToQuadratic(const bool theForce3d, const bool theT
       case SMDSEntity_BiQuad_Penta:
         NewVolume = aHelper.AddVolume(nodes[0], nodes[1], nodes[2],
                                       nodes[3], nodes[4], nodes[5], id, theForce3d);
-        for ( size_t i = 15; i < nodes.size(); ++i ) // rm central nodes
+
+        for (size_t i = 6; i < nodes.size(); ++i) // rm central nodes
+        //for ( size_t i = 15; i < nodes.size(); ++i ) // rm central nodes
           if ( nodes[i]->NbInverseElements() == 0 )
             GetMeshDS()->RemoveFreeNode( nodes[i], /*sm=*/0, /*fromGroups=*/true );
         break;
@@ -12989,6 +12998,7 @@ int SMESH_MeshEditor::MakeBoundaryMesh(const TIDSortedElemSet& elements,
   {
     const SMDS_MeshElement* elem = eIt->next();
     const int              iQuad = elem->IsQuadratic();
+    SMDSAbs_EntityType     anElemType = elem->GetEntityType();
     elemKind.SetQuad( iQuad );
 
     // ------------------------------------------------------------------------------------

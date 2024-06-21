@@ -265,7 +265,7 @@ static int QuadPyram_RE [5][9] = { // REVERSED -> FORWARD (EXTERNAL)
   { 3, 8, 0, 9, 4, 12,3, 4, 4 }}; 
 static int QuadPyram_nbN [] = { 8, 6, 6, 6, 6 };
 
-/*   2 1 5 4 3 6 7 8 9 10 11 12 13 14 15 16 18 17
+/*
 //            + N4                                 +
 //           /|\                                  /|\
 //         9/ | \10                              + | +

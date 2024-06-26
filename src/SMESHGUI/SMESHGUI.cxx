@@ -1123,9 +1123,8 @@ namespace
 
       SMESH::mesh_array_var aMeshes = new SMESH::mesh_array;
       {
-        // Get file path and re-import mesh
-        QString aPath = anInfo.fileName();
-        SMESH::SMESH_Mesh_var aReloadedMesh = SMESHGUI::GetSMESHGen()->ReloadMeshFromFile(aPath.toUtf8().constData(), aMeshByIO);
+        // re-import mesh
+        SMESH::SMESH_Mesh_var aReloadedMesh = SMESHGUI::GetSMESHGen()->ReloadMeshFromFile(aMeshByIO);
 
         QStringList anEntryList;
 

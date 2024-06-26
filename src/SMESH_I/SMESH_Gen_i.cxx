@@ -1331,15 +1331,16 @@ SMESH::SMESH_Mesh_ptr SMESH_Gen_i::CreateEmptyMesh()
   return mesh._retn();
 }
 
-SMESH::SMESH_Mesh_ptr SMESH_Gen_i::ReloadMeshFromFile(const char*           theFileName,
-                                                      SMESH::SMESH_Mesh_ptr theMesh)
+SMESH::SMESH_Mesh_ptr SMESH_Gen_i::ReloadMeshFromFile(SMESH::SMESH_Mesh_ptr theMesh)
 {
   SMESH::mesh_array_var aMeshes = new SMESH::mesh_array;
+
+  SMESH::MedFileInfo* aMedInfo = theMesh->GetMEDFileInfo();
+
   // Get file path and re-import mesh
-  QString aPath = QString(theFileName);
+  QString aPath = QString(aMedInfo->fileName);
   QStringList aSplit = aPath.split('.');
   QStringList anEntryList;
-
 
   auto aStudy = getStudyServant();
 

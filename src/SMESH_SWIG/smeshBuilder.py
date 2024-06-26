@@ -675,13 +675,13 @@ class smeshBuilder( SMESH._objref_SMESH_Gen, object ):
         global notebook
         notebook = salome_notebook.NoteBook( theIsEnablePublish )
 
-    def ReloadMeshFromFile(self, theFileName, theMesh):
+    def ReloadMeshFromFile(self, theMesh):
         """
         Desc for method,
         """
 
-        aSmeshMesh = SMESH._objref_SMESH_Gen.ReloadMeshFromFile(self,theFileName)
-        aMesh = Mesh(self, self.geompyD, theFileName, aSmeshMesh)
+        aSmeshMesh = SMESH._objref_SMESH_Gen.ReloadMeshFromFile(self, theMesh)
+        aMesh = Mesh(self, self.geompyD, aSmeshMesh)
         return aMesh
 
     def CreateMeshesFromUNV( self,theFileName ):

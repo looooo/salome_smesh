@@ -237,8 +237,7 @@ public:
   // Create empty mesh
   SMESH::SMESH_Mesh_ptr CreateEmptyMesh();
 
-  SMESH::SMESH_Mesh_ptr ReloadMeshFromFile( const char*           theFileName,
-                                            SMESH::SMESH_Mesh_ptr theMesh);
+  SMESH::SMESH_Mesh_ptr ReloadMeshFromFile(SMESH::SMESH_Mesh_ptr theMesh);
 
   //  Create a mesh and import data from an UNV file
   SMESH::SMESH_Mesh_ptr CreateMeshesFromUNV( const char* theFileName );

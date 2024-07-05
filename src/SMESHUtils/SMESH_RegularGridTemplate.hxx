@@ -80,27 +80,61 @@ namespace SMESHUtils
     }
   }
 
+  /*    Define vertex numeration convention for vertex and face index limits!
+    *
+    *               V7                           V6 
+    *                +--------+--------+--------+             
+    *               /        /        /        /|              
+    *              +--------+--------+--------+ | 
+    *             /        /        /        /| | 
+    *            +--------+--------+--------+ | + 
+    *           /        /        /     V5 /| |/| 
+    *       V4 +--------+--------+--------+ | + |   
+    *          |     |                    | |/| |                
+    *          |     |                    | + | +               
+    *          |     |                    |/| |/|
+    *          +     |                    | + |
+    *          |     |                    | |/| |
+    *          |     +-------+----------+-| + | + V2
+    *          |    / V3                  |/| |/
+    *          +   /                      | +
+    *          |  /                       | |/
+    *          | /                        | +
+    *          |/                         |/
+    *          +--------+--------+--------+
+    *         V0                          V1
+    * 
+    * Canonical cartesian axis orientation
+    * 
+    *         ^   ^ j (or y)
+    * k (or z)|  /
+    *         | /
+    *         |/
+    *         +------> i (or x)
+    * 
+    * 
+  */
   template<typename T>
   std::vector<T> SMESH_RegularGrid::getFaceIndexLimits( const FaceType face ) const
   {
     switch ( face ) {
       case FaceType::B_BOTTOM:
-        return std::vector<T>{1,1,1,mnx,mny,1};     /*V0-V2*/
+        return std::vector<T>{1,1,1,mnx,mny,1};       /*V0-V2*/
         break;
       case FaceType::B_RIGHT:
-        return std::vector<T>{mnx,1,1,mnx,mny,mnz}; /*V1-V6*/
+        return std::vector<T>{mnx,1,mnz,mnx,mny,1};   /*V5-V2*/  /*-> [bos #42468] pass from V1-V6 to V5-V2*/
         break;
       case FaceType::B_BACK:
-        return std::vector<T>{1,mny,1,mnx,mny,mnz}; /*V3-V6*/
+        return std::vector<T>{mnx,mny,1,1,mny,mnz};   /*V2-V7*/  /*-> [bos #42468] pass from V3-V6 to V2-V7*/
         break;
       case FaceType::B_LEFT:
-        return std::vector<T>{1,1,1,1,mny,mnz};     /*V0-V7*/
+        return std::vector<T>{1,1,1,1,mny,mnz};       /*V0-V7*/
         break;
       case FaceType::B_FRONT:
-        return std::vector<T>{1,1,1,mnx,1,mnz};     /*V0-V5*/
+        return std::vector<T>{1,1,1,mnx,1,mnz};       /*V0-V5*/
         break;
       case FaceType::B_TOP:
-        return std::vector<T>{1,1,mnz,mnx,mny,mnz}; /*V4-V6*/
+        return std::vector<T>{1,1,mnz,mnx,mny,mnz};   /*V4-V6*/
         break;
       default:
         return std::vector<T>{1,1,1,mnx,mny,1};

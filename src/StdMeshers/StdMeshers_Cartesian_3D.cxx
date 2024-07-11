@@ -187,6 +187,22 @@ bool StdMeshers_Cartesian_3D::CheckHypothesis (SMESH_Mesh&          aMesh,
 namespace
 {
   /*!
+   * \brief Represent the edges of polyhedrons. Used to check validity of created polyhedrons (see checkPolyhedronValidity2 function)
+   */
+  struct _Edge // link connecting two _Node's
+  {
+    smIdType _nodeId[2];
+    bool isConnectedTo( const smIdType n0, const smIdType n1 ) 
+    {
+      return (_nodeId[0] == n0 && _nodeId[1] == n1) || (_nodeId[0] == n1 && _nodeId[1] == n0);
+    }
+    _Edge(const smIdType n0, const smIdType n1 ): _nodeId{ n0, n1 } {}
+  };
+}
+
+namespace
+{
+  /*!
    * \brief Temporary mesh to hold 
    */
   struct TmpMesh: public SMESH_Mesh
@@ -944,8 +960,13 @@ namespace
         bool operator==(const _nodeDef& other ) const { return Ptr() == other.Ptr(); }
       };
 
+      public:
+      virtual vector<int>& quantity() {return _quantities; };
+      virtual const SMDS_MeshNode* meshNode( const int index ) { return _nodes[index].Node(); };  
+
       vector< _nodeDef >      _nodes;
       vector< int >           _quantities;
+      vector< int >    _quantitiesOffsets;         
       _volumeDef*             _next; // to store several _volumeDefs in a chain
       TGeomID                 _solidID;
       double                  _size;
@@ -961,6 +982,52 @@ namespace
       { _nodes.swap( other._nodes ); _quantities.swap( other._quantities ); other._volume = 0;
         _names.swap( other._names ); }
 
+      void defineQuantityOffsets() 
+      {
+       _quantitiesOffsets.resize(_quantities.size() + 1, 0 );
+        for (size_t i = 0; i < _quantities.size(); i++)
+          _quantitiesOffsets[i+1] = _quantities[i] + _quantitiesOffsets[i];
+      }
+
+      /// \brief Iterate in each node id defining polyhedron faces and apply the lambda function
+      /// \remark To call this function for each face of a polyhedron do:
+      ///         for ( int faceId = 0; faceId < _quantities.size(); faceId++ )
+      ///           this->forEachNodeIdInQuantity( faceId, [&] ( const SMDS_MeshNode* node )
+      ///           {
+      ///               code to do smth usefull with each node of the polyhedron faceId
+      ///           } );
+      /// \remark Polyhedrons are defined based in the number of nodes per faces and the index ids of those nodes
+      ///           the vector _quantities define the number of nodes per face and vector _quantitiesOffsets accumulate 
+      ///           those values so it is easier to iterate through the nodes ids in each face
+      virtual void forEachNodeIdInQuantity( const int index, const std::function<void(const SMDS_MeshNode* node )>& function )                                          
+      {
+        if ( _quantitiesOffsets.empty() ) 
+          defineQuantityOffsets();
+
+        for (int idx = _quantitiesOffsets[ index ]; idx < _quantitiesOffsets[ index + 1 ]; idx++)
+          function( _nodes[ idx ].Node() );
+      }
+
+      /// \brief Iterate in each face and give access to all the edges (through node id) in pairs defining a closed face
+      /// \remark helper function used in checkPolyhedronValidity2 function
+      /// \remark all edges are visited, including the one to closing the face.
+      virtual void forEachPairNodeIdInQuantity( const int index, const std::function<void(const smIdType id0, const smIdType id1)>& function )                                          
+      {
+        if ( _quantitiesOffsets.empty() ) 
+          defineQuantityOffsets();
+
+        const int initIter = _quantitiesOffsets[ index ];
+        const int endIter  = _quantitiesOffsets[ index + 1 ]; 
+        for (int idx = initIter; idx < endIter; idx++)
+        {
+          if ( idx != endIter - 1 )
+            function( _nodes[ idx ].Node()->GetID(),  _nodes[ idx + 1 ].Node()->GetID() );
+          else
+            function( _nodes[ idx ].Node()->GetID(),  _nodes[ initIter ].Node()->GetID() );
+        }
+      }
+
+
       size_t size() const { return 1 + ( _next ? _next->size() : 0 ); } // nb _volumeDef in a chain
       _volumeDef* at(int index)
       { return index == 0 ? this : ( _next ? _next->at(index-1) : _next ); }
@@ -975,6 +1042,7 @@ namespace
                                      ( !_next || _next->IsEmpty() )); }
       bool IsPolyhedron() const { return ( !_quantities.empty() ||
                                            ( _next && !_next->_quantities.empty() )); }
+      
 
 
       struct _linkDef: public std::pair<_ptr,_ptr> // to join polygons in removeExcessSideDivision()
@@ -999,6 +1067,75 @@ namespace
           next->_prev = this;
         }
       };
+    };
+
+    struct _lightVolDef : public _volumeDef
+    {
+      _lightVolDef( _volumeDef & vol ) : _quantities( vol._quantities ), _nodes( vol._nodes ) {  
+        for (auto n : _nodes )
+          _smeshnodes.push_back(n.Node());                
+      };
+
+      _lightVolDef( vector< int >& quantities, vector<const SMDS_MeshNode* >& smeshnodes ) : _quantities( quantities ), _nodes( vector<_nodeDef>() ), _smeshnodes(smeshnodes) 
+      {
+        std::cout << "Calling _lightVolDef constructor\n";
+      };
+
+      virtual vector<int>& quantity() { return _quantities; };
+      virtual const SMDS_MeshNode* meshNode( const int index ) { return _smeshnodes[index]; };  
+
+      
+      void defineQuantityOffsets() 
+      {
+       _quantitiesOffsets.resize(_quantities.size() + 1, 0 );
+        for (size_t i = 0; i < _quantities.size(); i++)
+          _quantitiesOffsets[i+1] = _quantities[i] + _quantitiesOffsets[i];
+      }
+
+      /// \brief Iterate in each node id defining polyhedron faces and apply the lambda function
+      /// \remark To call this function for each face of a polyhedron do:
+      ///         for ( int faceId = 0; faceId < _quantities.size(); faceId++ )
+      ///           this->forEachNodeIdInQuantity( faceId, [&] ( const SMDS_MeshNode* node )
+      ///           {
+      ///               code to do smth usefull with each node of the polyhedron faceId
+      ///           } );
+      /// \remark Polyhedrons are defined based in the number of nodes per faces and the index ids of those nodes
+      ///           the vector _quantities define the number of nodes per face and vector _quantitiesOffsets accumulate 
+      ///           those values so it is easier to iterate through the nodes ids in each face
+      virtual void forEachNodeIdInQuantity( const int index, const std::function<void(const SMDS_MeshNode* node )>& function )                                          
+      {
+        if ( _quantitiesOffsets.empty() ) 
+          defineQuantityOffsets();
+
+        for (int idx = _quantitiesOffsets[ index ]; idx < _quantitiesOffsets[ index + 1 ]; idx++)
+          function( _smeshnodes[ idx ] );
+      }
+
+      /// \brief Iterate in each face and give access to all the edges (through node id) in pairs defining a closed face
+      /// \remark helper function used in checkPolyhedronValidity2 function
+      /// \remark all edges are visited, including the one to closing the face.
+      virtual void forEachPairNodeIdInQuantity( const int index, const std::function<void(const smIdType id0, const smIdType id1)>& function )                                          
+      {
+        if ( _quantitiesOffsets.empty() ) 
+          defineQuantityOffsets();
+
+        const int initIter = _quantitiesOffsets[ index ];
+        const int endIter  = _quantitiesOffsets[ index + 1 ]; 
+        for (int idx = initIter; idx < endIter; idx++)
+        {
+          if ( idx != endIter - 1 )
+            function( _smeshnodes[ idx ]->GetID(),  _smeshnodes[ idx + 1 ]->GetID() );
+          else
+            function( _smeshnodes[ idx ]->GetID(),  _smeshnodes[ initIter ]->GetID() );
+        }
+      }
+
+      vector< int >                 _quantities;
+      vector< _nodeDef >                 _nodes;
+      vector<const SMDS_MeshNode* > _smeshnodes;
+      /// \brief this vector makes easier to iterate through faces nodes
+      /// \remark Defined as _offsets[i+1] = _offsets[i] + _quantities[i+1]
+      vector< int >           _quantitiesOffsets; 
     };
 
     // topology of a hexahedron
@@ -1083,7 +1220,13 @@ namespace
     bool hasStrangeEdge() const;
     bool checkPolyhedronSize( bool isCutByInternalFace, double & volSize ) const;
     int checkPolyhedronValidity( _volumeDef* volDef, std::vector<std::vector<int>>& splitQuantities, 
-                                  std::vector<std::vector<const SMDS_MeshNode*>>& splitNodes );
+                                  std::vector<std::vector<const SMDS_MeshNode*>>& splitNodes, bool & markFail2 );
+    int checkPolyhedronValidity2( _volumeDef* volDef, std::vector<int>& splitQuantities, std::vector<const SMDS_MeshNode*>& splitNodes, bool & markFail2 );
+    
+    void checkPolyhedronValidity3( const std::vector<int>& splitQuantities, const std::vector<const SMDS_MeshNode*>& splitNodes );                                  
+    // int splitPolyWithFreeEdges( _volumeDef* volDef, std::vector<std::vector<int>>& splitQuantities, 
+    //                               std::vector<std::vector<const SMDS_MeshNode*>>& splitNodes );
+
     const SMDS_MeshElement* addPolyhedronToMesh( _volumeDef* volDef,  SMESH_MesherHelper& helper, const std::vector<const SMDS_MeshNode*>& nodes, 
                                                 const std::vector<int>& quantities );
     bool addHexa ();
@@ -4917,17 +5060,26 @@ namespace
       {                      
         if ( !useQuanta )
         {
-          // split polyhedrons of with disjoint volumes
+          // split polyhedrons with disjoint volumes
           std::vector<std::vector<int>> splitQuantities;
           std::vector<std::vector< const SMDS_MeshNode* > > splitNodes;
-          if ( checkPolyhedronValidity( volDef, splitQuantities, splitNodes ) == 1 )
-            v = addPolyhedronToMesh( volDef, helper, nodes, volDef->_quantities );
+          bool fail2 = false;
+          std::vector<const SMDS_MeshNode*> tmpNodes;
+          for (auto node : volDef->_nodes )
+            tmpNodes.push_back( node._node );
+
+          if ( checkPolyhedronValidity( volDef, splitQuantities, splitNodes, fail2  ) == 1 )
+          {
+            v = addPolyhedronToMesh( volDef, helper, nodes, volDef->_quantities );            
+          }
           else
           {
             int counter = -1;
             for (size_t id = 0; id < splitQuantities.size(); id++)
             {
               v = addPolyhedronToMesh( volDef, helper, splitNodes[ id ], splitQuantities[ id ] );
+              // Check that there are not bare edges on this polys
+              // checkPolyhedronValidity3( splitQuantities[ id ], splitNodes[ id ] );
               if ( id < splitQuantities.size()-1 )
                 volDef->_brotherVolume.push_back( v );
               counter++;
@@ -5159,123 +5311,318 @@ namespace
     return volume > initVolume / _grid->_sizeThreshold;
   }
 
+  /*!
+    * \brief Identify polys with faces with bare edges
+   */
+  void Hexahedron::checkPolyhedronValidity3( const std::vector<int>& quantities, const std::vector<const SMDS_MeshNode*>& nodes )
+  {
+    
+    std::vector<int> quantitiesOffsets(quantities.size() + 1, 0);
+
+    for (size_t i = 0; i < quantities.size(); i++)
+      quantitiesOffsets[i+1] = quantities[i] + quantitiesOffsets[i];
+
+    std::map<int,std::tuple<int,int,bool,bool>> faceToConnection;    
+
+    for (size_t faceId = 0; faceId < quantities.size(); faceId++) /*Iterate in all faces of the polyhedron!*/
+    {       
+      faceToConnection[faceId] = std::make_tuple(quantities[faceId],  /* numOfEdges */         
+                                                                  0,  /* numOfConnections */
+                                                                true,  /* all edges 1to1 connected? */
+                                                                true  /* Has free edges? */ );
+      const int initIter = quantitiesOffsets[ faceId ];
+      const int endIter  = quantitiesOffsets[ faceId + 1 ]; 
+      smIdType id0; 
+      smIdType id1;
+      for (int idx = initIter; idx < endIter; idx++)
+      {
+        if ( idx != endIter - 1 )
+        {
+          id0 = nodes[ idx ]->GetID();
+          id1 = nodes[ idx + 1 ]->GetID();
+        }
+        else
+        {
+          id0 = nodes[ idx ]->GetID();
+          id1 = nodes[ initIter ]->GetID();
+        }
+         _Edge edge( id0, id1 );
+        bool edgeHasOneConnection = false;
+        for (size_t fId = 0; fId < quantities.size(); fId++) /*Iterate in all faces of the polyhedron!*/
+        {
+          if ( faceId != fId /*skip connection of face with herself!*/)
+          {
+            const int iniitIter = quantitiesOffsets[ fId ];
+            const int endiIter  = quantitiesOffsets[ fId + 1 ]; 
+            smIdType iid0; 
+            smIdType iid1;
+            for (int idx = iniitIter; idx < endiIter; idx++)
+            {
+              if ( idx != endiIter - 1 )
+              {
+                iid0 = nodes[ idx ]->GetID();
+                iid1 = nodes[ idx + 1 ]->GetID();
+              }
+              else
+              {
+                iid0 = nodes[ idx ]->GetID();
+                iid1 = nodes[ iniitIter ]->GetID();
+              }
+
+              if ( edge.isConnectedTo( iid0, iid1 ) )
+              {
+                std::get<1>( faceToConnection[faceId] )++; // increment the counter on the connection
+                edgeHasOneConnection = true;
+              }
+            }
+
+          }
+        }
+        std::get<3>(faceToConnection[faceId]) &= edgeHasOneConnection;       
+      }
+    }  
+
+
+    for( auto faceInfo : faceToConnection )
+    {
+      if ( !std::get<3>( faceInfo.second ) /* has face free edge? */ )
+      {
+        std::cout << "checkPolyhedronValidity3. Free edge on splited poly with " << faceToConnection.size() << " Faces\n ";    
+      }
+    }
+  }
+
+  //================================================================================
+  /*!
+   * \brief Identify polys with faces that are coplanar between then 
+   *        If coplanar faces are identified then a new poly w/o those faces is created and defined in splitQuantities and splitNodes
+   */
+  int Hexahedron::checkPolyhedronValidity2( _volumeDef* volDef, std::vector<int>& splitQuantities, std::vector<const SMDS_MeshNode*>& splitNodes, bool & markFail2 )
+  {
+    auto connectivity = volDef->quantity();
+    // Count the number of connected edges each face has! 
+    // Identify coplanar faces. 
+    // In a regular polyhedron every face will only share 
+    std::map<int,std::tuple<int,int,bool>> faceToConnection; 
+    int numOfFacesWithProblem = 0;
+
+    for (size_t faceId = 0; faceId < connectivity.size(); faceId++) /*Iterate in all faces of the polyhedron!*/
+    {       
+      faceToConnection[faceId] = std::make_tuple( connectivity[faceId],
+                                                     /* numOfEdges */0,
+                                     /* All edges has one to one */true );
+
+      std::map<int,int> face2faceConnection;              
+      volDef->forEachPairNodeIdInQuantity( faceId, [&] (const smIdType nId0, const smIdType nId1) 
+      {    
+        _Edge edge( nId0, nId1 );
+
+        /*Iterate in all faces of the polyhedron!*/
+        for (size_t fId = 0; fId < connectivity.size(); fId++) 
+        {
+          /*skip connection of face with herself!*/
+          if ( faceId != fId )
+          {
+            volDef->forEachPairNodeIdInQuantity( fId, [&] (const smIdType Iid0, const smIdType Iid1) 
+            {  
+              if ( edge.isConnectedTo( Iid0, Iid1 ) )
+                face2faceConnection[fId]++;              
+            });       
+          }  
+        }
+      });  
+      
+      for( const auto & faceInfo : face2faceConnection )
+      {
+        if ( faceInfo.second > 1 /*The connection with each face should be with a single edge.*/)
+        {
+          std::get<2>( faceToConnection[faceId] ) = false;
+          numOfFacesWithProblem++;    
+        }
+      }
+    }  
+
+    if ( numOfFacesWithProblem == 2 /* treat cases where even number of doubled faces*/)
+    {
+      // std::cout << "CheckPolyhedronValidity2. Identified coplanar faces with even number " << numOfFacesWithProblem << " \n";
+      // Fill tmpQuantities and tmpNodes
+      for( auto faceInfo : faceToConnection )
+      {
+        // std::cout << "Face Id and flag " << faceInfo.first << ", " << std::get<2>(faceInfo.second) << "\n";
+        if ( std::get<2>(faceInfo.second) /*The connection with each face should be with a single edge.*/)
+        {
+          splitQuantities.push_back( connectivity[faceInfo.first] );
+          volDef->forEachNodeIdInQuantity( faceInfo.first, [&] (const SMDS_MeshNode* node) 
+          {  
+            splitNodes.push_back( node );
+          });
+        }
+      }
+      markFail2 = true;
+    }
+
+    return 1;
+  }
+  
   //================================================================================
   /*!
    * \brief Check that all faces in polyhedron are connected so a unique volume is defined.
    *        We test that it is possible to go from any node to all nodes in the polyhedron.
    *        The set of nodes that can be visit within then defines a unique element.
    *        In case more than one polyhedron is detected. The function return the set of quantities and nodes defining separates elements.
-   *        Reference to issue #bos[38521][EDF] Generate polyhedron with separate volume.
+   *        Reference to issue bos[#38521][EDF] Generate polyhedron with separate volume.
+   * \param volDef, the volume as define by the compute method
+   * \param splitQuantities, result vector with the stack of quantities (number of nodes) defining a separate polyhedron in a disjoint polyhedron
+   * \param splitNodes, result vector with the stack of mesh nodes defining a separate polyhedron in a disjoint polyhedron as described by splitQuantities vector.
    */
   int Hexahedron::checkPolyhedronValidity( _volumeDef* volDef, std::vector<std::vector<int>>& splitQuantities, 
-                                           std::vector<std::vector<const SMDS_MeshNode*>>& splitNodes )
+                                           std::vector<std::vector<const SMDS_MeshNode*>>& splitNodes, bool & markFail2 )
   {  
+    splitQuantities.clear();
+    splitNodes.clear();
+
     int mySet = 1;
     std::map<int,int> numberOfSets; // define set id with the number of faces associated!
-    if ( !volDef->_quantities.empty() )
+    auto connectivity = volDef->quantity();
+
+    bool callFromLightPoly = (dynamic_cast<_lightVolDef*>(volDef) != nullptr);
+
+    if ( callFromLightPoly )
     {
-      auto connectivity = volDef->_quantities;
-      int accum = 0;
-      std::vector<bool> allFaces( connectivity.size(), false );
-      std::set<int> elementSet;
-      allFaces[ 0 ] = true; // the first node below to the first face
-      size_t connectedFaces = 1;
-      // Start filling the set with the nodes of the first face
-      splitQuantities.push_back( { connectivity[ 0 ] } );
-      splitNodes.push_back( { volDef->_nodes[ 0 ].Node() } );
-      elementSet.insert( volDef->_nodes[ 0 ].Node()->GetID() );
-      for (int n = 1; n < connectivity[ 0 ]; n++)
+      std::cout << "Calling from _lightVolDef\n";
+      std::cout << "Connectivity size: " << connectivity.size() << "\n";
+    }
+
+    int accum = 0;
+    std::vector<bool> allFaces( connectivity.size(), false );
+    std::set<smIdType> elementSet;
+    allFaces[ 0 ] = true; // the first node below to the first face
+    size_t connectedFaces = 1;
+    // Start filling the set with the nodes of the first face      
+    splitQuantities.push_back( { connectivity[ 0 ] } );
+
+    volDef->forEachNodeIdInQuantity( 0, [&] (const SMDS_MeshNode* node) 
+    {       
+      elementSet.insert( node->GetID() );
+      if ( !splitNodes.empty() )
+        splitNodes.back().push_back( node );
+      else
+        splitNodes.push_back( { node } );
+    });
+
+    numberOfSets.insert( std::pair<int,int>(mySet,1) );
+
+    while ( connectedFaces != allFaces.size() )
+    {
+      for (size_t faceId = 1; faceId < connectivity.size(); faceId++) /*Iterate in all faces of the polyhedron!*/
       {
-        elementSet.insert( volDef->_nodes[ n ].Node()->GetID() );
-        splitNodes.back().push_back( volDef->_nodes[ n ].Node() );
+        if ( !allFaces[ faceId ] /*if the face was not yet visited!*/)
+        {
+          int faceCounter = 0;
+
+          volDef->forEachNodeIdInQuantity( faceId, [&] (const SMDS_MeshNode* node) 
+          {       
+            if ( elementSet.count( node->GetID() ) != 0 ) 
+              faceCounter++;
+          });
+
+          if ( faceCounter >= 2 ) // found coincidences edges (>=2!)
+          {             
+            volDef->forEachNodeIdInQuantity( faceId, [&] (const SMDS_MeshNode* node) 
+            {       
+              splitNodes.back().push_back( node );
+              elementSet.insert( node->GetID() );
+            });
+
+            allFaces[ faceId ] = true;
+            splitQuantities.back().push_back( connectivity[ faceId ] );
+            numberOfSets[ mySet ]++;
+            connectedFaces++;
+            faceId = 0; // to restart searching!
+          }
+        }
+      }
+
+      if ( connectedFaces != allFaces.size() /*It means that there are disjoint polys because all faces are not connected yet!*/)
+      {
+        // empty the set, and fill it with nodes of a unvisited face to restart the process of checking connectivity!
+        elementSet.clear();
+        accum = connectivity[ 0 ];
+
+        for (size_t faceId = 1; faceId < connectivity.size(); faceId++)
+        {
+          if ( !allFaces[ faceId ] )
+          {
+            splitQuantities.push_back( { connectivity[ faceId ] } );
+            splitNodes.push_back( { volDef->meshNode(accum) } );
+            elementSet.insert( volDef->meshNode(accum)->GetID() );
+
+            for (int n = 1; n < connectivity[ faceId ]; n++)
+            {
+              elementSet.insert( volDef->meshNode(accum + n)->GetID() );
+              splitNodes.back().push_back( volDef->meshNode(accum + n) );
+            }
+            allFaces[ faceId ] = true;
+            connectedFaces++;
+            break; /*stop searching from free faces*/
+          }
+          accum += connectivity[ faceId ];
+        }
+        mySet++;
+        numberOfSets.insert( std::pair<int,int>(mySet,1) );
+      }
+    }
+
+    // if ( callFromLightPoly )
+    // {
+    //   std::cout << "Number of sets " << numberOfSets.size() << "\n";
+
+    // }
+
+    if ( numberOfSets.size() > 1 )
+    {
+      bool allMoreThan2Faces = true;
+      for( auto k : numberOfSets )
+      {
+        if ( k.second <= 2 /*valid polyhedron should have more than 2 faces! otherwise return the original poly for backward compatibility*/)
+          allMoreThan2Faces &= false;
       }
       
-      numberOfSets.insert( std::pair<int,int>(mySet,1) );
-      while ( connectedFaces != allFaces.size() )
-      {
-        for (size_t innerId = 1; innerId < connectivity.size(); innerId++)
-        {
-          if ( innerId == 1 )
-            accum = connectivity[ 0 ];
-
-          if ( !allFaces[ innerId ] )
-          {
-            int faceCounter = 0;
-            for (int n = 0; n < connectivity[ innerId ]; n++)
-            {
-              int nodeId = volDef->_nodes[ accum + n ].Node()->GetID();
-              if ( elementSet.count( nodeId ) != 0 ) 
-                faceCounter++;
-            }
-            if ( faceCounter >= 2 ) // found coincidences nodes
-            {
-              for (int n = 0; n < connectivity[ innerId ]; n++)
-              {
-                int nodeId = volDef->_nodes[ accum + n ].Node()->GetID();
-                // insert new nodes so other faces can be identified as belowing to the element
-                splitNodes.back().push_back( volDef->_nodes[ accum + n ].Node() );
-                elementSet.insert( nodeId );
-              }
-              allFaces[ innerId ] = true;
-              splitQuantities.back().push_back( connectivity[ innerId ] );
-              numberOfSets[ mySet ]++;
-              connectedFaces++;
-              innerId = 0; // to restart searching!
-            }
-          }
-          accum += connectivity[ innerId ];
-        }
-
-        if ( connectedFaces != allFaces.size() )
-        {
-          // empty the set, and fill it with nodes of a unvisited face!
-          elementSet.clear();
-          accum = connectivity[ 0 ];
-          for (size_t faceId = 1; faceId < connectivity.size(); faceId++)
-          {
-            if ( !allFaces[ faceId ] )
-            {
-              splitNodes.push_back( { volDef->_nodes[ accum ].Node() } );
-              elementSet.insert( volDef->_nodes[ accum ].Node()->GetID() );
-              for (int n = 1; n < connectivity[ faceId ]; n++)
-              {
-                elementSet.insert( volDef->_nodes[ accum + n ].Node()->GetID() );
-                splitNodes.back().push_back( volDef->_nodes[ accum + n ].Node() );
-              }
-
-              splitQuantities.push_back( { connectivity[ faceId ] } );
-              allFaces[ faceId ] = true;
-              connectedFaces++;
-              break;
-            }
-            accum += connectivity[ faceId ];
-          }
-          mySet++;
-          numberOfSets.insert( std::pair<int,int>(mySet,1) );
-        }
+      if ( allMoreThan2Faces )
+      {        
+        // The separate objects are suspect to be closed
+        return numberOfSets.size();        
       }
-
-      if ( numberOfSets.size() > 1 )
+      else
       {
-        bool allMoreThan2Faces = true;
-        for( auto k : numberOfSets )
-        {
-          if ( k.second <= 2 )
-            allMoreThan2Faces &= false;
-        }
-        
-        if ( allMoreThan2Faces )
-        {        
-          // The separate objects are suspect to be closed
-          return numberOfSets.size();        
-        }
-        else
-        {
-          // Have to index the last face nodes to the final set
-          // contrary case return as it were a valid polyhedron for backward compatibility
-          return 1;  
-        }
+        // Have to index the last face nodes to the final set
+        // contrary case return as it were a valid polyhedron for backward compatibility
+        return 1;  
       }
+    }
+
+    /*Do a different check. This time to identify two possibities: 
+      1) polys of disjoint bodies with common edge
+      2) polys of disjoint bodies with common isolated face (see bos #42217)
+    */
+    int numSets = numberOfSets.size();
+    if ( numSets == 1 )
+    {
+      std::vector<int> tmpQuantities;
+      std::vector<const SMDS_MeshNode*> tmpNodes;
+      numSets = checkPolyhedronValidity2( volDef, tmpQuantities, tmpNodes, markFail2 );
+      if ( markFail2 && !tmpQuantities.empty() && !callFromLightPoly ) 
+      {
+        // int sum=0;
+        int sum = std::accumulate(tmpQuantities.begin(), tmpQuantities.end(), 0);
+        std::cout << "Number of polys faces and nodes composing it: " << tmpQuantities.size() << ", " << sum << ", " << tmpNodes.size() << "\n";
+
+        auto lightVol = std::unique_ptr<_lightVolDef>( new _lightVolDef(tmpQuantities, tmpNodes) );
+        bool fail3 = false;
+        // return checkPolyhedronValidity( lightVol.get(), splitQuantities, splitNodes, fail3 );
+      }
+      // If this validation fail then create a volDef with split quantities and nodes of the poly w/o the 
+      // overlapped faces so the polys are split by checkPolyhedronValidity routine!
     }
     return numberOfSets.size();
   }
@@ -5288,7 +5635,7 @@ namespace
   const SMDS_MeshElement* Hexahedron::addPolyhedronToMesh( _volumeDef* volDef,  SMESH_MesherHelper& helper, const std::vector<const SMDS_MeshNode*>& nodes, 
                                                             const std::vector<int>& quantities )
   {
-    const SMDS_MeshElement* v = helper.AddPolyhedralVolume( nodes, quantities );
+    const SMDS_MeshElement* v = helper.AddPolyhedralVolume( nodes, quantities );  
 
     volDef->_size = SMDS_VolumeTool( v ).GetSize();
     if ( volDef->_size < 0 ) // invalid polyhedron
